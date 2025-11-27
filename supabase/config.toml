@@ -1,0 +1,10 @@
+project_id = "pnpuhewfoxssmbpryart"
+
+[functions.generate-reply]
+verify_jwt = false
+
+[functions.ingest-review]
+verify_jwt = false
+
+[functions.approve-reply]
+verify_jwt = true
