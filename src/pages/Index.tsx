@@ -80,8 +80,8 @@ const Index = () => {
         <div className="container mx-auto px-6">
           <div className="flex h-20 items-center justify-between">
             <div className="flex items-center gap-3">
-              <img src={logo} alt="Voyagerespond" className="h-8 w-8" />
-              <span className="text-lg font-semibold text-foreground">Voyagerespond</span>
+              <img src={logo} alt="VoyageRespond" className="h-8 w-8" />
+              <span className="text-lg font-semibold text-foreground">VoyageRespond</span>
             </div>
             <div className="hidden md:flex items-center gap-8">
               <button
@@ -311,7 +311,7 @@ const Index = () => {
       <footer className="border-t border-border bg-card/50 backdrop-blur-sm mt-20">
         <div className="container mx-auto px-6 py-12">
           <div className="flex flex-col md:flex-row items-center justify-center gap-6 text-sm text-muted-foreground">
-            <span>© 2025 Voyagerespond</span>
+            <span>© 2025 VoyageRespond</span>
             <span className="hidden md:block">•</span>
             <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
             <span className="hidden md:block">•</span>
