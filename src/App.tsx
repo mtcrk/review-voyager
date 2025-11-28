@@ -7,6 +7,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Reviews from "./pages/Reviews";
+import ReviewDetailPage from "./pages/ReviewDetailPage";
 import AutoReply from "./pages/AutoReply";
 import Statistics from "./pages/Statistics";
 import Settings from "./pages/Settings";
@@ -35,6 +36,14 @@ const App = () => (
             element={
               <AppLayout>
                 <Reviews />
+              </AppLayout>
+            }
+          />
+          <Route
+            path="/reviews/:id"
+            element={
+              <AppLayout>
+                <ReviewDetailPage />
               </AppLayout>
             }
           />
