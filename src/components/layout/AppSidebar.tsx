@@ -1,6 +1,6 @@
 import { LayoutDashboard, MessageSquare, Zap, BarChart3, Settings } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -25,18 +25,22 @@ const menuItems = [
 export function AppSidebar() {
   const { open } = useSidebar();
   const location = useLocation();
+  const navigate = useNavigate();
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="border-b border-sidebar-border p-4">
-        <div className="flex items-center gap-3">
+        <button 
+          onClick={() => navigate("/dashboard")}
+          className="flex items-center gap-3 hover:opacity-80 transition-opacity w-full"
+        >
           <img src={logo} alt="Voyagerespond" className="h-8 w-8" />
           {open && (
             <span className="text-lg font-semibold text-foreground">
               Voyagerespond
             </span>
           )}
-        </div>
+        </button>
       </SidebarHeader>
 
       <SidebarContent>
