@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { MessageSquare, Zap, BarChart3, Check } from "lucide-react";
-import logo from "@/assets/logo.png";
+import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { useState } from "react";
 
 const Index = () => {
@@ -80,7 +80,7 @@ const Index = () => {
         <div className="container mx-auto px-6">
           <div className="flex h-20 items-center justify-between">
             <div className="flex items-center gap-3">
-              <img src={logo} alt="VoyageRespond" className="h-8 w-8" />
+              <img src={voyageRespondLogo} alt="VoyageRespond" className="h-8 w-8" />
               <span className="text-lg font-semibold text-foreground">VoyageRespond</span>
             </div>
             <div className="hidden md:flex items-center gap-8">
