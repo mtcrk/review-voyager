@@ -80,13 +80,16 @@ const Index = () => {
         <div className="container mx-auto px-6">
           <div className="flex h-20 items-center justify-between">
             {/* Logo - Left */}
-            <div className="flex items-center gap-2 pl-3 pt-1">
+            <button 
+              onClick={() => navigate("/dashboard")}
+              className="flex items-center gap-2 pl-3 pt-1 hover:opacity-80 transition-opacity"
+            >
               <img src={voyageRespondLogo} alt="VoyageRespond" className="h-7 w-7" />
               <span className="text-lg" style={{ color: '#1F2937', letterSpacing: '0.02em' }}>
                 <span className="font-normal">Voyage</span>
                 <span className="font-semibold">Respond</span>
               </span>
-            </div>
+            </button>
 
             {/* Navigation Links - Center */}
             <div className="hidden md:flex items-center gap-8 absolute left-1/2 transform -translate-x-1/2">
