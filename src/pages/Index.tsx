@@ -144,7 +144,9 @@ const Index = () => {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="container mx-auto px-6 py-20">
+      <section id="features" className="relative py-20 overflow-hidden">
+        <div className="absolute inset-0 gradient-features"></div>
+        <div className="container mx-auto px-6 relative z-10">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Everything you need to manage reviews
@@ -171,10 +173,13 @@ const Index = () => {
             </div>
           ))}
         </div>
+        </div>
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="container mx-auto px-6 py-20">
+      <section id="pricing" className="relative py-20 overflow-hidden">
+        <div className="absolute inset-0 gradient-pricing"></div>
+        <div className="container mx-auto px-6 relative z-10">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Simple, transparent pricing
@@ -246,6 +251,7 @@ const Index = () => {
               </ul>
             </div>
           ))}
+        </div>
         </div>
       </section>
 

@@ -70,6 +70,11 @@ All colors MUST be HSL.
     --gradient-mesh: radial-gradient(at 40% 20%, hsla(262, 89%, 66%, 0.5) 0px, transparent 50%),
                      radial-gradient(at 80% 0%, hsla(338, 92%, 65%, 0.5) 0px, transparent 50%),
                      radial-gradient(at 0% 50%, hsla(196, 100%, 76%, 0.5) 0px, transparent 50%);
+    --gradient-features: radial-gradient(at 15% 20%, hsla(262, 89%, 66%, 0.15) 0px, transparent 60%),
+                         radial-gradient(at 85% 80%, hsla(196, 100%, 76%, 0.15) 0px, transparent 60%);
+    --gradient-pricing: radial-gradient(at 50% 0%, hsla(338, 92%, 65%, 0.12) 0px, transparent 65%),
+                        radial-gradient(at 20% 100%, hsla(262, 89%, 66%, 0.12) 0px, transparent 65%),
+                        radial-gradient(at 80% 100%, hsla(196, 100%, 76%, 0.12) 0px, transparent 65%);
   }
 
   .dark {
@@ -167,6 +172,14 @@ All colors MUST be HSL.
   
   .gradient-mesh {
     background: var(--gradient-mesh);
+  }
+  
+  .gradient-features {
+    background: var(--gradient-features);
+  }
+  
+  .gradient-pricing {
+    background: var(--gradient-pricing);
   }
   
   @keyframes gradient-shift {
