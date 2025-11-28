@@ -119,8 +119,9 @@ const Index = () => {
 
       {/* Hero Section */}
       <section className="container mx-auto px-6 py-24 md:py-32 relative overflow-hidden">
-        <div className="absolute inset-0 gradient-hero"></div>
+        <div className="absolute inset-0 gradient-hero opacity-90"></div>
         <div className="absolute inset-0 gradient-hero-overlay"></div>
+        <div className="absolute inset-0 gradient-mesh opacity-30"></div>
         <div className="text-center max-w-4xl mx-auto space-y-8 relative z-10">
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight">
             Transform Your Google Reviews into Growth
@@ -130,8 +131,13 @@ const Index = () => {
             and build stronger customer relationships.
           </p>
           <div className="pt-4">
-            <Button size="lg" onClick={() => navigate("/dashboard")} className="gradient-primary hover:opacity-90 text-white shadow-lg text-lg px-10 py-6">
-              Start Managing Reviews
+            <Button 
+              size="lg" 
+              onClick={() => navigate("/dashboard")} 
+              className="relative overflow-hidden gradient-primary text-white shadow-lg text-lg px-10 py-6 hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
+            >
+              <span className="relative z-10">Start Managing Reviews</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
             </Button>
           </div>
         </div>
@@ -151,9 +157,10 @@ const Index = () => {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="relative p-8 rounded-xl border border-border bg-card shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group overflow-hidden"
+              className="relative p-8 rounded-xl border border-border bg-card shadow-card hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group overflow-hidden"
             >
-              <div className="absolute inset-0 gradient-card opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 gradient-card opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <div className="relative z-10">
                 <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                   <feature.icon className="h-7 w-7 text-primary" />
@@ -244,9 +251,10 @@ const Index = () => {
 
       {/* Bottom CTA Section */}
       <section className="container mx-auto px-6 py-20">
-        <div className="border border-primary/20 rounded-2xl p-12 md:p-16 text-center relative overflow-hidden">
-          <div className="absolute inset-0 gradient-hero"></div>
+        <div className="border border-primary/20 rounded-2xl p-12 md:p-16 text-center relative overflow-hidden shadow-2xl">
+          <div className="absolute inset-0 gradient-hero opacity-80"></div>
           <div className="absolute inset-0 gradient-hero-overlay"></div>
+          <div className="absolute inset-0 gradient-mesh opacity-20"></div>
           <div className="relative z-10">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               Ready to elevate your customer relationships?
@@ -255,8 +263,13 @@ const Index = () => {
               Join businesses that are saving time and building better customer relationships 
               with AI-powered review responses.
             </p>
-            <Button size="lg" onClick={() => navigate("/dashboard")} className="gradient-primary hover:opacity-90 text-white shadow-lg text-lg px-10">
-              Get Started Now
+            <Button 
+              size="lg" 
+              onClick={() => navigate("/dashboard")} 
+              className="relative overflow-hidden gradient-primary text-white shadow-lg text-lg px-10 hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
+            >
+              <span className="relative z-10">Get Started Now</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
             </Button>
           </div>
         </div>

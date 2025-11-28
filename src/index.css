@@ -56,11 +56,20 @@ All colors MUST be HSL.
     
     /* Stripe-inspired gradients */
     --gradient-primary: linear-gradient(135deg, #635BFF 0%, #7A73FF 100%);
-    --gradient-hero: linear-gradient(135deg, #a960ee 0%, #ff333d 25%, #90e0ff 50%, #ffcb57 100%);
-    --gradient-hero-overlay: linear-gradient(180deg, rgba(245, 247, 250, 0.95) 0%, rgba(245, 247, 250, 0.85) 100%);
+    --gradient-hero: radial-gradient(at 27% 37%, hsla(262, 89%, 66%, 1) 0px, transparent 50%),
+                     radial-gradient(at 97% 21%, hsla(338, 92%, 65%, 1) 0px, transparent 50%),
+                     radial-gradient(at 52% 99%, hsla(196, 100%, 76%, 1) 0px, transparent 50%),
+                     radial-gradient(at 10% 29%, hsla(48, 100%, 67%, 1) 0px, transparent 50%),
+                     radial-gradient(at 97% 96%, hsla(262, 89%, 66%, 1) 0px, transparent 50%),
+                     radial-gradient(at 33% 50%, hsla(338, 92%, 65%, 1) 0px, transparent 50%),
+                     radial-gradient(at 79% 53%, hsla(196, 100%, 76%, 1) 0px, transparent 50%);
+    --gradient-hero-overlay: linear-gradient(180deg, rgba(245, 247, 250, 0.97) 0%, rgba(245, 247, 250, 0.92) 100%);
     --gradient-accent: linear-gradient(135deg, #00D4FF 0%, #635BFF 100%);
     --gradient-card: linear-gradient(135deg, rgba(99, 91, 255, 0.05) 0%, rgba(122, 115, 255, 0.02) 100%);
     --gradient-card-hover: linear-gradient(135deg, rgba(99, 91, 255, 0.1) 0%, rgba(122, 115, 255, 0.05) 100%);
+    --gradient-mesh: radial-gradient(at 40% 20%, hsla(262, 89%, 66%, 0.5) 0px, transparent 50%),
+                     radial-gradient(at 80% 0%, hsla(338, 92%, 65%, 0.5) 0px, transparent 50%),
+                     radial-gradient(at 0% 50%, hsla(196, 100%, 76%, 0.5) 0px, transparent 50%);
   }
 
   .dark {
@@ -136,6 +145,7 @@ All colors MUST be HSL.
   
   .gradient-hero {
     background: var(--gradient-hero);
+    animation: gradient-shift 15s ease infinite;
   }
   
   .gradient-accent {
@@ -152,5 +162,19 @@ All colors MUST be HSL.
   
   .gradient-hero-overlay {
     background: var(--gradient-hero-overlay);
+    backdrop-filter: blur(80px);
+  }
+  
+  .gradient-mesh {
+    background: var(--gradient-mesh);
+  }
+  
+  @keyframes gradient-shift {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.8;
+    }
   }
 }
