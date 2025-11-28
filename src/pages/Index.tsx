@@ -79,6 +79,7 @@ const Index = () => {
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg" style={{ backgroundColor: '#FFFFFF', borderBottomColor: '#E2E8F0' }}>
         <div className="container mx-auto px-6">
           <div className="flex h-20 items-center justify-between">
+            {/* Logo - Left */}
             <div className="flex items-center gap-2 pl-3 pt-1">
               <img src={voyageRespondLogo} alt="VoyageRespond" className="h-7 w-7" />
               <span className="text-lg" style={{ color: '#1F2937', letterSpacing: '0.02em' }}>
@@ -86,7 +87,9 @@ const Index = () => {
                 <span className="font-semibold">Respond</span>
               </span>
             </div>
-            <div className="hidden md:flex items-center gap-8">
+
+            {/* Navigation Links - Center */}
+            <div className="hidden md:flex items-center gap-8 absolute left-1/2 transform -translate-x-1/2">
               <button
                 onClick={() => scrollToSection("features")}
                 className="text-sm font-medium transition-colors"
@@ -123,6 +126,10 @@ const Index = () => {
               >
                 Login
               </button>
+            </div>
+
+            {/* CTA Button - Right */}
+            <div className="hidden md:block">
               <button 
                 onClick={() => navigate("/dashboard")}
                 className="px-5 py-2.5 rounded-md text-sm font-medium text-white transition-all duration-200 shadow-sm hover:shadow-md"
@@ -133,6 +140,8 @@ const Index = () => {
                 Get Started
               </button>
             </div>
+
+            {/* Mobile CTA */}
             <div className="md:hidden">
               <button 
                 onClick={() => navigate("/dashboard")}
