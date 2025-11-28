@@ -147,23 +147,23 @@ const Index = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-6 py-24 md:py-32 relative overflow-hidden">
-        <div className="absolute inset-0 gradient-hero opacity-90"></div>
+      <section className="container mx-auto px-6 pt-40 pb-36 md:pt-44 md:pb-40 relative overflow-hidden">
+        <div className="absolute inset-0 gradient-hero"></div>
         <div className="absolute inset-0 gradient-hero-overlay"></div>
-        <div className="absolute inset-0 gradient-mesh opacity-30"></div>
-        <div className="text-center max-w-4xl mx-auto space-y-8 relative z-10">
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight">
+        <div className="absolute inset-0 gradient-mesh"></div>
+        <div className="text-center max-w-3xl mx-auto space-y-10 relative z-10">
+          <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold text-foreground leading-tight tracking-tight">
             Transform Your Google Reviews into Growth
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
+          <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed">
             AI-powered review management that helps you respond faster, analyze deeper, 
             and build stronger customer relationships.
           </p>
-          <div className="pt-4">
+          <div className="pt-6">
             <Button 
               size="lg" 
               onClick={() => navigate("/dashboard")} 
-              className="relative overflow-hidden gradient-primary text-white shadow-lg text-lg px-10 py-6 hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
+              className="relative overflow-hidden gradient-primary text-white shadow-lg text-lg px-12 py-7 hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
             >
               <span className="relative z-10">Start Managing Reviews</span>
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
