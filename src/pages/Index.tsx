@@ -76,12 +76,12 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Navbar */}
-      <nav className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur-lg" style={{ borderBottomColor: '#E5E7EB' }}>
+      <nav className="sticky top-0 z-50 border-b backdrop-blur-lg" style={{ backgroundColor: '#FFFFFF', borderBottomColor: '#E2E8F0' }}>
         <div className="container mx-auto px-6">
           <div className="flex h-20 items-center justify-between">
-            <div className="flex items-center gap-3 pl-1.5 pt-1">
-              <img src={voyageRespondLogo} alt="VoyageRespond" className="h-9 w-9" />
-              <span className="text-lg text-foreground" style={{ letterSpacing: '0.02em' }}>
+            <div className="flex items-center gap-2 pl-3 pt-1">
+              <img src={voyageRespondLogo} alt="VoyageRespond" className="h-7 w-7" />
+              <span className="text-lg" style={{ color: '#1F2937', letterSpacing: '0.02em' }}>
                 <span className="font-normal">Voyage</span>
                 <span className="font-semibold">Respond</span>
               </span>
@@ -90,36 +90,36 @@ const Index = () => {
               <button
                 onClick={() => scrollToSection("features")}
                 className="text-sm font-medium transition-colors"
-                style={{ color: '#3A3A3A' }}
+                style={{ color: '#1F2937' }}
                 onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
-                onMouseLeave={(e) => e.currentTarget.style.color = '#3A3A3A'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#1F2937'}
               >
                 Features
               </button>
               <button
                 onClick={() => scrollToSection("pricing")}
                 className="text-sm font-medium transition-colors"
-                style={{ color: '#3A3A3A' }}
+                style={{ color: '#1F2937' }}
                 onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
-                onMouseLeave={(e) => e.currentTarget.style.color = '#3A3A3A'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#1F2937'}
               >
                 Pricing
               </button>
               <a
                 href="#"
                 className="text-sm font-medium transition-colors"
-                style={{ color: '#3A3A3A' }}
+                style={{ color: '#1F2937' }}
                 onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
-                onMouseLeave={(e) => e.currentTarget.style.color = '#3A3A3A'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#1F2937'}
               >
                 Docs
               </a>
               <button
                 onClick={() => navigate("/dashboard")}
                 className="text-sm font-medium transition-colors"
-                style={{ color: '#3A3A3A' }}
+                style={{ color: '#1F2937' }}
                 onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
-                onMouseLeave={(e) => e.currentTarget.style.color = '#3A3A3A'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#1F2937'}
               >
                 Login
               </button>
@@ -127,7 +127,7 @@ const Index = () => {
                 onClick={() => navigate("/dashboard")}
                 className="px-5 py-2.5 rounded-md text-sm font-medium text-white transition-all duration-200 shadow-sm hover:shadow-md"
                 style={{ backgroundColor: '#7A5AF8' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6845F4'}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6D28D9'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7A5AF8'}
               >
                 Get Started
