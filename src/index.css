@@ -53,6 +53,13 @@ All colors MUST be HSL.
     --shadow-soft: 0 1px 3px 0 rgb(0 0 0 / 0.03);
     --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Stripe-inspired gradients */
+    --gradient-primary: linear-gradient(135deg, #635BFF 0%, #7A73FF 100%);
+    --gradient-hero: linear-gradient(180deg, #F5F7FA 0%, #E8ECFF 100%);
+    --gradient-accent: linear-gradient(135deg, #00D4FF 0%, #635BFF 100%);
+    --gradient-card: linear-gradient(135deg, rgba(99, 91, 255, 0.05) 0%, rgba(122, 115, 255, 0.02) 100%);
+    --gradient-card-hover: linear-gradient(135deg, rgba(99, 91, 255, 0.1) 0%, rgba(122, 115, 255, 0.05) 100%);
   }
 
   .dark {
@@ -120,5 +127,25 @@ All colors MUST be HSL.
 
   .transition-smooth {
     transition: var(--transition-smooth);
+  }
+  
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+  
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+  
+  .gradient-accent {
+    background: var(--gradient-accent);
+  }
+  
+  .gradient-card {
+    background: var(--gradient-card);
+  }
+  
+  .gradient-card-hover {
+    background: var(--gradient-card-hover);
   }
 }

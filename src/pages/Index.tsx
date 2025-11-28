@@ -118,8 +118,9 @@ const Index = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-6 py-24 md:py-32">
-        <div className="text-center max-w-4xl mx-auto space-y-8">
+      <section className="container mx-auto px-6 py-24 md:py-32 gradient-hero relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.02] bg-grid-pattern"></div>
+        <div className="text-center max-w-4xl mx-auto space-y-8 relative z-10">
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight">
             Transform Your Google Reviews into Growth
           </h1>
@@ -128,7 +129,7 @@ const Index = () => {
             and build stronger customer relationships.
           </p>
           <div className="pt-4">
-            <Button size="lg" onClick={() => navigate("/dashboard")} className="text-lg px-10 py-6">
+            <Button size="lg" onClick={() => navigate("/dashboard")} className="gradient-primary hover:opacity-90 text-white shadow-lg text-lg px-10 py-6">
               Start Managing Reviews
             </Button>
           </div>
@@ -149,13 +150,16 @@ const Index = () => {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="p-8 rounded-xl border border-border bg-card shadow-card hover:shadow-soft transition-smooth"
+              className="relative p-8 rounded-xl border border-border bg-card shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group overflow-hidden"
             >
-              <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6">
-                <feature.icon className="h-7 w-7 text-primary" />
+              <div className="absolute inset-0 gradient-card opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative z-10">
+                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <feature.icon className="h-7 w-7 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground mb-3">{feature.title}</h3>
+                <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-3">{feature.title}</h3>
-              <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
             </div>
           ))}
         </div>
@@ -200,14 +204,14 @@ const Index = () => {
           {pricingPlans.map((plan, index) => (
             <div
               key={index}
-              className={`p-8 rounded-xl border bg-card transition-smooth ${
+              className={`relative p-8 rounded-xl border bg-card transition-all duration-300 hover:-translate-y-1 ${
                 plan.highlighted
-                  ? "border-primary shadow-lg scale-105"
-                  : "border-border shadow-card hover:shadow-soft"
+                  ? "border-primary shadow-xl scale-105 gradient-card"
+                  : "border-border shadow-card hover:shadow-lg"
               }`}
             >
               {plan.highlighted && (
-                <div className="inline-block px-3 py-1 mb-4 text-xs font-semibold text-primary bg-primary/10 rounded-full">
+                <div className="inline-block px-3 py-1 mb-4 text-xs font-semibold text-white gradient-primary rounded-full shadow-md">
                   Most Popular
                 </div>
               )}
@@ -218,7 +222,7 @@ const Index = () => {
                 <span className="text-muted-foreground">/{billingCycle === "monthly" ? "mo" : "mo"}</span>
               </div>
               <Button
-                className="w-full mb-6"
+                className={`w-full mb-6 ${plan.highlighted ? 'gradient-primary hover:opacity-90 text-white shadow-md' : ''}`}
                 variant={plan.highlighted ? "default" : "outline"}
                 onClick={() => navigate("/dashboard")}
               >
@@ -239,17 +243,20 @@ const Index = () => {
 
       {/* Bottom CTA Section */}
       <section className="container mx-auto px-6 py-20">
-        <div className="bg-primary/5 border border-primary/20 rounded-2xl p-12 md:p-16 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Ready to elevate your customer relationships?
-          </h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Join businesses that are saving time and building better customer relationships 
-            with AI-powered review responses.
-          </p>
-          <Button size="lg" onClick={() => navigate("/dashboard")} className="text-lg px-10">
-            Get Started Now
-          </Button>
+        <div className="gradient-card border border-primary/20 rounded-2xl p-12 md:p-16 text-center relative overflow-hidden">
+          <div className="absolute inset-0 gradient-hero opacity-50"></div>
+          <div className="relative z-10">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Ready to elevate your customer relationships?
+            </h2>
+            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Join businesses that are saving time and building better customer relationships 
+              with AI-powered review responses.
+            </p>
+            <Button size="lg" onClick={() => navigate("/dashboard")} className="gradient-primary hover:opacity-90 text-white shadow-lg text-lg px-10">
+              Get Started Now
+            </Button>
+          </div>
         </div>
       </section>
 
