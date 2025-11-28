@@ -1,155 +1,178 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MessageSquare, Clock, Star, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Star } from "lucide-react";
 
 export default function Dashboard() {
-  // Mock data - will be replaced with real data
-  const metrics = [
+  // Mock analytics data
+  const analytics = [
     {
-      title: "New Reviews",
-      value: "12",
-      subtitle: "Last 24 hours",
-      icon: MessageSquare,
-      trend: "+2 from yesterday",
+      title: "Average Rating",
+      value: "4.8",
+      icon: Star,
+      subtitle: "out of 5.0",
+    },
+    {
+      title: "Total Reviews",
+      value: "1,247",
+      subtitle: "all time",
+    },
+    {
+      title: "Reviews This Week",
+      value: "23",
+      subtitle: "+12% from last week",
     },
     {
       title: "Pending Replies",
       value: "5",
-      subtitle: "Needs attention",
-      icon: Clock,
-      trend: "3 are urgent",
-    },
-    {
-      title: "Avg Rating",
-      value: "4.5",
-      subtitle: "This month",
-      icon: Star,
-      trend: "+0.2 from last month",
-    },
-    {
-      title: "Auto Reply Success",
-      value: "94%",
-      subtitle: "Success rate",
-      icon: CheckCircle2,
-      trend: "Excellent performance",
+      subtitle: "need attention",
     },
   ];
 
-  const recentActivity = [
+  // Mock review data
+  const reviews = [
     {
       id: 1,
-      reviewer: "John Smith",
+      reviewer: "Sarah Johnson",
       rating: 5,
-      text: "Excellent service! Very professional and quick response time.",
-      time: "2 hours ago",
-      status: "replied",
+      text: "Excellent service! The team was very professional and responsive. I couldn't be happier with the results. Highly recommend to anyone looking for quality work.",
+      date: "2 hours ago",
+      sentiment: "Positive",
     },
     {
       id: 2,
-      reviewer: "Sarah Johnson",
+      reviewer: "Michael Chen",
       rating: 4,
-      text: "Great experience overall. Would definitely recommend.",
-      time: "5 hours ago",
-      status: "pending",
+      text: "Great experience overall. The communication was clear and the delivery was on time. Would definitely use again.",
+      date: "5 hours ago",
+      sentiment: "Positive",
     },
     {
       id: 3,
-      reviewer: "Michael Brown",
+      reviewer: "Emma Davis",
+      rating: 3,
+      text: "Decent service but there's room for improvement. The response time could be faster.",
+      date: "1 day ago",
+      sentiment: "Neutral",
+    },
+    {
+      id: 4,
+      reviewer: "James Wilson",
       rating: 5,
-      text: "Outstanding quality and attention to detail.",
-      time: "1 day ago",
-      status: "replied",
+      text: "Outstanding quality and attention to detail. Exceeded my expectations in every way.",
+      date: "2 days ago",
+      sentiment: "Positive",
     },
   ];
 
+  const getSentimentColor = (sentiment: string) => {
+    switch (sentiment) {
+      case "Positive":
+        return "bg-emerald-50 text-emerald-700 border-emerald-200";
+      case "Neutral":
+        return "bg-amber-50 text-amber-700 border-amber-200";
+      case "Negative":
+        return "bg-rose-50 text-rose-700 border-rose-200";
+      default:
+        return "bg-muted text-muted-foreground border-border";
+    }
+  };
+
   return (
-    <div className="p-8 space-y-8">
-      <div>
-        <h1 className="text-3xl font-semibold text-foreground mb-2">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back! Here's your review overview.</p>
-      </div>
-
-      {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {metrics.map((metric) => (
-          <Card key={metric.title} className="shadow-card hover:shadow-soft transition-smooth">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {metric.title}
-              </CardTitle>
-              <metric.icon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-semibold text-foreground mb-1">
-                {metric.value}
-              </div>
-              <p className="text-xs text-muted-foreground mb-2">{metric.subtitle}</p>
-              <p className="text-xs text-primary">{metric.trend}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2 shadow-card">
-          <CardHeader>
-            <CardTitle className="text-lg">Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentActivity.map((activity) => (
-                <div
-                  key={activity.id}
-                  className="flex items-start gap-4 p-4 rounded-lg border border-border hover:bg-muted/30 transition-smooth"
-                >
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium text-foreground">{activity.reviewer}</p>
-                      <div className="flex items-center gap-1">
-                        {Array.from({ length: activity.rating }).map((_, i) => (
-                          <Star key={i} className="h-3 w-3 fill-primary text-primary" />
-                        ))}
-                      </div>
-                    </div>
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {activity.text}
-                    </p>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                      <span>{activity.time}</span>
-                      <Badge
-                        variant={activity.status === "replied" ? "default" : "secondary"}
-                        className="text-xs"
-                      >
-                        {activity.status === "replied" ? "Replied" : "Pending"}
-                      </Badge>
-                    </div>
+    <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto p-8 space-y-10">
+        {/* Analytics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {analytics.map((item, index) => (
+            <Card
+              key={index}
+              className="shadow-card hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
+            >
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  {item.title}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="flex items-center gap-2">
+                  {item.icon && (
+                    <item.icon className="h-5 w-5 text-primary fill-primary" />
+                  )}
+                  <div className="text-3xl font-bold text-foreground">
+                    {item.value}
                   </div>
                 </div>
+                <p className="text-xs text-muted-foreground">{item.subtitle}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Recent Reviews Section */}
+        <div className="space-y-6">
+          <h2 className="text-2xl font-semibold text-foreground">
+            Recent Reviews
+          </h2>
+
+          {reviews.length === 0 ? (
+            <Card className="p-16 text-center shadow-card">
+              <p className="text-muted-foreground text-lg">No reviews found yet.</p>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {reviews.map((review) => (
+                <Card
+                  key={review.id}
+                  className="shadow-card hover:shadow-md transition-all duration-300 hover:scale-[1.005]"
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between gap-6">
+                      <div className="flex-1 space-y-3">
+                        {/* Header: Name and Stars */}
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <h3 className="font-semibold text-foreground text-base">
+                            {review.reviewer}
+                          </h3>
+                          <div className="flex items-center gap-0.5">
+                            {Array.from({ length: review.rating }).map((_, i) => (
+                              <Star
+                                key={i}
+                                className="h-4 w-4 fill-primary text-primary"
+                              />
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Review Text */}
+                        <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                          {review.text}
+                        </p>
+
+                        {/* Footer: Date and Sentiment */}
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs text-muted-foreground">
+                            {review.date}
+                          </span>
+                          <Badge
+                            variant="outline"
+                            className={`${getSentimentColor(review.sentiment)} text-xs`}
+                          >
+                            {review.sentiment}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      {/* View Reply Button */}
+                      <Button variant="outline" size="sm" className="shrink-0">
+                        View Reply
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Google Connection Status */}
-        <Card className="shadow-card">
-          <CardHeader>
-            <CardTitle className="text-lg">Google Business</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-              <div>
-                <p className="text-sm font-medium text-foreground">Connection Status</p>
-                <p className="text-xs text-muted-foreground mt-1">Not connected</p>
-              </div>
-              <Badge variant="secondary">Offline</Badge>
-            </div>
-            <div className="p-3 rounded-lg bg-muted/30">
-              <p className="text-sm font-medium text-foreground mb-1">Last Sync</p>
-              <p className="text-xs text-muted-foreground">Never</p>
-            </div>
-          </CardContent>
-        </Card>
+          )}
+        </div>
       </div>
     </div>
   );
