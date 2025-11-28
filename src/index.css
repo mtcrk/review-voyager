@@ -56,7 +56,8 @@ All colors MUST be HSL.
     
     /* Stripe-inspired gradients */
     --gradient-primary: linear-gradient(135deg, #635BFF 0%, #7A73FF 100%);
-    --gradient-hero: linear-gradient(180deg, #F5F7FA 0%, #E8ECFF 100%);
+    --gradient-hero: linear-gradient(135deg, #a960ee 0%, #ff333d 25%, #90e0ff 50%, #ffcb57 100%);
+    --gradient-hero-overlay: linear-gradient(180deg, rgba(245, 247, 250, 0.95) 0%, rgba(245, 247, 250, 0.85) 100%);
     --gradient-accent: linear-gradient(135deg, #00D4FF 0%, #635BFF 100%);
     --gradient-card: linear-gradient(135deg, rgba(99, 91, 255, 0.05) 0%, rgba(122, 115, 255, 0.02) 100%);
     --gradient-card-hover: linear-gradient(135deg, rgba(99, 91, 255, 0.1) 0%, rgba(122, 115, 255, 0.05) 100%);
@@ -147,5 +148,9 @@ All colors MUST be HSL.
   
   .gradient-card-hover {
     background: var(--gradient-card-hover);
+  }
+  
+  .gradient-hero-overlay {
+    background: var(--gradient-hero-overlay);
   }
 }
