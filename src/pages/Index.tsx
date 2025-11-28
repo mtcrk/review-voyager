@@ -92,7 +92,7 @@ const Index = () => {
             <div className="hidden md:flex items-center gap-8 absolute left-1/2 transform -translate-x-1/2">
               <button
                 onClick={() => scrollToSection("features")}
-                className="text-sm font-medium transition-colors"
+                className="text-base font-medium transition-colors"
                 style={{ color: '#1F2937' }}
                 onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
                 onMouseLeave={(e) => e.currentTarget.style.color = '#1F2937'}
@@ -101,7 +101,7 @@ const Index = () => {
               </button>
               <button
                 onClick={() => scrollToSection("pricing")}
-                className="text-sm font-medium transition-colors"
+                className="text-base font-medium transition-colors"
                 style={{ color: '#1F2937' }}
                 onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
                 onMouseLeave={(e) => e.currentTarget.style.color = '#1F2937'}
@@ -110,7 +110,7 @@ const Index = () => {
               </button>
               <a
                 href="#"
-                className="text-sm font-medium transition-colors"
+                className="text-base font-medium transition-colors"
                 style={{ color: '#1F2937' }}
                 onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
                 onMouseLeave={(e) => e.currentTarget.style.color = '#1F2937'}
@@ -119,7 +119,7 @@ const Index = () => {
               </a>
               <button
                 onClick={() => navigate("/dashboard")}
-                className="text-sm font-medium transition-colors"
+                className="text-base font-medium transition-colors"
                 style={{ color: '#1F2937' }}
                 onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
                 onMouseLeave={(e) => e.currentTarget.style.color = '#1F2937'}
