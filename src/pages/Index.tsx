@@ -118,8 +118,9 @@ const Index = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-6 py-24 md:py-32 gradient-hero relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.02] bg-grid-pattern"></div>
+      <section className="container mx-auto px-6 py-24 md:py-32 relative overflow-hidden">
+        <div className="absolute inset-0 gradient-hero"></div>
+        <div className="absolute inset-0 gradient-hero-overlay"></div>
         <div className="text-center max-w-4xl mx-auto space-y-8 relative z-10">
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight">
             Transform Your Google Reviews into Growth
@@ -243,8 +244,9 @@ const Index = () => {
 
       {/* Bottom CTA Section */}
       <section className="container mx-auto px-6 py-20">
-        <div className="gradient-card border border-primary/20 rounded-2xl p-12 md:p-16 text-center relative overflow-hidden">
-          <div className="absolute inset-0 gradient-hero opacity-50"></div>
+        <div className="border border-primary/20 rounded-2xl p-12 md:p-16 text-center relative overflow-hidden">
+          <div className="absolute inset-0 gradient-hero"></div>
+          <div className="absolute inset-0 gradient-hero-overlay"></div>
           <div className="relative z-10">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               Ready to elevate your customer relationships?
