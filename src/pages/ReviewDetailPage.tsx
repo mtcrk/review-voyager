@@ -79,40 +79,52 @@ const ReviewDetailPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header - Sticky */}
-      <div className="sticky top-0 z-10 border-b bg-muted/50 backdrop-blur-sm">
-        <div className="container mx-auto max-w-3xl px-6 py-4">
-          <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur-sm h-16">
+        <div className="container mx-auto max-w-[720px] px-6 h-full flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/dashboard")}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
             <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate("/dashboard")}
-                className="gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-              <h1 className="text-lg font-semibold">Review Details</h1>
+              <span className="font-semibold text-base">{mockReview.reviewerName}</span>
+              <div className="flex gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`h-4 w-4 ${
+                      i < mockReview.rating
+                        ? "fill-amber-400 text-amber-400"
+                        : "text-muted-foreground/30"
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
+          </div>
 
-            <div className="flex items-center gap-2">
-              <Badge className={getSentimentColor(mockReview.sentiment)}>
-                {mockReview.sentiment}
-              </Badge>
-              <Badge className={getStatusColor(status)}>
-                {status.charAt(0).toUpperCase() + status.slice(1)}
-              </Badge>
-            </div>
+          <div className="flex items-center gap-2">
+            <Badge className={getSentimentColor(mockReview.sentiment)}>
+              {mockReview.sentiment}
+            </Badge>
+            <Badge className={getStatusColor(status)}>
+              {status.charAt(0).toUpperCase() + status.slice(1)}
+            </Badge>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto max-w-3xl px-6 py-8">
+      <div className="container mx-auto max-w-[720px] px-6 py-8 flex-1">
         <div className="space-y-6">
           {/* Section A: Original Review */}
-          <Card className="shadow-md">
+          <Card className="rounded-xl shadow-sm border">
             <CardHeader className="pb-4">
               <CardTitle className="text-xl">Original Review</CardTitle>
             </CardHeader>
@@ -129,22 +141,6 @@ const ReviewDetailPage = () => {
               </div>
 
               <div>
-                <p className="text-sm text-muted-foreground mb-2">Rating</p>
-                <div className="flex gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-5 w-5 ${
-                        i < mockReview.rating
-                          ? "fill-amber-400 text-amber-400"
-                          : "text-muted-foreground/30"
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <div>
                 <p className="text-sm text-muted-foreground mb-2">Review Text</p>
                 <p className="text-base leading-relaxed text-foreground">{mockReview.text}</p>
               </div>
@@ -156,120 +152,122 @@ const ReviewDetailPage = () => {
             </CardContent>
           </Card>
 
-          {/* Section B: AI Insights & Reply */}
-          <div className="space-y-6">
-            {/* AI Insights */}
-            <Card className="shadow-md">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl">AI Insights</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-5">
+          {/* Section B: AI Insights */}
+          <Card className="rounded-xl shadow-sm border">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl">AI Insights</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-2">Summary</p>
+                <p className="text-sm leading-relaxed text-foreground">{mockReview.summary}</p>
+              </div>
+
+              {mockReview.praises.length > 0 && (
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-2">Summary</p>
-                  <p className="text-sm leading-relaxed text-foreground">{mockReview.summary}</p>
-                </div>
-
-                {mockReview.praises.length > 0 && (
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-3">Praises</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {mockReview.praises.map((praise, idx) => (
-                        <Badge
-                          key={idx}
-                          variant="secondary"
-                          className="bg-emerald-50 text-emerald-700 border-emerald-200 justify-start"
-                        >
-                          {praise}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {mockReview.issues.length > 0 && (
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-3">Issues</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {mockReview.issues.map((issue, idx) => (
-                        <Badge
-                          key={idx}
-                          variant="secondary"
-                          className="bg-red-50 text-red-700 border-red-200 justify-start"
-                        >
-                          {issue}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* AI Reply */}
-            <Card className="shadow-md">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl">AI Generated Reply</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-5">
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm font-medium text-muted-foreground">Tone</p>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleRegenerateReply}
-                      className="h-8 text-xs"
-                    >
-                      Regenerate Reply
-                    </Button>
-                  </div>
-                  <div className="inline-flex w-full rounded-lg border bg-muted p-1">
-                    {(["Friendly", "Professional", "Formal"] as ToneOption[]).map((tone) => (
-                      <button
-                        key={tone}
-                        onClick={() => setSelectedTone(tone)}
-                        className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                          selectedTone === tone
-                            ? "bg-background text-foreground shadow-sm"
-                            : "text-muted-foreground hover:text-foreground"
-                        }`}
+                  <p className="text-sm font-medium text-muted-foreground mb-3">Praises</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {mockReview.praises.map((praise, idx) => (
+                      <Badge
+                        key={idx}
+                        variant="secondary"
+                        className="bg-emerald-50 text-emerald-700 border-emerald-200 justify-start"
                       >
-                        {tone}
-                      </button>
+                        {praise}
+                      </Badge>
                     ))}
                   </div>
                 </div>
+              )}
 
+              {mockReview.issues.length > 0 && (
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-2">Reply Text</p>
-                  <Textarea
-                    value={aiReply}
-                    onChange={(e) => setAiReply(e.target.value)}
-                    className="min-h-[200px] resize-none text-base"
-                    placeholder="AI-generated reply will appear here..."
-                  />
+                  <p className="text-sm font-medium text-muted-foreground mb-3">Issues</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {mockReview.issues.map((issue, idx) => (
+                      <Badge
+                        key={idx}
+                        variant="secondary"
+                        className="bg-red-50 text-red-700 border-red-200 justify-start"
+                      >
+                        {issue}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
+              )}
+            </CardContent>
+          </Card>
 
-                <div className="grid grid-cols-2 gap-3 pt-2">
+          {/* Section C: AI Suggested Reply */}
+          <Card className="rounded-xl shadow-sm border">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl">AI Suggested Reply</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-sm font-medium text-muted-foreground">Tone</p>
                   <Button
-                    variant="outline"
-                    onClick={handleMarkAsApproved}
-                    disabled={status === "approved"}
-                    className="w-full"
-                    size="lg"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleRegenerateReply}
+                    className="h-8 text-xs"
                   >
-                    Approve & Copy Reply
-                  </Button>
-                  <Button 
-                    onClick={handleCopyReply}
-                    className="w-full"
-                    size="lg"
-                  >
-                    Send to Google
+                    Regenerate Reply
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="inline-flex w-full rounded-lg border bg-muted p-1">
+                  {(["Friendly", "Professional", "Formal"] as ToneOption[]).map((tone) => (
+                    <button
+                      key={tone}
+                      onClick={() => setSelectedTone(tone)}
+                      className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                        selectedTone === tone
+                          ? "bg-background text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {tone}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-2">Reply Text</p>
+                <Textarea
+                  value={aiReply}
+                  onChange={(e) => setAiReply(e.target.value)}
+                  className="min-h-[200px] resize-none text-base"
+                  placeholder="AI-generated reply will appear here..."
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Sticky Footer */}
+      <div className="sticky bottom-0 z-10 border-t bg-background/95 backdrop-blur-sm">
+        <div className="container mx-auto max-w-[720px] px-6 py-4">
+          <div className="flex items-center justify-between gap-3">
+            <Button
+              variant="outline"
+              onClick={handleMarkAsApproved}
+              disabled={status === "approved"}
+              size="lg"
+              className="flex-1"
+            >
+              Approve Reply
+            </Button>
+            <Button 
+              onClick={handleCopyReply}
+              size="lg"
+              className="flex-1"
+            >
+              Send to Google
+            </Button>
           </div>
         </div>
       </div>
