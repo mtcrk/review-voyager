@@ -80,75 +80,64 @@ const ReviewDetailPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b bg-card">
-        <div className="container mx-auto px-6 py-4">
+      {/* Header - Sticky */}
+      <div className="sticky top-0 z-10 border-b bg-muted/50 backdrop-blur-sm">
+        <div className="container mx-auto max-w-3xl px-6 py-4">
           <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/dashboard")}
-              className="gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-
             <div className="flex items-center gap-3">
-              <span className="font-medium text-foreground">{mockReview.reviewerName}</span>
-              <div className="flex gap-0.5">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`h-4 w-4 ${
-                      i < mockReview.rating
-                        ? "fill-amber-400 text-amber-400"
-                        : "text-muted"
-                    }`}
-                  />
-                ))}
-              </div>
-              <span className="text-sm text-muted-foreground">
-                {formatDate(mockReview.postedAt)}
-              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/dashboard")}
+                className="gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <h1 className="text-lg font-semibold">Review Details</h1>
             </div>
 
-            <Badge className={getSentimentColor(mockReview.sentiment)}>
-              {mockReview.sentiment}
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge className={getSentimentColor(mockReview.sentiment)}>
+                {mockReview.sentiment}
+              </Badge>
+              <Badge className={getStatusColor(status)}>
+                {status.charAt(0).toUpperCase() + status.slice(1)}
+              </Badge>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-6 py-8">
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Left Column - Original Review */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Original Review</CardTitle>
+      <div className="container mx-auto max-w-3xl px-6 py-8">
+        <div className="space-y-6">
+          {/* Section A: Original Review */}
+          <Card className="shadow-md">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl">Original Review</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Business</p>
-                <p className="font-medium">{mockReview.businessName}</p>
+            <CardContent className="space-y-6">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <p className="text-sm text-muted-foreground mb-1">Reviewer</p>
+                  <p className="text-lg font-semibold">{mockReview.reviewerName}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Posted</p>
+                  <p className="text-sm font-medium">{formatDate(mockReview.postedAt)}</p>
+                </div>
               </div>
 
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Reviewer</p>
-                <p className="font-medium">{mockReview.reviewerName}</p>
-              </div>
-
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Rating</p>
-                <div className="flex gap-0.5">
+                <p className="text-sm text-muted-foreground mb-2">Rating</p>
+                <div className="flex gap-1">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
                       className={`h-5 w-5 ${
                         i < mockReview.rating
                           ? "fill-amber-400 text-amber-400"
-                          : "text-muted"
+                          : "text-muted-foreground/30"
                       }`}
                     />
                   ))}
@@ -156,39 +145,39 @@ const ReviewDetailPage = () => {
               </div>
 
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Review</p>
-                <p className="text-foreground leading-relaxed">{mockReview.text}</p>
+                <p className="text-sm text-muted-foreground mb-2">Review Text</p>
+                <p className="text-base leading-relaxed text-foreground">{mockReview.text}</p>
               </div>
 
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Posted</p>
-                <p className="text-sm">{formatDate(mockReview.postedAt)}</p>
+                <p className="text-sm text-muted-foreground mb-1">Business</p>
+                <p className="font-medium text-foreground">{mockReview.businessName}</p>
               </div>
             </CardContent>
           </Card>
 
-          {/* Right Column - AI Insights & Reply */}
+          {/* Section B: AI Insights & Reply */}
           <div className="space-y-6">
             {/* AI Insights */}
-            <Card>
-              <CardHeader>
-                <CardTitle>AI Insights</CardTitle>
+            <Card className="shadow-md">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-xl">AI Insights</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-5">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-2">Summary</p>
-                  <p className="text-sm leading-relaxed">{mockReview.summary}</p>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Summary</p>
+                  <p className="text-sm leading-relaxed text-foreground">{mockReview.summary}</p>
                 </div>
 
                 {mockReview.praises.length > 0 && (
                   <div>
-                    <p className="text-sm text-muted-foreground mb-2">Praises</p>
-                    <div className="flex flex-wrap gap-2">
+                    <p className="text-sm font-medium text-muted-foreground mb-3">Praises</p>
+                    <div className="grid grid-cols-2 gap-2">
                       {mockReview.praises.map((praise, idx) => (
                         <Badge
                           key={idx}
                           variant="secondary"
-                          className="bg-emerald-50 text-emerald-700 border-emerald-200"
+                          className="bg-emerald-50 text-emerald-700 border-emerald-200 justify-start"
                         >
                           {praise}
                         </Badge>
@@ -199,13 +188,13 @@ const ReviewDetailPage = () => {
 
                 {mockReview.issues.length > 0 && (
                   <div>
-                    <p className="text-sm text-muted-foreground mb-2">Issues</p>
-                    <div className="flex flex-wrap gap-2">
+                    <p className="text-sm font-medium text-muted-foreground mb-3">Issues</p>
+                    <div className="grid grid-cols-2 gap-2">
                       {mockReview.issues.map((issue, idx) => (
                         <Badge
                           key={idx}
                           variant="secondary"
-                          className="bg-red-50 text-red-700 border-red-200"
+                          className="bg-red-50 text-red-700 border-red-200 justify-start"
                         >
                           {issue}
                         </Badge>
@@ -217,24 +206,29 @@ const ReviewDetailPage = () => {
             </Card>
 
             {/* AI Reply */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>AI Reply</CardTitle>
-                  <Badge className={getStatusColor(status)}>
-                    {status.charAt(0).toUpperCase() + status.slice(1)}
-                  </Badge>
-                </div>
+            <Card className="shadow-md">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-xl">AI Generated Reply</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-5">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-2">Tone</p>
-                  <div className="inline-flex rounded-lg border bg-muted p-1">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm font-medium text-muted-foreground">Tone</p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleRegenerateReply}
+                      className="h-8 text-xs"
+                    >
+                      Regenerate Reply
+                    </Button>
+                  </div>
+                  <div className="inline-flex w-full rounded-lg border bg-muted p-1">
                     {(["Friendly", "Professional", "Formal"] as ToneOption[]).map((tone) => (
                       <button
                         key={tone}
                         onClick={() => setSelectedTone(tone)}
-                        className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                        className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                           selectedTone === tone
                             ? "bg-background text-foreground shadow-sm"
                             : "text-muted-foreground hover:text-foreground"
@@ -247,33 +241,32 @@ const ReviewDetailPage = () => {
                 </div>
 
                 <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm text-muted-foreground">Generated Reply</p>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleRegenerateReply}
-                      className="h-8"
-                    >
-                      Regenerate
-                    </Button>
-                  </div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Reply Text</p>
                   <Textarea
                     value={aiReply}
                     onChange={(e) => setAiReply(e.target.value)}
-                    className="min-h-[150px] resize-none"
+                    className="min-h-[200px] resize-none text-base"
+                    placeholder="AI-generated reply will appear here..."
                   />
                 </div>
 
-                <div className="flex items-center justify-between pt-2">
+                <div className="grid grid-cols-2 gap-3 pt-2">
                   <Button
                     variant="outline"
                     onClick={handleMarkAsApproved}
                     disabled={status === "approved"}
+                    className="w-full"
+                    size="lg"
                   >
-                    Mark as Approved
+                    Approve & Copy Reply
                   </Button>
-                  <Button onClick={handleCopyReply}>Copy Reply</Button>
+                  <Button 
+                    onClick={handleCopyReply}
+                    className="w-full"
+                    size="lg"
+                  >
+                    Send to Google
+                  </Button>
                 </div>
               </CardContent>
             </Card>
