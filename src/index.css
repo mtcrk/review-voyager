@@ -18,7 +18,7 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 217 33% 17%;
 
-    --primary: 224 100% 61%; /* Soft Sapphire Blue #3A66FF */
+    --primary: 245 100% 68%; /* Modern Indigo #635BFF (Stripe-style) */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 220 13% 96%; /* Light smoke for cards */
@@ -27,7 +27,7 @@ All colors MUST be HSL.
     --muted: 220 13% 91%; /* Border color #E5E7EB */
     --muted-foreground: 217 11% 47%; /* Cool Gray #6B7280 */
 
-    --accent: 224 100% 61%; /* Same as primary for consistency */
+    --accent: 245 100% 68%; /* Same as primary for consistency */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
@@ -35,19 +35,19 @@ All colors MUST be HSL.
 
     --border: 220 13% 91%; /* Thin gray border #E5E7EB */
     --input: 220 13% 91%;
-    --ring: 224 100% 61%;
+    --ring: 245 100% 68%;
 
     --radius: 0.5rem;
 
     /* Sidebar specific colors */
     --sidebar-background: 220 13% 96%; /* Light smoke #F3F4F6 */
     --sidebar-foreground: 217 11% 47%;
-    --sidebar-primary: 224 100% 61%;
+    --sidebar-primary: 245 100% 68%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 220 13% 91%;
     --sidebar-accent-foreground: 217 33% 17%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 224 100% 61%;
+    --sidebar-ring: 245 100% 68%;
 
     /* Custom design tokens */
     --shadow-soft: 0 1px 3px 0 rgb(0 0 0 / 0.03);
@@ -82,15 +82,15 @@ All colors MUST be HSL.
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 245 100% 68%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary: 245 100% 68%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 245 100% 68%;
   }
 }
 
