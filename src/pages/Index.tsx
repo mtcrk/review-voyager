@@ -79,9 +79,12 @@ const Index = () => {
       <nav className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur-lg" style={{ borderBottomColor: '#E5E7EB' }}>
         <div className="container mx-auto px-6">
           <div className="flex h-20 items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img src={voyageRespondLogo} alt="VoyageRespond" className="h-8 w-8" />
-              <span className="text-lg font-semibold text-foreground">VoyageRespond</span>
+            <div className="flex items-center gap-3 pl-1.5 pt-1">
+              <img src={voyageRespondLogo} alt="VoyageRespond" className="h-9 w-9" />
+              <span className="text-lg text-foreground" style={{ letterSpacing: '0.02em' }}>
+                <span className="font-normal">Voyage</span>
+                <span className="font-semibold">Respond</span>
+              </span>
             </div>
             <div className="hidden md:flex items-center gap-8">
               <button
