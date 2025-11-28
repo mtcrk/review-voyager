@@ -2,10 +2,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Star, ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { startOfWeek, addDays, format, isSameDay } from "date-fns";
 
 export default function Dashboard() {
-  const [selectedDay, setSelectedDay] = useState(2); // Tuesday selected by default
+  // Get Monday of current week
+  const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => 
+    startOfWeek(new Date(), { weekStartsOn: 1 })
+  );
+  const [selectedDay, setSelectedDay] = useState<Date>(() => new Date());
 
   // Helper function to get heat colors based on rating
   function getDayHeatColor(avgRating: number) {
@@ -20,16 +25,38 @@ export default function Dashboard() {
     }
   }
 
-  // Mock weekly data
-  const weeklyData = [
-    { day: 'Mon', dayIndex: 0, reviewCount: 12, avgRating: 4.5 },
-    { day: 'Tue', dayIndex: 1, reviewCount: 8, avgRating: 4.2 },
-    { day: 'Wed', dayIndex: 2, reviewCount: 15, avgRating: 4.7 },
-    { day: 'Thu', dayIndex: 3, reviewCount: 6, avgRating: 3.8 },
-    { day: 'Fri', dayIndex: 4, reviewCount: 18, avgRating: 4.9 },
-    { day: 'Sat', dayIndex: 5, reviewCount: 4, avgRating: 3.2 },
-    { day: 'Sun', dayIndex: 6, reviewCount: 9, avgRating: 4.6 },
-  ];
+  // Generate weekly data dynamically based on currentWeekStart
+  const weeklyData = useMemo(() => {
+    // Mock data generator - in future this will come from Supabase
+    const mockRatings = [4.5, 4.2, 4.7, 3.8, 4.9, 3.2, 4.6];
+    const mockCounts = [12, 8, 15, 6, 18, 4, 9];
+    
+    return Array.from({ length: 7 }, (_, index) => {
+      const date = addDays(currentWeekStart, index);
+      return {
+        date,
+        day: format(date, 'EEE'),
+        dayNumber: format(date, 'd'),
+        reviewCount: mockCounts[index],
+        avgRating: mockRatings[index],
+      };
+    });
+  }, [currentWeekStart]);
+
+  // Calculate week range for display
+  const weekRange = useMemo(() => {
+    const weekEnd = addDays(currentWeekStart, 6);
+    return `${format(currentWeekStart, 'MMM d')} – ${format(weekEnd, 'MMM d, yyyy')}`;
+  }, [currentWeekStart]);
+
+  // Navigate weeks
+  const goToPreviousWeek = () => {
+    setCurrentWeekStart(prev => addDays(prev, -7));
+  };
+
+  const goToNextWeek = () => {
+    setCurrentWeekStart(prev => addDays(prev, 7));
+  };
   // Mock analytics data
   const analytics = [
     {
@@ -55,7 +82,7 @@ export default function Dashboard() {
     },
   ];
 
-  // Mock review data - now with day index for filtering
+  // Mock review data - now with date for filtering
   const reviews = [
     {
       id: 1,
@@ -64,7 +91,7 @@ export default function Dashboard() {
       text: "Excellent service! The team was very professional and responsive. I couldn't be happier with the results. Highly recommend to anyone looking for quality work.",
       date: "2 hours ago",
       sentiment: "Positive",
-      dayIndex: 2, // Wednesday
+      reviewDate: addDays(currentWeekStart, 2), // Wednesday
     },
     {
       id: 2,
@@ -73,7 +100,7 @@ export default function Dashboard() {
       text: "Great experience overall. The communication was clear and the delivery was on time. Would definitely use again.",
       date: "5 hours ago",
       sentiment: "Positive",
-      dayIndex: 2, // Wednesday
+      reviewDate: addDays(currentWeekStart, 2), // Wednesday
     },
     {
       id: 3,
@@ -82,7 +109,7 @@ export default function Dashboard() {
       text: "Decent service but there's room for improvement. The response time could be faster.",
       date: "1 day ago",
       sentiment: "Neutral",
-      dayIndex: 1, // Tuesday
+      reviewDate: addDays(currentWeekStart, 1), // Tuesday
     },
     {
       id: 4,
@@ -91,7 +118,7 @@ export default function Dashboard() {
       text: "Outstanding quality and attention to detail. Exceeded my expectations in every way.",
       date: "2 days ago",
       sentiment: "Positive",
-      dayIndex: 0, // Monday
+      reviewDate: addDays(currentWeekStart, 0), // Monday
     },
     {
       id: 5,
@@ -100,12 +127,17 @@ export default function Dashboard() {
       text: "Very satisfied with the service. Professional team and great results.",
       date: "3 days ago",
       sentiment: "Positive",
-      dayIndex: 4, // Friday
+      reviewDate: addDays(currentWeekStart, 4), // Friday
     },
   ];
 
   // Filter reviews by selected day
-  const filteredReviews = reviews.filter(review => review.dayIndex === selectedDay);
+  const filteredReviews = reviews.filter(review => 
+    isSameDay(review.reviewDate, selectedDay)
+  );
+
+  // Get selected day name for display
+  const selectedDayName = format(selectedDay, 'EEE');
 
   const getSentimentColor = (sentiment: string) => {
     switch (sentiment) {
@@ -153,14 +185,29 @@ export default function Dashboard() {
         {/* Weekly Activity Section */}
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold text-foreground">
-              This Week's Reviews
-            </h2>
+            <div>
+              <h2 className="text-2xl font-semibold text-foreground">
+                This Week's Reviews
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                {weekRange}
+              </p>
+            </div>
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8"
+                onClick={goToPreviousWeek}
+              >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8"
+                onClick={goToNextWeek}
+              >
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
@@ -168,14 +215,14 @@ export default function Dashboard() {
 
           {/* Weekly Strip */}
           <div className="grid grid-cols-7 gap-3">
-            {weeklyData.map((dayData) => {
+            {weeklyData.map((dayData, index) => {
               const colors = getDayHeatColor(dayData.avgRating);
-              const isSelected = selectedDay === dayData.dayIndex;
+              const isSelected = isSameDay(selectedDay, dayData.date);
               
               return (
                 <button
-                  key={dayData.dayIndex}
-                  onClick={() => setSelectedDay(dayData.dayIndex)}
+                  key={index}
+                  onClick={() => setSelectedDay(dayData.date)}
                   className={`
                     p-4 rounded-lg transition-all duration-200
                     ${isSelected 
@@ -200,13 +247,13 @@ export default function Dashboard() {
                       className="text-lg font-bold"
                       style={{ color: colors.text }}
                     >
-                      {dayData.reviewCount}
+                      {dayData.dayNumber}
                     </div>
                     <div 
                       className="text-[10px] font-medium"
                       style={{ color: colors.text }}
                     >
-                      reviews
+                      {dayData.reviewCount} reviews
                     </div>
                   </div>
                 </button>
@@ -218,7 +265,7 @@ export default function Dashboard() {
         {/* Recent Reviews Section */}
         <div className="space-y-6">
           <h2 className="text-2xl font-semibold text-foreground">
-            {weeklyData[selectedDay].day}'s Reviews
+            {selectedDayName}'s Reviews ({format(selectedDay, 'MMM d')})
           </h2>
 
           {filteredReviews.length === 0 ? (
