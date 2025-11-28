@@ -20,12 +20,19 @@ All colors MUST be HSL.
 
     --primary: 255 75% 70%; /* Soft pastel purple */
     --primary-foreground: 0 0% 100%;
+    
+    /* Premium CTA button colors */
+    --cta-button: 255 71% 67%; /* #7A5AF8 */
+    --cta-button-hover: 255 73% 61%; /* #6845F4 */
 
     --secondary: 220 13% 96%; /* Light smoke for cards */
     --secondary-foreground: 217 33% 17%;
 
     --muted: 220 13% 93%; /* Lighter muted gray */
     --muted-foreground: 217 11% 50%; /* Slightly lighter gray */
+    
+    /* Navbar specific colors */
+    --navbar-text: 0 0% 23%; /* #3A3A3A - darker text for better contrast */
 
     --accent: 215 85% 75%; /* Soft pastel blue */
     --accent-foreground: 0 0% 100%;

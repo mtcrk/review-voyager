@@ -76,9 +76,9 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Navbar */}
-      <nav className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-lg">
+      <nav className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur-lg" style={{ borderBottomColor: '#E5E7EB' }}>
         <div className="container mx-auto px-6">
-          <div className="flex h-16 items-center justify-between">
+          <div className="flex h-20 items-center justify-between">
             <div className="flex items-center gap-3">
               <img src={logo} alt="Voyagerespond" className="h-8 w-8" />
               <span className="text-lg font-semibold text-foreground">Voyagerespond</span>
@@ -86,32 +86,58 @@ const Index = () => {
             <div className="hidden md:flex items-center gap-8">
               <button
                 onClick={() => scrollToSection("features")}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="text-sm font-medium transition-colors"
+                style={{ color: '#3A3A3A' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#3A3A3A'}
               >
                 Features
               </button>
               <button
                 onClick={() => scrollToSection("pricing")}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="text-sm font-medium transition-colors"
+                style={{ color: '#3A3A3A' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#3A3A3A'}
               >
                 Pricing
               </button>
               <a
                 href="#"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="text-sm font-medium transition-colors"
+                style={{ color: '#3A3A3A' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#3A3A3A'}
               >
                 Docs
               </a>
               <button
                 onClick={() => navigate("/dashboard")}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="text-sm font-medium transition-colors"
+                style={{ color: '#3A3A3A' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#3A3A3A'}
               >
                 Login
               </button>
-              <Button onClick={() => navigate("/dashboard")}>Get Started</Button>
+              <button 
+                onClick={() => navigate("/dashboard")}
+                className="px-5 py-2.5 rounded-md text-sm font-medium text-white transition-all duration-200 shadow-sm hover:shadow-md"
+                style={{ backgroundColor: '#7A5AF8' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6845F4'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7A5AF8'}
+              >
+                Get Started
+              </button>
             </div>
             <div className="md:hidden">
-              <Button onClick={() => navigate("/dashboard")} size="sm">Get Started</Button>
+              <button 
+                onClick={() => navigate("/dashboard")}
+                className="px-4 py-2 rounded-md text-sm font-medium text-white transition-all"
+                style={{ backgroundColor: '#7A5AF8' }}
+              >
+                Get Started
+              </button>
             </div>
           </div>
         </div>
