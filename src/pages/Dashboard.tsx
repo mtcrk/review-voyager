@@ -155,33 +155,33 @@ export default function Dashboard() {
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
 
-    if (diffDays > 0) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-    if (diffHours > 0) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-    if (diffMins > 0) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
-    return 'Just now';
+    if (diffDays > 0) return `${diffDays} gün önce`;
+    if (diffHours > 0) return `${diffHours} saat önce`;
+    if (diffMins > 0) return `${diffMins} dakika önce`;
+    return 'Az önce';
   };
 
   const analyticsData = [
     {
-      title: "Average Rating",
+      title: "Ortalama Puan",
       value: metrics.avgRating,
       icon: Star,
-      subtitle: "out of 5.0",
+      subtitle: "5 üzerinden",
     },
     {
-      title: "Total Reviews",
+      title: "Toplam Yorumlar",
       value: metrics.totalReviews.toLocaleString(),
-      subtitle: "all time",
+      subtitle: "tüm zamanlar",
     },
     {
-      title: "Reviews This Week",
+      title: "Bu Haftanın Yorumları",
       value: metrics.reviewsThisWeek.toString(),
       subtitle: weekRange,
     },
     {
-      title: "Pending Replies",
+      title: "Bekleyen Yanıtlar",
       value: metrics.pendingReplies.toString(),
-      subtitle: "need attention",
+      subtitle: "dikkat gerekiyor",
     },
   ];
 
@@ -208,7 +208,7 @@ export default function Dashboard() {
               <h1 className="text-3xl font-semibold text-foreground">
                 {activeBusiness.name}
               </h1>
-              <p className="text-muted-foreground mt-1">Dashboard Overview</p>
+              <p className="text-muted-foreground mt-1">Dashboard Özeti</p>
             </div>
           )}
 
@@ -245,8 +245,8 @@ export default function Dashboard() {
             </div>
           ) : reviews.length === 0 ? (
             <Card className="p-12 text-center shadow-card">
-              <p className="text-muted-foreground text-lg">No reviews yet for this business.</p>
-              <p className="text-sm text-muted-foreground mt-2">Reviews will appear here once they're added.</p>
+              <p className="text-muted-foreground text-lg">Bu işletme için henüz yorum yok.</p>
+              <p className="text-sm text-muted-foreground mt-2">Yorumlar eklendiğinde burada görünecek.</p>
             </Card>
           ) : (
             <>
@@ -255,7 +255,7 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-2xl font-semibold text-foreground">
-                      This Week's Reviews
+                      Bu Haftanın Yorumları
                     </h2>
                     <p className="text-sm text-muted-foreground mt-1">
                       {weekRange}
@@ -323,7 +323,7 @@ export default function Dashboard() {
                             className="text-[10px] font-medium"
                             style={{ color: colors.text }}
                           >
-                            {dayData.reviewCount} review{dayData.reviewCount !== 1 ? 's' : ''}
+                            {dayData.reviewCount} yorum
                           </div>
                         </div>
                       </button>
@@ -335,12 +335,12 @@ export default function Dashboard() {
               {/* Recent Reviews Section */}
               <div className="space-y-6">
                 <h2 className="text-2xl font-semibold text-foreground">
-                  {selectedDayName}'s Reviews ({format(selectedDay, 'MMM d')})
+                  {selectedDayName} Günü Yorumları ({format(selectedDay, 'MMM d')})
                 </h2>
 
                 {filteredReviews.length === 0 ? (
                   <Card className="p-16 text-center shadow-card">
-                    <p className="text-muted-foreground text-lg">No reviews found for this day.</p>
+                    <p className="text-muted-foreground text-lg">Bu gün için yorum bulunamadı.</p>
                   </Card>
                 ) : (
                   <div className="space-y-4">
@@ -370,7 +370,7 @@ export default function Dashboard() {
 
                               {/* Review Text */}
                               <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-                                {review.text || 'No review text'}
+                                {review.text || 'Yorum metni yok'}
                               </p>
 
                               {/* Footer: Date and Sentiment */}
@@ -391,7 +391,7 @@ export default function Dashboard() {
 
                             {/* View Reply Button */}
                             <Button variant="outline" size="sm" className="shrink-0">
-                              View Reply
+                              Yanıtı Gör
                             </Button>
                           </div>
                         </CardContent>

@@ -16,10 +16,10 @@ import logo from "@/assets/logo.png";
 
 const menuItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Reviews", url: "/reviews", icon: MessageSquare },
-  { title: "Auto Reply", url: "/auto-reply", icon: Zap },
-  { title: "Statistics", url: "/statistics", icon: BarChart3 },
-  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Yorumlar", url: "/reviews", icon: MessageSquare },
+  { title: "Otomatik Yanıt", url: "/auto-reply", icon: Zap },
+  { title: "İstatistikler", url: "/statistics", icon: BarChart3 },
+  { title: "Ayarlar", url: "/settings", icon: Settings },
 ];
 
 export function AppSidebar() {

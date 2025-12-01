@@ -27,7 +27,7 @@ export default function Settings() {
     try {
       await supabase.auth.signOut();
       toast({
-        title: "Çıkış yapıldı",
+        title: "Çıkış Yapıldı",
         description: "Başarıyla çıkış yaptınız.",
       });
       navigate('/login');
@@ -73,39 +73,39 @@ export default function Settings() {
     <div className="p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-semibold text-foreground mb-2">Settings</h1>
-          <p className="text-muted-foreground">Manage your account and preferences</p>
+          <h1 className="text-3xl font-semibold text-foreground mb-2">Ayarlar</h1>
+          <p className="text-muted-foreground">Hesabınızı ve tercihlerinizi yönetin</p>
           {profile && (
             <Badge variant="secondary" className="mt-2">
-              Role: {profile.role}
+              Rol: {profile.role}
             </Badge>
           )}
         </div>
         <Button variant="outline" onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
-          Logout
+          Çıkış Yap
         </Button>
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
         <TabsList className="bg-muted/30">
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="business">Business Info</TabsTrigger>
-          <TabsTrigger value="google">Google Integration</TabsTrigger>
-          <TabsTrigger value="auto-reply">Auto Reply</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsTrigger value="profile">Profil</TabsTrigger>
+          <TabsTrigger value="business">İşletme Bilgileri</TabsTrigger>
+          <TabsTrigger value="google">Google Entegrasyonu</TabsTrigger>
+          <TabsTrigger value="auto-reply">Otomatik Yanıt</TabsTrigger>
+          <TabsTrigger value="notifications">Bildirimler</TabsTrigger>
         </TabsList>
 
         {/* Profile Tab */}
         <TabsContent value="profile" className="space-y-6">
           <Card className="shadow-card">
             <CardHeader>
-              <CardTitle>Profile Information</CardTitle>
-              <CardDescription>Update your personal details</CardDescription>
+              <CardTitle>Profil Bilgileri</CardTitle>
+              <CardDescription>Kişisel bilgilerinizi güncelleyin</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
+                <Label htmlFor="fullName">Tam Ad</Label>
                 <Input
                   id="fullName"
                   placeholder="Ahmet Yılmaz"
@@ -115,26 +115,26 @@ export default function Settings() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">E-posta</Label>
                 <Input
                   id="email"
                   type="email"
                   value={user?.email || ''}
                   disabled
                 />
-                <p className="text-xs text-muted-foreground">Email cannot be changed</p>
+                <p className="text-xs text-muted-foreground">E-posta değiştirilemez</p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="role">Role</Label>
+                <Label htmlFor="role">Rol</Label>
                 <Input
                   id="role"
                   value={profile?.role || 'owner'}
                   disabled
                 />
-                <p className="text-xs text-muted-foreground">Contact admin to change your role</p>
+                <p className="text-xs text-muted-foreground">Rolünüzü değiştirmek için yöneticiyle iletişime geçin</p>
               </div>
               <Button onClick={handleSaveProfile} disabled={saving}>
-                {saving ? 'Saving...' : 'Save Changes'}
+                {saving ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
               </Button>
             </CardContent>
           </Card>
@@ -144,19 +144,19 @@ export default function Settings() {
         <TabsContent value="business" className="space-y-6">
           <Card className="shadow-card">
             <CardHeader>
-              <CardTitle>Business Information</CardTitle>
-              <CardDescription>Manage your business details</CardDescription>
+              <CardTitle>İşletme Bilgileri</CardTitle>
+              <CardDescription>İşletme bilgilerinizi yönetin</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="businessName">Business Name</Label>
-                <Input id="businessName" placeholder="My Business" />
+                <Label htmlFor="businessName">İşletme Adı</Label>
+                <Input id="businessName" placeholder="İşletmem" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="placeId">Google Place ID</Label>
                 <Input id="placeId" placeholder="ChIJ..." />
               </div>
-              <Button>Save Changes</Button>
+              <Button>Değişiklikleri Kaydet</Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -165,35 +165,35 @@ export default function Settings() {
         <TabsContent value="google" className="space-y-6">
           <Card className="shadow-card">
             <CardHeader>
-              <CardTitle>Google Business Integration</CardTitle>
-              <CardDescription>Connect to your Google Business Profile</CardDescription>
+              <CardTitle>Google Business Entegrasyonu</CardTitle>
+              <CardDescription>Google Business Profilinize bağlanın</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="p-4 rounded-lg border border-border bg-muted/30">
                 <div className="flex items-center justify-between mb-3">
                   <div>
-                    <p className="font-medium text-foreground">Connection Status</p>
+                    <p className="font-medium text-foreground">Bağlantı Durumu</p>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Your Google Business account status
+                      Google Business hesap durumunuz
                     </p>
                   </div>
-                  <Badge variant="secondary">Not Connected</Badge>
+                  <Badge variant="secondary">Bağlı Değil</Badge>
                 </div>
-                <Button className="w-full">Connect Google Business</Button>
+                <Button className="w-full">Google Business'a Bağlan</Button>
               </div>
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-3 rounded-lg bg-muted/10">
-                  <span className="text-sm text-muted-foreground">Account</span>
+                  <span className="text-sm text-muted-foreground">Hesap</span>
                   <span className="text-sm font-medium">-</span>
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-lg bg-muted/10">
-                  <span className="text-sm text-muted-foreground">Location ID</span>
+                  <span className="text-sm text-muted-foreground">Konum ID</span>
                   <span className="text-sm font-medium">-</span>
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-lg bg-muted/10">
-                  <span className="text-sm text-muted-foreground">Last Synced</span>
-                  <span className="text-sm font-medium">Never</span>
+                  <span className="text-sm text-muted-foreground">Son Senkronizasyon</span>
+                  <span className="text-sm font-medium">Hiçbir zaman</span>
                 </div>
               </div>
             </CardContent>
@@ -204,12 +204,12 @@ export default function Settings() {
         <TabsContent value="auto-reply" className="space-y-6">
           <Card className="shadow-card">
             <CardHeader>
-              <CardTitle>Auto Reply Settings</CardTitle>
-              <CardDescription>Configure automated responses</CardDescription>
+              <CardTitle>Otomatik Yanıt Ayarları</CardTitle>
+              <CardDescription>Otomatik yanıtları yapılandırın</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Configure auto-reply settings in the Auto Reply page.
+                Otomatik yanıt ayarlarını Otomatik Yanıt sayfasından yapılandırın.
               </p>
             </CardContent>
           </Card>
@@ -219,12 +219,12 @@ export default function Settings() {
         <TabsContent value="notifications" className="space-y-6">
           <Card className="shadow-card">
             <CardHeader>
-              <CardTitle>Notification Preferences</CardTitle>
-              <CardDescription>Manage how you receive notifications</CardDescription>
+              <CardTitle>Bildirim Tercihleri</CardTitle>
+              <CardDescription>Bildirimleri nasıl alacağınızı yönetin</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Notification settings coming soon.
+                Bildirim ayarları yakında.
               </p>
             </CardContent>
           </Card>
