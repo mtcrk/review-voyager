@@ -35,8 +35,8 @@ export function BusinessOnboarding({ open, onBusinessCreated }: BusinessOnboardi
       if (error) throw error;
 
       toast({
-        title: 'Success',
-        description: 'Your business has been added!',
+        title: 'Başarılı',
+        description: 'İşletmeniz eklendi!',
       });
 
       onBusinessCreated();
@@ -44,8 +44,8 @@ export function BusinessOnboarding({ open, onBusinessCreated }: BusinessOnboardi
       setPlaceId('');
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to create business',
+        title: 'Hata',
+        description: error.message || 'İşletme oluşturulamadı',
         variant: 'destructive',
       });
     } finally {
@@ -57,17 +57,17 @@ export function BusinessOnboarding({ open, onBusinessCreated }: BusinessOnboardi
     <Dialog open={open} onOpenChange={() => {}}>
       <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
-          <DialogTitle>Welcome to VoyageRespond</DialogTitle>
+          <DialogTitle>VoyageRespond'a Hoş Geldiniz</DialogTitle>
           <DialogDescription>
-            Let's get started by adding your business information
+            İşletme bilgilerinizi ekleyerek başlayalım
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="businessName">Business Name</Label>
+            <Label htmlFor="businessName">İşletme Adı</Label>
             <Input
               id="businessName"
-              placeholder="My Business"
+              placeholder="İşletme Adım"
               value={businessName}
               onChange={(e) => setBusinessName(e.target.value)}
               required
@@ -84,11 +84,11 @@ export function BusinessOnboarding({ open, onBusinessCreated }: BusinessOnboardi
               disabled={loading}
             />
             <p className="text-xs text-muted-foreground">
-              Optional: Find your Google Place ID from Google Business Profile
+              Opsiyonel: Google İşletme Profili'nden Google Place ID'nizi bulabilirsiniz
             </p>
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Creating...' : 'Create Business'}
+            {loading ? 'Oluşturuluyor...' : 'İşletme Oluştur'}
           </Button>
         </form>
       </DialogContent>
