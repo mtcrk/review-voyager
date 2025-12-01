@@ -54,27 +54,12 @@ export function BusinessOnboarding({ open, onBusinessCreated }: BusinessOnboardi
     }
   };
 
-  const handleGoogleConnect = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase.functions.invoke('google-business-auth', {
-        body: { action: 'initiate' },
-      });
-
-      if (error) throw error;
-
-      if (data?.authUrl) {
-        window.location.href = data.authUrl;
-      }
-    } catch (error: any) {
-      console.error('Google connect error:', error);
-      toast({
-        title: 'Hata',
-        description: error.message || 'Google Business bağlantısı başlatılamadı',
-        variant: 'destructive',
-      });
-      setLoading(false);
-    }
+  const handleGoogleConnect = () => {
+    toast({
+      title: 'Yakında geliyor 🚀',
+      description: 'Google Business hesabını doğrudan bağlama özelliği şu an Google\'ın ek izin sürecine takıldığı için devre dışı. Şimdilik işletmeni manuel ekleyerek yorumlarını yönetebilirsin.',
+      duration: 7000,
+    });
   };
 
   return (
