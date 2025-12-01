@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.approve-reply]
 verify_jwt = true
+
+[functions.google-business-auth]
+verify_jwt = true

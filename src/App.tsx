@@ -21,6 +21,8 @@ import AuthCallback from "./pages/AuthCallback";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
+import GoogleBusinessCallback from "./pages/GoogleBusinessCallback";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -37,6 +39,7 @@ const App = () => (
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/auth/google-business/callback" element={<GoogleBusinessCallback />} />
             <Route path="/auth/reset" element={<ResetPassword />} />
             <Route
               path="/dashboard"
