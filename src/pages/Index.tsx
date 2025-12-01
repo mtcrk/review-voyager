@@ -13,58 +13,58 @@ const Index = () => {
   const features = [
     {
       icon: MessageSquare,
-      title: "Smart Review Management",
-      description: "Manage all your Google Business reviews in one clean, organized dashboard",
+      title: "Akıllı Yorum Yönetimi",
+      description: "Tüm Google İşletme yorumlarınızı tek, düzenli ve temiz bir panelde yönetin",
     },
     {
       icon: Zap,
-      title: "AI-Powered Replies",
-      description: "Generate professional responses instantly with customizable tone and language",
+      title: "Yapay Zeka Destekli Yanıtlar",
+      description: "Özelleştirilebilir ton ve dil ile anında profesyonel yanıtlar oluşturun",
     },
     {
       icon: BarChart3,
-      title: "Deep Analytics",
-      description: "Track sentiment trends, reply rates, and key insights from your reviews",
+      title: "Derinlemesine Analitik",
+      description: "Yorumlarınızdan duygu trendlerini, yanıt oranlarını ve önemli içgörüleri takip edin",
     },
   ];
 
   const pricingPlans = [
     {
-      name: "Starter",
+      name: "Başlangıç",
       price: billingCycle === "monthly" ? 19 : 15,
-      description: "Perfect for single location businesses",
+      description: "Tek lokasyonlu işletmeler için ideal",
       features: [
-        "1 location",
-        "200 reviews/month",
-        "Dashboard access",
-        "AI reply generation",
-        "Manual approve & copy",
+        "1 lokasyon",
+        "200 yorum/ay",
+        "Panel erişimi",
+        "Yapay zeka yanıt oluşturma",
+        "Manuel onay ve kopyalama",
       ],
       highlighted: false,
     },
     {
       name: "Pro",
       price: billingCycle === "monthly" ? 49 : 39,
-      description: "For growing businesses",
+      description: "Büyüyen işletmeler için",
       features: [
-        "3 locations",
-        "Unlimited reviews",
-        "Auto Reply",
-        "Google API reply send",
-        "Priority support",
+        "3 lokasyon",
+        "Sınırsız yorum",
+        "Otomatik Yanıt",
+        "Google API ile yanıt gönderimi",
+        "Öncelikli destek",
       ],
       highlighted: true,
     },
     {
-      name: "Agency",
+      name: "Ajans",
       price: billingCycle === "monthly" ? 99 : 79,
-      description: "Scale with your agency",
+      description: "Ajansınızla ölçeklendirin",
       features: [
-        "Unlimited locations",
-        "Team access",
-        "Advanced analytics",
-        "White-label option",
-        "Dedicated support",
+        "Sınırsız lokasyon",
+        "Ekip erişimi",
+        "Gelişmiş analitik",
+        "Beyaz etiket seçeneği",
+        "Özel destek",
       ],
       highlighted: false,
     },
@@ -102,7 +102,7 @@ const Index = () => {
                 onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
                 onMouseLeave={(e) => e.currentTarget.style.color = '#1F2937'}
               >
-                Features
+                Özellikler
               </button>
               <button
                 onClick={() => scrollToSection("pricing")}
@@ -111,7 +111,7 @@ const Index = () => {
                 onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
                 onMouseLeave={(e) => e.currentTarget.style.color = '#1F2937'}
               >
-                Pricing
+                Fiyatlandırma
               </button>
               <a
                 href="#"
@@ -120,7 +120,7 @@ const Index = () => {
                 onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
                 onMouseLeave={(e) => e.currentTarget.style.color = '#1F2937'}
               >
-                Docs
+                Dokümantasyon
               </a>
               <button
                 onClick={() => navigate(user ? "/dashboard" : "/login")}
@@ -129,7 +129,7 @@ const Index = () => {
                 onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
                 onMouseLeave={(e) => e.currentTarget.style.color = '#1F2937'}
               >
-                {user ? 'Dashboard' : 'Login'}
+                {user ? 'Panel' : 'Giriş Yap'}
               </button>
             </div>
 
@@ -142,7 +142,7 @@ const Index = () => {
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6D28D9'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7A5AF8'}
               >
-                Get Started
+                Başla
               </button>
             </div>
 
@@ -153,7 +153,7 @@ const Index = () => {
                 className="px-4 py-2 rounded-md text-sm font-medium text-white transition-all"
                 style={{ backgroundColor: '#7A5AF8' }}
               >
-                Get Started
+                Başla
               </button>
             </div>
           </div>
@@ -167,11 +167,10 @@ const Index = () => {
         <div className="absolute inset-0 gradient-mesh"></div>
         <div className="text-center max-w-3xl mx-auto space-y-10 relative z-10">
           <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold text-foreground leading-tight tracking-tight">
-            Transform Your Google Reviews into Growth
+            Google Yorumlarınızı Büyümeye Dönüştürün
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed">
-            AI-powered review management that helps you respond faster, analyze deeper, 
-            and build stronger customer relationships.
+            Daha hızlı yanıt vermenize, daha derinlemesine analiz yapmanıza ve daha güçlü müşteri ilişkileri kurmanıza yardımcı olan yapay zeka destekli yorum yönetimi.
           </p>
           <div className="pt-6">
             <Button 
@@ -179,7 +178,7 @@ const Index = () => {
               onClick={() => navigate("/register")} 
               className="relative overflow-hidden gradient-primary text-white shadow-lg text-lg px-12 py-7 hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
             >
-              <span className="relative z-10">Start Managing Reviews</span>
+              <span className="relative z-10">Yorumları Yönetmeye Başla</span>
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
             </Button>
           </div>
@@ -192,10 +191,10 @@ const Index = () => {
         <div className="container mx-auto px-6 relative z-10">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Everything you need to manage reviews
+            Yorumları yönetmek için ihtiyacınız olan her şey
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Powerful features designed to help you respond to every review efficiently
+            Her yoruma verimli bir şekilde yanıt vermenize yardımcı olmak için tasarlanmış güçlü özellikler
           </p>
         </div>
         <div className="grid md:grid-cols-3 gap-8">
@@ -225,10 +224,10 @@ const Index = () => {
         <div className="container mx-auto px-6 relative z-10">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Simple, transparent pricing
+            Basit, şeffaf fiyatlandırma
           </h2>
           <p className="text-lg text-muted-foreground mb-8">
-            Choose the plan that fits your business
+            İşletmenize uygun planı seçin
           </p>
           
           {/* Billing Toggle */}
@@ -241,7 +240,7 @@ const Index = () => {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              Monthly
+              Aylık
             </button>
             <button
               onClick={() => setBillingCycle("yearly")}
@@ -251,7 +250,7 @@ const Index = () => {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              Yearly <span className="text-primary ml-1">(save 20%)</span>
+              Yıllık <span className="text-primary ml-1">(20% tasarruf)</span>
             </button>
           </div>
         </div>
@@ -268,21 +267,21 @@ const Index = () => {
             >
               {plan.highlighted && (
                 <div className="inline-block px-3 py-1 mb-4 text-xs font-semibold text-white gradient-primary rounded-full shadow-md">
-                  Most Popular
+                  En Popüler
                 </div>
               )}
               <h3 className="text-2xl font-bold text-foreground mb-2">{plan.name}</h3>
               <p className="text-sm text-muted-foreground mb-6">{plan.description}</p>
               <div className="mb-6">
                 <span className="text-4xl font-bold text-foreground">${plan.price}</span>
-                <span className="text-muted-foreground">/{billingCycle === "monthly" ? "mo" : "mo"}</span>
+                <span className="text-muted-foreground">/ay</span>
               </div>
               <Button
                 className={`w-full mb-6 ${plan.highlighted ? 'gradient-primary hover:opacity-90 text-white shadow-md' : ''}`}
                 variant={plan.highlighted ? "default" : "outline"}
                 onClick={() => navigate("/dashboard")}
               >
-                Get Started
+                Başla
               </Button>
               <ul className="space-y-3">
                 {plan.features.map((feature, featureIndex) => (
@@ -306,18 +305,17 @@ const Index = () => {
           <div className="absolute inset-0 gradient-mesh opacity-20"></div>
           <div className="relative z-10">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Ready to elevate your customer relationships?
+              Müşteri ilişkilerinizi yükseltmeye hazır mısınız?
             </h2>
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Join businesses that are saving time and building better customer relationships 
-              with AI-powered review responses.
+              Yapay zeka destekli yorum yanıtlarıyla zaman kazanan ve daha iyi müşteri ilişkileri kuran işletmelere katılın.
             </p>
             <Button 
               size="lg" 
               onClick={() => navigate("/register")} 
               className="relative overflow-hidden gradient-primary text-white shadow-lg text-lg px-10 hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
             >
-              <span className="relative z-10">Get Started Now</span>
+              <span className="relative z-10">Hemen Başla</span>
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
             </Button>
           </div>
@@ -330,11 +328,11 @@ const Index = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-6 text-sm text-muted-foreground">
             <span>© 2025 VoyageRespond</span>
             <span className="hidden md:block">•</span>
-            <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
+            <a href="#" className="hover:text-foreground transition-colors">Gizlilik Politikası</a>
             <span className="hidden md:block">•</span>
-            <a href="#" className="hover:text-foreground transition-colors">Terms of Service</a>
+            <a href="#" className="hover:text-foreground transition-colors">Hizmet Şartları</a>
             <span className="hidden md:block">•</span>
-            <a href="#" className="hover:text-foreground transition-colors">Contact</a>
+            <a href="#" className="hover:text-foreground transition-colors">İletişim</a>
           </div>
         </div>
       </footer>
