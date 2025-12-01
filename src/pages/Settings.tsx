@@ -8,9 +8,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { useState, useEffect } from "react";
 
 export default function Settings() {
   const navigate = useNavigate();
+  const { user, profile, refreshProfile } = useAuth();
+  const [fullName, setFullName] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (profile) {
+      setFullName(profile.full_name);
+    }
+  }, [profile]);
 
   const handleLogout = async () => {
     try {
@@ -29,12 +40,46 @@ export default function Settings() {
     }
   };
 
+  const handleSaveProfile = async () => {
+    if (!user || !profile) return;
+
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ full_name: fullName })
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      await refreshProfile();
+      
+      toast({
+        title: "Başarılı",
+        description: "Profil bilgileriniz güncellendi.",
+      });
+    } catch (error) {
+      toast({
+        title: "Hata",
+        description: "Profil güncellenirken bir hata oluştu.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-semibold text-foreground mb-2">Settings</h1>
           <p className="text-muted-foreground">Manage your account and preferences</p>
+          {profile && (
+            <Badge variant="secondary" className="mt-2">
+              Role: {profile.role}
+            </Badge>
+          )}
         </div>
         <Button variant="outline" onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
@@ -59,21 +104,38 @@ export default function Settings() {
               <CardDescription>Update your personal details</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input id="firstName" placeholder="John" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input id="lastName" placeholder="Doe" />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Full Name</Label>
+                <Input
+                  id="fullName"
+                  placeholder="Ahmet Yılmaz"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  disabled={saving}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="john@example.com" />
+                <Input
+                  id="email"
+                  type="email"
+                  value={user?.email || ''}
+                  disabled
+                />
+                <p className="text-xs text-muted-foreground">Email cannot be changed</p>
               </div>
-              <Button>Save Changes</Button>
+              <div className="space-y-2">
+                <Label htmlFor="role">Role</Label>
+                <Input
+                  id="role"
+                  value={profile?.role || 'owner'}
+                  disabled
+                />
+                <p className="text-xs text-muted-foreground">Contact admin to change your role</p>
+              </div>
+              <Button onClick={handleSaveProfile} disabled={saving}>
+                {saving ? 'Saving...' : 'Save Changes'}
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
