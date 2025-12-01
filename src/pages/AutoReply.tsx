@@ -19,22 +19,22 @@ export default function AutoReply() {
   const [reviewRule, setReviewRule] = useState("positive");
 
   const toneOptions = [
-    { value: "formal", label: "Formal", description: "Professional and business-like" },
-    { value: "friendly", label: "Friendly", description: "Warm and approachable" },
-    { value: "playful", label: "Playful", description: "Fun and casual" },
+    { value: "formal", label: "Resmi", description: "Profesyonel ve iş benzeri" },
+    { value: "friendly", label: "Arkadaş Canlısı", description: "Sıcak ve samimi" },
+    { value: "playful", label: "Eğlenceli", description: "Eğlenceli ve rahat" },
   ];
 
   const previewReplies = {
-    formal: "Thank you for your review. We appreciate your feedback and are pleased to have met your expectations. We look forward to serving you again in the future.",
-    friendly: "Thank you so much for your wonderful review! We're thrilled to hear you had a great experience. Looking forward to seeing you again soon! 😊",
-    playful: "Wow, thank you! 🎉 Your amazing review made our day! We can't wait to welcome you back for more awesome experiences! ⭐",
+    formal: "Yorumunuz için teşekkür ederiz. Geri bildiriminizi takdir ediyoruz ve beklentilerinizi karşılamaktan memnuniyet duyuyoruz. Gelecekte sizlere tekrar hizmet etmeyi dört gözle bekliyoruz.",
+    friendly: "Harika yorumunuz için çok teşekkür ederiz! Harika bir deneyim yaşadığınızı duymak bizi çok mutlu etti. Sizi tekrar görmek için sabırsızlanıyoruz! 😊",
+    playful: "Vay be, teşekkürler! 🎉 Muhteşem yorumunuz günümüzü aydınlattı! Sizi tekrar ağırlamak ve daha fazla harika deneyim yaşatmak için sabırsızlanıyoruz! ⭐",
   };
 
   return (
     <div className="p-8 space-y-6">
       <div>
-        <h1 className="text-3xl font-semibold text-foreground mb-2">Auto Reply</h1>
-        <p className="text-muted-foreground">Configure AI-powered automatic responses</p>
+        <h1 className="text-3xl font-semibold text-foreground mb-2">Otomatik Yanıt</h1>
+        <p className="text-muted-foreground">AI destekli otomatik yanıtları yapılandırın</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -43,19 +43,19 @@ export default function AutoReply() {
           {/* Enable Auto Reply */}
           <Card className="shadow-card">
             <CardHeader>
-              <CardTitle className="text-lg">Auto Reply Status</CardTitle>
+              <CardTitle className="text-lg">Otomatik Yanıt Durumu</CardTitle>
               <CardDescription>
-                Enable AI to automatically respond to reviews
+                Yorumlara otomatik yanıt vermek için AI'yı etkinleştirin
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label htmlFor="auto-reply" className="text-base font-medium">
-                    Auto Reply
+                    Otomatik Yanıt
                   </Label>
                   <p className="text-sm text-muted-foreground">
-                    {autoReplyEnabled ? "Currently active" : "Currently inactive"}
+                    {autoReplyEnabled ? "Şu anda aktif" : "Şu anda aktif değil"}
                   </p>
                 </div>
                 <Switch
@@ -70,9 +70,9 @@ export default function AutoReply() {
           {/* Tone Selection */}
           <Card className="shadow-card">
             <CardHeader>
-              <CardTitle className="text-lg">Response Tone</CardTitle>
+              <CardTitle className="text-lg">Yanıt Tonu</CardTitle>
               <CardDescription>
-                Choose the tone for AI-generated responses
+                AI tarafından oluşturulan yanıtlar için ton seçin
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -111,38 +111,38 @@ export default function AutoReply() {
           {/* Language & Rules */}
           <Card className="shadow-card">
             <CardHeader>
-              <CardTitle className="text-lg">Language & Rules</CardTitle>
+              <CardTitle className="text-lg">Dil ve Kurallar</CardTitle>
               <CardDescription>
-                Configure language and reply rules
+                Dil ve yanıt kurallarını yapılandırın
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label>Language</Label>
+                <Label>Dil</Label>
                 <Select value={language} onValueChange={setLanguage}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="en">English</SelectItem>
-                    <SelectItem value="tr">Turkish</SelectItem>
+                    <SelectItem value="en">İngilizce</SelectItem>
+                    <SelectItem value="tr">Türkçe</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-3">
-                <Label>Reply Rules</Label>
+                <Label>Yanıt Kuralları</Label>
                 <RadioGroup value={reviewRule} onValueChange={setReviewRule}>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="positive" id="positive" />
                     <Label htmlFor="positive" className="font-normal cursor-pointer">
-                      Only positive reviews (4-5 stars)
+                      Sadece olumlu yorumlar (4-5 yıldız)
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="all" id="all" />
                     <Label htmlFor="all" className="font-normal cursor-pointer">
-                      All reviews
+                      Tüm yorumlar
                     </Label>
                   </div>
                 </RadioGroup>
@@ -157,10 +157,10 @@ export default function AutoReply() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Preview</CardTitle>
+                <CardTitle className="text-lg">Önizleme</CardTitle>
               </div>
               <CardDescription>
-                Example AI-generated response
+                Örnek AI tarafından oluşturulan yanıt
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -171,19 +171,19 @@ export default function AutoReply() {
               </div>
               <div className="mt-4 pt-4 border-t border-border space-y-2">
                 <div className="flex justify-between text-xs">
-                  <span className="text-muted-foreground">Tone:</span>
-                  <span className="font-medium text-foreground capitalize">{tone}</span>
+                  <span className="text-muted-foreground">Ton:</span>
+                  <span className="font-medium text-foreground capitalize">{toneOptions.find(t => t.value === tone)?.label}</span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-muted-foreground">Language:</span>
+                  <span className="text-muted-foreground">Dil:</span>
                   <span className="font-medium text-foreground">
-                    {language === "en" ? "English" : "Turkish"}
+                    {language === "en" ? "İngilizce" : "Türkçe"}
                   </span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-muted-foreground">Rule:</span>
+                  <span className="text-muted-foreground">Kural:</span>
                   <span className="font-medium text-foreground">
-                    {reviewRule === "positive" ? "Positive only" : "All reviews"}
+                    {reviewRule === "positive" ? "Sadece olumlu" : "Tüm yorumlar"}
                   </span>
                 </div>
               </div>

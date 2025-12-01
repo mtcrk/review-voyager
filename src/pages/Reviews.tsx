@@ -62,14 +62,14 @@ export default function Reviews() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reviews'] });
       toast({
-        title: "Reply Approved",
-        description: "The reply has been marked as approved.",
+        title: "Yanıt Onaylandı",
+        description: "Yanıt onaylandı olarak işaretlendi.",
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to approve reply.",
+        title: "Hata",
+        description: "Yanıt onaylanırken hata oluştu.",
         variant: "destructive",
       });
     },
@@ -96,15 +96,15 @@ export default function Reviews() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reviews'] });
       toast({
-        title: "Reply Copied",
-        description: "Reply copied to clipboard. Paste it into your Google Business console.",
+        title: "Yanıt Kopyalandı",
+        description: "Yanıt panoya kopyalandı. Google Business konsolunuze yapıştırın.",
       });
       setSelectedReview(null);
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to process reply.",
+        title: "Hata",
+        description: "Yanıt işlenirken hata oluştu.",
         variant: "destructive",
       });
     },
@@ -141,11 +141,11 @@ export default function Reviews() {
   const getStatusBadge = (status: string | null) => {
     switch (status) {
       case "replied":
-        return { label: "Replied", variant: "default" as const };
+        return { label: "Yanıtlandı", variant: "default" as const };
       case "approved":
-        return { label: "Approved", variant: "secondary" as const };
+        return { label: "Onaylandı", variant: "secondary" as const };
       default:
-        return { label: "Pending", variant: "outline" as const };
+        return { label: "Beklemede", variant: "outline" as const };
     }
   };
 
@@ -153,7 +153,7 @@ export default function Reviews() {
     return (
       <div className="p-8">
         <Card className="p-12 text-center">
-          <p className="text-muted-foreground">No business selected. Please add a business first.</p>
+          <p className="text-muted-foreground">İşletme seçilmedi. Lütfen önce bir işletme ekleyin.</p>
         </Card>
       </div>
     );
@@ -170,25 +170,25 @@ export default function Reviews() {
   return (
     <div className="p-8 space-y-6">
       <div>
-        <h1 className="text-3xl font-semibold text-foreground mb-2">Reviews</h1>
-        <p className="text-muted-foreground">Manage and respond to customer reviews</p>
+        <h1 className="text-3xl font-semibold text-foreground mb-2">Yorumlar</h1>
+        <p className="text-muted-foreground">Müşteri yorumlarını yönetin ve yanıtlayın</p>
       </div>
 
       {reviews.length === 0 ? (
         <Card className="p-12 text-center shadow-card">
-          <p className="text-muted-foreground text-lg">No reviews yet for this business.</p>
-          <p className="text-sm text-muted-foreground mt-2">Reviews will appear here once they're added.</p>
+          <p className="text-muted-foreground text-lg">Bu işletme için henüz yorum yok.</p>
+          <p className="text-sm text-muted-foreground mt-2">Yorumlar eklendiğinde burada görünecek.</p>
         </Card>
       ) : (
         <Card className="shadow-card">
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead className="font-semibold">Reviewer</TableHead>
-                <TableHead className="font-semibold">Rating</TableHead>
-                <TableHead className="font-semibold">Sentiment</TableHead>
-                <TableHead className="font-semibold">Date</TableHead>
-                <TableHead className="font-semibold">Status</TableHead>
+                <TableHead className="font-semibold">Yorumcu</TableHead>
+                <TableHead className="font-semibold">Puan</TableHead>
+                <TableHead className="font-semibold">Duygu</TableHead>
+                <TableHead className="font-semibold">Tarih</TableHead>
+                <TableHead className="font-semibold">Durum</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -234,9 +234,9 @@ export default function Reviews() {
       <Sheet open={!!selectedReview} onOpenChange={() => setSelectedReview(null)}>
         <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
           <SheetHeader>
-            <SheetTitle className="text-2xl">Review Details</SheetTitle>
+            <SheetTitle className="text-2xl">Yorum Detayları</SheetTitle>
             <SheetDescription>
-              Review from {selectedReview?.reviewer_name}
+              Yorumcu: {selectedReview?.reviewer_name}
             </SheetDescription>
           </SheetHeader>
 
@@ -244,15 +244,15 @@ export default function Reviews() {
             <div className="mt-6 space-y-6">
               {/* Review Text */}
               <div>
-                <h3 className="text-sm font-semibold text-foreground mb-2">Review</h3>
+                <h3 className="text-sm font-semibold text-foreground mb-2">Yorum</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  {selectedReview.text || 'No review text'}
+                  {selectedReview.text || 'Yorum metni yok'}
                 </p>
               </div>
 
               {/* Rating */}
               <div>
-                <h3 className="text-sm font-semibold text-foreground mb-2">Rating</h3>
+                <h3 className="text-sm font-semibold text-foreground mb-2">Puan</h3>
                 <div className="flex items-center gap-1">
                   {Array.from({ length: selectedReview.rating }).map((_, i) => (
                     <Star key={i} className="h-5 w-5 fill-primary text-primary" />
@@ -263,7 +263,7 @@ export default function Reviews() {
               {/* Summary */}
               {selectedReview.summary && (
                 <div>
-                  <h3 className="text-sm font-semibold text-foreground mb-2">Summary</h3>
+                  <h3 className="text-sm font-semibold text-foreground mb-2">Özet</h3>
                   <p className="text-sm text-muted-foreground">{selectedReview.summary}</p>
                 </div>
               )}
@@ -271,7 +271,7 @@ export default function Reviews() {
               {/* Praises */}
               {selectedReview.praises && Array.isArray(selectedReview.praises) && selectedReview.praises.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-semibold text-foreground mb-2">Praises</h3>
+                  <h3 className="text-sm font-semibold text-foreground mb-2">Övgüler</h3>
                   <div className="flex flex-wrap gap-2">
                     {selectedReview.praises.map((praise: string, i: number) => (
                       <Badge key={i} variant="secondary" className="bg-emerald-50 text-emerald-700">
@@ -285,7 +285,7 @@ export default function Reviews() {
               {/* Issues */}
               {selectedReview.issues && Array.isArray(selectedReview.issues) && selectedReview.issues.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-semibold text-foreground mb-2">Issues</h3>
+                  <h3 className="text-sm font-semibold text-foreground mb-2">Sorunlar</h3>
                   <div className="flex flex-wrap gap-2">
                     {selectedReview.issues.map((issue: string, i: number) => (
                       <Badge key={i} variant="secondary" className="bg-rose-50 text-rose-700">
@@ -299,13 +299,13 @@ export default function Reviews() {
               {/* AI Suggested Reply */}
               <div>
                 <h3 className="text-sm font-semibold text-foreground mb-3">
-                  AI Suggested Reply
+                  AI Önerilen Yanıt
                 </h3>
                 <Textarea
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
                   className="min-h-[120px] resize-none"
-                  placeholder="Edit the suggested reply..."
+                  placeholder="Önerilen yanıtı düzenleyin..."
                 />
               </div>
 
@@ -318,7 +318,7 @@ export default function Reviews() {
                   disabled={approveMutation.isPending || selectedReview.status === 'approved' || selectedReview.status === 'replied'}
                 >
                   <CheckCircle2 className="h-4 w-4" />
-                  {selectedReview.status === 'approved' || selectedReview.status === 'replied' ? 'Approved' : 'Approve Reply'}
+                  {selectedReview.status === 'approved' || selectedReview.status === 'replied' ? 'Onaylandı' : 'Yanıtı Onayla'}
                 </Button>
                 <Button 
                   className="flex-1 gap-2"
@@ -326,14 +326,14 @@ export default function Reviews() {
                   disabled={sendMutation.isPending || !replyText}
                 >
                   <Send className="h-4 w-4" />
-                  Send to Google
+                  Google'a Gönder
                 </Button>
               </div>
 
               {/* Status */}
               <div className="pt-4 border-t border-border">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Status:</span>
+                  <span className="text-sm text-muted-foreground">Durum:</span>
                   <Badge variant={getStatusBadge(selectedReview.status).variant}>
                     {getStatusBadge(selectedReview.status).label}
                   </Badge>
