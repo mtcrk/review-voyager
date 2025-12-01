@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { MessageSquare, Zap, BarChart3, Check } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
 
   const features = [
@@ -81,7 +83,7 @@ const Index = () => {
           <div className="flex h-20 items-center justify-between">
             {/* Logo - Left */}
             <button 
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate(user ? "/dashboard" : "/login")}
               className="flex items-center gap-2 pl-3 pt-1 hover:opacity-80 transition-opacity"
             >
               <img src={voyageRespondLogo} alt="VoyageRespond" className="h-7 w-7" />
@@ -121,20 +123,20 @@ const Index = () => {
                 Docs
               </a>
               <button
-                onClick={() => navigate("/dashboard")}
+                onClick={() => navigate(user ? "/dashboard" : "/login")}
                 className="text-base font-medium transition-colors"
                 style={{ color: '#1F2937' }}
                 onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
                 onMouseLeave={(e) => e.currentTarget.style.color = '#1F2937'}
               >
-                Login
+                {user ? 'Dashboard' : 'Login'}
               </button>
             </div>
 
             {/* CTA Button - Right */}
             <div className="hidden md:block">
               <button 
-                onClick={() => navigate("/dashboard")}
+                onClick={() => navigate("/register")}
                 className="px-5 py-2.5 rounded-md text-sm font-medium text-white transition-all duration-200 shadow-sm hover:shadow-md"
                 style={{ backgroundColor: '#7A5AF8' }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6D28D9'}
@@ -147,7 +149,7 @@ const Index = () => {
             {/* Mobile CTA */}
             <div className="md:hidden">
               <button 
-                onClick={() => navigate("/dashboard")}
+                onClick={() => navigate("/register")}
                 className="px-4 py-2 rounded-md text-sm font-medium text-white transition-all"
                 style={{ backgroundColor: '#7A5AF8' }}
               >
@@ -174,7 +176,7 @@ const Index = () => {
           <div className="pt-6">
             <Button 
               size="lg" 
-              onClick={() => navigate("/dashboard")} 
+              onClick={() => navigate("/register")} 
               className="relative overflow-hidden gradient-primary text-white shadow-lg text-lg px-12 py-7 hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
             >
               <span className="relative z-10">Start Managing Reviews</span>
@@ -312,7 +314,7 @@ const Index = () => {
             </p>
             <Button 
               size="lg" 
-              onClick={() => navigate("/dashboard")} 
+              onClick={() => navigate("/register")} 
               className="relative overflow-hidden gradient-primary text-white shadow-lg text-lg px-10 hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
             >
               <span className="relative z-10">Get Started Now</span>
