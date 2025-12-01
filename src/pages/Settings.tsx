@@ -4,13 +4,42 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { LogOut } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 export default function Settings() {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Çıkış yapıldı",
+        description: "Başarıyla çıkış yaptınız.",
+      });
+      navigate('/login');
+    } catch (error) {
+      toast({
+        title: "Hata",
+        description: "Çıkış yapılırken bir hata oluştu.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="p-8 space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold text-foreground mb-2">Settings</h1>
-        <p className="text-muted-foreground">Manage your account and preferences</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-semibold text-foreground mb-2">Settings</h1>
+          <p className="text-muted-foreground">Manage your account and preferences</p>
+        </div>
+        <Button variant="outline" onClick={handleLogout}>
+          <LogOut className="mr-2 h-4 w-4" />
+          Logout
+        </Button>
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
