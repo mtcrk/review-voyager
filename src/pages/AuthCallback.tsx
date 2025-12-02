@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useTranslation } from 'react-i18next';
 
 export default function AuthCallback() {
   const navigate = useNavigate();
-  const [message, setMessage] = useState('Hesabın doğrulanıyor...');
+  const { t } = useTranslation();
+  const [message, setMessage] = useState(t('auth.authCallback.verifying'));
 
   useEffect(() => {
     const handleCallback = async () => {
@@ -13,20 +15,20 @@ export default function AuthCallback() {
         const { data, error } = await supabase.auth.getSession();
         
         if (error) {
-          setMessage('Doğrulama sırasında bir hata oluştu.');
+          setMessage(t('auth.authCallback.error'));
           setTimeout(() => navigate('/login'), 3000);
           return;
         }
 
         if (data.session) {
-          setMessage('Hesabın başarıyla doğrulandı! Yönlendiriliyorsun...');
+          setMessage(t('auth.authCallback.success'));
           setTimeout(() => navigate('/dashboard'), 2000);
         } else {
-          setMessage('Oturum bulunamadı. Giriş sayfasına yönlendiriliyorsun...');
+          setMessage(t('auth.authCallback.noSession'));
           setTimeout(() => navigate('/login'), 2000);
         }
       } catch (err) {
-        setMessage('Bir hata oluştu. Giriş sayfasına yönlendiriliyorsun...');
+        setMessage(t('auth.authCallback.error'));
         setTimeout(() => navigate('/login'), 3000);
       }
     };
@@ -39,7 +41,7 @@ export default function AuthCallback() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">
-            Email Doğrulama
+            {t('auth.authCallback.title')}
           </CardTitle>
         </CardHeader>
         <CardContent className="text-center">

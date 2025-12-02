@@ -19,6 +19,8 @@ import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import AuthCallback from "./pages/AuthCallback";
 import ResetPassword from "./pages/ResetPassword";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
 
 import GoogleBusinessCallback from "./pages/GoogleBusinessCallback";
@@ -38,6 +40,8 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsOfService />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/auth/google-business/callback" element={<GoogleBusinessCallback />} />
             <Route path="/auth/reset" element={<ResetPassword />} />
