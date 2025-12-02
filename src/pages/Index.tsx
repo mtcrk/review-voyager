@@ -333,9 +333,9 @@ const Index = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-6 text-sm text-muted-foreground">
             <span>{t('footer.copyright')}</span>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/privacy")} className="hover:text-foreground transition-colors">{t('footer.privacy')}</button>
+            <button onClick={() => navigate("/privacy-policy")} className="hover:text-foreground transition-colors">{t('footer.privacy')}</button>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/terms")} className="hover:text-foreground transition-colors">{t('footer.terms')}</button>
+            <button onClick={() => navigate("/terms-of-service")} className="hover:text-foreground transition-colors">{t('footer.terms')}</button>
             <span className="hidden md:block">•</span>
             <a href="#" className="hover:text-foreground transition-colors">{t('footer.contact')}</a>
           </div>
