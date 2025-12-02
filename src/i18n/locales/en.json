@@ -1,0 +1,230 @@
+{
+  "nav": {
+    "features": "Features",
+    "pricing": "Pricing",
+    "documentation": "Documentation",
+    "login": "Login",
+    "dashboard": "Dashboard",
+    "getStarted": "Get Started"
+  },
+  "hero": {
+    "title": "Transform Your Google Reviews Into Growth",
+    "subtitle": "AI-powered review management that helps you respond faster, analyze deeper, and build stronger customer relationships.",
+    "cta": "Start Managing Reviews"
+  },
+  "features": {
+    "title": "Everything you need to manage reviews",
+    "subtitle": "Powerful features designed to help you respond to every review efficiently",
+    "smartManagement": {
+      "title": "Smart Review Management",
+      "description": "Manage all your Google Business reviews in one clean, organized dashboard"
+    },
+    "aiPowered": {
+      "title": "AI-Powered Responses",
+      "description": "Generate professional responses instantly with customizable tone and language"
+    },
+    "deepAnalytics": {
+      "title": "Deep Analytics",
+      "description": "Track sentiment trends, response rates, and key insights from your reviews"
+    }
+  },
+  "pricing": {
+    "title": "Simple, transparent pricing",
+    "subtitle": "Choose the plan that fits your business",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "yearlyDiscount": "(Save 20%)",
+    "perMonth": "/month",
+    "popular": "Most Popular",
+    "starter": {
+      "name": "Starter",
+      "description": "Perfect for single-location businesses",
+      "features": {
+        "locations": "1 location",
+        "reviews": "200 reviews/month",
+        "dashboard": "Dashboard access",
+        "aiGeneration": "AI response generation",
+        "manual": "Manual approve and copy"
+      }
+    },
+    "pro": {
+      "name": "Pro",
+      "description": "For growing businesses",
+      "features": {
+        "locations": "3 locations",
+        "reviews": "Unlimited reviews",
+        "autoReply": "Auto Reply",
+        "googleApi": "Google API reply sending",
+        "support": "Priority support"
+      }
+    },
+    "agency": {
+      "name": "Agency",
+      "description": "Scale with your agency",
+      "features": {
+        "locations": "Unlimited locations",
+        "team": "Team access",
+        "analytics": "Advanced analytics",
+        "whitelabel": "White label option",
+        "customSupport": "Custom support"
+      }
+    }
+  },
+  "cta": {
+    "title": "Ready to elevate your customer relationships?",
+    "subtitle": "Join businesses that save time and build better customer relationships with AI-powered review responses.",
+    "button": "Get Started Now"
+  },
+  "footer": {
+    "copyright": "© 2025 VoyageRespond",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "contact": "Contact"
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "subtitle": "Welcome back! Please sign in to continue.",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot password?",
+      "submit": "Login",
+      "noAccount": "Don't have an account?",
+      "register": "Register",
+      "error": "Invalid email or password",
+      "emailNotVerified": "Your email address has not been verified yet. Please click the verification link sent to your inbox."
+    },
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Get started with VoyageRespond today.",
+      "fullName": "Full Name",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Create Account",
+      "hasAccount": "Already have an account?",
+      "login": "Login",
+      "success": "Account created successfully! Please check your email to verify your account.",
+      "error": "An error occurred during registration"
+    },
+    "forgotPassword": {
+      "title": "Reset Password",
+      "subtitle": "Enter your email address and we'll send you a reset link.",
+      "email": "Email",
+      "submit": "Send Reset Link",
+      "backToLogin": "Back to Login",
+      "success": "Password reset link sent! Please check your email.",
+      "error": "An error occurred. Please try again."
+    },
+    "authCallback": {
+      "title": "Email Verification",
+      "verifying": "Verifying your account...",
+      "error": "An error occurred during verification.",
+      "success": "Account verified successfully! Redirecting...",
+      "noSession": "Session not found. Redirecting to login..."
+    }
+  },
+  "dashboard": {
+    "welcome": "Welcome",
+    "metrics": {
+      "avgRating": "Average Rating",
+      "totalReviews": "Total Reviews",
+      "thisWeek": "Reviews This Week",
+      "pending": "Pending Replies"
+    },
+    "weeklyActivity": "Weekly Review Activity",
+    "recentReviews": "Recent Reviews",
+    "noReviews": "No reviews yet",
+    "noReviewsDay": "No reviews on this day"
+  },
+  "reviews": {
+    "title": "Reviews",
+    "filters": {
+      "all": "All",
+      "pending": "Pending",
+      "replied": "Replied"
+    },
+    "sentiment": {
+      "positive": "Positive",
+      "neutral": "Neutral",
+      "negative": "Negative"
+    },
+    "copyReply": "Copy Reply",
+    "copiedSuccess": "Reply copied to clipboard!"
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "business": "Business Settings",
+    "account": "Account"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: December 2025",
+    "intro": "This Privacy Policy describes how VoyageRespond (\"we\", \"us\", or \"our\") collects, uses, and shares your personal information when you use our service.",
+    "sections": {
+      "collection": {
+        "title": "Information We Collect",
+        "content": "We collect information you provide directly to us, including your name, email address, business information, and Google Business Profile data when you connect your account."
+      },
+      "usage": {
+        "title": "How We Use Your Information",
+        "content": "We use the information we collect to provide, maintain, and improve our services, to process your requests, and to communicate with you about your account and our services."
+      },
+      "sharing": {
+        "title": "Information Sharing",
+        "content": "We do not sell your personal information. We may share your information with service providers who assist us in operating our platform, and as required by law."
+      },
+      "security": {
+        "title": "Data Security",
+        "content": "We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction."
+      },
+      "rights": {
+        "title": "Your Rights",
+        "content": "You have the right to access, correct, or delete your personal information. You may also object to or restrict certain processing of your data."
+      },
+      "contact": {
+        "title": "Contact Us",
+        "content": "If you have any questions about this Privacy Policy, please contact us at privacy@voyagerespond.com"
+      }
+    }
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "lastUpdated": "Last updated: December 2025",
+    "intro": "By accessing or using VoyageRespond, you agree to be bound by these Terms of Service.",
+    "sections": {
+      "acceptance": {
+        "title": "Acceptance of Terms",
+        "content": "By using our service, you agree to these terms. If you do not agree, please do not use our service."
+      },
+      "account": {
+        "title": "Account Registration",
+        "content": "You must provide accurate and complete information when creating an account. You are responsible for maintaining the security of your account credentials."
+      },
+      "usage": {
+        "title": "Acceptable Use",
+        "content": "You agree to use our service only for lawful purposes and in accordance with these Terms. You may not use our service in any way that could damage or impair our platform."
+      },
+      "subscription": {
+        "title": "Subscription and Payment",
+        "content": "Paid subscriptions are billed in advance on a monthly or yearly basis. You may cancel your subscription at any time, and cancellation will take effect at the end of the current billing period."
+      },
+      "termination": {
+        "title": "Termination",
+        "content": "We may terminate or suspend your account immediately, without prior notice, for any breach of these Terms."
+      },
+      "liability": {
+        "title": "Limitation of Liability",
+        "content": "To the maximum extent permitted by law, VoyageRespond shall not be liable for any indirect, incidental, special, consequential, or punitive damages."
+      },
+      "changes": {
+        "title": "Changes to Terms",
+        "content": "We reserve the right to modify these terms at any time. We will notify you of any changes by posting the new Terms on this page."
+      },
+      "contact": {
+        "title": "Contact Us",
+        "content": "If you have any questions about these Terms, please contact us at support@voyagerespond.com"
+      }
+    }
+  }
+}

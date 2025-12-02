@@ -1,0 +1,230 @@
+{
+  "nav": {
+    "features": "Özellikler",
+    "pricing": "Fiyatlandırma",
+    "documentation": "Dokümantasyon",
+    "login": "Giriş Yap",
+    "dashboard": "Panel",
+    "getStarted": "Başla"
+  },
+  "hero": {
+    "title": "Google Yorumlarınızı Büyümeye Dönüştürün",
+    "subtitle": "Daha hızlı yanıt vermenize, daha derinlemesine analiz yapmanıza ve daha güçlü müşteri ilişkileri kurmanıza yardımcı olan yapay zeka destekli yorum yönetimi.",
+    "cta": "Yorumları Yönetmeye Başla"
+  },
+  "features": {
+    "title": "Yorumları yönetmek için ihtiyacınız olan her şey",
+    "subtitle": "Her yoruma verimli bir şekilde yanıt vermenize yardımcı olmak için tasarlanmış güçlü özellikler",
+    "smartManagement": {
+      "title": "Akıllı Yorum Yönetimi",
+      "description": "Tüm Google İşletme yorumlarınızı tek, düzenli ve temiz bir panelde yönetin"
+    },
+    "aiPowered": {
+      "title": "Yapay Zeka Destekli Yanıtlar",
+      "description": "Özelleştirilebilir ton ve dil ile anında profesyonel yanıtlar oluşturun"
+    },
+    "deepAnalytics": {
+      "title": "Derinlemesine Analitik",
+      "description": "Yorumlarınızdan duygu trendlerini, yanıt oranlarını ve önemli içgörüleri takip edin"
+    }
+  },
+  "pricing": {
+    "title": "Basit, şeffaf fiyatlandırma",
+    "subtitle": "İşletmenize uygun planı seçin",
+    "monthly": "Aylık",
+    "yearly": "Yıllık",
+    "yearlyDiscount": "(20% tasarruf)",
+    "perMonth": "/ay",
+    "popular": "En Popüler",
+    "starter": {
+      "name": "Başlangıç",
+      "description": "Tek lokasyonlu işletmeler için ideal",
+      "features": {
+        "locations": "1 lokasyon",
+        "reviews": "200 yorum/ay",
+        "dashboard": "Panel erişimi",
+        "aiGeneration": "Yapay zeka yanıt oluşturma",
+        "manual": "Manuel onay ve kopyalama"
+      }
+    },
+    "pro": {
+      "name": "Pro",
+      "description": "Büyüyen işletmeler için",
+      "features": {
+        "locations": "3 lokasyon",
+        "reviews": "Sınırsız yorum",
+        "autoReply": "Otomatik Yanıt",
+        "googleApi": "Google API ile yanıt gönderimi",
+        "support": "Öncelikli destek"
+      }
+    },
+    "agency": {
+      "name": "Ajans",
+      "description": "Ajansınızla ölçeklendirin",
+      "features": {
+        "locations": "Sınırsız lokasyon",
+        "team": "Ekip erişimi",
+        "analytics": "Gelişmiş analitik",
+        "whitelabel": "Beyaz etiket seçeneği",
+        "customSupport": "Özel destek"
+      }
+    }
+  },
+  "cta": {
+    "title": "Müşteri ilişkilerinizi yükseltmeye hazır mısınız?",
+    "subtitle": "Yapay zeka destekli yorum yanıtlarıyla zaman kazanan ve daha iyi müşteri ilişkileri kuran işletmelere katılın.",
+    "button": "Hemen Başla"
+  },
+  "footer": {
+    "copyright": "© 2025 VoyageRespond",
+    "privacy": "Gizlilik Politikası",
+    "terms": "Hizmet Şartları",
+    "contact": "İletişim"
+  },
+  "auth": {
+    "login": {
+      "title": "Giriş Yap",
+      "subtitle": "Tekrar hoş geldiniz! Devam etmek için lütfen giriş yapın.",
+      "email": "E-posta",
+      "password": "Şifre",
+      "forgotPassword": "Şifreni mi unuttun?",
+      "submit": "Giriş Yap",
+      "noAccount": "Hesabın yok mu?",
+      "register": "Kayıt Ol",
+      "error": "Geçersiz e-posta veya şifre",
+      "emailNotVerified": "Email adresin henüz doğrulanmamış. Lütfen gelen kutuna gönderilen doğrulama linkine tıkla."
+    },
+    "register": {
+      "title": "Hesap Oluştur",
+      "subtitle": "VoyageRespond ile bugün başlayın.",
+      "fullName": "Ad Soyad",
+      "email": "E-posta",
+      "password": "Şifre",
+      "submit": "Hesap Oluştur",
+      "hasAccount": "Zaten hesabın var mı?",
+      "login": "Giriş Yap",
+      "success": "Hesabın başarıyla oluşturuldu! Lütfen hesabını doğrulamak için e-postanı kontrol et.",
+      "error": "Kayıt sırasında bir hata oluştu"
+    },
+    "forgotPassword": {
+      "title": "Şifre Sıfırla",
+      "subtitle": "E-posta adresini gir, sana sıfırlama linki gönderelim.",
+      "email": "E-posta",
+      "submit": "Sıfırlama Linki Gönder",
+      "backToLogin": "Giriş Sayfasına Dön",
+      "success": "Şifre sıfırlama linki gönderildi! Lütfen e-postanı kontrol et.",
+      "error": "Bir hata oluştu. Lütfen tekrar dene."
+    },
+    "authCallback": {
+      "title": "Email Doğrulama",
+      "verifying": "Hesabın doğrulanıyor...",
+      "error": "Doğrulama sırasında bir hata oluştu.",
+      "success": "Hesabın başarıyla doğrulandı! Yönlendiriliyorsun...",
+      "noSession": "Oturum bulunamadı. Giriş sayfasına yönlendiriliyorsun..."
+    }
+  },
+  "dashboard": {
+    "welcome": "Hoş geldin",
+    "metrics": {
+      "avgRating": "Ortalama Puan",
+      "totalReviews": "Toplam Yorum",
+      "thisWeek": "Bu Haftaki Yorumlar",
+      "pending": "Bekleyen Yanıtlar"
+    },
+    "weeklyActivity": "Haftalık Yorum Aktivitesi",
+    "recentReviews": "Son Yorumlar",
+    "noReviews": "Henüz yorum yok",
+    "noReviewsDay": "Bu günde yorum yok"
+  },
+  "reviews": {
+    "title": "Yorumlar",
+    "filters": {
+      "all": "Tümü",
+      "pending": "Bekleyen",
+      "replied": "Yanıtlanan"
+    },
+    "sentiment": {
+      "positive": "Pozitif",
+      "neutral": "Nötr",
+      "negative": "Negatif"
+    },
+    "copyReply": "Cevabı Kopyala",
+    "copiedSuccess": "Cevap panoya kopyalandı!"
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "profile": "Profil",
+    "business": "İşletme Ayarları",
+    "account": "Hesap"
+  },
+  "privacy": {
+    "title": "Gizlilik Politikası",
+    "lastUpdated": "Son güncelleme: Aralık 2025",
+    "intro": "Bu Gizlilik Politikası, VoyageRespond (\"biz\", \"bizim\" veya \"bizimki\") olarak hizmetimizi kullandığınızda kişisel bilgilerinizi nasıl topladığımızı, kullandığımızı ve paylaştığımızı açıklar.",
+    "sections": {
+      "collection": {
+        "title": "Topladığımız Bilgiler",
+        "content": "Doğrudan bize sağladığınız bilgileri topluyoruz; bunlar arasında adınız, e-posta adresiniz, işletme bilgileriniz ve hesabınızı bağladığınızda Google İşletme Profili verileriniz bulunur."
+      },
+      "usage": {
+        "title": "Bilgilerinizi Nasıl Kullanırız",
+        "content": "Topladığımız bilgileri hizmetlerimizi sağlamak, sürdürmek ve geliştirmek, taleplerinizi işlemek ve hesabınız ve hizmetlerimiz hakkında sizinle iletişim kurmak için kullanırız."
+      },
+      "sharing": {
+        "title": "Bilgi Paylaşımı",
+        "content": "Kişisel bilgilerinizi satmıyoruz. Bilgilerinizi, platformumuzu işletmemize yardımcı olan hizmet sağlayıcılarla ve yasaların gerektirdiği şekilde paylaşabiliriz."
+      },
+      "security": {
+        "title": "Veri Güvenliği",
+        "content": "Kişisel bilgilerinizi yetkisiz erişime, değişikliğe, ifşaya veya imhaya karşı korumak için uygun teknik ve organizasyonel önlemler uygularız."
+      },
+      "rights": {
+        "title": "Haklarınız",
+        "content": "Kişisel bilgilerinize erişme, bunları düzeltme veya silme hakkına sahipsiniz. Ayrıca verilerinizin belirli işlemlerine itiraz edebilir veya bunları kısıtlayabilirsiniz."
+      },
+      "contact": {
+        "title": "Bize Ulaşın",
+        "content": "Bu Gizlilik Politikası hakkında herhangi bir sorunuz varsa, lütfen privacy@voyagerespond.com adresinden bizimle iletişime geçin."
+      }
+    }
+  },
+  "terms": {
+    "title": "Hizmet Şartları",
+    "lastUpdated": "Son güncelleme: Aralık 2025",
+    "intro": "VoyageRespond'a erişerek veya kullanarak, bu Hizmet Şartları'na bağlı kalmayı kabul edersiniz.",
+    "sections": {
+      "acceptance": {
+        "title": "Şartların Kabulü",
+        "content": "Hizmetimizi kullanarak bu şartları kabul etmiş olursunuz. Kabul etmiyorsanız, lütfen hizmetimizi kullanmayın."
+      },
+      "account": {
+        "title": "Hesap Kaydı",
+        "content": "Hesap oluştururken doğru ve eksiksiz bilgi sağlamalısınız. Hesap kimlik bilgilerinizin güvenliğini sağlamaktan siz sorumlusunuz."
+      },
+      "usage": {
+        "title": "Kabul Edilebilir Kullanım",
+        "content": "Hizmetimizi yalnızca yasal amaçlar için ve bu Şartlar'a uygun olarak kullanmayı kabul edersiniz. Platformumuza zarar verebilecek şekilde hizmetimizi kullanamazsınız."
+      },
+      "subscription": {
+        "title": "Abonelik ve Ödeme",
+        "content": "Ücretli abonelikler, aylık veya yıllık bazda peşin olarak faturalandırılır. Aboneliğinizi istediğiniz zaman iptal edebilirsiniz ve iptal, mevcut fatura döneminin sonunda yürürlüğe girer."
+      },
+      "termination": {
+        "title": "Sonlandırma",
+        "content": "Bu Şartlar'ın herhangi bir ihlali durumunda, hesabınızı önceden haber vermeksizin derhal sonlandırabilir veya askıya alabiliriz."
+      },
+      "liability": {
+        "title": "Sorumluluk Sınırlaması",
+        "content": "Yasaların izin verdiği azami ölçüde, VoyageRespond dolaylı, arızi, özel, sonuçsal veya cezai zararlardan sorumlu olmayacaktır."
+      },
+      "changes": {
+        "title": "Şartlarda Değişiklikler",
+        "content": "Bu şartları istediğimiz zaman değiştirme hakkını saklı tutarız. Yeni Şartları bu sayfada yayınlayarak sizi herhangi bir değişiklikten haberdar edeceğiz."
+      },
+      "contact": {
+        "title": "Bize Ulaşın",
+        "content": "Bu Şartlar hakkında herhangi bir sorunuz varsa, lütfen support@voyagerespond.com adresinden bizimle iletişime geçin."
+      }
+    }
+  }
+}

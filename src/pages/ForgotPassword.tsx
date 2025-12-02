@@ -6,8 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useTranslation } from 'react-i18next';
 
 export default function ForgotPassword() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -31,7 +33,7 @@ export default function ForgotPassword() {
         setSuccess(true);
       }
     } catch (err) {
-      setError('Bir hata oluştu. Lütfen tekrar dene.');
+      setError(t('auth.forgotPassword.error'));
     } finally {
       setLoading(false);
     }
@@ -42,26 +44,22 @@ export default function ForgotPassword() {
       <div className="flex items-center justify-center min-h-screen bg-background">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold">Email Gönderildi</CardTitle>
+            <CardTitle className="text-2xl font-bold">{t('auth.forgotPassword.success')}</CardTitle>
             <CardDescription>
-              Şifre sıfırlama linki email adresine gönderildi.
+              {t('auth.forgotPassword.subtitle')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Alert>
               <AlertDescription>
-                <strong>{email}</strong> adresine şifre sıfırlama linki gönderdik. 
-                Linke tıklayarak yeni şifre belirleyebilirsin.
+                <strong>{email}</strong> - {t('auth.forgotPassword.success')}
               </AlertDescription>
             </Alert>
-            <p className="text-sm text-muted-foreground">
-              Email gelmediyse spam klasörünü kontrol et veya birkaç dakika bekle.
-            </p>
           </CardContent>
           <CardFooter>
             <Link to="/login" className="w-full">
               <Button variant="outline" className="w-full">
-                Giriş sayfasına dön
+                {t('auth.forgotPassword.backToLogin')}
               </Button>
             </Link>
           </CardFooter>
@@ -74,9 +72,9 @@ export default function ForgotPassword() {
     <div className="flex items-center justify-center min-h-screen bg-background">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Şifremi Unuttum</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t('auth.forgotPassword.title')}</CardTitle>
           <CardDescription>
-            Email adresini gir, sana şifre sıfırlama linki gönderelim
+            {t('auth.forgotPassword.subtitle')}
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleResetPassword}>
@@ -87,11 +85,11 @@ export default function ForgotPassword() {
               </Alert>
             )}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('auth.forgotPassword.email')}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="ornek@email.com"
+                placeholder="example@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -105,11 +103,11 @@ export default function ForgotPassword() {
               className="w-full"
               disabled={loading}
             >
-              {loading ? 'Gönderiliyor...' : 'Şifre Sıfırlama Linki Gönder'}
+              {loading ? `${t('auth.forgotPassword.submit')}...` : t('auth.forgotPassword.submit')}
             </Button>
             <div className="text-sm text-center text-muted-foreground">
               <Link to="/login" className="text-primary hover:underline">
-                Giriş sayfasına dön
+                {t('auth.forgotPassword.backToLogin')}
               </Link>
             </div>
           </CardFooter>

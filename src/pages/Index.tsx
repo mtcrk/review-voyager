@@ -4,67 +4,70 @@ import { MessageSquare, Zap, BarChart3, Check } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
 
   const features = [
     {
       icon: MessageSquare,
-      title: "Akıllı Yorum Yönetimi",
-      description: "Tüm Google İşletme yorumlarınızı tek, düzenli ve temiz bir panelde yönetin",
+      title: t('features.smartManagement.title'),
+      description: t('features.smartManagement.description'),
     },
     {
       icon: Zap,
-      title: "Yapay Zeka Destekli Yanıtlar",
-      description: "Özelleştirilebilir ton ve dil ile anında profesyonel yanıtlar oluşturun",
+      title: t('features.aiPowered.title'),
+      description: t('features.aiPowered.description'),
     },
     {
       icon: BarChart3,
-      title: "Derinlemesine Analitik",
-      description: "Yorumlarınızdan duygu trendlerini, yanıt oranlarını ve önemli içgörüleri takip edin",
+      title: t('features.deepAnalytics.title'),
+      description: t('features.deepAnalytics.description'),
     },
   ];
 
   const pricingPlans = [
     {
-      name: "Başlangıç",
+      name: t('pricing.starter.name'),
       price: billingCycle === "monthly" ? 19 : 15,
-      description: "Tek lokasyonlu işletmeler için ideal",
+      description: t('pricing.starter.description'),
       features: [
-        "1 lokasyon",
-        "200 yorum/ay",
-        "Panel erişimi",
-        "Yapay zeka yanıt oluşturma",
-        "Manuel onay ve kopyalama",
+        t('pricing.starter.features.locations'),
+        t('pricing.starter.features.reviews'),
+        t('pricing.starter.features.dashboard'),
+        t('pricing.starter.features.aiGeneration'),
+        t('pricing.starter.features.manual'),
       ],
       highlighted: false,
     },
     {
-      name: "Pro",
+      name: t('pricing.pro.name'),
       price: billingCycle === "monthly" ? 49 : 39,
-      description: "Büyüyen işletmeler için",
+      description: t('pricing.pro.description'),
       features: [
-        "3 lokasyon",
-        "Sınırsız yorum",
-        "Otomatik Yanıt",
-        "Google API ile yanıt gönderimi",
-        "Öncelikli destek",
+        t('pricing.pro.features.locations'),
+        t('pricing.pro.features.reviews'),
+        t('pricing.pro.features.autoReply'),
+        t('pricing.pro.features.googleApi'),
+        t('pricing.pro.features.support'),
       ],
       highlighted: true,
     },
     {
-      name: "Ajans",
+      name: t('pricing.agency.name'),
       price: billingCycle === "monthly" ? 99 : 79,
-      description: "Ajansınızla ölçeklendirin",
+      description: t('pricing.agency.description'),
       features: [
-        "Sınırsız lokasyon",
-        "Ekip erişimi",
-        "Gelişmiş analitik",
-        "Beyaz etiket seçeneği",
-        "Özel destek",
+        t('pricing.agency.features.locations'),
+        t('pricing.agency.features.team'),
+        t('pricing.agency.features.analytics'),
+        t('pricing.agency.features.whitelabel'),
+        t('pricing.agency.features.customSupport'),
       ],
       highlighted: false,
     },
@@ -102,7 +105,7 @@ const Index = () => {
                 onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
                 onMouseLeave={(e) => e.currentTarget.style.color = '#1F2937'}
               >
-                Özellikler
+                {t('nav.features')}
               </button>
               <button
                 onClick={() => scrollToSection("pricing")}
@@ -111,7 +114,7 @@ const Index = () => {
                 onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
                 onMouseLeave={(e) => e.currentTarget.style.color = '#1F2937'}
               >
-                Fiyatlandırma
+                {t('nav.pricing')}
               </button>
               <a
                 href="#"
@@ -120,7 +123,7 @@ const Index = () => {
                 onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
                 onMouseLeave={(e) => e.currentTarget.style.color = '#1F2937'}
               >
-                Dokümantasyon
+                {t('nav.documentation')}
               </a>
               <button
                 onClick={() => navigate(user ? "/dashboard" : "/login")}
@@ -129,12 +132,13 @@ const Index = () => {
                 onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
                 onMouseLeave={(e) => e.currentTarget.style.color = '#1F2937'}
               >
-                {user ? 'Panel' : 'Giriş Yap'}
+                {user ? t('nav.dashboard') : t('nav.login')}
               </button>
             </div>
 
-            {/* CTA Button - Right */}
-            <div className="hidden md:block">
+            {/* Language Switcher & CTA - Right */}
+            <div className="hidden md:flex items-center gap-3">
+              <LanguageSwitcher />
               <button 
                 onClick={() => navigate("/register")}
                 className="px-5 py-2.5 rounded-md text-sm font-medium text-white transition-all duration-200 shadow-sm hover:shadow-md"
@@ -142,18 +146,19 @@ const Index = () => {
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6D28D9'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7A5AF8'}
               >
-                Başla
+                {t('nav.getStarted')}
               </button>
             </div>
 
-            {/* Mobile CTA */}
-            <div className="md:hidden">
+            {/* Mobile Menu */}
+            <div className="md:hidden flex items-center gap-2">
+              <LanguageSwitcher />
               <button 
                 onClick={() => navigate("/register")}
                 className="px-4 py-2 rounded-md text-sm font-medium text-white transition-all"
                 style={{ backgroundColor: '#7A5AF8' }}
               >
-                Başla
+                {t('nav.getStarted')}
               </button>
             </div>
           </div>
@@ -167,10 +172,10 @@ const Index = () => {
         <div className="absolute inset-0 gradient-mesh"></div>
         <div className="text-center max-w-3xl mx-auto space-y-10 relative z-10">
           <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold text-foreground leading-tight tracking-tight">
-            Google Yorumlarınızı Büyümeye Dönüştürün
+            {t('hero.title')}
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed">
-            Daha hızlı yanıt vermenize, daha derinlemesine analiz yapmanıza ve daha güçlü müşteri ilişkileri kurmanıza yardımcı olan yapay zeka destekli yorum yönetimi.
+            {t('hero.subtitle')}
           </p>
           <div className="pt-6">
             <Button 
@@ -178,7 +183,7 @@ const Index = () => {
               onClick={() => navigate("/register")} 
               className="relative overflow-hidden gradient-primary text-white shadow-lg text-lg px-12 py-7 hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
             >
-              <span className="relative z-10">Yorumları Yönetmeye Başla</span>
+              <span className="relative z-10">{t('hero.cta')}</span>
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
             </Button>
           </div>
@@ -191,10 +196,10 @@ const Index = () => {
         <div className="container mx-auto px-6 relative z-10">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Yorumları yönetmek için ihtiyacınız olan her şey
+            {t('features.title')}
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Her yoruma verimli bir şekilde yanıt vermenize yardımcı olmak için tasarlanmış güçlü özellikler
+            {t('features.subtitle')}
           </p>
         </div>
         <div className="grid md:grid-cols-3 gap-8">
@@ -224,10 +229,10 @@ const Index = () => {
         <div className="container mx-auto px-6 relative z-10">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Basit, şeffaf fiyatlandırma
+            {t('pricing.title')}
           </h2>
           <p className="text-lg text-muted-foreground mb-8">
-            İşletmenize uygun planı seçin
+            {t('pricing.subtitle')}
           </p>
           
           {/* Billing Toggle */}
@@ -240,7 +245,7 @@ const Index = () => {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              Aylık
+              {t('pricing.monthly')}
             </button>
             <button
               onClick={() => setBillingCycle("yearly")}
@@ -250,7 +255,7 @@ const Index = () => {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              Yıllık <span className="text-primary ml-1">(20% tasarruf)</span>
+              {t('pricing.yearly')} <span className="text-primary ml-1">{t('pricing.yearlyDiscount')}</span>
             </button>
           </div>
         </div>
@@ -267,21 +272,21 @@ const Index = () => {
             >
               {plan.highlighted && (
                 <div className="inline-block px-3 py-1 mb-4 text-xs font-semibold text-white gradient-primary rounded-full shadow-md">
-                  En Popüler
+                  {t('pricing.popular')}
                 </div>
               )}
               <h3 className="text-2xl font-bold text-foreground mb-2">{plan.name}</h3>
               <p className="text-sm text-muted-foreground mb-6">{plan.description}</p>
               <div className="mb-6">
                 <span className="text-4xl font-bold text-foreground">${plan.price}</span>
-                <span className="text-muted-foreground">/ay</span>
+                <span className="text-muted-foreground">{t('pricing.perMonth')}</span>
               </div>
               <Button
                 className={`w-full mb-6 ${plan.highlighted ? 'gradient-primary hover:opacity-90 text-white shadow-md' : ''}`}
                 variant={plan.highlighted ? "default" : "outline"}
                 onClick={() => navigate("/dashboard")}
               >
-                Başla
+                {t('nav.getStarted')}
               </Button>
               <ul className="space-y-3">
                 {plan.features.map((feature, featureIndex) => (
@@ -305,17 +310,17 @@ const Index = () => {
           <div className="absolute inset-0 gradient-mesh opacity-20"></div>
           <div className="relative z-10">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Müşteri ilişkilerinizi yükseltmeye hazır mısınız?
+              {t('cta.title')}
             </h2>
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Yapay zeka destekli yorum yanıtlarıyla zaman kazanan ve daha iyi müşteri ilişkileri kuran işletmelere katılın.
+              {t('cta.subtitle')}
             </p>
             <Button 
               size="lg" 
               onClick={() => navigate("/register")} 
               className="relative overflow-hidden gradient-primary text-white shadow-lg text-lg px-10 hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
             >
-              <span className="relative z-10">Hemen Başla</span>
+              <span className="relative z-10">{t('cta.button')}</span>
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
             </Button>
           </div>
@@ -326,13 +331,13 @@ const Index = () => {
       <footer className="border-t border-border bg-card/50 backdrop-blur-sm mt-20">
         <div className="container mx-auto px-6 py-12">
           <div className="flex flex-col md:flex-row items-center justify-center gap-6 text-sm text-muted-foreground">
-            <span>© 2025 VoyageRespond</span>
+            <span>{t('footer.copyright')}</span>
             <span className="hidden md:block">•</span>
-            <a href="#" className="hover:text-foreground transition-colors">Gizlilik Politikası</a>
+            <button onClick={() => navigate("/privacy")} className="hover:text-foreground transition-colors">{t('footer.privacy')}</button>
             <span className="hidden md:block">•</span>
-            <a href="#" className="hover:text-foreground transition-colors">Hizmet Şartları</a>
+            <button onClick={() => navigate("/terms")} className="hover:text-foreground transition-colors">{t('footer.terms')}</button>
             <span className="hidden md:block">•</span>
-            <a href="#" className="hover:text-foreground transition-colors">İletişim</a>
+            <a href="#" className="hover:text-foreground transition-colors">{t('footer.contact')}</a>
           </div>
         </div>
       </footer>
