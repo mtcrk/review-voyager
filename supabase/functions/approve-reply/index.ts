@@ -19,11 +19,17 @@ serve(async (req) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    // User client for RLS-protected queries
     const supabase = createClient(supabaseUrl, supabaseKey, {
       global: {
         headers: { Authorization: authHeader },
       },
     });
+
+    // Service role client for accessing secure credentials table
+    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
 
     const { reviewId, approvedReply, sendToGoogle } = await req.json();
 
@@ -48,11 +54,22 @@ serve(async (req) => {
       }
 
       // Check if Google is connected
-      if (!review.businesses?.google_connected || !review.businesses?.google_refresh_token) {
+      if (!review.businesses?.google_connected) {
         throw new Error("Google Business account not connected");
       }
 
-      // TODO: Implement Google Business API reply
+      // Get refresh token from secure credentials table (service role only)
+      const { data: credentials, error: credError } = await supabaseAdmin
+        .from("business_credentials")
+        .select("google_refresh_token")
+        .eq("business_id", review.business_id)
+        .single();
+
+      if (credError || !credentials?.google_refresh_token) {
+        throw new Error("Google Business credentials not found");
+      }
+
+      // TODO: Implement Google Business API reply using credentials.google_refresh_token
       // For now, we'll mark it as pending
       updateData.google_reply_status = "pending_send";
       updateData.status = "replied";

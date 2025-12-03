@@ -14,13 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      business_credentials: {
+        Row: {
+          business_id: string
+          created_at: string
+          google_refresh_token: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          google_refresh_token?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          google_refresh_token?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_credentials_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: true
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       businesses: {
         Row: {
           created_at: string
           google_account_id: string | null
           google_connected: boolean | null
           google_location_id: string | null
-          google_refresh_token: string | null
           id: string
           language: string | null
           name: string
@@ -33,7 +64,6 @@ export type Database = {
           google_account_id?: string | null
           google_connected?: boolean | null
           google_location_id?: string | null
-          google_refresh_token?: string | null
           id?: string
           language?: string | null
           name: string
@@ -46,7 +76,6 @@ export type Database = {
           google_account_id?: string | null
           google_connected?: boolean | null
           google_location_id?: string | null
-          google_refresh_token?: string | null
           id?: string
           language?: string | null
           name?: string

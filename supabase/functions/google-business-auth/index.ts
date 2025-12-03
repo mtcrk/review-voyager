@@ -12,16 +12,20 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-        },
-      }
-    );
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+
+    // User client for RLS-protected queries
+    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
+
+    // Service role client for accessing secure credentials table
+    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
@@ -147,15 +151,37 @@ serve(async (req) => {
       const { refresh_token } = await req.json();
       
       for (const business of businesses) {
-        await supabaseClient.from("businesses").insert({
-          user_id: user.id,
-          name: business.name,
-          place_id: business.place_id,
-          google_account_id: business.account_id,
-          google_location_id: business.location_id,
-          google_refresh_token: refresh_token,
-          google_connected: true,
-        });
+        // Insert business (without refresh token - it goes to separate secure table)
+        const { data: insertedBusiness, error: insertError } = await supabaseClient
+          .from("businesses")
+          .insert({
+            user_id: user.id,
+            name: business.name,
+            place_id: business.place_id,
+            google_account_id: business.account_id,
+            google_location_id: business.location_id,
+            google_connected: true,
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error("Error inserting business:", insertError);
+          throw insertError;
+        }
+
+        // Store refresh token in secure credentials table (service role only)
+        const { error: credError } = await supabaseAdmin
+          .from("business_credentials")
+          .insert({
+            business_id: insertedBusiness.id,
+            google_refresh_token: refresh_token,
+          });
+
+        if (credError) {
+          console.error("Error storing credentials:", credError);
+          throw credError;
+        }
       }
 
       return new Response(
