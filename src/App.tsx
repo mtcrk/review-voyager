@@ -22,8 +22,14 @@ import ResetPassword from "./pages/ResetPassword";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
-
 import GoogleBusinessCallback from "./pages/GoogleBusinessCallback";
+import Onboarding from "./pages/Onboarding";
+import Hub from "./pages/Hub";
+import Pricing from "./pages/Pricing";
+import InstagramSales from "./pages/automations/InstagramSales";
+import GoogleReviews from "./pages/automations/GoogleReviews";
+import WhatsAppAutomation from "./pages/automations/WhatsAppAutomation";
+import OtherAutomations from "./pages/automations/OtherAutomations";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +51,13 @@ const App = () => (
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/auth/google-business/callback" element={<GoogleBusinessCallback />} />
             <Route path="/auth/reset" element={<ResetPassword />} />
+            <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/hub" element={<Hub />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/automations/instagram-sales" element={<InstagramSales />} />
+            <Route path="/automations/google-reviews" element={<GoogleReviews />} />
+            <Route path="/automations/whatsapp" element={<WhatsAppAutomation />} />
+            <Route path="/automations/other" element={<OtherAutomations />} />
             <Route
               path="/dashboard"
               element={
