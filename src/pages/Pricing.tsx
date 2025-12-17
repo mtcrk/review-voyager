@@ -24,92 +24,88 @@ const Pricing = () => {
     {
       name: "Starter",
       price: billingCycle === "monthly" ? 19 : 15,
-      description: "Perfect for getting started with Instagram automation.",
+      description: "Platform access with 1 automation of your choice.",
       highlighted: false,
       features: [
-        { text: "1 Instagram channel", included: true },
-        { text: "1 automation", included: true },
+        { text: "Core platform access", included: true },
+        { text: "1 automation (Instagram or Google)", included: true },
         { text: "500 messages/month", included: true },
         { text: "Basic analytics", included: true },
         { text: "Email support", included: true },
-        { text: "Google Reviews", included: false },
+        { text: "Multiple automations", included: false },
         { text: "Team access", included: false },
         { text: "Advanced analytics", included: false },
       ],
-      automations: ["Comment → DM auto reply"],
+      automationIcons: [MessageSquare, Star],
+      automationText: "Choose 1: Instagram or Google",
       cta: "Start Free Trial",
     },
     {
       name: "Pro",
       price: billingCycle === "monthly" ? 49 : 39,
-      description: "Full Instagram automation power with analytics.",
+      description: "Combine up to 2 automations with full analytics.",
       highlighted: true,
       features: [
-        { text: "3 Instagram channels", included: true },
-        { text: "Unlimited automations", included: true },
+        { text: "Core platform access", included: true },
+        { text: "Up to 2 automations", included: true },
         { text: "Unlimited messages", included: true },
         { text: "Advanced analytics", included: true },
         { text: "Priority support", included: true },
-        { text: "Google Reviews (Early Access)", included: true },
+        { text: "Instagram + Google together", included: true },
         { text: "Team access", included: false },
-        { text: "White-label", included: false },
+        { text: "Custom integrations", included: false },
       ],
-      automations: [
-        "Comment → DM auto reply",
-        "DM FAQ assistant",
-        "Story mention reply",
-        "AI review suggestions",
-      ],
+      automationIcons: [MessageSquare, Star],
+      automationText: "Instagram + Google",
       cta: "Start Free Trial",
     },
     {
-      name: "Business",
+      name: "Agency",
       price: billingCycle === "monthly" ? 99 : 79,
-      description: "For teams managing multiple channels.",
+      description: "All automations + team access for growing businesses.",
       highlighted: false,
       features: [
-        { text: "Unlimited channels", included: true },
-        { text: "Unlimited automations", included: true },
+        { text: "Core platform access", included: true },
+        { text: "All automations included", included: true },
         { text: "Unlimited messages", included: true },
         { text: "Full analytics suite", included: true },
         { text: "Dedicated support", included: true },
-        { text: "Google Reviews (Early Access)", included: true },
+        { text: "All channels access", included: true },
         { text: "Up to 5 team members", included: true },
         { text: "Custom integrations", included: true },
       ],
-      automations: [
-        "All Pro automations",
-        "Team inbox",
-        "Custom workflows",
-        "API access",
-      ],
+      automationIcons: [MessageSquare, Star, Phone],
+      automationText: "All automations",
       cta: "Contact Sales",
     },
   ];
 
   const addons = [
     {
-      name: "Instagram Sales Pack",
+      name: "Instagram Sales",
       price: 29,
-      description: "Advanced Instagram automation features.",
+      description: "Comment → DM automation for Instagram.",
       status: "available" as const,
       icon: MessageSquare,
+      color: "from-purple-500 to-pink-500",
       features: ["Comment keyword triggers", "Multi-step DM sequences", "Lead capture forms"],
     },
     {
-      name: "Google Reviews Pack",
+      name: "Google Reviews",
       price: 29,
       description: "AI-powered review management.",
-      status: "early-access" as const,
+      status: "available" as const,
       icon: Star,
+      color: "from-blue-500 to-cyan-500",
       features: ["AI reply suggestions", "Sentiment analysis", "Review alerts"],
     },
     {
-      name: "WhatsApp Pack",
+      name: "WhatsApp",
       price: 39,
       description: "WhatsApp Business automation.",
       status: "coming-soon" as const,
       icon: Phone,
+      color: "from-gray-400 to-gray-500",
       features: ["Auto-responder", "Quick replies", "Message templates"],
     },
   ];
@@ -165,7 +161,7 @@ const Pricing = () => {
                   Dashboard
                 </Button>
               ) : (
-                <Button className="gradient-primary text-white" onClick={() => navigate("/register")}>
+                <Button className="gradient-primary text-white" onClick={() => navigate("/onboarding")}>
                   Get Started
                 </Button>
               )}
@@ -177,10 +173,11 @@ const Pricing = () => {
       {/* Hero */}
       <section className="container mx-auto px-6 py-16 text-center">
         <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-          Simple, transparent pricing
+          Pay for the platform.<br />
+          <span className="text-primary">Activate the automations you need.</span>
         </h1>
         <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-          Choose the plan that fits your needs. Upgrade or downgrade anytime.
+          Start with one channel. Add more as you grow. No commitments.
         </p>
 
         {/* Billing Toggle */}
@@ -233,6 +230,20 @@ const Pricing = () => {
                 <span className="text-4xl font-bold text-foreground">${plan.price}</span>
                 <span className="text-muted-foreground">/month</span>
               </div>
+              
+              {/* Included automations visual */}
+              <div className="mb-6 p-4 rounded-lg bg-muted/50 border border-border">
+                <p className="text-xs font-medium text-muted-foreground mb-2">Included automations:</p>
+                <div className="flex items-center gap-2 mb-2">
+                  {plan.automationIcons.map((Icon, i) => (
+                    <div key={i} className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Icon className="w-4 h-4 text-primary" />
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-foreground font-medium">{plan.automationText}</p>
+              </div>
+
               <Button
                 className={`w-full mb-6 ${
                   plan.highlighted ? "gradient-primary text-white" : ""
@@ -243,7 +254,7 @@ const Pricing = () => {
                 {plan.cta}
               </Button>
 
-              <div className="space-y-3 mb-6">
+              <div className="space-y-3">
                 {plan.features.map((feature, i) => (
                   <div key={i} className="flex items-start gap-3">
                     {feature.included ? (
@@ -261,19 +272,6 @@ const Pricing = () => {
                   </div>
                 ))}
               </div>
-
-              <div className="border-t border-border pt-4">
-                <p className="text-xs font-medium text-muted-foreground mb-2">
-                  Included automations:
-                </p>
-                <div className="space-y-1">
-                  {plan.automations.map((automation, i) => (
-                    <p key={i} className="text-xs text-foreground">
-                      • {automation}
-                    </p>
-                  ))}
-                </div>
-              </div>
             </div>
           ))}
         </div>
@@ -284,7 +282,7 @@ const Pricing = () => {
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-foreground mb-4">Automation Add-ons</h2>
           <p className="text-muted-foreground text-lg">
-            Extend your capabilities with specialized automation packs.
+            Enable additional channels as your business grows.
           </p>
         </div>
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -296,8 +294,8 @@ const Pricing = () => {
               }`}
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="p-3 rounded-lg bg-primary/10">
-                  <addon.icon className="w-6 h-6 text-primary" />
+                <div className={`p-3 rounded-lg bg-gradient-to-br ${addon.color}`}>
+                  <addon.icon className="w-6 h-6 text-white" />
                 </div>
                 {getStatusBadge(addon.status)}
               </div>
@@ -319,18 +317,10 @@ const Pricing = () => {
                 variant="outline"
                 className="w-full"
                 disabled={addon.status === "coming-soon"}
-                onClick={() => {
-                  if (addon.status === "available") {
-                    navigate("/onboarding");
-                  } else if (addon.status === "early-access") {
-                    navigate("/automations/google-reviews");
-                  }
-                }}
+                onClick={() => navigate("/onboarding")}
               >
                 {addon.status === "coming-soon"
                   ? "Coming Soon"
-                  : addon.status === "early-access"
-                  ? "Join Waitlist"
                   : "Add to Plan"}
               </Button>
             </div>
@@ -346,7 +336,7 @@ const Pricing = () => {
             Not sure which plan is right for you?
           </h2>
           <p className="text-muted-foreground mb-6">
-            Start with our free trial. No credit card required.
+            Start with one automation. Add more anytime as your needs grow.
           </p>
           <Button
             size="lg"

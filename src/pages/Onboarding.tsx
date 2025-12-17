@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, Check, MessageSquare, Star, Phone, Sparkles, Lock, Clock } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, MessageSquare, Star, Phone, Sparkles, Lock, Clock, Square, CheckSquare } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 
 type Step = 1 | 2 | 3 | 4;
@@ -60,17 +60,17 @@ const Onboarding = () => {
   const channels: ChannelOption[] = [
     {
       id: "instagram",
-      title: "Instagram",
-      description: "DMs, comments, and story replies",
+      title: "Instagram Sales",
+      description: "Comment → DM automation, AI-powered replies, product sales",
       icon: MessageSquare,
       status: "available",
     },
     {
       id: "google-reviews",
       title: "Google Reviews",
-      description: "Review management & AI replies",
+      description: "AI review replies, sentiment analysis, reputation management",
       icon: Star,
-      status: "early-access",
+      status: "available",
     },
     {
       id: "whatsapp",
@@ -101,7 +101,14 @@ const Onboarding = () => {
       title: "AI review reply suggestions",
       description: "Get smart reply suggestions for every review",
       channel: "google-reviews",
-      status: "early-access",
+      status: "available",
+    },
+    {
+      id: "sentiment-analysis",
+      title: "Review sentiment analysis",
+      description: "Automatically categorize reviews by sentiment",
+      channel: "google-reviews",
+      status: "available",
     },
   ];
 
@@ -259,68 +266,76 @@ const Onboarding = () => {
           </div>
         )}
 
-        {/* Step 2: Choose your channels */}
+        {/* Step 2: Choose your automations - CHECKBOX STYLE */}
         {step === 2 && (
           <div className="space-y-8 animate-in fade-in duration-300">
             <div className="text-center space-y-3">
               <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-                Choose your channels
+                Which automations do you want to use?
               </h1>
               <p className="text-muted-foreground text-lg">
-                Select the platforms you want to automate.
+                Select one or more channels to automate.
               </p>
             </div>
 
             <div className="grid gap-4">
-              {channels.map((channel) => (
-                <button
-                  key={channel.id}
-                  onClick={() => channel.status !== "coming-soon" && toggleChannel(channel.id)}
-                  disabled={channel.status === "coming-soon"}
-                  className={`p-6 rounded-xl border text-left transition-all ${
-                    channel.status === "coming-soon"
-                      ? "opacity-60 cursor-not-allowed bg-muted/50"
-                      : selectedChannels.includes(channel.id)
-                      ? "border-primary bg-primary/5 shadow-md"
-                      : "border-border bg-card hover:border-primary/50 hover:shadow-md"
-                  }`}
-                >
-                  <div className="flex items-start gap-4">
-                    <div
-                      className={`p-3 rounded-lg ${
-                        selectedChannels.includes(channel.id) ? "bg-primary/10" : "bg-muted"
-                      }`}
-                    >
-                      <channel.icon
-                        className={`w-6 h-6 ${
-                          selectedChannels.includes(channel.id)
-                            ? "text-primary"
-                            : "text-muted-foreground"
-                        }`}
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-1">
-                        <h3 className="font-semibold text-foreground text-lg">{channel.title}</h3>
-                        {getStatusBadge(channel.status)}
+              {channels.map((channel) => {
+                const isSelected = selectedChannels.includes(channel.id);
+                const isDisabled = channel.status === "coming-soon";
+                
+                return (
+                  <button
+                    key={channel.id}
+                    onClick={() => !isDisabled && toggleChannel(channel.id)}
+                    disabled={isDisabled}
+                    className={`p-6 rounded-xl border text-left transition-all ${
+                      isDisabled
+                        ? "opacity-60 cursor-not-allowed bg-muted/50"
+                        : isSelected
+                        ? "border-primary bg-primary/5 shadow-md"
+                        : "border-border bg-card hover:border-primary/50 hover:shadow-md"
+                    }`}
+                  >
+                    <div className="flex items-start gap-4">
+                      {/* Checkbox Icon */}
+                      <div className="mt-1">
+                        {isSelected ? (
+                          <CheckSquare className="w-6 h-6 text-primary" />
+                        ) : (
+                          <Square className={`w-6 h-6 ${isDisabled ? "text-muted-foreground/40" : "text-muted-foreground"}`} />
+                        )}
                       </div>
-                      <p className="text-muted-foreground">{channel.description}</p>
+                      
+                      <div
+                        className={`p-3 rounded-lg ${
+                          isSelected ? "bg-primary/10" : "bg-muted"
+                        }`}
+                      >
+                        <channel.icon
+                          className={`w-6 h-6 ${
+                            isSelected
+                              ? "text-primary"
+                              : "text-muted-foreground"
+                          }`}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-1">
+                          <h3 className="font-semibold text-foreground text-lg">{channel.title}</h3>
+                          {getStatusBadge(channel.status)}
+                        </div>
+                        <p className="text-muted-foreground">{channel.description}</p>
+                      </div>
                     </div>
-                    <div
-                      className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
-                        selectedChannels.includes(channel.id)
-                          ? "border-primary bg-primary"
-                          : "border-muted-foreground/30"
-                      }`}
-                    >
-                      {selectedChannels.includes(channel.id) && (
-                        <Check className="w-4 h-4 text-white" />
-                      )}
-                    </div>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </div>
+
+            {/* Helper text */}
+            <p className="text-center text-muted-foreground text-sm">
+              You can start with one and add more anytime.
+            </p>
           </div>
         )}
 
@@ -361,6 +376,9 @@ const Onboarding = () => {
                         {getStatusBadge(automation.status)}
                       </div>
                       <p className="text-muted-foreground">{automation.description}</p>
+                      <span className="text-xs text-primary mt-2 inline-block">
+                        {channels.find((c) => c.id === automation.channel)?.title}
+                      </span>
                     </div>
                     <div
                       className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ml-4 ${
@@ -399,7 +417,7 @@ const Onboarding = () => {
               <div className="space-y-2">
                 <h3 className="font-semibold text-xl text-foreground">Ready to automate</h3>
                 <p className="text-muted-foreground">
-                  Your selected automation is ready to be configured.
+                  Your selected automations are ready to be configured.
                 </p>
               </div>
               <div className="flex flex-wrap justify-center gap-2">
@@ -412,6 +430,9 @@ const Onboarding = () => {
                   </span>
                 ))}
               </div>
+              <p className="text-sm text-muted-foreground">
+                You can add more channels or automations anytime from the Hub.
+              </p>
             </div>
           </div>
         )}
