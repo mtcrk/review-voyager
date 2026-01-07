@@ -11,3 +11,6 @@ verify_jwt = true
 
 [functions.google-business-auth]
 verify_jwt = true
+
+[functions.tiktok-auth]
+verify_jwt = true

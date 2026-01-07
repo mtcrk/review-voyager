@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { MessageSquare, Star, Phone, Check, ArrowRight, Zap, Users, BarChart3, Clock, Lock } from "lucide-react";
+import { MessageSquare, Star, Phone, Check, ArrowRight, Zap, Users, BarChart3, Clock, Lock, Music2 } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -45,6 +45,22 @@ const Index = () => {
       ],
       cta: "Enable Google Reviews",
       ctaLink: "/onboarding",
+    },
+    {
+      id: "tiktok",
+      title: "TikTok",
+      status: "available" as const,
+      color: "from-black to-gray-800",
+      bgColor: "bg-gray-50",
+      borderColor: "border-gray-300",
+      icon: Music2,
+      features: [
+        "Login Kit integration",
+        "Account connection",
+        "Coming soon: Inbox automation",
+      ],
+      cta: "Connect TikTok",
+      ctaLink: "/channels/tiktok",
     },
     {
       id: "whatsapp",

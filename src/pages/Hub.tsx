@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
   MessageSquare,
   Star,
@@ -24,11 +25,14 @@ import {
   Zap,
   Users,
   BarChart3,
+  Music2,
 } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBusiness } from "@/contexts/BusinessContext";
+import { supabase } from "@/integrations/supabase/client";
 
-type TabType = "all" | "instagram" | "google" | "whatsapp" | "coming-soon";
+type TabType = "all" | "instagram" | "google" | "tiktok" | "whatsapp" | "coming-soon";
 type AutomationStatus = "available" | "early-access" | "coming-soon";
 
 interface Automation {
@@ -36,14 +40,23 @@ interface Automation {
   title: string;
   description: string;
   benefit: string;
-  channel: "instagram" | "google" | "whatsapp" | "other";
+  channel: "instagram" | "google" | "tiktok" | "whatsapp" | "other";
   status: AutomationStatus;
   icon: React.ElementType;
+  badge?: string;
+  link?: string;
+}
+
+interface TikTokConnection {
+  connected: boolean;
+  username?: string;
+  avatar_url?: string;
 }
 
 const Hub = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { activeBusiness } = useBusiness();
   const [searchParams] = useSearchParams();
   const selectedFromOnboarding = searchParams.get("selected");
 
@@ -52,6 +65,25 @@ const Hub = () => {
   const [setupModal, setSetupModal] = useState<Automation | null>(null);
   const [waitlistModal, setWaitlistModal] = useState<Automation | null>(null);
   const [waitlistEmail, setWaitlistEmail] = useState("");
+  const [tiktokConnection, setTiktokConnection] = useState<TikTokConnection>({ connected: false });
+
+  // Fetch TikTok connection status
+  useEffect(() => {
+    const fetchTikTokStatus = async () => {
+      if (!activeBusiness?.id) return;
+      try {
+        const response = await supabase.functions.invoke("tiktok-auth", {
+          body: { action: "status", business_id: activeBusiness.id },
+        });
+        if (!response.error && response.data) {
+          setTiktokConnection(response.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch TikTok status:", error);
+      }
+    };
+    fetchTikTokStatus();
+  }, [activeBusiness?.id]);
 
   const automations: Automation[] = [
     {
@@ -100,6 +132,19 @@ const Hub = () => {
       icon: Bell,
     },
     {
+      id: "tiktok-connect",
+      title: "TikTok",
+      description: tiktokConnection.connected 
+        ? `Connected as @${tiktokConnection.username}`
+        : "Connect your TikTok Business account",
+      benefit: "Coming soon: Inbox automation",
+      channel: "tiktok",
+      status: "available",
+      icon: Music2,
+      badge: tiktokConnection.connected ? "Connected" : "Login Kit",
+      link: "/channels/tiktok",
+    },
+    {
       id: "whatsapp-auto",
       title: "WhatsApp Auto-Responder",
       description: "Automated responses for WhatsApp Business messages.",
@@ -132,6 +177,7 @@ const Hub = () => {
     { id: "all" as const, label: "All" },
     { id: "instagram" as const, label: "Instagram" },
     { id: "google" as const, label: "Google Reviews" },
+    { id: "tiktok" as const, label: "TikTok" },
     { id: "whatsapp" as const, label: "WhatsApp" },
     { id: "coming-soon" as const, label: "Coming Soon" },
   ];
@@ -142,6 +188,7 @@ const Hub = () => {
       (activeTab === "coming-soon" && a.status === "coming-soon") ||
       (activeTab === "instagram" && a.channel === "instagram") ||
       (activeTab === "google" && a.channel === "google") ||
+      (activeTab === "tiktok" && a.channel === "tiktok") ||
       (activeTab === "whatsapp" && a.channel === "whatsapp");
 
     const matchesSearch =
@@ -154,8 +201,21 @@ const Hub = () => {
   const connectedChannels = 1;
   const activeAutomations = 0;
 
-  const getStatusBadge = (status: AutomationStatus) => {
-    switch (status) {
+  const getStatusBadge = (automation: Automation) => {
+    // Special handling for TikTok with custom badge
+    if (automation.badge) {
+      const isConnected = automation.badge === "Connected";
+      return (
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+          isConnected ? "bg-green-100 text-green-800" : "bg-black text-white"
+        }`}>
+          {isConnected && <Check className="w-3 h-3 mr-1" />}
+          {automation.badge}
+        </span>
+      );
+    }
+
+    switch (automation.status) {
       case "available":
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -181,6 +241,12 @@ const Hub = () => {
   };
 
   const handleAutomationAction = (automation: Automation) => {
+    // If automation has a direct link, navigate there
+    if (automation.link) {
+      navigate(automation.link);
+      return;
+    }
+
     if (automation.status === "available") {
       setSetupModal(automation);
     } else if (automation.status === "early-access") {
@@ -338,7 +404,7 @@ const Hub = () => {
                 <div className="p-3 rounded-lg bg-primary/10">
                   <automation.icon className="w-6 h-6 text-primary" />
                 </div>
-                {getStatusBadge(automation.status)}
+                {getStatusBadge(automation)}
               </div>
               <h3 className="font-semibold text-lg text-foreground mb-2">{automation.title}</h3>
               <p className="text-muted-foreground text-sm mb-4">{automation.description}</p>
