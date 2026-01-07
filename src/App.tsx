@@ -30,6 +30,8 @@ import InstagramSales from "./pages/automations/InstagramSales";
 import GoogleReviews from "./pages/automations/GoogleReviews";
 import WhatsAppAutomation from "./pages/automations/WhatsAppAutomation";
 import OtherAutomations from "./pages/automations/OtherAutomations";
+import TikTokChannel from "./pages/channels/TikTok";
+import TikTokCallback from "./pages/TikTokCallback";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +60,8 @@ const App = () => (
             <Route path="/automations/google-reviews" element={<GoogleReviews />} />
             <Route path="/automations/whatsapp" element={<WhatsAppAutomation />} />
             <Route path="/automations/other" element={<OtherAutomations />} />
+            <Route path="/channels/tiktok" element={<TikTokChannel />} />
+            <Route path="/auth/tiktok/callback" element={<TikTokCallback />} />
             <Route
               path="/dashboard"
               element={

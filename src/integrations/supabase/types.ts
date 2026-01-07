@@ -186,6 +186,62 @@ export type Database = {
           },
         ]
       }
+      social_connections: {
+        Row: {
+          access_token: string | null
+          avatar_url: string | null
+          business_id: string
+          connected_at: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          provider: string
+          provider_user_id: string
+          refresh_token: string | null
+          scopes: string[] | null
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          access_token?: string | null
+          avatar_url?: string | null
+          business_id: string
+          connected_at?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          provider: string
+          provider_user_id: string
+          refresh_token?: string | null
+          scopes?: string[] | null
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          access_token?: string | null
+          avatar_url?: string | null
+          business_id?: string
+          connected_at?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          provider?: string
+          provider_user_id?: string
+          refresh_token?: string | null
+          scopes?: string[] | null
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_connections_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
