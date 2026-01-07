@@ -90,22 +90,33 @@ export default function TikTokChannel() {
 
     setConnecting(true);
     try {
+      console.log("Initiating TikTok OAuth for business:", activeBusiness.id);
+      
       const response = await supabase.functions.invoke("tiktok-auth", {
         body: { action: "initiate", business_id: activeBusiness.id },
       });
 
-      if (response.error || !response.data?.auth_url) {
-        throw new Error(response.error?.message || "Failed to initiate OAuth");
+      console.log("TikTok auth response:", response);
+
+      if (response.error) {
+        console.error("Edge function error:", response.error);
+        throw new Error(response.error.message || "Failed to initiate OAuth");
+      }
+
+      if (!response.data?.auth_url) {
+        console.error("No auth_url in response:", response.data);
+        throw new Error(response.data?.error || "Failed to get authorization URL");
       }
 
       // Store state in sessionStorage for callback verification
       sessionStorage.setItem("tiktok_oauth_state", response.data.state);
+      console.log("Redirecting to TikTok:", response.data.auth_url);
 
       // Redirect to TikTok
       window.location.href = response.data.auth_url;
     } catch (error) {
       console.error("Connect error:", error);
-      toast.error("TikTok connection failed. Please try again.");
+      toast.error(error instanceof Error ? error.message : "TikTok connection failed. Please try again.");
       setConnecting(false);
     }
   };
@@ -232,6 +243,11 @@ export default function TikTokChannel() {
                 <p className="text-sm text-muted-foreground">
                   Connect your TikTok account to enable future automation features.
                 </p>
+                {!activeBusiness && (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                    Please create or select a business first to connect TikTok.
+                  </div>
+                )}
                 <Button
                   className="w-full bg-black text-white hover:bg-black/90"
                   onClick={handleConnect}
