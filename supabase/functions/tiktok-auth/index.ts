@@ -7,6 +7,7 @@ const corsHeaders = {
 
 const TIKTOK_CLIENT_KEY = Deno.env.get("TIKTOK_CLIENT_KEY")!;
 const TIKTOK_CLIENT_SECRET = Deno.env.get("TIKTOK_CLIENT_SECRET")!;
+const TIKTOK_REDIRECT_URI = Deno.env.get("TIKTOK_REDIRECT_URI") || "https://app.voyagerespond.com/auth/tiktok/callback";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -55,19 +56,15 @@ Deno.serve(async (req) => {
       const statePayload = JSON.stringify({ csrf: csrfState, business_id, user_id: user.id });
       const encodedState = btoa(statePayload);
 
-      // Get redirect URI from request origin or use default
-      const origin = req.headers.get("origin") || "https://app.voyagerespond.com";
-      const redirectUri = `${origin}/auth/tiktok/callback`;
-
-      // Build TikTok authorization URL
+      // Build TikTok authorization URL (using exact redirect URI from config)
       const authUrl = new URL("https://www.tiktok.com/v2/auth/authorize/");
       authUrl.searchParams.set("client_key", TIKTOK_CLIENT_KEY);
-      authUrl.searchParams.set("redirect_uri", redirectUri);
+      authUrl.searchParams.set("redirect_uri", TIKTOK_REDIRECT_URI);
       authUrl.searchParams.set("response_type", "code");
       authUrl.searchParams.set("scope", "user.info.basic");
       authUrl.searchParams.set("state", encodedState);
 
-      console.log("Generated TikTok auth URL with redirect:", redirectUri);
+      console.log("Generated TikTok auth URL with redirect:", TIKTOK_REDIRECT_URI);
 
       return new Response(JSON.stringify({ 
         auth_url: authUrl.toString(),
@@ -105,10 +102,8 @@ Deno.serve(async (req) => {
       }
 
       const businessId = statePayload.business_id;
-      const origin = req.headers.get("origin") || "https://app.voyagerespond.com";
-      const redirectUri = `${origin}/auth/tiktok/callback`;
 
-      console.log("Exchanging code for tokens...");
+      console.log("Exchanging code for tokens with redirect_uri:", TIKTOK_REDIRECT_URI);
 
       // Exchange code for access token
       const tokenResponse = await fetch("https://open.tiktokapis.com/v2/oauth/token/", {
@@ -121,7 +116,7 @@ Deno.serve(async (req) => {
           client_secret: TIKTOK_CLIENT_SECRET,
           code,
           grant_type: "authorization_code",
-          redirect_uri: redirectUri,
+          redirect_uri: TIKTOK_REDIRECT_URI,
         }),
       });
 
