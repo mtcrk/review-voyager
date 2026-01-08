@@ -19,18 +19,28 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const url = new URL(req.url);
-    const authHeader = req.headers.get("Authorization");
+    const authHeader = req.headers.get("Authorization") || "";
+
+    // Validate JWT (signing keys compatible)
+    if (!authHeader.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const token = authHeader.replace("Bearer ", "");
 
     // Create user client for authenticated requests
     const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      global: { headers: { Authorization: authHeader || "" } },
+      global: { headers: { Authorization: `Bearer ${token}` } },
     });
 
-    // Verify user is authenticated
-    const { data: { user }, error: authError } = await userClient.auth.getUser();
-    if (authError || !user) {
-      console.error("Auth error:", authError);
+    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
+    const userId = claimsData?.claims?.sub;
+
+    if (claimsError || !userId) {
+      console.error("Auth error:", claimsError);
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -46,10 +56,10 @@ Deno.serve(async (req) => {
     if (action === "initiate") {
       // business_id is now optional - can do user-level connections
       
-      // Generate CSRF state token
-      const csrfState = crypto.randomUUID();
-      const statePayload = JSON.stringify({ csrf: csrfState, business_id: business_id || null, user_id: user.id });
-      const encodedState = btoa(statePayload);
+       // Generate CSRF state token
+       const csrfState = crypto.randomUUID();
+       const statePayload = JSON.stringify({ csrf: csrfState, business_id: business_id || null, user_id: userId });
+       const encodedState = btoa(statePayload);
 
       // Build TikTok authorization URL (using exact redirect URI from config)
       const authUrl = new URL("https://www.tiktok.com/v2/auth/authorize/");
@@ -89,7 +99,7 @@ Deno.serve(async (req) => {
         });
       }
 
-      if (statePayload.user_id !== user.id) {
+      if (statePayload.user_id !== userId) {
         return new Response(JSON.stringify({ error: "State mismatch" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -178,7 +188,7 @@ Deno.serve(async (req) => {
         expires_at: expiresAt,
         scopes: scope ? scope.split(",") : ["user.info.basic"],
         connected_at: new Date().toISOString(),
-        user_id: user.id,
+        user_id: userId,
       };
       
       if (businessId) {
@@ -189,7 +199,7 @@ Deno.serve(async (req) => {
       const { data: existingConnection } = await adminClient
         .from("social_connections")
         .select("id")
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .eq("provider", "tiktok")
         .maybeSingle();
 
@@ -217,7 +227,7 @@ Deno.serve(async (req) => {
         });
       }
 
-      console.log("TikTok connection saved successfully for user:", user.id);
+      console.log("TikTok connection saved successfully for user:", userId);
 
       return new Response(JSON.stringify({
         success: true,
@@ -243,7 +253,7 @@ Deno.serve(async (req) => {
       if (business_id) {
         query = query.eq("business_id", business_id);
       } else {
-        query = query.eq("user_id", user.id);
+        query = query.eq("user_id", userId);
       }
 
       const { error: deleteError } = await query;
@@ -256,7 +266,7 @@ Deno.serve(async (req) => {
         });
       }
 
-      console.log("TikTok disconnected for user:", user.id);
+      console.log("TikTok disconnected for user:", userId);
 
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -274,7 +284,7 @@ Deno.serve(async (req) => {
       if (business_id) {
         query = query.eq("business_id", business_id);
       } else {
-        query = query.eq("user_id", user.id);
+        query = query.eq("user_id", userId);
       }
 
       const { data: connection, error } = await query.maybeSingle();

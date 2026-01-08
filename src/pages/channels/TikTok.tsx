@@ -63,6 +63,7 @@ export default function TikTokChannel() {
 
         const response = await supabase.functions.invoke("tiktok-auth", {
           body: { action: "status", business_id: activeBusiness?.id || null },
+          headers: { Authorization: `Bearer ${session.access_token}` },
         });
 
         if (response.error) {
@@ -84,9 +85,18 @@ export default function TikTokChannel() {
     setConnecting(true);
     try {
       console.log("Initiating TikTok OAuth", activeBusiness?.id ? `for business: ${activeBusiness.id}` : "at user level");
-      
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Please log in to connect TikTok.");
+        navigate("/login?redirect=/channels/tiktok");
+        setConnecting(false);
+        return;
+      }
+
       const response = await supabase.functions.invoke("tiktok-auth", {
         body: { action: "initiate", business_id: activeBusiness?.id || null },
+        headers: { Authorization: `Bearer ${session.access_token}` },
       });
 
       console.log("TikTok auth response:", response);
@@ -127,8 +137,16 @@ export default function TikTokChannel() {
   const handleDisconnect = async () => {
     setDisconnecting(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Please log in to disconnect TikTok.");
+        navigate("/login?redirect=/channels/tiktok");
+        return;
+      }
+
       const response = await supabase.functions.invoke("tiktok-auth", {
         body: { action: "disconnect", business_id: activeBusiness?.id || null },
+        headers: { Authorization: `Bearer ${session.access_token}` },
       });
 
       if (response.error) {
