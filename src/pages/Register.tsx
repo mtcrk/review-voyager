@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,10 @@ import { useTranslation } from 'react-i18next';
 
 export default function Register() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectParam = searchParams.get('redirect');
+  const redirectTo = redirectParam && redirectParam.startsWith('/') ? redirectParam : '/dashboard';
+
   const { user } = useAuth();
   const { t } = useTranslation();
   const [fullName, setFullName] = useState('');
@@ -24,9 +28,9 @@ export default function Register() {
 
   useEffect(() => {
     if (user) {
-      navigate('/dashboard');
+      navigate(redirectTo);
     }
-  }, [user, navigate]);
+  }, [user, navigate, redirectTo]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,8 +45,8 @@ export default function Register() {
 
     try {
       const redirectUrl = `${window.location.origin}/auth/callback`;
-      
-      const { error } = await supabase.auth.signUp({
+
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -60,9 +64,16 @@ export default function Register() {
         } else {
           setError(error.message);
         }
-      } else {
-        setSuccess(true);
+        return;
       }
+
+      // If email confirmation is disabled, user gets a session immediately.
+      if (data?.session) {
+        navigate(redirectTo);
+        return;
+      }
+
+      setSuccess(true);
     } catch (err) {
       setError(t('auth.register.error'));
     } finally {
@@ -91,7 +102,7 @@ export default function Register() {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => navigate('/login')}
+              onClick={() => navigate(`/login?redirect=${encodeURIComponent(redirectTo)}`)}
             >
               {t('auth.login.title')}
             </Button>
