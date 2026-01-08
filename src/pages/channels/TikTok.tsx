@@ -54,17 +54,15 @@ export default function TikTokChannel() {
   // Fetch connection status
   useEffect(() => {
     const fetchStatus = async () => {
-      if (!activeBusiness?.id) {
-        setLoading(false);
-        return;
-      }
-
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return;
+        if (!session) {
+          setLoading(false);
+          return;
+        }
 
         const response = await supabase.functions.invoke("tiktok-auth", {
-          body: { action: "status", business_id: activeBusiness.id },
+          body: { action: "status", business_id: activeBusiness?.id || null },
         });
 
         if (response.error) {
@@ -83,17 +81,12 @@ export default function TikTokChannel() {
   }, [activeBusiness?.id]);
 
   const handleConnect = async () => {
-    if (!activeBusiness?.id) {
-      toast.error("Please select a business first.");
-      return;
-    }
-
     setConnecting(true);
     try {
-      console.log("Initiating TikTok OAuth for business:", activeBusiness.id);
+      console.log("Initiating TikTok OAuth", activeBusiness?.id ? `for business: ${activeBusiness.id}` : "at user level");
       
       const response = await supabase.functions.invoke("tiktok-auth", {
-        body: { action: "initiate", business_id: activeBusiness.id },
+        body: { action: "initiate", business_id: activeBusiness?.id || null },
       });
 
       console.log("TikTok auth response:", response);
@@ -122,12 +115,10 @@ export default function TikTokChannel() {
   };
 
   const handleDisconnect = async () => {
-    if (!activeBusiness?.id) return;
-
     setDisconnecting(true);
     try {
       const response = await supabase.functions.invoke("tiktok-auth", {
-        body: { action: "disconnect", business_id: activeBusiness.id },
+        body: { action: "disconnect", business_id: activeBusiness?.id || null },
       });
 
       if (response.error) {
@@ -243,15 +234,10 @@ export default function TikTokChannel() {
                 <p className="text-sm text-muted-foreground">
                   Connect your TikTok account to enable future automation features.
                 </p>
-                {!activeBusiness && (
-                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-                    Please create or select a business first to connect TikTok.
-                  </div>
-                )}
                 <Button
                   className="w-full bg-black text-white hover:bg-black/90"
                   onClick={handleConnect}
-                  disabled={connecting || !activeBusiness}
+                  disabled={connecting}
                 >
                   {connecting ? (
                     <>
