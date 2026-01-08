@@ -46,6 +46,17 @@ export default function TikTokCallback() {
       sessionStorage.removeItem("tiktok_oauth_state");
 
       try {
+        // Wait for session to be available (user may have just returned from TikTok)
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError || !session) {
+          console.error("No active session:", sessionError);
+          setStatus("error");
+          setErrorMessage("Session expired. Please log in and try again.");
+          setTimeout(() => navigate("/login?redirect=/channels/tiktok"), 2000);
+          return;
+        }
+
         // Exchange code for tokens via edge function
         const response = await supabase.functions.invoke("tiktok-auth", {
           body: { action: "exchange", code, state },
