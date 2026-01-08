@@ -190,7 +190,7 @@ export type Database = {
         Row: {
           access_token: string | null
           avatar_url: string | null
-          business_id: string
+          business_id: string | null
           connected_at: string
           created_at: string
           expires_at: string | null
@@ -200,12 +200,13 @@ export type Database = {
           refresh_token: string | null
           scopes: string[] | null
           updated_at: string
+          user_id: string | null
           username: string | null
         }
         Insert: {
           access_token?: string | null
           avatar_url?: string | null
-          business_id: string
+          business_id?: string | null
           connected_at?: string
           created_at?: string
           expires_at?: string | null
@@ -215,12 +216,13 @@ export type Database = {
           refresh_token?: string | null
           scopes?: string[] | null
           updated_at?: string
+          user_id?: string | null
           username?: string | null
         }
         Update: {
           access_token?: string | null
           avatar_url?: string | null
-          business_id?: string
+          business_id?: string | null
           connected_at?: string
           created_at?: string
           expires_at?: string | null
@@ -230,6 +232,7 @@ export type Database = {
           refresh_token?: string | null
           scopes?: string[] | null
           updated_at?: string
+          user_id?: string | null
           username?: string | null
         }
         Relationships: [

@@ -44,16 +44,11 @@ Deno.serve(async (req) => {
 
     // ACTION: Initiate OAuth flow
     if (action === "initiate") {
-      if (!business_id) {
-        return new Response(JSON.stringify({ error: "business_id is required" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
+      // business_id is now optional - can do user-level connections
+      
       // Generate CSRF state token
       const csrfState = crypto.randomUUID();
-      const statePayload = JSON.stringify({ csrf: csrfState, business_id, user_id: user.id });
+      const statePayload = JSON.stringify({ csrf: csrfState, business_id: business_id || null, user_id: user.id });
       const encodedState = btoa(statePayload);
 
       // Build TikTok authorization URL (using exact redirect URI from config)
@@ -172,23 +167,47 @@ Deno.serve(async (req) => {
       // Use admin client to store tokens (bypasses RLS for secure storage)
       const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-      // Upsert connection
-      const { error: upsertError } = await adminClient
+      // Build connection data - support both user-level and business-level connections
+      const connectionData: Record<string, unknown> = {
+        provider: "tiktok",
+        provider_user_id: open_id,
+        username,
+        avatar_url: avatarUrl,
+        access_token,
+        refresh_token,
+        expires_at: expiresAt,
+        scopes: scope ? scope.split(",") : ["user.info.basic"],
+        connected_at: new Date().toISOString(),
+        user_id: user.id,
+      };
+      
+      if (businessId) {
+        connectionData.business_id = businessId;
+      }
+
+      // First check if connection exists for this user/provider
+      const { data: existingConnection } = await adminClient
         .from("social_connections")
-        .upsert({
-          business_id: businessId,
-          provider: "tiktok",
-          provider_user_id: open_id,
-          username,
-          avatar_url: avatarUrl,
-          access_token,
-          refresh_token,
-          expires_at: expiresAt,
-          scopes: scope ? scope.split(",") : ["user.info.basic"],
-          connected_at: new Date().toISOString(),
-        }, {
-          onConflict: "business_id,provider",
-        });
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("provider", "tiktok")
+        .maybeSingle();
+
+      let upsertError;
+      if (existingConnection) {
+        // Update existing
+        const { error } = await adminClient
+          .from("social_connections")
+          .update(connectionData)
+          .eq("id", existingConnection.id);
+        upsertError = error;
+      } else {
+        // Insert new
+        const { error } = await adminClient
+          .from("social_connections")
+          .insert(connectionData);
+        upsertError = error;
+      }
 
       if (upsertError) {
         console.error("Failed to save connection:", upsertError);
@@ -198,7 +217,7 @@ Deno.serve(async (req) => {
         });
       }
 
-      console.log("TikTok connection saved successfully for business:", businessId);
+      console.log("TikTok connection saved successfully for user:", user.id);
 
       return new Response(JSON.stringify({
         success: true,
@@ -212,21 +231,22 @@ Deno.serve(async (req) => {
 
     // ACTION: Disconnect
     if (action === "disconnect") {
-      if (!business_id) {
-        return new Response(JSON.stringify({ error: "business_id is required" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
       // Use admin client to delete (ensures we can remove the tokens)
       const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-      const { error: deleteError } = await adminClient
+      // Delete by user_id (user-level) or business_id
+      let query = adminClient
         .from("social_connections")
         .delete()
-        .eq("business_id", business_id)
         .eq("provider", "tiktok");
+      
+      if (business_id) {
+        query = query.eq("business_id", business_id);
+      } else {
+        query = query.eq("user_id", user.id);
+      }
+
+      const { error: deleteError } = await query;
 
       if (deleteError) {
         console.error("Failed to disconnect:", deleteError);
@@ -236,7 +256,7 @@ Deno.serve(async (req) => {
         });
       }
 
-      console.log("TikTok disconnected for business:", business_id);
+      console.log("TikTok disconnected for user:", user.id);
 
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -245,19 +265,19 @@ Deno.serve(async (req) => {
 
     // ACTION: Get connection status
     if (action === "status") {
-      if (!business_id) {
-        return new Response(JSON.stringify({ error: "business_id is required" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      const { data: connection, error } = await userClient
+      // Check for user-level connection first, then business-level
+      let query = userClient
         .from("social_connections")
         .select("provider_user_id, username, avatar_url, connected_at")
-        .eq("business_id", business_id)
-        .eq("provider", "tiktok")
-        .maybeSingle();
+        .eq("provider", "tiktok");
+      
+      if (business_id) {
+        query = query.eq("business_id", business_id);
+      } else {
+        query = query.eq("user_id", user.id);
+      }
+
+      const { data: connection, error } = await query.maybeSingle();
 
       if (error) {
         console.error("Failed to fetch status:", error);
