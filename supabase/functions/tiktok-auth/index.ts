@@ -143,33 +143,35 @@ Deno.serve(async (req) => {
 
       console.log("Fetching user info for open_id:", open_id);
 
-      // Fetch user info
-      const userInfoResponse = await fetch(
-        `https://open.tiktokapis.com/v2/user/info/?fields=open_id,union_id,avatar_url,display_name,username`,
-        {
-          headers: {
-            Authorization: `Bearer ${access_token}`,
+      // Fetch user info.
+      // NOTE: TikTok migrated some fields (e.g. `username`) to `user.info.profile` scope.
+      // We only request fields guaranteed by `user.info.basic` to avoid scope_not_authorized.
+      let username = "TikTok User";
+      let avatarUrl: string | null = null;
+
+      try {
+        const userInfoResponse = await fetch(
+          "https://open.tiktokapis.com/v2/user/info/?fields=open_id,union_id,avatar_url,display_name",
+          {
+            headers: {
+              Authorization: `Bearer ${access_token}`,
+            },
           },
+        );
+
+        const userInfoData = await userInfoResponse.json();
+        console.log("User info response:", userInfoResponse.status);
+
+        if (!userInfoResponse.ok || userInfoData?.error?.code) {
+          console.warn("User info fetch failed (non-fatal):", userInfoData);
+        } else {
+          const userInfo = userInfoData.data?.user || {};
+          username = userInfo.display_name || username;
+          avatarUrl = userInfo.avatar_url || null;
         }
-      );
-
-      const userInfoData = await userInfoResponse.json();
-      console.log("User info response:", userInfoResponse.status);
-
-      if (!userInfoResponse.ok || userInfoData.error?.code) {
-        console.error("User info fetch failed:", userInfoData);
-        return new Response(JSON.stringify({ 
-          error: "Failed to fetch user info",
-          details: userInfoData.error?.message 
-        }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+      } catch (err) {
+        console.warn("User info fetch exception (non-fatal):", err);
       }
-
-      const userInfo = userInfoData.data?.user || {};
-      const username = userInfo.username || userInfo.display_name || "TikTok User";
-      const avatarUrl = userInfo.avatar_url || null;
 
       // Calculate expiration time
       const expiresAt = new Date(Date.now() + (expires_in * 1000)).toISOString();
