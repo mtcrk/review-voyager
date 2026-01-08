@@ -105,8 +105,18 @@ export default function TikTokChannel() {
       sessionStorage.setItem("tiktok_oauth_state", response.data.state);
       console.log("Redirecting to TikTok:", response.data.auth_url);
 
-      // Redirect to TikTok
-      window.location.href = response.data.auth_url;
+      // TikTok blocks being opened inside an iframe (preview), so open in a new tab when embedded.
+      const authUrl: string = response.data.auth_url;
+      const isInIframe = window.self !== window.top;
+
+      if (isInIframe) {
+        const opened = window.open(authUrl, "_blank", "noopener,noreferrer");
+        if (!opened) {
+          toast.error("Pop-up blocked. Please allow pop-ups and try again.");
+        }
+      } else {
+        window.location.href = authUrl;
+      }
     } catch (error) {
       console.error("Connect error:", error);
       toast.error(error instanceof Error ? error.message : "TikTok connection failed. Please try again.");
