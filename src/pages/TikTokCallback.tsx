@@ -42,17 +42,16 @@ export default function TikTokCallback() {
         return;
       }
 
-      // Clear stored state
-      sessionStorage.removeItem("tiktok_oauth_state");
-
       try {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
         if (sessionError || !session) {
           console.error("No active session:", sessionError);
           setStatus("error");
-          setErrorMessage("Session expired. Please log in and try again.");
-          setTimeout(() => navigate("/login?redirect=/channels/tiktok"), 2000);
+          setErrorMessage("Please log in to finish connecting TikTok.");
+
+          const redirectBack = `${window.location.pathname}${window.location.search}`;
+          setTimeout(() => navigate(`/login?redirect=${encodeURIComponent(redirectBack)}`), 500);
           return;
         }
 
@@ -65,6 +64,9 @@ export default function TikTokCallback() {
         if (response.error || !response.data?.success) {
           throw new Error(response.data?.error || response.error?.message || "Token exchange failed");
         }
+
+        // Clear stored state only after a successful exchange
+        sessionStorage.removeItem("tiktok_oauth_state");
 
         setStatus("success");
         setTimeout(() => navigate("/channels/tiktok?connected=1"), 1500);
