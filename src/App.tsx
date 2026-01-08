@@ -60,7 +60,14 @@ const App = () => (
             <Route path="/automations/google-reviews" element={<GoogleReviews />} />
             <Route path="/automations/whatsapp" element={<WhatsAppAutomation />} />
             <Route path="/automations/other" element={<OtherAutomations />} />
-            <Route path="/channels/tiktok" element={<TikTokChannel />} />
+            <Route
+              path="/channels/tiktok"
+              element={
+                <ProtectedRoute>
+                  <TikTokChannel />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/auth/tiktok/callback" element={<TikTokCallback />} />
             <Route
               path="/dashboard"
