@@ -341,11 +341,11 @@ export default function TikTokChannel() {
 
         {/* Disconnect Section */}
         {connection?.connected && (
-          <Card className="border-destructive/20">
+          <Card>
             <CardHeader>
-              <CardTitle className="text-destructive">Danger Zone</CardTitle>
+              <CardTitle>Manage Connection</CardTitle>
               <CardDescription>
-                Disconnect your TikTok account from VoyageRespond
+                You can disconnect your TikTok account anytime
               </CardDescription>
             </CardHeader>
             <CardContent>
