@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -81,7 +81,7 @@ export default function TikTokChannel() {
     fetchStatus();
   }, [activeBusiness?.id]);
 
-  const handleConnect = async () => {
+  const handleConnect = useCallback(async () => {
     setConnecting(true);
     try {
       console.log("Initiating TikTok OAuth", activeBusiness?.id ? `for business: ${activeBusiness.id}` : "at user level");
@@ -89,7 +89,7 @@ export default function TikTokChannel() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         toast.error("Please log in to connect TikTok.");
-        navigate("/login?redirect=/channels/tiktok");
+        navigate(`/login?redirect=${encodeURIComponent('/channels/tiktok?autoConnect=1')}`);
         setConnecting(false);
         return;
       }
@@ -132,7 +132,21 @@ export default function TikTokChannel() {
       toast.error(error instanceof Error ? error.message : "TikTok connection failed. Please try again.");
       setConnecting(false);
     }
-  };
+  }, [activeBusiness?.id, navigate]);
+
+  // Auto-continue after logging in (so user doesn't need to click Connect again)
+  useEffect(() => {
+    if (searchParams.get("autoConnect") !== "1") return;
+
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      // Clean URL first to avoid repeated triggers
+      navigate("/channels/tiktok", { replace: true });
+      handleConnect();
+    })();
+  }, [searchParams, navigate, handleConnect]);
 
   const handleDisconnect = async () => {
     setDisconnecting(true);
