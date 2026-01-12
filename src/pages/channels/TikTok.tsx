@@ -178,9 +178,12 @@ export default function TikTokChannel() {
     }
   };
 
+  const activeFeatures = [
+    { icon: MessagesSquare, label: "Comment Inbox", description: "Reply to comments on your videos with AI suggestions", path: "/tiktok-inbox" },
+  ];
+
   const comingSoonFeatures = [
     { icon: MessageSquare, label: "Inbox (DM)", description: "Manage TikTok direct messages" },
-    { icon: MessagesSquare, label: "Comment management", description: "Reply to comments on your videos" },
     { icon: Zap, label: "Auto-reply workflows", description: "Automate responses based on keywords" },
   ];
 
@@ -300,6 +303,45 @@ export default function TikTokChannel() {
             )}
           </CardContent>
         </Card>
+
+        {/* Active Features */}
+        {connection?.connected && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                Available Features
+                <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                  Active
+                </Badge>
+              </CardTitle>
+              <CardDescription>
+                Features you can use right now
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {activeFeatures.map((feature) => (
+                  <div
+                    key={feature.label}
+                    className="flex items-center gap-4 rounded-lg border p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => navigate(feature.path)}
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                      <feature.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium">{feature.label}</p>
+                      <p className="text-sm text-muted-foreground">{feature.description}</p>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      Open
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Coming Soon Features */}
         <Card className="mb-6">
