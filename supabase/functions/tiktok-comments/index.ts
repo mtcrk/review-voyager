@@ -90,81 +90,49 @@ serve(async (req) => {
     }
 
     const url = new URL(req.url);
-    const businessId = url.searchParams.get("business_id");
+    const connectionId = url.searchParams.get("connection_id");
     const videoId = url.searchParams.get("video_id"); // DB video id
-    const tiktokVideoId = url.searchParams.get("tiktok_video_id");
+    const businessId = url.searchParams.get("business_id"); // legacy
 
-    if (!businessId) {
-      return new Response(JSON.stringify({ error: "business_id is required" }), {
+    if (!videoId) {
+      return new Response(JSON.stringify({ error: "video_id is required" }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Verify business access
-    const { data: business, error: bizError } = await supabaseClient
-      .from("businesses")
-      .select("id, user_id")
-      .eq("id", businessId)
-      .eq("user_id", user.id)
-      .single();
-
-    if (bizError || !business) {
-      return new Response(JSON.stringify({ error: "Business not found or access denied" }), {
-        status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     // Get video info
-    let video;
-    if (videoId) {
-      const { data: v, error: vErr } = await supabaseClient
-        .from("tiktok_videos")
-        .select("id, tiktok_video_id, social_connection_id")
-        .eq("id", videoId)
-        .eq("business_id", businessId)
-        .single();
-      
-      if (vErr || !v) {
-        return new Response(JSON.stringify({ error: "Video not found" }), {
-          status: 404,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      video = v;
-    } else if (tiktokVideoId) {
-      const { data: v, error: vErr } = await supabaseClient
-        .from("tiktok_videos")
-        .select("id, tiktok_video_id, social_connection_id")
-        .eq("tiktok_video_id", tiktokVideoId)
-        .eq("business_id", businessId)
-        .single();
-      
-      if (vErr || !v) {
-        return new Response(JSON.stringify({ error: "Video not found" }), {
-          status: 404,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      video = v;
-    } else {
-      return new Response(JSON.stringify({ error: "video_id or tiktok_video_id is required" }), {
-        status: 400,
+    const { data: video, error: vErr } = await supabaseClient
+      .from("tiktok_videos")
+      .select("id, tiktok_video_id, social_connection_id, business_id")
+      .eq("id", videoId)
+      .single();
+    
+    if (vErr || !video) {
+      return new Response(JSON.stringify({ error: "Video not found" }), {
+        status: 404,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Get TikTok connection (without tokens)
+    // Verify user has access to this connection
     const { data: connection, error: connError } = await supabaseClient
       .from("social_connections")
-      .select("id, provider_user_id")
+      .select("id, provider_user_id, user_id")
       .eq("id", video.social_connection_id)
       .single();
 
     if (connError || !connection) {
       return new Response(JSON.stringify({ error: "TikTok connection not found", code: "NOT_CONNECTED" }), {
         status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Check user owns this connection
+    if (connection.user_id !== user.id) {
+      return new Response(JSON.stringify({ error: "Access denied" }), {
+        status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -226,9 +194,12 @@ serve(async (req) => {
     const comments = commentsResponse.data?.comments || [];
     console.log(`Found ${comments.length} comments`);
 
+    // Use video's business_id or connection id as fallback
+    const effectiveBusinessId = video.business_id || connection.id;
+
     // Upsert comments
     const upsertData = comments.map((comment: any) => ({
-      business_id: businessId,
+      business_id: effectiveBusinessId,
       social_connection_id: connection.id,
       video_id: video.id,
       tiktok_video_id: video.tiktok_video_id,
@@ -248,7 +219,7 @@ serve(async (req) => {
       const { error: upsertError } = await supabaseClient
         .from("tiktok_comments")
         .upsert(upsertData, { 
-          onConflict: "business_id,tiktok_comment_id",
+          onConflict: "social_connection_id,tiktok_comment_id",
           ignoreDuplicates: false 
         });
 

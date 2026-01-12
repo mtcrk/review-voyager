@@ -19,14 +19,14 @@ export interface TikTokVideo {
   updated_at: string;
 }
 
-export function useTikTokVideos(businessId: string | null) {
+export function useTikTokVideos(socialConnectionId: string | null) {
   const [videos, setVideos] = useState<TikTokVideo[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const fetchVideos = useCallback(async (refresh = false) => {
-    if (!businessId) return;
+    if (!socialConnectionId) return;
     
     setLoading(true);
     setError(null);
@@ -38,9 +38,9 @@ export function useTikTokVideos(businessId: string | null) {
       }
 
       if (refresh) {
-        // Fetch from TikTok API and update DB
+        // Fetch from TikTok API and update DB - use connection_id instead of business_id
         const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tiktok-videos?business_id=${businessId}`,
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tiktok-videos?connection_id=${socialConnectionId}`,
           {
             method: "GET",
             headers: {
@@ -70,11 +70,11 @@ export function useTikTokVideos(businessId: string | null) {
           description: `${data.fetched || 0} video TikTok'tan alındı`,
         });
       } else {
-        // Just fetch from local DB
+        // Just fetch from local DB using social_connection_id
         const { data, error: dbError } = await supabase
           .from("tiktok_videos")
           .select("*")
-          .eq("business_id", businessId)
+          .eq("social_connection_id", socialConnectionId)
           .order("published_at", { ascending: false });
 
         if (dbError) throw dbError;
@@ -91,7 +91,7 @@ export function useTikTokVideos(businessId: string | null) {
     } finally {
       setLoading(false);
     }
-  }, [businessId, toast]);
+  }, [socialConnectionId, toast]);
 
   return { videos, loading, error, fetchVideos };
 }

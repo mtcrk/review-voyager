@@ -53,14 +53,14 @@ export interface TikTokComment {
   replies?: TikTokCommentReply[];
 }
 
-export function useTikTokComments(businessId: string | null, videoId: string | null) {
+export function useTikTokComments(socialConnectionId: string | null, videoId: string | null) {
   const [comments, setComments] = useState<TikTokComment[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const fetchComments = useCallback(async (refresh = false) => {
-    if (!businessId || !videoId) return;
+    if (!socialConnectionId || !videoId) return;
     
     setLoading(true);
     setError(null);
@@ -72,9 +72,9 @@ export function useTikTokComments(businessId: string | null, videoId: string | n
       }
 
       if (refresh) {
-        // Fetch from TikTok API
+        // Fetch from TikTok API using connection_id
         const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tiktok-comments?business_id=${businessId}&video_id=${videoId}`,
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tiktok-comments?connection_id=${socialConnectionId}&video_id=${videoId}`,
           {
             method: "GET",
             headers: {
@@ -121,7 +121,7 @@ export function useTikTokComments(businessId: string | null, videoId: string | n
     } finally {
       setLoading(false);
     }
-  }, [businessId, videoId, toast]);
+  }, [socialConnectionId, videoId, toast]);
 
   const generateSuggestions = useCallback(async (commentId: string) => {
     try {

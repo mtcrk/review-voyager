@@ -102,47 +102,70 @@ serve(async (req) => {
     }
 
     const url = new URL(req.url);
-    const businessId = url.searchParams.get("business_id");
+    const connectionId = url.searchParams.get("connection_id");
+    const businessId = url.searchParams.get("business_id"); // legacy support
 
-    if (!businessId) {
-      return new Response(JSON.stringify({ error: "business_id is required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    let connection: { id: string; provider_user_id: string; business_id: string | null } | null = null;
 
-    // Verify user has access to this business
-    const { data: business, error: bizError } = await supabaseClient
-      .from("businesses")
-      .select("id, user_id")
-      .eq("id", businessId)
-      .eq("user_id", user.id)
-      .single();
+    if (connectionId) {
+      // Use connection_id directly
+      const { data, error } = await supabaseClient
+        .from("social_connections")
+        .select("id, provider_user_id, business_id")
+        .eq("id", connectionId)
+        .eq("user_id", user.id)
+        .single();
 
-    if (bizError || !business) {
-      return new Response(JSON.stringify({ error: "Business not found or access denied" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+      if (error || !data) {
+        return new Response(JSON.stringify({ error: "Connection not found or access denied" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      connection = data;
+    } else if (businessId) {
+      // Legacy: use business_id
+      const { data: business, error: bizError } = await supabaseClient
+        .from("businesses")
+        .select("id, user_id")
+        .eq("id", businessId)
+        .eq("user_id", user.id)
+        .single();
 
-    // Get TikTok connection (without tokens - they're in separate table now)
-    let connection: { id: string; provider_user_id: string } | null = null;
-    
-    const { data: bizConnection } = await supabaseClient
-      .from("social_connections")
-      .select("id, provider_user_id")
-      .eq("business_id", businessId)
-      .eq("provider", "tiktok")
-      .single();
+      if (bizError || !business) {
+        return new Response(JSON.stringify({ error: "Business not found or access denied" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
-    if (bizConnection) {
-      connection = bizConnection;
+      // Get TikTok connection for business or user
+      const { data: bizConnection } = await supabaseClient
+        .from("social_connections")
+        .select("id, provider_user_id, business_id")
+        .eq("business_id", businessId)
+        .eq("provider", "tiktok")
+        .single();
+
+      if (bizConnection) {
+        connection = bizConnection;
+      } else {
+        const { data: userConnection } = await supabaseClient
+          .from("social_connections")
+          .select("id, provider_user_id, business_id")
+          .eq("user_id", user.id)
+          .eq("provider", "tiktok")
+          .single();
+
+        if (userConnection) {
+          connection = userConnection;
+        }
+      }
     } else {
-      // Try user-level connection
+      // No connection_id or business_id - get user's TikTok connection
       const { data: userConnection } = await supabaseClient
         .from("social_connections")
-        .select("id, provider_user_id")
+        .select("id, provider_user_id, business_id")
         .eq("user_id", user.id)
         .eq("provider", "tiktok")
         .single();
@@ -176,7 +199,6 @@ serve(async (req) => {
     let accessToken = credentials.access_token;
     const refreshToken = credentials.refresh_token;
     const expiresAt = credentials.expires_at;
-    const connectionId = connection.id;
     const openId = connection.provider_user_id;
 
     // Check if token is expired or will expire soon (within 2 minutes)
@@ -199,7 +221,7 @@ serve(async (req) => {
           refresh_token: newTokens.refresh_token,
           expires_at: new Date(Date.now() + newTokens.expires_in * 1000).toISOString(),
         })
-        .eq("social_connection_id", connectionId);
+        .eq("social_connection_id", connection.id);
 
       accessToken = newTokens.access_token;
     }
@@ -219,10 +241,13 @@ serve(async (req) => {
     const videos = videosResponse.data?.videos || [];
     console.log(`Found ${videos.length} videos`);
 
+    // Use a placeholder business_id if none set (for user-level connections)
+    const effectiveBusinessId = connection.business_id || connection.id;
+
     // Upsert videos into database
     const upsertData = videos.map((video: any) => ({
-      business_id: businessId,
-      social_connection_id: connectionId,
+      business_id: effectiveBusinessId,
+      social_connection_id: connection!.id,
       tiktok_video_id: video.id,
       caption: video.video_description || video.title || "",
       permalink: video.share_url,
@@ -239,7 +264,7 @@ serve(async (req) => {
       const { error: upsertError } = await supabaseClient
         .from("tiktok_videos")
         .upsert(upsertData, { 
-          onConflict: "business_id,tiktok_video_id",
+          onConflict: "social_connection_id,tiktok_video_id",
           ignoreDuplicates: false 
         });
 
@@ -252,7 +277,7 @@ serve(async (req) => {
     const { data: dbVideos, error: fetchError } = await supabaseClient
       .from("tiktok_videos")
       .select("*")
-      .eq("business_id", businessId)
+      .eq("social_connection_id", connection.id)
       .order("published_at", { ascending: false });
 
     if (fetchError) {
