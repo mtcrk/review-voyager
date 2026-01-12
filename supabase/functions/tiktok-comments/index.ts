@@ -121,7 +121,7 @@ serve(async (req) => {
     if (videoId) {
       const { data: v, error: vErr } = await supabaseClient
         .from("tiktok_videos")
-        .select("*")
+        .select("id, tiktok_video_id, social_connection_id")
         .eq("id", videoId)
         .eq("business_id", businessId)
         .single();
@@ -136,7 +136,7 @@ serve(async (req) => {
     } else if (tiktokVideoId) {
       const { data: v, error: vErr } = await supabaseClient
         .from("tiktok_videos")
-        .select("*")
+        .select("id, tiktok_video_id, social_connection_id")
         .eq("tiktok_video_id", tiktokVideoId)
         .eq("business_id", businessId)
         .single();
@@ -155,10 +155,10 @@ serve(async (req) => {
       });
     }
 
-    // Get TikTok connection
+    // Get TikTok connection (without tokens)
     const { data: connection, error: connError } = await supabaseClient
       .from("social_connections")
-      .select("*")
+      .select("id, provider_user_id")
       .eq("id", video.social_connection_id)
       .single();
 
@@ -169,14 +169,28 @@ serve(async (req) => {
       });
     }
 
-    let accessToken = connection.access_token;
-    const refreshToken = connection.refresh_token;
-    const expiresAt = connection.expires_at;
+    // Get credentials from secure table
+    const { data: credentials, error: credError } = await supabaseClient
+      .from("social_connection_credentials")
+      .select("access_token, refresh_token, expires_at")
+      .eq("social_connection_id", connection.id)
+      .single();
 
-    // Check token expiry
-    if (expiresAt && new Date(expiresAt) < new Date()) {
-      console.log("Token expired, refreshing...");
-      const newTokens = await refreshTikTokToken(refreshToken);
+    if (credError || !credentials) {
+      return new Response(JSON.stringify({ error: "TikTok credentials not found. Please reconnect.", code: "NO_CREDENTIALS" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    let accessToken = credentials.access_token;
+    const refreshToken = credentials.refresh_token;
+    const expiresAt = credentials.expires_at;
+
+    // Check token expiry (refresh if expiring within 2 minutes)
+    if (expiresAt && new Date(expiresAt) < new Date(Date.now() + 2 * 60 * 1000)) {
+      console.log("Token expired or expiring soon, refreshing...");
+      const newTokens = await refreshTikTokToken(refreshToken!);
       
       if (!newTokens) {
         return new Response(JSON.stringify({ error: "Token refresh failed. Please reconnect TikTok.", code: "TOKEN_EXPIRED" }), {
@@ -186,20 +200,20 @@ serve(async (req) => {
       }
 
       await supabaseClient
-        .from("social_connections")
+        .from("social_connection_credentials")
         .update({
           access_token: newTokens.access_token,
           refresh_token: newTokens.refresh_token,
           expires_at: new Date(Date.now() + newTokens.expires_in * 1000).toISOString(),
         })
-        .eq("id", connection.id);
+        .eq("social_connection_id", connection.id);
 
       accessToken = newTokens.access_token;
     }
 
     // Fetch comments from TikTok
     console.log(`Fetching comments for video ${video.tiktok_video_id}...`);
-    const commentsResponse = await fetchTikTokComments(accessToken, video.tiktok_video_id);
+    const commentsResponse = await fetchTikTokComments(accessToken!, video.tiktok_video_id);
     
     if (commentsResponse.error?.code) {
       console.error("TikTok API error:", commentsResponse.error);
