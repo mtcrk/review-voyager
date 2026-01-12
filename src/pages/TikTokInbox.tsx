@@ -47,13 +47,23 @@ const statusConfig: Record<string, { label: string; variant: "default" | "second
   ignored: { label: "Yoksayıldı", variant: "outline", icon: <X className="h-3 w-3" /> },
 };
 
-function VideoCard({ video, isSelected, onClick }: { video: TikTokVideo; isSelected: boolean; onClick: () => void }) {
+interface VideoCardProps {
+  video: TikTokVideo;
+  isSelected: boolean;
+  onClick: () => void;
+}
+
+function VideoCard({ video, isSelected, onClick }: VideoCardProps) {
+  // Check if this is a demo video
+  const isDemo = video.raw && typeof video.raw === 'object' && !Array.isArray(video.raw) && 'demo' in video.raw && (video.raw as Record<string, unknown>).demo;
+  
   return (
     <button
       onClick={onClick}
       className={cn(
         "w-full text-left p-3 rounded-lg border transition-all hover:bg-accent/50",
-        isSelected && "bg-accent border-primary"
+        isSelected && "bg-accent border-primary",
+        isDemo && "border-dashed border-yellow-500/50"
       )}
     >
       <div className="flex gap-3">
@@ -69,9 +79,24 @@ function VideoCard({ video, isSelected, onClick }: { video: TikTokVideo; isSelec
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium line-clamp-2 mb-1">
-            {video.caption || "Video"}
-          </p>
+          <div className="flex items-center gap-2 mb-1">
+            <p className="text-sm font-medium line-clamp-2">
+              {video.caption || "Video"}
+            </p>
+            {isDemo && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700 border-yellow-300 shrink-0">
+                    <Beaker className="h-3 w-3 mr-1" />
+                    Demo
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Sandbox demo için örnek video</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
           {video.published_at && (
             <p className="text-xs text-muted-foreground mb-2">
               {formatDistanceToNow(new Date(video.published_at), { addSuffix: true, locale: tr })}
@@ -372,7 +397,7 @@ export default function TikTokInbox() {
   const { connection, loading: connectionLoading } = useTikTokConnection();
   const socialConnectionId = connection?.id || null;
   
-  const { videos, loading: videosLoading, fetchVideos } = useTikTokVideos(socialConnectionId);
+  const { videos, loading: videosLoading, fetchVideos, setVideos } = useTikTokVideos(socialConnectionId);
   const [selectedVideo, setSelectedVideo] = useState<TikTokVideo | null>(null);
   
   const { 
@@ -389,6 +414,8 @@ export default function TikTokInbox() {
     toggleDemoMode,
     loadSampleComments,
     isLoadingSamples,
+    loadDemoVideo,
+    isLoadingDemoVideo,
     simulateSendReply,
     canSimulateSend,
     isSandbox,
@@ -550,14 +577,45 @@ export default function TikTokInbox() {
               ) : videos.length === 0 ? (
                 <div className="p-6 text-center text-muted-foreground">
                   <Video className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p>Henüz video yok</p>
-                  <Button 
-                    variant="link" 
-                    size="sm"
-                    onClick={() => fetchVideos(true)}
-                  >
-                    TikTok'tan Al
-                  </Button>
+                  <p className="mb-2">Henüz video yok</p>
+                  {isSandbox && (
+                    <p className="text-xs mb-3">
+                      Sandbox modunda TikTok API boş video listesi döndürebilir.
+                    </p>
+                  )}
+                  <div className="flex flex-col gap-2 items-center">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => fetchVideos(true)}
+                    >
+                      <RefreshCw className="h-4 w-4 mr-1" />
+                      TikTok'tan Al
+                    </Button>
+                    {isSandbox && isDemoMode && (
+                      <Button 
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                          const video = await loadDemoVideo();
+                          if (video) {
+                            // Add demo video to list and select it
+                            setVideos(prev => [video, ...prev]);
+                            setSelectedVideo(video);
+                          }
+                        }}
+                        disabled={isLoadingDemoVideo}
+                        className="text-yellow-700 border-yellow-500 hover:bg-yellow-50"
+                      >
+                        {isLoadingDemoVideo ? (
+                          <RefreshCw className="h-4 w-4 animate-spin mr-1" />
+                        ) : (
+                          <Download className="h-4 w-4 mr-1" />
+                        )}
+                        Demo Video Yükle
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ) : (
                 videos.map((video) => (

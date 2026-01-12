@@ -2,6 +2,8 @@ import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+import { Json } from "@/integrations/supabase/types";
+
 export interface TikTokVideo {
   id: string;
   business_id: string;
@@ -15,6 +17,7 @@ export interface TikTokVideo {
   like_count: number;
   comment_count: number;
   share_count: number;
+  raw?: Json | null;
   created_at: string;
   updated_at: string;
 }
@@ -93,5 +96,5 @@ export function useTikTokVideos(socialConnectionId: string | null) {
     }
   }, [socialConnectionId, toast]);
 
-  return { videos, loading, error, fetchVideos };
+  return { videos, loading, error, fetchVideos, setVideos };
 }
