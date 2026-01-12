@@ -1,4 +1,18 @@
-import { LayoutDashboard, MessageSquare, Zap, BarChart3, Settings, Video } from "lucide-react";
+import { useState, useEffect } from "react";
+import { 
+  LayoutDashboard, 
+  MessageSquare, 
+  Zap, 
+  BarChart3, 
+  Settings, 
+  Video, 
+  ChevronDown,
+  Music2,
+  Star,
+  Inbox,
+  Send,
+  Check,
+} from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -6,20 +20,36 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
   useSidebar,
 } from "@/components/ui/sidebar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
+import { useBusiness } from "@/contexts/BusinessContext";
 import logo from "@/assets/logo.png";
 
-const menuItems = [
+type Platform = "google" | "tiktok" | "instagram" | "whatsapp";
+
+interface PlatformConfig {
+  id: Platform;
+  name: string;
+  icon: React.ReactNode;
+  connected: boolean;
+  menuItems: { title: string; url: string; icon: React.ComponentType<{ className?: string }> }[];
+}
+
+const commonItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Yorumlar", url: "/reviews", icon: MessageSquare },
-  { title: "TikTok Inbox", url: "/tiktok-inbox", icon: Video },
-  { title: "Otomatik Yanıt", url: "/auto-reply", icon: Zap },
-  { title: "İstatistikler", url: "/statistics", icon: BarChart3 },
   { title: "Ayarlar", url: "/settings", icon: Settings },
 ];
 
@@ -27,6 +57,83 @@ export function AppSidebar() {
   const { open } = useSidebar();
   const location = useLocation();
   const navigate = useNavigate();
+  const { activeBusiness } = useBusiness();
+  
+  const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null);
+  const [tiktokConnected, setTiktokConnected] = useState(false);
+  const [googleConnected, setGoogleConnected] = useState(false);
+
+  // Check platform connections
+  useEffect(() => {
+    const checkConnections = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      // Check TikTok connection
+      const { data: tiktok } = await supabase
+        .from("social_connections")
+        .select("id")
+        .eq("provider", "tiktok")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+      
+      setTiktokConnected(!!tiktok);
+
+      // Check Google connection via business
+      if (activeBusiness?.google_connected) {
+        setGoogleConnected(true);
+      } else {
+        setGoogleConnected(false);
+      }
+    };
+
+    checkConnections();
+  }, [activeBusiness]);
+
+  // Auto-select platform based on current route
+  useEffect(() => {
+    if (location.pathname.includes("tiktok")) {
+      setSelectedPlatform("tiktok");
+    } else if (location.pathname.includes("reviews") || location.pathname.includes("review")) {
+      setSelectedPlatform("google");
+    }
+  }, [location.pathname]);
+
+  const platforms: PlatformConfig[] = [
+    {
+      id: "google",
+      name: "Google Business",
+      icon: <Star className="h-4 w-4" />,
+      connected: googleConnected,
+      menuItems: [
+        { title: "Google Yorumları", url: "/reviews", icon: MessageSquare },
+        { title: "İstatistikler", url: "/statistics", icon: BarChart3 },
+      ],
+    },
+    {
+      id: "tiktok",
+      name: "TikTok",
+      icon: <Music2 className="h-4 w-4" />,
+      connected: tiktokConnected,
+      menuItems: [
+        { title: "Video Yorumları", url: "/tiktok-inbox", icon: Video },
+        { title: "DM Inbox", url: "/tiktok-dm", icon: Inbox },
+      ],
+    },
+    {
+      id: "instagram",
+      name: "Instagram",
+      icon: <Send className="h-4 w-4 rotate-12" />,
+      connected: false,
+      menuItems: [
+        { title: "DM Inbox", url: "/instagram-dm", icon: Inbox },
+        { title: "Yorum Yanıtları", url: "/instagram-comments", icon: MessageSquare },
+      ],
+    },
+  ];
+
+  const currentPlatform = platforms.find(p => p.id === selectedPlatform);
+  const connectedPlatforms = platforms.filter(p => p.connected);
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -45,10 +152,62 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
+        {/* Platform Selector */}
+        {open && (
+          <div className="px-3 py-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border bg-card hover:bg-accent transition-colors">
+                  <div className="flex items-center gap-2">
+                    {currentPlatform ? (
+                      <>
+                        {currentPlatform.icon}
+                        <span className="font-medium text-sm">{currentPlatform.name}</span>
+                        {currentPlatform.connected && (
+                          <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                            <Check className="h-3 w-3" />
+                          </Badge>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">Platform seç</span>
+                    )}
+                  </div>
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                {platforms.map((platform) => (
+                  <DropdownMenuItem
+                    key={platform.id}
+                    onClick={() => setSelectedPlatform(platform.id)}
+                    className="flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-2">
+                      {platform.icon}
+                      <span>{platform.name}</span>
+                    </div>
+                    {platform.connected ? (
+                      <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                        Bağlı
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary" className="text-xs">
+                        Bağla
+                      </Badge>
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
+
+        {/* Common Menu Items */}
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => {
+              {commonItems.slice(0, 1).map((item) => {
                 const isActive = location.pathname === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -68,6 +227,93 @@ export function AppSidebar() {
                   </SidebarMenuItem>
                 );
               })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Platform-specific Menu Items */}
+        {currentPlatform && (
+          <SidebarGroup>
+            {open && (
+              <SidebarGroupLabel className="flex items-center gap-2 text-xs text-muted-foreground px-3">
+                {currentPlatform.icon}
+                {currentPlatform.name}
+              </SidebarGroupLabel>
+            )}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {currentPlatform.menuItems.map((item) => {
+                  const isActive = location.pathname === item.url;
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive}
+                        tooltip={item.title}
+                      >
+                        <NavLink
+                          to={item.url}
+                          className="flex items-center gap-3 transition-smooth"
+                        >
+                          <item.icon className="h-5 w-5" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {/* Automation */}
+        <SidebarGroup>
+          {open && (
+            <SidebarGroupLabel className="text-xs text-muted-foreground px-3">
+              Otomasyon
+            </SidebarGroupLabel>
+          )}
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={location.pathname === "/auto-reply"}
+                  tooltip="Otomatik Yanıt"
+                >
+                  <NavLink
+                    to="/auto-reply"
+                    className="flex items-center gap-3 transition-smooth"
+                  >
+                    <Zap className="h-5 w-5" />
+                    <span>Otomatik Yanıt</span>
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Settings */}
+        <SidebarGroup className="mt-auto">
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={location.pathname === "/settings"}
+                  tooltip="Ayarlar"
+                >
+                  <NavLink
+                    to="/settings"
+                    className="flex items-center gap-3 transition-smooth"
+                  >
+                    <Settings className="h-5 w-5" />
+                    <span>Ayarlar</span>
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
