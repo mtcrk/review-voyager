@@ -48,6 +48,7 @@ export interface TikTokComment {
   commented_at: string | null;
   created_at: string;
   updated_at: string;
+  raw?: Record<string, unknown> | null;
   suggestions?: TikTokReplySuggestion[];
   replies?: TikTokCommentReply[];
 }
@@ -222,5 +223,6 @@ export function useTikTokComments(businessId: string | null, videoId: string | n
     fetchComments, 
     generateSuggestions,
     sendReply,
+    setComments,
   };
 }

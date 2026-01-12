@@ -33,6 +33,7 @@ import OtherAutomations from "./pages/automations/OtherAutomations";
 import TikTokChannel from "./pages/channels/TikTok";
 import TikTokCallback from "./pages/TikTokCallback";
 import TikTokInbox from "./pages/TikTokInbox";
+import TikTokReviewKit from "./pages/TikTokReviewKit";
 
 const queryClient = new QueryClient();
 
@@ -77,6 +78,14 @@ const App = () => (
                   <AppLayout>
                     <TikTokInbox />
                   </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/tiktok-review-kit"
+              element={
+                <ProtectedRoute>
+                  <TikTokReviewKit />
                 </ProtectedRoute>
               }
             />

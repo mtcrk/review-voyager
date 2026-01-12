@@ -26,3 +26,6 @@ verify_jwt = true
 
 [functions.tiktok-send-reply]
 verify_jwt = true
+
+[functions.tiktok-seed-demo-comments]
+verify_jwt = true

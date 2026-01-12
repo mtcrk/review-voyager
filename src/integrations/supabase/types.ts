@@ -85,6 +85,53 @@ export type Database = {
         }
         Relationships: []
       }
+      integration_logs: {
+        Row: {
+          action: string
+          business_id: string
+          created_at: string
+          error_code: string | null
+          error_message: string | null
+          http_status: number | null
+          id: string
+          meta: Json | null
+          provider: string
+          status: string
+        }
+        Insert: {
+          action: string
+          business_id: string
+          created_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          http_status?: number | null
+          id?: string
+          meta?: Json | null
+          provider: string
+          status: string
+        }
+        Update: {
+          action?: string
+          business_id?: string
+          created_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          http_status?: number | null
+          id?: string
+          meta?: Json | null
+          provider?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_logs_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
