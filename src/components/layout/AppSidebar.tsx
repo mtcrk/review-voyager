@@ -1,4 +1,4 @@
-import { LayoutDashboard, MessageSquare, Zap, BarChart3, Settings } from "lucide-react";
+import { LayoutDashboard, MessageSquare, Zap, BarChart3, Settings, Video } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -17,6 +17,7 @@ import logo from "@/assets/logo.png";
 const menuItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Yorumlar", url: "/reviews", icon: MessageSquare },
+  { title: "TikTok Inbox", url: "/tiktok-inbox", icon: Video },
   { title: "Otomatik Yanıt", url: "/auto-reply", icon: Zap },
   { title: "İstatistikler", url: "/statistics", icon: BarChart3 },
   { title: "Ayarlar", url: "/settings", icon: Settings },

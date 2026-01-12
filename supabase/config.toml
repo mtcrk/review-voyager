@@ -14,3 +14,15 @@ verify_jwt = true
 
 [functions.tiktok-auth]
 verify_jwt = false
+
+[functions.tiktok-videos]
+verify_jwt = true
+
+[functions.tiktok-comments]
+verify_jwt = true
+
+[functions.tiktok-suggest-reply]
+verify_jwt = true
+
+[functions.tiktok-send-reply]
+verify_jwt = true

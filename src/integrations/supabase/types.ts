@@ -245,6 +245,274 @@ export type Database = {
           },
         ]
       }
+      tiktok_comment_replies: {
+        Row: {
+          business_id: string
+          comment_id: string
+          created_at: string
+          error_message: string | null
+          id: string
+          reply_text: string
+          send_status: string
+          sent_at: string | null
+          sent_by_user_id: string | null
+          tiktok_reply_id: string | null
+        }
+        Insert: {
+          business_id: string
+          comment_id: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          reply_text: string
+          send_status?: string
+          sent_at?: string | null
+          sent_by_user_id?: string | null
+          tiktok_reply_id?: string | null
+        }
+        Update: {
+          business_id?: string
+          comment_id?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          reply_text?: string
+          send_status?: string
+          sent_at?: string | null
+          sent_by_user_id?: string | null
+          tiktok_reply_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tiktok_comment_replies_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tiktok_comment_replies_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "tiktok_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tiktok_comments: {
+        Row: {
+          author_avatar_url: string | null
+          author_display_name: string | null
+          author_username: string | null
+          business_id: string
+          comment_text: string
+          commented_at: string | null
+          created_at: string
+          id: string
+          like_count: number | null
+          parent_comment_id: string | null
+          raw: Json | null
+          reply_count: number | null
+          social_connection_id: string
+          status: string
+          tiktok_comment_id: string
+          tiktok_video_id: string
+          updated_at: string
+          video_id: string
+        }
+        Insert: {
+          author_avatar_url?: string | null
+          author_display_name?: string | null
+          author_username?: string | null
+          business_id: string
+          comment_text: string
+          commented_at?: string | null
+          created_at?: string
+          id?: string
+          like_count?: number | null
+          parent_comment_id?: string | null
+          raw?: Json | null
+          reply_count?: number | null
+          social_connection_id: string
+          status?: string
+          tiktok_comment_id: string
+          tiktok_video_id: string
+          updated_at?: string
+          video_id: string
+        }
+        Update: {
+          author_avatar_url?: string | null
+          author_display_name?: string | null
+          author_username?: string | null
+          business_id?: string
+          comment_text?: string
+          commented_at?: string | null
+          created_at?: string
+          id?: string
+          like_count?: number | null
+          parent_comment_id?: string | null
+          raw?: Json | null
+          reply_count?: number | null
+          social_connection_id?: string
+          status?: string
+          tiktok_comment_id?: string
+          tiktok_video_id?: string
+          updated_at?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tiktok_comments_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tiktok_comments_social_connection_id_fkey"
+            columns: ["social_connection_id"]
+            isOneToOne: false
+            referencedRelation: "social_connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tiktok_comments_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "tiktok_videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tiktok_reply_suggestions: {
+        Row: {
+          business_id: string
+          comment_id: string
+          confidence: number | null
+          created_at: string
+          id: string
+          intent: string | null
+          language: string
+          model: string
+          rationale: string | null
+          safe_to_reply: boolean | null
+          suggested_text: string
+          tone: string
+        }
+        Insert: {
+          business_id: string
+          comment_id: string
+          confidence?: number | null
+          created_at?: string
+          id?: string
+          intent?: string | null
+          language?: string
+          model?: string
+          rationale?: string | null
+          safe_to_reply?: boolean | null
+          suggested_text: string
+          tone?: string
+        }
+        Update: {
+          business_id?: string
+          comment_id?: string
+          confidence?: number | null
+          created_at?: string
+          id?: string
+          intent?: string | null
+          language?: string
+          model?: string
+          rationale?: string | null
+          safe_to_reply?: boolean | null
+          suggested_text?: string
+          tone?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tiktok_reply_suggestions_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tiktok_reply_suggestions_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "tiktok_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tiktok_videos: {
+        Row: {
+          business_id: string
+          caption: string | null
+          comment_count: number | null
+          created_at: string
+          id: string
+          like_count: number | null
+          permalink: string | null
+          published_at: string | null
+          raw: Json | null
+          share_count: number | null
+          social_connection_id: string
+          thumbnail_url: string | null
+          tiktok_video_id: string
+          updated_at: string
+          view_count: number | null
+        }
+        Insert: {
+          business_id: string
+          caption?: string | null
+          comment_count?: number | null
+          created_at?: string
+          id?: string
+          like_count?: number | null
+          permalink?: string | null
+          published_at?: string | null
+          raw?: Json | null
+          share_count?: number | null
+          social_connection_id: string
+          thumbnail_url?: string | null
+          tiktok_video_id: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Update: {
+          business_id?: string
+          caption?: string | null
+          comment_count?: number | null
+          created_at?: string
+          id?: string
+          like_count?: number | null
+          permalink?: string | null
+          published_at?: string | null
+          raw?: Json | null
+          share_count?: number | null
+          social_connection_id?: string
+          thumbnail_url?: string | null
+          tiktok_video_id?: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tiktok_videos_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tiktok_videos_social_connection_id_fkey"
+            columns: ["social_connection_id"]
+            isOneToOne: false
+            referencedRelation: "social_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

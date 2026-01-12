@@ -32,6 +32,7 @@ import WhatsAppAutomation from "./pages/automations/WhatsAppAutomation";
 import OtherAutomations from "./pages/automations/OtherAutomations";
 import TikTokChannel from "./pages/channels/TikTok";
 import TikTokCallback from "./pages/TikTokCallback";
+import TikTokInbox from "./pages/TikTokInbox";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +70,16 @@ const App = () => (
               }
             />
             <Route path="/auth/tiktok/callback" element={<TikTokCallback />} />
+            <Route
+              path="/tiktok-inbox"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <TikTokInbox />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/dashboard"
               element={
