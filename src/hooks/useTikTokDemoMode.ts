@@ -1,0 +1,124 @@
+import { useState, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { TIKTOK_CONFIG } from "@/lib/tiktokConfig";
+import { TikTokComment } from "@/hooks/useTikTokComments";
+
+export function useTikTokDemoMode(businessId: string | null, videoId: string | null) {
+  const [isDemoMode, setIsDemoMode] = useState(TIKTOK_CONFIG.canUseDemo);
+  const [isLoadingSamples, setIsLoadingSamples] = useState(false);
+  const { toast } = useToast();
+
+  const toggleDemoMode = useCallback(() => {
+    if (!TIKTOK_CONFIG.canUseDemo) return;
+    setIsDemoMode(prev => !prev);
+  }, []);
+
+  const loadSampleComments = useCallback(async (tiktokVideoId: string, socialConnectionId: string): Promise<TikTokComment[]> => {
+    if (!businessId || !videoId) return [];
+    
+    setIsLoadingSamples(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tiktok-seed-demo-comments`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ 
+            business_id: businessId, 
+            video_id: videoId,
+            tiktok_video_id: tiktokVideoId,
+            social_connection_id: socialConnectionId,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to load sample comments");
+      }
+
+      toast({
+        title: "Demo yorumlar yüklendi",
+        description: `${data.comments?.length || 0} örnek yorum eklendi`,
+      });
+
+      return data.comments || [];
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Bilinmeyen hata";
+      toast({
+        title: "Hata",
+        description: message,
+        variant: "destructive",
+      });
+      return [];
+    } finally {
+      setIsLoadingSamples(false);
+    }
+  }, [businessId, videoId, toast]);
+
+  const simulateSendReply = useCallback(async (
+    commentId: string, 
+    replyText: string,
+    onSuccess: (reply: any) => void
+  ) => {
+    if (!businessId) return;
+    
+    try {
+      // Create simulated reply in database
+      const { data: reply, error } = await supabase
+        .from("tiktok_comment_replies")
+        .insert({
+          business_id: businessId,
+          comment_id: commentId,
+          reply_text: replyText,
+          send_status: "sent",
+          tiktok_reply_id: `SIMULATED_${Date.now()}`,
+          sent_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Update comment status
+      await supabase
+        .from("tiktok_comments")
+        .update({ status: "sent" })
+        .eq("id", commentId);
+
+      toast({
+        title: "Simüle Gönderim",
+        description: "Demo modunda yanıt simüle edildi (gerçek gönderim yapılmadı)",
+      });
+
+      onSuccess(reply);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Bilinmeyen hata";
+      toast({
+        title: "Simülasyon Hatası",
+        description: message,
+        variant: "destructive",
+      });
+    }
+  }, [businessId, toast]);
+
+  return {
+    isDemoMode,
+    toggleDemoMode,
+    loadSampleComments,
+    isLoadingSamples,
+    simulateSendReply,
+    canUseDemo: TIKTOK_CONFIG.canUseDemo,
+    canSimulateSend: TIKTOK_CONFIG.canSimulateSend,
+    isSandbox: TIKTOK_CONFIG.isSandbox,
+    isProduction: TIKTOK_CONFIG.isProduction,
+  };
+}

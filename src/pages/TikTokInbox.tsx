@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useTikTokVideos, TikTokVideo } from "@/hooks/useTikTokVideos";
 import { useTikTokComments, TikTokComment } from "@/hooks/useTikTokComments";
+import { useTikTokDemoMode } from "@/hooks/useTikTokDemoMode";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +10,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { TikTokSandboxBanner } from "@/components/tiktok/TikTokSandboxBanner";
+import { TikTokComplianceCard } from "@/components/tiktok/TikTokComplianceCard";
+import { TikTokDemoModeToggle } from "@/components/tiktok/TikTokDemoModeToggle";
 import { 
   RefreshCw, 
   MessageSquare, 
@@ -23,11 +28,15 @@ import {
   X,
   Video,
   ChevronRight,
+  Download,
+  Ban,
+  Beaker,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { tr } from "date-fns/locale";
 import { Link } from "react-router-dom";
+import { TIKTOK_CONFIG } from "@/lib/tiktokConfig";
 
 const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline"; icon: React.ReactNode }> = {
   open: { label: "Açık", variant: "outline", icon: <Clock className="h-3 w-3" /> },
@@ -89,19 +98,29 @@ function VideoCard({ video, isSelected, onClick }: { video: TikTokVideo; isSelec
   );
 }
 
+interface CommentCardProps {
+  comment: TikTokComment;
+  onGenerateSuggestions: () => void;
+  onSendReply: (text: string) => void;
+  onSimulateSend: (text: string) => void;
+  isGenerating: boolean;
+  isSending: boolean;
+  isDemoMode: boolean;
+  canSimulateSend: boolean;
+  isSandbox: boolean;
+}
+
 function CommentCard({ 
   comment, 
   onGenerateSuggestions,
   onSendReply,
+  onSimulateSend,
   isGenerating,
   isSending,
-}: { 
-  comment: TikTokComment;
-  onGenerateSuggestions: () => void;
-  onSendReply: (text: string) => void;
-  isGenerating: boolean;
-  isSending: boolean;
-}) {
+  isDemoMode,
+  canSimulateSend,
+  isSandbox,
+}: CommentCardProps) {
   const [replyText, setReplyText] = useState("");
   const [showReplyBox, setShowReplyBox] = useState(false);
 
@@ -109,6 +128,12 @@ function CommentCard({
   const suggestions = comment.suggestions || [];
   const replies = comment.replies || [];
   const latestReply = replies.length > 0 ? replies[replies.length - 1] : null;
+  
+  // Check if this is a demo comment
+  const isDemo = comment.raw && typeof comment.raw === 'object' && 'demo' in comment.raw && (comment.raw as any).demo;
+  
+  // Check if suggestion recommends ignoring
+  const shouldIgnore = suggestions.length > 0 && suggestions[0].safe_to_reply === false;
 
   const handleSuggestionClick = (text: string) => {
     setReplyText(text);
@@ -116,14 +141,31 @@ function CommentCard({
   };
 
   const handleSend = () => {
-    if (replyText.trim()) {
+    if (!replyText.trim()) return;
+    
+    if (isDemoMode && canSimulateSend) {
+      onSimulateSend(replyText.trim());
+    } else {
       onSendReply(replyText.trim());
     }
   };
+  
+  // Determine if send is disabled
+  const isSendDisabled = isSandbox && !isDemoMode;
 
   return (
-    <Card className="mb-3">
+    <Card className={cn("mb-3", isDemo && "border-dashed border-yellow-500/50")}>
       <CardContent className="p-4">
+        {/* Demo badge */}
+        {isDemo && (
+          <div className="flex items-center gap-1 mb-2">
+            <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700 border-yellow-300">
+              <Beaker className="h-3 w-3 mr-1" />
+              Demo Yorum
+            </Badge>
+          </div>
+        )}
+        
         {/* Comment Header */}
         <div className="flex items-start gap-3 mb-3">
           <Avatar className="h-8 w-8">
@@ -140,10 +182,17 @@ function CommentCard({
               {comment.author_username && (
                 <span className="text-xs text-muted-foreground">@{comment.author_username}</span>
               )}
-              <Badge variant={status.variant} className="ml-auto gap-1">
-                {status.icon}
-                {status.label}
-              </Badge>
+              <div className="ml-auto flex items-center gap-1">
+                {latestReply?.tiktok_reply_id?.startsWith("SIMULATED") && (
+                  <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-300">
+                    Simüle
+                  </Badge>
+                )}
+                <Badge variant={status.variant} className="gap-1">
+                  {status.icon}
+                  {status.label}
+                </Badge>
+              </div>
             </div>
             <p className="text-sm">{comment.comment_text}</p>
             <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
@@ -165,7 +214,9 @@ function CommentCard({
           <div className="ml-11 p-3 bg-primary/10 rounded-lg mb-3">
             <div className="flex items-center gap-2 mb-1">
               <CheckCircle className="h-4 w-4 text-primary" />
-              <span className="text-xs font-medium text-primary">Gönderildi</span>
+              <span className="text-xs font-medium text-primary">
+                {latestReply.tiktok_reply_id?.startsWith("SIMULATED") ? "Simüle Gönderildi" : "Gönderildi"}
+              </span>
               {latestReply.sent_at && (
                 <span className="text-xs text-muted-foreground">
                   {formatDistanceToNow(new Date(latestReply.sent_at), { addSuffix: true, locale: tr })}
@@ -196,7 +247,15 @@ function CommentCard({
             {/* AI Suggestions */}
             {suggestions.length > 0 && (
               <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground">AI Önerileri:</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs font-medium text-muted-foreground">AI Önerileri:</p>
+                  {shouldIgnore && (
+                    <Badge variant="outline" className="text-xs bg-red-50 text-red-700 border-red-300">
+                      <Ban className="h-3 w-3 mr-1" />
+                      Yoksaymak Önerilir
+                    </Badge>
+                  )}
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {suggestions.map((s) => (
                     <button
@@ -241,18 +300,35 @@ function CommentCard({
                     >
                       İptal
                     </Button>
-                    <Button 
-                      size="sm"
-                      onClick={handleSend}
-                      disabled={!replyText.trim() || isSending}
-                    >
-                      {isSending ? (
-                        <RefreshCw className="h-4 w-4 animate-spin mr-1" />
-                      ) : (
-                        <Send className="h-4 w-4 mr-1" />
-                      )}
-                      Gönder
-                    </Button>
+                    {isSendDisabled ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <Button size="sm" disabled>
+                              <Send className="h-4 w-4 mr-1" />
+                              Gönder
+                            </Button>
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Yanıt göndermek için Production onayı gereklidir.<br/>Akışı simüle etmek için Demo Modu'nu açın.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : (
+                      <Button 
+                        size="sm"
+                        onClick={handleSend}
+                        disabled={!replyText.trim() || isSending}
+                        className={isDemoMode && canSimulateSend ? "bg-blue-600 hover:bg-blue-700" : ""}
+                      >
+                        {isSending ? (
+                          <RefreshCw className="h-4 w-4 animate-spin mr-1" />
+                        ) : (
+                          <Send className="h-4 w-4 mr-1" />
+                        )}
+                        {isDemoMode && canSimulateSend ? "Onayla ve Gönder (Simüle)" : "Onayla ve Gönder"}
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -304,7 +380,18 @@ export default function TikTokInbox() {
     fetchComments,
     generateSuggestions,
     sendReply,
+    setComments,
   } = useTikTokComments(businessId, selectedVideo?.id || null);
+
+  const {
+    isDemoMode,
+    toggleDemoMode,
+    loadSampleComments,
+    isLoadingSamples,
+    simulateSendReply,
+    canSimulateSend,
+    isSandbox,
+  } = useTikTokDemoMode(businessId, selectedVideo?.id || null);
 
   const [generatingFor, setGeneratingFor] = useState<string | null>(null);
   const [sendingFor, setSendingFor] = useState<string | null>(null);
@@ -342,6 +429,37 @@ export default function TikTokInbox() {
     }
   };
 
+  const handleSimulateSend = async (commentId: string, text: string) => {
+    setSendingFor(commentId);
+    try {
+      await simulateSendReply(commentId, text, (reply) => {
+        // Update local comments state
+        setComments(prev => prev.map(c => 
+          c.id === commentId 
+            ? { 
+                ...c, 
+                status: "sent", 
+                replies: [...(c.replies || []), reply] 
+              }
+            : c
+        ));
+      });
+    } finally {
+      setSendingFor(null);
+    }
+  };
+
+  const handleLoadSampleComments = async () => {
+    if (!selectedVideo) return;
+    const newComments = await loadSampleComments(
+      selectedVideo.tiktok_video_id, 
+      selectedVideo.social_connection_id
+    );
+    if (newComments.length > 0) {
+      setComments(prev => [...newComments, ...prev]);
+    }
+  };
+
   const filteredComments = statusFilter === "all" 
     ? comments 
     : comments.filter(c => c.status === statusFilter);
@@ -368,12 +486,19 @@ export default function TikTokInbox() {
 
   return (
     <div className="h-[calc(100vh-4rem)]">
+      {/* Sandbox Banner */}
+      <TikTokSandboxBanner isDemoMode={isDemoMode} />
+      
+      {/* Compliance Card */}
+      <TikTokComplianceCard />
+      
       <div className="flex items-center justify-between mb-4 px-1">
         <div>
           <h1 className="text-2xl font-bold">TikTok Inbox</h1>
           <p className="text-muted-foreground">Video yorumlarını yönetin ve AI ile yanıtlayın</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
+          <TikTokDemoModeToggle isDemoMode={isDemoMode} onToggle={toggleDemoMode} />
           <Button 
             variant="outline"
             onClick={() => selectedVideo ? fetchComments(true) : fetchVideos(true)}
@@ -385,7 +510,7 @@ export default function TikTokInbox() {
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-4 h-[calc(100%-5rem)]">
+      <div className="grid grid-cols-12 gap-4 h-[calc(100%-8rem)]">
         {/* Video List */}
         <div className="col-span-4 border rounded-lg bg-card">
           <div className="p-3 border-b">
@@ -455,14 +580,32 @@ export default function TikTokInbox() {
                       {selectedVideo.caption || "Video Yorumları"}
                     </h2>
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => fetchComments(true)}
-                    disabled={commentsLoading}
-                  >
-                    <RefreshCw className={cn("h-4 w-4", commentsLoading && "animate-spin")} />
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    {isDemoMode && (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={handleLoadSampleComments}
+                        disabled={isLoadingSamples}
+                        className="text-yellow-700 border-yellow-500 hover:bg-yellow-50"
+                      >
+                        {isLoadingSamples ? (
+                          <RefreshCw className="h-4 w-4 animate-spin mr-1" />
+                        ) : (
+                          <Download className="h-4 w-4 mr-1" />
+                        )}
+                        Demo Yorumları Yükle
+                      </Button>
+                    )}
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => fetchComments(true)}
+                      disabled={commentsLoading}
+                    >
+                      <RefreshCw className={cn("h-4 w-4", commentsLoading && "animate-spin")} />
+                    </Button>
+                  </div>
                 </div>
                 
                 {/* Status Filter */}
@@ -512,11 +655,27 @@ export default function TikTokInbox() {
                   ) : filteredComments.length === 0 ? (
                     <div className="p-6 text-center text-muted-foreground">
                       <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                      <p>
+                      <p className="mb-2">
                         {statusFilter === "all" 
                           ? "Bu videoda yorum yok" 
                           : `"${statusConfig[statusFilter]?.label}" durumunda yorum yok`}
                       </p>
+                      {isSandbox && isDemoMode && statusFilter === "all" && (
+                        <Button 
+                          variant="outline"
+                          size="sm"
+                          onClick={handleLoadSampleComments}
+                          disabled={isLoadingSamples}
+                          className="mt-2"
+                        >
+                          {isLoadingSamples ? (
+                            <RefreshCw className="h-4 w-4 animate-spin mr-1" />
+                          ) : (
+                            <Download className="h-4 w-4 mr-1" />
+                          )}
+                          Demo Yorumları Yükle
+                        </Button>
+                      )}
                       {statusFilter !== "all" && (
                         <Button 
                           variant="link" 
@@ -534,8 +693,12 @@ export default function TikTokInbox() {
                         comment={comment}
                         onGenerateSuggestions={() => handleGenerateSuggestions(comment.id)}
                         onSendReply={(text) => handleSendReply(comment.id, text)}
+                        onSimulateSend={(text) => handleSimulateSend(comment.id, text)}
                         isGenerating={generatingFor === comment.id}
                         isSending={sendingFor === comment.id}
+                        isDemoMode={isDemoMode}
+                        canSimulateSend={canSimulateSend}
+                        isSandbox={isSandbox}
                       />
                     ))
                   )}
