@@ -180,14 +180,12 @@ Deno.serve(async (req) => {
       const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
       // Build connection data - support both user-level and business-level connections
+      // NOTE: Tokens are now stored in separate social_connection_credentials table
       const connectionData: Record<string, unknown> = {
         provider: "tiktok",
         provider_user_id: open_id,
         username,
         avatar_url: avatarUrl,
-        access_token,
-        refresh_token,
-        expires_at: expiresAt,
         scopes: scope ? scope.split(",") : ["user.info.basic"],
         connected_at: new Date().toISOString(),
         user_id: userId,
@@ -205,25 +203,54 @@ Deno.serve(async (req) => {
         .eq("provider", "tiktok")
         .maybeSingle();
 
-      let upsertError;
+      let connectionId: string;
+      
       if (existingConnection) {
         // Update existing
         const { error } = await adminClient
           .from("social_connections")
           .update(connectionData)
           .eq("id", existingConnection.id);
-        upsertError = error;
+        
+        if (error) {
+          console.error("Failed to update connection:", error);
+          return new Response(JSON.stringify({ error: "Failed to save connection" }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        connectionId = existingConnection.id;
       } else {
         // Insert new
-        const { error } = await adminClient
+        const { data: newConnection, error } = await adminClient
           .from("social_connections")
-          .insert(connectionData);
-        upsertError = error;
+          .insert(connectionData)
+          .select("id")
+          .single();
+        
+        if (error || !newConnection) {
+          console.error("Failed to insert connection:", error);
+          return new Response(JSON.stringify({ error: "Failed to save connection" }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        connectionId = newConnection.id;
       }
 
-      if (upsertError) {
-        console.error("Failed to save connection:", upsertError);
-        return new Response(JSON.stringify({ error: "Failed to save connection" }), {
+      // Store tokens in secure credentials table (upsert)
+      const { error: credError } = await adminClient
+        .from("social_connection_credentials")
+        .upsert({
+          social_connection_id: connectionId,
+          access_token,
+          refresh_token,
+          expires_at: expiresAt,
+        }, { onConflict: "social_connection_id" });
+
+      if (credError) {
+        console.error("Failed to save credentials:", credError);
+        return new Response(JSON.stringify({ error: "Failed to save credentials" }), {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -247,6 +274,7 @@ Deno.serve(async (req) => {
       const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
       // Delete by user_id (user-level) or business_id
+      // Credentials will be automatically deleted via CASCADE
       let query = adminClient
         .from("social_connections")
         .delete()

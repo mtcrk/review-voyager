@@ -233,50 +233,79 @@ export type Database = {
           },
         ]
       }
-      social_connections: {
+      social_connection_credentials: {
         Row: {
           access_token: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          refresh_token: string | null
+          social_connection_id: string
+          updated_at: string
+        }
+        Insert: {
+          access_token?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          refresh_token?: string | null
+          social_connection_id: string
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          refresh_token?: string | null
+          social_connection_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_connection_credentials_social_connection_id_fkey"
+            columns: ["social_connection_id"]
+            isOneToOne: true
+            referencedRelation: "social_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_connections: {
+        Row: {
           avatar_url: string | null
           business_id: string | null
           connected_at: string
           created_at: string
-          expires_at: string | null
           id: string
           provider: string
           provider_user_id: string
-          refresh_token: string | null
           scopes: string[] | null
           updated_at: string
           user_id: string | null
           username: string | null
         }
         Insert: {
-          access_token?: string | null
           avatar_url?: string | null
           business_id?: string | null
           connected_at?: string
           created_at?: string
-          expires_at?: string | null
           id?: string
           provider: string
           provider_user_id: string
-          refresh_token?: string | null
           scopes?: string[] | null
           updated_at?: string
           user_id?: string | null
           username?: string | null
         }
         Update: {
-          access_token?: string | null
           avatar_url?: string | null
           business_id?: string | null
           connected_at?: string
           created_at?: string
-          expires_at?: string | null
           id?: string
           provider?: string
           provider_user_id?: string
-          refresh_token?: string | null
           scopes?: string[] | null
           updated_at?: string
           user_id?: string | null

@@ -126,44 +126,63 @@ serve(async (req) => {
       });
     }
 
-    // Get TikTok connection
-    const { data: connection, error: connError } = await supabaseClient
+    // Get TikTok connection (without tokens - they're in separate table now)
+    let connection: { id: string; provider_user_id: string } | null = null;
+    
+    const { data: bizConnection } = await supabaseClient
       .from("social_connections")
-      .select("*")
+      .select("id, provider_user_id")
       .eq("business_id", businessId)
       .eq("provider", "tiktok")
       .single();
 
-    if (connError || !connection) {
+    if (bizConnection) {
+      connection = bizConnection;
+    } else {
       // Try user-level connection
-      const { data: userConnection, error: userConnError } = await supabaseClient
+      const { data: userConnection } = await supabaseClient
         .from("social_connections")
-        .select("*")
+        .select("id, provider_user_id")
         .eq("user_id", user.id)
         .eq("provider", "tiktok")
         .single();
 
-      if (userConnError || !userConnection) {
-        return new Response(JSON.stringify({ error: "TikTok not connected", code: "NOT_CONNECTED" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+      if (userConnection) {
+        connection = userConnection;
       }
-
-      // Use user-level connection
-      Object.assign(connection || {}, userConnection);
     }
 
-    let accessToken = connection?.access_token || (connection as any)?.access_token;
-    const refreshToken = connection?.refresh_token || (connection as any)?.refresh_token;
-    const expiresAt = connection?.expires_at || (connection as any)?.expires_at;
-    const connectionId = connection?.id || (connection as any)?.id;
-    const openId = connection?.provider_user_id || (connection as any)?.provider_user_id;
+    if (!connection) {
+      return new Response(JSON.stringify({ error: "TikTok not connected", code: "NOT_CONNECTED" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    // Check if token is expired
-    if (expiresAt && new Date(expiresAt) < new Date()) {
-      console.log("Token expired, refreshing...");
-      const newTokens = await refreshTikTokToken(refreshToken);
+    // Get credentials from secure table
+    const { data: credentials, error: credError } = await supabaseClient
+      .from("social_connection_credentials")
+      .select("access_token, refresh_token, expires_at")
+      .eq("social_connection_id", connection.id)
+      .single();
+
+    if (credError || !credentials) {
+      return new Response(JSON.stringify({ error: "TikTok credentials not found. Please reconnect.", code: "NO_CREDENTIALS" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    let accessToken = credentials.access_token;
+    const refreshToken = credentials.refresh_token;
+    const expiresAt = credentials.expires_at;
+    const connectionId = connection.id;
+    const openId = connection.provider_user_id;
+
+    // Check if token is expired or will expire soon (within 2 minutes)
+    if (expiresAt && new Date(expiresAt) < new Date(Date.now() + 2 * 60 * 1000)) {
+      console.log("Token expired or expiring soon, refreshing...");
+      const newTokens = await refreshTikTokToken(refreshToken!);
       
       if (!newTokens) {
         return new Response(JSON.stringify({ error: "Token refresh failed. Please reconnect TikTok.", code: "TOKEN_EXPIRED" }), {
@@ -172,22 +191,22 @@ serve(async (req) => {
         });
       }
 
-      // Update tokens in database
+      // Update tokens in secure credentials table
       await supabaseClient
-        .from("social_connections")
+        .from("social_connection_credentials")
         .update({
           access_token: newTokens.access_token,
           refresh_token: newTokens.refresh_token,
           expires_at: new Date(Date.now() + newTokens.expires_in * 1000).toISOString(),
         })
-        .eq("id", connectionId);
+        .eq("social_connection_id", connectionId);
 
       accessToken = newTokens.access_token;
     }
 
     // Fetch videos from TikTok
     console.log("Fetching videos from TikTok...");
-    const videosResponse = await fetchTikTokVideos(accessToken, openId);
+    const videosResponse = await fetchTikTokVideos(accessToken!, openId);
     
     if (videosResponse.error?.code) {
       console.error("TikTok API error:", videosResponse.error);
