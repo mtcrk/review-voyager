@@ -108,36 +108,60 @@ serve(async (req) => {
     }
 
     // Parse request body
-    const { business_id, video_id, tiktok_video_id, social_connection_id } = await req.json();
+    const { social_connection_id, video_id, tiktok_video_id } = await req.json();
 
-    if (!business_id || !video_id || !tiktok_video_id || !social_connection_id) {
+    if (!social_connection_id || !video_id || !tiktok_video_id) {
       return new Response(
-        JSON.stringify({ error: "Missing required fields" }),
+        JSON.stringify({ error: "Missing required fields: social_connection_id, video_id, tiktok_video_id" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Verify business access
-    const { data: business, error: bizError } = await supabaseUser
-      .from("businesses")
-      .select("id")
-      .eq("id", business_id)
-      .eq("user_id", user.id)
+    // Verify connection access - user must own the connection
+    const { data: connection, error: connError } = await supabaseAdmin
+      .from("social_connections")
+      .select("id, user_id, business_id")
+      .eq("id", social_connection_id)
       .single();
 
-    if (bizError || !business) {
+    if (connError || !connection) {
       return new Response(
-        JSON.stringify({ error: "Business not found or access denied" }),
+        JSON.stringify({ error: "Connection not found" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (connection.user_id !== user.id) {
+      return new Response(
+        JSON.stringify({ error: "Access denied" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // Verify video exists and belongs to this connection
+    const { data: video, error: videoError } = await supabaseAdmin
+      .from("tiktok_videos")
+      .select("id, business_id")
+      .eq("id", video_id)
+      .eq("social_connection_id", social_connection_id)
+      .single();
+
+    if (videoError || !video) {
+      return new Response(
+        JSON.stringify({ error: "Video not found" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Use video's business_id or connection id as fallback
+    const effectiveBusinessId = video.business_id || social_connection_id;
 
     // Generate sample comments
     const now = new Date();
     const commentsToInsert = SAMPLE_COMMENTS.map((sample, index) => {
       const commentedAt = new Date(now.getTime() - (index + 1) * 3600000); // 1 hour apart
       return {
-        business_id,
+        business_id: effectiveBusinessId,
         social_connection_id,
         video_id,
         tiktok_video_id,
@@ -154,7 +178,7 @@ serve(async (req) => {
       };
     });
 
-    // Insert sample comments (use upsert to avoid duplicates based on tiktok_comment_id)
+    // Insert sample comments
     const { data: insertedComments, error: insertError } = await supabaseAdmin
       .from("tiktok_comments")
       .insert(commentsToInsert)
@@ -174,7 +198,7 @@ serve(async (req) => {
 
     // Log the action
     await supabaseAdmin.from("integration_logs").insert({
-      business_id,
+      business_id: effectiveBusinessId,
       provider: "tiktok",
       action: "seed_demo_comments",
       status: "ok",

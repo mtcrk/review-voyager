@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useBusiness } from "@/contexts/BusinessContext";
+import { useTikTokConnection } from "@/hooks/useTikTokConnection";
 import { useTikTokVideos, TikTokVideo } from "@/hooks/useTikTokVideos";
 import { useTikTokComments, TikTokComment } from "@/hooks/useTikTokComments";
 import { useTikTokDemoMode } from "@/hooks/useTikTokDemoMode";
@@ -368,10 +368,11 @@ function CommentCard({
 }
 
 export default function TikTokInbox() {
-  const { activeBusiness } = useBusiness();
-  const businessId = activeBusiness?.id || null;
+  // Use TikTok connection instead of business
+  const { connection, loading: connectionLoading } = useTikTokConnection();
+  const socialConnectionId = connection?.id || null;
   
-  const { videos, loading: videosLoading, fetchVideos } = useTikTokVideos(businessId);
+  const { videos, loading: videosLoading, fetchVideos } = useTikTokVideos(socialConnectionId);
   const [selectedVideo, setSelectedVideo] = useState<TikTokVideo | null>(null);
   
   const { 
@@ -381,7 +382,7 @@ export default function TikTokInbox() {
     generateSuggestions,
     sendReply,
     setComments,
-  } = useTikTokComments(businessId, selectedVideo?.id || null);
+  } = useTikTokComments(socialConnectionId, selectedVideo?.id || null);
 
   const {
     isDemoMode,
@@ -391,7 +392,7 @@ export default function TikTokInbox() {
     simulateSendReply,
     canSimulateSend,
     isSandbox,
-  } = useTikTokDemoMode(businessId, selectedVideo?.id || null);
+  } = useTikTokDemoMode(socialConnectionId, selectedVideo?.id || null);
 
   const [generatingFor, setGeneratingFor] = useState<string | null>(null);
   const [sendingFor, setSendingFor] = useState<string | null>(null);
@@ -399,10 +400,10 @@ export default function TikTokInbox() {
 
   // Load videos on mount
   useEffect(() => {
-    if (businessId) {
+    if (socialConnectionId) {
       fetchVideos(false);
     }
-  }, [businessId, fetchVideos]);
+  }, [socialConnectionId, fetchVideos]);
 
   // Load comments when video selected
   useEffect(() => {
@@ -453,7 +454,7 @@ export default function TikTokInbox() {
     if (!selectedVideo) return;
     const newComments = await loadSampleComments(
       selectedVideo.tiktok_video_id, 
-      selectedVideo.social_connection_id
+      selectedVideo.id
     );
     if (newComments.length > 0) {
       setComments(prev => [...newComments, ...prev]);
@@ -464,19 +465,29 @@ export default function TikTokInbox() {
     ? comments 
     : comments.filter(c => c.status === statusFilter);
 
-  if (!businessId) {
+  // Show loading while checking connection
+  if (connectionLoading) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  // Show connect prompt if no TikTok connection
+  if (!socialConnectionId) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
         <Card className="max-w-md">
           <CardHeader className="text-center">
-            <CardTitle>İşletme Seçin</CardTitle>
+            <CardTitle>TikTok Bağlantısı Gerekli</CardTitle>
             <CardDescription>
-              TikTok yorumlarını görmek için önce bir işletme seçmeniz gerekiyor.
+              TikTok yorumlarını görmek için önce TikTok hesabınızı bağlamanız gerekiyor.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center">
             <Button asChild>
-              <Link to="/settings">Ayarlara Git</Link>
+              <Link to="/channels/tiktok">TikTok Bağla</Link>
             </Button>
           </CardContent>
         </Card>

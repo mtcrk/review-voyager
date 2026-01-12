@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { TIKTOK_CONFIG } from "@/lib/tiktokConfig";
 import { TikTokComment } from "@/hooks/useTikTokComments";
 
-export function useTikTokDemoMode(businessId: string | null, videoId: string | null) {
+export function useTikTokDemoMode(socialConnectionId: string | null, videoId: string | null) {
   const [isDemoMode, setIsDemoMode] = useState(TIKTOK_CONFIG.canUseDemo);
   const [isLoadingSamples, setIsLoadingSamples] = useState(false);
   const { toast } = useToast();
@@ -14,8 +14,8 @@ export function useTikTokDemoMode(businessId: string | null, videoId: string | n
     setIsDemoMode(prev => !prev);
   }, []);
 
-  const loadSampleComments = useCallback(async (tiktokVideoId: string, socialConnectionId: string): Promise<TikTokComment[]> => {
-    if (!businessId || !videoId) return [];
+  const loadSampleComments = useCallback(async (tiktokVideoId: string, videoDbId: string): Promise<TikTokComment[]> => {
+    if (!socialConnectionId || !videoId) return [];
     
     setIsLoadingSamples(true);
     try {
@@ -31,10 +31,9 @@ export function useTikTokDemoMode(businessId: string | null, videoId: string | n
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ 
-            business_id: businessId, 
+            social_connection_id: socialConnectionId,
             video_id: videoId,
             tiktok_video_id: tiktokVideoId,
-            social_connection_id: socialConnectionId,
           }),
         }
       );
@@ -62,21 +61,28 @@ export function useTikTokDemoMode(businessId: string | null, videoId: string | n
     } finally {
       setIsLoadingSamples(false);
     }
-  }, [businessId, videoId, toast]);
+  }, [socialConnectionId, videoId, toast]);
 
   const simulateSendReply = useCallback(async (
     commentId: string, 
     replyText: string,
     onSuccess: (reply: any) => void
   ) => {
-    if (!businessId) return;
+    if (!socialConnectionId) return;
     
     try {
+      // Get the comment to find its business_id
+      const { data: comment } = await supabase
+        .from("tiktok_comments")
+        .select("business_id")
+        .eq("id", commentId)
+        .single();
+
       // Create simulated reply in database
       const { data: reply, error } = await supabase
         .from("tiktok_comment_replies")
         .insert({
-          business_id: businessId,
+          business_id: comment?.business_id || socialConnectionId, // fallback
           comment_id: commentId,
           reply_text: replyText,
           send_status: "sent",
@@ -108,7 +114,7 @@ export function useTikTokDemoMode(businessId: string | null, videoId: string | n
         variant: "destructive",
       });
     }
-  }, [businessId, toast]);
+  }, [socialConnectionId, toast]);
 
   return {
     isDemoMode,
