@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { MessageSquare, Star, Phone, Check, ArrowRight, Zap, Users, BarChart3, Clock, Lock, Music2 } from "lucide-react";
+import { MessageSquare, Star, Phone, Check, ArrowRight, Zap, Users, BarChart3, Clock, Lock, Music2, Eye, TrendingUp, Sparkles, Target } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -32,18 +32,18 @@ const Index = () => {
     },
     {
       id: "google-reviews",
-      title: "Google Reviews",
+      title: "Google Reviews + AI Visibility",
       status: "available" as const,
       color: "from-blue-500 to-cyan-500",
       bgColor: "bg-blue-50",
       borderColor: "border-blue-200",
       icon: Star,
       features: [
-        "AI review replies",
-        "Sentiment analysis",
-        "Reputation management",
+        "AI Visibility Score & insights",
+        "Smart review reply suggestions",
+        "Sentiment & search optimization",
       ],
-      cta: "Enable Google Reviews",
+      cta: "See Your AI Visibility Score",
       ctaLink: "/onboarding",
     },
     {
@@ -88,15 +88,15 @@ const Index = () => {
       color: "bg-purple-100 text-purple-700",
     },
     {
-      title: "Only Google Reviews",
-      description: "Ideal for local businesses focused on reputation management",
-      icon: Star,
+      title: "Google Reviews + AI Visibility",
+      description: "Boost your local search ranking with AI-powered review insights and visibility tracking",
+      icon: Eye,
       color: "bg-blue-100 text-blue-700",
     },
     {
-      title: "Instagram + Google Together",
-      description: "Combine conversations and trust for maximum growth",
-      icon: Zap,
+      title: "Full Visibility Stack",
+      description: "Combine social engagement with AI visibility for maximum discoverability",
+      icon: TrendingUp,
       color: "bg-gradient-to-r from-purple-100 to-blue-100 text-primary",
     },
   ];
@@ -104,21 +104,21 @@ const Index = () => {
   const howItWorks = [
     {
       step: "1",
-      title: "Choose your channels",
-      description: "Pick Instagram, Google Reviews, or both — whatever fits your business.",
-      icon: Users,
+      title: "Connect & Analyze",
+      description: "Link your Google Business Profile. Our AI instantly calculates your Visibility Score.",
+      icon: Eye,
     },
     {
       step: "2",
-      title: "Enable automations",
-      description: "Select the specific automations you need. Add more anytime.",
-      icon: Zap,
+      title: "Get Smart Recommendations",
+      description: "AI tells you which reviews to answer, when to respond, and how to optimize for search.",
+      icon: Sparkles,
     },
     {
       step: "3",
-      title: "Let AI handle it",
-      description: "AI crafts replies, routes conversations, and saves you hours daily.",
-      icon: BarChart3,
+      title: "Track Your Growth",
+      description: "Monitor visibility metrics, sentiment trends, and review performance in real-time.",
+      icon: TrendingUp,
     },
   ];
 
@@ -281,29 +281,52 @@ const Index = () => {
         </div>
       </nav>
 
-      {/* Hero Section - Platform Focused */}
+      {/* Hero Section - AI Visibility Focused */}
       <section className="container mx-auto px-6 pt-32 pb-20 md:pt-40 md:pb-28 relative overflow-hidden">
         <div className="absolute inset-0 gradient-hero"></div>
         <div className="absolute inset-0 gradient-hero-overlay"></div>
         <div className="absolute inset-0 gradient-mesh"></div>
         <div className="text-center max-w-4xl mx-auto space-y-8 relative z-10">
+          {/* AI Visibility Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium">
+            <Sparkles className="w-4 h-4" />
+            Powered by AI Visibility Engine
+          </div>
+          
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight tracking-tight">
-            One Platform.<br />
+            Be Found by Google.<br />
             <span className="bg-gradient-to-r from-purple-600 via-primary to-blue-600 bg-clip-text text-transparent">
-              Multiple Customer Automations.
+              Be Discovered by AI.
             </span>
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-            Automate Google Reviews, Instagram DMs, and more —<br className="hidden md:block" />
-            choose the channels you need, activate them when you want.
+            AI-powered review management that boosts your visibility on Google Search and AI assistants.<br className="hidden md:block" />
+            Get your AI Visibility Score, smart reply suggestions, and real-time performance insights.
           </p>
+          
+          {/* Value Props Row */}
+          <div className="flex flex-wrap items-center justify-center gap-6 pt-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <Eye className="w-4 h-4 text-primary" />
+              <span>AI Visibility Score</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Target className="w-4 h-4 text-primary" />
+              <span>Review Optimization</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-primary" />
+              <span>Performance Tracking</span>
+            </div>
+          </div>
+          
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button 
               size="lg" 
               onClick={() => navigate("/onboarding")} 
               className="relative overflow-hidden gradient-primary text-white shadow-lg text-lg px-10 py-7 hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
             >
-              <span className="relative z-10">Get Started</span>
+              <span className="relative z-10">See Your AI Visibility Score</span>
               <ArrowRight className="w-5 h-5 ml-2 relative z-10" />
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
             </Button>
@@ -313,7 +336,7 @@ const Index = () => {
               onClick={() => navigate("/hub")} 
               className="text-lg px-10 py-7 hover:bg-muted transition-all duration-300"
             >
-              Explore Automations
+              Try AI Reply Demo
             </Button>
           </div>
         </div>
@@ -509,6 +532,52 @@ const Index = () => {
         </div>
       </section>
 
+      {/* AI Visibility Value Section */}
+      <section className="container mx-auto px-6 py-16">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div>
+              <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
+                Why AI Visibility Matters
+              </h3>
+              <p className="text-muted-foreground mb-6 leading-relaxed">
+                Your reviews don't just influence customers — they train AI models. Google's AI Overviews, 
+                ChatGPT, and other AI assistants use your review content to recommend businesses. 
+                Our Reviewer AI Engine analyzes your reviews, suggests optimized responses, and tracks 
+                how your business appears in AI-powered search results.
+              </p>
+              <ul className="space-y-3">
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                  <span className="text-muted-foreground">AI Visibility Score: See how AI assistants perceive your business</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                  <span className="text-muted-foreground">Answer Optimization: Craft replies that boost search visibility</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                  <span className="text-muted-foreground">AI Recommendation Panel: Know which reviews to prioritize</span>
+                </li>
+              </ul>
+            </div>
+            <div className="bg-gradient-to-br from-primary/5 to-blue-500/5 border border-primary/10 rounded-2xl p-8">
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mb-4">
+                  <Eye className="w-10 h-10 text-primary" />
+                </div>
+                <div className="text-5xl font-bold text-foreground mb-2">87</div>
+                <div className="text-sm text-muted-foreground mb-4">AI Visibility Score</div>
+                <div className="flex items-center justify-center gap-2 text-green-600 text-sm font-medium">
+                  <TrendingUp className="w-4 h-4" />
+                  <span>+12% this month</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Bottom CTA Section */}
       <section className="container mx-auto px-6 py-20">
         <div className="border border-primary/20 rounded-2xl p-12 md:p-16 text-center relative overflow-hidden shadow-2xl">
@@ -517,19 +586,30 @@ const Index = () => {
           <div className="absolute inset-0 gradient-mesh opacity-20"></div>
           <div className="relative z-10">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Ready to automate your customer conversations?
+              Ready to boost your AI visibility?
             </h2>
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Start with one channel. Add more when you're ready. No commitments.
+              Get your free AI Visibility Score and see how your business appears to AI assistants.
             </p>
-            <Button 
-              size="lg" 
-              onClick={() => navigate("/onboarding")} 
-              className="relative overflow-hidden gradient-primary text-white shadow-lg text-lg px-10 hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
-            >
-              <span className="relative z-10">Get Started Free</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-            </Button>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Button 
+                size="lg" 
+                onClick={() => navigate("/onboarding")} 
+                className="relative overflow-hidden gradient-primary text-white shadow-lg text-lg px-10 hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
+              >
+                <span className="relative z-10">See Your AI Visibility Score</span>
+                <ArrowRight className="w-5 h-5 ml-2 relative z-10" />
+                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline"
+                onClick={() => navigate("/automations/google-reviews")} 
+                className="text-lg px-8 hover:bg-muted transition-all duration-300"
+              >
+                Learn More
+              </Button>
+            </div>
           </div>
         </div>
       </section>
