@@ -6,6 +6,62 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Helper: Refresh Google access token
+async function refreshAccessToken(refreshToken: string): Promise<string> {
+  const clientId = Deno.env.get("GOOGLE_BUSINESS_CLIENT_ID")!;
+  const clientSecret = Deno.env.get("GOOGLE_BUSINESS_CLIENT_SECRET")!;
+
+  const response = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      client_id: clientId,
+      client_secret: clientSecret,
+      refresh_token: refreshToken,
+      grant_type: "refresh_token",
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    console.error("Token refresh error:", error);
+    throw new Error("Failed to refresh Google access token");
+  }
+
+  const data = await response.json();
+  return data.access_token;
+}
+
+// Helper: Send reply to Google Business Profile
+async function sendReplyToGoogle(
+  accessToken: string,
+  reviewName: string,
+  replyText: string
+): Promise<{ success: boolean; error?: string }> {
+  // Google Business Profile API endpoint for replying to reviews
+  // Format: accounts/{account_id}/locations/{location_id}/reviews/{review_id}/reply
+  const url = `https://mybusiness.googleapis.com/v4/${reviewName}/reply`;
+
+  const response = await fetch(url, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      comment: replyText,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    console.error("Google API error:", error);
+    return { success: false, error: `Google API error: ${response.status}` };
+  }
+
+  return { success: true };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -35,27 +91,32 @@ serve(async (req) => {
 
     console.log("Approving reply for review:", reviewId, { sendToGoogle });
 
-    // Update review with approved reply
-    const updateData: any = {
+    // Get review details with business info
+    const { data: review, error: reviewError } = await supabase
+      .from("reviews")
+      .select("*, businesses(*)")
+      .eq("id", reviewId)
+      .single();
+
+    if (reviewError) {
+      throw reviewError;
+    }
+
+    // Update data object
+    const updateData: Record<string, unknown> = {
       approved_reply: approvedReply,
       reply_source: sendToGoogle ? "google_api" : "manual_copy",
     };
 
     if (sendToGoogle) {
-      // Get review details with business info
-      const { data: review, error: reviewError } = await supabase
-        .from("reviews")
-        .select("*, businesses(*)")
-        .eq("id", reviewId)
-        .single();
-
-      if (reviewError) {
-        throw reviewError;
-      }
-
       // Check if Google is connected
       if (!review.businesses?.google_connected) {
         throw new Error("Google Business account not connected");
+      }
+
+      // Check if we have the Google review name for API call
+      if (!review.google_review_name) {
+        throw new Error("Google review name not found - cannot send reply via API");
       }
 
       // Get refresh token from secure credentials table (service role only)
@@ -69,14 +130,41 @@ serve(async (req) => {
         throw new Error("Google Business credentials not found");
       }
 
-      // TODO: Implement Google Business API reply using credentials.google_refresh_token
-      // For now, we'll mark it as pending
-      updateData.google_reply_status = "pending_send";
-      updateData.status = "replied";
-      updateData.replied_at = new Date().toISOString();
+      try {
+        // Refresh access token
+        const accessToken = await refreshAccessToken(credentials.google_refresh_token);
 
-      console.log("Google API integration pending - reply approved but not sent");
+        // Send reply to Google
+        const result = await sendReplyToGoogle(accessToken, review.google_review_name, approvedReply);
+
+        if (result.success) {
+          updateData.google_reply_status = "sent";
+          updateData.status = "replied";
+          updateData.replied_at = new Date().toISOString();
+          console.log("Reply sent to Google successfully");
+        } else {
+          updateData.google_reply_status = "failed";
+          updateData.google_reply_error_message = result.error;
+          console.error("Failed to send reply to Google:", result.error);
+        }
+      } catch (apiError) {
+        console.error("Google API error:", apiError);
+        updateData.google_reply_status = "failed";
+        updateData.google_reply_error_message = apiError instanceof Error ? apiError.message : "Unknown API error";
+      }
+
+      // Log the integration attempt
+      await supabaseAdmin.from("integration_logs").insert({
+        business_id: review.business_id,
+        provider: "google",
+        action: "send_reply",
+        status: updateData.google_reply_status === "sent" ? "success" : "error",
+        error_message: updateData.google_reply_error_message || null,
+        http_status: updateData.google_reply_status === "sent" ? 200 : 500,
+        meta: { review_id: reviewId },
+      });
     } else {
+      // Manual copy - just mark as replied
       updateData.status = "replied";
       updateData.replied_at = new Date().toISOString();
     }
@@ -97,9 +185,12 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         message: sendToGoogle
-          ? "Reply approved and will be sent to Google"
+          ? updateData.google_reply_status === "sent"
+            ? "Reply sent to Google successfully"
+            : "Reply approved but failed to send to Google"
           : "Reply approved and copied",
         review: data,
+        googleStatus: updateData.google_reply_status,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
