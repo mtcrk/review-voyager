@@ -136,7 +136,7 @@ export function AIVisibilityChecker() {
               <div className="flex-1">
                 <Input
                   type="text"
-                  placeholder="İşletme adınız (örn: Oğulbey Shell)"
+                  placeholder="İşletme adınız"
                   value={businessName}
                   onChange={(e) => setBusinessName(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
@@ -149,7 +149,7 @@ export function AIVisibilityChecker() {
                   <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
                     type="text"
-                    placeholder="Konum (örn: Gölbaşı, Ankara)"
+                    placeholder="Konum"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
