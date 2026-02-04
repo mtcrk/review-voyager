@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -8,6 +8,31 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+// Türkiye şehirleri ve popüler ilçeler
+const LOCATIONS = [
+  // Büyükşehirler
+  "İstanbul", "İstanbul, Kadıköy", "İstanbul, Beşiktaş", "İstanbul, Şişli", "İstanbul, Beyoğlu",
+  "İstanbul, Bakırköy", "İstanbul, Ataşehir", "İstanbul, Üsküdar", "İstanbul, Maltepe",
+  "Ankara", "Ankara, Çankaya", "Ankara, Kızılay", "Ankara, Gölbaşı", "Ankara, Etimesgut", "Ankara, Keçiören",
+  "İzmir", "İzmir, Alsancak", "İzmir, Bornova", "İzmir, Karşıyaka", "İzmir, Konak",
+  "Bursa", "Bursa, Nilüfer", "Bursa, Osmangazi",
+  "Antalya", "Antalya, Muratpaşa", "Antalya, Konyaaltı", "Antalya, Lara",
+  "Adana", "Adana, Seyhan", "Adana, Çukurova",
+  "Konya", "Konya, Selçuklu", "Konya, Meram",
+  "Gaziantep", "Gaziantep, Şahinbey", "Gaziantep, Şehitkamil",
+  "Mersin", "Mersin, Mezitli", "Mersin, Yenişehir",
+  "Kayseri", "Kayseri, Melikgazi", "Kayseri, Kocasinan",
+  "Eskişehir", "Eskişehir, Tepebaşı", "Eskişehir, Odunpazarı",
+  "Diyarbakır", "Samsun", "Denizli", "Şanlıurfa", "Malatya", "Kahramanmaraş",
+  "Van", "Batman", "Elazığ", "Manisa", "Sakarya", "Kocaeli", "Kocaeli, İzmit",
+  "Trabzon", "Balıkesir", "Aydın", "Muğla", "Muğla, Bodrum", "Muğla, Marmaris", "Muğla, Fethiye",
+  "Tekirdağ", "Hatay", "Mardin", "Afyon", "Kütahya", "Çanakkale", "Edirne", "Uşak",
+  "Isparta", "Bolu", "Düzce", "Karabük", "Kastamonu", "Sinop", "Ordu", "Giresun", "Rize", "Artvin",
+  "Erzurum", "Erzincan", "Sivas", "Tokat", "Amasya", "Çorum", "Yozgat", "Kırşehir", "Nevşehir", "Aksaray",
+  "Niğde", "Karaman", "Adıyaman", "Bitlis", "Muş", "Bingöl", "Tunceli", "Hakkari", "Şırnak", "Siirt",
+  "Ağrı", "Iğdır", "Kars", "Ardahan"
+];
 
 interface Competitor {
   name: string;
@@ -49,6 +74,46 @@ export function AIVisibilityChecker() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [analyzedName, setAnalyzedName] = useState("");
   const [analyzedLocation, setAnalyzedLocation] = useState("");
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+  const [filteredLocations, setFilteredLocations] = useState<string[]>([]);
+  const locationInputRef = useRef<HTMLInputElement>(null);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  // Filter locations based on input
+  useEffect(() => {
+    if (location.trim().length > 0) {
+      const filtered = LOCATIONS.filter(loc => 
+        loc.toLowerCase().includes(location.toLowerCase())
+      ).slice(0, 8);
+      setFilteredLocations(filtered);
+      setShowLocationSuggestions(filtered.length > 0);
+    } else {
+      setFilteredLocations([]);
+      setShowLocationSuggestions(false);
+    }
+  }, [location]);
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        suggestionsRef.current && 
+        !suggestionsRef.current.contains(event.target as Node) &&
+        locationInputRef.current &&
+        !locationInputRef.current.contains(event.target as Node)
+      ) {
+        setShowLocationSuggestions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLocationSelect = (selectedLocation: string) => {
+    setLocation(selectedLocation);
+    setShowLocationSuggestions(false);
+  };
 
   const handleAnalyze = async () => {
     if (!businessName.trim()) {
@@ -144,19 +209,41 @@ export function AIVisibilityChecker() {
                   disabled={loading}
                 />
               </div>
-              <div className="sm:w-64">
+              <div className="sm:w-64 relative">
                 <div className="relative">
-                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
                   <Input
+                    ref={locationInputRef}
                     type="text"
                     placeholder="Konum"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
+                    onFocus={() => location.trim().length > 0 && filteredLocations.length > 0 && setShowLocationSuggestions(true)}
                     className="h-14 text-lg pl-12 pr-6"
                     disabled={loading}
+                    autoComplete="off"
                   />
                 </div>
+                {/* Location Suggestions Dropdown */}
+                {showLocationSuggestions && filteredLocations.length > 0 && (
+                  <div 
+                    ref={suggestionsRef}
+                    className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto"
+                  >
+                    {filteredLocations.map((loc, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        className="w-full px-4 py-3 text-left text-sm hover:bg-muted transition-colors flex items-center gap-2 first:rounded-t-lg last:rounded-b-lg"
+                        onClick={() => handleLocationSelect(loc)}
+                      >
+                        <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        <span>{loc}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
             <Button
