@@ -321,6 +321,110 @@ export type Database = {
           },
         ]
       }
+      story_kit_shares: {
+        Row: {
+          business_id: string
+          customer_message: string | null
+          downloaded_at: string
+          id: string
+          ip_hash: string | null
+          platform: string | null
+          template_id: string
+        }
+        Insert: {
+          business_id: string
+          customer_message?: string | null
+          downloaded_at?: string
+          id?: string
+          ip_hash?: string | null
+          platform?: string | null
+          template_id: string
+        }
+        Update: {
+          business_id?: string
+          customer_message?: string | null
+          downloaded_at?: string
+          id?: string
+          ip_hash?: string | null
+          platform?: string | null
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_kit_shares_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_kit_shares_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "story_kit_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_kit_templates: {
+        Row: {
+          accent_color: string | null
+          background_color: string | null
+          business_id: string
+          created_at: string
+          custom_message_placeholder: string | null
+          hashtag: string | null
+          id: string
+          is_active: boolean | null
+          logo_url: string | null
+          qr_code_enabled: boolean | null
+          tagline: string | null
+          template_name: string
+          text_color: string | null
+          updated_at: string
+        }
+        Insert: {
+          accent_color?: string | null
+          background_color?: string | null
+          business_id: string
+          created_at?: string
+          custom_message_placeholder?: string | null
+          hashtag?: string | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          qr_code_enabled?: boolean | null
+          tagline?: string | null
+          template_name?: string
+          text_color?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accent_color?: string | null
+          background_color?: string | null
+          business_id?: string
+          created_at?: string
+          custom_message_placeholder?: string | null
+          hashtag?: string | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          qr_code_enabled?: boolean | null
+          tagline?: string | null
+          template_name?: string
+          text_color?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_kit_templates_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tiktok_comment_replies: {
         Row: {
           business_id: string

@@ -35,6 +35,8 @@ import TikTokCallback from "./pages/TikTokCallback";
 import TikTokInbox from "./pages/TikTokInbox";
 import TikTokDMInbox from "./pages/TikTokDMInbox";
 import TikTokReviewKit from "./pages/TikTokReviewKit";
+import StoryKit from "./pages/StoryKit";
+import StoryKitSettings from "./pages/StoryKitSettings";
 
 const queryClient = new QueryClient();
 
@@ -90,6 +92,17 @@ const App = () => (
                 </ProtectedRoute>
               }
               />
+            {/* Story Kit - Public page for customers */}
+            <Route path="/share/:businessSlug" element={<StoryKit />} />
+            {/* Story Kit Settings - For business owners */}
+            <Route
+              path="/story-kit"
+              element={
+                <ProtectedRoute>
+                  <StoryKitSettings />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/tiktok-dm"
               element={
