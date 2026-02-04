@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 interface Testimonial {
   name: string;
   role: string;
-  company: string;
   avatar: string;
   quote: string;
   rating: number;
@@ -14,7 +13,6 @@ const testimonials: Testimonial[] = [
   {
     name: "Ahmet Y.",
     role: "İşletme Sahibi",
-    company: "Cafe Botanica",
     avatar: "AY",
     quote: "Google yorumlarına artık 5 dakikada değil, 30 saniyede yanıt veriyorum. AI önerileri gerçekten profesyonel ve ton ayarları mükemmel çalışıyor.",
     rating: 5,
@@ -22,7 +20,6 @@ const testimonials: Testimonial[] = [
   {
     name: "Zeynep K.",
     role: "Pazarlama Müdürü",
-    company: "Fitness Plus",
     avatar: "ZK",
     quote: "TikTok yorumlarına anında yanıt vermek satışlarımızı %40 artırdı. Story Kit ile müşterilerimiz içerik üretiyor, biz sadece paylaşıyoruz.",
     rating: 5,
@@ -30,7 +27,6 @@ const testimonials: Testimonial[] = [
   {
     name: "Mehmet D.",
     role: "Genel Müdür",
-    company: "Demir Grup Oteller",
     avatar: "MD",
     quote: "3 otelimizin tüm yorumlarını tek panelden yönetiyoruz. AI Visibility skoru sayesinde Google'da üst sıralara çıktık.",
     rating: 5,
@@ -38,7 +34,6 @@ const testimonials: Testimonial[] = [
   {
     name: "Elif Ö.",
     role: "Kurucu",
-    company: "Güzellik Merkezi Ela",
     avatar: "EÖ",
     quote: "Olumsuz yorumlara nasıl yanıt vereceğimi bilmiyordum. AI'ın empatik ton önerisi müşteriyi geri kazandırdı.",
     rating: 5,
@@ -93,7 +88,7 @@ export function Testimonials() {
                     {testimonials[activeIndex].name}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {testimonials[activeIndex].role} • {testimonials[activeIndex].company}
+                    {testimonials[activeIndex].role}
                   </div>
                 </div>
               </div>
@@ -137,7 +132,7 @@ export function Testimonials() {
                     {testimonial.name}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {testimonial.company}
+                    {testimonial.role}
                   </div>
                 </div>
               </div>
