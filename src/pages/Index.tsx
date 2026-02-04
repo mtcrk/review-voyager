@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { AIReplyDemo } from "@/components/landing/AIReplyDemo";
+import { StoryKitDemo } from "@/components/landing/StoryKitDemo";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -345,6 +346,9 @@ const Index = () => {
 
       {/* AI Reply Demo Section */}
       <AIReplyDemo />
+
+      {/* Story Kit Demo Section */}
+      <StoryKitDemo />
 
       {/* Automation Options Grid */}
       <section id="automations" className="relative py-20 overflow-hidden">
