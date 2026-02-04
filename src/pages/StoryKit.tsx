@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Download, Instagram, Share2, Loader2, MapPin, Star } from "lucide-react";
+import { Download, Instagram, Share2, Loader2, MapPin, Star, ImagePlus, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface StoryTemplate {
@@ -34,8 +34,35 @@ export default function StoryKit() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast({
+          title: "Dosya çok büyük",
+          description: "Maksimum 10MB boyutunda dosya yükleyebilirsiniz.",
+          variant: "destructive",
+        });
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setUploadedImage(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setUploadedImage(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
   useEffect(() => {
     fetchTemplateAndBusiness();
   }, [businessSlug]);
@@ -112,89 +139,177 @@ export default function StoryKit() {
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Location icon and business name
-      ctx.fillStyle = accentColor;
-      ctx.beginPath();
-      ctx.arc(540, 400, 60, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Location pin symbol
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 48px system-ui";
-      ctx.textAlign = "center";
-      ctx.fillText("📍", 540, 420);
-
-      // Business name
-      ctx.fillStyle = textColor;
-      ctx.font = "bold 64px system-ui";
-      ctx.textAlign = "center";
-      ctx.fillText(business.name, 540, 550);
-
-      // Tagline
-      if (template?.tagline) {
-        ctx.font = "32px system-ui";
-        ctx.fillStyle = textColor + "99";
-        ctx.fillText(template.tagline, 540, 620);
-      }
-
-      // Star rating decoration
-      ctx.font = "48px system-ui";
-      ctx.fillText("⭐⭐⭐⭐⭐", 540, 720);
-
-      // Customer message box
       const message = customerMessage || "Harika bir deneyimdi! 🎉";
-      
-      // Message background
-      ctx.fillStyle = accentColor + "15";
-      ctx.beginPath();
-      ctx.roundRect(100, 820, 880, 400, 30);
-      ctx.fill();
 
-      // Message border
-      ctx.strokeStyle = accentColor + "40";
-      ctx.lineWidth = 3;
-      ctx.stroke();
+      // Draw uploaded image if exists
+      if (uploadedImage) {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        await new Promise<void>((resolve, reject) => {
+          img.onload = () => {
+            const imgX = 140;
+            const imgY = 100;
+            const imgWidth = 800;
+            const imgHeight = 600;
+            const radius = 30;
 
-      // Quote mark
-      ctx.fillStyle = accentColor;
-      ctx.font = "bold 120px Georgia";
-      ctx.fillText('"', 150, 920);
+            ctx.save();
+            ctx.beginPath();
+            ctx.roundRect(imgX, imgY, imgWidth, imgHeight, radius);
+            ctx.clip();
 
-      // Message text (word wrap)
-      ctx.fillStyle = textColor;
-      ctx.font = "36px system-ui";
-      ctx.textAlign = "left";
-      
-      const words = message.split(" ");
-      let line = "";
-      let y = 960;
-      const maxWidth = 760;
-      const lineHeight = 50;
+            const scale = Math.max(imgWidth / img.width, imgHeight / img.height);
+            const scaledWidth = img.width * scale;
+            const scaledHeight = img.height * scale;
+            const offsetX = imgX + (imgWidth - scaledWidth) / 2;
+            const offsetY = imgY + (imgHeight - scaledHeight) / 2;
 
-      for (const word of words) {
-        const testLine = line + word + " ";
-        const metrics = ctx.measureText(testLine);
-        if (metrics.width > maxWidth && line !== "") {
-          ctx.fillText(line.trim(), 160, y);
-          line = word + " ";
-          y += lineHeight;
-        } else {
-          line = testLine;
-        }
-      }
-      ctx.fillText(line.trim(), 160, y);
+            ctx.drawImage(img, offsetX, offsetY, scaledWidth, scaledHeight);
+            ctx.restore();
 
-      // Hashtag
-      if (template?.hashtag) {
+            ctx.strokeStyle = accentColor;
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.roundRect(imgX, imgY, imgWidth, imgHeight, radius);
+            ctx.stroke();
+
+            resolve();
+          };
+          img.onerror = reject;
+          img.src = uploadedImage;
+        });
+
+        // Layout with image
         ctx.fillStyle = accentColor;
-        ctx.font = "bold 42px system-ui";
+        ctx.beginPath();
+        ctx.roundRect(340, 650, 400, 80, 40);
+        ctx.fill();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 40px system-ui";
         ctx.textAlign = "center";
-        ctx.fillText(template.hashtag, 540, 1400);
+        ctx.fillText(business.name, 540, 702);
+
+        // Message box
+        ctx.fillStyle = accentColor + "15";
+        ctx.beginPath();
+        ctx.roundRect(100, 780, 880, 350, 30);
+        ctx.fill();
+
+        ctx.strokeStyle = accentColor + "40";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ctx.fillStyle = accentColor;
+        ctx.font = "bold 100px Georgia";
+        ctx.fillText('"', 150, 870);
+
+        ctx.fillStyle = textColor;
+        ctx.font = "34px system-ui";
+        ctx.textAlign = "left";
+        
+        const words = message.split(" ");
+        let line = "";
+        let y = 900;
+        const maxWidth = 700;
+        const lineHeight = 46;
+
+        for (const word of words) {
+          const testLine = line + word + " ";
+          const metrics = ctx.measureText(testLine);
+          if (metrics.width > maxWidth && line !== "") {
+            ctx.fillText(line.trim(), 160, y);
+            line = word + " ";
+            y += lineHeight;
+          } else {
+            line = testLine;
+          }
+        }
+        ctx.fillText(line.trim(), 160, y);
+
+        ctx.font = "44px system-ui";
+        ctx.textAlign = "center";
+        ctx.fillText("⭐⭐⭐⭐⭐", 540, 1240);
+
+        if (template?.hashtag) {
+          ctx.fillStyle = accentColor;
+          ctx.font = "bold 40px system-ui";
+          ctx.fillText(template.hashtag, 540, 1340);
+        }
+
+      } else {
+        // Original layout without image
+        ctx.fillStyle = accentColor;
+        ctx.beginPath();
+        ctx.arc(540, 400, 60, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 48px system-ui";
+        ctx.textAlign = "center";
+        ctx.fillText("📍", 540, 420);
+
+        ctx.fillStyle = textColor;
+        ctx.font = "bold 64px system-ui";
+        ctx.fillText(business.name, 540, 550);
+
+        if (template?.tagline) {
+          ctx.font = "32px system-ui";
+          ctx.fillStyle = textColor + "99";
+          ctx.fillText(template.tagline, 540, 620);
+        }
+
+        ctx.font = "48px system-ui";
+        ctx.fillText("⭐⭐⭐⭐⭐", 540, 720);
+
+        ctx.fillStyle = accentColor + "15";
+        ctx.beginPath();
+        ctx.roundRect(100, 820, 880, 400, 30);
+        ctx.fill();
+
+        ctx.strokeStyle = accentColor + "40";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ctx.fillStyle = accentColor;
+        ctx.font = "bold 120px Georgia";
+        ctx.fillText('"', 150, 920);
+
+        ctx.fillStyle = textColor;
+        ctx.font = "36px system-ui";
+        ctx.textAlign = "left";
+        
+        const words = message.split(" ");
+        let line = "";
+        let y = 960;
+        const maxWidth = 760;
+        const lineHeight = 50;
+
+        for (const word of words) {
+          const testLine = line + word + " ";
+          const metrics = ctx.measureText(testLine);
+          if (metrics.width > maxWidth && line !== "") {
+            ctx.fillText(line.trim(), 160, y);
+            line = word + " ";
+            y += lineHeight;
+          } else {
+            line = testLine;
+          }
+        }
+        ctx.fillText(line.trim(), 160, y);
+
+        if (template?.hashtag) {
+          ctx.fillStyle = accentColor;
+          ctx.font = "bold 42px system-ui";
+          ctx.textAlign = "center";
+          ctx.fillText(template.hashtag, 540, 1400);
+        }
       }
 
       // Powered by footer
       ctx.fillStyle = textColor + "60";
       ctx.font = "24px system-ui";
+      ctx.textAlign = "center";
       ctx.fillText("Voyagerespond ile oluşturuldu", 540, 1800);
 
       // Convert to data URL
@@ -285,6 +400,53 @@ export default function StoryKit() {
           </p>
         </div>
 
+        {/* Photo Upload */}
+        <Card className="mb-4 shadow-lg border-0 bg-white/80 backdrop-blur">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 mb-3">
+              <ImagePlus className="h-4 w-4 text-purple-500" />
+              <label className="text-sm font-medium text-gray-700">
+                Fotoğraf Ekle (Opsiyonel) 📸
+              </label>
+            </div>
+            
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImageUpload}
+              accept="image/*"
+              className="hidden"
+            />
+            
+            {uploadedImage ? (
+              <div className="relative">
+                <img
+                  src={uploadedImage}
+                  alt="Yüklenen fotoğraf"
+                  className="w-full h-40 object-cover rounded-xl"
+                />
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-2 right-2 h-8 w-8 rounded-full"
+                  onClick={removeImage}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                className="w-full h-28 border-dashed border-2 border-purple-200 flex flex-col gap-2 hover:border-purple-400 hover:bg-purple-50"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <ImagePlus className="h-8 w-8 text-purple-400" />
+                <span className="text-sm text-gray-500">Yemek, mekan veya anı fotoğrafı</span>
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Message Input */}
         <Card className="mb-6 shadow-lg border-0 bg-white/80 backdrop-blur">
           <CardContent className="pt-6">
@@ -295,7 +457,7 @@ export default function StoryKit() {
               placeholder={template?.custom_message_placeholder || "Harika bir deneyimdi! Herkese tavsiye ederim..."}
               value={customerMessage}
               onChange={(e) => setCustomerMessage(e.target.value)}
-              className="min-h-[120px] resize-none border-gray-200 focus:border-purple-300"
+              className="min-h-[100px] resize-none border-gray-200 focus:border-purple-300"
               maxLength={200}
             />
             <p className="text-xs text-gray-400 mt-2 text-right">

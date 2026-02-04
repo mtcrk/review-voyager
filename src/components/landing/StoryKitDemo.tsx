@@ -14,6 +14,8 @@ import {
   QrCode,
   Sparkles,
   ArrowRight,
+  ImagePlus,
+  X,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
@@ -30,8 +32,35 @@ export function StoryKitDemo() {
   const [accentColor, setAccentColor] = useState("#f59e0b");
   const [generating, setGenerating] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast({
+          title: "Dosya çok büyük",
+          description: "Maksimum 10MB boyutunda dosya yükleyebilirsiniz.",
+          variant: "destructive",
+        });
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setUploadedImage(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setUploadedImage(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
   const generateStoryImage = async () => {
     if (!canvasRef.current) return;
 
@@ -59,82 +88,186 @@ export function StoryKitDemo() {
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Location icon circle
-      ctx.fillStyle = accentColor;
-      ctx.beginPath();
-      ctx.arc(540, 400, 70, 0, Math.PI * 2);
-      ctx.fill();
+      // Draw uploaded image if exists
+      if (uploadedImage) {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        await new Promise<void>((resolve, reject) => {
+          img.onload = () => {
+            // Draw image in top area with rounded corners
+            const imgX = 140;
+            const imgY = 100;
+            const imgWidth = 800;
+            const imgHeight = 600;
+            const radius = 30;
 
-      // Location pin symbol
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 56px system-ui";
-      ctx.textAlign = "center";
-      ctx.fillText("📍", 540, 420);
+            ctx.save();
+            ctx.beginPath();
+            ctx.roundRect(imgX, imgY, imgWidth, imgHeight, radius);
+            ctx.clip();
 
-      // Business name
-      ctx.fillStyle = textColor;
-      ctx.font = "bold 72px system-ui";
-      ctx.textAlign = "center";
-      ctx.fillText(selectedBusiness.name, 540, 560);
+            // Calculate aspect ratio to cover the area
+            const scale = Math.max(imgWidth / img.width, imgHeight / img.height);
+            const scaledWidth = img.width * scale;
+            const scaledHeight = img.height * scale;
+            const offsetX = imgX + (imgWidth - scaledWidth) / 2;
+            const offsetY = imgY + (imgHeight - scaledHeight) / 2;
 
-      // Tagline
-      ctx.font = "36px system-ui";
-      ctx.fillStyle = textColor + "99";
-      ctx.fillText(selectedBusiness.tagline, 540, 640);
+            ctx.drawImage(img, offsetX, offsetY, scaledWidth, scaledHeight);
+            ctx.restore();
 
-      // Star rating
-      ctx.font = "56px system-ui";
-      ctx.fillText("⭐⭐⭐⭐⭐", 540, 750);
+            // Add image border
+            ctx.strokeStyle = accentColor;
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.roundRect(imgX, imgY, imgWidth, imgHeight, radius);
+            ctx.stroke();
 
-      // Message background
-      ctx.fillStyle = accentColor + "20";
-      ctx.beginPath();
-      ctx.roundRect(100, 850, 880, 420, 30);
-      ctx.fill();
+            resolve();
+          };
+          img.onerror = reject;
+          img.src = uploadedImage;
+        });
 
-      // Message border
-      ctx.strokeStyle = accentColor + "50";
-      ctx.lineWidth = 4;
-      ctx.stroke();
+        // Adjust other elements position when image is present
+        // Business name badge on top of image
+        ctx.fillStyle = accentColor;
+        ctx.beginPath();
+        ctx.roundRect(340, 650, 400, 80, 40);
+        ctx.fill();
 
-      // Quote mark
-      ctx.fillStyle = accentColor;
-      ctx.font = "bold 140px Georgia";
-      ctx.fillText('"', 150, 970);
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 40px system-ui";
+        ctx.textAlign = "center";
+        ctx.fillText(selectedBusiness.name, 540, 702);
 
-      // Message text (word wrap)
-      ctx.fillStyle = textColor;
-      ctx.font = "40px system-ui";
-      ctx.textAlign = "left";
-      
-      const words = customerMessage.split(" ");
-      let line = "";
-      let y = 1020;
-      const maxWidth = 740;
-      const lineHeight = 55;
+        // Message background - moved down
+        ctx.fillStyle = accentColor + "20";
+        ctx.beginPath();
+        ctx.roundRect(100, 780, 880, 380, 30);
+        ctx.fill();
 
-      for (const word of words) {
-        const testLine = line + word + " ";
-        const metrics = ctx.measureText(testLine);
-        if (metrics.width > maxWidth && line !== "") {
-          ctx.fillText(line.trim(), 170, y);
-          line = word + " ";
-          y += lineHeight;
-        } else {
-          line = testLine;
+        ctx.strokeStyle = accentColor + "50";
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        // Quote mark
+        ctx.fillStyle = accentColor;
+        ctx.font = "bold 120px Georgia";
+        ctx.fillText('"', 150, 890);
+
+        // Message text
+        ctx.fillStyle = textColor;
+        ctx.font = "38px system-ui";
+        ctx.textAlign = "left";
+        
+        const words = customerMessage.split(" ");
+        let line = "";
+        let y = 920;
+        const maxWidth = 720;
+        const lineHeight = 50;
+
+        for (const word of words) {
+          const testLine = line + word + " ";
+          const metrics = ctx.measureText(testLine);
+          if (metrics.width > maxWidth && line !== "") {
+            ctx.fillText(line.trim(), 170, y);
+            line = word + " ";
+            y += lineHeight;
+          } else {
+            line = testLine;
+          }
         }
-      }
-      ctx.fillText(line.trim(), 170, y);
+        ctx.fillText(line.trim(), 170, y);
 
-      // Hashtag
-      ctx.fillStyle = accentColor;
-      ctx.font = "bold 48px system-ui";
-      ctx.textAlign = "center";
-      ctx.fillText(selectedBusiness.hashtag, 540, 1450);
+        // Star rating
+        ctx.font = "48px system-ui";
+        ctx.textAlign = "center";
+        ctx.fillText("⭐⭐⭐⭐⭐", 540, 1280);
+
+        // Hashtag
+        ctx.fillStyle = accentColor;
+        ctx.font = "bold 44px system-ui";
+        ctx.fillText(selectedBusiness.hashtag, 540, 1380);
+
+      } else {
+        // Original layout without image
+        // Location icon circle
+        ctx.fillStyle = accentColor;
+        ctx.beginPath();
+        ctx.arc(540, 400, 70, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 56px system-ui";
+        ctx.textAlign = "center";
+        ctx.fillText("📍", 540, 420);
+
+        // Business name
+        ctx.fillStyle = textColor;
+        ctx.font = "bold 72px system-ui";
+        ctx.textAlign = "center";
+        ctx.fillText(selectedBusiness.name, 540, 560);
+
+        // Tagline
+        ctx.font = "36px system-ui";
+        ctx.fillStyle = textColor + "99";
+        ctx.fillText(selectedBusiness.tagline, 540, 640);
+
+        // Star rating
+        ctx.font = "56px system-ui";
+        ctx.fillText("⭐⭐⭐⭐⭐", 540, 750);
+
+        // Message background
+        ctx.fillStyle = accentColor + "20";
+        ctx.beginPath();
+        ctx.roundRect(100, 850, 880, 420, 30);
+        ctx.fill();
+
+        ctx.strokeStyle = accentColor + "50";
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        // Quote mark
+        ctx.fillStyle = accentColor;
+        ctx.font = "bold 140px Georgia";
+        ctx.fillText('"', 150, 970);
+
+        // Message text (word wrap)
+        ctx.fillStyle = textColor;
+        ctx.font = "40px system-ui";
+        ctx.textAlign = "left";
+        
+        const words = customerMessage.split(" ");
+        let line = "";
+        let y = 1020;
+        const maxWidth = 740;
+        const lineHeight = 55;
+
+        for (const word of words) {
+          const testLine = line + word + " ";
+          const metrics = ctx.measureText(testLine);
+          if (metrics.width > maxWidth && line !== "") {
+            ctx.fillText(line.trim(), 170, y);
+            line = word + " ";
+            y += lineHeight;
+          } else {
+            line = testLine;
+          }
+        }
+        ctx.fillText(line.trim(), 170, y);
+
+        // Hashtag
+        ctx.fillStyle = accentColor;
+        ctx.font = "bold 48px system-ui";
+        ctx.textAlign = "center";
+        ctx.fillText(selectedBusiness.hashtag, 540, 1450);
+      }
 
       // Powered by footer
       ctx.fillStyle = textColor + "50";
       ctx.font = "28px system-ui";
+      ctx.textAlign = "center";
       ctx.fillText("Voyagerespond ile oluşturuldu", 540, 1800);
 
       // Convert to data URL
@@ -206,6 +339,51 @@ export function StoryKitDemo() {
                     </Button>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Photo Upload */}
+            <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
+              <CardContent className="pt-6 space-y-4">
+                <div className="flex items-center gap-2">
+                  <ImagePlus className="h-4 w-4 text-gray-500" />
+                  <Label className="text-sm font-medium">Fotoğraf Ekle (Opsiyonel)</Label>
+                </div>
+                
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageUpload}
+                  accept="image/*"
+                  className="hidden"
+                />
+                
+                {uploadedImage ? (
+                  <div className="relative">
+                    <img
+                      src={uploadedImage}
+                      alt="Yüklenen fotoğraf"
+                      className="w-full h-32 object-cover rounded-lg"
+                    />
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 h-7 w-7"
+                      onClick={removeImage}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    className="w-full h-24 border-dashed border-2 flex flex-col gap-2"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <ImagePlus className="h-6 w-6 text-gray-400" />
+                    <span className="text-sm text-gray-500">Yemek, mekan veya anı fotoğrafı ekleyin</span>
+                  </Button>
+                )}
               </CardContent>
             </Card>
 
