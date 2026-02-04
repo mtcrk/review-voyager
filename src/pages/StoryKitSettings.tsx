@@ -18,11 +18,15 @@ import {
   Loader2,
   CheckCircle,
   Instagram,
+  Printer,
+  Code,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { toast } from "@/hooks/use-toast";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { TableStandGenerator } from "@/components/storykit/TableStandGenerator";
+import { EmbedWidgetGenerator } from "@/components/storykit/EmbedWidgetGenerator";
 
 interface StoryTemplate {
   id: string;
@@ -274,8 +278,9 @@ export default function StoryKitSettings() {
         </div>
 
         <Tabs defaultValue="share" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="share">Paylaşım Linki</TabsTrigger>
+          <TabsList className="flex-wrap">
+            <TabsTrigger value="share">Paylaşım</TabsTrigger>
+            <TabsTrigger value="materials">Materyaller</TabsTrigger>
             <TabsTrigger value="design">Tasarım</TabsTrigger>
             <TabsTrigger value="settings">Ayarlar</TabsTrigger>
           </TabsList>
@@ -340,6 +345,22 @@ export default function StoryKitSettings() {
             </div>
           </TabsContent>
 
+          {/* Materials Tab - Table Stand & Embed Widget */}
+          <TabsContent value="materials" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <TableStandGenerator
+                businessName={activeBusiness.name}
+                businessId={activeBusiness.id}
+                accentColor={accentColor}
+                tagline={tagline}
+              />
+              <EmbedWidgetGenerator
+                businessName={activeBusiness.name}
+                businessId={activeBusiness.id}
+                accentColor={accentColor}
+              />
+            </div>
+          </TabsContent>
           {/* Design Tab */}
           <TabsContent value="design" className="space-y-6">
             <Card>
