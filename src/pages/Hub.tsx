@@ -92,7 +92,7 @@ const Hub = () => {
       description: "Automatically send a DM when someone comments a keyword on your post.",
       benefit: "Convert comments into sales conversations",
       channel: "instagram",
-      status: "available",
+      status: "coming-soon",
       icon: MessageSquare,
     },
     {
@@ -101,7 +101,7 @@ const Hub = () => {
       description: "AI-powered responses to common questions in your Instagram DMs.",
       benefit: "Save 10+ hours per week on repetitive questions",
       channel: "instagram",
-      status: "available",
+      status: "coming-soon",
       icon: Sparkles,
     },
     {
@@ -110,7 +110,7 @@ const Hub = () => {
       description: "Automatically thank users who mention you in their stories.",
       benefit: "Build stronger relationships with fans",
       channel: "instagram",
-      status: "available",
+      status: "coming-soon",
       icon: Zap,
     },
     {
