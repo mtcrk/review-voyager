@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { AIReplyDemo } from "@/components/landing/AIReplyDemo";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -333,7 +334,7 @@ const Index = () => {
             <Button 
               size="lg" 
               variant="outline"
-              onClick={() => navigate("/hub")} 
+              onClick={() => scrollToSection("demo")} 
               className="text-lg px-10 py-7 hover:bg-muted transition-all duration-300"
             >
               Try AI Reply Demo
@@ -341,6 +342,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* AI Reply Demo Section */}
+      <AIReplyDemo />
 
       {/* Automation Options Grid */}
       <section id="automations" className="relative py-20 overflow-hidden">
