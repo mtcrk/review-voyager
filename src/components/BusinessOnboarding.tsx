@@ -54,12 +54,45 @@ export function BusinessOnboarding({ open, onBusinessCreated }: BusinessOnboardi
     }
   };
 
-  const handleGoogleConnect = () => {
-    toast({
-      title: 'Yakında geliyor 🚀',
-      description: 'Google Business hesabını doğrudan bağlama özelliği şu an Google\'ın ek izin sürecine takıldığı için devre dışı. Şimdilik işletmeni manuel ekleyerek yorumlarını yönetebilirsin.',
-      duration: 7000,
-    });
+  const handleGoogleConnect = async () => {
+    setLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Lütfen önce giriş yapın');
+      }
+
+      const response = await supabase.functions.invoke('google-business-auth', {
+        body: { action: 'initiate' },
+      });
+
+      if (response.error) {
+        // Check if it's a scope/permission error
+        if (response.error.message?.includes('403') || response.error.message?.includes('permission')) {
+          toast({
+            title: 'Google API Onayı Bekleniyor',
+            description: 'Google Business API izni henüz onaylanmadı. Şimdilik manuel ekleme ile devam edebilirsiniz.',
+            duration: 7000,
+          });
+          return;
+        }
+        throw response.error;
+      }
+
+      // Redirect to Google OAuth
+      if (response.data?.authUrl) {
+        window.location.href = response.data.authUrl;
+      }
+    } catch (error: any) {
+      console.error('Google connect error:', error);
+      toast({
+        title: 'Bağlantı Hatası',
+        description: error.message || 'Google hesabına bağlanılamadı',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
