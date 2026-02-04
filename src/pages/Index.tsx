@@ -13,6 +13,7 @@ import { Testimonials } from "@/components/landing/Testimonials";
 import { TrustBadges } from "@/components/landing/TrustBadges";
 import { ProductVideo } from "@/components/landing/ProductVideo";
 import { ClientLogos } from "@/components/landing/ClientLogos";
+import { AIVisibilityDemo } from "@/components/landing/AIVisibilityDemo";
 const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -582,19 +583,7 @@ const Index = () => {
                 </li>
               </ul>
             </div>
-            <div className="bg-gradient-to-br from-primary/5 to-blue-500/5 border border-primary/10 rounded-2xl p-8">
-              <div className="text-center">
-                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mb-4">
-                  <Eye className="w-10 h-10 text-primary" />
-                </div>
-                <div className="text-5xl font-bold text-foreground mb-2">87</div>
-                <div className="text-sm text-muted-foreground mb-4">AI Visibility Score</div>
-                <div className="flex items-center justify-center gap-2 text-green-600 text-sm font-medium">
-                  <TrendingUp className="w-4 h-4" />
-                  <span>+12% this month</span>
-                </div>
-              </div>
-            </div>
+            <AIVisibilityDemo />
           </div>
         </div>
       </section>

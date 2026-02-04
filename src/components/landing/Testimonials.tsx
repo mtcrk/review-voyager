@@ -12,7 +12,7 @@ interface Testimonial {
 
 const testimonials: Testimonial[] = [
   {
-    name: "Ahmet Yılmaz",
+    name: "Ahmet Y.",
     role: "İşletme Sahibi",
     company: "Cafe Botanica",
     avatar: "AY",
@@ -20,7 +20,7 @@ const testimonials: Testimonial[] = [
     rating: 5,
   },
   {
-    name: "Zeynep Kara",
+    name: "Zeynep K.",
     role: "Pazarlama Müdürü",
     company: "Fitness Plus",
     avatar: "ZK",
@@ -28,7 +28,7 @@ const testimonials: Testimonial[] = [
     rating: 5,
   },
   {
-    name: "Mehmet Demir",
+    name: "Mehmet D.",
     role: "Genel Müdür",
     company: "Demir Grup Oteller",
     avatar: "MD",
@@ -36,7 +36,7 @@ const testimonials: Testimonial[] = [
     rating: 5,
   },
   {
-    name: "Elif Özkan",
+    name: "Elif Ö.",
     role: "Kurucu",
     company: "Güzellik Merkezi Ela",
     avatar: "EÖ",
