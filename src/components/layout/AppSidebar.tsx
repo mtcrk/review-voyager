@@ -12,6 +12,7 @@ import {
   Inbox,
   Send,
   Check,
+  Camera,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -288,6 +289,34 @@ export function AppSidebar() {
                   >
                     <Zap className="h-5 w-5" />
                     <span>Otomatik Yanıt</span>
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Story Kit */}
+        <SidebarGroup>
+          {open && (
+            <SidebarGroupLabel className="text-xs text-muted-foreground px-3">
+              Pazarlama
+            </SidebarGroupLabel>
+          )}
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={location.pathname === "/story-kit"}
+                  tooltip="Story Kit"
+                >
+                  <NavLink
+                    to="/story-kit"
+                    className="flex items-center gap-3 transition-smooth"
+                  >
+                    <Camera className="h-5 w-5" />
+                    <span>Story Kit</span>
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
