@@ -12,7 +12,7 @@ import { LiveMetrics } from "@/components/landing/LiveMetrics";
 import { Testimonials } from "@/components/landing/Testimonials";
 import { TrustBadges } from "@/components/landing/TrustBadges";
 import { ProductVideo } from "@/components/landing/ProductVideo";
-import { ClientLogos } from "@/components/landing/ClientLogos";
+// import { ClientLogos } from "@/components/landing/ClientLogos"; // Temporarily hidden
 import { AIVisibilityDemo } from "@/components/landing/AIVisibilityDemo";
 import { AIVisibilityChecker } from "@/components/landing/AIVisibilityChecker";
 const Index = () => {
@@ -349,9 +349,6 @@ const Index = () => {
           </div>
         </div>
       </section>
-
-      {/* Client Logos - Social Proof */}
-      <ClientLogos />
 
       {/* AI Visibility Checker - Interactive Demo */}
       <AIVisibilityChecker />
