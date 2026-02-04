@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { MessageSquare, Star, Phone, Check, ArrowRight, Zap, Users, BarChart3, Clock, Lock, Music2, Eye, TrendingUp, Sparkles, Target } from "lucide-react";
+import { MessageSquare, Star, Phone, Check, ArrowRight, Clock, Lock, Music2, Eye, TrendingUp, Sparkles, Target } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,7 +8,11 @@ import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { AIReplyDemo } from "@/components/landing/AIReplyDemo";
 import { StoryKitDemo } from "@/components/landing/StoryKitDemo";
-
+import { LiveMetrics } from "@/components/landing/LiveMetrics";
+import { Testimonials } from "@/components/landing/Testimonials";
+import { TrustBadges } from "@/components/landing/TrustBadges";
+import { ProductVideo } from "@/components/landing/ProductVideo";
+import { ClientLogos } from "@/components/landing/ClientLogos";
 const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -344,11 +348,20 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Client Logos - Social Proof */}
+      <ClientLogos />
+
+      {/* Live Metrics Section */}
+      <LiveMetrics />
+
       {/* AI Reply Demo Section */}
       <AIReplyDemo />
 
       {/* Story Kit Demo Section */}
       <StoryKitDemo />
+
+      {/* Product Video Section */}
+      <ProductVideo />
 
       {/* Automation Options Grid */}
       <section id="automations" className="relative py-20 overflow-hidden">
@@ -585,6 +598,12 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Testimonials Section */}
+      <Testimonials />
+
+      {/* Trust Badges & Security Section */}
+      <TrustBadges />
 
       {/* Bottom CTA Section */}
       <section className="container mx-auto px-6 py-20">
