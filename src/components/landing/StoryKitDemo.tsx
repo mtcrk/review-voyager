@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Download, 
   Instagram, 
@@ -16,6 +17,10 @@ import {
   ArrowRight,
   ImagePlus,
   X,
+  Printer,
+  Code,
+  Copy,
+  CheckCircle,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
@@ -299,6 +304,21 @@ export function StoryKitDemo() {
     });
   };
 
+  const [activeTab, setActiveTab] = useState("story");
+  const [embedCopied, setEmbedCopied] = useState(false);
+
+  const copyEmbedCode = () => {
+    const code = `<!-- Story Kit Widget -->
+<a href="https://voyagerespond.com/share/demo" target="_blank" 
+   style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:${accentColor};color:white;text-decoration:none;border-radius:8px;font-family:system-ui;font-weight:600;">
+  📸 Story Oluştur
+</a>`;
+    navigator.clipboard.writeText(code);
+    setEmbedCopied(true);
+    toast({ title: "Kopyalandı!", description: "Embed kodu panoya kopyalandı." });
+    setTimeout(() => setEmbedCopied(false), 2000);
+  };
+
   return (
     <section className="py-24 bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
       {/* Hidden canvas */}
@@ -320,9 +340,19 @@ export function StoryKitDemo() {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          {/* Left: Controls */}
-          <div className="space-y-6">
+        {/* Demo Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-6xl mx-auto">
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-3 mb-8">
+            <TabsTrigger value="story">📱 Story</TabsTrigger>
+            <TabsTrigger value="materials">🖨️ Materyaller</TabsTrigger>
+            <TabsTrigger value="embed">💻 Website</TabsTrigger>
+          </TabsList>
+
+          {/* Story Tab */}
+          <TabsContent value="story">
+            <div className="grid lg:grid-cols-2 gap-8">
+              {/* Left: Controls */}
+              <div className="space-y-6">
             {/* Business Selector */}
             <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
               <CardContent className="pt-6 space-y-4">
@@ -494,65 +524,233 @@ export function StoryKitDemo() {
                 </ol>
               </CardContent>
             </Card>
-          </div>
+              </div>
 
-          {/* Right: Preview */}
-          <div className="flex flex-col items-center justify-center">
-            <div className="relative">
-              {/* Phone frame */}
-              <div className="relative w-[280px] h-[580px] bg-gray-900 rounded-[40px] p-3 shadow-2xl">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-gray-900 rounded-b-2xl z-10" />
-                <div className="w-full h-full bg-gray-100 rounded-[30px] overflow-hidden">
-                  {previewUrl ? (
-                    <img
-                      src={previewUrl}
-                      alt="Story preview"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-amber-100 to-orange-100 p-6 text-center">
-                      <Instagram className="h-16 w-16 text-amber-500/50 mb-4" />
-                      <p className="text-gray-500 text-sm">
-                        "Demo Story Oluştur" butonuna tıklayarak örnek bir Instagram Story görseli oluşturun
-                      </p>
+              {/* Right: Preview */}
+              <div className="flex flex-col items-center justify-center">
+                <div className="relative">
+                  {/* Phone frame */}
+                  <div className="relative w-[280px] h-[580px] bg-gray-900 rounded-[40px] p-3 shadow-2xl">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-gray-900 rounded-b-2xl z-10" />
+                    <div className="w-full h-full bg-gray-100 rounded-[30px] overflow-hidden">
+                      {previewUrl ? (
+                        <img
+                          src={previewUrl}
+                          alt="Story preview"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-amber-100 to-orange-100 p-6 text-center">
+                          <Instagram className="h-16 w-16 text-amber-500/50 mb-4" />
+                          <p className="text-gray-500 text-sm">
+                            "Demo Story Oluştur" butonuna tıklayarak örnek bir Instagram Story görseli oluşturun
+                          </p>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
+
+                  {/* Instagram badge */}
+                  <div className="absolute -top-3 -right-3 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg">
+                    <Instagram className="h-4 w-4 inline mr-1" />
+                    Story
+                  </div>
                 </div>
-              </div>
 
-              {/* Instagram badge */}
-              <div className="absolute -top-3 -right-3 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg">
-                <Instagram className="h-4 w-4 inline mr-1" />
-                Story
+                {/* Download button */}
+                {previewUrl && (
+                  <Button
+                    onClick={downloadImage}
+                    variant="outline"
+                    className="mt-6"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Story'yi İndir
+                  </Button>
+                )}
               </div>
             </div>
+          </TabsContent>
 
-            {/* Download button */}
-            {previewUrl && (
-              <Button
-                onClick={downloadImage}
-                variant="outline"
-                className="mt-6"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Story'yi İndir
-              </Button>
-            )}
+          {/* Materials Tab */}
+          <TabsContent value="materials">
+            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              {/* QR Code & Table Stand */}
+              <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
+                <CardContent className="pt-6 space-y-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Printer className="h-5 w-5 text-amber-500" />
+                    <h3 className="font-semibold">Masa Standı / QR Kod</h3>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    Masanıza veya kasanıza koyabileceğiniz QR kodlu tasarım
+                  </p>
+                  
+                  {/* Demo QR Preview */}
+                  <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 text-center">
+                    <div className="bg-white rounded-lg p-4 inline-block shadow-md mb-4">
+                      <img
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://voyagerespond.com/share/demo`}
+                        alt="Demo QR"
+                        className="w-24 h-24"
+                      />
+                    </div>
+                    <p className="text-sm font-medium text-gray-800">{selectedBusiness.name}</p>
+                    <p className="text-xs text-gray-500">📸 Story oluşturmak için tarayın</p>
+                  </div>
 
-            {/* CTA */}
-            <div className="mt-8 text-center">
-              <p className="text-gray-600 mb-4">
-                İşletmeniz için Story Kit'i şimdi aktifleştirin
-              </p>
-              <Button 
-                variant="link" 
-                className="text-amber-600 hover:text-amber-700"
-                onClick={() => window.location.href = '/register'}
-              >
-                Ücretsiz Başla <ArrowRight className="h-4 w-4 ml-1" />
-              </Button>
+                  <div className="flex flex-wrap gap-2 text-xs text-gray-500">
+                    <Badge variant="outline">A5</Badge>
+                    <Badge variant="outline">A6</Badge>
+                    <Badge variant="outline">Kare</Badge>
+                  </div>
+                  
+                  <p className="text-xs text-gray-400">
+                    ✓ Özelleştirilebilir boyut ve renkler<br/>
+                    ✓ Yüksek çözünürlüklü PNG indirme<br/>
+                    ✓ Anında yazdırma için hazır
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* SMS/WhatsApp Template */}
+              <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
+                <CardContent className="pt-6 space-y-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <QrCode className="h-5 w-5 text-green-500" />
+                    <h3 className="font-semibold">Paylaşım Linki</h3>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    WhatsApp, SMS veya sosyal medyada paylaşabileceğiniz link
+                  </p>
+
+                  {/* Demo Link */}
+                  <div className="bg-gray-50 rounded-lg p-3 font-mono text-xs break-all">
+                    voyagerespond.com/share/{selectedBusiness.name.toLowerCase().replace(/\s+/g, '-')}
+                  </div>
+
+                  {/* WhatsApp Template */}
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <p className="text-sm text-gray-700">
+                      "Bizi ziyaret ettiğiniz için teşekkürler! 🙏 Deneyiminizi Instagram'da paylaşmak ister misiniz? 
+                      <span className="text-green-600 font-medium"> [link]</span>"
+                    </p>
+                  </div>
+
+                  <p className="text-xs text-gray-400">
+                    ✓ Hazır mesaj şablonları<br/>
+                    ✓ Tek tıkla kopyalama<br/>
+                    ✓ WhatsApp, SMS, Email için uygun
+                  </p>
+                </CardContent>
+              </Card>
             </div>
-          </div>
+          </TabsContent>
+
+          {/* Embed Tab */}
+          <TabsContent value="embed">
+            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              {/* Button Widget */}
+              <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
+                <CardContent className="pt-6 space-y-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Code className="h-5 w-5 text-blue-500" />
+                    <h3 className="font-semibold">Website Butonu</h3>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    Web sitenize ekleyebileceğiniz tek satır kod
+                  </p>
+
+                  {/* Preview */}
+                  <div className="bg-gray-50 rounded-lg p-6 text-center">
+                    <a 
+                      href="#"
+                      onClick={(e) => e.preventDefault()}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        padding: "12px 24px",
+                        background: accentColor,
+                        color: "white",
+                        textDecoration: "none",
+                        borderRadius: "8px",
+                        fontWeight: 600,
+                      }}
+                    >
+                      📸 Story Oluştur
+                    </a>
+                  </div>
+
+                  <Button onClick={copyEmbedCode} variant="outline" className="w-full">
+                    {embedCopied ? (
+                      <>
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Kopyalandı!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-4 w-4 mr-2" />
+                        Embed Kodunu Kopyala
+                      </>
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Popup Widget */}
+              <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
+                <CardContent className="pt-6 space-y-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Sparkles className="h-5 w-5 text-purple-500" />
+                    <h3 className="font-semibold">Floating Popup</h3>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    Sağ alt köşede sabit duran popup buton
+                  </p>
+
+                  {/* Preview */}
+                  <div className="bg-gray-900 rounded-lg p-6 relative h-40">
+                    <div className="absolute bottom-4 right-4">
+                      <div 
+                        style={{
+                          padding: "12px 20px",
+                          background: accentColor,
+                          color: "white",
+                          borderRadius: "50px",
+                          fontWeight: 600,
+                          fontSize: "14px",
+                          boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+                        }}
+                      >
+                        📸 Story Oluştur
+                      </div>
+                    </div>
+                    <p className="text-gray-400 text-xs">Site önizlemesi</p>
+                  </div>
+
+                  <p className="text-xs text-gray-400">
+                    ✓ 3 farklı widget tipi<br/>
+                    ✓ Renk özelleştirme<br/>
+                    ✓ Tek satır JavaScript
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* CTA */}
+        <div className="mt-12 text-center">
+          <p className="text-gray-600 mb-4">
+            İşletmeniz için Story Kit'i şimdi aktifleştirin
+          </p>
+          <Button 
+            className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+            onClick={() => window.location.href = '/register'}
+          >
+            Ücretsiz Başla <ArrowRight className="h-4 w-4 ml-2" />
+          </Button>
         </div>
       </div>
     </section>
