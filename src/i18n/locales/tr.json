@@ -1,6 +1,27 @@
 {
   "nav": { "features": "Özellikler", "pricing": "Fiyatlandırma", "documentation": "Dokümantasyon", "login": "Giriş Yap", "dashboard": "Panel", "getStarted": "Başla", "automations": "Otomasyonlar", "hub": "Hub", "contact": "İletişim" },
   "landing": {
+    "aiReplyDemo": {
+      "badge": "İnteraktif Demo",
+      "title": "AI Yanıt Önerilerini Deneyin",
+      "subtitle": "Yapay zekamızın her yorum için nasıl profesyonel ve markaya uygun yanıtlar oluşturduğunu görün. Örnek bir yorum seçin ve oluştur'a tıklayın.",
+      "selectReview": "Yorum Seçin",
+      "generatedReply": "AI Oluşturulmuş Yanıt",
+      "selectedReview": "Seçili Yorum",
+      "generate": "AI Yanıt Oluştur",
+      "generating": "AI Yanıt Oluşturuluyor...",
+      "regenerate": "Yeniden Oluştur",
+      "copied": "Yanıt panoya kopyalandı!",
+      "error": "Yanıt oluşturulamadı. Lütfen tekrar deneyin.",
+      "demoNote": "Bu bir demodur. Gerçek Google yorumlarınızda AI yanıtları kullanmak için kayıt olun.",
+      "emptyState": "Sihri görmek için \"AI Yanıt Oluştur\"a tıklayın ✨",
+      "positive": "Pozitif",
+      "neutral": "Nötr",
+      "negative": "Negatif",
+      "review1": "Yemek harikaydı ama servis biraz yavaştı. Ana yemeğimiz için 30 dakika bekledik. Yine de tekrar geleceğim!",
+      "review2": "Şehirdeki en iyi kahve! Barista süper arkadaş canlısıydı ve atmosfer çalışmak için mükemmel. Kesinlikle tavsiye ederim!",
+      "review3": "Deneyimimden hayal kırıklığına uğradım. Pizza soğuktu ve personel ilgisiz görünüyordu. Bir daha gelmeyeceğim."
+    },
     "chatDemo": {
       "badge": "AI Destekli Analiz",
       "title": "Yorumlarınızla Sohbet Edin",

@@ -4,10 +4,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Star, Sparkles, Loader2, RefreshCw, Copy, Check, MessageSquare, ThumbsUp, ThumbsDown, Meh } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface SampleReview {
   id: string;
-  text: string;
+  textKey: string;
   rating: number;
   reviewer: string;
   sentiment: "positive" | "neutral" | "negative";
@@ -16,51 +17,59 @@ interface SampleReview {
 const sampleReviews: SampleReview[] = [
   {
     id: "1",
-    text: "Food was amazing but the service was a bit slow. We waited 30 minutes for our main course. Would still come back though!",
+    textKey: "review1",
     rating: 4,
     reviewer: "Ahmet Y.",
     sentiment: "neutral",
   },
   {
     id: "2",
-    text: "Best coffee in town! The barista was super friendly and the atmosphere is perfect for working. Highly recommend!",
+    textKey: "review2",
     rating: 5,
     reviewer: "Sarah M.",
     sentiment: "positive",
   },
   {
     id: "3",
-    text: "Disappointed with my experience. The pizza was cold and the staff seemed uninterested. Won't be coming back.",
+    textKey: "review3",
     rating: 2,
     reviewer: "Can K.",
     sentiment: "negative",
   },
 ];
 
-const sentimentConfig = {
-  positive: { icon: ThumbsUp, color: "text-green-600", bg: "bg-green-100", label: "Positive" },
-  neutral: { icon: Meh, color: "text-amber-600", bg: "bg-amber-100", label: "Neutral" },
-  negative: { icon: ThumbsDown, color: "text-red-600", bg: "bg-red-100", label: "Negative" },
-};
-
 export function AIReplyDemo() {
+  const { t, i18n } = useTranslation();
   const [selectedReview, setSelectedReview] = useState<SampleReview>(sampleReviews[0]);
   const [generatedReply, setGeneratedReply] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [hasGenerated, setHasGenerated] = useState(false);
 
+  const sentimentConfig = {
+    positive: { icon: ThumbsUp, color: "text-green-600", bg: "bg-green-100", label: t("landing.aiReplyDemo.positive", "Positive") },
+    neutral: { icon: Meh, color: "text-amber-600", bg: "bg-amber-100", label: t("landing.aiReplyDemo.neutral", "Neutral") },
+    negative: { icon: ThumbsDown, color: "text-red-600", bg: "bg-red-100", label: t("landing.aiReplyDemo.negative", "Negative") },
+  };
+
+  const getReviewText = (textKey: string) => {
+    return t(`landing.aiReplyDemo.${textKey}`, "");
+  };
+
   const handleGenerateReply = async () => {
     setIsGenerating(true);
     setGeneratedReply("");
     
+    const reviewText = getReviewText(selectedReview.textKey);
+    const currentLang = i18n.language === "tr" ? "tr" : "en";
+    
     try {
       const { data, error } = await supabase.functions.invoke("generate-reply", {
         body: {
-          reviewText: selectedReview.text,
+          reviewText: reviewText,
           rating: selectedReview.rating,
           tone: "friendly",
-          language: "en",
+          language: currentLang,
           summary: selectedReview.sentiment === "positive" 
             ? "Customer had a great experience" 
             : selectedReview.sentiment === "negative"
@@ -81,7 +90,7 @@ export function AIReplyDemo() {
       setHasGenerated(true);
     } catch (error) {
       console.error("Error generating reply:", error);
-      toast.error("Failed to generate reply. Please try again.");
+      toast.error(t("landing.aiReplyDemo.error", "Failed to generate reply. Please try again."));
     } finally {
       setIsGenerating(false);
     }
@@ -90,7 +99,7 @@ export function AIReplyDemo() {
   const handleCopy = () => {
     navigator.clipboard.writeText(generatedReply);
     setCopied(true);
-    toast.success("Reply copied to clipboard!");
+    toast.success(t("landing.aiReplyDemo.copied", "Reply copied to clipboard!"));
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -107,14 +116,13 @@ export function AIReplyDemo() {
       <div className="text-center mb-12">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-6">
           <Sparkles className="w-4 h-4" />
-          Interactive Demo
+          {t("landing.aiReplyDemo.badge", "Interactive Demo")}
         </div>
         <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-          Try AI Reply Suggestions
+          {t("landing.aiReplyDemo.title", "Try AI Reply Suggestions")}
         </h2>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          See how our AI generates professional, on-brand replies for any review.
-          Select a sample review and click generate.
+          {t("landing.aiReplyDemo.subtitle", "See how our AI generates professional, on-brand replies for any review. Select a sample review and click generate.")}
         </p>
       </div>
 
@@ -123,7 +131,7 @@ export function AIReplyDemo() {
           {/* Left: Review Selection */}
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">
-              Select a Review
+              {t("landing.aiReplyDemo.selectReview", "Select a Review")}
             </h3>
             <div className="space-y-3">
               {sampleReviews.map((review) => {
@@ -154,14 +162,14 @@ export function AIReplyDemo() {
                             className={`w-4 h-4 ${
                               i < review.rating
                                 ? "fill-amber-400 text-amber-400"
-                                : "text-gray-300"
+                                : "text-muted-foreground/30"
                             }`}
                           />
                         ))}
                       </div>
                     </div>
                     <p className="text-sm text-muted-foreground line-clamp-2">
-                      "{review.text}"
+                      "{getReviewText(review.textKey)}"
                     </p>
                   </button>
                 );
@@ -172,14 +180,14 @@ export function AIReplyDemo() {
           {/* Right: AI Reply Generation */}
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">
-              AI-Generated Reply
+              {t("landing.aiReplyDemo.generatedReply", "AI-Generated Reply")}
             </h3>
             
             {/* Selected Review Preview */}
             <div className="p-4 rounded-xl border border-border bg-muted/30">
               <div className="flex items-center gap-2 mb-2">
                 <MessageSquare className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm font-medium text-foreground">Selected Review</span>
+                <span className="text-sm font-medium text-foreground">{t("landing.aiReplyDemo.selectedReview", "Selected Review")}</span>
               </div>
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-sm font-medium text-foreground">{selectedReview.reviewer}</span>
@@ -190,7 +198,7 @@ export function AIReplyDemo() {
                       className={`w-3 h-3 ${
                         i < selectedReview.rating
                           ? "fill-amber-400 text-amber-400"
-                          : "text-gray-300"
+                          : "text-muted-foreground/30"
                       }`}
                     />
                   ))}
@@ -200,7 +208,7 @@ export function AIReplyDemo() {
                   {sentimentConfig[selectedReview.sentiment].label}
                 </span>
               </div>
-              <p className="text-sm text-muted-foreground italic">"{selectedReview.text}"</p>
+              <p className="text-sm text-muted-foreground italic">"{getReviewText(selectedReview.textKey)}"</p>
             </div>
 
             {/* Generate Button */}
@@ -213,17 +221,17 @@ export function AIReplyDemo() {
               {isGenerating ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Generating AI Reply...
+                  {t("landing.aiReplyDemo.generating", "Generating AI Reply...")}
                 </>
               ) : hasGenerated ? (
                 <>
                   <RefreshCw className="w-4 h-4 mr-2" />
-                  Regenerate Reply
+                  {t("landing.aiReplyDemo.regenerate", "Regenerate Reply")}
                 </>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Generate AI Reply
+                  {t("landing.aiReplyDemo.generate", "Generate AI Reply")}
                 </>
               )}
             </Button>
@@ -251,7 +259,7 @@ export function AIReplyDemo() {
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground text-center">
-                  This is a demo. Sign up to use AI replies on your real Google reviews.
+                  {t("landing.aiReplyDemo.demoNote", "This is a demo. Sign up to use AI replies on your real Google reviews.")}
                 </p>
               </div>
             )}
@@ -261,7 +269,7 @@ export function AIReplyDemo() {
               <div className="flex flex-col items-center justify-center p-8 rounded-xl border border-dashed border-border bg-muted/10 text-center">
                 <Sparkles className="w-10 h-10 text-muted-foreground/50 mb-3" />
                 <p className="text-sm text-muted-foreground">
-                  Click "Generate AI Reply" to see the magic ✨
+                  {t("landing.aiReplyDemo.emptyState", 'Click "Generate AI Reply" to see the magic ✨')}
                 </p>
               </div>
             )}
