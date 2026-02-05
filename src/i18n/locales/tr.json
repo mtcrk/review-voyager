@@ -33,39 +33,47 @@
     "automations": {
       "instagram": {
         "title": "Instagram Satış",
-        "features": ["Yorum → DM otomasyonu", "Yapay zeka destekli DM yanıtları", "Ürün ve seans satışları"],
+        "feature1": "Yorum → DM otomasyonu",
+        "feature2": "Yapay zeka destekli DM yanıtları",
+        "feature3": "Ürün ve seans satışları",
         "cta": "Instagram Otomasyonunu Etkinleştir"
       },
       "googleReviews": {
         "title": "Google Yorumları + AI Visibility",
-        "features": ["AI Visibility Skoru ve içgörüler", "Akıllı yorum yanıt önerileri", "Duygu ve arama optimizasyonu"],
+        "feature1": "AI Visibility Skoru ve içgörüler",
+        "feature2": "Akıllı yorum yanıt önerileri",
+        "feature3": "Duygu ve arama optimizasyonu",
         "cta": "AI Visibility Skorunu Gör"
       },
       "tiktok": {
         "title": "TikTok",
-        "features": ["Login Kit entegrasyonu", "Hesap bağlantısı", "Yakında: Inbox otomasyonu"],
+        "feature1": "Login Kit entegrasyonu",
+        "feature2": "Hesap bağlantısı",
+        "feature3": "Yakında: Inbox otomasyonu",
         "cta": "TikTok Bağla"
       },
       "whatsapp": {
         "title": "WhatsApp",
-        "features": ["Paylaşımlı inbox", "Müşteri görüşmeleri", "İşletme mesajlaşması"],
+        "feature1": "Paylaşımlı inbox",
+        "feature2": "Müşteri görüşmeleri",
+        "feature3": "İşletme mesajlaşması",
         "cta": "Beni Bilgilendir"
       }
     },
     "useCases": {
       "instagram": { "title": "Sadece Instagram Satış", "description": "DM üzerinden satış yapan içerik üreticileri ve e-ticaret markaları için mükemmel" },
       "google": { "title": "Google Yorumları + AI Visibility", "description": "Yapay zeka destekli yorum içgörüleri ve görünürlük takibi ile yerel arama sıralamanızı yükseltin" },
-      "multi": { "title": "Çoklu Kanal Yönetimi", "description": "Birden fazla kanalı birleştirin ve tüm müşteri etkileşimlerinizi tek bir yerden yönetin" }
+      "multi": { "title": "Tam Görünürlük Paketi", "description": "Sosyal etkileşimi AI görünürlüğü ile birleştirerek maksimum keşfedilebilirlik elde edin" }
     },
     "howItWorks": {
-      "step1": { "title": "Kanallarınızı Bağlayın", "description": "Instagram, Google veya TikTok hesaplarınızı saniyeler içinde bağlayın." },
-      "step2": { "title": "Yapay Zeka Ayarlayın", "description": "Yapay zekanın sizin için yanıt önerileri oluşturmasına izin verin." },
-      "step3": { "title": "İzleyin ve Büyütün", "description": "Etkileşimlerinizi takip edin ve işletmenizin büyümesini izleyin." }
+      "step1": { "title": "Bağla ve Analiz Et", "description": "Google İşletme Profilinizi bağlayın. Yapay zekamız anında Görünürlük Skorunuzu hesaplar." },
+      "step2": { "title": "Akıllı Öneriler Al", "description": "Yapay zeka hangi yorumlara yanıt vermeniz, ne zaman yanıt vermeniz ve aramalarda nasıl optimize olacağınızı söyler." },
+      "step3": { "title": "Büyümenizi Takip Edin", "description": "Görünürlük metriklerini, duygu trendlerini ve yorum performansını gerçek zamanlı izleyin." }
     },
     "pricingPlans": {
-      "starter": { "name": "Başlangıç", "description": "Temel özelliklerle başlayın", "price": "49", "features": ["1 otomasyon modülü", "Aylık 500 etkileşim", "Temel analitik", "E-posta desteği"] },
-      "pro": { "name": "Pro", "description": "Büyüyen işletmeler için", "price": "99", "features": ["3 otomasyon modülü", "Sınırsız etkileşim", "Gelişmiş analitik", "Öncelikli destek", "Özel entegrasyonlar"] },
-      "agency": { "name": "Ajans", "description": "Ajanslar için ölçeklenebilir çözüm", "price": "199", "features": ["Sınırsız modül", "Sınırsız etkileşim", "Beyaz etiket seçeneği", "API erişimi", "Özel hesap yöneticisi"] }
+      "starter": { "name": "Başlangıç", "description": "1 otomasyonlu platform erişimi", "feature1": "Temel platform erişimi", "feature2": "1 otomasyon (Instagram veya Google)", "feature3": "Aylık 500 mesaj", "feature4": "Temel analitik" },
+      "pro": { "name": "Pro", "description": "2 otomasyona kadar + analitik", "feature1": "Temel platform erişimi", "feature2": "2 otomasyona kadar", "feature3": "Sınırsız mesaj", "feature4": "Gelişmiş analitik", "feature5": "Öncelikli destek" },
+      "agency": { "name": "Ajans", "description": "Tüm otomasyonlar + ekip erişimi", "feature1": "Temel platform erişimi", "feature2": "Tüm otomasyonlar dahil", "feature3": "Ekip erişimi (5 üye)", "feature4": "Tam analitik paketi", "feature5": "Özel entegrasyonlar" }
     },
     "comingSoon": "Yakında",
     "monthly": "Aylık",
