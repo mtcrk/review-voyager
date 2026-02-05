@@ -307,33 +307,33 @@ const Index = () => {
           {/* AI Visibility Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium">
             <Sparkles className="w-4 h-4" />
-            Powered by AI Visibility Engine
+            {t('landing.aiVisibilityBadge', 'Powered by AI Visibility Engine')}
           </div>
           
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight tracking-tight">
-            Be Found by Google.<br />
+            {t('landing.heroLine1', 'Be Found by Google.')}<br />
             <span className="bg-gradient-to-r from-purple-600 via-primary to-blue-600 bg-clip-text text-transparent">
-              Be Discovered by AI.
+              {t('landing.heroLine2', 'Be Discovered by AI.')}
             </span>
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-            AI-powered review management that boosts your visibility on Google Search and AI assistants.<br className="hidden md:block" />
-            Get your AI Visibility Score, smart reply suggestions, and real-time performance insights.
+            {t('landing.heroSubtitle', 'AI-powered review management that boosts your visibility on Google Search and AI assistants.')}<br className="hidden md:block" />
+            {t('landing.heroSubtitle2', 'Get your AI Visibility Score, smart reply suggestions, and real-time performance insights.')}
           </p>
           
           {/* Value Props Row */}
           <div className="flex flex-wrap items-center justify-center gap-6 pt-2 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <Eye className="w-4 h-4 text-primary" />
-              <span>AI Visibility Score</span>
+              <span>{t('landing.valueProp1', 'AI Visibility Score')}</span>
             </div>
             <div className="flex items-center gap-2">
               <Target className="w-4 h-4 text-primary" />
-              <span>Review Optimization</span>
+              <span>{t('landing.valueProp2', 'Review Optimization')}</span>
             </div>
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-primary" />
-              <span>Performance Tracking</span>
+              <span>{t('landing.valueProp3', 'Performance Tracking')}</span>
             </div>
           </div>
           
@@ -343,7 +343,7 @@ const Index = () => {
               onClick={() => navigate("/onboarding")} 
               className="relative overflow-hidden gradient-primary text-white shadow-lg text-lg px-10 py-7 hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
             >
-              <span className="relative z-10">See Your AI Visibility Score</span>
+              <span className="relative z-10">{t('landing.heroCta', 'See Your AI Visibility Score')}</span>
               <ArrowRight className="w-5 h-5 ml-2 relative z-10" />
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
             </Button>
@@ -353,7 +353,7 @@ const Index = () => {
               onClick={() => scrollToSection("demo")} 
               className="text-lg px-10 py-7 hover:bg-muted transition-all duration-300"
             >
-              Try AI Reply Demo
+              {t('landing.tryDemo', 'Try AI Reply Demo')}
             </Button>
           </div>
         </div>
@@ -380,10 +380,10 @@ const Index = () => {
         <div className="container mx-auto px-6 relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Choose Your Automations
+              {t('landing.automationsTitle', 'Choose Your Automations')}
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Each channel is independent. Enable one, or combine multiple — it's your choice.
+              {t('landing.automationsSubtitle', "Each channel is independent. Enable one, or combine multiple — it's your choice.")}
             </p>
           </div>
 
@@ -435,10 +435,10 @@ const Index = () => {
       <section className="container mx-auto px-6 py-20">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Use one automation — or combine multiple channels
+            {t('landing.useCasesTitle', 'Use one automation — or combine multiple channels')}
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            You're not buying a single product. You're choosing modules that fit your business.
+            {t('landing.useCasesSubtitle', "You're not buying a single product. You're choosing modules that fit your business.")}
           </p>
         </div>
 
@@ -464,10 +464,10 @@ const Index = () => {
         <div className="container mx-auto px-6 relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              How It Works
+              {t('landing.howItWorksTitle', 'How It Works')}
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Get started in minutes, not days.
+              {t('landing.howItWorksSubtitle', 'Get started in minutes, not days.')}
             </p>
           </div>
 
@@ -491,10 +491,10 @@ const Index = () => {
         <div className="container mx-auto px-6 relative z-10">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Pay for the platform. Activate the automations you need.
+              {t('landing.pricingTitle', 'Pay for the platform. Activate the automations you need.')}
             </h2>
             <p className="text-lg text-muted-foreground mb-8">
-              Start with one automation and add more as you grow.
+              {t('landing.pricingSubtitle', 'Start with one automation and add more as you grow.')}
             </p>
             
             {/* Billing Toggle */}
@@ -507,7 +507,7 @@ const Index = () => {
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                Monthly
+                {t('landing.monthly', 'Monthly')}
               </button>
               <button
                 onClick={() => setBillingCycle("yearly")}
@@ -517,7 +517,7 @@ const Index = () => {
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                Yearly <span className="text-primary ml-1">-20%</span>
+                {t('landing.yearly', 'Yearly')} <span className="text-primary ml-1">-20%</span>
               </button>
             </div>
           </div>
@@ -534,7 +534,7 @@ const Index = () => {
               >
                 {plan.highlighted && (
                   <div className="inline-block px-3 py-1 mb-4 text-xs font-semibold text-white gradient-primary rounded-full shadow-md">
-                    Most Popular
+                    {t('landing.mostPopular', 'Most Popular')}
                   </div>
                 )}
                 <h3 className="text-2xl font-bold text-foreground mb-2">{plan.name}</h3>
@@ -548,7 +548,7 @@ const Index = () => {
                   variant={plan.highlighted ? "default" : "outline"}
                   onClick={() => navigate("/onboarding")}
                 >
-                  Get Started
+                  {t('nav.getStarted')}
                 </Button>
                 <ul className="space-y-3">
                   {plan.features.map((feature, featureIndex) => (
@@ -570,26 +570,23 @@ const Index = () => {
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div>
               <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
-                Why AI Visibility Matters
+                {t('landing.whyAIVisibility', 'Why AI Visibility Matters')}
               </h3>
               <p className="text-muted-foreground mb-6 leading-relaxed">
-                Your reviews don't just influence customers — they train AI models. Google's AI Overviews, 
-                ChatGPT, and other AI assistants use your review content to recommend businesses. 
-                Our Reviewer AI Engine analyzes your reviews, suggests optimized responses, and tracks 
-                how your business appears in AI-powered search results.
+                {t('landing.whyAIVisibilityDesc', "Your reviews don't just influence customers — they train AI models. Google's AI Overviews, ChatGPT, and other AI assistants use your review content to recommend businesses. Our Reviewer AI Engine analyzes your reviews, suggests optimized responses, and tracks how your business appears in AI-powered search results.")}
               </p>
               <ul className="space-y-3">
                 <li className="flex items-start gap-3">
                   <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                  <span className="text-muted-foreground">AI Visibility Score: See how AI assistants perceive your business</span>
+                  <span className="text-muted-foreground">{t('landing.aiFeature1', 'AI Visibility Score: See how AI assistants perceive your business')}</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                  <span className="text-muted-foreground">Answer Optimization: Craft replies that boost search visibility</span>
+                  <span className="text-muted-foreground">{t('landing.aiFeature2', 'Answer Optimization: Craft replies that boost search visibility')}</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                  <span className="text-muted-foreground">AI Recommendation Panel: Know which reviews to prioritize</span>
+                  <span className="text-muted-foreground">{t('landing.aiFeature3', 'AI Recommendation Panel: Know which reviews to prioritize')}</span>
                 </li>
               </ul>
             </div>
@@ -612,10 +609,10 @@ const Index = () => {
           <div className="absolute inset-0 gradient-mesh opacity-20"></div>
           <div className="relative z-10">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Ready to boost your AI visibility?
+              {t('landing.ctaTitle', 'Ready to boost your AI visibility?')}
             </h2>
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Get your free AI Visibility Score and see how your business appears to AI assistants.
+              {t('landing.ctaSubtitle', 'Get your free AI Visibility Score and see how your business appears to AI assistants.')}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button 
@@ -623,7 +620,7 @@ const Index = () => {
                 onClick={() => navigate("/onboarding")} 
                 className="relative overflow-hidden gradient-primary text-white shadow-lg text-lg px-10 hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
               >
-                <span className="relative z-10">See Your AI Visibility Score</span>
+                <span className="relative z-10">{t('landing.heroCta', 'See Your AI Visibility Score')}</span>
                 <ArrowRight className="w-5 h-5 ml-2 relative z-10" />
                 <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
               </Button>
@@ -633,7 +630,7 @@ const Index = () => {
                 onClick={() => navigate("/automations/google-reviews")} 
                 className="text-lg px-8 hover:bg-muted transition-all duration-300"
               >
-                Learn More
+                {t('landing.learnMore', 'Learn More')}
               </Button>
             </div>
           </div>

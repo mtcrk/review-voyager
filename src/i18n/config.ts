@@ -12,8 +12,8 @@ i18n
       en: { translation: en },
       tr: { translation: tr },
     },
-    fallbackLng: 'en',
-    lng: 'en', // Default language is English
+    fallbackLng: 'tr',
+    lng: 'tr', // Default language is Turkish
     interpolation: {
       escapeValue: false,
     },

@@ -1,9 +1,11 @@
  import { Mail, MapPin, Clock, ArrowLeft } from "lucide-react";
  import { Button } from "@/components/ui/button";
  import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
  
  const Contact = () => {
    const navigate = useNavigate();
+  const { t } = useTranslation();
  
    return (
      <div className="min-h-screen bg-background">
@@ -18,7 +20,7 @@
                className="gap-2"
              >
                <ArrowLeft className="w-4 h-4" />
-               Ana Sayfa
+              {t('contact.backToHome', 'Ana Sayfa')}
              </Button>
            </div>
          </div>
@@ -31,10 +33,10 @@
            </div>
            
            <h1 className="text-4xl font-bold text-foreground mb-4">
-             Bize Ulaşın
+            {t('contact.title', 'Bize Ulaşın')}
            </h1>
            <p className="text-lg text-muted-foreground mb-12">
-             Sorularınız, önerileriniz veya destek talepleriniz için bizimle iletişime geçin.
+            {t('contact.subtitle', 'Sorularınız, önerileriniz veya destek talepleriniz için bizimle iletişime geçin.')}
            </p>
  
            {/* Email Card */}
@@ -44,7 +46,7 @@
                  <Mail className="w-7 h-7 text-primary" />
                </div>
                <div>
-                 <h2 className="text-xl font-semibold text-foreground mb-2">E-posta</h2>
+                <h2 className="text-xl font-semibold text-foreground mb-2">{t('contact.email', 'E-posta')}</h2>
                  <a 
                    href="mailto:support@voyagerespond.com"
                    className="text-2xl font-medium text-primary hover:underline transition-colors"
@@ -58,7 +60,7 @@
                  onClick={() => window.location.href = "mailto:support@voyagerespond.com"}
                >
                  <Mail className="w-5 h-5 mr-2" />
-                 E-posta Gönder
+                {t('contact.sendEmail', 'E-posta Gönder')}
                </Button>
              </div>
            </div>
@@ -67,13 +69,13 @@
            <div className="grid sm:grid-cols-2 gap-6 mt-12">
              <div className="p-6 rounded-xl border border-border bg-card/50">
                <Clock className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-               <h3 className="font-semibold text-foreground mb-1">Yanıt Süresi</h3>
-               <p className="text-sm text-muted-foreground">Genellikle 24 saat içinde yanıt veriyoruz</p>
+              <h3 className="font-semibold text-foreground mb-1">{t('contact.responseTime', 'Yanıt Süresi')}</h3>
+              <p className="text-sm text-muted-foreground">{t('contact.responseTimeDesc', 'Genellikle 24 saat içinde yanıt veriyoruz')}</p>
              </div>
              <div className="p-6 rounded-xl border border-border bg-card/50">
                <MapPin className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-               <h3 className="font-semibold text-foreground mb-1">Konum</h3>
-               <p className="text-sm text-muted-foreground">Türkiye</p>
+              <h3 className="font-semibold text-foreground mb-1">{t('contact.location', 'Konum')}</h3>
+              <p className="text-sm text-muted-foreground">{t('contact.locationValue', 'Türkiye')}</p>
              </div>
            </div>
          </div>

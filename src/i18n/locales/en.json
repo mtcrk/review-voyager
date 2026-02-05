@@ -7,6 +7,81 @@
     "dashboard": "Dashboard",
     "getStarted": "Get Started"
   },
+  "landing": {
+    "aiVisibilityBadge": "Powered by AI Visibility Engine",
+    "heroLine1": "Be Found by Google.",
+    "heroLine2": "Be Discovered by AI.",
+    "heroSubtitle": "AI-powered review management that boosts your visibility on Google Search and AI assistants.",
+    "heroSubtitle2": "Get your AI Visibility Score, smart reply suggestions, and real-time performance insights.",
+    "valueProp1": "AI Visibility Score",
+    "valueProp2": "Review Optimization",
+    "valueProp3": "Performance Tracking",
+    "heroCta": "See Your AI Visibility Score",
+    "tryDemo": "Try AI Reply Demo",
+    "automationsTitle": "Choose Your Automations",
+    "automationsSubtitle": "Each channel is independent. Enable one, or combine multiple — it's your choice.",
+    "useCasesTitle": "Use one automation — or combine multiple channels",
+    "useCasesSubtitle": "You're not buying a single product. You're choosing modules that fit your business.",
+    "howItWorksTitle": "How It Works",
+    "howItWorksSubtitle": "Get started in minutes, not days.",
+    "pricingTitle": "Pay for the platform. Activate the automations you need.",
+    "pricingSubtitle": "Start with one automation and add more as you grow.",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "mostPopular": "Most Popular",
+    "whyAIVisibility": "Why AI Visibility Matters",
+    "whyAIVisibilityDesc": "Your reviews don't just influence customers — they train AI models. Google's AI Overviews, ChatGPT, and other AI assistants use your review content to recommend businesses. Our Reviewer AI Engine analyzes your reviews, suggests optimized responses, and tracks how your business appears in AI-powered search results.",
+    "aiFeature1": "AI Visibility Score: See how AI assistants perceive your business",
+    "aiFeature2": "Answer Optimization: Craft replies that boost search visibility",
+    "aiFeature3": "AI Recommendation Panel: Know which reviews to prioritize",
+    "ctaTitle": "Ready to boost your AI visibility?",
+    "ctaSubtitle": "Get your free AI Visibility Score and see how your business appears to AI assistants.",
+    "learnMore": "Learn More",
+    "automations": {
+      "instagram": {
+        "title": "Instagram Sales",
+        "features": ["Comment → DM automation", "AI-powered DM replies", "Product & session sales"],
+        "cta": "Enable Instagram Automation"
+      },
+      "googleReviews": {
+        "title": "Google Reviews + AI Visibility",
+        "features": ["AI Visibility Score & insights", "Smart review reply suggestions", "Sentiment & search optimization"],
+        "cta": "See Your AI Visibility Score"
+      },
+      "tiktok": {
+        "title": "TikTok",
+        "features": ["Login Kit integration", "Account connection", "Coming soon: Inbox automation"],
+        "cta": "Connect TikTok"
+      },
+      "whatsapp": {
+        "title": "WhatsApp",
+        "features": ["Shared inbox", "Customer conversations", "Business messaging"],
+        "cta": "Notify Me"
+      }
+    },
+    "useCases": {
+      "instagram": { "title": "Only Instagram Sales", "description": "Perfect for creators and e-commerce brands who sell through DMs" },
+      "google": { "title": "Google Reviews + AI Visibility", "description": "Boost your local search ranking with AI-powered review insights and visibility tracking" },
+      "multi": { "title": "Multi-Channel Management", "description": "Combine multiple channels and manage all customer interactions from one place" }
+    },
+    "howItWorks": {
+      "step1": { "title": "Connect Your Channels", "description": "Link your Instagram, Google, or TikTok accounts in seconds." },
+      "step2": { "title": "Configure AI", "description": "Let AI generate response suggestions for you." },
+      "step3": { "title": "Monitor and Grow", "description": "Track your interactions and watch your business grow." }
+    },
+    "pricingPlans": {
+      "starter": { "name": "Starter", "description": "Get started with basic features", "price": "49", "features": ["1 automation module", "500 interactions/month", "Basic analytics", "Email support"] },
+      "pro": { "name": "Pro", "description": "For growing businesses", "price": "99", "features": ["3 automation modules", "Unlimited interactions", "Advanced analytics", "Priority support", "Custom integrations"] },
+      "agency": { "name": "Agency", "description": "Scalable solution for agencies", "price": "199", "features": ["Unlimited modules", "Unlimited interactions", "White label option", "API access", "Dedicated account manager"] }
+    },
+    "comingSoon": "Coming Soon",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "yearlyDiscount": "2 months free",
+    "perMonth": "/month",
+    "choosePlan": "Choose Plan",
+    "contact": "Contact"
+  },
   "hero": {
     "title": "Transform Your Google Reviews Into Growth",
     "subtitle": "AI-powered review management that helps you respond faster, analyze deeper, and build stronger customer relationships.",
@@ -33,6 +108,17 @@
   },
   "cta": { "title": "Ready to elevate your customer relationships?", "subtitle": "Join businesses that save time and build better customer relationships with AI-powered review responses.", "button": "Get Started Now" },
   "footer": { "copyright": "© 2025 VoyageRespond", "privacy": "Privacy Policy", "terms": "Terms of Service", "contact": "Contact" },
+  "contact": {
+    "backToHome": "Home",
+    "title": "Contact Us",
+    "subtitle": "Get in touch with us for questions, suggestions, or support requests.",
+    "email": "Email",
+    "sendEmail": "Send Email",
+    "responseTime": "Response Time",
+    "responseTimeDesc": "We typically respond within 24 hours",
+    "location": "Location",
+    "locationValue": "Turkey"
+  },
   "auth": {
     "login": { "title": "Login", "subtitle": "Welcome back! Please sign in to continue.", "email": "Email", "password": "Password", "forgotPassword": "Forgot password?", "submit": "Login", "noAccount": "Don't have an account?", "register": "Register", "error": "Invalid email or password", "emailNotVerified": "Your email address has not been verified yet. Please click the verification link sent to your inbox." },
     "register": { "title": "Create Account", "subtitle": "Get started with VoyageRespond today.", "fullName": "Full Name", "email": "Email", "password": "Password", "submit": "Create Account", "hasAccount": "Already have an account?", "login": "Login", "success": "Account created successfully! Please check your email to verify your account.", "error": "An error occurred during registration" },
