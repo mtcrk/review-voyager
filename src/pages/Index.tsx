@@ -258,6 +258,15 @@ const Index = () => {
               >
                 {user ? t('nav.dashboard') : t('nav.login')}
               </button>
+              <button
+                onClick={() => navigate("/contact")}
+                className="text-base font-medium transition-colors"
+                style={{ color: '#1F2937' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#1F2937'}
+              >
+                Contact
+              </button>
             </div>
 
             {/* Language Switcher & CTA - Right */}
