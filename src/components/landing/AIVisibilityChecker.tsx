@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -91,6 +92,7 @@ function incrementUsageCount(): number {
 }
 
 export function AIVisibilityChecker() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [businessName, setBusinessName] = useState("");
   const [location, setLocation] = useState("");
@@ -156,7 +158,7 @@ export function AIVisibilityChecker() {
     }
 
     if (!businessName.trim()) {
-      toast.error("Lütfen işletme adı girin");
+      toast.error(t('landing.visibilityChecker.pleaseEnterBusiness', 'Please enter a business name'));
       return;
     }
 
@@ -172,7 +174,7 @@ export function AIVisibilityChecker() {
       });
 
       if (error) {
-        throw new Error(error.message || "Analiz başarısız");
+        throw new Error(error.message || t('landing.visibilityChecker.analysisFailed', 'Analysis failed'));
       }
 
       if (data?.error) {
@@ -193,7 +195,7 @@ export function AIVisibilityChecker() {
       }
     } catch (error) {
       console.error("Analysis error:", error);
-      toast.error(error instanceof Error ? error.message : "Analiz sırasında bir hata oluştu");
+      toast.error(error instanceof Error ? error.message : t('landing.visibilityChecker.errorOccurred', 'An error occurred during analysis'));
     } finally {
       setLoading(false);
     }
@@ -206,9 +208,9 @@ export function AIVisibilityChecker() {
   };
 
   const getScoreLabel = (score: number) => {
-    if (score >= 75) return "İyi";
-    if (score >= 50) return "Orta";
-    return "Geliştirilebilir";
+    if (score >= 75) return t('landing.visibilityChecker.scoreGood', 'Good');
+    if (score >= 50) return t('landing.visibilityChecker.scoreMedium', 'Medium');
+    return t('landing.visibilityChecker.scoreNeedsImprovement', 'Needs Improvement');
   };
 
   const getScoreBg = (score: number) => {
@@ -232,13 +234,13 @@ export function AIVisibilityChecker() {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4">
             <Sparkles className="w-4 h-4" />
-            Ücretsiz Demo
+            {t('landing.visibilityChecker.freeDemo', 'Free Demo')}
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            AI Sizi Nasıl Görüyor?
+            {t('landing.visibilityChecker.title', 'How Does AI See You?')}
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            İşletme adınızı ve konumunuzu girin, AI asistanların sizi nasıl algıladığını görün
+            {t('landing.visibilityChecker.subtitle', 'Enter your business name and location to see how AI assistants perceive you')}
           </p>
         </div>
 
@@ -250,17 +252,17 @@ export function AIVisibilityChecker() {
                 <Lock className="w-8 h-8 text-primary" />
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-2">
-                Ücretsiz deneme hakkınız doldu
+                {t('landing.visibilityChecker.trialEnded', 'Your free trial has ended')}
               </h3>
               <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                Sınırsız analiz yapmak ve tüm özelliklere erişmek için ücretsiz hesap oluşturun.
+                {t('landing.visibilityChecker.trialEndedDesc', 'Create a free account for unlimited analysis and access to all features.')}
               </p>
               <Button 
                 size="lg" 
                 className="gradient-primary text-white px-8"
                 onClick={() => navigate("/register")}
               >
-                Ücretsiz Kayıt Ol
+                {t('landing.visibilityChecker.freeSignup', 'Free Sign Up')}
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </div>
@@ -270,7 +272,7 @@ export function AIVisibilityChecker() {
               <div className="flex-1">
                 <Input
                   type="text"
-                    placeholder="İşletme adınız"
+                    placeholder={t('landing.visibilityChecker.businessPlaceholder', 'Your business name')}
                   value={businessName}
                   onChange={(e) => setBusinessName(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
@@ -284,7 +286,7 @@ export function AIVisibilityChecker() {
                   <Input
                     ref={locationInputRef}
                     type="text"
-                      placeholder="Konum"
+                      placeholder={t('landing.visibilityChecker.locationPlaceholder', 'Location')}
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
@@ -323,12 +325,12 @@ export function AIVisibilityChecker() {
               {loading ? (
                 <>
                   <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Analiz Ediliyor...
+                  {t('landing.visibilityChecker.analyzing', 'Analyzing...')}
                 </>
               ) : (
                 <>
                   <Eye className="w-5 h-5 mr-2" />
-                  Analiz Et
+                  {t('landing.visibilityChecker.analyze', 'Analyze')}
                 </>
               )}
             </Button>
@@ -336,7 +338,7 @@ export function AIVisibilityChecker() {
           )}
           {!limitReached && (
             <p className="text-xs text-muted-foreground mt-3 text-center">
-              Kalan deneme hakkı: <span className="font-medium text-foreground">{remainingTries}</span> | Sınırsız analiz için <button onClick={() => navigate("/register")} className="text-primary hover:underline">kayıt olun</button>
+              {t('landing.visibilityChecker.remainingTries', 'Remaining tries')}: <span className="font-medium text-foreground">{remainingTries}</span> | {t('landing.visibilityChecker.unlimitedAnalysis', 'for unlimited analysis')} <button onClick={() => navigate("/register")} className="text-primary hover:underline">{t('landing.visibilityChecker.register', 'register')}</button>
             </p>
           )}
         </div>

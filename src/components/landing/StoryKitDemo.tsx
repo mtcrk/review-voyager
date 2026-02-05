@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -31,6 +32,7 @@ const DEMO_BUSINESSES = [
 ];
 
 export function StoryKitDemo() {
+  const { t } = useTranslation();
   const [selectedBusiness, setSelectedBusiness] = useState(DEMO_BUSINESSES[0]);
   const [customerMessage, setCustomerMessage] = useState("Harika bir deneyimdi! Herkese tavsiye ederim 🎉");
   const [backgroundColor, setBackgroundColor] = useState("#fef3c7");
@@ -46,8 +48,8 @@ export function StoryKitDemo() {
     if (file) {
       if (file.size > 10 * 1024 * 1024) {
         toast({
-          title: "Dosya çok büyük",
-          description: "Maksimum 10MB boyutunda dosya yükleyebilirsiniz.",
+          title: t('landing.storyKit.fileTooLarge', 'File too large'),
+          description: t('landing.storyKit.maxFileSize', 'Maximum file size is 10MB.'),
           variant: "destructive",
         });
         return;
@@ -280,8 +282,8 @@ export function StoryKitDemo() {
       setPreviewUrl(dataUrl);
 
       toast({
-        title: "Story hazır! 🎉",
-        description: "Örnek story başarıyla oluşturuldu.",
+        title: t('landing.storyKit.storyReady', 'Story ready! 🎉'),
+        description: t('landing.storyKit.storyCreated', 'Sample story created successfully.'),
       });
     } catch (error) {
       console.error("Error generating story:", error);
@@ -299,8 +301,8 @@ export function StoryKitDemo() {
     link.click();
 
     toast({
-      title: "İndirildi!",
-      description: "Story görseliniz indirildi.",
+      title: t('landing.storyKit.downloaded', 'Downloaded!'),
+      description: t('landing.storyKit.storyDownloaded', 'Your story image has been downloaded.'),
     });
   };
 
@@ -315,7 +317,7 @@ export function StoryKitDemo() {
 </a>`;
     navigator.clipboard.writeText(code);
     setEmbedCopied(true);
-    toast({ title: "Kopyalandı!", description: "Embed kodu panoya kopyalandı." });
+    toast({ title: t('common.copied', 'Copied!'), description: t('landing.storyKit.embedCopied', 'Embed code copied to clipboard.') });
     setTimeout(() => setEmbedCopied(false), 2000);
   };
 
@@ -329,23 +331,22 @@ export function StoryKitDemo() {
         <div className="text-center mb-12">
           <Badge className="mb-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white">
             <Sparkles className="h-3 w-3 mr-1" />
-            Yeni Özellik
+            {t('landing.storyKit.badge', 'New Feature')}
           </Badge>
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Story Kit ile Ücretsiz Pazarlama
+            {t('landing.storyKit.title', 'Free Marketing with Story Kit')}
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Müşterileriniz işletmenizi Instagram'da paylaşsın. 
-            Branded story'ler oluştursun, organik reach kazanın.
+            {t('landing.storyKit.subtitle', 'Let your customers share your business on Instagram. Create branded stories, gain organic reach.')}
           </p>
         </div>
 
         {/* Demo Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-6xl mx-auto">
           <TabsList className="grid w-full max-w-md mx-auto grid-cols-3 mb-8">
-            <TabsTrigger value="story">📱 Story</TabsTrigger>
-            <TabsTrigger value="materials">🖨️ Materyaller</TabsTrigger>
-            <TabsTrigger value="embed">💻 Website</TabsTrigger>
+            <TabsTrigger value="story">{t('landing.storyKit.tabStory', '📱 Story')}</TabsTrigger>
+            <TabsTrigger value="materials">{t('landing.storyKit.tabMaterials', '🖨️ Materials')}</TabsTrigger>
+            <TabsTrigger value="embed">{t('landing.storyKit.tabWebsite', '💻 Website')}</TabsTrigger>
           </TabsList>
 
           {/* Story Tab */}
@@ -356,7 +357,7 @@ export function StoryKitDemo() {
             {/* Business Selector */}
             <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
               <CardContent className="pt-6 space-y-4">
-                <Label className="text-sm font-medium">Demo İşletme Seçin</Label>
+                <Label className="text-sm font-medium">{t('landing.storyKit.selectBusiness', 'Select Demo Business')}</Label>
                 <div className="flex flex-wrap gap-2">
                   {DEMO_BUSINESSES.map((biz) => (
                     <Button
@@ -377,7 +378,7 @@ export function StoryKitDemo() {
               <CardContent className="pt-6 space-y-4">
                 <div className="flex items-center gap-2">
                   <ImagePlus className="h-4 w-4 text-gray-500" />
-                  <Label className="text-sm font-medium">Fotoğraf Ekle (Opsiyonel)</Label>
+                  <Label className="text-sm font-medium">{t('landing.storyKit.addPhoto', 'Add Photo (Optional)')}</Label>
                 </div>
                 
                 <input
@@ -392,7 +393,7 @@ export function StoryKitDemo() {
                   <div className="relative">
                     <img
                       src={uploadedImage}
-                      alt="Yüklenen fotoğraf"
+                      alt={t('landing.storyKit.uploadedPhoto', 'Uploaded photo')}
                       className="w-full h-32 object-cover rounded-lg"
                     />
                     <Button
@@ -411,7 +412,7 @@ export function StoryKitDemo() {
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <ImagePlus className="h-6 w-6 text-gray-400" />
-                    <span className="text-sm text-gray-500">Yemek, mekan veya anı fotoğrafı ekleyin</span>
+                    <span className="text-sm text-gray-500">{t('landing.storyKit.uploadPrompt', 'Add food, venue, or memory photo')}</span>
                   </Button>
                 )}
               </CardContent>
@@ -420,9 +421,9 @@ export function StoryKitDemo() {
             {/* Message Input */}
             <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
               <CardContent className="pt-6 space-y-4">
-                <Label className="text-sm font-medium">Müşteri Mesajı</Label>
+                <Label className="text-sm font-medium">{t('landing.storyKit.customerMessage', 'Customer Message')}</Label>
                 <Textarea
-                  placeholder="Harika bir deneyimdi..."
+                  placeholder={t('landing.storyKit.messagePlaceholder', 'It was a great experience...')}
                   value={customerMessage}
                   onChange={(e) => setCustomerMessage(e.target.value)}
                   className="min-h-[100px] resize-none"
@@ -439,11 +440,11 @@ export function StoryKitDemo() {
               <CardContent className="pt-6 space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Palette className="h-4 w-4 text-gray-500" />
-                  <Label className="text-sm font-medium">Renk Özelleştirme</Label>
+                  <Label className="text-sm font-medium">{t('landing.storyKit.colorCustomization', 'Color Customization')}</Label>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-xs text-gray-500">Arka Plan</Label>
+                    <Label className="text-xs text-gray-500">{t('landing.storyKit.background', 'Background')}</Label>
                     <div className="flex gap-2">
                       <Input
                         type="color"
@@ -459,7 +460,7 @@ export function StoryKitDemo() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-xs text-gray-500">Vurgu Rengi</Label>
+                    <Label className="text-xs text-gray-500">{t('landing.storyKit.accentColor', 'Accent Color')}</Label>
                     <div className="flex gap-2">
                       <Input
                         type="color"
@@ -487,12 +488,12 @@ export function StoryKitDemo() {
               {generating ? (
                 <>
                   <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                  Oluşturuluyor...
+                  {t('landing.storyKit.generating', 'Generating...')}
                 </>
               ) : (
                 <>
                   <Share2 className="h-5 w-5 mr-2" />
-                  Demo Story Oluştur
+                  {t('landing.storyKit.generateStory', 'Generate Story')}
                 </>
               )}
             </Button>
