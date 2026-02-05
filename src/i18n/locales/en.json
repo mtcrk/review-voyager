@@ -43,39 +43,47 @@
     "automations": {
       "instagram": {
         "title": "Instagram Sales",
-        "features": ["Comment → DM automation", "AI-powered DM replies", "Product & session sales"],
+        "feature1": "Comment → DM automation",
+        "feature2": "AI-powered DM replies",
+        "feature3": "Product & session sales",
         "cta": "Enable Instagram Automation"
       },
       "googleReviews": {
         "title": "Google Reviews + AI Visibility",
-        "features": ["AI Visibility Score & insights", "Smart review reply suggestions", "Sentiment & search optimization"],
+        "feature1": "AI Visibility Score & insights",
+        "feature2": "Smart review reply suggestions",
+        "feature3": "Sentiment & search optimization",
         "cta": "See Your AI Visibility Score"
       },
       "tiktok": {
         "title": "TikTok",
-        "features": ["Login Kit integration", "Account connection", "Coming soon: Inbox automation"],
+        "feature1": "Login Kit integration",
+        "feature2": "Account connection",
+        "feature3": "Coming soon: Inbox automation",
         "cta": "Connect TikTok"
       },
       "whatsapp": {
         "title": "WhatsApp",
-        "features": ["Shared inbox", "Customer conversations", "Business messaging"],
+        "feature1": "Shared inbox",
+        "feature2": "Customer conversations",
+        "feature3": "Business messaging",
         "cta": "Notify Me"
       }
     },
     "useCases": {
       "instagram": { "title": "Only Instagram Sales", "description": "Perfect for creators and e-commerce brands who sell through DMs" },
       "google": { "title": "Google Reviews + AI Visibility", "description": "Boost your local search ranking with AI-powered review insights and visibility tracking" },
-      "multi": { "title": "Multi-Channel Management", "description": "Combine multiple channels and manage all customer interactions from one place" }
+      "multi": { "title": "Full Visibility Stack", "description": "Combine social engagement with AI visibility for maximum discoverability" }
     },
     "howItWorks": {
-      "step1": { "title": "Connect Your Channels", "description": "Link your Instagram, Google, or TikTok accounts in seconds." },
-      "step2": { "title": "Configure AI", "description": "Let AI generate response suggestions for you." },
-      "step3": { "title": "Monitor and Grow", "description": "Track your interactions and watch your business grow." }
+      "step1": { "title": "Connect & Analyze", "description": "Link your Google Business Profile. Our AI instantly calculates your Visibility Score." },
+      "step2": { "title": "Get Smart Recommendations", "description": "AI tells you which reviews to answer, when to respond, and how to optimize for search." },
+      "step3": { "title": "Track Your Growth", "description": "Monitor visibility metrics, sentiment trends, and review performance in real-time." }
     },
     "pricingPlans": {
-      "starter": { "name": "Starter", "description": "Get started with basic features", "price": "49", "features": ["1 automation module", "500 interactions/month", "Basic analytics", "Email support"] },
-      "pro": { "name": "Pro", "description": "For growing businesses", "price": "99", "features": ["3 automation modules", "Unlimited interactions", "Advanced analytics", "Priority support", "Custom integrations"] },
-      "agency": { "name": "Agency", "description": "Scalable solution for agencies", "price": "199", "features": ["Unlimited modules", "Unlimited interactions", "White label option", "API access", "Dedicated account manager"] }
+      "starter": { "name": "Starter", "description": "Platform access with 1 automation", "feature1": "Core platform access", "feature2": "1 automation (Instagram or Google)", "feature3": "500 messages/month", "feature4": "Basic analytics" },
+      "pro": { "name": "Pro", "description": "Up to 2 automations + analytics", "feature1": "Core platform access", "feature2": "Up to 2 automations", "feature3": "Unlimited messages", "feature4": "Advanced analytics", "feature5": "Priority support" },
+      "agency": { "name": "Agency", "description": "All automations + team access", "feature1": "Core platform access", "feature2": "All automations included", "feature3": "Team access (5 members)", "feature4": "Full analytics suite", "feature5": "Custom integrations" }
     },
     "comingSoon": "Coming Soon",
     "monthly": "Monthly",
