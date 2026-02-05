@@ -1,6 +1,11 @@
 {
   "nav": { "features": "Özellikler", "pricing": "Fiyatlandırma", "documentation": "Dokümantasyon", "login": "Giriş Yap", "dashboard": "Panel", "getStarted": "Başla", "automations": "Otomasyonlar", "hub": "Hub", "contact": "İletişim" },
   "landing": {
+    "chatDemo": {
+      "badge": "AI Destekli Analiz",
+      "title": "Yorumlarınızla Sohbet Edin",
+      "subtitle": "Müşteri geri bildirimleriniz hakkında sorular sorun ve anında AI destekli içgörüler alın."
+    },
     "aiVisibilityBadge": "AI Visibility Engine ile Güçlendirildi",
     "heroLine1": "Yorumlarınızı Yönetin.",
     "heroLine2": "Yapay Zeka ile Büyüyün.",
