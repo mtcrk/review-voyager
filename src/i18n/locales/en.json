@@ -252,9 +252,33 @@
        "widgetTypes": "✓ 3 different widget types",
        "colorCustom": "✓ Color customization",
        "singleLineJs": "✓ Single line JavaScript",
-       "activateNow": "Activate Story Kit for your business now",
-       "startFree": "Start Free"
-     }
+        "activateNow": "Activate Story Kit for your business now",
+        "startFree": "Start Free"
+      },
+      "dashboardDemo": {
+        "badge": "Dashboard Preview",
+        "title": "Powerful Dashboard Tools",
+        "subtitle": "AI-powered insights, priority management, and competitive analysis - all in one place."
+      },
+      "priorityDemo": {
+        "title": "Priority Actions",
+        "subtitle": "Reviews that need to be answered today",
+        "critical": "Critical",
+        "urgent": "Urgent",
+        "normal": "Normal",
+        "reply": "Reply",
+        "cta": "Manage All Reviews"
+      },
+      "competitorDemo": {
+        "title": "Competitor Comparison",
+        "subtitle": "Compare your AI visibility with competitors",
+        "placeholder": "Competitor business name...",
+        "metric": "Metric",
+        "you": "You",
+        "insights": "AI Insights:",
+        "hint": "Enter competitor name to compare AI visibility",
+        "cta": "Compare with Real Data"
+      }
   },
   "hero": {
     "title": "Transform Your Google Reviews Into Growth",

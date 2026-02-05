@@ -242,9 +242,33 @@
        "widgetTypes": "✓ 3 farklı widget tipi",
        "colorCustom": "✓ Renk özelleştirme",
        "singleLineJs": "✓ Tek satır JavaScript",
-       "activateNow": "İşletmeniz için Story Kit'i şimdi aktifleştirin",
-       "startFree": "Ücretsiz Başla"
-    }
+        "activateNow": "İşletmeniz için Story Kit'i şimdi aktifleştirin",
+        "startFree": "Ücretsiz Başla"
+     },
+     "dashboardDemo": {
+       "badge": "Dashboard Önizleme",
+       "title": "Güçlü Dashboard Araçları",
+       "subtitle": "AI destekli içgörüler, öncelik yönetimi ve rekabet analizi - hepsi tek yerden."
+     },
+     "priorityDemo": {
+       "title": "Öncelikli İşlemler",
+       "subtitle": "Bugün yanıtlanması gereken yorumlar",
+       "critical": "Kritik",
+       "urgent": "Acil",
+       "normal": "Normal",
+       "reply": "Yanıtla",
+       "cta": "Tüm Yorumları Yönet"
+     },
+     "competitorDemo": {
+       "title": "Rakip Karşılaştırması",
+       "subtitle": "AI görünürlüğünüzü rakiplerle karşılaştırın",
+       "placeholder": "Rakip işletme adı...",
+       "metric": "Metrik",
+       "you": "Siz",
+       "insights": "AI Önerileri:",
+       "hint": "Rakip işletme adı girerek AI görünürlük karşılaştırması yapın",
+       "cta": "Gerçek Verilerle Karşılaştır"
+     }
   },
   "hero": { "title": "Google Yorumlarınızı Büyümeye Dönüştürün", "subtitle": "Daha hızlı yanıt vermenize, daha derinlemesine analiz yapmanıza ve daha güçlü müşteri ilişkileri kurmanıza yardımcı olan yapay zeka destekli yorum yönetimi.", "cta": "Yorumları Yönetmeye Başla" },
   "features": {
