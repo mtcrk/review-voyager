@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { MessageSquare, Star, Users, Zap } from "lucide-react";
 
 interface MetricCardProps {
@@ -51,30 +52,32 @@ function MetricCard({ icon: Icon, value, label, suffix = "", color }: MetricCard
 }
 
 export function LiveMetrics() {
+  const { t } = useTranslation();
+
   const metrics = [
     {
       icon: MessageSquare,
       value: 47500,
-      label: "AI Yanıtlar Oluşturuldu",
+      label: t('landing.metrics.aiReplies', 'AI Replies Generated'),
       color: "bg-primary/10 text-primary",
     },
     {
       icon: Star,
       value: 12800,
-      label: "Yorum Yönetildi",
+      label: t('landing.metrics.reviewsManaged', 'Reviews Managed'),
       color: "bg-amber-100 text-amber-600",
     },
     {
       icon: Users,
       value: 850,
-      label: "Aktif İşletme",
+      label: t('landing.metrics.activeBusinesses', 'Active Businesses'),
       color: "bg-blue-100 text-blue-600",
     },
     {
       icon: Zap,
       value: 98,
       suffix: "%",
-      label: "Yanıt Hızı İyileştirmesi",
+      label: t('landing.metrics.responseImprovement', 'Response Speed Improvement'),
       color: "bg-green-100 text-green-600",
     },
   ];
@@ -83,10 +86,10 @@ export function LiveMetrics() {
     <section className="container mx-auto px-6 py-16">
       <div className="text-center mb-12">
         <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
-          Rakamlarla VoyageRespond
+          {t('landing.metrics.title', 'VoyageRespond by the Numbers')}
         </h2>
         <p className="text-muted-foreground">
-          Binlerce işletme tarafından güveniliyor
+          {t('landing.metrics.subtitle', 'Trusted by thousands of businesses')}
         </p>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">

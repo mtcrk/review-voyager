@@ -1,18 +1,20 @@
 import { Play, Pause } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 export function ProductVideo() {
+  const { t } = useTranslation();
   const [isPlaying, setIsPlaying] = useState(false);
 
   return (
     <section className="container mx-auto px-6 py-20">
       <div className="text-center mb-12">
         <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
-          VoyageRespond'u Keşfedin
+          {t('landing.video.title', 'Discover VoyageRespond')}
         </h2>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          30 saniyede platformun nasıl çalıştığını görün
+          {t('landing.video.subtitle', 'See how the platform works in 30 seconds')}
         </p>
       </div>
 
@@ -58,7 +60,7 @@ export function ProductVideo() {
 
               {/* Coming Soon Badge */}
               <div className="absolute bottom-4 right-4 px-4 py-2 rounded-full bg-black/60 text-white text-sm backdrop-blur-sm">
-                Demo Video Yakında
+                {t('landing.video.comingSoon', 'Demo Video Coming Soon')}
               </div>
             </>
           ) : (
@@ -66,13 +68,13 @@ export function ProductVideo() {
               {/* Video player placeholder */}
               <div className="text-center text-white">
                 <Pause className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                <p className="text-lg opacity-70">Video yükleniyor...</p>
+                <p className="text-lg opacity-70">{t('landing.video.loading', 'Loading video...')}</p>
                 <Button
                   variant="ghost"
                   className="mt-4 text-white"
                   onClick={() => setIsPlaying(false)}
                 >
-                  Geri Dön
+                  {t('landing.video.goBack', 'Go Back')}
                 </Button>
               </div>
             </div>
@@ -83,15 +85,15 @@ export function ProductVideo() {
         <div className="grid grid-cols-3 gap-4 mt-8">
           <div className="text-center p-4">
             <div className="text-2xl font-bold text-primary mb-1">0:08</div>
-            <div className="text-sm text-muted-foreground">Hesap Bağlama</div>
+            <div className="text-sm text-muted-foreground">{t('landing.video.step1', 'Account Connection')}</div>
           </div>
           <div className="text-center p-4 border-x border-border">
             <div className="text-2xl font-bold text-primary mb-1">0:15</div>
-            <div className="text-sm text-muted-foreground">AI Yanıt Oluşturma</div>
+            <div className="text-sm text-muted-foreground">{t('landing.video.step2', 'AI Reply Generation')}</div>
           </div>
           <div className="text-center p-4">
             <div className="text-2xl font-bold text-primary mb-1">0:25</div>
-            <div className="text-sm text-muted-foreground">Yanıt Gönderme</div>
+            <div className="text-sm text-muted-foreground">{t('landing.video.step3', 'Reply Submission')}</div>
           </div>
         </div>
       </div>
