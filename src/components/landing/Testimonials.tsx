@@ -1,47 +1,41 @@
 import { Star, Quote } from "lucide-react";
 import { useState, useEffect } from "react";
-
-interface Testimonial {
-  name: string;
-  role: string;
-  avatar: string;
-  quote: string;
-  rating: number;
-}
-
-const testimonials: Testimonial[] = [
-  {
-    name: "Ahmet Y.",
-    role: "İşletme Sahibi",
-    avatar: "AY",
-    quote: "Google yorumlarına artık 5 dakikada değil, 30 saniyede yanıt veriyorum. AI önerileri gerçekten profesyonel ve ton ayarları mükemmel çalışıyor.",
-    rating: 5,
-  },
-  {
-    name: "Zeynep K.",
-    role: "Pazarlama Müdürü",
-    avatar: "ZK",
-    quote: "TikTok yorumlarına anında yanıt vermek satışlarımızı %40 artırdı. Story Kit ile müşterilerimiz içerik üretiyor, biz sadece paylaşıyoruz.",
-    rating: 5,
-  },
-  {
-    name: "Mehmet D.",
-    role: "Genel Müdür",
-    avatar: "MD",
-    quote: "3 otelimizin tüm yorumlarını tek panelden yönetiyoruz. AI Visibility skoru sayesinde Google'da üst sıralara çıktık.",
-    rating: 5,
-  },
-  {
-    name: "Elif Ö.",
-    role: "Kurucu",
-    avatar: "EÖ",
-    quote: "Olumsuz yorumlara nasıl yanıt vereceğimi bilmiyordum. AI'ın empatik ton önerisi müşteriyi geri kazandırdı.",
-    rating: 5,
-  },
-];
+import { useTranslation } from "react-i18next";
 
 export function Testimonials() {
+  const { t } = useTranslation();
   const [activeIndex, setActiveIndex] = useState(0);
+
+  const testimonials = [
+    {
+      name: t('landing.testimonials.testimonial1.name', 'Ahmet Y.'),
+      role: t('landing.testimonials.testimonial1.role', 'Business Owner'),
+      avatar: "AY",
+      quote: t('landing.testimonials.testimonial1.quote', 'I now respond to Google reviews in 30 seconds instead of 5 minutes. The AI suggestions are really professional and the tone settings work perfectly.'),
+      rating: 5,
+    },
+    {
+      name: t('landing.testimonials.testimonial2.name', 'Zeynep K.'),
+      role: t('landing.testimonials.testimonial2.role', 'Marketing Director'),
+      avatar: "ZK",
+      quote: t('landing.testimonials.testimonial2.quote', 'Responding to TikTok comments instantly increased our sales by 40%. With Story Kit, our customers create content, we just share it.'),
+      rating: 5,
+    },
+    {
+      name: t('landing.testimonials.testimonial3.name', 'Mehmet D.'),
+      role: t('landing.testimonials.testimonial3.role', 'General Manager'),
+      avatar: "MD",
+      quote: t('landing.testimonials.testimonial3.quote', "We manage all reviews of our 3 hotels from a single panel. Thanks to the AI Visibility score, we've climbed to the top of Google."),
+      rating: 5,
+    },
+    {
+      name: t('landing.testimonials.testimonial4.name', 'Elif Ö.'),
+      role: t('landing.testimonials.testimonial4.role', 'Founder'),
+      avatar: "EÖ",
+      quote: t('landing.testimonials.testimonial4.quote', "I didn't know how to respond to negative reviews. The AI's empathetic tone suggestion won back the customer."),
+      rating: 5,
+    },
+  ];
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -56,10 +50,10 @@ export function Testimonials() {
       <div className="container mx-auto px-6 relative z-10">
         <div className="text-center mb-12">
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
-            Müşterilerimiz Ne Diyor?
+            {t('landing.testimonials.title', 'What Our Customers Say')}
           </h2>
           <p className="text-muted-foreground">
-            850+ işletmenin güvendiği platform
+            {t('landing.testimonials.subtitle', 'Trusted by 850+ businesses')}
           </p>
         </div>
 

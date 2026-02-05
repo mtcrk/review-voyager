@@ -166,7 +166,90 @@
       "customerSatisfaction": "Customer Satisfaction",
       "reviews": "reviews",
       "highlights": "Highlights"
-    }
+     },
+     "visibilityDemo": {
+       "excellent": "Excellent",
+       "good": "Good",
+       "medium": "Medium",
+       "needsImprovement": "Needs Improvement",
+       "thisMonth": "this month",
+       "averageRating": "Average Rating",
+       "responseRate": "Response Rate",
+       "positiveReviews": "Positive Reviews",
+       "totalReviews": "Total Reviews",
+       "liveData": "Live Data"
+     },
+     "testimonials": {
+       "title": "What Our Customers Say",
+       "subtitle": "Trusted by 850+ businesses",
+       "testimonial1": {
+         "quote": "I now respond to Google reviews in 30 seconds instead of 5 minutes. The AI suggestions are really professional and the tone settings work perfectly.",
+         "name": "Ahmet Y.",
+         "role": "Business Owner"
+       },
+       "testimonial2": {
+         "quote": "Responding to TikTok comments instantly increased our sales by 40%. With Story Kit, our customers create content, we just share it.",
+         "name": "Zeynep K.",
+         "role": "Marketing Director"
+       },
+       "testimonial3": {
+         "quote": "We manage all reviews of our 3 hotels from a single panel. Thanks to the AI Visibility score, we've climbed to the top of Google.",
+         "name": "Mehmet D.",
+         "role": "General Manager"
+       },
+       "testimonial4": {
+         "quote": "I didn't know how to respond to negative reviews. The AI's empathetic tone suggestion won back the customer.",
+         "name": "Elif Ö.",
+         "role": "Founder"
+       }
+     },
+     "trustBadges": {
+       "gdpr": "GDPR Compliant",
+       "gdprDesc": "European data protection standards",
+       "ssl": "256-bit SSL",
+       "sslDesc": "Encrypted data transfer",
+       "euData": "EU Data Center",
+       "euDataDesc": "Data hosted in Europe",
+       "soc2": "SOC 2 Type II",
+       "soc2Desc": "Security audit certified",
+       "apiIntegrations": "Official API Integrations",
+       "countriesUsed": "Used in 180+ Countries"
+     },
+     "storyKitDemo": {
+       "howItWorks": "How It Works?",
+       "step1": "Set hashtag and colors for your business",
+       "step2": "Download QR code and place on your table/counter",
+       "step3": "Customers scan, create stories and share",
+       "step4": "Track your sharing statistics",
+       "phonePrompt": "Click \"Generate Story\" to create a sample Instagram Story",
+       "downloadStoryBtn": "Download Story",
+       "tableStand": "Table Stand / QR Code",
+       "tableStandDesc": "QR code design for your table or counter",
+       "scanToCreate": "Scan to create a story",
+       "sizeOptions": "Square",
+       "customizableSizes": "✓ Customizable sizes and colors",
+       "highResDownload": "✓ High resolution PNG download",
+       "printReady": "✓ Ready for instant printing",
+       "shareLink": "Share Link",
+       "shareLinkDesc": "Link to share via WhatsApp, SMS, or social media",
+       "whatsappTemplate": "Thank you for visiting us! 🙏 Would you like to share your experience on Instagram?",
+       "readyTemplates": "✓ Ready message templates",
+       "oneClickCopy": "✓ One-click copy",
+       "suitableFor": "✓ Suitable for WhatsApp, SMS, Email",
+       "websiteButton": "Website Button",
+       "websiteButtonDesc": "Single line of code to add to your website",
+       "createStory": "Create Story",
+       "copied": "Copied!",
+       "copyEmbedCode": "Copy Embed Code",
+       "floatingPopup": "Floating Popup",
+       "floatingPopupDesc": "Fixed popup button in the bottom right corner",
+       "sitePreview": "Site preview",
+       "widgetTypes": "✓ 3 different widget types",
+       "colorCustom": "✓ Color customization",
+       "singleLineJs": "✓ Single line JavaScript",
+       "activateNow": "Activate Story Kit for your business now",
+       "startFree": "Start Free"
+     }
   },
   "hero": {
     "title": "Transform Your Google Reviews Into Growth",

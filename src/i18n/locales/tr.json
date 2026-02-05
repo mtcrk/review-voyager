@@ -156,6 +156,89 @@
       "customerSatisfaction": "Müşteri Memnuniyeti",
       "reviews": "yorum",
       "highlights": "Öne Çıkanlar"
+     },
+     "visibilityDemo": {
+       "excellent": "Mükemmel",
+       "good": "İyi",
+       "medium": "Orta",
+       "needsImprovement": "Geliştirilebilir",
+       "thisMonth": "bu ay",
+       "averageRating": "Ortalama Puan",
+       "responseRate": "Yanıt Oranı",
+       "positiveReviews": "Pozitif Yorum",
+       "totalReviews": "Toplam Yorum",
+       "liveData": "Canlı Veri"
+     },
+     "testimonials": {
+       "title": "Müşterilerimiz Ne Diyor?",
+       "subtitle": "850+ işletmenin güvendiği platform",
+       "testimonial1": {
+         "quote": "Google yorumlarına artık 5 dakikada değil, 30 saniyede yanıt veriyorum. AI önerileri gerçekten profesyonel ve ton ayarları mükemmel çalışıyor.",
+         "name": "Ahmet Y.",
+         "role": "İşletme Sahibi"
+       },
+       "testimonial2": {
+         "quote": "TikTok yorumlarına anında yanıt vermek satışlarımızı %40 artırdı. Story Kit ile müşterilerimiz içerik üretiyor, biz sadece paylaşıyoruz.",
+         "name": "Zeynep K.",
+         "role": "Pazarlama Müdürü"
+       },
+       "testimonial3": {
+         "quote": "3 otelimizin tüm yorumlarını tek panelden yönetiyoruz. AI Visibility skoru sayesinde Google'da üst sıralara çıktık.",
+         "name": "Mehmet D.",
+         "role": "Genel Müdür"
+       },
+       "testimonial4": {
+         "quote": "Olumsuz yorumlara nasıl yanıt vereceğimi bilmiyordum. AI'ın empatik ton önerisi müşteriyi geri kazandırdı.",
+         "name": "Elif Ö.",
+         "role": "Kurucu"
+       }
+     },
+     "trustBadges": {
+       "gdpr": "GDPR Uyumlu",
+       "gdprDesc": "Avrupa veri koruma standartları",
+       "ssl": "256-bit SSL",
+       "sslDesc": "Şifreli veri transferi",
+       "euData": "EU Data Center",
+       "euDataDesc": "Avrupa'da barındırılan veriler",
+       "soc2": "SOC 2 Type II",
+       "soc2Desc": "Güvenlik denetimi onaylı",
+       "apiIntegrations": "Resmi API Entegrasyonları",
+       "countriesUsed": "180+ Ülkede Kullanımda"
+     },
+     "storyKitDemo": {
+       "howItWorks": "Nasıl Çalışır?",
+       "step1": "İşletmeniz için hashtag ve renkler belirleyin",
+       "step2": "QR kodu indirip masanıza/kasanıza koyun",
+       "step3": "Müşteriler tarayıp story oluşturur ve paylaşır",
+       "step4": "Siz de paylaşım istatistiklerini takip edin",
+       "phonePrompt": "\"Demo Story Oluştur\" butonuna tıklayarak örnek bir Instagram Story görseli oluşturun",
+       "downloadStoryBtn": "Story'yi İndir",
+       "tableStand": "Masa Standı / QR Kod",
+       "tableStandDesc": "Masanıza veya kasanıza koyabileceğiniz QR kodlu tasarım",
+       "scanToCreate": "Story oluşturmak için tarayın",
+       "sizeOptions": "Kare",
+       "customizableSizes": "✓ Özelleştirilebilir boyut ve renkler",
+       "highResDownload": "✓ Yüksek çözünürlüklü PNG indirme",
+       "printReady": "✓ Anında yazdırma için hazır",
+       "shareLink": "Paylaşım Linki",
+       "shareLinkDesc": "WhatsApp, SMS veya sosyal medyada paylaşabileceğiniz link",
+       "whatsappTemplate": "Bizi ziyaret ettiğiniz için teşekkürler! 🙏 Deneyiminizi Instagram'da paylaşmak ister misiniz?",
+       "readyTemplates": "✓ Hazır mesaj şablonları",
+       "oneClickCopy": "✓ Tek tıkla kopyalama",
+       "suitableFor": "✓ WhatsApp, SMS, Email için uygun",
+       "websiteButton": "Website Butonu",
+       "websiteButtonDesc": "Web sitenize ekleyebileceğiniz tek satır kod",
+       "createStory": "Story Oluştur",
+       "copied": "Kopyalandı!",
+       "copyEmbedCode": "Embed Kodunu Kopyala",
+       "floatingPopup": "Floating Popup",
+       "floatingPopupDesc": "Sağ alt köşede sabit duran popup buton",
+       "sitePreview": "Site önizlemesi",
+       "widgetTypes": "✓ 3 farklı widget tipi",
+       "colorCustom": "✓ Renk özelleştirme",
+       "singleLineJs": "✓ Tek satır JavaScript",
+       "activateNow": "İşletmeniz için Story Kit'i şimdi aktifleştirin",
+       "startFree": "Ücretsiz Başla"
     }
   },
   "hero": { "title": "Google Yorumlarınızı Büyümeye Dönüştürün", "subtitle": "Daha hızlı yanıt vermenize, daha derinlemesine analiz yapmanıza ve daha güçlü müşteri ilişkileri kurmanıza yardımcı olan yapay zeka destekli yorum yönetimi.", "cta": "Yorumları Yönetmeye Başla" },

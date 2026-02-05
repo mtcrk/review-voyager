@@ -1,26 +1,29 @@
 import { Shield, Lock, Server, CheckCircle, Award, Globe } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export function TrustBadges() {
+  const { t } = useTranslation();
+  
   const badges = [
     {
       icon: Shield,
-      title: "GDPR Uyumlu",
-      description: "Avrupa veri koruma standartları",
+      title: t('landing.trustBadges.gdpr', 'GDPR Compliant'),
+      description: t('landing.trustBadges.gdprDesc', 'European data protection standards'),
     },
     {
       icon: Lock,
-      title: "256-bit SSL",
-      description: "Şifreli veri transferi",
+      title: t('landing.trustBadges.ssl', '256-bit SSL'),
+      description: t('landing.trustBadges.sslDesc', 'Encrypted data transfer'),
     },
     {
       icon: Server,
-      title: "EU Data Center",
-      description: "Avrupa'da barındırılan veriler",
+      title: t('landing.trustBadges.euData', 'EU Data Center'),
+      description: t('landing.trustBadges.euDataDesc', 'Data hosted in Europe'),
     },
     {
       icon: CheckCircle,
-      title: "SOC 2 Type II",
-      description: "Güvenlik denetimi onaylı",
+      title: t('landing.trustBadges.soc2', 'SOC 2 Type II'),
+      description: t('landing.trustBadges.soc2Desc', 'Security audit certified'),
     },
   ];
 
@@ -58,7 +61,7 @@ export function TrustBadges() {
         <div className="border-t border-border pt-8">
           <div className="text-center mb-6">
             <p className="text-sm text-muted-foreground">
-              Resmi API Entegrasyonları
+              {t('landing.trustBadges.apiIntegrations', 'Official API Integrations')}
             </p>
           </div>
           <div className="flex items-center justify-center gap-8 md:gap-16">
@@ -86,7 +89,7 @@ export function TrustBadges() {
             <span className="text-xs text-muted-foreground">|</span>
             <Globe className="w-4 h-4 text-primary" />
             <span className="text-sm font-medium text-foreground">
-              180+ Ülkede Kullanımda
+              {t('landing.trustBadges.countriesUsed', 'Used in 180+ Countries')}
             </span>
           </div>
         </div>
