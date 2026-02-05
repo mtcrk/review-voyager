@@ -37,6 +37,7 @@ import TikTokDMInbox from "./pages/TikTokDMInbox";
 import TikTokReviewKit from "./pages/TikTokReviewKit";
 import StoryKit from "./pages/StoryKit";
 import StoryKitSettings from "./pages/StoryKitSettings";
+import Contact from "./pages/Contact";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +62,7 @@ const App = () => (
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/hub" element={<Hub />} />
             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/automations/instagram-sales" element={<InstagramSales />} />
             <Route path="/automations/google-reviews" element={<GoogleReviews />} />
             <Route path="/automations/whatsapp" element={<WhatsAppAutomation />} />
