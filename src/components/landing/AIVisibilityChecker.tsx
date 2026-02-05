@@ -4,10 +4,14 @@ import { Input } from "@/components/ui/input";
 import { 
   Eye, Sparkles, CheckCircle, AlertTriangle, ArrowRight, Loader2, 
   TrendingUp, Lightbulb, MapPin, Star, Users, MessageSquare, Trophy,
-  Building2
+  Building2, Lock
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+
+const STORAGE_KEY = "ai_visibility_demo_count";
+const MAX_FREE_TRIES = 2;
 
 // Türkiye şehirleri ve popüler ilçeler
 const LOCATIONS = [
@@ -67,7 +71,27 @@ interface AnalysisResult {
   recommendation: string;
 }
 
+function getUsageCount(): number {
+  try {
+    const count = localStorage.getItem(STORAGE_KEY);
+    return count ? parseInt(count, 10) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function incrementUsageCount(): number {
+  try {
+    const newCount = getUsageCount() + 1;
+    localStorage.setItem(STORAGE_KEY, String(newCount));
+    return newCount;
+  } catch {
+    return 0;
+  }
+}
+
 export function AIVisibilityChecker() {
+  const navigate = useNavigate();
   const [businessName, setBusinessName] = useState("");
   const [location, setLocation] = useState("");
   const [loading, setLoading] = useState(false);
@@ -76,8 +100,17 @@ export function AIVisibilityChecker() {
   const [analyzedLocation, setAnalyzedLocation] = useState("");
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
   const [filteredLocations, setFilteredLocations] = useState<string[]>([]);
+  const [usageCount, setUsageCount] = useState(0);
+  const [limitReached, setLimitReached] = useState(false);
   const locationInputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  // Check usage count on mount
+  useEffect(() => {
+    const count = getUsageCount();
+    setUsageCount(count);
+    setLimitReached(count >= MAX_FREE_TRIES);
+  }, []);
 
   // Filter locations based on input
   useEffect(() => {
@@ -116,6 +149,12 @@ export function AIVisibilityChecker() {
   };
 
   const handleAnalyze = async () => {
+    // Check if limit reached
+    if (usageCount >= MAX_FREE_TRIES) {
+      setLimitReached(true);
+      return;
+    }
+
     if (!businessName.trim()) {
       toast.error("Lütfen işletme adı girin");
       return;
@@ -144,6 +183,13 @@ export function AIVisibilityChecker() {
         setResult(data.analysis);
         setAnalyzedName(data.businessName);
         setAnalyzedLocation(data.location || "");
+        
+        // Increment usage count after successful analysis
+        const newCount = incrementUsageCount();
+        setUsageCount(newCount);
+        if (newCount >= MAX_FREE_TRIES) {
+          setLimitReached(true);
+        }
       }
     } catch (error) {
       console.error("Analysis error:", error);
@@ -171,6 +217,8 @@ export function AIVisibilityChecker() {
     return "bg-red-100";
   };
 
+  const remainingTries = Math.max(0, MAX_FREE_TRIES - usageCount);
+
   const getRankingBadge = (position: number) => {
     if (position === 1) return "🥇";
     if (position === 2) return "🥈";
@@ -196,12 +244,33 @@ export function AIVisibilityChecker() {
 
         {/* Input Section */}
         <div className="bg-card border border-border rounded-2xl p-8 shadow-lg mb-8">
-          <div className="flex flex-col gap-4">
+          {limitReached ? (
+            <div className="text-center py-8">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+                <Lock className="w-8 h-8 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold text-foreground mb-2">
+                Ücretsiz deneme hakkınız doldu
+              </h3>
+              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                Sınırsız analiz yapmak ve tüm özelliklere erişmek için ücretsiz hesap oluşturun.
+              </p>
+              <Button 
+                size="lg" 
+                className="gradient-primary text-white px-8"
+                onClick={() => navigate("/register")}
+              >
+                Ücretsiz Kayıt Ol
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
                 <Input
                   type="text"
-                  placeholder="İşletme adınız"
+                    placeholder="İşletme adınız"
                   value={businessName}
                   onChange={(e) => setBusinessName(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
@@ -215,7 +284,7 @@ export function AIVisibilityChecker() {
                   <Input
                     ref={locationInputRef}
                     type="text"
-                    placeholder="Konum"
+                      placeholder="Konum"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
@@ -263,10 +332,13 @@ export function AIVisibilityChecker() {
                 </>
               )}
             </Button>
-          </div>
-          <p className="text-xs text-muted-foreground mt-3 text-center">
-            Bu demo amaçlı bir analizdir. Gerçek sonuçlar için hesap oluşturun.
-          </p>
+            </div>
+          )}
+          {!limitReached && (
+            <p className="text-xs text-muted-foreground mt-3 text-center">
+              Kalan deneme hakkı: <span className="font-medium text-foreground">{remainingTries}</span> | Sınırsız analiz için <button onClick={() => navigate("/register")} className="text-primary hover:underline">kayıt olun</button>
+            </p>
+          )}
         </div>
 
         {/* Results Section */}
