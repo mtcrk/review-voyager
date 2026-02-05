@@ -1,5 +1,5 @@
 {
-  "nav": { "features": "Özellikler", "pricing": "Fiyatlandırma", "documentation": "Dokümantasyon", "login": "Giriş Yap", "dashboard": "Panel", "getStarted": "Başla" },
+  "nav": { "features": "Özellikler", "pricing": "Fiyatlandırma", "documentation": "Dokümantasyon", "login": "Giriş Yap", "dashboard": "Panel", "getStarted": "Başla", "automations": "Otomasyonlar", "hub": "Hub", "contact": "İletişim" },
   "landing": {
     "aiVisibilityBadge": "AI Visibility Engine ile Güçlendirildi",
     "heroLine1": "Yorumlarınızı Yönetin.",

@@ -5,7 +5,10 @@
     "documentation": "Documentation",
     "login": "Login",
     "dashboard": "Dashboard",
-    "getStarted": "Get Started"
+    "getStarted": "Get Started",
+    "automations": "Automations",
+    "hub": "Hub",
+    "contact": "Contact"
   },
   "landing": {
     "aiVisibilityBadge": "Powered by AI Visibility Engine",

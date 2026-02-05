@@ -229,7 +229,7 @@ const Index = () => {
                 onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
                 onMouseLeave={(e) => e.currentTarget.style.color = '#1F2937'}
               >
-                Automations
+                {t('nav.automations', 'Automations')}
               </button>
               <button
                 onClick={() => scrollToSection("pricing")}
@@ -247,7 +247,7 @@ const Index = () => {
                 onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
                 onMouseLeave={(e) => e.currentTarget.style.color = '#1F2937'}
               >
-                Hub
+                {t('nav.hub', 'Hub')}
               </button>
               <button
                 onClick={() => navigate(user ? "/dashboard" : "/login")}
@@ -265,7 +265,7 @@ const Index = () => {
                 onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
                 onMouseLeave={(e) => e.currentTarget.style.color = '#1F2937'}
               >
-                Contact
+                {t('nav.contact', 'Contact')}
               </button>
             </div>
 
