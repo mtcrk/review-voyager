@@ -11,6 +11,11 @@
     "contact": "Contact"
   },
   "landing": {
+    "chatDemo": {
+      "badge": "AI-Powered Analysis",
+      "title": "Chat with Your Reviews",
+      "subtitle": "Ask questions about your customer feedback and get AI-powered insights instantly."
+    },
     "aiVisibilityBadge": "Powered by AI Visibility Engine",
     "heroLine1": "Manage Your Reviews.",
     "heroLine2": "Grow with AI.",
