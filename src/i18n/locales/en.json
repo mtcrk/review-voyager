@@ -11,6 +11,27 @@
     "contact": "Contact"
   },
   "landing": {
+    "aiReplyDemo": {
+      "badge": "Interactive Demo",
+      "title": "Try AI Reply Suggestions",
+      "subtitle": "See how our AI generates professional, on-brand replies for any review. Select a sample review and click generate.",
+      "selectReview": "Select a Review",
+      "generatedReply": "AI-Generated Reply",
+      "selectedReview": "Selected Review",
+      "generate": "Generate AI Reply",
+      "generating": "Generating AI Reply...",
+      "regenerate": "Regenerate Reply",
+      "copied": "Reply copied to clipboard!",
+      "error": "Failed to generate reply. Please try again.",
+      "demoNote": "This is a demo. Sign up to use AI replies on your real Google reviews.",
+      "emptyState": "Click \"Generate AI Reply\" to see the magic ✨",
+      "positive": "Positive",
+      "neutral": "Neutral",
+      "negative": "Negative",
+      "review1": "Food was amazing but the service was a bit slow. We waited 30 minutes for our main course. Would still come back though!",
+      "review2": "Best coffee in town! The barista was super friendly and the atmosphere is perfect for working. Highly recommend!",
+      "review3": "Disappointed with my experience. The pizza was cold and the staff seemed uninterested. Won't be coming back."
+    },
     "chatDemo": {
       "badge": "AI-Powered Analysis",
       "title": "Chat with Your Reviews",
