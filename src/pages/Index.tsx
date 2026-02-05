@@ -641,7 +641,7 @@ const Index = () => {
             <span className="hidden md:block">•</span>
             <button onClick={() => navigate("/terms-of-service")} className="hover:text-foreground transition-colors">{t('footer.terms')}</button>
             <span className="hidden md:block">•</span>
-            <a href="mailto:support@voyagerespond.com" className="hover:text-foreground transition-colors">{t('footer.contact')}</a>
+            <button onClick={() => navigate("/contact")} className="hover:text-foreground transition-colors">{t('footer.contact')}</button>
           </div>
         </div>
       </footer>
