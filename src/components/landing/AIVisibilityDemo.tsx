@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Eye, TrendingUp, Star, MessageSquare, CheckCircle, ArrowUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -12,6 +13,7 @@ interface StatsData {
 }
 
 export function AIVisibilityDemo() {
+  const { t } = useTranslation();
   const [stats, setStats] = useState<StatsData>({
     totalReviews: 0,
     averageRating: 0,
@@ -114,10 +116,10 @@ export function AIVisibilityDemo() {
   };
 
   const getScoreLabel = (score: number) => {
-    if (score >= 80) return "Mükemmel";
-    if (score >= 60) return "İyi";
-    if (score >= 40) return "Orta";
-    return "Geliştirilebilir";
+    if (score >= 80) return t('landing.visibilityDemo.excellent', 'Excellent');
+    if (score >= 60) return t('landing.visibilityDemo.good', 'Good');
+    if (score >= 40) return t('landing.visibilityDemo.medium', 'Medium');
+    return t('landing.visibilityDemo.needsImprovement', 'Needs Improvement');
   };
 
   return (
@@ -147,7 +149,7 @@ export function AIVisibilityDemo() {
         {!loading && stats.trend > 0 && (
           <div className="flex items-center justify-center gap-2 text-green-600 text-sm font-medium mt-3">
             <TrendingUp className="w-4 h-4" />
-            <span>+{stats.trend}% bu ay</span>
+            <span>+{stats.trend}% {t('landing.visibilityDemo.thisMonth', 'this month')}</span>
           </div>
         )}
       </div>
@@ -158,7 +160,7 @@ export function AIVisibilityDemo() {
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2 text-muted-foreground">
               <Star className="w-4 h-4" />
-              <span>Ortalama Puan</span>
+              <span>{t('landing.visibilityDemo.averageRating', 'Average Rating')}</span>
             </div>
             <span className="font-medium text-foreground">{stats.averageRating}/5</span>
           </div>
@@ -166,7 +168,7 @@ export function AIVisibilityDemo() {
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2 text-muted-foreground">
               <MessageSquare className="w-4 h-4" />
-              <span>Yanıt Oranı</span>
+              <span>{t('landing.visibilityDemo.responseRate', 'Response Rate')}</span>
             </div>
             <span className="font-medium text-foreground">%{stats.repliedPercentage}</span>
           </div>
@@ -174,7 +176,7 @@ export function AIVisibilityDemo() {
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2 text-muted-foreground">
               <CheckCircle className="w-4 h-4" />
-              <span>Pozitif Yorum</span>
+              <span>{t('landing.visibilityDemo.positiveReviews', 'Positive Reviews')}</span>
             </div>
             <span className="font-medium text-foreground">%{stats.positivePercentage}</span>
           </div>
@@ -182,7 +184,7 @@ export function AIVisibilityDemo() {
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2 text-muted-foreground">
               <ArrowUp className="w-4 h-4" />
-              <span>Toplam Yorum</span>
+              <span>{t('landing.visibilityDemo.totalReviews', 'Total Reviews')}</span>
             </div>
             <span className="font-medium text-foreground">{stats.totalReviews}</span>
           </div>
@@ -193,7 +195,7 @@ export function AIVisibilityDemo() {
       <div className="mt-4 pt-4 border-t border-primary/10 text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-100 text-green-700 text-xs font-medium">
           <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-          Canlı Veri
+          {t('landing.visibilityDemo.liveData', 'Live Data')}
         </div>
       </div>
     </div>

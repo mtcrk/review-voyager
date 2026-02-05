@@ -503,24 +503,24 @@ export function StoryKitDemo() {
               <CardContent className="pt-6">
                 <h4 className="font-semibold mb-3 flex items-center gap-2">
                   <QrCode className="h-4 w-4" />
-                  Nasıl Çalışır?
+                  {t('landing.storyKitDemo.howItWorks', 'How It Works?')}
                 </h4>
                 <ol className="space-y-2 text-sm text-gray-600">
                   <li className="flex items-start gap-2">
                     <span className="bg-amber-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shrink-0">1</span>
-                    İşletmeniz için hashtag ve renkler belirleyin
+                    {t('landing.storyKitDemo.step1', 'Set hashtag and colors for your business')}
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="bg-amber-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shrink-0">2</span>
-                    QR kodu indirip masanıza/kasanıza koyun
+                    {t('landing.storyKitDemo.step2', 'Download QR code and place on your table/counter')}
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="bg-amber-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shrink-0">3</span>
-                    Müşteriler tarayıp story oluşturur ve paylaşır
+                    {t('landing.storyKitDemo.step3', 'Customers scan, create stories and share')}
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="bg-amber-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shrink-0">4</span>
-                    Siz de paylaşım istatistiklerini takip edin
+                    {t('landing.storyKitDemo.step4', 'Track your sharing statistics')}
                   </li>
                 </ol>
               </CardContent>
@@ -544,7 +544,7 @@ export function StoryKitDemo() {
                         <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-amber-100 to-orange-100 p-6 text-center">
                           <Instagram className="h-16 w-16 text-amber-500/50 mb-4" />
                           <p className="text-gray-500 text-sm">
-                            "Demo Story Oluştur" butonuna tıklayarak örnek bir Instagram Story görseli oluşturun
+                            {t('landing.storyKitDemo.phonePrompt', 'Click "Generate Story" to create a sample Instagram Story')}
                           </p>
                         </div>
                       )}
@@ -566,7 +566,7 @@ export function StoryKitDemo() {
                     className="mt-6"
                   >
                     <Download className="h-4 w-4 mr-2" />
-                    Story'yi İndir
+                    {t('landing.storyKitDemo.downloadStoryBtn', 'Download Story')}
                   </Button>
                 )}
               </div>
@@ -581,10 +581,10 @@ export function StoryKitDemo() {
                 <CardContent className="pt-6 space-y-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Printer className="h-5 w-5 text-amber-500" />
-                    <h3 className="font-semibold">Masa Standı / QR Kod</h3>
+                    <h3 className="font-semibold">{t('landing.storyKitDemo.tableStand', 'Table Stand / QR Code')}</h3>
                   </div>
                   <p className="text-sm text-gray-600">
-                    Masanıza veya kasanıza koyabileceğiniz QR kodlu tasarım
+                    {t('landing.storyKitDemo.tableStandDesc', 'QR code design for your table or counter')}
                   </p>
                   
                   {/* Demo QR Preview */}
@@ -597,19 +597,19 @@ export function StoryKitDemo() {
                       />
                     </div>
                     <p className="text-sm font-medium text-gray-800">{selectedBusiness.name}</p>
-                    <p className="text-xs text-gray-500">📸 Story oluşturmak için tarayın</p>
+                    <p className="text-xs text-gray-500">📸 {t('landing.storyKitDemo.scanToCreate', 'Scan to create a story')}</p>
                   </div>
 
                   <div className="flex flex-wrap gap-2 text-xs text-gray-500">
                     <Badge variant="outline">A5</Badge>
                     <Badge variant="outline">A6</Badge>
-                    <Badge variant="outline">Kare</Badge>
+                    <Badge variant="outline">{t('landing.storyKitDemo.sizeOptions', 'Square')}</Badge>
                   </div>
                   
                   <p className="text-xs text-gray-400">
-                    ✓ Özelleştirilebilir boyut ve renkler<br/>
-                    ✓ Yüksek çözünürlüklü PNG indirme<br/>
-                    ✓ Anında yazdırma için hazır
+                    {t('landing.storyKitDemo.customizableSizes', '✓ Customizable sizes and colors')}<br/>
+                    {t('landing.storyKitDemo.highResDownload', '✓ High resolution PNG download')}<br/>
+                    {t('landing.storyKitDemo.printReady', '✓ Ready for instant printing')}
                   </p>
                 </CardContent>
               </Card>
@@ -619,10 +619,10 @@ export function StoryKitDemo() {
                 <CardContent className="pt-6 space-y-4">
                   <div className="flex items-center gap-2 mb-2">
                     <QrCode className="h-5 w-5 text-green-500" />
-                    <h3 className="font-semibold">Paylaşım Linki</h3>
+                    <h3 className="font-semibold">{t('landing.storyKitDemo.shareLink', 'Share Link')}</h3>
                   </div>
                   <p className="text-sm text-gray-600">
-                    WhatsApp, SMS veya sosyal medyada paylaşabileceğiniz link
+                    {t('landing.storyKitDemo.shareLinkDesc', 'Link to share via WhatsApp, SMS, or social media')}
                   </p>
 
                   {/* Demo Link */}
@@ -633,15 +633,15 @@ export function StoryKitDemo() {
                   {/* WhatsApp Template */}
                   <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                     <p className="text-sm text-gray-700">
-                      "Bizi ziyaret ettiğiniz için teşekkürler! 🙏 Deneyiminizi Instagram'da paylaşmak ister misiniz? 
+                      "{t('landing.storyKitDemo.whatsappTemplate', 'Thank you for visiting us! 🙏 Would you like to share your experience on Instagram?')}
                       <span className="text-green-600 font-medium"> [link]</span>"
                     </p>
                   </div>
 
                   <p className="text-xs text-gray-400">
-                    ✓ Hazır mesaj şablonları<br/>
-                    ✓ Tek tıkla kopyalama<br/>
-                    ✓ WhatsApp, SMS, Email için uygun
+                    {t('landing.storyKitDemo.readyTemplates', '✓ Ready message templates')}<br/>
+                    {t('landing.storyKitDemo.oneClickCopy', '✓ One-click copy')}<br/>
+                    {t('landing.storyKitDemo.suitableFor', '✓ Suitable for WhatsApp, SMS, Email')}
                   </p>
                 </CardContent>
               </Card>
@@ -656,10 +656,10 @@ export function StoryKitDemo() {
                 <CardContent className="pt-6 space-y-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Code className="h-5 w-5 text-blue-500" />
-                    <h3 className="font-semibold">Website Butonu</h3>
+                    <h3 className="font-semibold">{t('landing.storyKitDemo.websiteButton', 'Website Button')}</h3>
                   </div>
                   <p className="text-sm text-gray-600">
-                    Web sitenize ekleyebileceğiniz tek satır kod
+                    {t('landing.storyKitDemo.websiteButtonDesc', 'Single line of code to add to your website')}
                   </p>
 
                   {/* Preview */}
@@ -679,7 +679,7 @@ export function StoryKitDemo() {
                         fontWeight: 600,
                       }}
                     >
-                      📸 Story Oluştur
+                      📸 {t('landing.storyKitDemo.createStory', 'Create Story')}
                     </a>
                   </div>
 
@@ -687,12 +687,12 @@ export function StoryKitDemo() {
                     {embedCopied ? (
                       <>
                         <CheckCircle className="h-4 w-4 mr-2" />
-                        Kopyalandı!
+                        {t('landing.storyKitDemo.copied', 'Copied!')}
                       </>
                     ) : (
                       <>
                         <Copy className="h-4 w-4 mr-2" />
-                        Embed Kodunu Kopyala
+                        {t('landing.storyKitDemo.copyEmbedCode', 'Copy Embed Code')}
                       </>
                     )}
                   </Button>
@@ -704,10 +704,10 @@ export function StoryKitDemo() {
                 <CardContent className="pt-6 space-y-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Sparkles className="h-5 w-5 text-purple-500" />
-                    <h3 className="font-semibold">Floating Popup</h3>
+                    <h3 className="font-semibold">{t('landing.storyKitDemo.floatingPopup', 'Floating Popup')}</h3>
                   </div>
                   <p className="text-sm text-gray-600">
-                    Sağ alt köşede sabit duran popup buton
+                    {t('landing.storyKitDemo.floatingPopupDesc', 'Fixed popup button in the bottom right corner')}
                   </p>
 
                   {/* Preview */}
@@ -724,16 +724,16 @@ export function StoryKitDemo() {
                           boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
                         }}
                       >
-                        📸 Story Oluştur
+                      📸 {t('landing.storyKitDemo.createStory', 'Create Story')}
                       </div>
                     </div>
-                    <p className="text-gray-400 text-xs">Site önizlemesi</p>
+                    <p className="text-gray-400 text-xs">{t('landing.storyKitDemo.sitePreview', 'Site preview')}</p>
                   </div>
 
                   <p className="text-xs text-gray-400">
-                    ✓ 3 farklı widget tipi<br/>
-                    ✓ Renk özelleştirme<br/>
-                    ✓ Tek satır JavaScript
+                    {t('landing.storyKitDemo.widgetTypes', '✓ 3 different widget types')}<br/>
+                    {t('landing.storyKitDemo.colorCustom', '✓ Color customization')}<br/>
+                    {t('landing.storyKitDemo.singleLineJs', '✓ Single line JavaScript')}
                   </p>
                 </CardContent>
               </Card>
@@ -744,13 +744,13 @@ export function StoryKitDemo() {
         {/* CTA */}
         <div className="mt-12 text-center">
           <p className="text-gray-600 mb-4">
-            İşletmeniz için Story Kit'i şimdi aktifleştirin
+            {t('landing.storyKitDemo.activateNow', 'Activate Story Kit for your business now')}
           </p>
           <Button 
             className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
             onClick={() => window.location.href = '/register'}
           >
-            Ücretsiz Başla <ArrowRight className="h-4 w-4 ml-2" />
+            {t('landing.storyKitDemo.startFree', 'Start Free')} <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
         </div>
       </div>
