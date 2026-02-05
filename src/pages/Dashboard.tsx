@@ -9,6 +9,9 @@ import { BusinessOnboarding } from "@/components/BusinessOnboarding";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { ChatWithReviews } from "@/components/dashboard/ChatWithReviews";
+import { PriorityActions } from "@/components/dashboard/PriorityActions";
+import { CompetitorComparison } from "@/components/dashboard/CompetitorComparison";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -237,6 +240,13 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+
+          {/* New Feature Widgets */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <PriorityActions reviews={reviews} />
+            <ChatWithReviews />
+            <CompetitorComparison />
           </div>
 
           {reviewsLoading ? (
