@@ -1,5 +1,80 @@
 {
   "nav": { "features": "Özellikler", "pricing": "Fiyatlandırma", "documentation": "Dokümantasyon", "login": "Giriş Yap", "dashboard": "Panel", "getStarted": "Başla" },
+  "landing": {
+    "aiVisibilityBadge": "AI Visibility Engine ile Güçlendirildi",
+    "heroLine1": "Google'da Bulunun.",
+    "heroLine2": "Yapay Zeka ile Keşfedilsin.",
+    "heroSubtitle": "Google Arama ve yapay zeka asistanlarında görünürlüğünüzü artıran AI destekli yorum yönetimi.",
+    "heroSubtitle2": "AI Visibility Skorunuzu alın, akıllı yanıt önerileri ve gerçek zamanlı performans içgörüleri elde edin.",
+    "valueProp1": "AI Visibility Skoru",
+    "valueProp2": "Yorum Optimizasyonu",
+    "valueProp3": "Performans Takibi",
+    "heroCta": "AI Visibility Skorunu Gör",
+    "tryDemo": "AI Yanıt Demosunu Dene",
+    "automationsTitle": "Otomasyonlarınızı Seçin",
+    "automationsSubtitle": "Her kanal bağımsızdır. Birini etkinleştirin veya birden fazlasını birleştirin — seçim sizin.",
+    "useCasesTitle": "Tek bir otomasyon kullanın — veya birden fazla kanalı birleştirin",
+    "useCasesSubtitle": "Tek bir ürün satın almıyorsunuz. İşletmenize uygun modülleri seçiyorsunuz.",
+    "howItWorksTitle": "Nasıl Çalışır",
+    "howItWorksSubtitle": "Günlerde değil, dakikalar içinde başlayın.",
+    "pricingTitle": "Platform için ödeme yapın. İhtiyacınız olan otomasyonları aktive edin.",
+    "pricingSubtitle": "Bir otomasyonla başlayın ve büyüdükçe daha fazlasını ekleyin.",
+    "monthly": "Aylık",
+    "yearly": "Yıllık",
+    "mostPopular": "En Popüler",
+    "whyAIVisibility": "AI Görünürlüğü Neden Önemli",
+    "whyAIVisibilityDesc": "Yorumlarınız sadece müşterileri etkilemiyor — yapay zeka modellerini de eğitiyor. Google'ın AI Overviews'u, ChatGPT ve diğer yapay zeka asistanları işletmeleri önermek için yorum içeriklerinizi kullanıyor. Reviewer AI Engine'imiz yorumlarınızı analiz eder, optimize edilmiş yanıtlar önerir ve işletmenizin yapay zeka destekli arama sonuçlarında nasıl göründüğünü takip eder.",
+    "aiFeature1": "AI Visibility Skoru: Yapay zeka asistanlarının işletmenizi nasıl algıladığını görün",
+    "aiFeature2": "Yanıt Optimizasyonu: Arama görünürlüğünü artıran yanıtlar oluşturun",
+    "aiFeature3": "AI Öneri Paneli: Hangi yorumlara öncelik vermeniz gerektiğini bilin",
+    "ctaTitle": "AI görünürlüğünüzü artırmaya hazır mısınız?",
+    "ctaSubtitle": "Ücretsiz AI Visibility Skorunuzu alın ve işletmenizin yapay zeka asistanlarına nasıl göründüğünü görün.",
+    "learnMore": "Daha Fazla Bilgi",
+    "automations": {
+      "instagram": {
+        "title": "Instagram Satış",
+        "features": ["Yorum → DM otomasyonu", "Yapay zeka destekli DM yanıtları", "Ürün ve seans satışları"],
+        "cta": "Instagram Otomasyonunu Etkinleştir"
+      },
+      "googleReviews": {
+        "title": "Google Yorumları + AI Visibility",
+        "features": ["AI Visibility Skoru ve içgörüler", "Akıllı yorum yanıt önerileri", "Duygu ve arama optimizasyonu"],
+        "cta": "AI Visibility Skorunu Gör"
+      },
+      "tiktok": {
+        "title": "TikTok",
+        "features": ["Login Kit entegrasyonu", "Hesap bağlantısı", "Yakında: Inbox otomasyonu"],
+        "cta": "TikTok Bağla"
+      },
+      "whatsapp": {
+        "title": "WhatsApp",
+        "features": ["Paylaşımlı inbox", "Müşteri görüşmeleri", "İşletme mesajlaşması"],
+        "cta": "Beni Bilgilendir"
+      }
+    },
+    "useCases": {
+      "instagram": { "title": "Sadece Instagram Satış", "description": "DM üzerinden satış yapan içerik üreticileri ve e-ticaret markaları için mükemmel" },
+      "google": { "title": "Google Yorumları + AI Visibility", "description": "Yapay zeka destekli yorum içgörüleri ve görünürlük takibi ile yerel arama sıralamanızı yükseltin" },
+      "multi": { "title": "Çoklu Kanal Yönetimi", "description": "Birden fazla kanalı birleştirin ve tüm müşteri etkileşimlerinizi tek bir yerden yönetin" }
+    },
+    "howItWorks": {
+      "step1": { "title": "Kanallarınızı Bağlayın", "description": "Instagram, Google veya TikTok hesaplarınızı saniyeler içinde bağlayın." },
+      "step2": { "title": "Yapay Zeka Ayarlayın", "description": "Yapay zekanın sizin için yanıt önerileri oluşturmasına izin verin." },
+      "step3": { "title": "İzleyin ve Büyütün", "description": "Etkileşimlerinizi takip edin ve işletmenizin büyümesini izleyin." }
+    },
+    "pricingPlans": {
+      "starter": { "name": "Başlangıç", "description": "Temel özelliklerle başlayın", "price": "49", "features": ["1 otomasyon modülü", "Aylık 500 etkileşim", "Temel analitik", "E-posta desteği"] },
+      "pro": { "name": "Pro", "description": "Büyüyen işletmeler için", "price": "99", "features": ["3 otomasyon modülü", "Sınırsız etkileşim", "Gelişmiş analitik", "Öncelikli destek", "Özel entegrasyonlar"] },
+      "agency": { "name": "Ajans", "description": "Ajanslar için ölçeklenebilir çözüm", "price": "199", "features": ["Sınırsız modül", "Sınırsız etkileşim", "Beyaz etiket seçeneği", "API erişimi", "Özel hesap yöneticisi"] }
+    },
+    "comingSoon": "Yakında",
+    "monthly": "Aylık",
+    "yearly": "Yıllık",
+    "yearlyDiscount": "2 ay ücretsiz",
+    "perMonth": "/ay",
+    "choosePlan": "Planı Seç",
+    "contact": "İletişim"
+  },
   "hero": { "title": "Google Yorumlarınızı Büyümeye Dönüştürün", "subtitle": "Daha hızlı yanıt vermenize, daha derinlemesine analiz yapmanıza ve daha güçlü müşteri ilişkileri kurmanıza yardımcı olan yapay zeka destekli yorum yönetimi.", "cta": "Yorumları Yönetmeye Başla" },
   "features": {
     "title": "Yorumları yönetmek için ihtiyacınız olan her şey",
@@ -16,6 +91,17 @@
   },
   "cta": { "title": "Müşteri ilişkilerinizi yükseltmeye hazır mısınız?", "subtitle": "Yapay zeka destekli yorum yanıtlarıyla zaman kazanan ve daha iyi müşteri ilişkileri kuran işletmelere katılın.", "button": "Hemen Başla" },
   "footer": { "copyright": "© 2025 VoyageRespond", "privacy": "Gizlilik Politikası", "terms": "Hizmet Şartları", "contact": "İletişim" },
+  "contact": {
+    "backToHome": "Ana Sayfa",
+    "title": "Bize Ulaşın",
+    "subtitle": "Sorularınız, önerileriniz veya destek talepleriniz için bizimle iletişime geçin.",
+    "email": "E-posta",
+    "sendEmail": "E-posta Gönder",
+    "responseTime": "Yanıt Süresi",
+    "responseTimeDesc": "Genellikle 24 saat içinde yanıt veriyoruz",
+    "location": "Konum",
+    "locationValue": "Türkiye"
+  },
   "auth": {
     "login": { "title": "Giriş Yap", "subtitle": "Tekrar hoş geldiniz! Devam etmek için lütfen giriş yapın.", "email": "E-posta", "password": "Şifre", "forgotPassword": "Şifreni mi unuttun?", "submit": "Giriş Yap", "noAccount": "Hesabın yok mu?", "register": "Kayıt Ol", "error": "Geçersiz e-posta veya şifre", "emailNotVerified": "Email adresin henüz doğrulanmamış. Lütfen gelen kutuna gönderilen doğrulama linkine tıkla." },
     "register": { "title": "Hesap Oluştur", "subtitle": "VoyageRespond ile bugün başlayın.", "fullName": "Ad Soyad", "email": "E-posta", "password": "Şifre", "submit": "Hesap Oluştur", "hasAccount": "Zaten hesabın var mı?", "login": "Giriş Yap", "success": "Hesabın başarıyla oluşturuldu! Lütfen hesabını doğrulamak için e-postanı kontrol et.", "error": "Kayıt sırasında bir hata oluştu" },
