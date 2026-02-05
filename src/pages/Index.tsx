@@ -16,6 +16,8 @@ import { ProductVideo } from "@/components/landing/ProductVideo";
 import { AIVisibilityDemo } from "@/components/landing/AIVisibilityDemo";
 import { AIVisibilityChecker } from "@/components/landing/AIVisibilityChecker";
 import { ChatWithReviewsDemo } from "@/components/landing/ChatWithReviewsDemo";
+import { PriorityActionsDemo } from "@/components/landing/PriorityActionsDemo";
+import { CompetitorComparisonDemo } from "@/components/landing/CompetitorComparisonDemo";
 const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -369,22 +371,36 @@ const Index = () => {
       {/* AI Reply Demo Section */}
       <AIReplyDemo />
 
-      {/* Chat with Reviews Demo Section */}
-      <section className="container mx-auto px-6 py-20">
+      {/* Dashboard Features Demo Section */}
+      <section className="container mx-auto px-6 py-20 bg-muted/30">
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4">
-            <MessageSquare className="w-4 h-4" />
-            {t('landing.chatDemo.badge', 'AI-Powered Analysis')}
+            <Sparkles className="w-4 h-4" />
+            {t('landing.dashboardDemo.badge', 'Dashboard Preview')}
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            {t('landing.chatDemo.title', 'Chat with Your Reviews')}
+            {t('landing.dashboardDemo.title', 'Powerful Dashboard Tools')}
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            {t('landing.chatDemo.subtitle', 'Ask questions about your customer feedback and get AI-powered insights instantly.')}
+            {t('landing.dashboardDemo.subtitle', 'AI-powered insights, priority management, and competitive analysis - all in one place.')}
           </p>
         </div>
-        <div className="max-w-xl mx-auto">
-          <ChatWithReviewsDemo />
+        
+        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          {/* Chat with Reviews */}
+          <div className="md:col-span-1">
+            <ChatWithReviewsDemo />
+          </div>
+          
+          {/* Priority Actions */}
+          <div className="md:col-span-1">
+            <PriorityActionsDemo />
+          </div>
+          
+          {/* Competitor Comparison */}
+          <div className="md:col-span-1">
+            <CompetitorComparisonDemo />
+          </div>
         </div>
       </section>
 
