@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Star, ChevronLeft, ChevronRight } from "lucide-react";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { startOfWeek, addDays, format, isSameDay, startOfDay, endOfDay } from "date-fns";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { BusinessOnboarding } from "@/components/BusinessOnboarding";
@@ -12,92 +12,79 @@ import { useNavigate } from "react-router-dom";
 import { ChatWithReviews } from "@/components/dashboard/ChatWithReviews";
 import { PriorityActions } from "@/components/dashboard/PriorityActions";
 import { CompetitorComparison } from "@/components/dashboard/CompetitorComparison";
+import { DemoModeBanner } from "@/components/dashboard/DemoModeBanner";
+import { UpgradeCTA } from "@/components/dashboard/UpgradeCTA";
+import { DEMO_REVIEWS, DEMO_METRICS } from "@/lib/demoData";
+import { useTranslation } from "react-i18next";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { activeBusiness, loading: businessLoading, refetchBusinesses } = useBusiness();
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => 
     startOfWeek(new Date(), { weekStartsOn: 1 })
   );
   const [selectedDay, setSelectedDay] = useState<Date>(() => new Date());
+  const [demoDismissed, setDemoDismissed] = useState(false);
 
   // Fetch reviews for active business
   const { data: reviews = [], isLoading: reviewsLoading } = useQuery({
     queryKey: ['reviews', activeBusiness?.id],
     queryFn: async () => {
       if (!activeBusiness) return [];
-
       const { data, error } = await supabase
         .from('reviews')
         .select('*')
         .eq('business_id', activeBusiness.id)
         .order('posted_at', { ascending: false });
-
       if (error) throw error;
       return data || [];
     },
     enabled: !!activeBusiness,
   });
 
+  // Demo mode: active business exists, no real reviews, not google connected
+  const isDemoMode = !!activeBusiness && !reviewsLoading && reviews.length === 0 && !activeBusiness.google_connected;
+  const effectiveReviews = isDemoMode ? DEMO_REVIEWS : reviews;
+
   // Helper function to get heat colors based on rating
   function getDayHeatColor(avgRating: number) {
-    if (avgRating <= 2.0) {
-      return { bg: '#FEF2F2', border: '#FCA5A5', text: '#B91C1C' };
-    } else if (avgRating <= 3.5) {
-      return { bg: '#FFFBEB', border: '#FACC15', text: '#92400E' };
-    } else if (avgRating <= 4.3) {
-      return { bg: '#ECFDF3', border: '#4ADE80', text: '#166534' };
-    } else {
-      return { bg: '#ECFEFF', border: '#22D3EE', text: '#115E59' };
-    }
+    if (avgRating <= 2.0) return { bg: '#FEF2F2', border: '#FCA5A5', text: '#B91C1C' };
+    if (avgRating <= 3.5) return { bg: '#FFFBEB', border: '#FACC15', text: '#92400E' };
+    if (avgRating <= 4.3) return { bg: '#ECFDF3', border: '#4ADE80', text: '#166534' };
+    return { bg: '#ECFEFF', border: '#22D3EE', text: '#115E59' };
   }
 
-  // Calculate metrics from real data
+  // Calculate metrics
   const metrics = useMemo(() => {
-    if (!reviews.length) {
-      return {
-        avgRating: 0,
-        totalReviews: 0,
-        reviewsThisWeek: 0,
-        pendingReplies: 0,
-      };
-    }
+    if (isDemoMode) return DEMO_METRICS;
+    if (!reviews.length) return { avgRating: 0, totalReviews: 0, reviewsThisWeek: 0, pendingReplies: 0 };
 
     const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
-    
     const weekStart = startOfDay(currentWeekStart);
     const weekEnd = endOfDay(addDays(currentWeekStart, 6));
     const reviewsThisWeek = reviews.filter(r => {
       const date = new Date(r.posted_at);
       return date >= weekStart && date <= weekEnd;
     }).length;
-
     const pendingReplies = reviews.filter(r => r.status === 'pending_reply').length;
 
-    return {
-      avgRating: avgRating.toFixed(1),
-      totalReviews: reviews.length,
-      reviewsThisWeek,
-      pendingReplies,
-    };
-  }, [reviews, currentWeekStart]);
+    return { avgRating: avgRating.toFixed(1), totalReviews: reviews.length, reviewsThisWeek, pendingReplies };
+  }, [reviews, currentWeekStart, isDemoMode]);
 
-  // Generate weekly data from real reviews
+  // Generate weekly data
   const weeklyData = useMemo(() => {
     return Array.from({ length: 7 }, (_, index) => {
       const date = addDays(currentWeekStart, index);
       const dayStart = startOfDay(date);
       const dayEnd = endOfDay(date);
-      
-      const dayReviews = reviews.filter(r => {
+      const dayReviews = effectiveReviews.filter(r => {
         const reviewDate = new Date(r.posted_at);
         return reviewDate >= dayStart && reviewDate <= dayEnd;
       });
-
       const avgRating = dayReviews.length > 0
         ? dayReviews.reduce((sum, r) => sum + r.rating, 0) / dayReviews.length
         : 0;
-
       return {
         date,
         day: format(date, 'EEE'),
@@ -106,47 +93,33 @@ export default function Dashboard() {
         avgRating,
       };
     });
-  }, [currentWeekStart, reviews]);
+  }, [currentWeekStart, effectiveReviews]);
 
-  // Calculate week range for display
   const weekRange = useMemo(() => {
     const weekEnd = addDays(currentWeekStart, 6);
     return `${format(currentWeekStart, 'MMM d')} – ${format(weekEnd, 'MMM d, yyyy')}`;
   }, [currentWeekStart]);
 
-  // Navigate weeks
-  const goToPreviousWeek = () => {
-    setCurrentWeekStart(prev => addDays(prev, -7));
-  };
+  const goToPreviousWeek = () => setCurrentWeekStart(prev => addDays(prev, -7));
+  const goToNextWeek = () => setCurrentWeekStart(prev => addDays(prev, 7));
 
-  const goToNextWeek = () => {
-    setCurrentWeekStart(prev => addDays(prev, 7));
-  };
-
-  // Filter reviews by selected day
   const filteredReviews = useMemo(() => {
     const dayStart = startOfDay(selectedDay);
     const dayEnd = endOfDay(selectedDay);
-    
-    return reviews.filter(review => {
+    return effectiveReviews.filter(review => {
       const reviewDate = new Date(review.posted_at);
       return reviewDate >= dayStart && reviewDate <= dayEnd;
     });
-  }, [reviews, selectedDay]);
+  }, [effectiveReviews, selectedDay]);
 
-  // Get selected day name for display
   const selectedDayName = format(selectedDay, 'EEE');
 
   const getSentimentColor = (sentiment: string | null) => {
     switch (sentiment?.toLowerCase()) {
-      case "positive":
-        return "bg-emerald-50 text-emerald-700 border-emerald-200";
-      case "neutral":
-        return "bg-amber-50 text-amber-700 border-amber-200";
-      case "negative":
-        return "bg-rose-50 text-rose-700 border-rose-200";
-      default:
-        return "bg-muted text-muted-foreground border-border";
+      case "positive": return "bg-emerald-50 text-emerald-700 border-emerald-200";
+      case "neutral": return "bg-amber-50 text-amber-700 border-amber-200";
+      case "negative": return "bg-rose-50 text-rose-700 border-rose-200";
+      default: return "bg-muted text-muted-foreground border-border";
     }
   };
 
@@ -157,7 +130,6 @@ export default function Dashboard() {
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
-
     if (diffDays > 0) return `${diffDays} gün önce`;
     if (diffHours > 0) return `${diffHours} saat önce`;
     if (diffMins > 0) return `${diffMins} dakika önce`;
@@ -165,27 +137,10 @@ export default function Dashboard() {
   };
 
   const analyticsData = [
-    {
-      title: "Ortalama Puan",
-      value: metrics.avgRating,
-      icon: Star,
-      subtitle: "5 üzerinden",
-    },
-    {
-      title: "Toplam Yorumlar",
-      value: metrics.totalReviews.toLocaleString(),
-      subtitle: "tüm zamanlar",
-    },
-    {
-      title: "Bu Haftanın Yorumları",
-      value: metrics.reviewsThisWeek.toString(),
-      subtitle: weekRange,
-    },
-    {
-      title: "Bekleyen Yanıtlar",
-      value: metrics.pendingReplies.toString(),
-      subtitle: "dikkat gerekiyor",
-    },
+    { title: t('dashboard.metrics.avgRating', 'Ortalama Puan'), value: metrics.avgRating, icon: Star, subtitle: t('dashboard.metrics.outOf5', '5 üzerinden') },
+    { title: t('dashboard.metrics.totalReviews', 'Toplam Yorumlar'), value: typeof metrics.totalReviews === 'number' ? metrics.totalReviews.toLocaleString() : metrics.totalReviews, subtitle: t('dashboard.metrics.allTime', 'tüm zamanlar') },
+    { title: t('dashboard.metrics.weeklyReviews', 'Bu Haftanın Yorumları'), value: metrics.reviewsThisWeek.toString(), subtitle: weekRange },
+    { title: t('dashboard.metrics.pendingReplies', 'Bekleyen Yanıtlar'), value: metrics.pendingReplies.toString(), subtitle: t('dashboard.metrics.needsAttention', 'dikkat gerekiyor') },
   ];
 
   if (businessLoading) {
@@ -211,17 +166,21 @@ export default function Dashboard() {
               <h1 className="text-3xl font-semibold text-foreground">
                 {activeBusiness.name}
               </h1>
-              <p className="text-muted-foreground mt-1">Dashboard Özeti</p>
+              <p className="text-muted-foreground mt-1">
+                {t('dashboard.subtitle', 'Dashboard Özeti')}
+              </p>
             </div>
+          )}
+
+          {/* Demo Mode Banner */}
+          {isDemoMode && !demoDismissed && (
+            <DemoModeBanner onDismiss={() => setDemoDismissed(true)} />
           )}
 
           {/* Analytics Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {analyticsData.map((item, index) => (
-              <Card
-                key={index}
-                className="shadow-card hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
-              >
+              <Card key={index} className="shadow-card hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     {item.title}
@@ -229,12 +188,8 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div className="flex items-center gap-2">
-                    {item.icon && (
-                      <item.icon className="h-5 w-5 text-primary fill-primary" />
-                    )}
-                    <div className="text-3xl font-bold text-foreground">
-                      {item.value}
-                    </div>
+                    {item.icon && <item.icon className="h-5 w-5 text-primary fill-primary" />}
+                    <div className="text-3xl font-bold text-foreground">{item.value}</div>
                   </div>
                   <p className="text-xs text-muted-foreground">{item.subtitle}</p>
                 </CardContent>
@@ -242,21 +197,30 @@ export default function Dashboard() {
             ))}
           </div>
 
-          {/* New Feature Widgets */}
+          {/* Feature Widgets */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <PriorityActions reviews={reviews} />
-            <ChatWithReviews />
-            <CompetitorComparison />
+            <div className="space-y-0">
+              <PriorityActions reviews={effectiveReviews} />
+              {isDemoMode && <UpgradeCTA feature={t('dashboard.demo.features.priorityActions', 'Öncelikli İşlemler')} />}
+            </div>
+            <div className="space-y-0">
+              <ChatWithReviews />
+              {isDemoMode && <UpgradeCTA feature={t('dashboard.demo.features.chatWithReviews', 'Yorumlarla Sohbet')} />}
+            </div>
+            <div className="space-y-0">
+              <CompetitorComparison />
+              {isDemoMode && <UpgradeCTA feature={t('dashboard.demo.features.competitorAnalysis', 'Rakip Analizi')} />}
+            </div>
           </div>
 
-          {reviewsLoading ? (
+          {reviewsLoading && !isDemoMode ? (
             <div className="flex items-center justify-center p-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
-          ) : reviews.length === 0 ? (
+          ) : effectiveReviews.length === 0 ? (
             <Card className="p-12 text-center shadow-card">
-              <p className="text-muted-foreground text-lg">Bu işletme için henüz yorum yok.</p>
-              <p className="text-sm text-muted-foreground mt-2">Yorumlar eklendiğinde burada görünecek.</p>
+              <p className="text-muted-foreground text-lg">{t('dashboard.noReviews', 'Bu işletme için henüz yorum yok.')}</p>
+              <p className="text-sm text-muted-foreground mt-2">{t('dashboard.noReviewsSub', 'Yorumlar eklendiğinde burada görünecek.')}</p>
             </Card>
           ) : (
             <>
@@ -265,27 +229,15 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-2xl font-semibold text-foreground">
-                      Bu Haftanın Yorumları
+                      {t('dashboard.weeklyTitle', 'Bu Haftanın Yorumları')}
                     </h2>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {weekRange}
-                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">{weekRange}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8"
-                      onClick={goToPreviousWeek}
-                    >
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={goToPreviousWeek}>
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8"
-                      onClick={goToNextWeek}
-                    >
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={goToNextWeek}>
                       <ChevronRight className="h-4 w-4" />
                     </Button>
                   </div>
@@ -303,13 +255,9 @@ export default function Dashboard() {
                       <button
                         key={index}
                         onClick={() => setSelectedDay(dayData.date)}
-                        className={`
-                          p-4 rounded-lg transition-all duration-200
-                          ${isSelected 
-                            ? 'shadow-md scale-105' 
-                            : 'shadow-soft hover:shadow-card hover:scale-[1.02]'
-                          }
-                        `}
+                        className={`p-4 rounded-lg transition-all duration-200 ${
+                          isSelected ? 'shadow-md scale-105' : 'shadow-soft hover:shadow-card hover:scale-[1.02]'
+                        }`}
                         style={{
                           backgroundColor: colors.bg,
                           borderWidth: '2px',
@@ -317,24 +265,9 @@ export default function Dashboard() {
                         }}
                       >
                         <div className="space-y-2 text-center">
-                          <div 
-                            className="text-xs font-semibold"
-                            style={{ color: colors.text }}
-                          >
-                            {dayData.day}
-                          </div>
-                          <div 
-                            className="text-lg font-bold"
-                            style={{ color: colors.text }}
-                          >
-                            {dayData.dayNumber}
-                          </div>
-                          <div 
-                            className="text-[10px] font-medium"
-                            style={{ color: colors.text }}
-                          >
-                            {dayData.reviewCount} yorum
-                          </div>
+                          <div className="text-xs font-semibold" style={{ color: colors.text }}>{dayData.day}</div>
+                          <div className="text-lg font-bold" style={{ color: colors.text }}>{dayData.dayNumber}</div>
+                          <div className="text-[10px] font-medium" style={{ color: colors.text }}>{dayData.reviewCount} yorum</div>
                         </div>
                       </button>
                     );
@@ -345,12 +278,12 @@ export default function Dashboard() {
               {/* Recent Reviews Section */}
               <div className="space-y-6">
                 <h2 className="text-2xl font-semibold text-foreground">
-                  {selectedDayName} Günü Yorumları ({format(selectedDay, 'MMM d')})
+                  {selectedDayName} {t('dashboard.dayReviews', 'Günü Yorumları')} ({format(selectedDay, 'MMM d')})
                 </h2>
 
                 {filteredReviews.length === 0 ? (
                   <Card className="p-16 text-center shadow-card">
-                    <p className="text-muted-foreground text-lg">Bu gün için yorum bulunamadı.</p>
+                    <p className="text-muted-foreground text-lg">{t('dashboard.noDayReviews', 'Bu gün için yorum bulunamadı.')}</p>
                   </Card>
                 ) : (
                   <div className="space-y-4">
@@ -358,50 +291,38 @@ export default function Dashboard() {
                       <Card
                         key={review.id}
                         className="shadow-card hover:shadow-md transition-all duration-300 hover:scale-[1.005] cursor-pointer"
-                        onClick={() => navigate(`/reviews/${review.id}`)}
+                        onClick={() => !isDemoMode && navigate(`/reviews/${review.id}`)}
                       >
                         <CardContent className="p-6">
                           <div className="flex items-start justify-between gap-6">
                             <div className="flex-1 space-y-3">
-                              {/* Header: Name and Stars */}
                               <div className="flex items-center gap-3 flex-wrap">
-                                <h3 className="font-semibold text-foreground text-base">
-                                  {review.reviewer_name}
-                                </h3>
+                                <h3 className="font-semibold text-foreground text-base">{review.reviewer_name}</h3>
                                 <div className="flex items-center gap-0.5">
                                   {Array.from({ length: review.rating }).map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className="h-4 w-4 fill-primary text-primary"
-                                    />
+                                    <Star key={i} className="h-4 w-4 fill-primary text-primary" />
                                   ))}
                                 </div>
+                                {isDemoMode && (
+                                  <Badge variant="outline" className="text-xs bg-primary/5 text-primary border-primary/20">
+                                    Demo
+                                  </Badge>
+                                )}
                               </div>
-
-                              {/* Review Text */}
                               <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
                                 {review.text || 'Yorum metni yok'}
                               </p>
-
-                              {/* Footer: Date and Sentiment */}
                               <div className="flex items-center gap-3">
-                                <span className="text-xs text-muted-foreground">
-                                  {getTimeAgo(review.posted_at)}
-                                </span>
+                                <span className="text-xs text-muted-foreground">{getTimeAgo(review.posted_at)}</span>
                                 {review.sentiment && (
-                                  <Badge
-                                    variant="outline"
-                                    className={`${getSentimentColor(review.sentiment)} text-xs capitalize`}
-                                  >
+                                  <Badge variant="outline" className={`${getSentimentColor(review.sentiment)} text-xs capitalize`}>
                                     {review.sentiment}
                                   </Badge>
                                 )}
                               </div>
                             </div>
-
-                            {/* View Reply Button */}
                             <Button variant="outline" size="sm" className="shrink-0">
-                              Yanıtı Gör
+                              {isDemoMode ? t('dashboard.demo.seeExample', 'Örnek Yanıt') : t('dashboard.seeReply', 'Yanıtı Gör')}
                             </Button>
                           </div>
                         </CardContent>
@@ -410,6 +331,21 @@ export default function Dashboard() {
                   </div>
                 )}
               </div>
+
+              {/* Bottom Upgrade CTA for Demo Mode */}
+              {isDemoMode && (
+                <div className="rounded-xl border border-primary/20 bg-gradient-to-r from-primary/5 via-background to-primary/5 p-8 text-center space-y-4">
+                  <h3 className="text-xl font-semibold text-foreground">
+                    {t('dashboard.demo.bottomCta.title', 'Gerçek verilerinizle çalışmaya hazır mısınız?')}
+                  </h3>
+                  <p className="text-muted-foreground max-w-lg mx-auto">
+                    {t('dashboard.demo.bottomCta.subtitle', 'Google Business hesabınızı bağlayın ve gerçek müşteri yorumlarınızı AI ile yönetmeye başlayın.')}
+                  </p>
+                  <Button onClick={() => navigate("/settings")} className="gradient-primary text-white px-8 py-6 text-base">
+                    {t('dashboard.demo.bottomCta.button', 'Hesabımı Bağla ve Başla')}
+                  </Button>
+                </div>
+              )}
             </>
           )}
         </div>

@@ -365,5 +365,42 @@
       "governingLaw": { "title": "Geçerli Yasa", "content": "Bu Şartlar, kanunlar ihtilafı hükümlerine bakılmaksızın Türkiye Cumhuriyeti yasalarına göre yönetilecek ve yorumlanacaktır. Bu Şartlardan veya Hizmetten kaynaklanan veya bunlarla ilgili herhangi bir anlaşmazlık, İstanbul, Türkiye'de bulunan mahkemelerin münhasır yargı yetkisine tabi olacaktır. Bu tür mahkemelerin kişisel yargı yetkisine tabi olmayı kabul edersiniz." },
       "contact": { "title": "İletişim Bilgileri", "content": "Bu Hizmet Şartları hakkında herhangi bir sorunuz varsa, lütfen bizimle iletişime geçin: support@voyagerespond.com. Sorunuza makul bir süre içinde yanıt vereceğiz." }
     }
+  },
+  "dashboard": {
+    "subtitle": "Dashboard Özeti",
+    "metrics": {
+      "avgRating": "Ortalama Puan",
+      "outOf5": "5 üzerinden",
+      "totalReviews": "Toplam Yorumlar",
+      "allTime": "tüm zamanlar",
+      "weeklyReviews": "Bu Haftanın Yorumları",
+      "pendingReplies": "Bekleyen Yanıtlar",
+      "needsAttention": "dikkat gerekiyor"
+    },
+    "weeklyTitle": "Bu Haftanın Yorumları",
+    "dayReviews": "Günü Yorumları",
+    "noReviews": "Bu işletme için henüz yorum yok.",
+    "noReviewsSub": "Yorumlar eklendiğinde burada görünecek.",
+    "noDayReviews": "Bu gün için yorum bulunamadı.",
+    "seeReply": "Yanıtı Gör",
+    "demo": {
+      "bannerTitle": "Demo Modu Aktif",
+      "bannerSubtitle": "Örnek verilerle platformu keşfediyorsunuz. Gerçek verilerinizi görmek için hesabınızı bağlayın.",
+      "connectCta": "Google Business Bağla",
+      "upgradePro": "Pro'ya Geç",
+      "upgradeText": "{{feature}} özelliğini gerçek verilerle kullanmak için Pro'ya geçin",
+      "upgradeButton": "Pro Planı Keşfet",
+      "seeExample": "Örnek Yanıt",
+      "features": {
+        "priorityActions": "Öncelikli İşlemler",
+        "chatWithReviews": "Yorumlarla Sohbet",
+        "competitorAnalysis": "Rakip Analizi"
+      },
+      "bottomCta": {
+        "title": "Gerçek verilerinizle çalışmaya hazır mısınız?",
+        "subtitle": "Google Business hesabınızı bağlayın ve gerçek müşteri yorumlarınızı AI ile yönetmeye başlayın.",
+        "button": "Hesabımı Bağla ve Başla"
+      }
+    }
   }
 }

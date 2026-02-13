@@ -389,5 +389,42 @@
       "governingLaw": { "title": "Governing Law", "content": "These Terms shall be governed by and construed in accordance with the laws of the Republic of Turkey, without regard to its conflict of law provisions. Any disputes arising from or relating to these Terms or the Service shall be subject to the exclusive jurisdiction of the courts located in Istanbul, Turkey. You agree to submit to the personal jurisdiction of such courts." },
       "contact": { "title": "Contact Information", "content": "If you have any questions about these Terms of Service, please contact us at: support@voyagerespond.com. We will respond to your inquiry within a reasonable timeframe." }
     }
+  },
+  "dashboard": {
+    "subtitle": "Dashboard Overview",
+    "metrics": {
+      "avgRating": "Average Rating",
+      "outOf5": "out of 5",
+      "totalReviews": "Total Reviews",
+      "allTime": "all time",
+      "weeklyReviews": "This Week's Reviews",
+      "pendingReplies": "Pending Replies",
+      "needsAttention": "needs attention"
+    },
+    "weeklyTitle": "This Week's Reviews",
+    "dayReviews": "Reviews",
+    "noReviews": "No reviews yet for this business.",
+    "noReviewsSub": "Reviews will appear here once added.",
+    "noDayReviews": "No reviews found for this day.",
+    "seeReply": "See Reply",
+    "demo": {
+      "bannerTitle": "Demo Mode Active",
+      "bannerSubtitle": "You're exploring the platform with sample data. Connect your account to see your real data.",
+      "connectCta": "Connect Google Business",
+      "upgradePro": "Upgrade to Pro",
+      "upgradeText": "Upgrade to Pro to use {{feature}} with your real data",
+      "upgradeButton": "Explore Pro Plan",
+      "seeExample": "Example Reply",
+      "features": {
+        "priorityActions": "Priority Actions",
+        "chatWithReviews": "Chat with Reviews",
+        "competitorAnalysis": "Competitor Analysis"
+      },
+      "bottomCta": {
+        "title": "Ready to work with your real data?",
+        "subtitle": "Connect your Google Business account and start managing your real customer reviews with AI.",
+        "button": "Connect My Account & Start"
+      }
+    }
   }
 }
