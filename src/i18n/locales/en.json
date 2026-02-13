@@ -45,6 +45,22 @@
       "cta": "Check My AI Score - Free",
       "subtext": "No credit card required"
     },
+    "demoTeaser": {
+      "badge": "Try for Free",
+      "title": "Try All Features for Free",
+      "subtitle": "Sign up and explore all interactive demos of the platform.",
+      "tryNow": "Try Free",
+      "cards": {
+        "visibility": "AI Visibility Score",
+        "visibilityDesc": "How does your business look on AI?",
+        "aiReply": "AI Reply Suggestions",
+        "aiReplyDesc": "Professional AI replies for every review",
+        "dashboard": "Dashboard Tools",
+        "dashboardDesc": "Chat, priorities, competitor analysis",
+        "storyKit": "Story Kit",
+        "storyKitDesc": "Free social media marketing"
+      }
+    },
     "heroLine1": "Manage Your Reviews.",
     "heroLine2": "Grow with AI.",
     "heroSubtitle": "An AI-powered platform that helps you smartly manage your business reviews and boost your AI visibility.",
@@ -347,7 +363,7 @@
   },
   "auth": {
     "login": { "title": "Login", "subtitle": "Welcome back! Please sign in to continue.", "email": "Email", "password": "Password", "forgotPassword": "Forgot password?", "submit": "Login", "noAccount": "Don't have an account?", "register": "Register", "error": "Invalid email or password", "emailNotVerified": "Your email address has not been verified yet. Please click the verification link sent to your inbox." },
-    "register": { "title": "Create Account", "subtitle": "Get started with VoyageRespond today.", "fullName": "Full Name", "email": "Email", "password": "Password", "submit": "Create Account", "hasAccount": "Already have an account?", "login": "Login", "success": "Account created successfully! Please check your email to verify your account.", "error": "An error occurred during registration" },
+    "register": { "title": "Create Account", "subtitle": "Get started with VoyageRespond today.", "fullName": "Full Name", "email": "Email", "password": "Password", "submit": "Create Account", "hasAccount": "Already have an account?", "login": "Login", "success": "Account created successfully! Please check your email to verify your account.", "error": "An error occurred during registration", "googleSignIn": "Sign up with Google", "orEmail": "or with email" },
     "forgotPassword": { "title": "Reset Password", "subtitle": "Enter your email address and we'll send you a reset link.", "email": "Email", "submit": "Send Reset Link", "backToLogin": "Back to Login", "success": "Password reset link sent! Please check your email.", "error": "An error occurred. Please try again." },
     "authCallback": { "title": "Email Verification", "verifying": "Verifying your account...", "error": "An error occurred during verification.", "success": "Account verified successfully! Redirecting...", "noSession": "Session not found. Redirecting to login..." }
   },
@@ -425,6 +441,17 @@
         "subtitle": "Connect your Google Business account and start managing your real customer reviews with AI.",
         "button": "Connect My Account & Start"
       }
+    }
+  },
+  "demo": {
+    "badge": "Interactive Demos",
+    "title": "Explore the Platform",
+    "subtitle": "Try all features for free. Start working with your real data when you're ready.",
+    "sections": {
+      "visibility": { "title": "How Does Your Business Look on AI?", "subtitle": "Discover your AI Visibility Score instantly" },
+      "aiReply": { "title": "Try AI Reply Suggestions", "subtitle": "See how AI generates professional replies for every review" },
+      "dashboardTools": { "title": "Dashboard Tools", "subtitle": "Priority actions, chat, and competitor analysis" },
+      "storyKit": { "title": "Free Marketing with Story Kit", "subtitle": "Turn your customers into your brand storytellers" }
     }
   }
 }
