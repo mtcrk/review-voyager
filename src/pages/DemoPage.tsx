@@ -11,6 +11,7 @@ import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { useNavigate } from "react-router-dom";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useAuth } from "@/contexts/AuthContext";
+import { GatedDemoWrapper } from "@/components/GatedDemoWrapper";
 
 export default function DemoPage() {
   const { t } = useTranslation();
@@ -106,37 +107,47 @@ export default function DemoPage() {
 
       {/* Demo Sections */}
       <div id="demo-visibility">
-        <AIVisibilityChecker />
+        <GatedDemoWrapper>
+          <AIVisibilityChecker />
+        </GatedDemoWrapper>
       </div>
 
       <div id="demo-ai-reply">
-        <AIReplyDemo />
+        <GatedDemoWrapper>
+          <AIReplyDemo />
+        </GatedDemoWrapper>
       </div>
 
       <div id="demo-dashboard-tools">
-        <section className="container mx-auto px-6 py-20 bg-muted/30">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              {t('demo.sections.dashboardTools.title', 'Dashboard Araçları')}
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              {t('demo.sections.dashboardTools.subtitle', 'Öncelikli işlemler, sohbet ve rakip analizi')}
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            <ChatWithReviewsDemo />
-            <PriorityActionsDemo />
-            <CompetitorComparisonDemo />
-          </div>
-        </section>
+        <GatedDemoWrapper>
+          <section className="container mx-auto px-6 py-20 bg-muted/30">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+                {t('demo.sections.dashboardTools.title', 'Dashboard Araçları')}
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                {t('demo.sections.dashboardTools.subtitle', 'Öncelikli işlemler, sohbet ve rakip analizi')}
+              </p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              <ChatWithReviewsDemo />
+              <PriorityActionsDemo />
+              <CompetitorComparisonDemo />
+            </div>
+          </section>
+        </GatedDemoWrapper>
       </div>
 
       <div id="demo-storykit">
-        <StoryKitDemo />
+        <GatedDemoWrapper>
+          <StoryKitDemo />
+        </GatedDemoWrapper>
       </div>
 
       {/* AI Visibility Score (live data) */}
-      <AIVisibilityDemo />
+      <GatedDemoWrapper>
+        <AIVisibilityDemo />
+      </GatedDemoWrapper>
     </div>
   );
 }

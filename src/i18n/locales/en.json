@@ -37,6 +37,11 @@
       "title": "Chat with Your Reviews",
       "subtitle": "Ask questions about your customer feedback and get AI-powered insights instantly."
     },
+    "gated": {
+      "title": "Sign Up to Try the Demo",
+      "description": "Create a free account to test all features",
+      "signup": "Sign Up for Free"
+    },
     "aiVisibilityBadge": "Powered by AI Visibility Engine",
     "freemiumCta": {
       "badge": "AI Visibility Engine",

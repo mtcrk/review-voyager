@@ -27,6 +27,11 @@
       "title": "Yorumlarınızla Sohbet Edin",
       "subtitle": "Müşteri geri bildirimleriniz hakkında sorular sorun ve anında AI destekli içgörüler alın."
     },
+    "gated": {
+      "title": "Demoyu Denemek İçin Kayıt Olun",
+      "description": "Tüm özellikleri test etmek için ücretsiz bir hesap oluşturun",
+      "signup": "Ücretsiz Kayıt Ol"
+    },
     "aiVisibilityBadge": "AI Visibility Engine ile Güçlendirildi",
     "freemiumCta": {
       "badge": "AI Visibility Engine",
