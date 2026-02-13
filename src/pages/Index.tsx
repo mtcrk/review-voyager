@@ -362,8 +362,48 @@ const Index = () => {
         </div>
       </section>
 
-      {/* AI Visibility Checker - Interactive Demo */}
-      <AIVisibilityChecker />
+       {/* Freemium CTA Section */}
+       <section className="container mx-auto px-6 py-20 md:py-28">
+         <div className="max-w-3xl mx-auto">
+           <div className="relative overflow-hidden rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/5 via-background to-background p-12 md:p-16 text-center">
+             {/* Subtle gradient background */}
+             <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-50"></div>
+             
+             <div className="relative z-10 space-y-6">
+               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium">
+                 <Sparkles className="w-4 h-4" />
+                 {t('landing.freemiumCta.badge', 'AI Visibility Engine')}
+               </div>
+               
+               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground leading-tight">
+                 {t('landing.freemiumCta.title', 'How does your business look on AI?')}
+               </h2>
+               
+               <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+                 {t('landing.freemiumCta.subtitle', 'Discover your AI Visibility Score instantly. See how you rank on Google Search, AI assistants, and get smart recommendations to boost your online presence.')}
+               </p>
+               
+               <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+                 <Button 
+                   size="lg" 
+                   onClick={() => navigate(user ? "/dashboard" : "/register")} 
+                   className="relative overflow-hidden gradient-primary text-white shadow-lg text-base px-8 py-6 hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
+                 >
+                   <span className="relative z-10">{t('landing.freemiumCta.cta', 'Check My AI Score - Free')}</span>
+                   <ArrowRight className="w-4 h-4 ml-2 relative z-10" />
+                   <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                 </Button>
+                 <p className="text-sm text-muted-foreground">
+                   {t('landing.freemiumCta.subtext', 'No credit card required')}
+                 </p>
+               </div>
+             </div>
+           </div>
+         </div>
+       </section>
+
+       {/* AI Visibility Checker - Interactive Demo */}
+       <AIVisibilityChecker />
 
       {/* Live Metrics Section */}
       <LiveMetrics />
