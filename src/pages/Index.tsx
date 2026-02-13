@@ -6,18 +6,10 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
-import { AIReplyDemo } from "@/components/landing/AIReplyDemo";
-import { StoryKitDemo } from "@/components/landing/StoryKitDemo";
-import { LiveMetrics } from "@/components/landing/LiveMetrics";
 import { Testimonials } from "@/components/landing/Testimonials";
 import { TrustBadges } from "@/components/landing/TrustBadges";
 import { ProductVideo } from "@/components/landing/ProductVideo";
-// import { ClientLogos } from "@/components/landing/ClientLogos"; // Temporarily hidden
 import { AIVisibilityDemo } from "@/components/landing/AIVisibilityDemo";
-import { AIVisibilityChecker } from "@/components/landing/AIVisibilityChecker";
-import { ChatWithReviewsDemo } from "@/components/landing/ChatWithReviewsDemo";
-import { PriorityActionsDemo } from "@/components/landing/PriorityActionsDemo";
-import { CompetitorComparisonDemo } from "@/components/landing/CompetitorComparisonDemo";
 const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -402,50 +394,45 @@ const Index = () => {
          </div>
        </section>
 
-       {/* AI Visibility Checker - Interactive Demo */}
-       <AIVisibilityChecker />
+       {/* Demo Teaser Section */}
+       <section className="container mx-auto px-6 py-20">
+         <div className="text-center mb-12">
+           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4">
+             <Sparkles className="w-4 h-4" />
+             {t('landing.demoTeaser.badge', 'Ücretsiz Deneyin')}
+           </div>
+           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+             {t('landing.demoTeaser.title', 'Tüm Özellikleri Ücretsiz Deneyin')}
+           </h2>
+           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+             {t('landing.demoTeaser.subtitle', 'Kayıt olun ve platformun tüm interaktif demolarını keşfedin.')}
+           </p>
+         </div>
 
-      {/* Live Metrics Section */}
-      <LiveMetrics />
-
-      {/* AI Reply Demo Section */}
-      <AIReplyDemo />
-
-      {/* Dashboard Features Demo Section */}
-      <section className="container mx-auto px-6 py-20 bg-muted/30">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4">
-            <Sparkles className="w-4 h-4" />
-            {t('landing.dashboardDemo.badge', 'Dashboard Preview')}
-          </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            {t('landing.dashboardDemo.title', 'Powerful Dashboard Tools')}
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            {t('landing.dashboardDemo.subtitle', 'AI-powered insights, priority management, and competitive analysis - all in one place.')}
-          </p>
-        </div>
-        
-        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {/* Chat with Reviews */}
-          <div className="md:col-span-1">
-            <ChatWithReviewsDemo />
-          </div>
-          
-          {/* Priority Actions */}
-          <div className="md:col-span-1">
-            <PriorityActionsDemo />
-          </div>
-          
-          {/* Competitor Comparison */}
-          <div className="md:col-span-1">
-            <CompetitorComparisonDemo />
-          </div>
-        </div>
-      </section>
-
-      {/* Story Kit Demo Section */}
-      <StoryKitDemo />
+         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
+           {[
+             { icon: Eye, title: t('landing.demoTeaser.cards.visibility', 'AI Visibility Skoru'), desc: t('landing.demoTeaser.cards.visibilityDesc', 'İşletmeniz yapay zekada nasıl görünüyor?') },
+             { icon: MessageSquare, title: t('landing.demoTeaser.cards.aiReply', 'AI Yanıt Önerileri'), desc: t('landing.demoTeaser.cards.aiReplyDesc', 'Her yoruma profesyonel AI yanıtlar') },
+             { icon: Target, title: t('landing.demoTeaser.cards.dashboard', 'Dashboard Araçları'), desc: t('landing.demoTeaser.cards.dashboardDesc', 'Sohbet, öncelik, rakip analizi') },
+             { icon: Star, title: t('landing.demoTeaser.cards.storyKit', 'Story Kit'), desc: t('landing.demoTeaser.cards.storyKitDesc', 'Ücretsiz sosyal medya pazarlama') },
+           ].map((card, i) => (
+             <button
+               key={i}
+               onClick={() => navigate(user ? "/demo" : "/register?redirect=/demo")}
+               className="p-6 rounded-xl border border-border bg-card hover:bg-muted/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 text-left group"
+             >
+               <div className="p-2 rounded-lg bg-primary/10 w-fit mb-4">
+                 <card.icon className="w-5 h-5 text-primary" />
+               </div>
+               <h3 className="font-semibold text-foreground mb-2">{card.title}</h3>
+               <p className="text-sm text-muted-foreground mb-4">{card.desc}</p>
+               <span className="text-sm font-medium text-primary group-hover:underline flex items-center gap-1">
+                 {t('landing.demoTeaser.tryNow', 'Ücretsiz Dene')} <ArrowRight className="w-3 h-3" />
+               </span>
+             </button>
+           ))}
+         </div>
+       </section>
 
       {/* Product Video Section */}
       <ProductVideo />

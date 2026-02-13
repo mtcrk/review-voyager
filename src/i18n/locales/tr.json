@@ -35,6 +35,22 @@
       "cta": "AI Skorumu Kontrol Et - Ücretsiz",
       "subtext": "Kredi kartı gerekli değil"
     },
+    "demoTeaser": {
+      "badge": "Ücretsiz Deneyin",
+      "title": "Tüm Özellikleri Ücretsiz Deneyin",
+      "subtitle": "Kayıt olun ve platformun tüm interaktif demolarını keşfedin.",
+      "tryNow": "Ücretsiz Dene",
+      "cards": {
+        "visibility": "AI Visibility Skoru",
+        "visibilityDesc": "İşletmeniz yapay zekada nasıl görünüyor?",
+        "aiReply": "AI Yanıt Önerileri",
+        "aiReplyDesc": "Her yoruma profesyonel AI yanıtlar",
+        "dashboard": "Dashboard Araçları",
+        "dashboardDesc": "Sohbet, öncelik, rakip analizi",
+        "storyKit": "Story Kit",
+        "storyKitDesc": "Ücretsiz sosyal medya pazarlama"
+      }
+    },
     "heroLine1": "Yorumlarınızı Yönetin.",
     "heroLine2": "Yapay Zeka ile Büyüyün.",
     "heroSubtitle": "İşletme yorumlarınızı akıllıca yönetmenizi ve yapay zeka görünürlüğünüzü artırmanızı sağlayan AI destekli platform.",
@@ -327,7 +343,7 @@
   },
   "auth": {
     "login": { "title": "Giriş Yap", "subtitle": "Tekrar hoş geldiniz! Devam etmek için lütfen giriş yapın.", "email": "E-posta", "password": "Şifre", "forgotPassword": "Şifreni mi unuttun?", "submit": "Giriş Yap", "noAccount": "Hesabın yok mu?", "register": "Kayıt Ol", "error": "Geçersiz e-posta veya şifre", "emailNotVerified": "Email adresin henüz doğrulanmamış. Lütfen gelen kutuna gönderilen doğrulama linkine tıkla." },
-    "register": { "title": "Hesap Oluştur", "subtitle": "VoyageRespond ile bugün başlayın.", "fullName": "Ad Soyad", "email": "E-posta", "password": "Şifre", "submit": "Hesap Oluştur", "hasAccount": "Zaten hesabın var mı?", "login": "Giriş Yap", "success": "Hesabın başarıyla oluşturuldu! Lütfen hesabını doğrulamak için e-postanı kontrol et.", "error": "Kayıt sırasında bir hata oluştu" },
+    "register": { "title": "Hesap Oluştur", "subtitle": "VoyageRespond ile bugün başlayın.", "fullName": "Ad Soyad", "email": "E-posta", "password": "Şifre", "submit": "Hesap Oluştur", "hasAccount": "Zaten hesabın var mı?", "login": "Giriş Yap", "success": "Hesabın başarıyla oluşturuldu! Lütfen hesabını doğrulamak için e-postanı kontrol et.", "error": "Kayıt sırasında bir hata oluştu", "googleSignIn": "Google ile Kayıt Ol", "orEmail": "veya email ile" },
     "forgotPassword": { "title": "Şifre Sıfırla", "subtitle": "E-posta adresini gir, sana sıfırlama linki gönderelim.", "email": "E-posta", "submit": "Sıfırlama Linki Gönder", "backToLogin": "Giriş Sayfasına Dön", "success": "Şifre sıfırlama linki gönderildi! Lütfen e-postanı kontrol et.", "error": "Bir hata oluştu. Lütfen tekrar dene." },
     "authCallback": { "title": "Email Doğrulama", "verifying": "Hesabın doğrulanıyor...", "error": "Doğrulama sırasında bir hata oluştu.", "success": "Hesabın başarıyla doğrulandı! Yönlendiriliyorsun...", "noSession": "Oturum bulunamadı. Giriş sayfasına yönlendiriliyorsun..." }
   },
@@ -401,6 +417,17 @@
         "subtitle": "Google Business hesabınızı bağlayın ve gerçek müşteri yorumlarınızı AI ile yönetmeye başlayın.",
         "button": "Hesabımı Bağla ve Başla"
       }
+    }
+  },
+  "demo": {
+    "badge": "İnteraktif Demolar",
+    "title": "Platformu Keşfedin",
+    "subtitle": "Tüm özellikleri ücretsiz deneyin. Beğendiğinizde gerçek verilerinizle çalışmaya başlayın.",
+    "sections": {
+      "visibility": { "title": "İşletmeniz Yapay Zekada Nasıl Görünüyor?", "subtitle": "AI Visibility Skorunuzu anında keşfedin" },
+      "aiReply": { "title": "AI Yanıt Önerilerini Deneyin", "subtitle": "Yapay zekanın her yorum için nasıl profesyonel yanıtlar ürettiğini görün" },
+      "dashboardTools": { "title": "Dashboard Araçları", "subtitle": "Öncelikli işlemler, sohbet ve rakip analizi" },
+      "storyKit": { "title": "Story Kit ile Ücretsiz Pazarlama", "subtitle": "Müşterilerinizi markanızın hikaye anlatıcısına dönüştürün" }
     }
   }
 }
