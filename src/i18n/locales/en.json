@@ -38,6 +38,13 @@
       "subtitle": "Ask questions about your customer feedback and get AI-powered insights instantly."
     },
     "aiVisibilityBadge": "Powered by AI Visibility Engine",
+    "freemiumCta": {
+      "badge": "AI Visibility Engine",
+      "title": "How does your business look on AI?",
+      "subtitle": "Discover your AI Visibility Score instantly. See how you rank on Google Search, AI assistants, and get smart recommendations to boost your online presence.",
+      "cta": "Check My AI Score - Free",
+      "subtext": "No credit card required"
+    },
     "heroLine1": "Manage Your Reviews.",
     "heroLine2": "Grow with AI.",
     "heroSubtitle": "An AI-powered platform that helps you smartly manage your business reviews and boost your AI visibility.",
