@@ -64,14 +64,7 @@ const App = () => (
             <Route path="/hub" element={<Hub />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/contact" element={<Contact />} />
-            <Route
-              path="/demo"
-              element={
-                <ProtectedRoute>
-                  <DemoPage />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/demo" element={<DemoPage />} />
             <Route path="/automations/instagram-sales" element={<InstagramSales />} />
             <Route path="/automations/google-reviews" element={<GoogleReviews />} />
             <Route path="/automations/whatsapp" element={<WhatsAppAutomation />} />
