@@ -21,8 +21,9 @@ export function SetupWizard({ onDismiss, onComplete }: SetupWizardProps) {
   // Parse booking hotel ID from full URL or partial input
   const parseBookingId = (input: string): string => {
     const trimmed = input.trim();
+    // Extract country/hotel-name from full Booking.com URL
     const match = trimmed.match(/hotel\/([a-z]{2})\/([a-z0-9_-]+)/i);
-    if (match) return `hotel/${match[1]}/${match[2]}`;
+    if (match) return `${match[1]}/${match[2]}`;
     return trimmed;
   };
 
