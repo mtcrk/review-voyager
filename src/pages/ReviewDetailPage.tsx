@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Star } from "lucide-react";
+import { ArrowLeft, Star, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 type ToneOption = "Friendly" | "Professional" | "Formal";
+const toneMap: Record<ToneOption, string> = {
+  Friendly: "friendly",
+  Professional: "empathetic",
+  Formal: "formal",
+};
 
 const ReviewDetailPage = () => {
   const navigate = useNavigate();
@@ -42,8 +47,11 @@ const ReviewDetailPage = () => {
   useEffect(() => {
     if (review?.suggested_reply) {
       setAiReply(review.suggested_reply);
+    } else if (review && !review.suggested_reply) {
+      // Auto-generate if no reply exists
+      regenerateMutation.mutate();
     }
-  }, [review]);
+  }, [review?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Approve mutation
   const approveMutation = useMutation({
@@ -133,9 +141,48 @@ const ReviewDetailPage = () => {
     sendMutation.mutate();
   };
 
+  const regenerateMutation = useMutation({
+    mutationFn: async () => {
+      if (!review) throw new Error('No review');
+
+      const { data, error } = await supabase.functions.invoke('generate-reply', {
+        body: {
+          review_text: review.text,
+          reviewer_name: review.reviewer_name,
+          rating: review.rating,
+          tone: toneMap[selectedTone],
+          language: "TR",
+          summary: review.summary,
+          issues: review.issues,
+          praises: review.praises,
+          sentiment: review.sentiment,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      const reply = data.reply;
+
+      await supabase
+        .from('reviews')
+        .update({ suggested_reply: reply })
+        .eq('id', review.id);
+
+      return reply;
+    },
+    onSuccess: (reply) => {
+      setAiReply(reply);
+      queryClient.invalidateQueries({ queryKey: ['review', id] });
+      toast.success("Yanıt üretildi!");
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : "Yanıt üretilemedi");
+    },
+  });
+
   const handleRegenerateReply = () => {
-    // Will connect to AI service later
-    toast.info("Regenerating reply...");
+    regenerateMutation.mutate();
   };
 
   const formatDate = (dateString: string) => {
@@ -324,8 +371,10 @@ const ReviewDetailPage = () => {
                     variant="outline"
                     size="sm"
                     onClick={handleRegenerateReply}
+                    disabled={regenerateMutation.isPending}
                   >
-                    Regenerate Reply
+                    {regenerateMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
+                    {regenerateMutation.isPending ? "Üretiliyor..." : "Yeniden Üret"}
                   </Button>
                 </div>
               </div>
