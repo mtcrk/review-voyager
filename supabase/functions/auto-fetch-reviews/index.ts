@@ -53,15 +53,22 @@ Deno.serve(async (req) => {
         let insertedCount = 0;
 
         for (const review of wextData.reviews || []) {
-          const reviewId = review.id || `booking-${biz.booking_hotel_id}-${review.author || review.author_name}-${review.date}`;
+          const reviewerName = review.reviewer || review.author || review.author_name || "Anonymous";
+          const reviewDate = review.datetime || review.date;
+          const posText = review.pros || review.positive || "";
+          const negText = review.cons || review.negative || "";
 
-          let normalizedRating = review.rating || 3;
+          const reviewId = review.id || `booking-${biz.booking_hotel_id}-${reviewerName}-${reviewDate}`;
+
+          let normalizedRating = typeof review.rating === "string" ? parseFloat(review.rating) : (review.rating || 3);
           if (normalizedRating > 5) normalizedRating = Math.round(normalizedRating / 2);
 
           const parts: string[] = [];
-          if (review.positive) parts.push(`👍 ${review.positive}`);
-          if (review.negative) parts.push(`👎 ${review.negative}`);
-          const reviewText = parts.length > 0 ? parts.join("\n\n") : (review.text || "");
+          if (posText) parts.push(`👍 ${posText}`);
+          if (negText) parts.push(`👎 ${negText}`);
+          let reviewText = parts.length > 0 ? parts.join("\n\n") : (review.text || "");
+          if (review.title && reviewText) reviewText = `${review.title}\n\n${reviewText}`;
+          else if (review.title) reviewText = review.title;
 
           const { data: existing } = await supabase
             .from("reviews")
@@ -77,10 +84,10 @@ Deno.serve(async (req) => {
             business_id: biz.id,
             platform: "booking",
             google_review_id: reviewId,
-            reviewer_name: review.author || review.author_name || "Anonymous",
+            reviewer_name: reviewerName,
             rating: normalizedRating,
             text: reviewText || null,
-            posted_at: review.date ? new Date(review.date).toISOString() : new Date().toISOString(),
+            posted_at: reviewDate ? new Date(reviewDate).toISOString() : new Date().toISOString(),
             status: "pending_reply",
             sentiment: normalizedRating >= 4 ? "positive" : normalizedRating >= 3 ? "neutral" : "negative",
           });

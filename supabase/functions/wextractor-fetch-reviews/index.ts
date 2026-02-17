@@ -10,12 +10,16 @@ interface WextractorReview {
   id?: string;
   title?: string;
   text?: string;
-  rating?: number;
+  rating?: string | number;
   date?: string;
+  datetime?: string;
   author?: string;
   author_name?: string;
+  reviewer?: string;
   positive?: string;
   negative?: string;
+  pros?: string;
+  cons?: string;
   reply?: string | null;
   room_type?: string;
   stay_date?: string;
@@ -154,11 +158,17 @@ Deno.serve(async (req) => {
     let skippedCount = 0;
 
     for (const review of wextData.reviews || []) {
+      // Resolve field name differences between API versions
+      const reviewerName = review.reviewer || review.author || review.author_name || "Anonymous";
+      const reviewDate = review.datetime || review.date;
+      const posText = review.pros || review.positive || "";
+      const negText = review.cons || review.negative || "";
+
       // Create a unique identifier for deduplication
-      const reviewId = review.id || `${platform}-${business.booking_hotel_id}-${review.author || review.author_name}-${review.date}`;
+      const reviewId = review.id || `${platform}-${business.booking_hotel_id}-${reviewerName}-${reviewDate}`;
 
       // Normalize rating: Booking uses 1-10 scale, we use 1-5
-      let normalizedRating = review.rating || 3;
+      let normalizedRating = typeof review.rating === "string" ? parseFloat(review.rating) : (review.rating || 3);
       if (platform === "booking" && normalizedRating > 5) {
         normalizedRating = Math.round(normalizedRating / 2);
       }
@@ -167,10 +177,13 @@ Deno.serve(async (req) => {
       let reviewText = review.text || "";
       if (platform === "booking") {
         const parts: string[] = [];
-        if (review.positive) parts.push(`👍 ${review.positive}`);
-        if (review.negative) parts.push(`👎 ${review.negative}`);
+        if (posText) parts.push(`👍 ${posText}`);
+        if (negText) parts.push(`👎 ${negText}`);
         if (parts.length > 0) reviewText = parts.join("\n\n");
       }
+      // Add title if available
+      if (review.title && reviewText) reviewText = `${review.title}\n\n${reviewText}`;
+      else if (review.title) reviewText = review.title;
 
       // Check if review already exists
       const { data: existing } = await supabase
@@ -189,11 +202,11 @@ Deno.serve(async (req) => {
       const { error: insertError } = await supabase.from("reviews").insert({
         business_id,
         platform,
-        google_review_id: reviewId, // reusing this field as external_review_id
-        reviewer_name: review.author || review.author_name || "Anonymous",
+        google_review_id: reviewId,
+        reviewer_name: reviewerName,
         rating: normalizedRating,
         text: reviewText || null,
-        posted_at: review.date ? new Date(review.date).toISOString() : new Date().toISOString(),
+        posted_at: reviewDate ? new Date(reviewDate).toISOString() : new Date().toISOString(),
         status: "pending_reply",
         sentiment: normalizedRating >= 4 ? "positive" : normalizedRating >= 3 ? "neutral" : "negative",
       });
