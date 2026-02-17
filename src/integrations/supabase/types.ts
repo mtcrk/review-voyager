@@ -48,6 +48,7 @@ export type Database = {
       }
       businesses: {
         Row: {
+          booking_hotel_id: string | null
           created_at: string
           google_account_id: string | null
           google_connected: boolean | null
@@ -60,6 +61,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          booking_hotel_id?: string | null
           created_at?: string
           google_account_id?: string | null
           google_connected?: boolean | null
@@ -72,6 +74,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          booking_hotel_id?: string | null
           created_at?: string
           google_account_id?: string | null
           google_connected?: boolean | null
@@ -167,6 +170,7 @@ export type Database = {
           google_review_name: string | null
           id: string
           issues: Json | null
+          platform: string
           posted_at: string
           praises: Json | null
           rating: number
@@ -189,6 +193,7 @@ export type Database = {
           google_review_name?: string | null
           id?: string
           issues?: Json | null
+          platform?: string
           posted_at: string
           praises?: Json | null
           rating: number
@@ -211,6 +216,7 @@ export type Database = {
           google_review_name?: string | null
           id?: string
           issues?: Json | null
+          platform?: string
           posted_at?: string
           praises?: Json | null
           rating?: number
