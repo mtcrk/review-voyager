@@ -178,7 +178,7 @@ export default function Dashboard() {
           )}
 
           {/* Setup Wizard */}
-          {activeBusiness && !activeBusiness.booking_hotel_id && !wizardDismissed && (
+          {activeBusiness && !wizardDismissed && (
             <SetupWizard
               onDismiss={() => setWizardDismissed(true)}
               onComplete={() => {
