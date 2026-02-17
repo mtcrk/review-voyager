@@ -156,6 +156,13 @@ export default function Settings() {
                 <Label htmlFor="placeId">Google Place ID</Label>
                 <Input id="placeId" placeholder="ChIJ..." />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="bookingHotelId">Booking.com Otel ID</Label>
+                <Input id="bookingHotelId" placeholder="us/hotel-name" />
+                <p className="text-xs text-muted-foreground">
+                  Booking.com URL'sindeki otel yolunu girin. Örn: "tr/hotel-sultanahmet-palace"
+                </p>
+              </div>
               <Button>Değişiklikleri Kaydet</Button>
             </CardContent>
           </Card>
