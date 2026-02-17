@@ -65,6 +65,24 @@ const toneDescriptions = {
     examples_tr: ["Bizimle paylaştığınız için minnettarız.", "Desteğiniz bizim için paha biçilmez."],
     examples_en: ["We're grateful you shared this with us.", "Your support is invaluable to us."],
   },
+  witty: {
+    tr: "Zeki ve espritüel bir dil kullan. Hafif mizah ekle ama saygılı kal.",
+    en: "Use witty and clever language. Add light humor while staying respectful.",
+    examples_tr: ["Sizi mutlu ettiğimize sevindik! 😉", "Böyle güzel sözler duymak keyif veriyor!"],
+    examples_en: ["Glad we could make your day! 😉", "Words like these keep us going!"],
+  },
+  apologetic: {
+    tr: "Özür dileyen ve çözüm odaklı bir dil kullan. Samimi pişmanlık göster.",
+    en: "Use an apologetic and solution-focused tone. Show genuine remorse.",
+    examples_tr: ["Bu durum için içtenlikle özür dileriz.", "Sizi hayal kırıklığına uğrattığımız için çok üzgünüz."],
+    examples_en: ["We sincerely apologize for this situation.", "We're truly sorry for the disappointment."],
+  },
+  enthusiastic: {
+    tr: "Coşkulu ve heyecanlı bir dil kullan. Pozitif enerjiyi yansıt, ünlem işaretleri kullan.",
+    en: "Use enthusiastic and excited language. Reflect positive energy with exclamation marks.",
+    examples_tr: ["Harika bir yorum! Çok mutluyuz!", "Sizi ağırlamak bizim için büyük keyif!"],
+    examples_en: ["What an amazing review! We're thrilled!", "It's an absolute pleasure to serve you!"],
+  },
 };
 
 serve(async (req) => {
