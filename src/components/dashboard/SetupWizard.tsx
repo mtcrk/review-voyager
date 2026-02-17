@@ -51,11 +51,18 @@ export function SetupWizard({ onDismiss, onComplete }: SetupWizardProps) {
       if (result?.error) {
         toast({ title: "Hata", description: result.error, variant: "destructive" });
       } else {
+        const total = (result.inserted || 0) + (result.skipped || 0);
+        const msg = result.inserted > 0
+          ? `${result.inserted} yeni yorum eklendi${result.skipped ? ` (${result.skipped} zaten mevcut)` : ''}. Toplam: ${result.total_available || total}`
+          : total > 0
+            ? `${result.skipped} yorum zaten mevcut. Yeni yorum yok.`
+            : 'Henüz yorum bulunamadı.';
         toast({
-          title: "Harika! 🎉",
-          description: `${result.inserted} yorum çekildi.`,
+          title: result.inserted > 0 ? "Harika! 🎉" : "Bilgi",
+          description: msg,
         });
         setStep(3);
+        setIsEditing(false);
         await refetchBusinesses();
         onComplete();
       }
