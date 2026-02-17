@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Star, Copy, Send, CheckCircle2, Search, Filter, ArrowUpDown, RefreshCw, Sparkles } from "lucide-react";
+import { Star, Copy, Send, CheckCircle2, Search, Filter, ArrowUpDown, RefreshCw, Sparkles, Download, Globe } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -39,6 +39,13 @@ type SortField = "posted_at" | "rating" | "reviewer_name";
 type SortOrder = "asc" | "desc";
 type StatusFilter = "all" | "pending" | "approved" | "replied";
 type SentimentFilter = "all" | "positive" | "negative" | "neutral";
+type PlatformFilter = "all" | "google" | "booking" | "tripadvisor";
+
+const platformLabels: Record<string, { label: string; color: string }> = {
+  google: { label: "Google", color: "bg-blue-50 text-blue-700 border-blue-200" },
+  booking: { label: "Booking.com", color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
+  tripadvisor: { label: "TripAdvisor", color: "bg-green-50 text-green-700 border-green-200" },
+};
 
 export default function Reviews() {
   const { activeBusiness } = useBusiness();
@@ -50,8 +57,10 @@ export default function Reviews() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [sentimentFilter, setSentimentFilter] = useState<SentimentFilter>("all");
+  const [platformFilter, setPlatformFilter] = useState<PlatformFilter>("all");
   const [sortField, setSortField] = useState<SortField>("posted_at");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+  const [isFetchingBooking, setIsFetchingBooking] = useState(false);
   
   // Bulk selection
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -98,6 +107,11 @@ export default function Reviews() {
       });
     }
 
+    // Platform filter
+    if (platformFilter !== "all") {
+      result = result.filter((r) => (r as any).platform === platformFilter);
+    }
+
     // Sentiment filter
     if (sentimentFilter !== "all") {
       result = result.filter((r) => r.sentiment?.toLowerCase() === sentimentFilter);
@@ -121,7 +135,7 @@ export default function Reviews() {
     });
 
     return result;
-  }, [reviews, searchQuery, statusFilter, sentimentFilter, sortField, sortOrder]);
+  }, [reviews, searchQuery, statusFilter, sentimentFilter, platformFilter, sortField, sortOrder]);
 
   // Bulk approve mutation
   const bulkApproveMutation = useMutation({
@@ -363,10 +377,43 @@ export default function Reviews() {
             {reviews.length} yorum • {pendingCount} beklemede • {repliedCount} yanıtlandı
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => refetch()}>
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Yenile
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Yenile
+          </Button>
+          <Button 
+            size="sm" 
+            onClick={async () => {
+              if (!activeBusiness) return;
+              setIsFetchingBooking(true);
+              try {
+                const response = await supabase.functions.invoke('wextractor-fetch-reviews', {
+                  body: { business_id: activeBusiness.id, platform: 'booking', offset: 0 },
+                });
+                if (response.error) throw new Error(response.error.message);
+                const result = response.data;
+                if (result?.error) {
+                  toast({ title: "Hata", description: result.error, variant: "destructive" });
+                } else {
+                  toast({
+                    title: "Booking Yorumları Çekildi",
+                    description: `${result.inserted} yeni yorum eklendi, ${result.skipped} zaten mevcut.`,
+                  });
+                  refetch();
+                }
+              } catch (err: any) {
+                toast({ title: "Hata", description: err.message || "Yorumlar çekilemedi.", variant: "destructive" });
+              } finally {
+                setIsFetchingBooking(false);
+              }
+            }}
+            disabled={isFetchingBooking}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            {isFetchingBooking ? 'Çekiliyor...' : 'Booking Yorumları Çek'}
+          </Button>
+        </div>
       </div>
 
       {/* Filters and Search */}
@@ -402,6 +449,18 @@ export default function Reviews() {
               <SelectItem value="positive">Pozitif</SelectItem>
               <SelectItem value="neutral">Nötr</SelectItem>
               <SelectItem value="negative">Negatif</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={platformFilter} onValueChange={(v) => setPlatformFilter(v as PlatformFilter)}>
+            <SelectTrigger className="w-[160px]">
+              <Globe className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Platform" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tüm Platformlar</SelectItem>
+              <SelectItem value="google">Google</SelectItem>
+              <SelectItem value="booking">Booking.com</SelectItem>
+              <SelectItem value="tripadvisor">TripAdvisor</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -460,6 +519,7 @@ export default function Reviews() {
                     {sortField === "rating" && <ArrowUpDown className="h-3 w-3" />}
                   </button>
                 </TableHead>
+                <TableHead className="font-semibold">Platform</TableHead>
                 <TableHead className="font-semibold">Duygu</TableHead>
                 <TableHead className="font-semibold">
                   <button
@@ -497,6 +557,16 @@ export default function Reviews() {
                       </div>
                     </TableCell>
                     <TableCell>
+                      {(() => {
+                        const p = platformLabels[(review as any).platform || 'google'] || platformLabels.google;
+                        return (
+                          <Badge className={p.color} variant="outline">
+                            {p.label}
+                          </Badge>
+                        );
+                      })()}
+                    </TableCell>
+                    <TableCell>
                       {review.sentiment && (
                         <Badge className={getSentimentColor(review.sentiment)} variant="outline">
                           {review.sentiment}
@@ -523,7 +593,14 @@ export default function Reviews() {
       <Sheet open={!!selectedReview} onOpenChange={() => setSelectedReview(null)}>
         <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
           <SheetHeader>
-            <SheetTitle className="text-2xl">Yorum Detayları</SheetTitle>
+            <SheetTitle className="text-2xl flex items-center gap-2">
+              Yorum Detayları
+              {selectedReview && (
+                <Badge className={platformLabels[(selectedReview as any).platform || 'google']?.color} variant="outline">
+                  {platformLabels[(selectedReview as any).platform || 'google']?.label}
+                </Badge>
+              )}
+            </SheetTitle>
             <SheetDescription>
               Yorumcu: {selectedReview?.reviewer_name}
             </SheetDescription>
@@ -620,14 +697,33 @@ export default function Reviews() {
                   <CheckCircle2 className="h-4 w-4" />
                   {selectedReview.status === 'approved' || selectedReview.status === 'replied' ? 'Onaylandı' : 'Yanıtı Onayla'}
                 </Button>
-                <Button 
-                  className="flex-1 gap-2"
-                  onClick={handleSendToGoogle}
-                  disabled={sendMutation.isPending || !replyText}
-                >
-                  <Send className="h-4 w-4" />
-                  Google'a Gönder
-                </Button>
+                {(selectedReview as any).platform === 'google' || !(selectedReview as any).platform ? (
+                  <Button 
+                    className="flex-1 gap-2"
+                    onClick={handleSendToGoogle}
+                    disabled={sendMutation.isPending || !replyText}
+                  >
+                    <Send className="h-4 w-4" />
+                    Google'a Gönder
+                  </Button>
+                ) : (
+                  <Button 
+                    className="flex-1 gap-2"
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(replyText);
+                      // Also approve the review
+                      handleApprove();
+                      toast({
+                        title: "Panoya Kopyalandı",
+                        description: `Yanıtı ${platformLabels[(selectedReview as any).platform]?.label || 'platform'} paneline yapıştırın.`,
+                      });
+                    }}
+                    disabled={!replyText}
+                  >
+                    <Copy className="h-4 w-4" />
+                    Kopyala & Onayla
+                  </Button>
+                )}
               </div>
 
               {/* Copy button for fallback */}
