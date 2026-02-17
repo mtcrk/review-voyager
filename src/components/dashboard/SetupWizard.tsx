@@ -16,6 +16,7 @@ export function SetupWizard({ onDismiss, onComplete }: SetupWizardProps) {
   const { activeBusiness, refetchBusinesses } = useBusiness();
   const [bookingId, setBookingId] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [step, setStep] = useState(1);
 
   // Parse booking hotel ID from full URL or partial input
@@ -128,10 +129,37 @@ export function SetupWizard({ onDismiss, onComplete }: SetupWizardProps) {
           </div>
         )}
 
-        {hasBookingId && (
-          <p className="text-sm text-primary font-medium">
-            ✅ Booking.com bağlı! Yorumlarınız otomatik olarak her gün güncellenir.
-          </p>
+        {hasBookingId && !isEditing && (
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-primary font-medium">
+              ✅ Booking.com bağlı ({activeBusiness?.booking_hotel_id}). Yorumlarınız otomatik olarak her gün güncellenir.
+            </p>
+            <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)} className="text-xs text-muted-foreground">
+              Değiştir
+            </Button>
+          </div>
+        )}
+
+        {hasBookingId && isEditing && (
+          <div className="space-y-2">
+            <div className="flex gap-2 items-center">
+              <Input
+                placeholder="Booking.com URL'sini yapıştırın"
+                value={bookingId}
+                onChange={(e) => setBookingId(e.target.value)}
+                disabled={loading}
+                className="flex-1"
+              />
+              <Button onClick={handleSetupBooking} disabled={!bookingId.trim() || loading}>
+                <Download className="h-4 w-4 mr-2" />
+                {loading ? "Çekiliyor..." : "Güncelle"}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => setIsEditing(false)}>İptal</Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Yeni Booking.com URL'sini yapıştırın.
+            </p>
+          </div>
         )}
       </CardContent>
     </Card>
