@@ -69,6 +69,7 @@ export default function Reviews() {
   // Bulk selection
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isGeneratingReply, setIsGeneratingReply] = useState(false);
+  const [generatingIds, setGeneratingIds] = useState<Set<string>>(new Set());
 
   // Fetch reviews from Supabase
   const { data: reviews = [], isLoading, refetch } = useQuery({
@@ -238,7 +239,7 @@ export default function Reviews() {
     },
   });
 
-  // Generate AI reply mutation
+  // Generate AI reply mutation (for detail sheet)
   const generateReplyMutation = useMutation({
     mutationFn: async (review: any) => {
       setIsGeneratingReply(true);
@@ -257,24 +258,55 @@ export default function Reviews() {
       });
 
       if (response.error) throw response.error;
-      return response.data?.reply || "";
+      return { reply: response.data?.reply || "", reviewId: review.id };
     },
-    onSuccess: (reply) => {
+    onSuccess: ({ reply, reviewId }) => {
       setReplyText(reply);
-      toast({
-        title: "AI Yanıt Oluşturuldu",
-        description: "Yeni bir yanıt önerisi oluşturuldu.",
+      // Save to DB
+      supabase.from('reviews').update({ suggested_reply: reply }).eq('id', reviewId).then(() => {
+        queryClient.invalidateQueries({ queryKey: ['reviews'] });
       });
+      toast({ title: "AI Yanıt Oluşturuldu", description: "Yeni bir yanıt önerisi oluşturuldu." });
     },
     onError: () => {
-      toast({
-        title: "Hata",
-        description: "AI yanıt oluşturulamadı.",
-        variant: "destructive",
-      });
+      toast({ title: "Hata", description: "AI yanıt oluşturulamadı.", variant: "destructive" });
     },
     onSettled: () => {
       setIsGeneratingReply(false);
+    },
+  });
+
+  // Inline AI reply generation for table rows
+  const inlineGenerateMutation = useMutation({
+    mutationFn: async (review: any) => {
+      setGeneratingIds(prev => new Set(prev).add(review.id));
+      const response = await supabase.functions.invoke('generate-reply', {
+        body: {
+          review_text: review.text,
+          reviewer_name: review.reviewer_name,
+          rating: review.rating,
+          sentiment: review.sentiment,
+          tone: activeBusiness?.tone || 'Friendly',
+          language: activeBusiness?.language || 'TR',
+        },
+      });
+      if (response.error) throw response.error;
+      return { reply: response.data?.reply || "", reviewId: review.id };
+    },
+    onSuccess: async ({ reply, reviewId }) => {
+      await supabase.from('reviews').update({ suggested_reply: reply }).eq('id', reviewId);
+      queryClient.invalidateQueries({ queryKey: ['reviews'] });
+      toast({ title: "AI Yanıt Hazır ✨", description: "Yanıt oluşturuldu, kopyalayabilirsiniz." });
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "AI yanıt oluşturulamadı.", variant: "destructive" });
+    },
+    onSettled: (_, __, review) => {
+      setGeneratingIds(prev => {
+        const next = new Set(prev);
+        next.delete(review.id);
+        return next;
+      });
     },
   });
 
@@ -601,6 +633,7 @@ export default function Reviews() {
                   </button>
                 </TableHead>
                 <TableHead className="font-semibold">Durum</TableHead>
+                <TableHead className="font-semibold min-w-[280px]">AI Yanıt</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -650,6 +683,50 @@ export default function Reviews() {
                       <Badge variant={statusInfo.variant}>
                         {statusInfo.label}
                       </Badge>
+                    </TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      {review.suggested_reply ? (
+                        <div className="flex items-start gap-2">
+                          <p className="text-xs text-muted-foreground line-clamp-2 flex-1 max-w-[200px]">
+                            {review.suggested_reply}
+                          </p>
+                          <div className="flex gap-1 shrink-0">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-7 w-7"
+                              title="Kopyala"
+                              onClick={async () => {
+                                await navigator.clipboard.writeText(review.suggested_reply!);
+                                toast({ title: "Kopyalandı ✓", description: "Yanıt panoya kopyalandı." });
+                              }}
+                            >
+                              <Copy className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-7 w-7"
+                              title="Yeniden oluştur"
+                              disabled={generatingIds.has(review.id)}
+                              onClick={() => inlineGenerateMutation.mutate(review)}
+                            >
+                              <Sparkles className={`h-3.5 w-3.5 ${generatingIds.has(review.id) ? 'animate-spin' : ''}`} />
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs gap-1.5"
+                          disabled={generatingIds.has(review.id)}
+                          onClick={() => inlineGenerateMutation.mutate(review)}
+                        >
+                          <Sparkles className={`h-3.5 w-3.5 ${generatingIds.has(review.id) ? 'animate-spin' : ''}`} />
+                          {generatingIds.has(review.id) ? 'Üretiliyor...' : 'AI Yanıt Üret'}
+                        </Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 );
