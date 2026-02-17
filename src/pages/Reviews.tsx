@@ -514,19 +514,6 @@ export default function Reviews() {
               <SelectItem value="tripadvisor">TripAdvisor</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={selectedTone} onValueChange={(v) => setSelectedTone(v as ToneOption)}>
-            <SelectTrigger className="w-[170px]">
-              <Sparkles className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="Ton" />
-            </SelectTrigger>
-            <SelectContent>
-              {toneOptions.map((t) => (
-                <SelectItem key={t.value} value={t.value}>
-                  {t.emoji} {t.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
       </div>
 
@@ -738,29 +725,57 @@ export default function Reviews() {
                             >
                               <Copy className="h-3.5 w-3.5" />
                             </Button>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="h-7 w-7"
-                              title="Yeniden oluştur"
-                              disabled={generatingIds.has(review.id)}
-                              onClick={() => inlineGenerateMutation.mutate(review)}
+                            <Select
+                              value={selectedTone}
+                              onValueChange={(v) => {
+                                setSelectedTone(v as ToneOption);
+                                inlineGenerateMutation.mutate(review);
+                              }}
                             >
-                              <Sparkles className={`h-3.5 w-3.5 ${generatingIds.has(review.id) ? 'animate-spin' : ''}`} />
-                            </Button>
+                              <SelectTrigger className="h-7 w-7 p-0 border-0 bg-transparent shadow-none [&>svg:last-child]:hidden" title="Tonla yeniden üret">
+                                <Sparkles className={`h-3.5 w-3.5 ${generatingIds.has(review.id) ? 'animate-spin' : ''}`} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {toneOptions.map((t) => (
+                                  <SelectItem key={t.value} value={t.value}>
+                                    {t.emoji} {t.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </div>
                         </div>
                       ) : (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-xs gap-1.5"
-                          disabled={generatingIds.has(review.id)}
-                          onClick={() => inlineGenerateMutation.mutate(review)}
-                        >
-                          <Sparkles className={`h-3.5 w-3.5 ${generatingIds.has(review.id) ? 'animate-spin' : ''}`} />
-                          {generatingIds.has(review.id) ? 'Üretiliyor...' : 'AI Yanıt Üret'}
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-xs gap-1.5"
+                            disabled={generatingIds.has(review.id)}
+                            onClick={() => inlineGenerateMutation.mutate(review)}
+                          >
+                            <Sparkles className={`h-3.5 w-3.5 ${generatingIds.has(review.id) ? 'animate-spin' : ''}`} />
+                            {generatingIds.has(review.id) ? 'Üretiliyor...' : 'AI Yanıt Üret'}
+                          </Button>
+                          <Select
+                            value={selectedTone}
+                            onValueChange={(v) => {
+                              setSelectedTone(v as ToneOption);
+                              inlineGenerateMutation.mutate(review);
+                            }}
+                          >
+                            <SelectTrigger className="h-8 w-8 p-0 border rounded bg-background shadow-sm [&>svg:last-child]:hidden" title="Ton seç">
+                              <span className="text-sm">{toneOptions.find(t => t.value === selectedTone)?.emoji}</span>
+                            </SelectTrigger>
+                            <SelectContent>
+                              {toneOptions.map((t) => (
+                                <SelectItem key={t.value} value={t.value}>
+                                  {t.emoji} {t.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                       )}
                     </TableCell>
                   </TableRow>
