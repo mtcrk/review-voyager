@@ -48,7 +48,7 @@ const platformLabels: Record<string, { label: string; color: string }> = {
 };
 
 export default function Reviews() {
-  const { activeBusiness } = useBusiness();
+  const { activeBusiness, refetchBusinesses } = useBusiness();
   const queryClient = useQueryClient();
   const [selectedReview, setSelectedReview] = useState<any>(null);
   const [replyText, setReplyText] = useState("");
@@ -61,6 +61,10 @@ export default function Reviews() {
   const [sortField, setSortField] = useState<SortField>("posted_at");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [isFetchingBooking, setIsFetchingBooking] = useState(false);
+  
+  // Inline Booking ID setup
+  const [bookingIdInput, setBookingIdInput] = useState("");
+  const [savingBookingId, setSavingBookingId] = useState(false);
   
   // Bulk selection
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -480,17 +484,83 @@ export default function Reviews() {
         </div>
       )}
 
+      {/* Inline Booking Setup - show when no booking_hotel_id and no reviews */}
+      {reviews.length === 0 && !activeBusiness.booking_hotel_id && (
+        <Card className="p-8 shadow-card border-dashed border-2 border-primary/30 bg-primary/5">
+          <div className="max-w-lg mx-auto text-center space-y-4">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+              <Download className="h-6 w-6 text-primary" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground">Booking.com Yorumlarınızı Çekin</h3>
+            <p className="text-sm text-muted-foreground">
+              Booking.com URL'nizdeki otel yolunu girin ve yorumlarınızı otomatik olarak çekelim.
+            </p>
+            <div className="flex gap-2 max-w-md mx-auto">
+              <Input
+                placeholder="örn: tr/hotel-sultanahmet-palace"
+                value={bookingIdInput}
+                onChange={(e) => setBookingIdInput(e.target.value)}
+                disabled={savingBookingId}
+                className="flex-1"
+              />
+              <Button
+                disabled={!bookingIdInput.trim() || savingBookingId}
+                onClick={async () => {
+                  if (!activeBusiness || !bookingIdInput.trim()) return;
+                  setSavingBookingId(true);
+                  try {
+                    // Save booking_hotel_id
+                    const { error: updateError } = await supabase
+                      .from('businesses')
+                      .update({ booking_hotel_id: bookingIdInput.trim() })
+                      .eq('id', activeBusiness.id);
+                    if (updateError) throw updateError;
+
+                    // Immediately fetch reviews
+                    const response = await supabase.functions.invoke('wextractor-fetch-reviews', {
+                      body: { business_id: activeBusiness.id, platform: 'booking', offset: 0 },
+                    });
+                    
+                    if (response.error) throw new Error(response.error.message);
+                    const result = response.data;
+                    if (result?.error) {
+                      toast({ title: "Hata", description: result.error, variant: "destructive" });
+                    } else {
+                      toast({
+                        title: "Yorumlar Çekildi! 🎉",
+                        description: `${result.inserted} yorum eklendi.`,
+                      });
+                      refetch();
+                      refetchBusinesses();
+                    }
+                  } catch (err: any) {
+                    toast({ title: "Hata", description: err.message || "Bir sorun oluştu.", variant: "destructive" });
+                  } finally {
+                    setSavingBookingId(false);
+                  }
+                }}
+              >
+                {savingBookingId ? 'Çekiliyor...' : 'Yorumları Çek'}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Booking.com otel sayfanızın URL'sinden alabilirsiniz. Örn: booking.com/hotel/<strong>tr/hotel-sultanahmet-palace</strong>
+            </p>
+          </div>
+        </Card>
+      )}
+
       {/* Reviews Table */}
-      {filteredReviews.length === 0 ? (
+      {filteredReviews.length === 0 && (reviews.length > 0 || activeBusiness.booking_hotel_id) ? (
         <Card className="p-12 text-center shadow-card">
           <p className="text-muted-foreground text-lg">
-            {reviews.length === 0 ? "Bu işletme için henüz yorum yok." : "Arama kriterlerine uygun yorum bulunamadı."}
+            {reviews.length === 0 ? "Yorumlar yükleniyor veya henüz çekilmedi." : "Arama kriterlerine uygun yorum bulunamadı."}
           </p>
           <p className="text-sm text-muted-foreground mt-2">
-            {reviews.length === 0 ? "Yorumlar eklendiğinde burada görünecek." : "Filtreleri değiştirmeyi deneyin."}
+            {reviews.length === 0 ? "'Booking Yorumları Çek' butonunu kullanın." : "Filtreleri değiştirmeyi deneyin."}
           </p>
         </Card>
-      ) : (
+      ) : filteredReviews.length === 0 && reviews.length === 0 && !activeBusiness.booking_hotel_id ? null : (
         <Card className="shadow-card">
           <Table>
             <TableHeader>
