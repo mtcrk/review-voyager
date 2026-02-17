@@ -98,18 +98,23 @@ export function SetupWizard({ onDismiss, onComplete }: SetupWizardProps) {
 
         {/* Step content */}
         {!hasBookingId && step <= 2 && (
-          <div className="flex gap-2 items-center">
-            <Input
-              placeholder="Booking.com otel yolu, örn: tr/hotel-sultanahmet-palace"
-              value={bookingId}
-              onChange={(e) => setBookingId(e.target.value)}
-              disabled={loading}
-              className="flex-1"
-            />
-            <Button onClick={handleSetupBooking} disabled={!bookingId.trim() || loading}>
-              <Download className="h-4 w-4 mr-2" />
-              {loading ? "Çekiliyor..." : "Yorumları Çek"}
-            </Button>
+          <div className="space-y-2">
+            <div className="flex gap-2 items-center">
+              <Input
+                placeholder="hotel/tr/ela-excellence-resort-belek"
+                value={bookingId}
+                onChange={(e) => setBookingId(e.target.value)}
+                disabled={loading}
+                className="flex-1"
+              />
+              <Button onClick={handleSetupBooking} disabled={!bookingId.trim() || loading}>
+                <Download className="h-4 w-4 mr-2" />
+                {loading ? "Çekiliyor..." : "Yorumları Çek"}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Booking.com'da otelinizin sayfasını açın. URL'deki <code className="bg-muted px-1 rounded">booking.com/<strong>hotel/tr/otel-adi</strong>.html</code> kısmını yapıştırın.
+            </p>
           </div>
         )}
 
