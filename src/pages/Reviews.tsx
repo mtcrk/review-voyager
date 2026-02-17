@@ -453,7 +453,7 @@ export default function Reviews() {
               setIsFetchingBooking(true);
               try {
                 const response = await supabase.functions.invoke('wextractor-fetch-reviews', {
-                  body: { business_id: activeBusiness.id, platform: 'booking', offset: 0 },
+                  body: { business_id: activeBusiness.id, platform: 'booking', fetch_all: true },
                 });
                 if (response.error) throw new Error(response.error.message);
                 const result = response.data;
@@ -578,7 +578,7 @@ export default function Reviews() {
 
                     // Immediately fetch reviews
                     const response = await supabase.functions.invoke('wextractor-fetch-reviews', {
-                      body: { business_id: activeBusiness.id, platform: 'booking', offset: 0 },
+                      body: { business_id: activeBusiness.id, platform: 'booking', fetch_all: true },
                     });
                     
                     if (response.error) throw new Error(response.error.message);

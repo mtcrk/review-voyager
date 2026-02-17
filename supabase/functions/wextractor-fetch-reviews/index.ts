@@ -36,6 +36,15 @@ interface WextractorResponse {
   reviews: WextractorReview[];
 }
 
+async function fetchPage(apiBaseUrl: string, offset: number): Promise<WextractorResponse> {
+  const url = `${apiBaseUrl}&offset=${offset}`;
+  const resp = await fetch(url);
+  if (!resp.ok) {
+    throw new Error(`Wextractor API error: ${resp.status}`);
+  }
+  return resp.json();
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -62,7 +71,6 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    // Create authenticated client to verify user
     const supabaseAuth = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
       global: { headers: { Authorization: authHeader } },
     });
@@ -75,7 +83,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { business_id, platform = "booking", offset = 0 } = await req.json();
+    const { business_id, platform = "booking", offset = 0, fetch_all = false } = await req.json();
 
     if (!business_id) {
       return new Response(
@@ -84,10 +92,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Use service role client for DB operations
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Verify user owns this business
     const { data: business, error: bizError } = await supabaseAuth
       .from("businesses")
       .select("id, booking_hotel_id, name")
@@ -108,12 +114,11 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Determine Wextractor endpoint based on platform
-    let apiUrl: string;
+    let apiBaseUrl: string;
     if (platform === "booking") {
-      apiUrl = `https://wextractor.com/api/v1/reviews/booking?id=${encodeURIComponent(business.booking_hotel_id)}&auth_token=${WEXTRACTOR_API_TOKEN}&offset=${offset}`;
+      apiBaseUrl = `https://wextractor.com/api/v1/reviews/booking?id=${encodeURIComponent(business.booking_hotel_id)}&auth_token=${WEXTRACTOR_API_TOKEN}`;
     } else if (platform === "tripadvisor") {
-      apiUrl = `https://wextractor.com/api/v1/reviews/tripadvisor?id=${encodeURIComponent(business.booking_hotel_id)}&auth_token=${WEXTRACTOR_API_TOKEN}&offset=${offset}`;
+      apiBaseUrl = `https://wextractor.com/api/v1/reviews/tripadvisor?id=${encodeURIComponent(business.booking_hotel_id)}&auth_token=${WEXTRACTOR_API_TOKEN}`;
     } else {
       return new Response(
         JSON.stringify({ error: "Unsupported platform. Use 'booking' or 'tripadvisor'." }),
@@ -121,59 +126,76 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`Fetching ${platform} reviews for business ${business_id}, offset ${offset}`);
+    // Collect all reviews - either single page or all pages
+    let allReviews: WextractorReview[] = [];
+    let totalAvailable: number | undefined;
+    let averageRating: string | undefined;
 
-    // Fetch reviews from Wextractor
-    const wextResponse = await fetch(apiUrl);
-    if (!wextResponse.ok) {
-      const errorText = await wextResponse.text();
-      console.error(`Wextractor API error [${wextResponse.status}]:`, errorText);
-
-      // Log the error
-      await supabase.from("integration_logs").insert({
-        business_id,
-        provider: "wextractor",
-        action: `${platform}_reviews_fetch`,
-        status: "error",
-        http_status: wextResponse.status,
-        error_message: errorText.substring(0, 500),
-      });
-
-      return new Response(
-        JSON.stringify({ error: `Wextractor API error: ${wextResponse.status}` }),
-        { status: wextResponse.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    if (fetch_all) {
+      // First fetch to get total count
+      console.log(`Fetching first page to get total count...`);
+      const firstPage = await fetchPage(apiBaseUrl, 0);
+      totalAvailable = firstPage.totals?.review_count;
+      averageRating = firstPage.totals?.average_rating;
+      allReviews.push(...(firstPage.reviews || []));
+      
+      const pageSize = firstPage.reviews?.length || 10;
+      
+      if (totalAvailable && totalAvailable > pageSize) {
+        const totalPages = Math.ceil(totalAvailable / pageSize);
+        console.log(`Total reviews: ${totalAvailable}, pages: ${totalPages}. Fetching in parallel batches...`);
+        
+        // Fetch remaining pages in parallel batches of 5
+        const BATCH_SIZE = 5;
+        for (let batchStart = 1; batchStart < totalPages; batchStart += BATCH_SIZE) {
+          const batchEnd = Math.min(batchStart + BATCH_SIZE, totalPages);
+          const promises = [];
+          for (let page = batchStart; page < batchEnd; page++) {
+            promises.push(
+              fetchPage(apiBaseUrl, page * pageSize).catch(err => {
+                console.error(`Failed to fetch page ${page}:`, err.message);
+                return { reviews: [] } as WextractorResponse;
+              })
+            );
+          }
+          const results = await Promise.all(promises);
+          for (const result of results) {
+            allReviews.push(...(result.reviews || []));
+          }
+          console.log(`Fetched batch ${batchStart}-${batchEnd - 1}, total reviews so far: ${allReviews.length}`);
+        }
+      }
+    } else {
+      // Single page fetch (legacy behavior)
+      console.log(`Fetching ${platform} reviews for business ${business_id}, offset ${offset}`);
+      const pageData = await fetchPage(apiBaseUrl, offset);
+      allReviews = pageData.reviews || [];
+      totalAvailable = pageData.totals?.review_count;
+      averageRating = pageData.totals?.average_rating;
     }
 
-    const wextData: WextractorResponse = await wextResponse.json();
-    console.log(`Received ${wextData.reviews?.length || 0} reviews from Wextractor`);
-    // Log first review for debugging field names
-    if (wextData.reviews?.length > 0) {
-      console.log("Sample review keys:", JSON.stringify(Object.keys(wextData.reviews[0])));
-      console.log("Sample review data:", JSON.stringify(wextData.reviews[0]));
+    console.log(`Total reviews fetched: ${allReviews.length}`);
+    if (allReviews.length > 0) {
+      console.log("Sample review keys:", JSON.stringify(Object.keys(allReviews[0])));
     }
 
     // Transform and upsert reviews
     let insertedCount = 0;
     let skippedCount = 0;
 
-    for (const review of wextData.reviews || []) {
-      // Resolve field name differences between API versions
+    for (const review of allReviews) {
       const reviewerName = review.reviewer || review.author || review.author_name || "Anonymous";
       const reviewDate = review.datetime || review.date;
       const posText = review.pros || review.positive || "";
       const negText = review.cons || review.negative || "";
 
-      // Create a unique identifier for deduplication
       const reviewId = review.id || `${platform}-${business.booking_hotel_id}-${reviewerName}-${reviewDate}`;
 
-      // Normalize rating: Booking uses 1-10 scale, we use 1-5
       let normalizedRating = typeof review.rating === "string" ? parseFloat(review.rating) : (review.rating || 3);
       if (platform === "booking" && normalizedRating > 5) {
         normalizedRating = Math.round(normalizedRating / 2);
       }
 
-      // Combine positive and negative text for Booking reviews
       let reviewText = review.text || "";
       if (platform === "booking") {
         const parts: string[] = [];
@@ -181,7 +203,6 @@ Deno.serve(async (req) => {
         if (negText) parts.push(`👎 ${negText}`);
         if (parts.length > 0) reviewText = parts.join("\n\n");
       }
-      // Add title if available
       if (review.title && reviewText) reviewText = `${review.title}\n\n${reviewText}`;
       else if (review.title) reviewText = review.title;
 
@@ -225,22 +246,22 @@ Deno.serve(async (req) => {
       action: `${platform}_reviews_fetch`,
       status: "success",
       meta: {
-        total_fetched: wextData.reviews?.length || 0,
+        total_fetched: allReviews.length,
         inserted: insertedCount,
         skipped: skippedCount,
-        offset,
-        total_available: wextData.totals?.review_count,
+        offset: fetch_all ? "all" : offset,
+        total_available: totalAvailable,
       },
     });
 
     return new Response(
       JSON.stringify({
         success: true,
-        fetched: wextData.reviews?.length || 0,
+        fetched: allReviews.length,
         inserted: insertedCount,
         skipped: skippedCount,
-        total_available: wextData.totals?.review_count || null,
-        average_rating: wextData.totals?.average_rating || null,
+        total_available: totalAvailable || null,
+        average_rating: averageRating || null,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
