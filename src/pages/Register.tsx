@@ -23,7 +23,7 @@ export default function Register() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [businessName, setBusinessName] = useState('');
+  
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -55,7 +55,6 @@ export default function Register() {
           emailRedirectTo: redirectUrl,
           data: {
             full_name: fullName,
-            business_name: businessName,
           },
         },
       });
@@ -205,17 +204,6 @@ export default function Register() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                disabled={loading}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="businessName">Business Name (Optional)</Label>
-              <Input
-                id="businessName"
-                type="text"
-                placeholder="My Business"
-                value={businessName}
-                onChange={(e) => setBusinessName(e.target.value)}
                 disabled={loading}
               />
             </div>
