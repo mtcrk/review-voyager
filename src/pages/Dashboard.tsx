@@ -26,6 +26,7 @@ export default function Dashboard() {
   );
   const [selectedDay, setSelectedDay] = useState<Date>(() => new Date());
   const [demoDismissed, setDemoDismissed] = useState(false);
+  const [onboardingDismissed, setOnboardingDismissed] = useState(false);
 
   // Fetch reviews for active business
   const { data: reviews = [], isLoading: reviewsLoading } = useQuery({
@@ -154,8 +155,9 @@ export default function Dashboard() {
   return (
     <>
       <BusinessOnboarding
-        open={!businessLoading && !activeBusiness}
+        open={!businessLoading && !activeBusiness && !onboardingDismissed}
         onBusinessCreated={refetchBusinesses}
+        onDismiss={() => setOnboardingDismissed(true)}
       />
       
       <div className="min-h-screen bg-background">

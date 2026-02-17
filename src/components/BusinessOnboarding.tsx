@@ -10,9 +10,10 @@ import { toast } from '@/hooks/use-toast';
 interface BusinessOnboardingProps {
   open: boolean;
   onBusinessCreated: () => void;
+  onDismiss?: () => void;
 }
 
-export function BusinessOnboarding({ open, onBusinessCreated }: BusinessOnboardingProps) {
+export function BusinessOnboarding({ open, onBusinessCreated, onDismiss }: BusinessOnboardingProps) {
   const { user } = useAuth();
   const [businessName, setBusinessName] = useState('');
   const [placeId, setPlaceId] = useState('');
@@ -96,8 +97,8 @@ export function BusinessOnboarding({ open, onBusinessCreated }: BusinessOnboardi
   };
 
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen && onDismiss) onDismiss(); }}>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>VoyageRespond'a Hoş Geldiniz</DialogTitle>
           <DialogDescription>
