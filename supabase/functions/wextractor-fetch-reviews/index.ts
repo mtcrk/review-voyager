@@ -143,6 +143,11 @@ Deno.serve(async (req) => {
 
     const wextData: WextractorResponse = await wextResponse.json();
     console.log(`Received ${wextData.reviews?.length || 0} reviews from Wextractor`);
+    // Log first review for debugging field names
+    if (wextData.reviews?.length > 0) {
+      console.log("Sample review keys:", JSON.stringify(Object.keys(wextData.reviews[0])));
+      console.log("Sample review data:", JSON.stringify(wextData.reviews[0]));
+    }
 
     // Transform and upsert reviews
     let insertedCount = 0;
