@@ -35,6 +35,14 @@ export function SetupWizard({ onDismiss, onComplete }: SetupWizardProps) {
     setLoading(true);
     const parsedId = parseBookingId(bookingId);
     try {
+      // Delete old booking reviews before updating
+      const { error: deleteError } = await supabase
+        .from("reviews")
+        .delete()
+        .eq("business_id", activeBusiness.id)
+        .eq("platform", "booking");
+      if (deleteError) throw deleteError;
+
       const { error: updateError } = await supabase
         .from("businesses")
         .update({ booking_hotel_id: parsedId })
