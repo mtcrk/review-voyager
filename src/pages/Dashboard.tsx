@@ -6,7 +6,7 @@ import { useState, useMemo } from "react";
 import { startOfWeek, addDays, format, isSameDay, startOfDay, endOfDay } from "date-fns";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { BusinessOnboarding } from "@/components/BusinessOnboarding";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { ChatWithReviews } from "@/components/dashboard/ChatWithReviews";
@@ -16,10 +16,12 @@ import { DemoModeBanner } from "@/components/dashboard/DemoModeBanner";
 import { UpgradeCTA } from "@/components/dashboard/UpgradeCTA";
 import { DEMO_REVIEWS, DEMO_METRICS } from "@/lib/demoData";
 import { useTranslation } from "react-i18next";
+import { SetupWizard } from "@/components/dashboard/SetupWizard";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const { activeBusiness, loading: businessLoading, refetchBusinesses } = useBusiness();
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => 
     startOfWeek(new Date(), { weekStartsOn: 1 })
@@ -27,6 +29,7 @@ export default function Dashboard() {
   const [selectedDay, setSelectedDay] = useState<Date>(() => new Date());
   const [demoDismissed, setDemoDismissed] = useState(false);
   const [onboardingDismissed, setOnboardingDismissed] = useState(false);
+  const [wizardDismissed, setWizardDismissed] = useState(false);
 
   // Fetch reviews for active business
   const { data: reviews = [], isLoading: reviewsLoading } = useQuery({
@@ -172,6 +175,17 @@ export default function Dashboard() {
                 {t('dashboard.subtitle', 'Dashboard Özeti')}
               </p>
             </div>
+          )}
+
+          {/* Setup Wizard */}
+          {activeBusiness && !activeBusiness.booking_hotel_id && !wizardDismissed && (
+            <SetupWizard
+              onDismiss={() => setWizardDismissed(true)}
+              onComplete={() => {
+                refetchBusinesses();
+                queryClient.invalidateQueries({ queryKey: ['reviews'] });
+              }}
+            />
           )}
 
           {/* Demo Mode Banner */}
