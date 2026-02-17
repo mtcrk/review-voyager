@@ -18,15 +18,24 @@ export function SetupWizard({ onDismiss, onComplete }: SetupWizardProps) {
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
 
+  // Parse booking hotel ID from full URL or partial input
+  const parseBookingId = (input: string): string => {
+    const trimmed = input.trim();
+    const match = trimmed.match(/hotel\/([a-z]{2})\/([a-z0-9_-]+)/i);
+    if (match) return `hotel/${match[1]}/${match[2]}`;
+    return trimmed;
+  };
+
   const hasBookingId = !!activeBusiness?.booking_hotel_id;
 
   const handleSetupBooking = async () => {
     if (!activeBusiness || !bookingId.trim()) return;
     setLoading(true);
+    const parsedId = parseBookingId(bookingId);
     try {
       const { error: updateError } = await supabase
         .from("businesses")
-        .update({ booking_hotel_id: bookingId.trim() })
+        .update({ booking_hotel_id: parsedId })
         .eq("id", activeBusiness.id);
       if (updateError) throw updateError;
 
@@ -101,7 +110,7 @@ export function SetupWizard({ onDismiss, onComplete }: SetupWizardProps) {
           <div className="space-y-2">
             <div className="flex gap-2 items-center">
               <Input
-                placeholder="hotel/tr/ela-excellence-resort-belek"
+                placeholder="Booking.com URL'sini yapıştırın"
                 value={bookingId}
                 onChange={(e) => setBookingId(e.target.value)}
                 disabled={loading}
@@ -113,7 +122,7 @@ export function SetupWizard({ onDismiss, onComplete }: SetupWizardProps) {
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              Booking.com'da otelinizin sayfasını açın. URL'deki <code className="bg-muted px-1 rounded">booking.com/<strong>hotel/tr/otel-adi</strong>.html</code> kısmını yapıştırın.
+              Booking.com'da otelinizin sayfasını açın, URL'yi kopyalayıp buraya yapıştırın. Otomatik olarak doğru kısmı alacağız.
             </p>
           </div>
         )}
