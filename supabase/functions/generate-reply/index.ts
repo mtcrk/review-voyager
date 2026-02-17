@@ -94,7 +94,9 @@ serve(async (req) => {
 
     console.log("Generating AI reply for review:", { rating, tone, language, sentiment });
 
-    const lang = language.toLowerCase() === "tr" ? "tr" : "en";
+    const lang = language.toLowerCase() === "auto" 
+      ? (review_text && /[çğıöşüÇĞİÖŞÜ]/.test(review_text) ? "tr" : "en")
+      : (language.toLowerCase() === "tr" ? "tr" : "en");
     const toneConfig = toneDescriptions[tone as keyof typeof toneDescriptions] || toneDescriptions.friendly;
     
     // Determine sentiment category
@@ -125,7 +127,8 @@ serve(async (req) => {
     const systemPrompt = `You are an expert review response writer for ${business_name || "a business"}. Your task is to generate authentic, personalized responses to customer reviews.
 
 ## Language & Tone
-- Write in ${lang === "tr" ? "TURKISH" : "ENGLISH"} only
+- CRITICAL: Detect the language of the original review and reply in THE SAME LANGUAGE. If the review is in Turkish, reply in Turkish. If in English, reply in English. If in German, reply in German. Match the reviewer's language exactly.
+- Fallback language hint: ${lang === "tr" ? "TURKISH" : "ENGLISH"}
 - Tone: ${tone.toUpperCase()}
 - ${lang === "tr" ? toneConfig.tr : toneConfig.en}
 - Example phrases: ${(lang === "tr" ? toneConfig.examples_tr : toneConfig.examples_en).join(", ")}
