@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Star, Copy, Send, CheckCircle2, Search, Filter, ArrowUpDown, RefreshCw, Sparkles, Download, Globe } from "lucide-react";
 import {
   Table,
@@ -687,9 +688,16 @@ export default function Reviews() {
                     <TableCell onClick={(e) => e.stopPropagation()}>
                       {review.suggested_reply ? (
                         <div className="flex items-start gap-2">
-                          <p className="text-xs text-muted-foreground line-clamp-2 flex-1 max-w-[200px]">
-                            {review.suggested_reply}
-                          </p>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <p className="text-xs text-muted-foreground line-clamp-2 flex-1 max-w-[200px] cursor-pointer hover:text-foreground transition-colors">
+                                {review.suggested_reply}
+                              </p>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-80 max-h-60 overflow-auto" side="left">
+                              <p className="text-sm leading-relaxed whitespace-pre-wrap">{review.suggested_reply}</p>
+                            </PopoverContent>
+                          </Popover>
                           <div className="flex gap-1 shrink-0">
                             <Button
                               size="icon"
