@@ -642,6 +642,7 @@ export default function Reviews() {
                     {sortField === "rating" && <ArrowUpDown className="h-3 w-3" />}
                   </button>
                 </TableHead>
+                <TableHead className="font-semibold min-w-[200px]">Yorum</TableHead>
                 <TableHead className="font-semibold">Platform</TableHead>
                 <TableHead className="font-semibold">Duygu</TableHead>
                 <TableHead className="font-semibold">
@@ -679,6 +680,22 @@ export default function Reviews() {
                           <Star key={i} className="h-4 w-4 fill-primary text-primary" />
                         ))}
                       </div>
+                    </TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      {review.text ? (
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <p className="text-xs text-muted-foreground line-clamp-2 max-w-[200px] cursor-pointer hover:text-foreground transition-colors">
+                              {review.text}
+                            </p>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-96 max-h-72 overflow-auto" side="bottom">
+                            <p className="text-sm leading-relaxed whitespace-pre-wrap">{review.text}</p>
+                          </PopoverContent>
+                        </Popover>
+                      ) : (
+                        <span className="text-xs text-muted-foreground italic">Metin yok</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       {(() => {
