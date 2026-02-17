@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Star, Copy, Send, CheckCircle2, Search, Filter, ArrowUpDown, RefreshCw, Sparkles, Download, Globe } from "lucide-react";
+import { Star, Copy, Send, CheckCircle2, Search, Filter, ArrowUpDown, RefreshCw, Sparkles, Download, Globe, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -85,6 +85,8 @@ export default function Reviews() {
   const [isGeneratingReply, setIsGeneratingReply] = useState(false);
   const [generatingIds, setGeneratingIds] = useState<Set<string>>(new Set());
   const [tonePerId, setTonePerId] = useState<Record<string, ToneOption>>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 25;
 
   // Fetch reviews from Supabase
   const { data: reviews = [], isLoading, refetch } = useQuery({
@@ -156,6 +158,11 @@ export default function Reviews() {
 
     return result;
   }, [reviews, searchQuery, statusFilter, sentimentFilter, platformFilter, sortField, sortOrder]);
+
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(filteredReviews.length / pageSize));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const paginatedReviews = filteredReviews.slice((safeCurrentPage - 1) * pageSize, safeCurrentPage * pageSize);
 
   // Bulk approve mutation
   const bulkApproveMutation = useMutation({
@@ -480,12 +487,12 @@ export default function Reviews() {
           <Input
             placeholder="Yorum veya yorumcu ara..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
             className="pl-10"
           />
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
+          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v as StatusFilter); setCurrentPage(1); }}>
             <SelectTrigger className="w-[140px]">
               <Filter className="h-4 w-4 mr-2" />
               <SelectValue placeholder="Durum" />
@@ -497,7 +504,7 @@ export default function Reviews() {
               <SelectItem value="replied">Yanıtlandı</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={sentimentFilter} onValueChange={(v) => setSentimentFilter(v as SentimentFilter)}>
+          <Select value={sentimentFilter} onValueChange={(v) => { setSentimentFilter(v as SentimentFilter); setCurrentPage(1); }}>
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="Duygu" />
             </SelectTrigger>
@@ -508,7 +515,7 @@ export default function Reviews() {
               <SelectItem value="negative">Negatif</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={platformFilter} onValueChange={(v) => setPlatformFilter(v as PlatformFilter)}>
+          <Select value={platformFilter} onValueChange={(v) => { setPlatformFilter(v as PlatformFilter); setCurrentPage(1); }}>
             <SelectTrigger className="w-[160px]">
               <Globe className="h-4 w-4 mr-2" />
               <SelectValue placeholder="Platform" />
@@ -659,7 +666,7 @@ export default function Reviews() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredReviews.map((review) => {
+              {paginatedReviews.map((review) => {
                 const statusInfo = getStatusBadge(review.status);
                 return (
                   <TableRow
@@ -811,6 +818,54 @@ export default function Reviews() {
               })}
             </TableBody>
           </Table>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t">
+              <p className="text-sm text-muted-foreground">
+                {filteredReviews.length} yorumdan {(safeCurrentPage - 1) * pageSize + 1}–{Math.min(safeCurrentPage * pageSize, filteredReviews.length)} arası gösteriliyor
+              </p>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={safeCurrentPage <= 1}
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(p => p === 1 || p === totalPages || Math.abs(p - safeCurrentPage) <= 1)
+                  .reduce<(number | string)[]>((acc, p, idx, arr) => {
+                    if (idx > 0 && p - (arr[idx - 1] as number) > 1) acc.push('...');
+                    acc.push(p);
+                    return acc;
+                  }, [])
+                  .map((p, i) =>
+                    typeof p === 'string' ? (
+                      <span key={`ellipsis-${i}`} className="px-2 text-muted-foreground text-sm">…</span>
+                    ) : (
+                      <Button
+                        key={p}
+                        variant={p === safeCurrentPage ? "default" : "outline"}
+                        size="sm"
+                        className="min-w-[36px]"
+                        onClick={() => setCurrentPage(p)}
+                      >
+                        {p}
+                      </Button>
+                    )
+                  )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={safeCurrentPage >= totalPages}
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </Card>
       )}
 
