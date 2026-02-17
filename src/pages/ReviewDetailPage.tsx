@@ -151,7 +151,7 @@ const ReviewDetailPage = () => {
           reviewer_name: review.reviewer_name,
           rating: review.rating,
           tone: toneMap[selectedTone],
-          language: "TR",
+          language: "auto",
           summary: review.summary,
           issues: review.issues,
           praises: review.praises,
