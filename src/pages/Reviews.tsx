@@ -42,6 +42,19 @@ type StatusFilter = "all" | "pending" | "approved" | "replied";
 type SentimentFilter = "all" | "positive" | "negative" | "neutral";
 type PlatformFilter = "all" | "google" | "booking" | "tripadvisor";
 
+type ToneOption = "friendly" | "formal" | "playful" | "empathetic" | "grateful" | "witty" | "apologetic" | "enthusiastic";
+
+const toneOptions: { value: ToneOption; label: string; emoji: string }[] = [
+  { value: "friendly", label: "Samimi", emoji: "😊" },
+  { value: "formal", label: "Resmi", emoji: "👔" },
+  { value: "playful", label: "Eğlenceli", emoji: "🎉" },
+  { value: "empathetic", label: "Empatik", emoji: "🤝" },
+  { value: "grateful", label: "Minnettar", emoji: "🙏" },
+  { value: "witty", label: "Espritüel", emoji: "😄" },
+  { value: "apologetic", label: "Özür Dileyen", emoji: "💐" },
+  { value: "enthusiastic", label: "Coşkulu", emoji: "🔥" },
+];
+
 const platformLabels: Record<string, { label: string; color: string }> = {
   google: { label: "Google", color: "bg-blue-50 text-blue-700 border-blue-200" },
   booking: { label: "Booking.com", color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
@@ -71,6 +84,7 @@ export default function Reviews() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isGeneratingReply, setIsGeneratingReply] = useState(false);
   const [generatingIds, setGeneratingIds] = useState<Set<string>>(new Set());
+  const [selectedTone, setSelectedTone] = useState<ToneOption>("friendly");
 
   // Fetch reviews from Supabase
   const { data: reviews = [], isLoading, refetch } = useQuery({
@@ -287,8 +301,8 @@ export default function Reviews() {
           reviewer_name: review.reviewer_name,
           rating: review.rating,
           sentiment: review.sentiment,
-          tone: activeBusiness?.tone || 'Friendly',
-          language: activeBusiness?.language || 'TR',
+          tone: selectedTone,
+          language: "auto",
         },
       });
       if (response.error) throw response.error;
@@ -498,6 +512,19 @@ export default function Reviews() {
               <SelectItem value="google">Google</SelectItem>
               <SelectItem value="booking">Booking.com</SelectItem>
               <SelectItem value="tripadvisor">TripAdvisor</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={selectedTone} onValueChange={(v) => setSelectedTone(v as ToneOption)}>
+            <SelectTrigger className="w-[170px]">
+              <Sparkles className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Ton" />
+            </SelectTrigger>
+            <SelectContent>
+              {toneOptions.map((t) => (
+                <SelectItem key={t.value} value={t.value}>
+                  {t.emoji} {t.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
