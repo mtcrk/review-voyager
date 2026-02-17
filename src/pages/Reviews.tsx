@@ -84,7 +84,7 @@ export default function Reviews() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isGeneratingReply, setIsGeneratingReply] = useState(false);
   const [generatingIds, setGeneratingIds] = useState<Set<string>>(new Set());
-  const [selectedTone, setSelectedTone] = useState<ToneOption>("friendly");
+  const [tonePerId, setTonePerId] = useState<Record<string, ToneOption>>({});
 
   // Fetch reviews from Supabase
   const { data: reviews = [], isLoading, refetch } = useQuery({
@@ -291,17 +291,23 @@ export default function Reviews() {
     },
   });
 
+  const getReviewTone = (reviewId: string): ToneOption => tonePerId[reviewId] || "friendly";
+  const setReviewTone = (reviewId: string, tone: ToneOption) => {
+    setTonePerId(prev => ({ ...prev, [reviewId]: tone }));
+  };
+
   // Inline AI reply generation for table rows
   const inlineGenerateMutation = useMutation({
     mutationFn: async (review: any) => {
       setGeneratingIds(prev => new Set(prev).add(review.id));
+      const tone = getReviewTone(review.id);
       const response = await supabase.functions.invoke('generate-reply', {
         body: {
           review_text: review.text,
           reviewer_name: review.reviewer_name,
           rating: review.rating,
           sentiment: review.sentiment,
-          tone: selectedTone,
+          tone,
           language: "auto",
         },
       });
@@ -726,14 +732,11 @@ export default function Reviews() {
                               <Copy className="h-3.5 w-3.5" />
                             </Button>
                             <Select
-                              value={selectedTone}
-                              onValueChange={(v) => {
-                                setSelectedTone(v as ToneOption);
-                                inlineGenerateMutation.mutate(review);
-                              }}
+                              value={getReviewTone(review.id)}
+                              onValueChange={(v) => setReviewTone(review.id, v as ToneOption)}
                             >
-                              <SelectTrigger className="h-7 w-7 p-0 border-0 bg-transparent shadow-none [&>svg:last-child]:hidden" title="Tonla yeniden üret">
-                                <Sparkles className={`h-3.5 w-3.5 ${generatingIds.has(review.id) ? 'animate-spin' : ''}`} />
+                              <SelectTrigger className="h-7 w-7 p-0 border-0 bg-transparent shadow-none [&>svg:last-child]:hidden" title="Ton seç">
+                                <span className="text-sm">{toneOptions.find(t => t.value === getReviewTone(review.id))?.emoji}</span>
                               </SelectTrigger>
                               <SelectContent>
                                 {toneOptions.map((t) => (
@@ -743,10 +746,36 @@ export default function Reviews() {
                                 ))}
                               </SelectContent>
                             </Select>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-7 w-7"
+                              title="Yeniden üret"
+                              disabled={generatingIds.has(review.id)}
+                              onClick={() => inlineGenerateMutation.mutate(review)}
+                            >
+                              <RefreshCw className={`h-3.5 w-3.5 ${generatingIds.has(review.id) ? 'animate-spin' : ''}`} />
+                            </Button>
                           </div>
                         </div>
                       ) : (
                         <div className="flex items-center gap-1">
+                          <Select
+                            value={getReviewTone(review.id)}
+                            onValueChange={(v) => setReviewTone(review.id, v as ToneOption)}
+                          >
+                            <SelectTrigger className="h-8 w-auto px-2 border rounded bg-background shadow-sm gap-1" title="Ton seç">
+                              <span className="text-sm">{toneOptions.find(t => t.value === getReviewTone(review.id))?.emoji}</span>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {toneOptions.map((t) => (
+                                <SelectItem key={t.value} value={t.value}>
+                                  {t.emoji} {t.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                           <Button
                             size="sm"
                             variant="outline"
@@ -757,24 +786,6 @@ export default function Reviews() {
                             <Sparkles className={`h-3.5 w-3.5 ${generatingIds.has(review.id) ? 'animate-spin' : ''}`} />
                             {generatingIds.has(review.id) ? 'Üretiliyor...' : 'AI Yanıt Üret'}
                           </Button>
-                          <Select
-                            value={selectedTone}
-                            onValueChange={(v) => {
-                              setSelectedTone(v as ToneOption);
-                              inlineGenerateMutation.mutate(review);
-                            }}
-                          >
-                            <SelectTrigger className="h-8 w-8 p-0 border rounded bg-background shadow-sm [&>svg:last-child]:hidden" title="Ton seç">
-                              <span className="text-sm">{toneOptions.find(t => t.value === selectedTone)?.emoji}</span>
-                            </SelectTrigger>
-                            <SelectContent>
-                              {toneOptions.map((t) => (
-                                <SelectItem key={t.value} value={t.value}>
-                                  {t.emoji} {t.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
                         </div>
                       )}
                     </TableCell>
