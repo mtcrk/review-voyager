@@ -39,6 +39,7 @@ import StoryKit from "./pages/StoryKit";
 import StoryKitSettings from "./pages/StoryKitSettings";
 import Contact from "./pages/Contact";
 import DemoPage from "./pages/DemoPage";
+import About from "./pages/About";
 
 const queryClient = new QueryClient();
 
@@ -65,6 +66,7 @@ const App = () => (
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/demo" element={<DemoPage />} />
+            <Route path="/about" element={<About />} />
             <Route path="/automations/instagram-sales" element={<InstagramSales />} />
             <Route path="/automations/google-reviews" element={<GoogleReviews />} />
             <Route path="/automations/whatsapp" element={<WhatsAppAutomation />} />

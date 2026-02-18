@@ -263,6 +263,15 @@ const Index = () => {
               >
                 {t('nav.contact', 'Contact')}
               </button>
+              <button
+                onClick={() => navigate("/about")}
+                className="text-base font-medium transition-colors"
+                style={{ color: '#1F2937' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#1F2937'}
+              >
+                {t('about.badge', 'Hakkımızda')}
+              </button>
             </div>
 
             {/* Language Switcher & CTA - Right */}
@@ -706,14 +715,41 @@ const Index = () => {
       {/* Footer */}
       <footer className="border-t border-border bg-card/50 backdrop-blur-sm mt-20">
         <div className="container mx-auto px-6 py-12">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-6 text-sm text-muted-foreground">
+          <div className="grid md:grid-cols-3 gap-8 mb-8">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <img src={voyageRespondLogo} alt="VoyageRespond" className="h-6 w-6" />
+                <span className="font-semibold text-foreground">VoyageRespond</span>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {t('footer.description', 'AI-powered review management & visibility optimization platform.')}
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold text-foreground mb-3">{t('footer.quickLinks', 'Hızlı Bağlantılar')}</h4>
+              <div className="space-y-2">
+                <button onClick={() => navigate("/pricing")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('nav.pricing')}</button>
+                <button onClick={() => navigate("/contact")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('nav.contact', 'İletişim')}</button>
+                <button onClick={() => navigate("/about")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('about.badge', 'Hakkımızda')}</button>
+                <button onClick={() => navigate("/hub")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Hub</button>
+              </div>
+            </div>
+            <div>
+              <h4 className="font-semibold text-foreground mb-3">{t('footer.address', 'Adres')}</h4>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Bilkent Cyberpark, Üniversiteler Mah.<br />
+                Bilkent Blv., 06520 Çankaya<br />
+                Ankara, Türkiye
+              </p>
+              <p className="text-sm text-muted-foreground mt-2">info@voyagerespond.com</p>
+            </div>
+          </div>
+          <div className="border-t border-border pt-6 flex flex-col md:flex-row items-center justify-center gap-6 text-sm text-muted-foreground">
             <span>{t('footer.copyright')}</span>
             <span className="hidden md:block">•</span>
             <button onClick={() => navigate("/privacy-policy")} className="hover:text-foreground transition-colors">{t('footer.privacy')}</button>
             <span className="hidden md:block">•</span>
             <button onClick={() => navigate("/terms-of-service")} className="hover:text-foreground transition-colors">{t('footer.terms')}</button>
-            <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/contact")} className="hover:text-foreground transition-colors">{t('footer.contact')}</button>
           </div>
         </div>
       </footer>
