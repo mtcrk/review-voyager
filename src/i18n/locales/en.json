@@ -458,5 +458,47 @@
       "dashboardTools": { "title": "Dashboard Tools", "subtitle": "Priority actions, chat, and competitor analysis" },
       "storyKit": { "title": "Free Marketing with Story Kit", "subtitle": "Turn your customers into your brand storytellers" }
     }
+  },
+  "about": {
+    "badge": "About Us",
+    "title": "We Manage Businesses'",
+    "titleHighlight": "Online Reputation with AI",
+    "subtitle": "VoyageRespond is an AI-powered reputation management platform that strengthens your business's online reputation through smart review management and reputation optimization. Manage reviews from Google, Booking.com, TripAdvisor, and social media platforms from one place.",
+    "mission": {
+      "title": "Our Mission",
+      "description": "To manage and strengthen businesses' online reputation with artificial intelligence. Every review is an opportunity to shape your brand's digital reputation."
+    },
+    "vision": {
+      "title": "Our Vision",
+      "description": "A world where every business can easily manage their online reputation with AI, turn negative reviews into opportunities, and increase customer satisfaction."
+    },
+    "values": {
+      "title": "Our Values",
+      "description": "Transparency, innovation, and customer focus. We contribute to business growth with data-driven decisions."
+    },
+    "whatWeDo": {
+      "title": "What We Do",
+      "aiVisibility": "Technology that measures and optimizes your business's visibility in Google Search and AI assistants.",
+      "smartReply": "AI-powered automatic review reply suggestions that match your brand's tone. Google, Booking, TripAdvisor, and Trustpilot supported.",
+      "analytics": "Monitor your business's online reputation in real-time with sentiment analysis, trend tracking, and competitive comparison.",
+      "multiPlatform": "Manage reviews from Google, Instagram, TikTok, Booking.com, TripAdvisor, and more from a single dashboard."
+    },
+    "companyInfo": {
+      "title": "Company Information",
+      "name": "Company Name",
+      "address": "Address",
+      "email": "Email",
+      "website": "Website"
+    },
+    "cta": {
+      "title": "Start Growing Your Business",
+      "subtitle": "Get your AI Visibility Score for free and boost your digital visibility."
+    }
+  },
+  "footer": {
+    "quickLinks": "Quick Links",
+    "copyright": "© 2025 VoyageRespond",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service"
   }
 }
