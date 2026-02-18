@@ -438,6 +438,8 @@ const Index = () => {
       {/* Product Video Section */}
       <ProductVideo />
 
+      {/* API Compliance Section */}
+      <APIComplianceBanner />
       {/* Automation Options Grid */}
       <section id="automations" className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 gradient-features"></div>
@@ -661,9 +663,6 @@ const Index = () => {
 
       {/* Testimonials Section */}
       <Testimonials />
-
-      {/* API Compliance Section */}
-      <APIComplianceBanner />
 
       {/* Trust Badges & Security Section */}
       <TrustBadges />
