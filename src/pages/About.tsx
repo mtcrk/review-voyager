@@ -55,13 +55,13 @@ export default function About() {
           {t('about.badge', 'Hakkımızda')}
         </div>
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
-          {t('about.title', 'İşletmelerin Dijital')}{' '}
+          {t('about.title', 'Yapay Zeka ile İşletmelerin')}{' '}
           <span className="bg-gradient-to-r from-purple-600 via-primary to-blue-600 bg-clip-text text-transparent">
-            {t('about.titleHighlight', 'Görünürlüğünü Artırıyoruz')}
+            {t('about.titleHighlight', 'Çevrimiçi İtibarını Yönetiyoruz')}
           </span>
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-          {t('about.subtitle', 'VoyageRespond, yapay zeka destekli yorum yönetimi ve görünürlük optimizasyonu ile işletmelerin çevrimiçi varlığını güçlendiren bir teknoloji şirketidir.')}
+          {t('about.subtitle', 'VoyageRespond, yapay zeka destekli yorum yönetimi ve itibar optimizasyonu ile işletmelerin çevrimiçi itibarını güçlendiren bir teknoloji platformudur. Google, Booking.com, TripAdvisor ve sosyal medya platformlarındaki yorumları tek noktadan yönetin.')}
         </p>
       </section>
 
@@ -76,7 +76,7 @@ export default function About() {
               {t('about.mission.title', 'Misyonumuz')}
             </h3>
             <p className="text-muted-foreground leading-relaxed">
-              {t('about.mission.description', 'İşletmelerin Google, yapay zeka asistanları ve sosyal medya platformlarında keşfedilebilirliğini artırmak. Her yorum bir büyüme fırsatıdır.')}
+              {t('about.mission.description', 'İşletmelerin çevrimiçi itibarını yapay zeka ile yönetmek ve güçlendirmek. Her yorum, markanızın dijital itibarını şekillendiren bir fırsattır.')}
             </p>
           </div>
 
@@ -88,7 +88,7 @@ export default function About() {
               {t('about.vision.title', 'Vizyonumuz')}
             </h3>
             <p className="text-muted-foreground leading-relaxed">
-              {t('about.vision.description', 'Yapay zeka çağında her işletmenin çevrimiçi itibarını kolayca yönetebileceği ve müşteri deneyimini optimize edebileceği bir dünya.')}
+              {t('about.vision.description', 'Her işletmenin çevrimiçi itibarını yapay zeka ile kolayca yönetebileceği, olumsuz yorumları fırsata çevirebileceği ve müşteri memnuniyetini artırabileceği bir dünya.')}
             </p>
           </div>
 
