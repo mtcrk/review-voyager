@@ -434,5 +434,47 @@
       "dashboardTools": { "title": "Dashboard Araçları", "subtitle": "Öncelikli işlemler, sohbet ve rakip analizi" },
       "storyKit": { "title": "Story Kit ile Ücretsiz Pazarlama", "subtitle": "Müşterilerinizi markanızın hikaye anlatıcısına dönüştürün" }
     }
+  },
+  "about": {
+    "badge": "Hakkımızda",
+    "title": "Yapay Zeka ile İşletmelerin",
+    "titleHighlight": "Çevrimiçi İtibarını Yönetiyoruz",
+    "subtitle": "VoyageRespond, yapay zeka destekli yorum yönetimi ve itibar optimizasyonu ile işletmelerin çevrimiçi itibarını güçlendiren bir teknoloji platformudur. Google, Booking.com, TripAdvisor ve sosyal medya platformlarındaki yorumları tek noktadan yönetin.",
+    "mission": {
+      "title": "Misyonumuz",
+      "description": "İşletmelerin çevrimiçi itibarını yapay zeka ile yönetmek ve güçlendirmek. Her yorum, markanızın dijital itibarını şekillendiren bir fırsattır."
+    },
+    "vision": {
+      "title": "Vizyonumuz",
+      "description": "Her işletmenin çevrimiçi itibarını yapay zeka ile kolayca yönetebileceği, olumsuz yorumları fırsata çevirebileceği ve müşteri memnuniyetini artırabileceği bir dünya."
+    },
+    "values": {
+      "title": "Değerlerimiz",
+      "description": "Şeffaflık, yenilikçilik ve müşteri odaklılık. Veriye dayalı kararlar ile işletmelerin büyümesine katkıda bulunuyoruz."
+    },
+    "whatWeDo": {
+      "title": "Ne Yapıyoruz?",
+      "aiVisibility": "İşletmenizin Google arama ve yapay zeka asistanlarındaki görünürlüğünü ölçen ve optimize eden teknoloji.",
+      "smartReply": "Yapay zeka destekli, markanızın tonuna uygun otomatik yorum yanıtı önerileri. Google, Booking, TripAdvisor ve Trustpilot desteği.",
+      "analytics": "Duygu analizi, trend takibi ve rekabet karşılaştırması ile işletmenizin çevrimiçi itibarını anlık olarak izleyin.",
+      "multiPlatform": "Google, Instagram, TikTok, Booking.com, TripAdvisor ve daha fazla platformdan gelen yorumları tek bir panelden yönetin."
+    },
+    "companyInfo": {
+      "title": "Şirket Bilgileri",
+      "name": "Şirket Adı",
+      "address": "Adres",
+      "email": "E-posta",
+      "website": "Web Sitesi"
+    },
+    "cta": {
+      "title": "İşletmenizi Büyütmeye Başlayın",
+      "subtitle": "AI Visibility Score'unuzu ücretsiz öğrenin ve dijital görünürlüğünüzü artırın."
+    }
+  },
+  "footer": {
+    "quickLinks": "Hızlı Bağlantılar",
+    "copyright": "© 2025 VoyageRespond",
+    "privacy": "Gizlilik Politikası",
+    "terms": "Kullanım Koşulları"
   }
 }
