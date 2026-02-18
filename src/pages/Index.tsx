@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Testimonials } from "@/components/landing/Testimonials";
 import { TrustBadges } from "@/components/landing/TrustBadges";
+import { APIComplianceBanner } from "@/components/landing/APIComplianceBanner";
 import { ProductVideo } from "@/components/landing/ProductVideo";
 import { AIVisibilityDemo } from "@/components/landing/AIVisibilityDemo";
 const Index = () => {
@@ -660,6 +661,9 @@ const Index = () => {
 
       {/* Testimonials Section */}
       <Testimonials />
+
+      {/* API Compliance Section */}
+      <APIComplianceBanner />
 
       {/* Trust Badges & Security Section */}
       <TrustBadges />
