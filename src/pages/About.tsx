@@ -177,7 +177,7 @@ export default function About() {
               </div>
               <div>
                 <h3 className="font-semibold text-foreground">{t('about.companyInfo.email', 'E-posta')}</h3>
-                <p className="text-muted-foreground">info@voyagerespond.com</p>
+                <p className="text-muted-foreground">support@voyagerespond.com</p>
               </div>
             </div>
 
@@ -261,7 +261,7 @@ export default function About() {
                 Bilkent Blv., 06520 Çankaya<br />
                 Ankara, Türkiye
               </p>
-              <p className="text-sm text-muted-foreground mt-2">info@voyagerespond.com</p>
+              <p className="text-sm text-muted-foreground mt-2">support@voyagerespond.com</p>
             </div>
           </div>
           <div className="border-t border-border pt-6 flex flex-col md:flex-row items-center justify-center gap-6 text-sm text-muted-foreground">
