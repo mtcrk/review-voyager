@@ -13,6 +13,7 @@ import {
   Send,
   Check,
   Camera,
+  Building2,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -51,6 +52,7 @@ interface PlatformConfig {
 
 const commonItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Lokasyonlar", url: "/locations", icon: Building2 },
   { title: "Ayarlar", url: "/settings", icon: Settings },
 ];
 
@@ -208,7 +210,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {commonItems.slice(0, 1).map((item) => {
+              {commonItems.slice(0, 2).map((item) => {
                 const isActive = location.pathname === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>

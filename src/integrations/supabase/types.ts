@@ -49,44 +49,67 @@ export type Database = {
       businesses: {
         Row: {
           booking_hotel_id: string | null
+          city: string | null
           created_at: string
           google_account_id: string | null
           google_connected: boolean | null
           google_location_id: string | null
           id: string
           language: string | null
+          lat: number | null
+          lng: number | null
           name: string
+          parent_business_id: string | null
           place_id: string | null
           tone: string | null
           user_id: string
+          weekly_report_enabled: boolean
         }
         Insert: {
           booking_hotel_id?: string | null
+          city?: string | null
           created_at?: string
           google_account_id?: string | null
           google_connected?: boolean | null
           google_location_id?: string | null
           id?: string
           language?: string | null
+          lat?: number | null
+          lng?: number | null
           name: string
+          parent_business_id?: string | null
           place_id?: string | null
           tone?: string | null
           user_id: string
+          weekly_report_enabled?: boolean
         }
         Update: {
           booking_hotel_id?: string | null
+          city?: string | null
           created_at?: string
           google_account_id?: string | null
           google_connected?: boolean | null
           google_location_id?: string | null
           id?: string
           language?: string | null
+          lat?: number | null
+          lng?: number | null
           name?: string
+          parent_business_id?: string | null
           place_id?: string | null
           tone?: string | null
           user_id?: string
+          weekly_report_enabled?: boolean
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "businesses_parent_business_id_fkey"
+            columns: ["parent_business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       integration_logs: {
         Row: {
