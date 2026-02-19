@@ -67,6 +67,16 @@ const Hub = () => {
   const [waitlistEmail, setWaitlistEmail] = useState("");
   const [tiktokConnection, setTiktokConnection] = useState<TikTokConnection>({ connected: false });
 
+  // Scroll to selected automation from onboarding
+  useEffect(() => {
+    if (selectedFromOnboarding) {
+      setTimeout(() => {
+        const el = document.getElementById(`automation-${selectedFromOnboarding}`);
+        el?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 300);
+    }
+  }, [selectedFromOnboarding]);
+
   // Fetch TikTok connection status
   useEffect(() => {
     const fetchTikTokStatus = async () => {
@@ -394,9 +404,10 @@ const Hub = () => {
           {filteredAutomations.map((automation) => (
             <div
               key={automation.id}
+              id={`automation-${automation.id}`}
               className={`p-6 rounded-xl border bg-card transition-all hover:shadow-lg ${
                 selectedFromOnboarding === automation.id
-                  ? "ring-2 ring-primary border-primary"
+                  ? "ring-2 ring-primary border-primary shadow-lg shadow-primary/20"
                   : "border-border"
               }`}
             >
