@@ -40,6 +40,7 @@ import StoryKitSettings from "./pages/StoryKitSettings";
 import Contact from "./pages/Contact";
 import DemoPage from "./pages/DemoPage";
 import About from "./pages/About";
+import Locations from "./pages/Locations";
 
 const queryClient = new QueryClient();
 
@@ -114,6 +115,16 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <TikTokDMInbox />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/locations"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <Locations />
+                  </AppLayout>
                 </ProtectedRoute>
               }
             />
