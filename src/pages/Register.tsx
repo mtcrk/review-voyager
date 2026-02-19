@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
@@ -8,8 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
-import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { isPersonalEmail } from '@/lib/emailValidation';
+import { Building2, AlertTriangle } from 'lucide-react';
 
 
 export default function Register() {
@@ -25,8 +26,18 @@ export default function Register() {
   const [password, setPassword] = useState('');
   
   const [error, setError] = useState('');
+  const [emailWarning, setEmailWarning] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  const handleEmailChange = (value: string) => {
+    setEmail(value);
+    if (value.includes('@') && isPersonalEmail(value)) {
+      setEmailWarning('Lütfen kurumsal e-posta adresinizi kullanın (örn: ad@oteliniz.com). Kişisel e-postalar (Gmail, Hotmail vb.) kabul edilmemektedir.');
+    } else {
+      setEmailWarning('');
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -38,6 +49,12 @@ export default function Register() {
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    if (isPersonalEmail(email)) {
+      setError('Lütfen kurumsal e-posta adresinizi kullanın. Kişisel e-postalar (Gmail, Hotmail vb.) kabul edilmemektedir.');
+      setLoading(false);
+      return;
+    }
 
     if (password.length < 6) {
       setError('Şifre en az 6 karakter olmalı.');
@@ -188,12 +205,22 @@ export default function Register() {
               <Input
                 id="email"
                 type="email"
-                placeholder="example@email.com"
+                placeholder="ad@oteliniz.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => handleEmailChange(e.target.value)}
                 required
                 disabled={loading}
               />
+              {emailWarning && (
+                <Alert className="border-destructive/30 bg-destructive/5">
+                  <AlertTriangle className="w-4 h-4 text-destructive" />
+                  <AlertDescription className="text-destructive text-sm">{emailWarning}</AlertDescription>
+                </Alert>
+              )}
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <Building2 className="w-3 h-3" />
+                Kurumsal e-posta adresi gereklidir (örn: ad@oteliniz.com)
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">{t('auth.register.password')}</Label>
