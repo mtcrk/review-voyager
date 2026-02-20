@@ -7,8 +7,8 @@ export function APIComplianceBanner() {
   const compliancePoints = [
     {
       icon: Shield,
-      title: t('landing.compliance.officialApi', 'Official Google Business Profile API'),
-      description: t('landing.compliance.officialApiDesc', 'Verified integration using Google\'s official APIs'),
+      title: t('landing.compliance.officialApi', 'Secure Platform Integrations'),
+      description: t('landing.compliance.officialApiDesc', 'Connected via official APIs and verified data sources'),
     },
     {
       icon: Lock,
