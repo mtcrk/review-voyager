@@ -67,6 +67,26 @@ const Hub = () => {
   const [waitlistEmail, setWaitlistEmail] = useState("");
   const [tiktokConnection, setTiktokConnection] = useState<TikTokConnection>({ connected: false });
 
+  // Read onboarding channel selections
+  const onboardingChannels: string[] = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("onboarding_channels") || "[]");
+    } catch { return []; }
+  })();
+
+  // Map onboarding channel IDs to hub channel types
+  const channelMap: Record<string, string> = {
+    "google-reviews": "google",
+    "booking": "google", // booking/tripadvisor automations are under google tab
+    "tripadvisor": "google",
+    "trustpilot": "google",
+    "instagram": "instagram",
+  };
+
+  const isChannelActivated = (automationChannel: string) => {
+    return onboardingChannels.some(ch => channelMap[ch] === automationChannel);
+  };
+
   // Scroll to selected automation from onboarding
   useEffect(() => {
     if (selectedFromOnboarding) {
@@ -210,16 +230,21 @@ const Hub = () => {
     return matchesTab && matchesSearch;
   });
 
-  const connectedChannels = 1;
-  const activeAutomations = 0;
+  const connectedChannels = onboardingChannels.length || 0;
+  const activeAutomations = automations.filter(a => 
+    a.status === "available" && a.link && isChannelActivated(a.channel)
+  ).length;
 
   const getStatusBadge = (automation: Automation) => {
+    // Check if activated via onboarding
+    const activated = automation.status === "available" && isChannelActivated(automation.channel);
+    
     // Special handling for TikTok with custom badge
     if (automation.badge) {
       const isConnected = automation.badge === "Connected";
       return (
         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-          isConnected ? "bg-green-100 text-green-800" : "bg-black text-white"
+          isConnected ? "bg-primary/10 text-primary" : "bg-foreground text-background"
         }`}>
           {isConnected && <Check className="w-3 h-3 mr-1" />}
           {automation.badge}
@@ -227,24 +252,33 @@ const Hub = () => {
       );
     }
 
+    if (activated) {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+          <Check className="w-3 h-3 mr-1" />
+          Active
+        </span>
+      );
+    }
+
     switch (automation.status) {
       case "available":
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
             <Check className="w-3 h-3 mr-1" />
             Available
           </span>
         );
       case "early-access":
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-accent text-accent-foreground">
             <Clock className="w-3 h-3 mr-1" />
             Early Access
           </span>
         );
       case "coming-soon":
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground">
             <Lock className="w-3 h-3 mr-1" />
             Coming Soon
           </span>
@@ -253,7 +287,6 @@ const Hub = () => {
   };
 
   const handleAutomationAction = (automation: Automation) => {
-    // If automation has a direct link, navigate there
     if (automation.link) {
       navigate(automation.link);
       return;
@@ -269,6 +302,21 @@ const Hub = () => {
   };
 
   const getActionButton = (automation: Automation) => {
+    const activated = automation.status === "available" && isChannelActivated(automation.channel);
+    
+    if (activated && automation.link) {
+      return (
+        <Button
+          size="sm"
+          className="gradient-primary text-white"
+          onClick={() => navigate(automation.link!)}
+        >
+          Open
+          <ArrowRight className="w-4 h-4 ml-1" />
+        </Button>
+      );
+    }
+
     switch (automation.status) {
       case "available":
         return (
@@ -286,7 +334,7 @@ const Hub = () => {
           <Button
             size="sm"
             variant="outline"
-            className="border-amber-300 text-amber-700 hover:bg-amber-50"
+            className="border-accent text-accent-foreground hover:bg-accent/50"
             onClick={() => handleAutomationAction(automation)}
           >
             Join waitlist

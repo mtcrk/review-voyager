@@ -130,6 +130,7 @@ const Onboarding = () => {
     if (step < 3) {
       setStep((prev) => (prev + 1) as Step);
     } else {
+      localStorage.setItem("onboarding_channels", JSON.stringify(selectedChannels));
       navigate("/hub");
     }
   };
