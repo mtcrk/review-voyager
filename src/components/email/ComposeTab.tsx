@@ -132,37 +132,45 @@ export function ComposeTab() {
       }));
 
       // Process template per recipient - send batch with first contact's template as base
-      const logoUrl = "https://pnpuhewfoxssmbpryart.supabase.co/storage/v1/object/public/email-assets/logo.png";
+      const logoUrl = "https://pnpuhewfoxssmbpryart.supabase.co/storage/v1/object/public/email-assets/logo.png?v=1";
       const processedBody = bodyToHtml(processTemplate(body, recipientsList[0]));
-      const processedHtml = `
-<!DOCTYPE html>
+      const processedHtml = `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
 <body style="margin:0;padding:0;background-color:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f3f4f6;">
-    <tr><td align="center" style="padding:40px 16px;">
-      <table role="presentation" width="560" cellspacing="0" cellpadding="0" style="max-width:560px;width:100%;">
-        <!-- Logo -->
-        <tr><td align="center" style="padding-bottom:24px;">
-          <img src="${logoUrl}" alt="${activeBusiness?.name || 'VoyageRespond'}" width="40" height="40" style="display:block;border-radius:8px;" />
-        </td></tr>
-        <!-- Card -->
-        <tr><td style="background-color:#ffffff;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden;">
-          <!-- Header accent -->
-          <div style="height:4px;background:linear-gradient(90deg,#7C3AED,#6366F1);"></div>
-          <!-- Content -->
-          <td style="padding:36px 32px;">
-            ${processedBody}
-          </td>
-        </td></tr>
-        <!-- Footer -->
-        <tr><td align="center" style="padding-top:24px;">
-          <p style="margin:0;font-size:12px;color:#9ca3af;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-            ${activeBusiness?.name || ''} tarafından <a href="https://voyagerespond.com" style="color:#7C3AED;text-decoration:none;">VoyageRespond</a> ile gönderildi
-          </p>
-        </td></tr>
-      </table>
-    </td></tr>
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f3f4f6;">
+    <tr>
+      <td align="center" style="padding:40px 16px;">
+        <table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;width:100%;">
+          <tr>
+            <td align="center" style="padding-bottom:24px;">
+              <img src="${logoUrl}" alt="${activeBusiness?.name || 'VoyageRespond'}" width="40" height="40" style="display:block;border-radius:8px;" />
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color:#ffffff;border-radius:12px;border:1px solid #e5e7eb;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                  <td style="height:4px;background:linear-gradient(90deg,#7C3AED,#6366F1);border-radius:12px 12px 0 0;font-size:0;line-height:0;">&nbsp;</td>
+                </tr>
+                <tr>
+                  <td style="padding:36px 32px;">
+                    ${processedBody}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding-top:24px;">
+              <p style="margin:0;font-size:12px;color:#9ca3af;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+                ${activeBusiness?.name || ''} tarafından <a href="https://voyagerespond.com" style="color:#7C3AED;text-decoration:none;">VoyageRespond</a> ile gönderildi
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
   </table>
 </body>
 </html>`;
