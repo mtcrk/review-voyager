@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Check, Star, Sparkles, Lock, Clock, Square, CheckSquare, Globe, Hotel, UtensilsCrossed, MessageSquare } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 
-type Step = 1 | 2 | 3 | 4;
+type Step = 1 | 2 | 3;
 
 interface GoalOption {
   id: string;
@@ -21,20 +21,10 @@ interface ChannelOption {
   status: "available" | "early-access" | "coming-soon";
 }
 
-interface AutomationOption {
-  id: string;
-  title: string;
-  description: string;
-  channel: string;
-  status: "available" | "early-access" | "coming-soon";
-}
-
 const Onboarding = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>(1);
-  const [selectedGoal, setSelectedGoal] = useState<string>("");
   const [selectedChannels, setSelectedChannels] = useState<string[]>([]);
-  const [selectedAutomation, setSelectedAutomation] = useState<string>("");
 
   const goals: GoalOption[] = [
     {
@@ -95,51 +85,6 @@ const Onboarding = () => {
     },
   ];
 
-  const automations: AutomationOption[] = [
-    {
-      id: "review-reply",
-      title: "AI yanıt önerileri",
-      description: "Her yorum için akıllı yanıt önerileri alın",
-      channel: "google-reviews",
-      status: "available",
-    },
-    {
-      id: "sentiment-analysis",
-      title: "Duygu analizi",
-      description: "Yorumları otomatik olarak duyguya göre kategorize edin",
-      channel: "google-reviews",
-      status: "available",
-    },
-    {
-      id: "booking-sync",
-      title: "Booking.com yorum senkronizasyonu",
-      description: "Booking yorumlarını otomatik çekin ve analiz edin",
-      channel: "booking",
-      status: "available",
-    },
-    {
-      id: "tripadvisor-sync",
-      title: "TripAdvisor yorum senkronizasyonu",
-      description: "TripAdvisor yorumlarını otomatik çekin",
-      channel: "tripadvisor",
-      status: "available",
-    },
-    {
-      id: "trustpilot-sync",
-      title: "Trustpilot yorum takibi",
-      description: "Trustpilot yorumlarını otomatik çekin",
-      channel: "trustpilot",
-      status: "available",
-    },
-    {
-      id: "comment-to-dm",
-      title: "Yorum → DM otomatik yanıt",
-      description: "Biri anahtar kelime yazdığında otomatik DM gönderin",
-      channel: "instagram",
-      status: "early-access",
-    },
-  ];
-
   const getStatusBadge = (status: "available" | "early-access" | "coming-soon") => {
     switch (status) {
       case "available":
@@ -174,19 +119,18 @@ const Onboarding = () => {
 
   const canProceed = () => {
     switch (step) {
-      case 1: return true; // showcase step, always proceed
+      case 1: return true;
       case 2: return selectedChannels.length > 0;
-      case 3: return !!selectedAutomation;
-      case 4: return true;
+      case 3: return true;
       default: return false;
     }
   };
 
   const handleNext = () => {
-    if (step < 4) {
+    if (step < 3) {
       setStep((prev) => (prev + 1) as Step);
     } else {
-      navigate(`/hub?selected=${selectedAutomation}`);
+      navigate("/hub");
     }
   };
 
@@ -197,10 +141,6 @@ const Onboarding = () => {
       navigate("/");
     }
   };
-
-  const filteredAutomations = automations.filter(
-    (a) => selectedChannels.includes(a.channel) || selectedChannels.length === 0
-  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -219,7 +159,7 @@ const Onboarding = () => {
               </span>
             </button>
             <div className="flex items-center gap-2">
-              {[1, 2, 3, 4].map((s) => (
+              {[1, 2, 3].map((s) => (
                 <div
                   key={s}
                   className={`w-8 h-1.5 rounded-full transition-all ${
@@ -234,7 +174,7 @@ const Onboarding = () => {
 
       {/* Content */}
       <div className="container mx-auto px-6 py-12 max-w-3xl">
-        {/* Step 1: Hedefinizi seçin */}
+        {/* Step 1: Showcase */}
         {step === 1 && (
           <div className="space-y-8 animate-in fade-in duration-300">
             <div className="text-center space-y-3">
@@ -274,7 +214,7 @@ const Onboarding = () => {
           </div>
         )}
 
-        {/* Step 2: Platformlarınızı seçin */}
+        {/* Step 2: Platform seçimi */}
         {step === 2 && (
           <div className="space-y-8 animate-in fade-in duration-300">
             <div className="text-center space-y-3">
@@ -343,67 +283,8 @@ const Onboarding = () => {
           </div>
         )}
 
-        {/* Step 3: İlk otomasyonunuzu seçin */}
+        {/* Step 3: Hazırsınız */}
         {step === 3 && (
-          <div className="space-y-8 animate-in fade-in duration-300">
-            <div className="text-center space-y-3">
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-                İlk otomasyonunuzu seçin
-              </h1>
-              <p className="text-muted-foreground text-lg">
-                Daha sonra istediğiniz kadar otomasyon ekleyebilirsiniz.
-              </p>
-            </div>
-
-            <div className="grid gap-4">
-              {filteredAutomations.map((automation) => (
-                <button
-                  key={automation.id}
-                  onClick={() =>
-                    automation.status !== "coming-soon" && setSelectedAutomation(automation.id)
-                  }
-                  disabled={automation.status === "coming-soon"}
-                  className={`p-6 rounded-xl border text-left transition-all ${
-                    automation.status === "coming-soon"
-                      ? "opacity-60 cursor-not-allowed bg-muted/50"
-                      : selectedAutomation === automation.id
-                      ? "border-primary bg-primary/5 shadow-md"
-                      : "border-border bg-card hover:border-primary/50 hover:shadow-md"
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-semibold text-foreground text-lg">
-                          {automation.title}
-                        </h3>
-                        {getStatusBadge(automation.status)}
-                      </div>
-                      <p className="text-muted-foreground">{automation.description}</p>
-                      <span className="text-xs text-primary mt-2 inline-block">
-                        {channels.find((c) => c.id === automation.channel)?.title}
-                      </span>
-                    </div>
-                    <div
-                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ml-4 ${
-                        selectedAutomation === automation.id
-                          ? "border-primary bg-primary"
-                          : "border-muted-foreground/30"
-                      }`}
-                    >
-                      {selectedAutomation === automation.id && (
-                        <Check className="w-4 h-4 text-primary-foreground" />
-                      )}
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Step 4: Hazırsınız */}
-        {step === 4 && (
           <div className="space-y-8 animate-in fade-in duration-300">
             <div className="text-center space-y-3">
               <h1 className="text-3xl md:text-4xl font-bold text-foreground">
@@ -421,7 +302,7 @@ const Onboarding = () => {
               <div className="space-y-2">
                 <h3 className="font-semibold text-xl text-foreground">Otomasyona hazır</h3>
                 <p className="text-muted-foreground">
-                  Seçtiğiniz otomasyonlar yapılandırılmaya hazır.
+                  Seçtiğiniz platformlar yapılandırılmaya hazır.
                 </p>
               </div>
               <div className="flex flex-wrap justify-center gap-2">
@@ -435,7 +316,7 @@ const Onboarding = () => {
                 ))}
               </div>
               <p className="text-sm text-muted-foreground">
-                İstediğiniz zaman Hub'dan daha fazla kanal veya otomasyon ekleyebilirsiniz.
+                İstediğiniz zaman Hub'dan daha fazla kanal ekleyebilirsiniz.
               </p>
             </div>
           </div>
@@ -452,7 +333,7 @@ const Onboarding = () => {
             disabled={!canProceed()}
             className="gap-2 gradient-primary text-white"
           >
-            {step === 4 ? "Hub'a Devam Et" : "İleri"}
+            {step === 3 ? "Hub'a Devam Et" : "İleri"}
             <ArrowRight className="w-4 h-4" />
           </Button>
         </div>
