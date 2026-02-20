@@ -214,7 +214,15 @@ const Hub = () => {
     { id: "coming-soon" as const, label: "Coming Soon" },
   ];
 
+  // If onboarding channels exist, only show relevant automations
+  const hasOnboardingSelection = onboardingChannels.length > 0;
+
   const filteredAutomations = automations.filter((a) => {
+    // First filter by onboarding selections if they exist
+    if (hasOnboardingSelection && !isChannelActivated(a.channel)) {
+      return false;
+    }
+
     const matchesTab =
       activeTab === "all" ||
       (activeTab === "coming-soon" && a.status === "coming-soon") ||
@@ -397,26 +405,47 @@ const Hub = () => {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
               <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-                Your Automation Hub
+                {hasOnboardingSelection ? "Seçtiğiniz Otomasyonlar" : "Your Automation Hub"}
               </h1>
               <p className="text-muted-foreground text-lg">
-                Pick a channel, enable automations, and start converting.
+                {hasOnboardingSelection 
+                  ? "Bu otomasyonlar sizin için hazır. Hemen başlamak için kayıt olun."
+                  : "Pick a channel, enable automations, and start converting."}
               </p>
             </div>
             <div className="flex items-center gap-6">
               <div className="text-center">
                 <div className="text-2xl font-bold text-foreground">{connectedChannels}</div>
-                <div className="text-sm text-muted-foreground">Connected Channels</div>
+                <div className="text-sm text-muted-foreground">Seçili Kanal</div>
               </div>
               <div className="w-px h-10 bg-border" />
               <div className="text-center">
-                <div className="text-2xl font-bold text-foreground">{activeAutomations}</div>
-                <div className="text-sm text-muted-foreground">Active Automations</div>
+                <div className="text-2xl font-bold text-foreground">{filteredAutomations.length}</div>
+                <div className="text-sm text-muted-foreground">Otomasyon</div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* CTA Banner for non-logged-in users */}
+      {!user && hasOnboardingSelection && (
+        <div className="bg-primary/5 border-b border-primary/20">
+          <div className="container mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-foreground font-medium">
+              🚀 Bu otomasyonları kullanmaya başlamak için hesap oluşturun
+            </p>
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => navigate("/login")}>
+                Giriş Yap
+              </Button>
+              <Button className="gradient-primary text-white" onClick={() => navigate("/register")}>
+                Ücretsiz Başla
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="container mx-auto px-6 py-6">
