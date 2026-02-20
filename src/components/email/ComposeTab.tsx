@@ -143,8 +143,9 @@ export function ComposeTab() {
       <td align="center" style="padding:40px 16px;">
         <table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;width:100%;">
           <tr>
-            <td align="center" style="padding-bottom:24px;">
-              <img src="${logoUrl}" alt="${activeBusiness?.name || 'VoyageRespond'}" width="40" height="40" style="display:block;border-radius:8px;" />
+            <td align="center" style="padding-bottom:28px;">
+              <img src="${logoUrl}" alt="${activeBusiness?.name || 'VoyageRespond'}" width="64" height="64" style="display:block;border-radius:12px;" />
+              <p style="margin:8px 0 0 0;font-size:16px;font-weight:600;color:#1f2937;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${activeBusiness?.name || 'VoyageRespond'}</p>
             </td>
           </tr>
           <tr>
