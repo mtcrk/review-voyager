@@ -14,6 +14,7 @@ import {
   Check,
   Camera,
   Building2,
+  Mail,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -319,6 +320,21 @@ export function AppSidebar() {
                   >
                     <Camera className="h-5 w-5" />
                     <span>Story Kit</span>
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={location.pathname === "/email"}
+                  tooltip="Email Merkezi"
+                >
+                  <NavLink
+                    to="/email"
+                    className="flex items-center gap-3 transition-smooth"
+                  >
+                    <Mail className="h-5 w-5" />
+                    <span>Email Merkezi</span>
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>

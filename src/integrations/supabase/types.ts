@@ -111,6 +111,164 @@ export type Database = {
           },
         ]
       }
+      customer_contacts: {
+        Row: {
+          business_id: string
+          created_at: string
+          email: string
+          id: string
+          name: string | null
+          source: string
+          subscribed: boolean
+          tags: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          email: string
+          id?: string
+          name?: string | null
+          source?: string
+          subscribed?: boolean
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string | null
+          source?: string
+          subscribed?: boolean
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_contacts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_campaigns: {
+        Row: {
+          body_html: string
+          business_id: string
+          created_at: string
+          created_by: string | null
+          failed_count: number
+          id: string
+          recipient_count: number
+          sent_at: string | null
+          sent_count: number
+          status: string
+          subject: string
+          template_type: string
+        }
+        Insert: {
+          body_html: string
+          business_id: string
+          created_at?: string
+          created_by?: string | null
+          failed_count?: number
+          id?: string
+          recipient_count?: number
+          sent_at?: string | null
+          sent_count?: number
+          status?: string
+          subject: string
+          template_type?: string
+        }
+        Update: {
+          body_html?: string
+          business_id?: string
+          created_at?: string
+          created_by?: string | null
+          failed_count?: number
+          id?: string
+          recipient_count?: number
+          sent_at?: string | null
+          sent_count?: number
+          status?: string
+          subject?: string
+          template_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_campaigns_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_logs: {
+        Row: {
+          business_id: string
+          campaign_id: string | null
+          contact_id: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          recipient_email: string
+          resend_id: string | null
+          status: string
+          subject: string
+        }
+        Insert: {
+          business_id: string
+          campaign_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          recipient_email: string
+          resend_id?: string | null
+          status?: string
+          subject: string
+        }
+        Update: {
+          business_id?: string
+          campaign_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          recipient_email?: string
+          resend_id?: string | null
+          status?: string
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_logs_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_logs_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "email_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_logs_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "customer_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       integration_logs: {
         Row: {
           action: string
