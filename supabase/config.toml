@@ -32,3 +32,6 @@ verify_jwt = true
 
 [functions.ai-visibility-demo]
 verify_jwt = false
+
+[functions.send-customer-email]
+verify_jwt = false

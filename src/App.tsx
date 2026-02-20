@@ -41,6 +41,7 @@ import Contact from "./pages/Contact";
 import DemoPage from "./pages/DemoPage";
 import About from "./pages/About";
 import Locations from "./pages/Locations";
+import EmailCenter from "./pages/EmailCenter";
 
 const queryClient = new QueryClient();
 
@@ -184,6 +185,16 @@ const App = () => (
                 <ProtectedRoute>
                   <AppLayout>
                     <Settings />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/email"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <EmailCenter />
                   </AppLayout>
                 </ProtectedRoute>
               }
