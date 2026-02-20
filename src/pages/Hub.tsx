@@ -433,14 +433,14 @@ const Hub = () => {
         <div className="bg-primary/5 border-b border-primary/20">
           <div className="container mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-foreground font-medium">
-              🚀 Bu otomasyonları kullanmaya başlamak için hesap oluşturun
+              🚀 Bu otomasyonları kullanmaya başlamak için hesap oluşturun — 3 ay ücretsiz!
             </p>
             <div className="flex gap-3">
               <Button variant="outline" onClick={() => navigate("/login")}>
                 Giriş Yap
               </Button>
               <Button className="gradient-primary text-white" onClick={() => navigate("/register")}>
-                Ücretsiz Başla
+                3 Ay Ücretsiz Dene
               </Button>
             </div>
           </div>
