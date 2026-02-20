@@ -143,12 +143,6 @@ export function ComposeTab() {
       <td align="center" style="padding:40px 16px;">
         <table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;width:100%;">
           <tr>
-            <td align="center" style="padding-bottom:28px;">
-              <img src="${logoUrl}" alt="${activeBusiness?.name || 'VoyageRespond'}" width="64" height="64" style="display:block;border-radius:12px;" />
-              <p style="margin:8px 0 0 0;font-size:16px;font-weight:600;color:#1f2937;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">${activeBusiness?.name || 'VoyageRespond'}</p>
-            </td>
-          </tr>
-          <tr>
             <td style="background-color:#ffffff;border-radius:12px;border:1px solid #e5e7eb;">
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                 <tr>
@@ -163,9 +157,13 @@ export function ComposeTab() {
             </td>
           </tr>
           <tr>
-            <td align="center" style="padding-top:24px;">
-              <p style="margin:0;font-size:12px;color:#9ca3af;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-                ${activeBusiness?.name || ''} tarafından <a href="https://voyagerespond.com" style="color:#7C3AED;text-decoration:none;">VoyageRespond</a> ile gönderildi
+            <td align="center" style="padding-top:28px;">
+              <img src="${logoUrl}" alt="VoyageRespond" width="36" height="36" style="display:inline-block;border-radius:8px;vertical-align:middle;" />
+              <p style="margin:6px 0 0 0;font-size:13px;font-weight:600;color:#6b7280;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+                <a href="https://voyagerespond.com" style="color:#7C3AED;text-decoration:none;">VoyageRespond</a>
+              </p>
+              <p style="margin:4px 0 0 0;font-size:11px;color:#9ca3af;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+                ${activeBusiness?.name || ''} tarafından gönderildi
               </p>
             </td>
           </tr>

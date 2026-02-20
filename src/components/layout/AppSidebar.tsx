@@ -146,10 +146,10 @@ export function AppSidebar() {
           onClick={() => navigate("/dashboard")}
           className="flex items-center gap-3 hover:opacity-80 transition-opacity w-full"
         >
-          <img src={logo} alt="Voyagerespond" className="h-8 w-8" />
+          <img src={logo} alt="VoyageRespond" className="h-8 w-8" />
           {open && (
             <span className="text-lg font-semibold text-foreground">
-              Voyagerespond
+              VoyageRespond
             </span>
           )}
         </button>
