@@ -132,7 +132,7 @@ export function ComposeTab() {
       }));
 
       // Process template per recipient - send batch with first contact's template as base
-      const logoUrl = "https://pnpuhewfoxssmbpryart.supabase.co/storage/v1/object/public/email-assets/logo.png?v=1";
+      const logoUrl = "https://pnpuhewfoxssmbpryart.supabase.co/storage/v1/object/public/email-assets/logo.png?v=2";
       const processedBody = bodyToHtml(processTemplate(body, recipientsList[0]));
       const processedHtml = `<!DOCTYPE html>
 <html>
