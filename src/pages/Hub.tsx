@@ -129,8 +129,9 @@ const Hub = () => {
       description: "Get smart, personalized reply suggestions for every Google review.",
       benefit: "Reply faster, sound professional every time",
       channel: "google",
-      status: "early-access",
+      status: "available",
       icon: Star,
+      link: "/reviews",
     },
     {
       id: "review-alerts",
@@ -138,8 +139,9 @@ const Hub = () => {
       description: "Get instant notifications when you receive a negative review.",
       benefit: "Respond quickly to unhappy customers",
       channel: "google",
-      status: "early-access",
+      status: "available",
       icon: Bell,
+      link: "/reviews",
     },
     {
       id: "tiktok-connect",
