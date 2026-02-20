@@ -174,7 +174,7 @@ const Onboarding = () => {
 
   const canProceed = () => {
     switch (step) {
-      case 1: return !!selectedGoal;
+      case 1: return true; // showcase step, always proceed
       case 2: return selectedChannels.length > 0;
       case 3: return !!selectedAutomation;
       case 4: return true;
@@ -239,53 +239,38 @@ const Onboarding = () => {
           <div className="space-y-8 animate-in fade-in duration-300">
             <div className="text-center space-y-3">
               <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-                Ana hedefiniz nedir?
+                VoyageRespond ile neler yapabilirsiniz?
               </h1>
               <p className="text-muted-foreground text-lg">
-                Size daha hızlı ulaşmanızı sağlayalım.
+                Tek platformdan tüm yorum süreçlerinizi yönetin.
               </p>
             </div>
 
             <div className="grid gap-4">
               {goals.map((goal) => (
-                <button
+                <div
                   key={goal.id}
-                  onClick={() => setSelectedGoal(goal.id)}
-                  className={`p-6 rounded-xl border text-left transition-all hover:shadow-md ${
-                    selectedGoal === goal.id
-                      ? "border-primary bg-primary/5 shadow-md"
-                      : "border-border bg-card hover:border-primary/50"
-                  }`}
+                  className="p-6 rounded-xl border border-border bg-card text-left"
                 >
                   <div className="flex items-start gap-4">
-                    <div
-                      className={`p-3 rounded-lg ${
-                        selectedGoal === goal.id ? "bg-primary/10" : "bg-muted"
-                      }`}
-                    >
-                      <goal.icon
-                        className={`w-6 h-6 ${
-                          selectedGoal === goal.id ? "text-primary" : "text-muted-foreground"
-                        }`}
-                      />
+                    <div className="p-3 rounded-lg bg-primary/10">
+                      <goal.icon className="w-6 h-6 text-primary" />
                     </div>
                     <div className="flex-1">
                       <h3 className="font-semibold text-foreground text-lg">{goal.title}</h3>
                       <p className="text-muted-foreground mt-1">{goal.description}</p>
                     </div>
-                    <div
-                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                        selectedGoal === goal.id
-                          ? "border-primary bg-primary"
-                          : "border-muted-foreground/30"
-                      }`}
-                    >
-                      {selectedGoal === goal.id && <Check className="w-4 h-4 text-primary-foreground" />}
+                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Check className="w-4 h-4 text-primary" />
                     </div>
                   </div>
-                </button>
+                </div>
               ))}
             </div>
+
+            <p className="text-center text-muted-foreground text-sm">
+              Tüm bu özellikler planınıza dahildir. Hadi başlayalım!
+            </p>
           </div>
         )}
 
