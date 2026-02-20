@@ -46,7 +46,7 @@ const Onboarding = () => {
     {
       id: "multi-platform",
       title: "Tüm platformlardaki yorumları tek yerden yönet",
-      description: "Google, Booking, TripAdvisor — hepsi bir arada ve daha fazlası",
+      description: "Google, Booking, TripAdvisor ve daha fazlası — hepsi bir arada",
       icon: Globe,
     },
     {
