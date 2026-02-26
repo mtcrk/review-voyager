@@ -35,3 +35,9 @@ verify_jwt = false
 
 [functions.send-customer-email]
 verify_jwt = false
+
+[functions.google-business-reviews]
+verify_jwt = false
+
+[functions.google-business-info]
+verify_jwt = false
