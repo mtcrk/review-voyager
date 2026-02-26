@@ -446,37 +446,72 @@ export default function Reviews() {
             <RefreshCw className="h-4 w-4 mr-2" />
             Yenile
           </Button>
-          <Button 
-            size="sm" 
-            onClick={async () => {
-              if (!activeBusiness) return;
-              setIsFetchingBooking(true);
-              try {
-                const response = await supabase.functions.invoke('wextractor-fetch-reviews', {
-                  body: { business_id: activeBusiness.id, platform: 'booking', fetch_all: true },
-                });
-                if (response.error) throw new Error(response.error.message);
-                const result = response.data;
-                if (result?.error) {
-                  toast({ title: "Hata", description: result.error, variant: "destructive" });
-                } else {
-                  toast({
-                    title: "Booking Yorumları Çekildi",
-                    description: `${result.inserted} yeni yorum eklendi, ${result.skipped} zaten mevcut.`,
+          {activeBusiness?.google_connected && (
+            <Button 
+              size="sm" 
+              onClick={async () => {
+                if (!activeBusiness) return;
+                setIsFetchingBooking(true);
+                try {
+                  const response = await supabase.functions.invoke('google-business-reviews', {
+                    body: { business_id: activeBusiness.id },
                   });
-                  refetch();
+                  if (response.error) throw new Error(response.error.message);
+                  const result = response.data;
+                  if (result?.error) {
+                    toast({ title: "Hata", description: result.error, variant: "destructive" });
+                  } else {
+                    toast({
+                      title: "Google Yorumları Çekildi",
+                      description: `${result.inserted || 0} yeni yorum eklendi, ${result.skipped || 0} zaten mevcut.`,
+                    });
+                    refetch();
+                  }
+                } catch (err: any) {
+                  toast({ title: "Hata", description: err.message || "Yorumlar çekilemedi.", variant: "destructive" });
+                } finally {
+                  setIsFetchingBooking(false);
                 }
-              } catch (err: any) {
-                toast({ title: "Hata", description: err.message || "Yorumlar çekilemedi.", variant: "destructive" });
-              } finally {
-                setIsFetchingBooking(false);
-              }
-            }}
-            disabled={isFetchingBooking}
-          >
-            <Download className="h-4 w-4 mr-2" />
-            {isFetchingBooking ? 'Çekiliyor...' : 'Booking Yorumları Çek'}
-          </Button>
+              }}
+              disabled={isFetchingBooking}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              {isFetchingBooking ? 'Çekiliyor...' : 'Google Yorumları Çek'}
+            </Button>
+          )}
+          {activeBusiness?.booking_hotel_id && !activeBusiness?.google_connected && (
+            <Button 
+              size="sm" 
+              onClick={async () => {
+                if (!activeBusiness) return;
+                setIsFetchingBooking(true);
+                try {
+                  const response = await supabase.functions.invoke('wextractor-fetch-reviews', {
+                    body: { business_id: activeBusiness.id, platform: 'booking', fetch_all: true },
+                  });
+                  if (response.error) throw new Error(response.error.message);
+                  const result = response.data;
+                  if (result?.error) {
+                    toast({ title: "Hata", description: result.error, variant: "destructive" });
+                  } else {
+                    toast({
+                      title: "Booking Yorumları Çekildi",
+                      description: `${result.inserted} yeni yorum eklendi, ${result.skipped} zaten mevcut.`,
+                    });
+                    refetch();
+                  }
+                } catch (err: any) {
+                  toast({ title: "Hata", description: err.message || "Yorumlar çekilemedi.", variant: "destructive" });
+                } finally {
+                  setIsFetchingBooking(false);
+                }
+              }}
+              disabled={isFetchingBooking}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              {isFetchingBooking ? 'Çekiliyor...' : 'Booking Yorumları Çek'}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -544,8 +579,52 @@ export default function Reviews() {
         </div>
       )}
 
-      {/* Inline Booking Setup - show when no booking_hotel_id and no reviews */}
-      {reviews.length === 0 && !activeBusiness.booking_hotel_id && (
+      {/* Empty state - platform-aware */}
+      {reviews.length === 0 && activeBusiness.google_connected && (
+        <Card className="p-8 shadow-card border-dashed border-2 border-primary/30 bg-primary/5">
+          <div className="max-w-lg mx-auto text-center space-y-4">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+              <Download className="h-6 w-6 text-primary" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground">Google Yorumlarınızı Çekin</h3>
+            <p className="text-sm text-muted-foreground">
+              Google Business hesabınız bağlı. Yorumlarınızı API üzerinden otomatik çekebilirsiniz.
+            </p>
+            <Button
+              onClick={async () => {
+                if (!activeBusiness) return;
+                setIsFetchingBooking(true);
+                try {
+                  const response = await supabase.functions.invoke('google-business-reviews', {
+                    body: { business_id: activeBusiness.id },
+                  });
+                  if (response.error) throw new Error(response.error.message);
+                  const result = response.data;
+                  if (result?.error) {
+                    toast({ title: "Hata", description: result.error, variant: "destructive" });
+                  } else {
+                    toast({
+                      title: "Google Yorumları Çekildi! 🎉",
+                      description: `${result.inserted || 0} yorum eklendi.`,
+                    });
+                    refetch();
+                  }
+                } catch (err: any) {
+                  toast({ title: "Hata", description: err.message || "Yorumlar çekilemedi.", variant: "destructive" });
+                } finally {
+                  setIsFetchingBooking(false);
+                }
+              }}
+              disabled={isFetchingBooking}
+            >
+              {isFetchingBooking ? 'Çekiliyor...' : 'Google Yorumlarını Çek'}
+            </Button>
+          </div>
+        </Card>
+      )}
+
+      {/* Inline Booking Setup - show only when NOT google connected and no booking_hotel_id */}
+      {reviews.length === 0 && !activeBusiness.google_connected && !activeBusiness.booking_hotel_id && (
         <Card className="p-8 shadow-card border-dashed border-2 border-primary/30 bg-primary/5">
           <div className="max-w-lg mx-auto text-center space-y-4">
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
@@ -569,14 +648,12 @@ export default function Reviews() {
                   if (!activeBusiness || !bookingIdInput.trim()) return;
                   setSavingBookingId(true);
                   try {
-                    // Save booking_hotel_id
                     const { error: updateError } = await supabase
                       .from('businesses')
                       .update({ booking_hotel_id: bookingIdInput.trim() })
                       .eq('id', activeBusiness.id);
                     if (updateError) throw updateError;
 
-                    // Immediately fetch reviews
                     const response = await supabase.functions.invoke('wextractor-fetch-reviews', {
                       body: { business_id: activeBusiness.id, platform: 'booking', fetch_all: true },
                     });
@@ -611,16 +688,12 @@ export default function Reviews() {
       )}
 
       {/* Reviews Table */}
-      {filteredReviews.length === 0 && (reviews.length > 0 || activeBusiness.booking_hotel_id) ? (
+      {filteredReviews.length === 0 && reviews.length > 0 ? (
         <Card className="p-12 text-center shadow-card">
-          <p className="text-muted-foreground text-lg">
-            {reviews.length === 0 ? "Yorumlar yükleniyor veya henüz çekilmedi." : "Arama kriterlerine uygun yorum bulunamadı."}
-          </p>
-          <p className="text-sm text-muted-foreground mt-2">
-            {reviews.length === 0 ? "'Booking Yorumları Çek' butonunu kullanın." : "Filtreleri değiştirmeyi deneyin."}
-          </p>
+          <p className="text-muted-foreground text-lg">Arama kriterlerine uygun yorum bulunamadı.</p>
+          <p className="text-sm text-muted-foreground mt-2">Filtreleri değiştirmeyi deneyin.</p>
         </Card>
-      ) : filteredReviews.length === 0 && reviews.length === 0 && !activeBusiness.booking_hotel_id ? null : (
+      ) : filteredReviews.length > 0 ? (
         <Card className="shadow-card">
           <Table>
             <TableHeader>
@@ -867,7 +940,7 @@ export default function Reviews() {
             </div>
           )}
         </Card>
-      )}
+      ) : null}
 
       {/* Review Detail Sheet */}
       <Sheet open={!!selectedReview} onOpenChange={() => setSelectedReview(null)}>
