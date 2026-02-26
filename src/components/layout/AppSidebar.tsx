@@ -136,8 +136,33 @@ export function AppSidebar() {
     },
   ];
 
+  const handlePlatformSelect = async (platform: PlatformConfig) => {
+    if (platform.connected) {
+      setSelectedPlatform(platform.id);
+      return;
+    }
+
+    // Not connected — trigger OAuth for Google
+    if (platform.id === "google") {
+      try {
+        const response = await supabase.functions.invoke('google-business-auth', {
+          body: { action: 'initiate' },
+        });
+        if (response.error) throw response.error;
+        if (response.data?.authUrl) {
+          window.location.href = response.data.authUrl;
+        }
+      } catch (error: any) {
+        console.error('Google connect error:', error);
+      }
+      return;
+    }
+
+    // For other platforms, just select them (they handle connection in their own pages)
+    setSelectedPlatform(platform.id);
+  };
+
   const currentPlatform = platforms.find(p => p.id === selectedPlatform);
-  const connectedPlatforms = platforms.filter(p => p.connected);
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -184,7 +209,7 @@ export function AppSidebar() {
                 {platforms.map((platform) => (
                   <DropdownMenuItem
                     key={platform.id}
-                    onClick={() => setSelectedPlatform(platform.id)}
+                    onClick={() => handlePlatformSelect(platform)}
                     className="flex items-center justify-between"
                   >
                     <div className="flex items-center gap-2">
