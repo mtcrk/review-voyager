@@ -1,7 +1,16 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Eye, TrendingUp, Star, MessageSquare, CheckCircle, ArrowUp } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+
+// Demo data for landing page - no real database queries
+const DEMO_STATS: StatsData = {
+  totalReviews: 156,
+  averageRating: 4.3,
+  repliedPercentage: 87,
+  positivePercentage: 78,
+  visibilityScore: 82,
+  trend: 8,
+};
 
 interface StatsData {
   totalReviews: number;
@@ -14,77 +23,14 @@ interface StatsData {
 
 export function AIVisibilityDemo() {
   const { t } = useTranslation();
-  const [stats, setStats] = useState<StatsData>({
-    totalReviews: 0,
-    averageRating: 0,
-    repliedPercentage: 0,
-    positivePercentage: 0,
-    visibilityScore: 0,
-    trend: 0,
-  });
+  const [stats, setStats] = useState<StatsData>(DEMO_STATS);
   const [loading, setLoading] = useState(true);
   const [animatedScore, setAnimatedScore] = useState(0);
 
   useEffect(() => {
-    const fetchRealStats = async () => {
-      try {
-        // Fetch all reviews from database
-        const { data: reviews, error } = await supabase
-          .from("reviews")
-          .select("rating, status, sentiment, replied_at");
-
-        if (error) throw error;
-
-        if (reviews && reviews.length > 0) {
-          const totalReviews = reviews.length;
-          const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews;
-          const repliedCount = reviews.filter(r => r.replied_at || r.status === "replied").length;
-          const positiveCount = reviews.filter(r => r.sentiment === "positive" || r.rating >= 4).length;
-
-          // Calculate AI Visibility Score (0-100)
-          // Formula: 40% rating + 30% reply rate + 20% positive ratio + 10% volume bonus
-          const ratingScore = (avgRating / 5) * 40;
-          const replyScore = (repliedCount / totalReviews) * 30;
-          const positiveScore = (positiveCount / totalReviews) * 20;
-          const volumeBonus = Math.min(totalReviews / 100, 1) * 10;
-          const visibilityScore = Math.round(ratingScore + replyScore + positiveScore + volumeBonus);
-
-          setStats({
-            totalReviews,
-            averageRating: parseFloat(avgRating.toFixed(1)),
-            repliedPercentage: Math.round((repliedCount / totalReviews) * 100),
-            positivePercentage: Math.round((positiveCount / totalReviews) * 100),
-            visibilityScore: Math.min(visibilityScore, 100),
-            trend: 12, // Mock trend for now
-          });
-        } else {
-          // Demo data if no reviews exist
-          setStats({
-            totalReviews: 156,
-            averageRating: 4.3,
-            repliedPercentage: 87,
-            positivePercentage: 78,
-            visibilityScore: 82,
-            trend: 8,
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching stats:", error);
-        // Fallback demo data
-        setStats({
-          totalReviews: 156,
-          averageRating: 4.3,
-          repliedPercentage: 87,
-          positivePercentage: 78,
-          visibilityScore: 82,
-          trend: 8,
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRealStats();
+    // Landing page always uses demo data
+    setStats(DEMO_STATS);
+    setLoading(false);
   }, []);
 
   // Animate the score
