@@ -57,7 +57,7 @@ serve(async (req) => {
       authUrl.searchParams.set("response_type", "code");
       authUrl.searchParams.set("scope", "https://www.googleapis.com/auth/business.manage");
       authUrl.searchParams.set("access_type", "offline");
-      authUrl.searchParams.set("prompt", "consent");
+      authUrl.searchParams.set("prompt", "consent select_account");
       authUrl.searchParams.set("state", user.id);
 
       return new Response(
