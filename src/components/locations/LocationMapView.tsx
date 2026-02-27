@@ -17,17 +17,7 @@ export function LocationMapView({ locations, onRefresh }: Props) {
 
   const locationsWithCoords = locations.filter((l) => l.lat && l.lng);
 
-  useEffect(() => {
-    if (!locationsWithCoords.length) {
-      setSelectedLocationId(null);
-      return;
-    }
-
-    const stillExists = locationsWithCoords.some((l) => l.id === selectedLocationId);
-    if (!selectedLocationId || !stillExists) {
-      setSelectedLocationId(locationsWithCoords[0].id);
-    }
-  }, [locationsWithCoords, selectedLocationId]);
+  // No auto-select — show all locations by default
 
   const selectedLocation =
     locationsWithCoords.find((l) => l.id === selectedLocationId) || locationsWithCoords[0];
@@ -87,21 +77,38 @@ export function LocationMapView({ locations, onRefresh }: Props) {
     );
   }
 
-  const mapUrl = `https://maps.google.com/maps?q=${selectedLocation.lat},${selectedLocation.lng}&z=14&output=embed`;
+  // Build map URL showing all locations or selected one
+  const allMarkersUrl = locationsWithCoords.length === 1
+    ? `https://maps.google.com/maps?q=${locationsWithCoords[0].lat},${locationsWithCoords[0].lng}&z=14&output=embed`
+    : selectedLocationId
+      ? `https://maps.google.com/maps?q=${selectedLocation.lat},${selectedLocation.lng}&z=14&output=embed`
+      : `https://maps.google.com/maps?q=${locationsWithCoords.map(l => `${l.lat},${l.lng}`).join('|')}&z=6&output=embed`;
 
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-base font-semibold flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-primary" />
-          Harita Görünümü
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base font-semibold flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-primary" />
+            Harita Görünümü
+          </CardTitle>
+          {selectedLocationId && locationsWithCoords.length > 1 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectedLocationId(null)}
+              className="text-xs text-muted-foreground"
+            >
+              Tümünü Göster
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="h-72 rounded-xl border border-border/60 overflow-hidden bg-muted/20">
           <iframe
-            title={`${selectedLocation.name} harita görünümü`}
-            src={mapUrl}
+            title="Lokasyon harita görünümü"
+            src={allMarkersUrl}
             className="w-full h-full"
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
