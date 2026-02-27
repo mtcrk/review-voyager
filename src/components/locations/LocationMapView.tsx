@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, Star, Loader2, RefreshCw } from "lucide-react";
@@ -13,7 +13,24 @@ interface Props {
 
 export function LocationMapView({ locations, onRefresh }: Props) {
   const [syncing, setSyncing] = useState(false);
+  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
+
   const locationsWithCoords = locations.filter((l) => l.lat && l.lng);
+
+  useEffect(() => {
+    if (!locationsWithCoords.length) {
+      setSelectedLocationId(null);
+      return;
+    }
+
+    const stillExists = locationsWithCoords.some((l) => l.id === selectedLocationId);
+    if (!selectedLocationId || !stillExists) {
+      setSelectedLocationId(locationsWithCoords[0].id);
+    }
+  }, [locationsWithCoords, selectedLocationId]);
+
+  const selectedLocation =
+    locationsWithCoords.find((l) => l.id === selectedLocationId) || locationsWithCoords[0];
 
   const handleSyncLocations = async () => {
     setSyncing(true);
@@ -60,17 +77,8 @@ export function LocationMapView({ locations, onRefresh }: Props) {
             <p className="text-sm text-muted-foreground max-w-xs mb-4">
               Lokasyon koordinatları henüz yok. Google Business'tan otomatik çekebilirsiniz.
             </p>
-            <Button
-              onClick={handleSyncLocations}
-              disabled={syncing}
-              variant="outline"
-              className="gap-2"
-            >
-              {syncing ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <RefreshCw className="h-4 w-4" />
-              )}
+            <Button onClick={handleSyncLocations} disabled={syncing} variant="outline" className="gap-2">
+              {syncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
               {syncing ? "Çekiliyor..." : "Google'dan Koordinatları Çek"}
             </Button>
           </div>
@@ -79,11 +87,7 @@ export function LocationMapView({ locations, onRefresh }: Props) {
     );
   }
 
-  // Build a static Google Maps embed with markers
-  const center = {
-    lat: locationsWithCoords.reduce((s, l) => s + l.lat!, 0) / locationsWithCoords.length,
-    lng: locationsWithCoords.reduce((s, l) => s + l.lng!, 0) / locationsWithCoords.length,
-  };
+  const mapUrl = `https://maps.google.com/maps?q=${selectedLocation.lat},${selectedLocation.lng}&z=14&output=embed`;
 
   return (
     <Card>
@@ -93,30 +97,49 @@ export function LocationMapView({ locations, onRefresh }: Props) {
           Harita Görünümü
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        {/* Card-based visual map alternative */}
+      <CardContent className="space-y-4">
+        <div className="h-72 rounded-xl border border-border/60 overflow-hidden bg-muted/20">
+          <iframe
+            title={`${selectedLocation.name} harita görünümü`}
+            src={mapUrl}
+            className="w-full h-full"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {locationsWithCoords.map((loc) => (
-            <div
-              key={loc.id}
-              className="flex items-start gap-3 p-3 rounded-xl border border-border/60 bg-muted/20 hover:bg-muted/40 transition-colors"
-            >
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <MapPin className="h-5 w-5 text-primary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-foreground text-sm truncate">{loc.name}</p>
-                <p className="text-xs text-muted-foreground">{loc.city || "Konum belirtilmedi"}</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <Star className="h-3 w-3 text-amber-400 fill-amber-400" />
-                  <span className="text-xs font-semibold text-foreground">{loc.averageRating}</span>
-                  <span className="text-xs text-muted-foreground">· {loc.totalReviews} yorum</span>
+          {locationsWithCoords.map((loc) => {
+            const isActive = selectedLocation.id === loc.id;
+            return (
+              <button
+                key={loc.id}
+                type="button"
+                onClick={() => setSelectedLocationId(loc.id)}
+                className={`flex items-start gap-3 p-3 rounded-xl border transition-colors text-left ${
+                  isActive
+                    ? "border-primary/40 bg-primary/10"
+                    : "border-border/60 bg-muted/20 hover:bg-muted/40"
+                }`}
+              >
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <MapPin className="h-5 w-5 text-primary" />
                 </div>
-              </div>
-            </div>
-          ))}
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-foreground text-sm truncate">{loc.name}</p>
+                  <p className="text-xs text-muted-foreground">{loc.city || "Konum belirtilmedi"}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Star className="h-3 w-3 text-primary fill-primary" />
+                    <span className="text-xs font-semibold text-foreground">{loc.averageRating}</span>
+                    <span className="text-xs text-muted-foreground">· {loc.totalReviews} yorum</span>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </CardContent>
     </Card>
   );
 }
+
