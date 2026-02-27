@@ -105,25 +105,33 @@ serve(async (req) => {
         }
       );
 
+      const accountsBody = await accountsResponse.text();
+      console.log("Accounts response status:", accountsResponse.status);
+      console.log("Accounts response body:", accountsBody);
+
       if (!accountsResponse.ok) {
-        throw new Error("Failed to fetch Google Business accounts");
+        throw new Error(`Failed to fetch Google Business accounts: ${accountsBody}`);
       }
 
-      const accountsData = await accountsResponse.json();
+      const accountsData = JSON.parse(accountsBody);
       const accounts = accountsData.accounts || [];
+      console.log("Found accounts:", accounts.length);
 
       // Fetch locations for each account
       const businessList = [];
       for (const account of accounts) {
-        const locationsResponse = await fetch(
-          `https://mybusinessbusinessinformation.googleapis.com/v1/${account.name}/locations`,
-          {
-            headers: { Authorization: `Bearer ${access_token}` },
-          }
-        );
+        const locationsUrl = `https://mybusinessbusinessinformation.googleapis.com/v1/${account.name}/locations?readMask=name,title,metadata,storefrontAddress`;
+        console.log("Fetching locations from:", locationsUrl);
+        
+        const locationsResponse = await fetch(locationsUrl, {
+          headers: { Authorization: `Bearer ${access_token}` },
+        });
+
+        const locationsBody = await locationsResponse.text();
+        console.log("Locations response status:", locationsResponse.status, "body:", locationsBody);
 
         if (locationsResponse.ok) {
-          const locationsData = await locationsResponse.json();
+          const locationsData = JSON.parse(locationsBody);
           const locations = locationsData.locations || [];
           
           for (const location of locations) {
