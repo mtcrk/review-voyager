@@ -13,6 +13,7 @@ import Reviews from "./pages/Reviews";
 import ReviewDetailPage from "./pages/ReviewDetailPage";
 import AutoReply from "./pages/AutoReply";
 import Statistics from "./pages/Statistics";
+import ChatWithReviewsPage from "./pages/ChatWithReviewsPage";
 import Settings from "./pages/Settings";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -175,6 +176,16 @@ const App = () => (
                 <ProtectedRoute>
                   <AppLayout>
                     <Statistics />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/chat"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <ChatWithReviewsPage />
                   </AppLayout>
                 </ProtectedRoute>
               }
