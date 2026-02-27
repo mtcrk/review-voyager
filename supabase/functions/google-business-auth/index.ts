@@ -40,7 +40,8 @@ serve(async (req) => {
       throw new Error("Unauthorized");
     }
 
-    const { action, code, businesses } = await req.json();
+    const requestBody = await req.json();
+    const { action, code, businesses } = requestBody;
 
     // Initiate OAuth flow
     if (action === "initiate") {
@@ -158,7 +159,7 @@ serve(async (req) => {
 
     // Save selected businesses
     if (action === "save" && businesses && businesses.length > 0) {
-      const { refresh_token } = await req.json();
+      const refresh_token = requestBody.refresh_token;
       
       for (const business of businesses) {
         // Insert business (without refresh token - it goes to separate secure table)
