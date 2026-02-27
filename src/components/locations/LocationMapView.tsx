@@ -1,13 +1,47 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { MapPin, Star, Loader2, RefreshCw } from "lucide-react";
 import { LocationMetrics } from "@/hooks/useMultiLocationData";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface Props {
   locations: LocationMetrics[];
+  onRefresh?: () => void;
 }
 
-export function LocationMapView({ locations }: Props) {
+export function LocationMapView({ locations, onRefresh }: Props) {
+  const [syncing, setSyncing] = useState(false);
   const locationsWithCoords = locations.filter((l) => l.lat && l.lng);
+
+  const handleSyncLocations = async () => {
+    setSyncing(true);
+    try {
+      const googleLocations = locations.filter((l) => l.id);
+      if (!googleLocations.length) {
+        toast.error("Google bağlantılı işletme bulunamadı");
+        return;
+      }
+
+      const results = await Promise.allSettled(
+        googleLocations.map((l) =>
+          supabase.functions.invoke("google-business-info", {
+            body: { business_id: l.id },
+          })
+        )
+      );
+
+      const successCount = results.filter((r) => r.status === "fulfilled").length;
+      toast.success(`${successCount} işletmenin bilgileri güncellendi`);
+      onRefresh?.();
+    } catch (error) {
+      console.error("Sync error:", error);
+      toast.error("Bilgiler güncellenirken hata oluştu");
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   if (locationsWithCoords.length === 0) {
     return (
@@ -23,9 +57,22 @@ export function LocationMapView({ locations }: Props) {
             <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4">
               <MapPin className="h-8 w-8 text-muted-foreground/50" />
             </div>
-            <p className="text-sm text-muted-foreground max-w-xs">
-              Harita görünümü için işletme ayarlarından lokasyon koordinatlarını ekleyin.
+            <p className="text-sm text-muted-foreground max-w-xs mb-4">
+              Lokasyon koordinatları henüz yok. Google Business'tan otomatik çekebilirsiniz.
             </p>
+            <Button
+              onClick={handleSyncLocations}
+              disabled={syncing}
+              variant="outline"
+              className="gap-2"
+            >
+              {syncing ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
+              {syncing ? "Çekiliyor..." : "Google'dan Koordinatları Çek"}
+            </Button>
           </div>
         </CardContent>
       </Card>
