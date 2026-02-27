@@ -45,6 +45,36 @@ async function fetchPage(apiBaseUrl: string, offset: number): Promise<Wextractor
   return resp.json();
 }
 
+function getPlatformId(business: any, platform: string): string | null {
+  switch (platform) {
+    case "booking":
+      return business.booking_hotel_id;
+    case "tripadvisor":
+      return business.tripadvisor_id;
+    case "trustpilot":
+      return business.trustpilot_url;
+    case "hotelscom":
+      return business.hotelscom_url;
+    default:
+      return null;
+  }
+}
+
+function buildApiUrl(platform: string, platformId: string, token: string): string | null {
+  switch (platform) {
+    case "booking":
+      return `https://wextractor.com/api/v1/reviews/booking?id=${encodeURIComponent(platformId)}&auth_token=${token}`;
+    case "tripadvisor":
+      return `https://wextractor.com/api/v1/reviews/tripadvisor?id=${encodeURIComponent(platformId)}&auth_token=${token}`;
+    case "trustpilot":
+      return `https://wextractor.com/api/v1/reviews/trustpilot?id=${encodeURIComponent(platformId)}&auth_token=${token}`;
+    case "hotelscom":
+      return `https://wextractor.com/api/v1/reviews/hotelscom?id=${encodeURIComponent(platformId)}&auth_token=${token}`;
+    default:
+      return null;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -96,7 +126,7 @@ Deno.serve(async (req) => {
 
     const { data: business, error: bizError } = await supabaseAuth
       .from("businesses")
-      .select("id, booking_hotel_id, name")
+      .select("id, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url, name")
       .eq("id", business_id)
       .maybeSingle();
 
@@ -107,21 +137,24 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (!business.booking_hotel_id) {
+    const platformId = getPlatformId(business, platform);
+    if (!platformId) {
+      const platformNames: Record<string, string> = {
+        booking: "Booking.com",
+        tripadvisor: "TripAdvisor",
+        trustpilot: "Trustpilot",
+        hotelscom: "Hotels.com",
+      };
       return new Response(
-        JSON.stringify({ error: "Booking hotel ID not configured for this business. Please add it in Settings." }),
+        JSON.stringify({ error: `${platformNames[platform] || platform} ID/URL henüz yapılandırılmamış.` }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    let apiBaseUrl: string;
-    if (platform === "booking") {
-      apiBaseUrl = `https://wextractor.com/api/v1/reviews/booking?id=${encodeURIComponent(business.booking_hotel_id)}&auth_token=${WEXTRACTOR_API_TOKEN}`;
-    } else if (platform === "tripadvisor") {
-      apiBaseUrl = `https://wextractor.com/api/v1/reviews/tripadvisor?id=${encodeURIComponent(business.booking_hotel_id)}&auth_token=${WEXTRACTOR_API_TOKEN}`;
-    } else {
+    const apiBaseUrl = buildApiUrl(platform, platformId, WEXTRACTOR_API_TOKEN);
+    if (!apiBaseUrl) {
       return new Response(
-        JSON.stringify({ error: "Unsupported platform. Use 'booking' or 'tripadvisor'." }),
+        JSON.stringify({ error: `Desteklenmeyen platform: ${platform}` }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -132,7 +165,6 @@ Deno.serve(async (req) => {
     let averageRating: string | undefined;
 
     if (fetch_all) {
-      // First fetch to get total count
       console.log(`Fetching first page to get total count...`);
       const firstPage = await fetchPage(apiBaseUrl, 0);
       totalAvailable = firstPage.totals?.review_count;
@@ -145,7 +177,6 @@ Deno.serve(async (req) => {
         const totalPages = Math.ceil(totalAvailable / pageSize);
         console.log(`Total reviews: ${totalAvailable}, pages: ${totalPages}. Fetching in parallel batches...`);
         
-        // Fetch remaining pages in parallel batches of 5
         const BATCH_SIZE = 5;
         for (let batchStart = 1; batchStart < totalPages; batchStart += BATCH_SIZE) {
           const batchEnd = Math.min(batchStart + BATCH_SIZE, totalPages);
@@ -166,7 +197,6 @@ Deno.serve(async (req) => {
         }
       }
     } else {
-      // Single page fetch (legacy behavior)
       console.log(`Fetching ${platform} reviews for business ${business_id}, offset ${offset}`);
       const pageData = await fetchPage(apiBaseUrl, offset);
       allReviews = pageData.reviews || [];
@@ -175,9 +205,6 @@ Deno.serve(async (req) => {
     }
 
     console.log(`Total reviews fetched: ${allReviews.length}`);
-    if (allReviews.length > 0) {
-      console.log("Sample review keys:", JSON.stringify(Object.keys(allReviews[0])));
-    }
 
     // Transform and upsert reviews
     let insertedCount = 0;
@@ -189,7 +216,7 @@ Deno.serve(async (req) => {
       const posText = review.pros || review.positive || "";
       const negText = review.cons || review.negative || "";
 
-      const reviewId = review.id || `${platform}-${business.booking_hotel_id}-${reviewerName}-${reviewDate}`;
+      const reviewId = review.id || `${platform}-${platformId}-${reviewerName}-${reviewDate}`;
 
       let normalizedRating = typeof review.rating === "string" ? parseFloat(review.rating) : (review.rating || 3);
       if (platform === "booking" && normalizedRating > 5) {

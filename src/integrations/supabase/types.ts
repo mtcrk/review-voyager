@@ -54,6 +54,7 @@ export type Database = {
           google_account_id: string | null
           google_connected: boolean | null
           google_location_id: string | null
+          hotelscom_url: string | null
           id: string
           language: string | null
           lat: number | null
@@ -62,6 +63,8 @@ export type Database = {
           parent_business_id: string | null
           place_id: string | null
           tone: string | null
+          tripadvisor_id: string | null
+          trustpilot_url: string | null
           user_id: string
           weekly_report_enabled: boolean
         }
@@ -72,6 +75,7 @@ export type Database = {
           google_account_id?: string | null
           google_connected?: boolean | null
           google_location_id?: string | null
+          hotelscom_url?: string | null
           id?: string
           language?: string | null
           lat?: number | null
@@ -80,6 +84,8 @@ export type Database = {
           parent_business_id?: string | null
           place_id?: string | null
           tone?: string | null
+          tripadvisor_id?: string | null
+          trustpilot_url?: string | null
           user_id: string
           weekly_report_enabled?: boolean
         }
@@ -90,6 +96,7 @@ export type Database = {
           google_account_id?: string | null
           google_connected?: boolean | null
           google_location_id?: string | null
+          hotelscom_url?: string | null
           id?: string
           language?: string | null
           lat?: number | null
@@ -98,6 +105,8 @@ export type Database = {
           parent_business_id?: string | null
           place_id?: string | null
           tone?: string | null
+          tripadvisor_id?: string | null
+          trustpilot_url?: string | null
           user_id?: string
           weekly_report_enabled?: boolean
         }
