@@ -46,7 +46,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import logo from "@/assets/logo.png";
 
-type Platform = "google" | "tiktok" | "instagram" | "whatsapp" | "booking" | "tripadvisor" | "trustpilot" | "hotelscom";
+type Platform = "google" | "tiktok" | "instagram" | "whatsapp";
 
 interface PlatformConfig {
   id: Platform;
@@ -130,42 +130,6 @@ export function AppSidebar() {
       ],
     },
     {
-      id: "booking" as Platform,
-      name: "Booking.com",
-      icon: <BedDouble className="h-4 w-4" />,
-      connected: !!activeBusiness?.booking_hotel_id,
-      menuItems: [
-        { title: "Booking Yorumları", url: "/reviews?platform=booking", icon: MessageSquare },
-      ],
-    },
-    {
-      id: "tripadvisor" as Platform,
-      name: "TripAdvisor",
-      icon: <MapPin className="h-4 w-4" />,
-      connected: false,
-      menuItems: [
-        { title: "TripAdvisor Yorumları", url: "/reviews?platform=tripadvisor", icon: MessageSquare },
-      ],
-    },
-    {
-      id: "trustpilot" as Platform,
-      name: "Trustpilot",
-      icon: <ShieldCheck className="h-4 w-4" />,
-      connected: false,
-      menuItems: [
-        { title: "Trustpilot Yorumları", url: "/reviews?platform=trustpilot", icon: MessageSquare },
-      ],
-    },
-    {
-      id: "hotelscom" as Platform,
-      name: "Hotels.com",
-      icon: <Hotel className="h-4 w-4" />,
-      connected: false,
-      menuItems: [
-        { title: "Hotels.com Yorumları", url: "/reviews?platform=hotelscom", icon: MessageSquare },
-      ],
-    },
-    {
       id: "tiktok",
       name: "TikTok",
       icon: <Music2 className="h-4 w-4" />,
@@ -185,6 +149,13 @@ export function AppSidebar() {
         { title: "Yorum Yanıtları", url: "/instagram-comments", icon: MessageSquare },
       ],
     },
+  ];
+
+  const reviewPlatforms = [
+    { title: "Booking Yorumları", url: "/reviews?platform=booking", icon: BedDouble },
+    { title: "TripAdvisor Yorumları", url: "/reviews?platform=tripadvisor", icon: MapPin },
+    { title: "Trustpilot Yorumları", url: "/reviews?platform=trustpilot", icon: ShieldCheck },
+    { title: "Hotels.com Yorumları", url: "/reviews?platform=hotelscom", icon: Hotel },
   ];
 
   const handlePlatformSelect = async (platform: PlatformConfig) => {
@@ -346,6 +317,39 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         )}
+
+        {/* Review Platforms (Wextractor-based) */}
+        <SidebarGroup>
+          {open && (
+            <SidebarGroupLabel className="text-xs text-muted-foreground px-3">
+              Yorum Platformları
+            </SidebarGroupLabel>
+          )}
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {reviewPlatforms.map((item) => {
+                const isActive = (location.pathname + location.search) === item.url;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      tooltip={item.title}
+                    >
+                      <NavLink
+                        to={item.url}
+                        className="flex items-center gap-3 transition-smooth"
+                      >
+                        <item.icon className="h-5 w-5" />
+                        <span>{item.title}</span>
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
         {/* Automation */}
         <SidebarGroup>
