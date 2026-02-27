@@ -8,10 +8,12 @@ import { LocationHighlights } from "@/components/locations/LocationHighlights";
 import { LocationComparisonTable } from "@/components/locations/LocationComparisonTable";
 import { LocationTrendChart } from "@/components/locations/LocationTrendChart";
 import { LocationMapView } from "@/components/locations/LocationMapView";
+import { BusinessOnboarding } from "@/components/BusinessOnboarding";
 
 export default function Locations() {
   const navigate = useNavigate();
   const { data: locations = [], isLoading, refetch } = useMultiLocationData();
+  const [showAddBusiness, setShowAddBusiness] = useState(false);
 
   const handleSelectLocation = (id: string) => {
     // Navigate to dashboard filtered to this business
@@ -41,10 +43,15 @@ export default function Locations() {
             İşletme ekleyerek çoklu lokasyon yönetimini kullanmaya başlayın. 
             Her lokasyonun yorumlarını tek panelden takip edin.
           </p>
-          <Button onClick={() => navigate("/settings")} className="gap-2">
+          <Button onClick={() => setShowAddBusiness(true)} className="gap-2">
             <Plus className="h-4 w-4" />
             İşletme Ekle
           </Button>
+          <BusinessOnboarding
+            open={showAddBusiness}
+            onBusinessCreated={() => { setShowAddBusiness(false); refetch(); }}
+            onDismiss={() => setShowAddBusiness(false)}
+          />
         </div>
       </div>
     );
@@ -65,7 +72,7 @@ export default function Locations() {
             Tüm şubelerinizin performansını tek panelden yönetin
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => navigate("/settings")} className="gap-2">
+        <Button variant="outline" size="sm" onClick={() => setShowAddBusiness(true)} className="gap-2">
           <Plus className="h-4 w-4" />
           Lokasyon Ekle
         </Button>
@@ -85,6 +92,12 @@ export default function Locations() {
         <LocationTrendChart locations={locations} />
         <LocationMapView locations={locations} onRefresh={() => refetch()} />
       </div>
+
+      <BusinessOnboarding
+        open={showAddBusiness}
+        onBusinessCreated={() => { setShowAddBusiness(false); refetch(); }}
+        onDismiss={() => setShowAddBusiness(false)}
+      />
     </div>
   );
 }
