@@ -142,6 +142,16 @@ serve(async (req) => {
               place_id: location.metadata?.placeId,
             });
           }
+        } else {
+          // Fallback: If Business Information API is not enabled,
+          // add the account itself so the user can still proceed
+          console.log("Locations API failed, using account as fallback for:", account.accountName);
+          businessList.push({
+            account_id: account.name,
+            location_id: account.name, // use account name as location fallback
+            name: account.accountName || "İşletme",
+            place_id: null,
+          });
         }
       }
 
