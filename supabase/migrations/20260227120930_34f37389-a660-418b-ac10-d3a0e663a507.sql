@@ -1,0 +1,1 @@
+DROP POLICY "Service role insert for reply logs" ON public.reply_logs;

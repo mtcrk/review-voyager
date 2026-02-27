@@ -340,6 +340,60 @@ export type Database = {
         }
         Relationships: []
       }
+      reply_logs: {
+        Row: {
+          business_id: string
+          created_at: string
+          google_status: string | null
+          id: string
+          reply_source: string | null
+          reply_text: string
+          response_time_hours: number | null
+          review_id: string
+          tone: string | null
+          user_id: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          google_status?: string | null
+          id?: string
+          reply_source?: string | null
+          reply_text: string
+          response_time_hours?: number | null
+          review_id: string
+          tone?: string | null
+          user_id: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          google_status?: string | null
+          id?: string
+          reply_source?: string | null
+          reply_text?: string
+          response_time_hours?: number | null
+          review_id?: string
+          tone?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reply_logs_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reply_logs_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews: {
         Row: {
           approved_reply: string | null
