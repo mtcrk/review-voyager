@@ -224,7 +224,7 @@ export default function Reviews() {
       if (!session) throw new Error("Not authenticated");
 
       const response = await supabase.functions.invoke('approve-reply', {
-        body: { reviewId, approvedReply: reply, sendToGoogle: true },
+        body: { reviewId, approvedReply: reply, sendToGoogle: true, userId: session.user.id },
       });
 
       if (response.error) {

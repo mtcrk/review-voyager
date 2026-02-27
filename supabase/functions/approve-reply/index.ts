@@ -87,7 +87,7 @@ serve(async (req) => {
     // Service role client for accessing secure credentials table
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
 
-    const { reviewId, approvedReply, sendToGoogle } = await req.json();
+    const { reviewId, approvedReply, sendToGoogle, userId } = await req.json();
 
     console.log("Approving reply for review:", reviewId, { sendToGoogle });
 
@@ -178,6 +178,26 @@ serve(async (req) => {
 
     if (error) {
       throw error;
+    }
+
+    // Log reply to reply_logs for analytics
+    try {
+      const postedAt = new Date(review.posted_at).getTime();
+      const repliedAt = new Date().getTime();
+      const responseTimeHours = (repliedAt - postedAt) / (1000 * 60 * 60);
+
+      await supabaseAdmin.from("reply_logs").insert({
+        review_id: reviewId,
+        business_id: review.business_id,
+        user_id: userId || "unknown",
+        reply_text: approvedReply,
+        tone: "friendly",
+        reply_source: sendToGoogle ? "google_api" : "manual_copy",
+        google_status: updateData.google_reply_status || null,
+        response_time_hours: parseFloat(responseTimeHours.toFixed(1)),
+      });
+    } catch (logErr) {
+      console.error("Error logging reply:", logErr);
     }
 
     console.log("Reply approved successfully");
