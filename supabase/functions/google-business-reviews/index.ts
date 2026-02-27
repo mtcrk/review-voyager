@@ -97,8 +97,8 @@ Deno.serve(async (req) => {
         const accessToken = await refreshAccessToken(credentials.google_refresh_token);
 
         // Fetch reviews from Google Business Profile API
-        // location_id format: accounts/{accountId}/locations/{locationId}
-        const reviewsUrl = `https://mybusiness.googleapis.com/v4/${biz.google_location_id}/reviews`;
+        // Full resource path: accounts/{accountId}/locations/{locationId}
+        const reviewsUrl = `https://mybusiness.googleapis.com/v4/${biz.google_account_id}/${biz.google_location_id}/reviews`;
         console.log(`Fetching reviews from: ${reviewsUrl}`);
 
         const reviewsResponse = await fetch(reviewsUrl, {
