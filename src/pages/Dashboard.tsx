@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star, ChevronLeft, ChevronRight, CheckCircle2, AlertCircle, ExternalLink } from "lucide-react";
 import { useState, useMemo } from "react";
 import { startOfWeek, addDays, format, isSameDay, startOfDay, endOfDay } from "date-fns";
 import { useBusiness } from "@/contexts/BusinessContext";
@@ -17,6 +17,7 @@ import { UpgradeCTA } from "@/components/dashboard/UpgradeCTA";
 import { DEMO_REVIEWS, DEMO_METRICS } from "@/lib/demoData";
 import { useTranslation } from "react-i18next";
 import { SetupWizard } from "@/components/dashboard/SetupWizard";
+
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -167,13 +168,45 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto p-8 space-y-10">
           {/* Business Name Header */}
           {activeBusiness && (
-            <div>
-              <h1 className="text-3xl font-semibold text-foreground">
-                {activeBusiness.name}
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                {t('dashboard.subtitle', 'Dashboard Özeti')}
-              </p>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-3">
+                  <h1 className="text-3xl font-semibold text-foreground">
+                    {activeBusiness.name}
+                  </h1>
+                  {activeBusiness.google_connected ? (
+                    <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-50">
+                      <CheckCircle2 className="h-3 w-3 mr-1" />
+                      Google Bağlı
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary" className="text-muted-foreground">
+                      <AlertCircle className="h-3 w-3 mr-1" />
+                      Google Bağlı Değil
+                    </Badge>
+                  )}
+                  {activeBusiness.booking_hotel_id && (
+                    <Badge className="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-50">
+                      <CheckCircle2 className="h-3 w-3 mr-1" />
+                      Booking.com
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-muted-foreground mt-1">
+                  {activeBusiness.city ? `${activeBusiness.city} · ` : ''}{t('dashboard.subtitle', 'Dashboard Özeti')}
+                </p>
+              </div>
+              {activeBusiness.place_id && (
+                <a 
+                  href={`https://search.google.com/local/reviews?placeid=${activeBusiness.place_id}`}
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  Google'da Gör
+                </a>
+              )}
             </div>
           )}
 
@@ -234,9 +267,30 @@ export default function Dashboard() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           ) : effectiveReviews.length === 0 ? (
-            <Card className="p-12 text-center shadow-card">
-              <p className="text-muted-foreground text-lg">{t('dashboard.noReviews', 'Bu işletme için henüz yorum yok.')}</p>
-              <p className="text-sm text-muted-foreground mt-2">{t('dashboard.noReviewsSub', 'Yorumlar eklendiğinde burada görünecek.')}</p>
+            <Card className="p-12 text-center shadow-card space-y-4">
+              {activeBusiness?.google_connected ? (
+                <>
+                  <div className="flex justify-center">
+                    <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Star className="h-8 w-8 text-primary" />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-foreground text-lg font-medium">Google Business bağlı, yorumları çekelim!</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Sidebar'dan Google Business → Google Yorumları sayfasına gidin ve "Yorumları Çek" butonuna tıklayın.
+                    </p>
+                  </div>
+                  <Button onClick={() => navigate('/reviews')} className="mt-2">
+                    Yorumlar Sayfasına Git
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <p className="text-muted-foreground text-lg">{t('dashboard.noReviews', 'Bu işletme için henüz yorum yok.')}</p>
+                  <p className="text-sm text-muted-foreground">{t('dashboard.noReviewsSub', 'Yorumlar eklendiğinde burada görünecek.')}</p>
+                </>
+              )}
             </Card>
           ) : (
             <>

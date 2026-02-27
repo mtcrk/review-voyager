@@ -66,6 +66,7 @@ export function AppSidebar() {
   const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null);
   const [tiktokConnected, setTiktokConnected] = useState(false);
   const [googleConnected, setGoogleConnected] = useState(false);
+  const [autoSelected, setAutoSelected] = useState(false);
 
   // Check platform connections
   useEffect(() => {
@@ -94,14 +95,17 @@ export function AppSidebar() {
     checkConnections();
   }, [activeBusiness]);
 
-  // Auto-select platform based on current route
+  // Auto-select platform based on current route or connection
   useEffect(() => {
     if (location.pathname.includes("tiktok")) {
       setSelectedPlatform("tiktok");
     } else if (location.pathname.includes("reviews") || location.pathname.includes("review")) {
       setSelectedPlatform("google");
+    } else if (!autoSelected && googleConnected && !selectedPlatform) {
+      setSelectedPlatform("google");
+      setAutoSelected(true);
     }
-  }, [location.pathname]);
+  }, [location.pathname, googleConnected, autoSelected, selectedPlatform]);
 
   const platforms: PlatformConfig[] = [
     {
