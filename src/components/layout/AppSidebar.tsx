@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "@/hooks/use-toast";
 import { 
   LayoutDashboard, 
   MessageSquare, 
@@ -20,6 +21,7 @@ import {
   MapPin,
   ShieldCheck,
   Hotel,
+  LogOut,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -447,6 +449,23 @@ export function AppSidebar() {
                     <Settings className="h-5 w-5" />
                     <span>Ayarlar</span>
                   </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip="Çıkış Yap"
+                >
+                  <button
+                    onClick={async () => {
+                      await supabase.auth.signOut();
+                      toast({ title: "Çıkış Yapıldı", description: "Başarıyla çıkış yaptınız." });
+                      navigate('/login');
+                    }}
+                    className="flex items-center gap-3 transition-smooth w-full text-left text-destructive"
+                  >
+                    <LogOut className="h-5 w-5" />
+                    <span>Çıkış Yap</span>
+                  </button>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
