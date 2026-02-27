@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -78,6 +78,14 @@ export default function Reviews() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [sentimentFilter, setSentimentFilter] = useState<SentimentFilter>("all");
   const [platformFilter, setPlatformFilter] = useState<PlatformFilter>(urlPlatform || "all");
+  
+  // Sync platformFilter with URL changes (sidebar navigation)
+  useEffect(() => {
+    const newPlatform = searchParams.get("platform") as PlatformFilter | null;
+    setPlatformFilter(newPlatform || "all");
+    setCurrentPage(1);
+  }, [searchParams]);
+
   const [sortField, setSortField] = useState<SortField>("posted_at");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [isFetchingBooking, setIsFetchingBooking] = useState(false);
