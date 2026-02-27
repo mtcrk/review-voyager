@@ -86,7 +86,7 @@ Deno.serve(async (req) => {
     const accessToken = await refreshAccessToken(credentials.google_refresh_token);
 
     // Fetch location details from GBP API
-    const locationUrl = `https://mybusinessbusinessinformation.googleapis.com/v1/${business.google_location_id}?readMask=name,title,phoneNumbers,categories,storefrontAddress,websiteUri,regularHours,metadata`;
+    const locationUrl = `https://mybusinessbusinessinformation.googleapis.com/v1/${business.google_location_id}?readMask=name,title,phoneNumbers,categories,storefrontAddress,websiteUri,regularHours,metadata,latlng`;
 
     console.log(`Fetching business info from: ${locationUrl}`);
 
@@ -145,9 +145,10 @@ Deno.serve(async (req) => {
     if (locationData.storefrontAddress?.locality && !business.city) {
       updates.city = locationData.storefrontAddress.locality;
     }
-    if (locationData.metadata?.latlng) {
-      updates.lat = locationData.metadata.latlng.latitude;
-      updates.lng = locationData.metadata.latlng.longitude;
+    const latlng = locationData.latlng || locationData.metadata?.latlng;
+    if (latlng) {
+      updates.lat = latlng.latitude;
+      updates.lng = latlng.longitude;
     }
 
     if (Object.keys(updates).length > 0) {
