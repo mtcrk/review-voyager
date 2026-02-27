@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,7 +41,7 @@ type SortField = "posted_at" | "rating" | "reviewer_name";
 type SortOrder = "asc" | "desc";
 type StatusFilter = "all" | "pending" | "approved" | "replied";
 type SentimentFilter = "all" | "positive" | "negative" | "neutral";
-type PlatformFilter = "all" | "google" | "booking" | "tripadvisor";
+type PlatformFilter = "all" | "google" | "booking" | "tripadvisor" | "trustpilot" | "hotelscom";
 
 type ToneOption = "friendly" | "formal" | "playful" | "empathetic" | "grateful" | "witty" | "apologetic" | "enthusiastic";
 
@@ -59,11 +60,16 @@ const platformLabels: Record<string, { label: string; color: string }> = {
   google: { label: "Google", color: "bg-blue-50 text-blue-700 border-blue-200" },
   booking: { label: "Booking.com", color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
   tripadvisor: { label: "TripAdvisor", color: "bg-green-50 text-green-700 border-green-200" },
+  trustpilot: { label: "Trustpilot", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  hotelscom: { label: "Hotels.com", color: "bg-red-50 text-red-700 border-red-200" },
 };
 
 export default function Reviews() {
   const { activeBusiness, refetchBusinesses } = useBusiness();
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
+  const urlPlatform = searchParams.get("platform") as PlatformFilter | null;
+  
   const [selectedReview, setSelectedReview] = useState<any>(null);
   const [replyText, setReplyText] = useState("");
   
@@ -71,7 +77,7 @@ export default function Reviews() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [sentimentFilter, setSentimentFilter] = useState<SentimentFilter>("all");
-  const [platformFilter, setPlatformFilter] = useState<PlatformFilter>("all");
+  const [platformFilter, setPlatformFilter] = useState<PlatformFilter>(urlPlatform || "all");
   const [sortField, setSortField] = useState<SortField>("posted_at");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [isFetchingBooking, setIsFetchingBooking] = useState(false);
@@ -560,6 +566,8 @@ export default function Reviews() {
               <SelectItem value="google">Google</SelectItem>
               <SelectItem value="booking">Booking.com</SelectItem>
               <SelectItem value="tripadvisor">TripAdvisor</SelectItem>
+              <SelectItem value="trustpilot">Trustpilot</SelectItem>
+              <SelectItem value="hotelscom">Hotels.com</SelectItem>
             </SelectContent>
           </Select>
         </div>

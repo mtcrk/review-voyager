@@ -16,6 +16,10 @@ import {
   Building2,
   Mail,
   Brain,
+  BedDouble,
+  MapPin,
+  ShieldCheck,
+  Hotel,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -42,7 +46,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import logo from "@/assets/logo.png";
 
-type Platform = "google" | "tiktok" | "instagram" | "whatsapp";
+type Platform = "google" | "tiktok" | "instagram" | "whatsapp" | "booking" | "tripadvisor" | "trustpilot" | "hotelscom";
 
 interface PlatformConfig {
   id: Platform;
@@ -55,6 +59,7 @@ interface PlatformConfig {
 const commonItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Lokasyonlar", url: "/locations", icon: Building2 },
+  { title: "İstatistikler", url: "/statistics", icon: BarChart3 },
   { title: "Ayarlar", url: "/settings", icon: Settings },
 ];
 
@@ -98,15 +103,20 @@ export function AppSidebar() {
 
   // Auto-select platform based on current route or connection
   useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const platformParam = searchParams.get("platform");
+    
     if (location.pathname.includes("tiktok")) {
       setSelectedPlatform("tiktok");
+    } else if (location.pathname.includes("reviews") && platformParam) {
+      setSelectedPlatform(platformParam as Platform);
     } else if (location.pathname.includes("reviews") || location.pathname.includes("review")) {
       setSelectedPlatform("google");
     } else if (!autoSelected && googleConnected && !selectedPlatform) {
       setSelectedPlatform("google");
       setAutoSelected(true);
     }
-  }, [location.pathname, googleConnected, autoSelected, selectedPlatform]);
+  }, [location.pathname, location.search, googleConnected, autoSelected, selectedPlatform]);
 
   const platforms: PlatformConfig[] = [
     {
@@ -115,9 +125,44 @@ export function AppSidebar() {
       icon: <Star className="h-4 w-4" />,
       connected: googleConnected,
       menuItems: [
-        { title: "Google Yorumları", url: "/reviews", icon: MessageSquare },
+        { title: "Google Yorumları", url: "/reviews?platform=google", icon: MessageSquare },
         { title: "Yorumlarla Sohbet", url: "/chat", icon: Brain },
-        { title: "İstatistikler", url: "/statistics", icon: BarChart3 },
+      ],
+    },
+    {
+      id: "booking" as Platform,
+      name: "Booking.com",
+      icon: <BedDouble className="h-4 w-4" />,
+      connected: !!activeBusiness?.booking_hotel_id,
+      menuItems: [
+        { title: "Booking Yorumları", url: "/reviews?platform=booking", icon: MessageSquare },
+      ],
+    },
+    {
+      id: "tripadvisor" as Platform,
+      name: "TripAdvisor",
+      icon: <MapPin className="h-4 w-4" />,
+      connected: false,
+      menuItems: [
+        { title: "TripAdvisor Yorumları", url: "/reviews?platform=tripadvisor", icon: MessageSquare },
+      ],
+    },
+    {
+      id: "trustpilot" as Platform,
+      name: "Trustpilot",
+      icon: <ShieldCheck className="h-4 w-4" />,
+      connected: false,
+      menuItems: [
+        { title: "Trustpilot Yorumları", url: "/reviews?platform=trustpilot", icon: MessageSquare },
+      ],
+    },
+    {
+      id: "hotelscom" as Platform,
+      name: "Hotels.com",
+      icon: <Hotel className="h-4 w-4" />,
+      connected: false,
+      menuItems: [
+        { title: "Hotels.com Yorumları", url: "/reviews?platform=hotelscom", icon: MessageSquare },
       ],
     },
     {
@@ -242,7 +287,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {commonItems.slice(0, 2).map((item) => {
+              {commonItems.slice(0, 3).map((item) => {
                 const isActive = location.pathname === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -278,7 +323,7 @@ export function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {currentPlatform.menuItems.map((item) => {
-                  const isActive = location.pathname === item.url;
+                  const isActive = (location.pathname + location.search) === item.url || location.pathname === item.url;
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
