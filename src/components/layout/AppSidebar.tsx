@@ -42,6 +42,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import logo from "@/assets/logo.png";
@@ -318,38 +319,45 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        {/* Review Platforms (Wextractor-based) */}
-        <SidebarGroup>
-          {open && (
-            <SidebarGroupLabel className="text-xs text-muted-foreground px-3">
-              Yorum Platformları
-            </SidebarGroupLabel>
-          )}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {reviewPlatforms.map((item) => {
-                const isActive = (location.pathname + location.search) === item.url;
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive}
-                      tooltip={item.title}
-                    >
-                      <NavLink
-                        to={item.url}
-                        className="flex items-center gap-3 transition-smooth"
-                      >
-                        <item.icon className="h-5 w-5" />
-                        <span>{item.title}</span>
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {/* Review Platforms (Wextractor-based) - Collapsible */}
+        <Collapsible defaultOpen={false} className="group/collapsible">
+          <SidebarGroup>
+            {open && (
+              <CollapsibleTrigger asChild>
+                <SidebarGroupLabel className="text-xs text-muted-foreground px-3 cursor-pointer hover:text-foreground transition-colors">
+                  Yorum Platformları
+                  <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                </SidebarGroupLabel>
+              </CollapsibleTrigger>
+            )}
+            <CollapsibleContent>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {reviewPlatforms.map((item) => {
+                    const isActive = (location.pathname + location.search) === item.url;
+                    return (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={isActive}
+                          tooltip={item.title}
+                        >
+                          <NavLink
+                            to={item.url}
+                            className="flex items-center gap-3 transition-smooth"
+                          >
+                            <item.icon className="h-5 w-5" />
+                            <span>{item.title}</span>
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
 
         {/* Automation */}
         <SidebarGroup>
