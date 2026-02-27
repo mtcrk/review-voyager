@@ -1,11 +1,8 @@
-import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { CheckCircle2, Circle, Hotel, Download, MessageSquare, X } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
+import { CheckCircle2, Circle, X } from "lucide-react";
 import { useBusiness } from "@/contexts/BusinessContext";
+import { useNavigate } from "react-router-dom";
 
 interface SetupWizardProps {
   onDismiss: () => void;
@@ -13,78 +10,21 @@ interface SetupWizardProps {
 }
 
 export function SetupWizard({ onDismiss, onComplete }: SetupWizardProps) {
-  const { activeBusiness, refetchBusinesses } = useBusiness();
-  const [bookingId, setBookingId] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [step, setStep] = useState(1);
+  const { activeBusiness } = useBusiness();
+  const navigate = useNavigate();
 
-  // Parse booking hotel ID from full URL or partial input
-  const parseBookingId = (input: string): string => {
-    const trimmed = input.trim();
-    // Extract country/hotel-name from full Booking.com URL
-    const match = trimmed.match(/hotel\/([a-z]{2})\/([a-z0-9_-]+)/i);
-    if (match) return `${match[1]}/${match[2]}`;
-    return trimmed;
-  };
-
-  const hasBookingId = !!activeBusiness?.booking_hotel_id;
-
-  const handleSetupBooking = async () => {
-    if (!activeBusiness || !bookingId.trim()) return;
-    setLoading(true);
-    const parsedId = parseBookingId(bookingId);
-    try {
-      // Delete old booking reviews before updating
-      const { error: deleteError } = await supabase
-        .from("reviews")
-        .delete()
-        .eq("business_id", activeBusiness.id)
-        .eq("platform", "booking");
-      if (deleteError) throw deleteError;
-
-      const { error: updateError } = await supabase
-        .from("businesses")
-        .update({ booking_hotel_id: parsedId })
-        .eq("id", activeBusiness.id);
-      if (updateError) throw updateError;
-
-      const response = await supabase.functions.invoke("wextractor-fetch-reviews", {
-        body: { business_id: activeBusiness.id, platform: "booking", offset: 0 },
-      });
-
-      if (response.error) throw new Error(response.error.message);
-      const result = response.data;
-
-      if (result?.error) {
-        toast({ title: "Hata", description: result.error, variant: "destructive" });
-      } else {
-        const total = (result.inserted || 0) + (result.skipped || 0);
-        const msg = result.inserted > 0
-          ? `${result.inserted} yeni yorum eklendi${result.skipped ? ` (${result.skipped} zaten mevcut)` : ''}. Toplam: ${result.total_available || total}`
-          : total > 0
-            ? `${result.skipped} yorum zaten mevcut. Yeni yorum yok.`
-            : 'Henüz yorum bulunamadı.';
-        toast({
-          title: result.inserted > 0 ? "Harika! 🎉" : "Bilgi",
-          description: msg,
-        });
-        setStep(3);
-        setIsEditing(false);
-        await refetchBusinesses();
-        onComplete();
-      }
-    } catch (err: any) {
-      toast({ title: "Hata", description: err.message, variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const hasReviewPlatform = !!(
+    activeBusiness?.google_connected ||
+    activeBusiness?.booking_hotel_id ||
+    activeBusiness?.tripadvisor_id ||
+    activeBusiness?.trustpilot_url ||
+    activeBusiness?.hotelscom_url
+  );
 
   const steps = [
-    { num: 1, label: "Hesap Oluştur", icon: CheckCircle2, done: true },
-    { num: 2, label: "Booking ID Ekle", icon: hasBookingId ? CheckCircle2 : Hotel, done: hasBookingId },
-    { num: 3, label: "Yorumları Yönet", icon: MessageSquare, done: false },
+    { num: 1, label: "Hesap Oluştur", done: true },
+    { num: 2, label: "Platform Bağla", done: hasReviewPlatform },
+    { num: 3, label: "Yorumları Yönet", done: false },
   ];
 
   return (
@@ -110,9 +50,7 @@ export function SetupWizard({ onDismiss, onComplete }: SetupWizardProps) {
               <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm ${
                 s.done 
                   ? "bg-primary/10 text-primary" 
-                  : step === s.num 
-                    ? "bg-primary text-primary-foreground" 
-                    : "bg-muted text-muted-foreground"
+                  : "bg-muted text-muted-foreground"
               }`}>
                 {s.done ? <CheckCircle2 className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
                 {s.label}
@@ -122,59 +60,20 @@ export function SetupWizard({ onDismiss, onComplete }: SetupWizardProps) {
           ))}
         </div>
 
-        {/* Step content */}
-        {!hasBookingId && step <= 2 && (
+        {/* Content */}
+        {!hasReviewPlatform ? (
           <div className="space-y-2">
-            <div className="flex gap-2 items-center">
-              <Input
-                placeholder="Booking.com URL'sini yapıştırın"
-                value={bookingId}
-                onChange={(e) => setBookingId(e.target.value)}
-                disabled={loading}
-                className="flex-1"
-              />
-              <Button onClick={handleSetupBooking} disabled={!bookingId.trim() || loading}>
-                <Download className="h-4 w-4 mr-2" />
-                {loading ? "Çekiliyor..." : "Yorumları Çek"}
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Booking.com'da otelinizin sayfasını açın, URL'yi kopyalayıp buraya yapıştırın. Otomatik olarak doğru kısmı alacağız.
+            <p className="text-sm text-muted-foreground">
+              Sidebar'dan bir yorum platformu seçerek (Google, Booking, TripAdvisor vb.) bağlantı kurabilirsiniz.
             </p>
-          </div>
-        )}
-
-        {hasBookingId && !isEditing && (
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-primary font-medium">
-              ✅ Booking.com bağlı ({activeBusiness?.booking_hotel_id}). Yorumlarınız otomatik olarak her gün güncellenir.
-            </p>
-            <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)} className="text-xs text-muted-foreground">
-              Değiştir
+            <Button variant="outline" size="sm" onClick={() => navigate("/reviews?platform=booking")}>
+              Platformları Gör
             </Button>
           </div>
-        )}
-
-        {hasBookingId && isEditing && (
-          <div className="space-y-2">
-            <div className="flex gap-2 items-center">
-              <Input
-                placeholder="Booking.com URL'sini yapıştırın"
-                value={bookingId}
-                onChange={(e) => setBookingId(e.target.value)}
-                disabled={loading}
-                className="flex-1"
-              />
-              <Button onClick={handleSetupBooking} disabled={!bookingId.trim() || loading}>
-                <Download className="h-4 w-4 mr-2" />
-                {loading ? "Çekiliyor..." : "Güncelle"}
-              </Button>
-              <Button variant="ghost" size="sm" onClick={() => setIsEditing(false)}>İptal</Button>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Yeni Booking.com URL'sini yapıştırın.
-            </p>
-          </div>
+        ) : (
+          <p className="text-sm text-primary font-medium">
+            ✅ Platform bağlı! Sidebar'dan yorumlarınızı yönetmeye başlayın.
+          </p>
         )}
       </CardContent>
     </Card>
