@@ -11,7 +11,7 @@ import { LocationMapView } from "@/components/locations/LocationMapView";
 
 export default function Locations() {
   const navigate = useNavigate();
-  const { data: locations = [], isLoading } = useMultiLocationData();
+  const { data: locations = [], isLoading, refetch } = useMultiLocationData();
 
   const handleSelectLocation = (id: string) => {
     // Navigate to dashboard filtered to this business
@@ -83,7 +83,7 @@ export default function Locations() {
       {/* Charts & Map Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <LocationTrendChart locations={locations} />
-        <LocationMapView locations={locations} />
+        <LocationMapView locations={locations} onRefresh={() => refetch()} />
       </div>
     </div>
   );
