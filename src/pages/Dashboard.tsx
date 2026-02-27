@@ -9,7 +9,7 @@ import { BusinessOnboarding } from "@/components/BusinessOnboarding";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { ChatWithReviews } from "@/components/dashboard/ChatWithReviews";
+
 import { PriorityActions } from "@/components/dashboard/PriorityActions";
 import { CompetitorComparison } from "@/components/dashboard/CompetitorComparison";
 import { DemoModeBanner } from "@/components/dashboard/DemoModeBanner";
@@ -253,7 +253,32 @@ export default function Dashboard() {
               {isDemoMode && <UpgradeCTA feature={t('dashboard.demo.features.priorityActions', 'Öncelikli İşlemler')} />}
             </div>
             <div className="space-y-0">
-              <ChatWithReviews />
+              <Card className="shadow-card h-[500px] flex flex-col cursor-pointer hover:shadow-md transition-all" onClick={() => navigate('/chat')}>
+                <CardHeader className="pb-3 border-b">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <Star className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">Yorumlarınızla Sohbet</CardTitle>
+                      <p className="text-sm text-muted-foreground">
+                        AI'a yorumlarınız hakkında sorular sorun
+                      </p>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="flex-1 flex flex-col items-center justify-center p-6">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    <Star className="w-8 h-8 text-primary" />
+                  </div>
+                  <p className="text-muted-foreground text-center mb-4">
+                    Yorumlarınız hakkında sorular sorun
+                  </p>
+                  <Button variant="outline" size="sm">
+                    Sohbete Git →
+                  </Button>
+                </CardContent>
+              </Card>
               {isDemoMode && <UpgradeCTA feature={t('dashboard.demo.features.chatWithReviews', 'Yorumlarla Sohbet')} />}
             </div>
             <div className="space-y-0">
