@@ -82,9 +82,111 @@ export default function Reviews() {
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [isFetchingBooking, setIsFetchingBooking] = useState(false);
   
-  // Inline Booking ID setup
-  const [bookingIdInput, setBookingIdInput] = useState("");
-  const [savingBookingId, setSavingBookingId] = useState(false);
+  // Inline platform setup
+  const [platformUrlInput, setPlatformUrlInput] = useState("");
+  const [savingPlatformUrl, setSavingPlatformUrl] = useState(false);
+
+  // Platform setup config for Wextractor-based platforms
+  const platformSetupConfig: Record<string, {
+    label: string;
+    placeholder: string;
+    hint: string;
+    dbField: string;
+    getIdFromBusiness: (b: any) => string | null;
+  }> = {
+    booking: {
+      label: "Booking.com",
+      placeholder: "Booking.com URL'sini yapıştırın",
+      hint: "Booking.com'da otelinizin sayfasını açın, URL'yi kopyalayıp buraya yapıştırın. Otomatik olarak doğru kısmı alacağız.",
+      dbField: "booking_hotel_id",
+      getIdFromBusiness: (b) => b.booking_hotel_id,
+    },
+    tripadvisor: {
+      label: "TripAdvisor",
+      placeholder: "TripAdvisor URL'sini yapıştırın",
+      hint: "TripAdvisor'da otelinizin sayfasını açın, URL'yi kopyalayıp buraya yapıştırın.",
+      dbField: "tripadvisor_id",
+      getIdFromBusiness: (b) => b.tripadvisor_id,
+    },
+    trustpilot: {
+      label: "Trustpilot",
+      placeholder: "Trustpilot URL'sini yapıştırın",
+      hint: "Trustpilot'ta işletmenizin sayfasını açın, URL'yi kopyalayıp buraya yapıştırın.",
+      dbField: "trustpilot_url",
+      getIdFromBusiness: (b) => b.trustpilot_url,
+    },
+    hotelscom: {
+      label: "Hotels.com",
+      placeholder: "Hotels.com URL'sini yapıştırın",
+      hint: "Hotels.com'da otelinizin sayfasını açın, URL'yi kopyalayıp buraya yapıştırın.",
+      dbField: "hotelscom_url",
+      getIdFromBusiness: (b) => b.hotelscom_url,
+    },
+  };
+
+  const parseUrlId = (input: string, platform: string): string => {
+    const trimmed = input.trim();
+    if (platform === "booking") {
+      const match = trimmed.match(/hotel\/([a-z]{2})\/([a-z0-9_-]+)/i);
+      if (match) return `${match[1]}/${match[2]}`;
+    }
+    if (platform === "tripadvisor") {
+      const match = trimmed.match(/(Hotel_Review-[a-zA-Z0-9_-]+\.html)/i);
+      if (match) return match[1];
+    }
+    if (platform === "trustpilot") {
+      const match = trimmed.match(/trustpilot\.com\/review\/([^\s/?#]+)/i);
+      if (match) return match[1];
+    }
+    if (platform === "hotelscom") {
+      const match = trimmed.match(/hotels\.com\/ho(\d+)/i);
+      if (match) return `ho${match[1]}`;
+    }
+    return trimmed;
+  };
+
+  const handlePlatformSetup = async (platform: string) => {
+    const config = platformSetupConfig[platform];
+    if (!activeBusiness || !platformUrlInput.trim() || !config) return;
+    setSavingPlatformUrl(true);
+    const parsedId = parseUrlId(platformUrlInput, platform);
+    try {
+      // Delete old reviews for this platform before updating
+      await supabase
+        .from("reviews")
+        .delete()
+        .eq("business_id", activeBusiness.id)
+        .eq("platform", platform);
+
+      const { error: updateError } = await supabase
+        .from('businesses')
+        .update({ [config.dbField]: parsedId })
+        .eq('id', activeBusiness.id);
+      if (updateError) throw updateError;
+
+      const response = await supabase.functions.invoke('wextractor-fetch-reviews', {
+        body: { business_id: activeBusiness.id, platform, fetch_all: true },
+      });
+      
+      if (response.error) throw new Error(response.error.message);
+      const result = response.data;
+      if (result?.error) {
+        toast({ title: "Hata", description: result.error, variant: "destructive" });
+      } else {
+        toast({
+          title: "Yorumlar Çekildi! 🎉",
+          description: `${result.inserted} yorum eklendi${result.skipped ? `, ${result.skipped} zaten mevcut` : ''}.`,
+        });
+        setPlatformUrlInput("");
+        refetch();
+        refetchBusinesses();
+      }
+    } catch (err: any) {
+      toast({ title: "Hata", description: err.message || "Bir sorun oluştu.", variant: "destructive" });
+    } finally {
+      setSavingPlatformUrl(false);
+    }
+  };
   
   // Bulk selection
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -485,7 +587,7 @@ export default function Reviews() {
               {isFetchingBooking ? 'Çekiliyor...' : 'Google Yorumları Çek'}
             </Button>
           )}
-          {activeBusiness?.booking_hotel_id && !activeBusiness?.google_connected && (
+          {platformFilter !== "all" && platformFilter !== "google" && (
             <Button 
               size="sm" 
               onClick={async () => {
@@ -493,7 +595,7 @@ export default function Reviews() {
                 setIsFetchingBooking(true);
                 try {
                   const response = await supabase.functions.invoke('wextractor-fetch-reviews', {
-                    body: { business_id: activeBusiness.id, platform: 'booking', fetch_all: true },
+                    body: { business_id: activeBusiness.id, platform: platformFilter, fetch_all: true },
                   });
                   if (response.error) throw new Error(response.error.message);
                   const result = response.data;
@@ -501,7 +603,7 @@ export default function Reviews() {
                     toast({ title: "Hata", description: result.error, variant: "destructive" });
                   } else {
                     toast({
-                      title: "Booking Yorumları Çekildi",
+                      title: `${platformLabels[platformFilter]?.label} Yorumları Çekildi`,
                       description: `${result.inserted} yeni yorum eklendi, ${result.skipped} zaten mevcut.`,
                     });
                     refetch();
@@ -515,7 +617,7 @@ export default function Reviews() {
               disabled={isFetchingBooking}
             >
               <Download className="h-4 w-4 mr-2" />
-              {isFetchingBooking ? 'Çekiliyor...' : 'Booking Yorumları Çek'}
+              {isFetchingBooking ? 'Çekiliyor...' : `${platformLabels[platformFilter]?.label} Yorumları Çek`}
             </Button>
           )}
         </div>
@@ -587,8 +689,79 @@ export default function Reviews() {
         </div>
       )}
 
-      {/* Empty state - platform-aware */}
-      {reviews.length === 0 && activeBusiness.google_connected && (
+      {/* Platform Setup Card - shows when a specific wextractor platform is selected and not configured */}
+      {platformFilter !== "all" && platformFilter !== "google" && platformSetupConfig[platformFilter] && (() => {
+        const config = platformSetupConfig[platformFilter];
+        const hasId = config.getIdFromBusiness(activeBusiness);
+        const platformReviews = reviews.filter((r: any) => r.platform === platformFilter);
+        if (platformReviews.length > 0 || !config) return null;
+        return (
+          <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-transparent shadow-card">
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-foreground mb-1">
+                {hasId ? `${config.label} Bağlı ✅` : `${config.label} Yorumlarını Çekin`}
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                {hasId 
+                  ? `${config.label} bağlı (${hasId}). Yorumlarınızı çekebilirsiniz.`
+                  : config.hint
+                }
+              </p>
+              {!hasId ? (
+                <div className="flex gap-2 items-center">
+                  <Input
+                    placeholder={config.placeholder}
+                    value={platformUrlInput}
+                    onChange={(e) => setPlatformUrlInput(e.target.value)}
+                    disabled={savingPlatformUrl}
+                    className="flex-1"
+                  />
+                  <Button 
+                    onClick={() => handlePlatformSetup(platformFilter)} 
+                    disabled={!platformUrlInput.trim() || savingPlatformUrl}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    {savingPlatformUrl ? "Çekiliyor..." : "Yorumları Çek"}
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  onClick={async () => {
+                    setIsFetchingBooking(true);
+                    try {
+                      const response = await supabase.functions.invoke('wextractor-fetch-reviews', {
+                        body: { business_id: activeBusiness.id, platform: platformFilter, fetch_all: true },
+                      });
+                      if (response.error) throw new Error(response.error.message);
+                      const result = response.data;
+                      if (result?.error) {
+                        toast({ title: "Hata", description: result.error, variant: "destructive" });
+                      } else {
+                        toast({
+                          title: `${config.label} Yorumları Çekildi! 🎉`,
+                          description: `${result.inserted} yorum eklendi.`,
+                        });
+                        refetch();
+                      }
+                    } catch (err: any) {
+                      toast({ title: "Hata", description: err.message, variant: "destructive" });
+                    } finally {
+                      setIsFetchingBooking(false);
+                    }
+                  }}
+                  disabled={isFetchingBooking}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  {isFetchingBooking ? "Çekiliyor..." : `${config.label} Yorumlarını Çek`}
+                </Button>
+              )}
+            </div>
+          </Card>
+        );
+      })()}
+
+      {/* Google empty state */}
+      {filteredReviews.length === 0 && platformFilter === "google" && activeBusiness.google_connected && (
         <Card className="p-8 shadow-card border-dashed border-2 border-primary/30 bg-primary/5">
           <div className="max-w-lg mx-auto text-center space-y-4">
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
@@ -627,70 +800,6 @@ export default function Reviews() {
             >
               {isFetchingBooking ? 'Çekiliyor...' : 'Google Yorumlarını Çek'}
             </Button>
-          </div>
-        </Card>
-      )}
-
-      {/* Inline Booking Setup - show only when NOT google connected and no booking_hotel_id */}
-      {reviews.length === 0 && !activeBusiness.google_connected && !activeBusiness.booking_hotel_id && (
-        <Card className="p-8 shadow-card border-dashed border-2 border-primary/30 bg-primary/5">
-          <div className="max-w-lg mx-auto text-center space-y-4">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-              <Download className="h-6 w-6 text-primary" />
-            </div>
-            <h3 className="text-lg font-semibold text-foreground">Booking.com Yorumlarınızı Çekin</h3>
-            <p className="text-sm text-muted-foreground">
-              Booking.com URL'nizdeki otel yolunu girin ve yorumlarınızı otomatik olarak çekelim.
-            </p>
-            <div className="flex gap-2 max-w-md mx-auto">
-              <Input
-                placeholder="örn: tr/hotel-sultanahmet-palace"
-                value={bookingIdInput}
-                onChange={(e) => setBookingIdInput(e.target.value)}
-                disabled={savingBookingId}
-                className="flex-1"
-              />
-              <Button
-                disabled={!bookingIdInput.trim() || savingBookingId}
-                onClick={async () => {
-                  if (!activeBusiness || !bookingIdInput.trim()) return;
-                  setSavingBookingId(true);
-                  try {
-                    const { error: updateError } = await supabase
-                      .from('businesses')
-                      .update({ booking_hotel_id: bookingIdInput.trim() })
-                      .eq('id', activeBusiness.id);
-                    if (updateError) throw updateError;
-
-                    const response = await supabase.functions.invoke('wextractor-fetch-reviews', {
-                      body: { business_id: activeBusiness.id, platform: 'booking', fetch_all: true },
-                    });
-                    
-                    if (response.error) throw new Error(response.error.message);
-                    const result = response.data;
-                    if (result?.error) {
-                      toast({ title: "Hata", description: result.error, variant: "destructive" });
-                    } else {
-                      toast({
-                        title: "Yorumlar Çekildi! 🎉",
-                        description: `${result.inserted} yorum eklendi.`,
-                      });
-                      refetch();
-                      refetchBusinesses();
-                    }
-                  } catch (err: any) {
-                    toast({ title: "Hata", description: err.message || "Bir sorun oluştu.", variant: "destructive" });
-                  } finally {
-                    setSavingBookingId(false);
-                  }
-                }}
-              >
-                {savingBookingId ? 'Çekiliyor...' : 'Yorumları Çek'}
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Booking.com otel sayfanızın URL'sinden alabilirsiniz. Örn: booking.com/hotel/<strong>tr/hotel-sultanahmet-palace</strong>
-            </p>
           </div>
         </Card>
       )}
