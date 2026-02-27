@@ -15,6 +15,7 @@ import {
   Camera,
   Building2,
   Mail,
+  Brain,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -115,6 +116,7 @@ export function AppSidebar() {
       connected: googleConnected,
       menuItems: [
         { title: "Google Yorumları", url: "/reviews", icon: MessageSquare },
+        { title: "Yorumlarla Sohbet", url: "/chat", icon: Brain },
         { title: "İstatistikler", url: "/statistics", icon: BarChart3 },
       ],
     },
