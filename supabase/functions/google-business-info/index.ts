@@ -146,8 +146,8 @@ Deno.serve(async (req) => {
       updates.city = locationData.storefrontAddress.locality;
     }
     if (locationData.metadata?.latlng) {
-      if (!business.lat) updates.lat = locationData.metadata.latlng.latitude;
-      if (!business.lng) updates.lng = locationData.metadata.latlng.longitude;
+      updates.lat = locationData.metadata.latlng.latitude;
+      updates.lng = locationData.metadata.latlng.longitude;
     }
 
     if (Object.keys(updates).length > 0) {

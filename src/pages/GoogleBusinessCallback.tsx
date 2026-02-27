@@ -114,6 +114,28 @@ export default function GoogleBusinessCallback() {
 
       if (error) throw error;
 
+      // Auto-fetch business info (coordinates, address, etc.) for each saved business
+      try {
+        const { data: userBusinesses } = await supabase
+          .from("businesses")
+          .select("id, google_connected, google_location_id")
+          .eq("google_connected", true);
+
+        if (userBusinesses) {
+          await Promise.allSettled(
+            userBusinesses
+              .filter(b => b.google_location_id)
+              .map(b =>
+                supabase.functions.invoke("google-business-info", {
+                  body: { business_id: b.id },
+                })
+              )
+          );
+        }
+      } catch (infoError) {
+        console.warn("Auto-fetch business info failed:", infoError);
+      }
+
       toast({
         title: 'Başarılı',
         description: `${selectedBusinesses.size} işletme eklendi`,
