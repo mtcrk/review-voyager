@@ -32,11 +32,6 @@ export default function Register() {
 
   const handleEmailChange = (value: string) => {
     setEmail(value);
-    if (value.includes('@') && isPersonalEmail(value)) {
-      setEmailWarning('Lütfen kurumsal e-posta adresinizi kullanın (örn: ad@oteliniz.com). Kişisel e-postalar (Gmail, Hotmail vb.) kabul edilmemektedir.');
-    } else {
-      setEmailWarning('');
-    }
   };
 
   useEffect(() => {
@@ -49,12 +44,6 @@ export default function Register() {
     e.preventDefault();
     setError('');
     setLoading(true);
-
-    if (isPersonalEmail(email)) {
-      setError('Lütfen kurumsal e-posta adresinizi kullanın. Kişisel e-postalar (Gmail, Hotmail vb.) kabul edilmemektedir.');
-      setLoading(false);
-      return;
-    }
 
     if (password.length < 6) {
       setError('Şifre en az 6 karakter olmalı.');
@@ -211,16 +200,6 @@ export default function Register() {
                 required
                 disabled={loading}
               />
-              {emailWarning && (
-                <Alert className="border-destructive/30 bg-destructive/5">
-                  <AlertTriangle className="w-4 h-4 text-destructive" />
-                  <AlertDescription className="text-destructive text-sm">{emailWarning}</AlertDescription>
-                </Alert>
-              )}
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <Building2 className="w-3 h-3" />
-                Kurumsal e-posta adresi gereklidir (örn: ad@oteliniz.com)
-              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">{t('auth.register.password')}</Label>
