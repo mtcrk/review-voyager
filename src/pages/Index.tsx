@@ -583,10 +583,10 @@ const Index = () => {
           <div className="text-center mt-12">
             <Button 
               size="lg" 
-              onClick={() => navigate("/contact")} 
+              onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })} 
               className="gradient-primary text-white shadow-lg text-base px-10 py-7 hover:shadow-2xl transition-all duration-300 hover:scale-105"
             >
-              {t('landing.enterprise.cta', 'Talk to Sales')}
+              {t('landing.enterprise.cta', 'Join Early Access')}
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
           </div>
