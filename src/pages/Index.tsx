@@ -526,6 +526,73 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Enterprise / Built for Scale Section */}
+      <section className="relative py-24 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-foreground/[0.03] to-transparent"></div>
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold tracking-wide uppercase mb-4">
+              <TrendingUp className="w-3.5 h-3.5" />
+              {t('landing.enterprise.badge', 'Built for Scale')}
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold text-foreground leading-tight mb-4">
+              {t('landing.enterprise.title', '30,000+ reviews?')}
+              <br />
+              <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+                {t('landing.enterprise.titleHighlight', 'We handle it.')}
+              </span>
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              {t('landing.enterprise.subtitle', 'Shopping malls, hotel chains, and franchise networks trust VoyageRespond to manage thousands of reviews across multiple locations — automatically.')}
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto mb-12">
+            {[
+              { icon: Target, value: '30K+', label: t('landing.enterprise.stat1', 'Reviews managed per location') },
+              { icon: MessageSquare, value: '< 2min', label: t('landing.enterprise.stat2', 'Average response time') },
+              { icon: Users, value: '50+', label: t('landing.enterprise.stat3', 'Locations from one dashboard') },
+              { icon: Sparkles, value: '12+', label: t('landing.enterprise.stat4', 'Languages auto-detected') },
+            ].map((stat, i) => (
+              <div key={i} className="text-center p-6 rounded-xl bg-card border border-border hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-4">
+                  <stat.icon className="w-6 h-6 text-primary" />
+                </div>
+                <div className="text-3xl font-bold text-foreground mb-1">{stat.value}</div>
+                <div className="text-sm text-muted-foreground">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {[
+              { icon: Eye, title: t('landing.enterprise.feature1Title', 'Multi-Location Dashboard'), desc: t('landing.enterprise.feature1Desc', 'Manage all branches from a single panel. Compare ratings, response rates, and sentiment across locations.') },
+              { icon: Sparkles, title: t('landing.enterprise.feature2Title', 'Multilingual AI Replies'), desc: t('landing.enterprise.feature2Desc', 'Auto-detect review language and respond in Arabic, English, Russian, Hindi, and 8+ more languages.') },
+              { icon: TrendingUp, title: t('landing.enterprise.feature3Title', 'Enterprise Analytics'), desc: t('landing.enterprise.feature3Desc', 'Track AI Visibility scores, review velocity, and competitor benchmarks across your entire portfolio.') },
+            ].map((feature, i) => (
+              <div key={i} className="p-6 rounded-xl border border-border bg-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <div className="p-2 rounded-lg bg-primary/10 w-fit mb-4">
+                  <feature.icon className="w-5 h-5 text-primary" />
+                </div>
+                <h3 className="font-semibold text-foreground mb-2">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{feature.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Button 
+              size="lg" 
+              onClick={() => navigate("/contact")} 
+              className="gradient-primary text-white shadow-lg text-base px-10 py-7 hover:shadow-2xl transition-all duration-300 hover:scale-105"
+            >
+              {t('landing.enterprise.cta', 'Talk to Sales')}
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* Early Access Section - YC Style */}
       <section id="pricing" className="relative py-24 overflow-hidden">
         <div className="absolute inset-0 gradient-pricing"></div>
