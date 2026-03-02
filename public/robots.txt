@@ -24,4 +24,4 @@ Disallow: /tiktok-dm
 Disallow: /locations
 Disallow: /statistics
 
-Sitemap: https://voyagerespondcom.lovable.app/sitemap.xml
+Sitemap: https://voyagerespond.com/sitemap.xml
