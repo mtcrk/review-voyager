@@ -12,3 +12,16 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /reviews
+Disallow: /chat
+Disallow: /auto-reply
+Disallow: /story-kit
+Disallow: /email
+Disallow: /tiktok-inbox
+Disallow: /tiktok-dm
+Disallow: /locations
+Disallow: /statistics
+
+Sitemap: https://voyagerespondcom.lovable.app/sitemap.xml
