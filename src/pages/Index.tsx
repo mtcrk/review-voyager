@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { MessageSquare, Star, Phone, Check, ArrowRight, Clock, Lock, Music2, Eye, TrendingUp, Sparkles, Target } from "lucide-react";
+import { MessageSquare, Star, Phone, Check, ArrowRight, Clock, Lock, Music2, Eye, TrendingUp, Sparkles, Target, Users, Zap, Shield } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
-import { useState } from "react";
+
 import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -15,7 +15,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { t } = useTranslation();
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
+  
 
   const automationOptions = [
     {
@@ -126,45 +126,11 @@ const Index = () => {
     },
   ];
 
-  const pricingPlans = [
-    {
-      name: t('landing.pricingPlans.starter.name', 'Starter'),
-      price: billingCycle === "monthly" ? 19 : 15,
-      description: t('landing.pricingPlans.starter.description', 'Platform access with 1 automation'),
-      features: [
-        t('landing.pricingPlans.starter.feature1', 'Core platform access'),
-        t('landing.pricingPlans.starter.feature2', '1 automation (Instagram or Google)'),
-        t('landing.pricingPlans.starter.feature3', '500 messages/month'),
-        t('landing.pricingPlans.starter.feature4', 'Basic analytics'),
-      ],
-      highlighted: false,
-    },
-    {
-      name: t('landing.pricingPlans.pro.name', 'Pro'),
-      price: billingCycle === "monthly" ? 49 : 39,
-      description: t('landing.pricingPlans.pro.description', 'Up to 2 automations + analytics'),
-      features: [
-        t('landing.pricingPlans.pro.feature1', 'Core platform access'),
-        t('landing.pricingPlans.pro.feature2', 'Up to 2 automations'),
-        t('landing.pricingPlans.pro.feature3', 'Unlimited messages'),
-        t('landing.pricingPlans.pro.feature4', 'Advanced analytics'),
-        t('landing.pricingPlans.pro.feature5', 'Priority support'),
-      ],
-      highlighted: true,
-    },
-    {
-      name: t('landing.pricingPlans.agency.name', 'Agency'),
-      price: billingCycle === "monthly" ? 99 : 79,
-      description: t('landing.pricingPlans.agency.description', 'All automations + team access'),
-      features: [
-        t('landing.pricingPlans.agency.feature1', 'Core platform access'),
-        t('landing.pricingPlans.agency.feature2', 'All automations included'),
-        t('landing.pricingPlans.agency.feature3', 'Team access (5 members)'),
-        t('landing.pricingPlans.agency.feature4', 'Full analytics suite'),
-        t('landing.pricingPlans.agency.feature5', 'Custom integrations'),
-      ],
-      highlighted: false,
-    },
+  const earlyAccessPerks = [
+    { icon: Zap, text: t('landing.earlyAccess.perk1', '3 ay tamamen ücretsiz kullanım') },
+    { icon: Users, text: t('landing.earlyAccess.perk2', 'Kurucu ekiple birebir onboarding') },
+    { icon: Star, text: t('landing.earlyAccess.perk3', 'Ömür boyu %50 indirimli fiyat garantisi') },
+    { icon: Shield, text: t('landing.earlyAccess.perk4', 'Öncelikli destek ve özellik talepleri') },
   ];
 
   const getStatusBadge = (status: "available" | "early-access" | "coming-soon") => {
@@ -560,81 +526,85 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section id="pricing" className="relative py-20 overflow-hidden">
+      {/* Early Access Section - YC Style */}
+      <section id="pricing" className="relative py-24 overflow-hidden">
         <div className="absolute inset-0 gradient-pricing"></div>
         <div className="container mx-auto px-6 relative z-10">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              {t('landing.pricingTitle', 'Pay for the platform. Activate the automations you need.')}
-            </h2>
-            <p className="text-lg text-muted-foreground mb-8">
-              {t('landing.pricingSubtitle', 'Start with one automation and add more as you grow.')}
-            </p>
-            
-            {/* Billing Toggle */}
-            <div className="inline-flex items-center gap-3 p-1 bg-secondary rounded-lg">
-              <button
-                onClick={() => setBillingCycle("monthly")}
-                className={`px-6 py-2 rounded-md text-sm font-medium transition-smooth ${
-                  billingCycle === "monthly"
-                    ? "bg-card text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {t('landing.monthly', 'Monthly')}
-              </button>
-              <button
-                onClick={() => setBillingCycle("yearly")}
-                className={`px-6 py-2 rounded-md text-sm font-medium transition-smooth ${
-                  billingCycle === "yearly"
-                    ? "bg-card text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {t('landing.yearly', 'Yearly')} <span className="text-primary ml-1">-20%</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {pricingPlans.map((plan, index) => (
-              <div
-                key={index}
-                className={`relative p-8 rounded-xl border bg-card transition-all duration-300 hover:-translate-y-1 ${
-                  plan.highlighted
-                    ? "border-primary shadow-xl scale-105 gradient-card"
-                    : "border-border shadow-card hover:shadow-lg"
-                }`}
-              >
-                {plan.highlighted && (
-                  <div className="inline-block px-3 py-1 mb-4 text-xs font-semibold text-white gradient-primary rounded-full shadow-md">
-                    {t('landing.mostPopular', 'Most Popular')}
-                  </div>
-                )}
-                <h3 className="text-2xl font-bold text-foreground mb-2">{plan.name}</h3>
-                <p className="text-sm text-muted-foreground mb-6">{plan.description}</p>
-                <div className="mb-6">
-                  <span className="text-4xl font-bold text-foreground">${plan.price}</span>
-                  <span className="text-muted-foreground">/month</span>
+          <div className="max-w-3xl mx-auto">
+            {/* Main Card */}
+            <div className="relative rounded-2xl border border-primary/20 bg-card p-10 md:p-14 shadow-xl overflow-hidden">
+              {/* Subtle gradient accent */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-purple-500 to-blue-500"></div>
+              
+              <div className="text-center space-y-6">
+                {/* Badge */}
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold tracking-wide uppercase">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  {t('landing.earlyAccess.badge', 'Early Access')}
                 </div>
-                <Button
-                  className={`w-full mb-6 ${plan.highlighted ? 'gradient-primary hover:opacity-90 text-white shadow-md' : ''}`}
-                  variant={plan.highlighted ? "default" : "outline"}
-                  onClick={() => navigate("/onboarding")}
-                >
-                  {t('nav.getStarted')}
-                </Button>
-                <ul className="space-y-3">
-                  {plan.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                      <span className="text-sm text-muted-foreground">{feature}</span>
-                    </li>
+
+                {/* Title */}
+                <h2 className="text-3xl md:text-4xl font-bold text-foreground leading-tight">
+                  {t('landing.earlyAccess.title', 'İlk 100 işletmeye özel')}
+                </h2>
+
+                {/* Subtitle */}
+                <p className="text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
+                  {t('landing.earlyAccess.subtitle', '3 ay boyunca tüm özellikler ücretsiz. Kredi kartı gerekmez. İlk kullanıcılarımız ömür boyu özel fiyattan yararlanır.')}
+                </p>
+
+                {/* Perks Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 text-left max-w-lg mx-auto">
+                  {earlyAccessPerks.map((perk, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <perk.icon className="w-4 h-4 text-primary" />
+                      </div>
+                      <span className="text-sm text-foreground font-medium">{perk.text}</span>
+                    </div>
                   ))}
-                </ul>
+                </div>
+
+                {/* CTA */}
+                <div className="pt-6 space-y-4">
+                  <Button 
+                    size="lg" 
+                    onClick={() => navigate("/register")} 
+                    className="relative overflow-hidden gradient-primary text-white shadow-lg text-base px-10 py-7 hover:shadow-2xl transition-all duration-300 hover:scale-105 group w-full sm:w-auto"
+                  >
+                    <span className="relative z-10">{t('landing.earlyAccess.cta', '3 Ay Ücretsiz Başla')}</span>
+                    <ArrowRight className="w-5 h-5 ml-2 relative z-10" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                  </Button>
+                  
+                  <p className="text-xs text-muted-foreground">
+                    {t('landing.earlyAccess.disclaimer', 'Kredi kartı gerekmez · 2 dakikada kurulum · İstediğiniz zaman iptal')}
+                  </p>
+                </div>
+
+                {/* Social Proof Counter */}
+                <div className="pt-6 border-t border-border">
+                  <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <div className="flex -space-x-2">
+                        {[...Array(4)].map((_, i) => (
+                          <div key={i} className="w-7 h-7 rounded-full bg-gradient-to-br from-primary/30 to-primary/60 border-2 border-card flex items-center justify-center">
+                            <Users className="w-3 h-3 text-primary-foreground" />
+                          </div>
+                        ))}
+                      </div>
+                      <span className="font-medium text-foreground">
+                        {t('landing.earlyAccess.counter', '23 işletme katıldı')}
+                      </span>
+                    </div>
+                    <div className="hidden sm:block w-px h-4 bg-border"></div>
+                    <span className="hidden sm:block">
+                      {t('landing.earlyAccess.spotsLeft', '77 kontenjan kaldı')}
+                    </span>
+                  </div>
+                </div>
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </section>
