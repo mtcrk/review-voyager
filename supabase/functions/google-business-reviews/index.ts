@@ -139,6 +139,20 @@ Deno.serve(async (req) => {
           const postedAt = review.createTime || new Date().toISOString();
           const hasReply = !!review.reviewReply;
 
+          // Extract review photos
+          const photos: { url: string; thumbnail?: string }[] = [];
+          if (review.reviewPhotos && Array.isArray(review.reviewPhotos)) {
+            for (const photo of review.reviewPhotos) {
+              const photoUrl = photo.photoUri || photo.googleUrl || photo.url;
+              if (photoUrl) {
+                photos.push({
+                  url: photoUrl,
+                  thumbnail: photo.thumbnailUri || photo.thumbnailUrl || photoUrl,
+                });
+              }
+            }
+          }
+
           // Check if review already exists
           const { data: existing } = await supabaseAdmin
             .from("reviews")
@@ -180,6 +194,7 @@ Deno.serve(async (req) => {
             status: hasReply ? "replied" : "pending_reply",
             replied_at: hasReply ? review.reviewReply?.updateTime : null,
             sentiment,
+            photos: photos.length > 0 ? photos : [],
           });
 
           if (!insertError) insertedCount++;

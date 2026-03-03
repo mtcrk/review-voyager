@@ -289,6 +289,31 @@ const ReviewDetailPage = () => {
                   {review.text || 'No review text'}
                 </p>
               </div>
+
+              {/* Review Photos */}
+              {review.photos && Array.isArray(review.photos) && (review.photos as any[]).length > 0 && (
+                <div className="pt-4 border-t">
+                  <h4 className="text-sm font-semibold mb-3">Fotoğraflar</h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {(review.photos as any[]).map((photo: any, i: number) => (
+                      <a
+                        key={i}
+                        href={photo.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="relative aspect-square rounded-lg overflow-hidden border hover:opacity-90 transition-opacity"
+                      >
+                        <img
+                          src={photo.thumbnail || photo.url}
+                          alt={`Review photo ${i + 1}`}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 

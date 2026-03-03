@@ -414,6 +414,7 @@ export type Database = {
           google_review_name: string | null
           id: string
           issues: Json | null
+          photos: Json | null
           platform: string
           posted_at: string
           praises: Json | null
@@ -437,6 +438,7 @@ export type Database = {
           google_review_name?: string | null
           id?: string
           issues?: Json | null
+          photos?: Json | null
           platform?: string
           posted_at: string
           praises?: Json | null
@@ -460,6 +462,7 @@ export type Database = {
           google_review_name?: string | null
           id?: string
           issues?: Json | null
+          photos?: Json | null
           platform?: string
           posted_at?: string
           praises?: Json | null
