@@ -17,6 +17,7 @@ import { UpgradeCTA } from "@/components/dashboard/UpgradeCTA";
 import { DEMO_REVIEWS, DEMO_METRICS } from "@/lib/demoData";
 import { useTranslation } from "react-i18next";
 import { SetupWizard } from "@/components/dashboard/SetupWizard";
+import { PlatformDiscovery } from "@/components/dashboard/PlatformDiscovery";
 
 
 export default function Dashboard() {
@@ -220,6 +221,9 @@ export default function Dashboard() {
               }}
             />
           )}
+
+          {/* Platform Discovery */}
+          <PlatformDiscovery />
 
           {/* Demo Mode Banner */}
           {isDemoMode && !demoDismissed && (
