@@ -21,12 +21,10 @@ function extractPlatformId(platform: string, url: string): string | null {
     switch (platform) {
       case "tripadvisor": {
         // e.g. tripadvisor.com/Hotel_Review-g293974-d325309-Reviews-...
-        const match = url.match(/Hotel_Review-g\d+-d(\d+)/i) ||
-                      url.match(/Restaurant_Review-g\d+-d(\d+)/i) ||
-                      url.match(/Attraction_Review-g\d+-d(\d+)/i);
-        if (match) return match[0]; // return full slug like Hotel_Review-g293974-d325309
-        // Try location ID
-        const locMatch = url.match(/-d(\d+)/);
+        // Wextractor expects numeric place id (the number after -d)
+        const slugMatch = url.match(/(?:Hotel|Restaurant|Attraction)_Review-g\d+-d(\d+)/i);
+        if (slugMatch) return slugMatch[1];
+        const locMatch = url.match(/-d(\d+)/i);
         return locMatch ? locMatch[1] : null;
       }
       case "booking": {

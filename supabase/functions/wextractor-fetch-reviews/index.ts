@@ -47,6 +47,9 @@ async function fetchPage(apiBaseUrl: string, offset: number): Promise<Wextractor
     if (resp.status === 404) {
       throw new Error("Kaynak bulunamadı (404). Platform ID/URL formatını kontrol edin.");
     }
+    if (resp.status === 400 && errorBody.includes("BAD_PLACE_ID")) {
+      throw new Error("Geçersiz platform ID (BAD_PLACE_ID). TripAdvisor için URL'deki d ile başlayan sayıyı (örn: d4291665 → 4291665) kaydedin.");
+    }
     throw new Error(`Wextractor API error: ${resp.status}${errorBody ? ` - ${errorBody}` : ""}`);
   }
   return resp.json();
@@ -56,8 +59,15 @@ function getPlatformId(business: any, platform: string): string | null {
   switch (platform) {
     case "booking":
       return business.booking_hotel_id;
-    case "tripadvisor":
-      return business.tripadvisor_id;
+    case "tripadvisor": {
+      const raw = business.tripadvisor_id;
+      if (!raw) return null;
+      const slugMatch = String(raw).match(/(?:Hotel|Restaurant|Attraction)_Review-g\d+-d(\d+)/i);
+      if (slugMatch) return slugMatch[1];
+      const dMatch = String(raw).match(/-d(\d+)/i);
+      if (dMatch) return dMatch[1];
+      return String(raw).trim();
+    }
     case "trustpilot":
       return business.trustpilot_url;
     case "hotelscom":
