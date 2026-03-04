@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { toast } from "@/hooks/use-toast";
-import { Search, Check, X, ExternalLink, Loader2, Sparkles } from "lucide-react";
+import { Search, Check, X, ExternalLink, Loader2, Sparkles, Star, Hotel, Map, Building2 } from "lucide-react";
 
 interface PlatformResult {
   platform: string;
@@ -17,11 +17,11 @@ interface PlatformResult {
   description: string;
 }
 
-const platformIcons: Record<string, string> = {
-  tripadvisor: "🦉",
-  booking: "🏨",
-  trustpilot: "⭐",
-  hotelscom: "🏠",
+const platformIcons: Record<string, React.ReactNode> = {
+  tripadvisor: <Map className="h-5 w-5 text-green-600" />,
+  booking: <Hotel className="h-5 w-5 text-blue-700" />,
+  trustpilot: <Star className="h-5 w-5 text-emerald-500" />,
+  hotelscom: <Building2 className="h-5 w-5 text-red-600" />,
 };
 
 const platformDbField: Record<string, string> = {
@@ -202,7 +202,7 @@ export function PlatformDiscovery() {
                 key={result.url}
                 className="flex items-start gap-3 p-3 rounded-lg border bg-background"
               >
-                <span className="text-2xl mt-0.5">{platformIcons[result.platform] || "🌐"}</span>
+                <span className="mt-0.5">{platformIcons[result.platform] || <Building2 className="h-5 w-5" />}</span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-medium text-sm truncate">{result.title}</span>

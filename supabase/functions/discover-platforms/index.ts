@@ -172,10 +172,19 @@ Deno.serve(async (req) => {
       return order[a.confidence] - order[b.confidence];
     });
 
-    console.log(`Found ${flatResults.length} platform results for "${business_name}"`);
+    // Deduplicate: keep only the best result per platform
+    const bestPerPlatform = new Map<string, PlatformResult>();
+    for (const result of flatResults) {
+      if (!bestPerPlatform.has(result.platform)) {
+        bestPerPlatform.set(result.platform, result);
+      }
+    }
+    const dedupedResults = Array.from(bestPerPlatform.values());
+
+    console.log(`Found ${dedupedResults.length} platform results (deduped from ${flatResults.length}) for "${business_name}"`);
 
     return new Response(
-      JSON.stringify({ success: true, results: flatResults }),
+      JSON.stringify({ success: true, results: dedupedResults }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
