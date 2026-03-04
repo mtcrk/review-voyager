@@ -40,7 +40,14 @@ async function fetchPage(apiBaseUrl: string, offset: number): Promise<Wextractor
   const url = `${apiBaseUrl}&offset=${offset}`;
   const resp = await fetch(url);
   if (!resp.ok) {
-    throw new Error(`Wextractor API error: ${resp.status}`);
+    const errorBody = await resp.text().catch(() => "");
+    if (resp.status === 403) {
+      throw new Error("Wextractor erişimi reddedildi (403). Büyük olasılıkla kredi limitiniz doldu veya plan erişimi yok.");
+    }
+    if (resp.status === 404) {
+      throw new Error("Kaynak bulunamadı (404). Platform ID/URL formatını kontrol edin.");
+    }
+    throw new Error(`Wextractor API error: ${resp.status}${errorBody ? ` - ${errorBody}` : ""}`);
   }
   return resp.json();
 }
