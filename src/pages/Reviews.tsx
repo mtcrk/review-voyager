@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Star, Copy, Send, CheckCircle2, Search, Filter, ArrowUpDown, RefreshCw, Sparkles, Download, Globe, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star, Copy, Send, CheckCircle2, Search, Filter, ArrowUpDown, RefreshCw, Sparkles, Download, Globe, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -591,7 +591,7 @@ export default function Reviews() {
               }}
               disabled={isFetchingBooking}
             >
-              <Download className="h-4 w-4 mr-2" />
+              {isFetchingBooking ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
               {isFetchingBooking ? 'Çekiliyor...' : 'Google Yorumları Çek'}
             </Button>
           )}
@@ -624,7 +624,7 @@ export default function Reviews() {
               }}
               disabled={isFetchingBooking}
             >
-              <Download className="h-4 w-4 mr-2" />
+              {isFetchingBooking ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
               {isFetchingBooking ? 'Çekiliyor...' : `${platformLabels[platformFilter]?.label} Yorumları Çek`}
             </Button>
           )}
@@ -728,7 +728,7 @@ export default function Reviews() {
                     onClick={() => handlePlatformSetup(platformFilter)} 
                     disabled={!platformUrlInput.trim() || savingPlatformUrl}
                   >
-                    <Download className="h-4 w-4 mr-2" />
+                    {savingPlatformUrl ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
                     {savingPlatformUrl ? "Çekiliyor..." : "Yorumları Çek"}
                   </Button>
                 </div>
@@ -759,7 +759,7 @@ export default function Reviews() {
                   }}
                   disabled={isFetchingBooking}
                 >
-                  <Download className="h-4 w-4 mr-2" />
+                  {isFetchingBooking ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
                   {isFetchingBooking ? "Çekiliyor..." : `${config.label} Yorumlarını Çek`}
                 </Button>
               )}
@@ -806,6 +806,7 @@ export default function Reviews() {
               }}
               disabled={isFetchingBooking}
             >
+              {isFetchingBooking && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {isFetchingBooking ? 'Çekiliyor...' : 'Google Yorumlarını Çek'}
             </Button>
           </div>
