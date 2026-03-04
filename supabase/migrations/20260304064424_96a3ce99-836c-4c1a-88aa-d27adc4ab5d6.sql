@@ -1,0 +1,1 @@
+UPDATE businesses SET hotelscom_url = '436348' WHERE id = 'a0eda611-ccc2-4fea-863d-be2131e7fbf2' AND hotelscom_url = 'ho436348';

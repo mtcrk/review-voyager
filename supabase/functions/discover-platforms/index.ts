@@ -40,9 +40,9 @@ function extractPlatformId(platform: string, url: string): string | null {
         return match ? match[1] : null;
       }
       case "hotelscom": {
-        // e.g. hotels.com/ho123456
-        const match = url.match(/hotels\.com\/h[oe](\d+)/i);
-        return match ? `ho${match[1]}` : url;
+        // e.g. hotels.com/ho123456 or expedia.com/Hotel.h3670
+        const match = url.match(/h[oe](\d+)/i);
+        return match ? match[1] : null;
       }
       default:
         return null;

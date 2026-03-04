@@ -69,7 +69,7 @@ function buildApiUrl(platform: string, platformId: string, token: string): strin
     case "trustpilot":
       return `https://wextractor.com/api/v1/reviews/trustpilot?id=${encodeURIComponent(platformId)}&auth_token=${token}`;
     case "hotelscom":
-      return `https://wextractor.com/api/v1/reviews/hotelscom?id=${encodeURIComponent(platformId)}&auth_token=${token}`;
+      return `https://wextractor.com/api/v1/reviews/expedia?id=${encodeURIComponent(platformId)}&auth_token=${token}`;
     default:
       return null;
   }
