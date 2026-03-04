@@ -9,15 +9,25 @@ import { LocationComparisonTable } from "@/components/locations/LocationComparis
 import { LocationTrendChart } from "@/components/locations/LocationTrendChart";
 import { LocationMapView } from "@/components/locations/LocationMapView";
 import { BusinessOnboarding } from "@/components/BusinessOnboarding";
+import { useBusiness } from "@/contexts/BusinessContext";
+import { toast } from "@/hooks/use-toast";
 
 export default function Locations() {
   const navigate = useNavigate();
+  const { businesses, setActiveBusiness } = useBusiness();
   const { data: locations = [], isLoading, refetch } = useMultiLocationData();
   const [showAddBusiness, setShowAddBusiness] = useState(false);
 
   const handleSelectLocation = (id: string) => {
-    // Navigate to dashboard filtered to this business
-    navigate(`/dashboard?business=${id}`);
+    const selected = businesses.find(b => b.id === id);
+    if (selected) {
+      setActiveBusiness(selected);
+      toast({
+        title: `${selected.name} seçildi`,
+        description: "Dashboard bu lokasyona göre güncellendi.",
+      });
+      navigate("/dashboard");
+    }
   };
 
   if (isLoading) {
