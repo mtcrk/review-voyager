@@ -139,10 +139,10 @@ export default function Reviews() {
       if (match) return `${match[1]}/${match[2]}`;
     }
     if (platform === "tripadvisor") {
-      const match = trimmed.match(/(Hotel_Review-g\d+-d\d+)/i) ||
-                    trimmed.match(/(Restaurant_Review-g\d+-d\d+)/i) ||
-                    trimmed.match(/(Attraction_Review-g\d+-d\d+)/i);
-      if (match) return match[1];
+      const slugMatch = trimmed.match(/(?:Hotel|Restaurant|Attraction)_Review-g\d+-d(\d+)/i);
+      if (slugMatch) return slugMatch[1];
+      const numericMatch = trimmed.match(/(?:^|\D)(\d{5,})(?:\D|$)/);
+      if (numericMatch) return numericMatch[1];
     }
     if (platform === "trustpilot") {
       const match = trimmed.match(/trustpilot\.com\/review\/([^\s/?#]+)/i);
