@@ -139,7 +139,9 @@ export default function Reviews() {
       if (match) return `${match[1]}/${match[2]}`;
     }
     if (platform === "tripadvisor") {
-      const match = trimmed.match(/(Hotel_Review-[a-zA-Z0-9_-]+\.html)/i);
+      const match = trimmed.match(/(Hotel_Review-g\d+-d\d+)/i) ||
+                    trimmed.match(/(Restaurant_Review-g\d+-d\d+)/i) ||
+                    trimmed.match(/(Attraction_Review-g\d+-d\d+)/i);
       if (match) return match[1];
     }
     if (platform === "trustpilot") {
@@ -147,8 +149,8 @@ export default function Reviews() {
       if (match) return match[1];
     }
     if (platform === "hotelscom") {
-      const match = trimmed.match(/hotels\.com\/ho(\d+)/i);
-      if (match) return `ho${match[1]}`;
+      const match = trimmed.match(/h[oe](\d+)/i);
+      if (match) return match[1];
     }
     return trimmed;
   };
