@@ -127,8 +127,8 @@ const Index = () => {
   ];
 
   const earlyAccessPerks = [
-    { icon: Zap, text: t('landing.earlyAccess.perk1', '3 ay tamamen ücretsiz kullanım') },
-    { icon: Users, text: t('landing.earlyAccess.perk2', 'Kurucu ekiple birebir onboarding') },
+    { icon: Zap, text: t('landing.earlyAccess.perk1', '3 ay tüm lokasyonlar ücretsiz') },
+    { icon: Target, text: t('landing.earlyAccess.perk2multi', 'Sınırsız lokasyon ile multi-branch yönetim') },
     { icon: Star, text: t('landing.earlyAccess.perk3', 'Ömür boyu %50 indirimli fiyat garantisi') },
     { icon: Shield, text: t('landing.earlyAccess.perk4', 'Öncelikli destek ve özellik talepleri') },
   ];
@@ -617,7 +617,7 @@ const Index = () => {
 
                 {/* Subtitle */}
                 <p className="text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
-                  {t('landing.earlyAccess.subtitle', '3 ay boyunca tüm özellikler ücretsiz. Kredi kartı gerekmez. İlk kullanıcılarımız ömür boyu özel fiyattan yararlanır.')}
+                  {t('landing.earlyAccess.subtitle', '3 ay boyunca tüm lokasyonlar ve özellikler ücretsiz. Sonrasında lokasyon başına uygun fiyatlarla devam edin.')}
                 </p>
 
                 {/* Perks Grid */}
@@ -645,7 +645,7 @@ const Index = () => {
                   </Button>
                   
                   <p className="text-xs text-muted-foreground">
-                    {t('landing.earlyAccess.disclaimer', 'Kredi kartı gerekmez · 2 dakikada kurulum · İstediğiniz zaman iptal')}
+                    {t('landing.earlyAccess.disclaimer', 'Kredi kartı gerekmez · Sınırsız lokasyon · Sonrasında lokasyon başına fiyatlandırma')}
                   </p>
                 </div>
 
