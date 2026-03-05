@@ -36,6 +36,13 @@ interface WextractorResponse {
   reviews: WextractorReview[];
 }
 
+const FETCH_ALL_LIMITS: Record<string, number> = {
+  booking: 2000,
+  tripadvisor: 500,
+  trustpilot: 1000,
+  hotelscom: 1000,
+};
+
 async function fetchPage(apiBaseUrl: string, offset: number): Promise<WextractorResponse> {
   const url = `${apiBaseUrl}&offset=${offset}`;
   const resp = await fetch(url);
@@ -53,6 +60,12 @@ async function fetchPage(apiBaseUrl: string, offset: number): Promise<Wextractor
     throw new Error(`Wextractor API error: ${resp.status}${errorBody ? ` - ${errorBody}` : ""}`);
   }
   return resp.json();
+}
+
+function toSafeIsoDate(input?: string): string {
+  if (!input) return new Date().toISOString();
+  const parsed = new Date(input);
+  return Number.isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString();
 }
 
 function getPlatformId(business: any, platform: string): string | null {
