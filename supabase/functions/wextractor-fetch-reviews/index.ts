@@ -195,7 +195,8 @@ Deno.serve(async (req) => {
     let averageRating: string | undefined;
 
     if (fetch_all) {
-      console.log(`Fetching first page to get total count...`);
+      const maxReviews = FETCH_ALL_LIMITS[platform] || 1000;
+      console.log(`Fetching first page to get total count (limit: ${maxReviews})...`);
       const firstPage = await fetchPage(apiBaseUrl, 0);
       totalAvailable = firstPage.totals?.review_count;
       averageRating = firstPage.totals?.average_rating;
@@ -204,11 +205,13 @@ Deno.serve(async (req) => {
       const pageSize = firstPage.reviews?.length || 10;
       
       if (totalAvailable && totalAvailable > pageSize) {
-        const totalPages = Math.ceil(totalAvailable / pageSize);
-        console.log(`Total reviews: ${totalAvailable}, pages: ${totalPages}. Fetching in parallel batches...`);
+        const cappedTotal = Math.min(totalAvailable, maxReviews);
+        const totalPages = Math.ceil(cappedTotal / pageSize);
+        console.log(`Total reviews: ${totalAvailable}, capped to: ${cappedTotal}, pages: ${totalPages}. Fetching in parallel batches...`);
         
         const BATCH_SIZE = 5;
         for (let batchStart = 1; batchStart < totalPages; batchStart += BATCH_SIZE) {
+          if (allReviews.length >= maxReviews) break;
           const batchEnd = Math.min(batchStart + BATCH_SIZE, totalPages);
           const promises = [];
           for (let page = batchStart; page < batchEnd; page++) {
@@ -225,6 +228,10 @@ Deno.serve(async (req) => {
           }
           console.log(`Fetched batch ${batchStart}-${batchEnd - 1}, total reviews so far: ${allReviews.length}`);
         }
+        // Trim to limit
+        if (allReviews.length > maxReviews) {
+          allReviews = allReviews.slice(0, maxReviews);
+        }
       }
     } else {
       console.log(`Fetching ${platform} reviews for business ${business_id}, offset ${offset}`);
@@ -240,12 +247,12 @@ Deno.serve(async (req) => {
     let insertedCount = 0;
     let skippedCount = 0;
 
-    for (const review of allReviews) {
+    // Transform all reviews first
+    const transformedReviews = allReviews.map((review) => {
       const reviewerName = review.reviewer || review.author || review.author_name || "Anonymous";
       const reviewDate = review.datetime || review.date;
       const posText = review.pros || review.positive || "";
       const negText = review.cons || review.negative || "";
-
       const reviewId = review.id || `${platform}-${platformId}-${reviewerName}-${reviewDate}`;
 
       let normalizedRating = typeof review.rating === "string" ? parseFloat(review.rating) : (review.rating || 3);
@@ -263,38 +270,58 @@ Deno.serve(async (req) => {
       if (review.title && reviewText) reviewText = `${review.title}\n\n${reviewText}`;
       else if (review.title) reviewText = review.title;
 
-      // Check if review already exists
-      const { data: existing } = await supabase
-        .from("reviews")
-        .select("id")
-        .eq("business_id", business_id)
-        .eq("google_review_id", reviewId)
-        .eq("platform", platform)
-        .maybeSingle();
-
-      if (existing) {
-        skippedCount++;
-        continue;
-      }
-
-      const { error: insertError } = await supabase.from("reviews").insert({
+      return {
         business_id,
         platform,
         google_review_id: reviewId,
         reviewer_name: reviewerName,
         rating: normalizedRating,
         text: reviewText || null,
-        posted_at: reviewDate ? new Date(reviewDate).toISOString() : new Date().toISOString(),
+        posted_at: toSafeIsoDate(reviewDate),
         status: "pending_reply",
         sentiment: normalizedRating >= 4 ? "positive" : normalizedRating >= 3 ? "neutral" : "negative",
-      });
+      };
+    });
 
-      if (insertError) {
-        console.error("Insert error:", insertError);
-      } else {
-        insertedCount++;
+    // Batch check existing reviews (query in chunks of 200)
+    const existingIds = new Set<string>();
+    const allGoogleIds = transformedReviews.map(r => r.google_review_id);
+    const CHECK_BATCH = 200;
+    for (let i = 0; i < allGoogleIds.length; i += CHECK_BATCH) {
+      const batch = allGoogleIds.slice(i, i + CHECK_BATCH);
+      const { data: existingRows } = await supabase
+        .from("reviews")
+        .select("google_review_id")
+        .eq("business_id", business_id)
+        .eq("platform", platform)
+        .in("google_review_id", batch);
+      if (existingRows) {
+        for (const row of existingRows) {
+          existingIds.add(row.google_review_id!);
+        }
       }
     }
+
+    const newReviews = transformedReviews.filter(r => !existingIds.has(r.google_review_id));
+    const skippedCount = transformedReviews.length - newReviews.length;
+    let insertedCount = 0;
+
+    // Batch insert in chunks of 100
+    const INSERT_BATCH = 100;
+    for (let i = 0; i < newReviews.length; i += INSERT_BATCH) {
+      const batch = newReviews.slice(i, i + INSERT_BATCH);
+      const { error: insertError, data: inserted } = await supabase
+        .from("reviews")
+        .insert(batch)
+        .select("id");
+
+      if (insertError) {
+        console.error(`Batch insert error at ${i}:`, insertError.message);
+      } else {
+        insertedCount += (inserted?.length || 0);
+      }
+    }
+    console.log(`Done: ${insertedCount} inserted, ${skippedCount} skipped`);
 
     // Log success
     await supabase.from("integration_logs").insert({
