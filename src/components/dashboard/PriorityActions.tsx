@@ -143,21 +143,34 @@ export function PriorityActions({ reviews }: PriorityActionsProps) {
         {/* Priority Summary */}
         <div className="flex gap-2 flex-wrap">
           {priorityReviews.critical.length > 0 && (
-            <Badge variant="destructive" className="gap-1">
+            <Badge 
+              variant="destructive" 
+              className={`gap-1 cursor-pointer transition-all ${activeFilter === "critical" ? "ring-2 ring-destructive ring-offset-2" : "opacity-80 hover:opacity-100"}`}
+              onClick={() => toggleFilter("critical")}
+            >
               <AlertTriangle className="w-3 h-3" />
               {priorityReviews.critical.length} Kritik
             </Badge>
           )}
           {priorityReviews.urgent.length > 0 && (
-            <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 gap-1">
+            <Badge 
+              className={`bg-amber-100 text-amber-800 gap-1 cursor-pointer transition-all ${activeFilter === "urgent" ? "ring-2 ring-amber-400 ring-offset-2" : "opacity-80 hover:opacity-100"}`}
+              onClick={() => toggleFilter("urgent")}
+            >
               <Clock className="w-3 h-3" />
               {priorityReviews.urgent.length} Acil
             </Badge>
           )}
           {priorityReviews.normal.length > 0 && (
-            <Badge variant="secondary" className="gap-1">
+            <Badge 
+              variant="secondary" 
+              className={`gap-1 cursor-pointer transition-all ${activeFilter === "normal" ? "ring-2 ring-secondary ring-offset-2" : "opacity-80 hover:opacity-100"}`}
+              onClick={() => toggleFilter("normal")}
+            >
               <MessageSquare className="w-3 h-3" />
               {priorityReviews.normal.length} Normal
+            </Badge>
+          )}
             </Badge>
           )}
         </div>
