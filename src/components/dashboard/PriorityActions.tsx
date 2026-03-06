@@ -171,8 +171,6 @@ export function PriorityActions({ reviews }: PriorityActionsProps) {
               {priorityReviews.normal.length} Normal
             </Badge>
           )}
-            </Badge>
-          )}
         </div>
 
         {/* Review List */}
