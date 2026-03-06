@@ -80,7 +80,8 @@ export default function Reviews() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [sentimentFilter, setSentimentFilter] = useState<SentimentFilter>("all");
   const [platformFilter, setPlatformFilter] = useState<PlatformFilter>(urlPlatform || "all");
-  
+  const [ratingFilter, setRatingFilter] = useState<RatingFilter>("all");
+  const [sortOption, setSortOption] = useState<SortOption>("newest");
   // Sync platformFilter with URL changes (sidebar navigation)
   useEffect(() => {
     const newPlatform = searchParams.get("platform") as PlatformFilter | null;
