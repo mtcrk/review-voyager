@@ -42,6 +42,8 @@ type SortOrder = "asc" | "desc";
 type StatusFilter = "all" | "pending" | "approved" | "replied";
 type SentimentFilter = "all" | "positive" | "negative" | "neutral";
 type PlatformFilter = "all" | "google" | "booking" | "tripadvisor" | "trustpilot" | "hotelscom";
+type RatingFilter = "all" | "1" | "2" | "3" | "4" | "5";
+type SortOption = "newest" | "oldest" | "rating_high" | "rating_low" | "name_az";
 
 type ToneOption = "friendly" | "formal" | "playful" | "empathetic" | "grateful" | "witty" | "apologetic" | "enthusiastic";
 
