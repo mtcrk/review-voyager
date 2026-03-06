@@ -501,11 +501,12 @@ export default function Reviews() {
   };
 
   const toggleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortOrder("desc");
+    if (field === "posted_at") {
+      setSortOption(sortOption === "newest" ? "oldest" : "newest");
+    } else if (field === "rating") {
+      setSortOption(sortOption === "rating_high" ? "rating_low" : "rating_high");
+    } else if (field === "reviewer_name") {
+      setSortOption("name_az");
     }
   };
 
