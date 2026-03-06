@@ -89,8 +89,8 @@ export default function Reviews() {
     setCurrentPage(1);
   }, [searchParams]);
 
-  const [sortField, setSortField] = useState<SortField>("posted_at");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+  const sortField: SortField = sortOption === "name_az" ? "reviewer_name" : sortOption?.includes("rating") ? "rating" : "posted_at";
+  const sortOrder: SortOrder = sortOption === "oldest" || sortOption === "rating_low" || sortOption === "name_az" ? "asc" : "desc";
   const [isFetchingBooking, setIsFetchingBooking] = useState(false);
   
   // Inline platform setup
