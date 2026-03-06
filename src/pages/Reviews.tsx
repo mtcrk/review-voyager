@@ -260,6 +260,12 @@ export default function Reviews() {
       result = result.filter((r) => r.sentiment?.toLowerCase() === sentimentFilter);
     }
 
+    // Rating filter
+    if (ratingFilter !== "all") {
+      const targetRating = parseInt(ratingFilter);
+      result = result.filter((r) => r.rating === targetRating);
+    }
+
     // Sorting
     result.sort((a, b) => {
       let comparison = 0;
@@ -278,7 +284,7 @@ export default function Reviews() {
     });
 
     return result;
-  }, [reviews, searchQuery, statusFilter, sentimentFilter, platformFilter, sortField, sortOrder]);
+  }, [reviews, searchQuery, statusFilter, sentimentFilter, platformFilter, ratingFilter, sortField, sortOrder]);
 
   // Pagination
   const totalPages = Math.max(1, Math.ceil(filteredReviews.length / pageSize));
