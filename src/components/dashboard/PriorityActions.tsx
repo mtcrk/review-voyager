@@ -73,11 +73,19 @@ export function PriorityActions({ reviews }: PriorityActionsProps) {
     return "Az önce";
   };
 
-  const allPriorityReviews = [
-    ...priorityReviews.critical.map(r => ({ ...r, priority: "critical" as const })),
-    ...priorityReviews.urgent.map(r => ({ ...r, priority: "urgent" as const })),
-    ...priorityReviews.normal.map(r => ({ ...r, priority: "normal" as const })),
-  ];
+  const allPriorityReviews = useMemo(() => {
+    const all = [
+      ...priorityReviews.critical.map(r => ({ ...r, priority: "critical" as const })),
+      ...priorityReviews.urgent.map(r => ({ ...r, priority: "urgent" as const })),
+      ...priorityReviews.normal.map(r => ({ ...r, priority: "normal" as const })),
+    ];
+    if (activeFilter === "all") return all;
+    return all.filter(r => r.priority === activeFilter);
+  }, [priorityReviews, activeFilter]);
+
+  const toggleFilter = (filter: PriorityFilter) => {
+    setActiveFilter(prev => prev === filter ? "all" : filter);
+  };
 
   if (priorityReviews.totalPending === 0) {
     return (
