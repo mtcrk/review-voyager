@@ -42,6 +42,8 @@ type SortOrder = "asc" | "desc";
 type StatusFilter = "all" | "pending" | "approved" | "replied";
 type SentimentFilter = "all" | "positive" | "negative" | "neutral";
 type PlatformFilter = "all" | "google" | "booking" | "tripadvisor" | "trustpilot" | "hotelscom";
+type RatingFilter = "all" | "1" | "2" | "3" | "4" | "5";
+type SortOption = "newest" | "oldest" | "rating_high" | "rating_low" | "name_az";
 
 type ToneOption = "friendly" | "formal" | "playful" | "empathetic" | "grateful" | "witty" | "apologetic" | "enthusiastic";
 
@@ -78,7 +80,8 @@ export default function Reviews() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [sentimentFilter, setSentimentFilter] = useState<SentimentFilter>("all");
   const [platformFilter, setPlatformFilter] = useState<PlatformFilter>(urlPlatform || "all");
-  
+  const [ratingFilter, setRatingFilter] = useState<RatingFilter>("all");
+  const [sortOption, setSortOption] = useState<SortOption>("newest");
   // Sync platformFilter with URL changes (sidebar navigation)
   useEffect(() => {
     const newPlatform = searchParams.get("platform") as PlatformFilter | null;
@@ -86,8 +89,8 @@ export default function Reviews() {
     setCurrentPage(1);
   }, [searchParams]);
 
-  const [sortField, setSortField] = useState<SortField>("posted_at");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+  const sortField: SortField = sortOption === "name_az" ? "reviewer_name" : sortOption?.includes("rating") ? "rating" : "posted_at";
+  const sortOrder: SortOrder = sortOption === "oldest" || sortOption === "rating_low" || sortOption === "name_az" ? "asc" : "desc";
   const [isFetchingBooking, setIsFetchingBooking] = useState(false);
   
   // Inline platform setup
@@ -257,6 +260,12 @@ export default function Reviews() {
       result = result.filter((r) => r.sentiment?.toLowerCase() === sentimentFilter);
     }
 
+    // Rating filter
+    if (ratingFilter !== "all") {
+      const targetRating = parseInt(ratingFilter);
+      result = result.filter((r) => r.rating === targetRating);
+    }
+
     // Sorting
     result.sort((a, b) => {
       let comparison = 0;
@@ -275,7 +284,7 @@ export default function Reviews() {
     });
 
     return result;
-  }, [reviews, searchQuery, statusFilter, sentimentFilter, platformFilter, sortField, sortOrder]);
+  }, [reviews, searchQuery, statusFilter, sentimentFilter, platformFilter, ratingFilter, sortField, sortOrder]);
 
   // Pagination
   const totalPages = Math.max(1, Math.ceil(filteredReviews.length / pageSize));
@@ -498,11 +507,12 @@ export default function Reviews() {
   };
 
   const toggleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortOrder("desc");
+    if (field === "posted_at") {
+      setSortOption(sortOption === "newest" ? "oldest" : "newest");
+    } else if (field === "rating") {
+      setSortOption(sortOption === "rating_high" ? "rating_low" : "rating_high");
+    } else if (field === "reviewer_name") {
+      setSortOption("name_az");
     }
   };
 
@@ -680,6 +690,33 @@ export default function Reviews() {
               <SelectItem value="tripadvisor">TripAdvisor</SelectItem>
               <SelectItem value="trustpilot">Trustpilot</SelectItem>
               <SelectItem value="hotelscom">Hotels.com</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={ratingFilter} onValueChange={(v) => { setRatingFilter(v as RatingFilter); setCurrentPage(1); }}>
+            <SelectTrigger className="w-[130px]">
+              <Star className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Puan" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tüm Puanlar</SelectItem>
+              <SelectItem value="5">⭐⭐⭐⭐⭐ (5)</SelectItem>
+              <SelectItem value="4">⭐⭐⭐⭐ (4)</SelectItem>
+              <SelectItem value="3">⭐⭐⭐ (3)</SelectItem>
+              <SelectItem value="2">⭐⭐ (2)</SelectItem>
+              <SelectItem value="1">⭐ (1)</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={sortOption} onValueChange={(v) => { setSortOption(v as SortOption); setCurrentPage(1); }}>
+            <SelectTrigger className="w-[160px]">
+              <ArrowUpDown className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Sırala" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">En Yeni</SelectItem>
+              <SelectItem value="oldest">En Eski</SelectItem>
+              <SelectItem value="rating_high">Puan (Yüksek→Düşük)</SelectItem>
+              <SelectItem value="rating_low">Puan (Düşük→Yüksek)</SelectItem>
+              <SelectItem value="name_az">İsim (A→Z)</SelectItem>
             </SelectContent>
           </Select>
         </div>
