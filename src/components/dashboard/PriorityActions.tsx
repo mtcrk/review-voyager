@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,8 +26,11 @@ interface PriorityActionsProps {
   reviews: Review[];
 }
 
+type PriorityFilter = "all" | "critical" | "urgent" | "normal";
+
 export function PriorityActions({ reviews }: PriorityActionsProps) {
   const navigate = useNavigate();
+  const [activeFilter, setActiveFilter] = useState<PriorityFilter>("all");
 
   const priorityReviews = useMemo(() => {
     const now = new Date();
