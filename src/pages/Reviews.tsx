@@ -692,6 +692,33 @@ export default function Reviews() {
               <SelectItem value="hotelscom">Hotels.com</SelectItem>
             </SelectContent>
           </Select>
+          <Select value={ratingFilter} onValueChange={(v) => { setRatingFilter(v as RatingFilter); setCurrentPage(1); }}>
+            <SelectTrigger className="w-[130px]">
+              <Star className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Puan" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tüm Puanlar</SelectItem>
+              <SelectItem value="5">⭐⭐⭐⭐⭐ (5)</SelectItem>
+              <SelectItem value="4">⭐⭐⭐⭐ (4)</SelectItem>
+              <SelectItem value="3">⭐⭐⭐ (3)</SelectItem>
+              <SelectItem value="2">⭐⭐ (2)</SelectItem>
+              <SelectItem value="1">⭐ (1)</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={sortOption} onValueChange={(v) => { setSortOption(v as SortOption); setCurrentPage(1); }}>
+            <SelectTrigger className="w-[160px]">
+              <ArrowUpDown className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Sırala" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">En Yeni</SelectItem>
+              <SelectItem value="oldest">En Eski</SelectItem>
+              <SelectItem value="rating_high">Puan (Yüksek→Düşük)</SelectItem>
+              <SelectItem value="rating_low">Puan (Düşük→Yüksek)</SelectItem>
+              <SelectItem value="name_az">İsim (A→Z)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
