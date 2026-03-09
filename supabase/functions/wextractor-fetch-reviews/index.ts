@@ -243,10 +243,6 @@ Deno.serve(async (req) => {
 
     console.log(`Total reviews fetched: ${allReviews.length}`);
 
-    // Transform and upsert reviews
-    let insertedCount = 0;
-    let skippedCount = 0;
-
     // Transform all reviews first
     const transformedReviews = allReviews.map((review) => {
       const reviewerName = review.reviewer || review.author || review.author_name || "Anonymous";
