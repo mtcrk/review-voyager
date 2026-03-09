@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { useAuth } from "@/contexts/AuthContext";
-import { MapPin, Mail, Globe, Building2, Target, Users, Sparkles, ArrowRight } from "lucide-react";
+import { Building2, Target, Users, Sparkles, ArrowRight } from "lucide-react";
 
 export default function About() {
   const navigate = useNavigate();
@@ -136,77 +136,6 @@ export default function About() {
               <p className="text-muted-foreground">
                 {t('about.whatWeDo.multiPlatform', 'Google, Instagram, TikTok, Booking.com, TripAdvisor ve daha fazla platformdan gelen yorumları tek bir panelden yönetin.')}
               </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Company Info */}
-      <section className="container mx-auto px-6 py-16">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mb-12">
-            {t('about.companyInfo.title', 'Şirket Bilgileri')}
-          </h2>
-          <div className="rounded-2xl border border-border bg-card p-8 md:p-12 space-y-6">
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <Building2 className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-foreground">{t('about.companyInfo.name', 'Şirket Adı')}</h3>
-                <p className="text-muted-foreground">VoyageRespond</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <MapPin className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-foreground">{t('about.companyInfo.address', 'Adres')}</h3>
-                <p className="text-muted-foreground">
-                  Bilkent Cyberpark, Üniversiteler Mah., Bilkent Blv.<br />
-                  06520 Çankaya, Ankara, Türkiye
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <Mail className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-foreground">{t('about.companyInfo.email', 'E-posta')}</h3>
-                <p className="text-muted-foreground">support@voyagerespond.com</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <Globe className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-foreground">{t('about.companyInfo.website', 'Web Sitesi')}</h3>
-                <p className="text-muted-foreground">
-                  <a href="https://voyagerespond.com" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
-                    voyagerespond.com
-                  </a>
-                </p>
-              </div>
-            </div>
-
-            {/* Google Maps Embed */}
-            <div className="pt-4">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3061.5!2d32.74!3d39.87!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zVm95YWdlUmVzcG9uZA!5e0!3m2!1str!2str!4v1700000000000!5m2!1str!2str"
-                width="100%"
-                height="300"
-                style={{ border: 0, borderRadius: '12px' }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title="VoyageRespond Location"
-              />
             </div>
           </div>
         </div>
