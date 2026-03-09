@@ -66,7 +66,7 @@ const App = () => (
             <Route path="/auth/reset" element={<ResetPassword />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/hub" element={<Hub />} />
-            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/pricing" element={<Navigate to="/#pricing" replace />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/demo" element={<DemoPage />} />
             <Route path="/about" element={<About />} />
