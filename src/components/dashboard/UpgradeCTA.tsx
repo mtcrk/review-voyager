@@ -31,7 +31,7 @@ export function UpgradeCTA({ feature, compact = false }: UpgradeCTAProps) {
       </p>
       <Button
         size="sm"
-        onClick={() => navigate("/pricing")}
+        onClick={() => navigate("/#pricing")}
         className="gradient-primary text-white"
       >
         {t('dashboard.demo.upgradeButton', 'Pro Planı Keşfet')}

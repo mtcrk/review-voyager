@@ -249,7 +249,7 @@ export default function About() {
               <h4 className="font-semibold text-foreground mb-3">{t('footer.quickLinks', 'Hızlı Bağlantılar')}</h4>
               <div className="space-y-2">
                 <button onClick={() => navigate("/")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('nav.home', 'Ana Sayfa')}</button>
-                <button onClick={() => navigate("/pricing")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('nav.pricing')}</button>
+                <button onClick={() => navigate("/#pricing")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing.earlyAccess.badge', 'Erken Erişim')}</button>
                 <button onClick={() => navigate("/contact")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('nav.contact', 'İletişim')}</button>
                 <button onClick={() => navigate("/about")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('about.badge', 'Hakkımızda')}</button>
               </div>
