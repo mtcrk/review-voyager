@@ -200,7 +200,7 @@ const Index = () => {
                 onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
                 onMouseLeave={(e) => e.currentTarget.style.color = '#1F2937'}
               >
-                {t('nav.pricing')}
+                {t('landing.earlyAccess.badge', 'Erken Erişim')}
               </button>
               <button
                 onClick={() => navigate("/hub")}
