@@ -31,8 +31,8 @@ export default function About() {
               <button onClick={() => navigate("/")} className="text-base font-medium text-foreground hover:text-primary transition-colors">
                 {t('nav.home', 'Ana Sayfa')}
               </button>
-              <button onClick={() => navigate("/pricing")} className="text-base font-medium text-foreground hover:text-primary transition-colors">
-                {t('nav.pricing')}
+              <button onClick={() => navigate("/#pricing")} className="text-base font-medium text-foreground hover:text-primary transition-colors">
+                {t('landing.earlyAccess.badge', 'Erken Erişim')}
               </button>
               <button onClick={() => navigate("/contact")} className="text-base font-medium text-foreground hover:text-primary transition-colors">
                 {t('nav.contact', 'İletişim')}
