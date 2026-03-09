@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { useAuth } from "@/contexts/AuthContext";
-import { MapPin, Mail, Globe, Building2, Target, Users, Sparkles, ArrowRight } from "lucide-react";
+import { Building2, Target, Users, Sparkles, ArrowRight } from "lucide-react";
 
 export default function About() {
   const navigate = useNavigate();
