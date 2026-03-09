@@ -15,7 +15,7 @@ export function UpgradeCTA({ feature, compact = false }: UpgradeCTAProps) {
   if (compact) {
     return (
       <button
-        onClick={() => navigate("/pricing")}
+        onClick={() => navigate("/#pricing")}
         className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-primary/10 border border-primary/20 text-primary text-xs font-medium hover:bg-primary/20 transition-colors"
       >
         <Lock className="w-3 h-3" />
@@ -31,7 +31,7 @@ export function UpgradeCTA({ feature, compact = false }: UpgradeCTAProps) {
       </p>
       <Button
         size="sm"
-        onClick={() => navigate("/pricing")}
+        onClick={() => navigate("/#pricing")}
         className="gradient-primary text-white"
       >
         {t('dashboard.demo.upgradeButton', 'Pro Planı Keşfet')}

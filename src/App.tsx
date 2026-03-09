@@ -26,7 +26,7 @@ import NotFound from "./pages/NotFound";
 import GoogleBusinessCallback from "./pages/GoogleBusinessCallback";
 import Onboarding from "./pages/Onboarding";
 import Hub from "./pages/Hub";
-import Pricing from "./pages/Pricing";
+import { Navigate } from "react-router-dom";
 import InstagramSales from "./pages/automations/InstagramSales";
 import GoogleReviews from "./pages/automations/GoogleReviews";
 import WhatsAppAutomation from "./pages/automations/WhatsAppAutomation";
@@ -66,7 +66,7 @@ const App = () => (
             <Route path="/auth/reset" element={<ResetPassword />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/hub" element={<Hub />} />
-            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/pricing" element={<Navigate to="/#pricing" replace />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/demo" element={<DemoPage />} />
             <Route path="/about" element={<About />} />

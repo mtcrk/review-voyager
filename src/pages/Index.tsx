@@ -200,7 +200,7 @@ const Index = () => {
                 onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
                 onMouseLeave={(e) => e.currentTarget.style.color = '#1F2937'}
               >
-                {t('nav.pricing')}
+                {t('landing.earlyAccess.badge', 'Erken Erişim')}
               </button>
               <button
                 onClick={() => navigate("/hub")}
@@ -765,7 +765,7 @@ const Index = () => {
             <div>
               <h4 className="font-semibold text-foreground mb-3">{t('footer.quickLinks', 'Hızlı Bağlantılar')}</h4>
               <div className="space-y-2">
-                <button onClick={() => navigate("/pricing")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('nav.pricing')}</button>
+                <button onClick={() => scrollToSection("pricing")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing.earlyAccess.badge', 'Erken Erişim')}</button>
                 <button onClick={() => navigate("/contact")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('nav.contact', 'İletişim')}</button>
                 <button onClick={() => navigate("/about")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('about.badge', 'Hakkımızda')}</button>
                 <button onClick={() => navigate("/hub")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Hub</button>
