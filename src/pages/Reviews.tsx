@@ -169,8 +169,13 @@ export default function Reviews() {
   const invokeApifyFetchWithPolling = async (platform: string) => {
     if (!activeBusiness) throw new Error("İşletme bulunamadı");
 
-    let response = await supabase.functions.invoke("apify-fetch-reviews", {
-      body: { business_id: activeBusiness.id, platform },
+    // Use dedicated TripAdvisor scraper for restaurants
+    const functionName = platform === "tripadvisor" 
+      ? "tripadvisor-fetch-reviews" 
+      : "apify-fetch-reviews";
+
+    let response = await supabase.functions.invoke(functionName, {
+      body: { business_id: activeBusiness.id, ...(platform !== "tripadvisor" ? { platform } : {}) },
     });
 
     if (response.error) throw new Error(response.error.message);
@@ -185,8 +190,8 @@ export default function Reviews() {
 
       await new Promise((resolve) => setTimeout(resolve, APIFY_POLL_INTERVAL_MS));
 
-      const pollResp = await supabase.functions.invoke("apify-fetch-reviews", {
-        body: { business_id: activeBusiness.id, platform, run_id: result.run_id },
+      const pollResp = await supabase.functions.invoke(functionName, {
+        body: { business_id: activeBusiness.id, ...(platform !== "tripadvisor" ? { platform } : {}), run_id: result.run_id },
       });
 
       if (pollResp.error) throw new Error(pollResp.error.message);
