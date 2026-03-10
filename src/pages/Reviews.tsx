@@ -85,7 +85,11 @@ export default function Reviews() {
   // Sync platformFilter with URL changes (sidebar navigation)
   useEffect(() => {
     const newPlatform = searchParams.get("platform") as PlatformFilter | null;
+    const newSentiment = searchParams.get("sentiment") as SentimentFilter | null;
+    const newStatus = searchParams.get("status") as StatusFilter | null;
     setPlatformFilter(newPlatform || "all");
+    if (newSentiment) setSentimentFilter(newSentiment);
+    if (newStatus) setStatusFilter(newStatus);
     setCurrentPage(1);
   }, [searchParams]);
 
