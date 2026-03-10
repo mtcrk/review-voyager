@@ -162,6 +162,39 @@ export default function Reviews() {
     return trimmed;
   };
 
+  const APIFY_POLL_INTERVAL_MS = 2000;
+  const APIFY_POLL_TIMEOUT_MS = 120000;
+
+  const invokeApifyFetchWithPolling = async (platform: string) => {
+    if (!activeBusiness) throw new Error("İşletme bulunamadı");
+
+    let response = await supabase.functions.invoke("apify-fetch-reviews", {
+      body: { business_id: activeBusiness.id, platform },
+    });
+
+    if (response.error) throw new Error(response.error.message);
+
+    let result: any = response.data;
+    const startedAt = Date.now();
+
+    while (result?.status === "running" && result?.run_id) {
+      if (Date.now() - startedAt > APIFY_POLL_TIMEOUT_MS) {
+        throw new Error("Çekim uzun sürüyor, lütfen 1 dakika sonra tekrar deneyin.");
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, APIFY_POLL_INTERVAL_MS));
+
+      const pollResp = await supabase.functions.invoke("apify-fetch-reviews", {
+        body: { business_id: activeBusiness.id, platform, run_id: result.run_id },
+      });
+
+      if (pollResp.error) throw new Error(pollResp.error.message);
+      result = pollResp.data;
+    }
+
+    return result;
+  };
+
   const handlePlatformSetup = async (platform: string) => {
     const config = platformSetupConfig[platform];
     if (!activeBusiness || !platformUrlInput.trim() || !config) return;
@@ -181,25 +214,7 @@ export default function Reviews() {
         .eq('id', activeBusiness.id);
       if (updateError) throw updateError;
 
-      let response = await supabase.functions.invoke('apify-fetch-reviews', {
-        body: { business_id: activeBusiness.id, platform },
-      });
-      // Handle async polling
-      if (response.data?.status === 'running' && response.data?.run_id) {
-        let pollResult = response.data;
-        while (pollResult?.status === 'running') {
-          await new Promise(r => setTimeout(r, 5000));
-          const pollResp = await supabase.functions.invoke('apify-fetch-reviews', {
-            body: { business_id: activeBusiness.id, platform, run_id: pollResult.run_id },
-          });
-          pollResult = pollResp.data;
-          if (pollResp.error) throw new Error(pollResp.error.message);
-        }
-        response = { ...response, data: pollResult };
-      }
-      
-      if (response.error) throw new Error(response.error.message);
-      const result = response.data;
+      const result = await invokeApifyFetchWithPolling(platform);
       if (result?.error) {
         toast({ title: "Hata", description: result.error, variant: "destructive" });
       } else {
