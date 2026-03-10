@@ -656,14 +656,6 @@ export default function Reviews() {
                     });
                     refetch();
                   }
-                    toast({ title: "Hata", description: result.error, variant: "destructive" });
-                  } else {
-                    toast({
-                      title: `${platformLabels[platformFilter]?.label} Yorumları Çekildi`,
-                      description: `${result.inserted} yeni yorum eklendi, ${result.skipped} zaten mevcut.`,
-                    });
-                    refetch();
-                  }
                 } catch (err: any) {
                   toast({ title: "Hata", description: err.message || "Yorumlar çekilemedi.", variant: "destructive" });
                 } finally {
