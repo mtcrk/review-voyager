@@ -170,12 +170,15 @@ Deno.serve(async (req) => {
     }
 
     // Build TripAdvisor URL from stored ID
-    // tripadvisor_id could be a full URL or just an ID like "g293974-d731652"
+    // tripadvisor_id could be a full URL or just a numeric ID
     let tripAdvisorUrl = business.tripadvisor_id;
     if (!tripAdvisorUrl.startsWith("http")) {
-      // Try to construct a URL - the ID format varies
-      tripAdvisorUrl = `https://www.tripadvisor.com/Restaurant_Review-${tripAdvisorUrl}-Reviews`;
+      // If it's just a numeric ID, we can't construct a reliable URL
+      // Try common URL patterns
+      tripAdvisorUrl = `https://www.tripadvisor.com/Restaurant_Review-d${tripAdvisorUrl}-Reviews`;
     }
+    // Clean up URL - remove query params and fragments
+    tripAdvisorUrl = tripAdvisorUrl.split('?')[0].split('#')[0];
 
     console.log(`Starting TripAdvisor actor for business ${business_id}, URL: ${tripAdvisorUrl}`);
 

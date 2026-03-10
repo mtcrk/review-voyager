@@ -147,8 +147,10 @@ export default function Reviews() {
       if (match) return `${match[1]}/${match[2]}`;
     }
     if (platform === "tripadvisor") {
-      const slugMatch = trimmed.match(/(?:Hotel|Restaurant|Attraction)_Review-g\d+-d(\d+)/i);
-      if (slugMatch) return slugMatch[1];
+      // Store the full TripAdvisor URL for the dedicated scraper
+      const urlMatch = trimmed.match(/(https?:\/\/(?:www\.)?tripadvisor\.[a-z.]+\/(?:Hotel|Restaurant|Attraction)_Review[^\s]*)/i);
+      if (urlMatch) return urlMatch[1];
+      // If just a numeric ID, return as-is
       const numericMatch = trimmed.match(/(?:^|\D)(\d{5,})(?:\D|$)/);
       if (numericMatch) return numericMatch[1];
     }
@@ -178,7 +180,12 @@ export default function Reviews() {
       body: { business_id: activeBusiness.id, ...(platform !== "tripadvisor" ? { platform } : {}) },
     });
 
-    if (response.error) throw new Error(response.error.message);
+    if (response.error) {
+      // Try to extract the actual error message from the response data
+      const errorBody = response.data;
+      const msg = errorBody?.error || response.error.message || "Bilinmeyen hata";
+      throw new Error(msg);
+    }
 
     let result: any = response.data;
     const startedAt = Date.now();
@@ -678,7 +685,7 @@ export default function Reviews() {
               {isFetchingBooking ? 'Çekiliyor...' : 'Google Yorumları Çek'}
             </Button>
           )}
-          {platformFilter !== "all" && platformFilter !== "google" && (
+          {platformFilter !== "all" && platformFilter !== "google" && activeBusiness && platformSetupConfig[platformFilter]?.getIdFromBusiness(activeBusiness) && (
             <Button 
               size="sm" 
               onClick={async () => {
