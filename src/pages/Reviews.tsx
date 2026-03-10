@@ -69,6 +69,7 @@ const platformLabels: Record<string, { label: string; color: string }> = {
 
 export default function Reviews() {
   const { activeBusiness, businesses, refetchBusinesses } = useBusiness();
+  const { startFetch, hasPendingRuns, setOnFetchComplete } = useReviewFetch();
   const [locationFilter, setLocationFilter] = useState<string>("active");
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
