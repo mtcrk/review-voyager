@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import {
   FileDown, Mail, CalendarIcon, Star, MessageSquare, ThumbsUp, ThumbsDown,
-  Send, AlertTriangle, TrendingUp, BarChart3, Brain, Loader2, Clock, CheckCircle2,
+  Send, AlertTriangle, TrendingUp, BarChart3, Brain, Loader2, CheckCircle2,
 } from "lucide-react";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useQuery, useMutation } from "@tanstack/react-query";
