@@ -71,9 +71,6 @@ function toSafeIsoDate(input?: string | null): string {
   return Number.isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString();
 }
 
-function canUseWextractorFallback(_platform: string): boolean {
-  return false;
-}
 
 async function getRunStatus(runId: string, token: string): Promise<any> {
   const resp = await fetch(`${APIFY_BASE}/actor-runs/${runId}?token=${token}`);
