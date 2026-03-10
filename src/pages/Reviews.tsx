@@ -805,9 +805,21 @@ export default function Reviews() {
                   onClick={async () => {
                     setIsFetchingBooking(true);
                     try {
-                      const response = await supabase.functions.invoke('wextractor-fetch-reviews', {
-                        body: { business_id: activeBusiness.id, platform: platformFilter, fetch_all: true },
+                      let response = await supabase.functions.invoke('apify-fetch-reviews', {
+                        body: { business_id: activeBusiness.id, platform: platformFilter },
                       });
+                      if (response.data?.status === 'running' && response.data?.run_id) {
+                        let pollResult = response.data;
+                        while (pollResult?.status === 'running') {
+                          await new Promise(r => setTimeout(r, 5000));
+                          const pollResp = await supabase.functions.invoke('apify-fetch-reviews', {
+                            body: { business_id: activeBusiness.id, platform: platformFilter, run_id: pollResult.run_id },
+                          });
+                          pollResult = pollResp.data;
+                          if (pollResp.error) throw new Error(pollResp.error.message);
+                        }
+                        response = { ...response, data: pollResult };
+                      }
                       if (response.error) throw new Error(response.error.message);
                       const result = response.data;
                       if (result?.error) {
