@@ -405,50 +405,85 @@ async function logSuccess(supabase: any, businessId: string, platform: string, f
 
 // ====== Wextractor Fallback (for businesses without Google Place ID) ======
 
-function getWextractorPlatformId(business: any, platform: string): string | null {
+function getWextractorPlatformIds(business: any, platform: string): string[] {
   switch (platform) {
-    case "booking": return business.booking_hotel_id;
+    case "booking": {
+      const id = business.booking_hotel_id ? String(business.booking_hotel_id).trim() : "";
+      return id ? [id] : [];
+    }
     case "tripadvisor": {
       const raw = business.tripadvisor_id;
-      if (!raw) return null;
-      const slugMatch = String(raw).match(/(?:Hotel|Restaurant|Attraction)_Review-g\d+-d(\d+)/i);
-      if (slugMatch) return slugMatch[1];
-      const dMatch = String(raw).match(/-d(\d+)/i);
-      if (dMatch) return dMatch[1];
-      return String(raw).trim();
+      if (!raw) return [];
+      const value = String(raw).trim();
+      const ids = new Set<string>();
+      const slugMatch = value.match(/(?:Hotel|Restaurant|Attraction)_Review-g\d+-d(\d+)/i);
+      if (slugMatch?.[1]) ids.add(slugMatch[1]);
+      const dMatch = value.match(/-d(\d+)/i);
+      if (dMatch?.[1]) ids.add(dMatch[1]);
+      if (value) ids.add(value);
+      return Array.from(ids);
     }
-    case "trustpilot": return business.trustpilot_url;
+    case "trustpilot": {
+      const url = business.trustpilot_url ? String(business.trustpilot_url).trim() : "";
+      return url ? [url] : [];
+    }
     case "hotelscom": {
       const raw = business.hotelscom_url;
-      if (!raw) return null;
+      if (!raw) return [];
       const value = String(raw).trim();
+      const ids = new Set<string>();
 
-      // Accept raw numeric IDs, ho-prefixed IDs, or Hotels.com URLs containing the ID
-      const hoMatch = value.match(/^ho(\d+)$/i);
-      if (hoMatch) return hoMatch[1];
+      // Try as-is
+      if (value) ids.add(value);
+
+      // URL patterns
+      const slashHoMatch = value.match(/\/ho(\d+)/i);
+      if (slashHoMatch?.[1]) {
+        ids.add(slashHoMatch[1]);
+        ids.add(`ho${slashHoMatch[1]}`);
+      }
 
       const idParamMatch = value.match(/[?&]id=(\d+)/i);
-      if (idParamMatch) return idParamMatch[1];
+      if (idParamMatch?.[1]) {
+        ids.add(idParamMatch[1]);
+        ids.add(`ho${idParamMatch[1]}`);
+      }
 
-      const slashHoMatch = value.match(/\/ho(\d+)/i);
-      if (slashHoMatch) return slashHoMatch[1];
+      // ho-prefixed and numeric variants
+      const hoMatch = value.match(/^ho(\d+)$/i);
+      if (hoMatch?.[1]) {
+        ids.add(hoMatch[1]);
+        ids.add(`ho${hoMatch[1]}`);
+      }
 
       const numericMatch = value.match(/(\d{4,})/);
-      if (numericMatch) return numericMatch[1];
+      if (numericMatch?.[1]) {
+        ids.add(numericMatch[1]);
+        ids.add(`ho${numericMatch[1]}`);
+      }
 
-      return value.replace(/^ho/i, "");
+      return Array.from(ids);
     }
-    default: return null;
+    default:
+      return [];
   }
 }
 
-function buildWextractorUrl(platform: string, platformId: string, token: string): string | null {
+function buildWextractorUrls(platform: string, platformId: string, token: string): string[] {
   switch (platform) {
-    case "booking": return `https://wextractor.com/api/v1/reviews/booking?id=${encodeURIComponent(platformId)}&auth_token=${token}`;
-    case "tripadvisor": return `https://wextractor.com/api/v1/reviews/tripadvisor?id=${encodeURIComponent(platformId)}&auth_token=${token}`;
-    case "trustpilot": return `https://wextractor.com/api/v1/reviews/trustpilot?id=${encodeURIComponent(platformId)}&auth_token=${token}`;
-    case "hotelscom": return `https://wextractor.com/api/v1/reviews/expedia?id=${encodeURIComponent(platformId)}&auth_token=${token}`;
-    default: return null;
+    case "booking":
+      return [`https://wextractor.com/api/v1/reviews/booking?id=${encodeURIComponent(platformId)}&auth_token=${token}`];
+    case "tripadvisor":
+      return [`https://wextractor.com/api/v1/reviews/tripadvisor?id=${encodeURIComponent(platformId)}&auth_token=${token}`];
+    case "trustpilot":
+      return [`https://wextractor.com/api/v1/reviews/trustpilot?id=${encodeURIComponent(platformId)}&auth_token=${token}`];
+    case "hotelscom":
+      return [
+        `https://wextractor.com/api/v1/reviews/expedia?id=${encodeURIComponent(platformId)}&auth_token=${token}`,
+        `https://wextractor.com/api/v1/reviews/hotelscom?id=${encodeURIComponent(platformId)}&auth_token=${token}`,
+      ];
+    default:
+      return [];
   }
 }
 
