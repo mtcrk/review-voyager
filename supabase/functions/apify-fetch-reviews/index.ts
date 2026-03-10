@@ -168,6 +168,20 @@ Deno.serve(async (req) => {
 
       const datasetId = runData.defaultDatasetId;
       const items = await fetchDatasetItems(datasetId, APIFY_API_TOKEN);
+
+      if (platform === "hotelscom" && items.length === 0) {
+        const { data: businessForFallback } = await supabaseAuth
+          .from("businesses")
+          .select("id, place_id, name, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url")
+          .eq("id", business_id)
+          .maybeSingle();
+
+        if (businessForFallback?.hotelscom_url) {
+          console.log("Apify returned 0 for hotelscom, trying Wextractor fallback");
+          return await handleWextractorFallback(req, supabase, businessForFallback, platform, business_id);
+        }
+      }
+
       const result = await insertReviews(supabase, items, business_id, platform === "hotelscom" ? "hotelscom" : undefined);
 
       await logSuccess(supabase, business_id, platform, items.length, result.inserted, result.skipped);
