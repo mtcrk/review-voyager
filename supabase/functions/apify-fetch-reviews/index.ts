@@ -71,11 +71,9 @@ function toSafeIsoDate(input?: string | null): string {
   return Number.isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString();
 }
 
-function canUseWextractorFallback(platform: string): boolean {
-  return ["booking", "tripadvisor", "trustpilot", "hotelscom", "all"].includes(platform);
+function canUseWextractorFallback(_platform: string): boolean {
+  return false;
 }
-
-const RUNNING_FALLBACK_THRESHOLD_MS = 20000;
 
 async function getRunStatus(runId: string, token: string): Promise<any> {
   const resp = await fetch(`${APIFY_BASE}/actor-runs/${runId}?token=${token}`);
@@ -86,24 +84,6 @@ async function getRunStatus(runId: string, token: string): Promise<any> {
 
 function isTerminalStatus(status?: string): boolean {
   return ["SUCCEEDED", "FAILED", "ABORTED", "TIMED-OUT"].includes(status || "");
-}
-
-function hasBeenRunningTooLong(runData: any, thresholdMs = RUNNING_FALLBACK_THRESHOLD_MS): boolean {
-  const startedAt = runData?.startedAt || runData?.started_at || runData?.createdAt;
-  if (!startedAt) return false;
-  const startedMs = new Date(startedAt).getTime();
-  if (Number.isNaN(startedMs)) return false;
-  return Date.now() - startedMs >= thresholdMs;
-}
-
-async function getBusinessForFallback(supabaseAuth: any, businessId: string) {
-  const { data: business } = await supabaseAuth
-    .from("businesses")
-    .select("id, place_id, name, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url")
-    .eq("id", businessId)
-    .maybeSingle();
-
-  return business;
 }
 
 async function fetchDatasetItems(datasetId: string, token: string): Promise<ApifyReview[]> {
