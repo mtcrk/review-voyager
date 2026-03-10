@@ -210,10 +210,12 @@ Deno.serve(async (req) => {
       );
     }
 
-    // If no place_id, fall back to Wextractor-style direct platform scraping
+    // Apify requires place_id
     if (!business.place_id) {
-      console.log("No place_id found, falling back to Wextractor");
-      return await handleWextractorFallback(req, supabase, business, platform, business_id);
+      return new Response(
+        JSON.stringify({ error: "Google Place ID bulunamadı. Apify çekimi için önce işletmeyi Google ile bağlamanız gerekiyor." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     // Build Apify actor input
