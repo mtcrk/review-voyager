@@ -75,21 +75,35 @@ function canUseWextractorFallback(platform: string): boolean {
   return ["booking", "tripadvisor", "trustpilot", "hotelscom", "all"].includes(platform);
 }
 
-async function pollRunStatus(runId: string, token: string, maxWaitMs = 55000): Promise<any> {
-  const start = Date.now();
-  while (Date.now() - start < maxWaitMs) {
-    const resp = await fetch(`${APIFY_BASE}/actor-runs/${runId}?token=${token}`);
-    if (!resp.ok) throw new Error(`Failed to check run status: ${resp.status}`);
-    const data = await resp.json();
-    const status = data.data?.status;
-    if (status === "SUCCEEDED") return data.data;
-    if (status === "FAILED" || status === "ABORTED" || status === "TIMED-OUT") {
-      return { ...data.data, __failed: true };
-    }
-    // Wait 1 second before next poll
-    await new Promise(r => setTimeout(r, 1000));
-  }
-  return null; // Timed out waiting
+const RUNNING_FALLBACK_THRESHOLD_MS = 20000;
+
+async function getRunStatus(runId: string, token: string): Promise<any> {
+  const resp = await fetch(`${APIFY_BASE}/actor-runs/${runId}?token=${token}`);
+  if (!resp.ok) throw new Error(`Failed to check run status: ${resp.status}`);
+  const data = await resp.json();
+  return data.data;
+}
+
+function isTerminalStatus(status?: string): boolean {
+  return ["SUCCEEDED", "FAILED", "ABORTED", "TIMED-OUT"].includes(status || "");
+}
+
+function hasBeenRunningTooLong(runData: any, thresholdMs = RUNNING_FALLBACK_THRESHOLD_MS): boolean {
+  const startedAt = runData?.startedAt || runData?.started_at || runData?.createdAt;
+  if (!startedAt) return false;
+  const startedMs = new Date(startedAt).getTime();
+  if (Number.isNaN(startedMs)) return false;
+  return Date.now() - startedMs >= thresholdMs;
+}
+
+async function getBusinessForFallback(supabaseAuth: any, businessId: string) {
+  const { data: business } = await supabaseAuth
+    .from("businesses")
+    .select("id, place_id, name, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url")
+    .eq("id", businessId)
+    .maybeSingle();
+
+  return business;
 }
 
 async function fetchDatasetItems(datasetId: string, token: string): Promise<ApifyReview[]> {
@@ -161,8 +175,8 @@ Deno.serve(async (req) => {
     // If run_id is provided, we're checking an existing run
     if (run_id) {
       console.log(`Checking existing run: ${run_id}`);
-      const runData = await pollRunStatus(run_id, APIFY_API_TOKEN, 4000);
-      
+      const runData = await getRunStatus(run_id, APIFY_API_TOKEN);
+
       if (!runData) {
         return new Response(
           JSON.stringify({ status: "running", run_id, message: "Actor is still running. Try again in a few seconds." }),
@@ -170,15 +184,25 @@ Deno.serve(async (req) => {
         );
       }
 
-      if (runData.__failed || !runData.defaultDatasetId) {
-        if (canUseWextractorFallback(platform)) {
-          const { data: businessForFallback } = await supabaseAuth
-            .from("businesses")
-            .select("id, place_id, name, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url")
-            .eq("id", business_id)
-            .maybeSingle();
+      if (!isTerminalStatus(runData.status)) {
+        if (canUseWextractorFallback(platform) && hasBeenRunningTooLong(runData)) {
+          const businessForFallback = await getBusinessForFallback(supabaseAuth, business_id);
+          if (businessForFallback && getWextractorPlatformIds(businessForFallback, platform).length > 0) {
+            console.log(`Apify run exceeded ${RUNNING_FALLBACK_THRESHOLD_MS}ms for ${platform}, trying Wextractor fallback`);
+            return await handleWextractorFallback(req, supabase, businessForFallback, platform, business_id);
+          }
+        }
 
-          if (businessForFallback) {
+        return new Response(
+          JSON.stringify({ status: "running", run_id, message: "Actor is still running. Try again in a few seconds." }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      if (runData.status !== "SUCCEEDED" || !runData.defaultDatasetId) {
+        if (canUseWextractorFallback(platform)) {
+          const businessForFallback = await getBusinessForFallback(supabaseAuth, business_id);
+          if (businessForFallback && getWextractorPlatformIds(businessForFallback, platform).length > 0) {
             console.log(`Apify run ${runData.status} for ${platform}, trying Wextractor fallback`);
             return await handleWextractorFallback(req, supabase, businessForFallback, platform, business_id);
           }
@@ -198,14 +222,10 @@ Deno.serve(async (req) => {
       const datasetId = runData.defaultDatasetId;
       const items = await fetchDatasetItems(datasetId, APIFY_API_TOKEN);
 
-      if ((platform === "hotelscom" || platform === "booking") && items.length === 0) {
-        const { data: businessForFallback } = await supabaseAuth
-          .from("businesses")
-          .select("id, place_id, name, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url")
-          .eq("id", business_id)
-          .maybeSingle();
+      if (items.length === 0 && canUseWextractorFallback(platform)) {
+        const businessForFallback = await getBusinessForFallback(supabaseAuth, business_id);
 
-        if (businessForFallback && canUseWextractorFallback(platform)) {
+        if (businessForFallback && getWextractorPlatformIds(businessForFallback, platform).length > 0) {
           console.log(`Apify returned 0 for ${platform}, trying Wextractor fallback`);
           return await handleWextractorFallback(req, supabase, businessForFallback, platform, business_id);
         }
