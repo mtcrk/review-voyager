@@ -29,6 +29,7 @@ const COLORS = {
 
 export default function Statistics() {
   const { activeBusiness } = useBusiness();
+  const navigate = useNavigate();
   const [aiReport, setAiReport] = useState<string | null>(null);
 
   // Fetch reviews
