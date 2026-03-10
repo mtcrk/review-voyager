@@ -235,21 +235,21 @@ export default function Statistics() {
             <p className="text-xs text-muted-foreground">Ort. Puan</p>
           </CardContent>
         </Card>
-        <Card className="shadow-card">
+        <Card className="shadow-card cursor-pointer hover:ring-2 hover:ring-primary/30 transition-all" onClick={() => navigate("/reviews")}>
           <CardContent className="pt-5 pb-4 text-center">
             <MessageSquare className="h-5 w-5 mx-auto mb-1 text-primary" />
             <div className="text-2xl font-bold">{stats?.totalReviews}</div>
             <p className="text-xs text-muted-foreground">Toplam Yorum</p>
           </CardContent>
         </Card>
-        <Card className="shadow-card">
+        <Card className="shadow-card cursor-pointer hover:ring-2 hover:ring-emerald-400/30 transition-all" onClick={() => navigate("/reviews?sentiment=positive")}>
           <CardContent className="pt-5 pb-4 text-center">
             <ThumbsUp className="h-5 w-5 mx-auto mb-1 text-emerald-500" />
             <div className="text-2xl font-bold">{stats?.sentimentCounts.positive}</div>
             <p className="text-xs text-muted-foreground">Pozitif</p>
           </CardContent>
         </Card>
-        <Card className="shadow-card">
+        <Card className="shadow-card cursor-pointer hover:ring-2 hover:ring-rose-400/30 transition-all" onClick={() => navigate("/reviews?sentiment=negative")}>
           <CardContent className="pt-5 pb-4 text-center">
             <ThumbsDown className="h-5 w-5 mx-auto mb-1 text-rose-500" />
             <div className="text-2xl font-bold">{stats?.sentimentCounts.negative}</div>
@@ -263,7 +263,7 @@ export default function Statistics() {
             <p className="text-xs text-muted-foreground">Yanıt Oranı</p>
           </CardContent>
         </Card>
-        <Card className="shadow-card">
+        <Card className="shadow-card cursor-pointer hover:ring-2 hover:ring-amber-400/30 transition-all" onClick={() => navigate("/reviews?status=pending_reply")}>
           <CardContent className="pt-5 pb-4 text-center">
             <AlertTriangle className="h-5 w-5 mx-auto mb-1 text-amber-500" />
             <div className="text-2xl font-bold">{stats?.pendingCount}</div>
