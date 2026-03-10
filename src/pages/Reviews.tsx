@@ -812,24 +812,16 @@ export default function Reviews() {
                   onClick={async () => {
                     setIsFetchingBooking(true);
                     try {
-                      let response = await supabase.functions.invoke('apify-fetch-reviews', {
-                        body: { business_id: activeBusiness.id, platform: platformFilter },
-                      });
-                      if (response.data?.status === 'running' && response.data?.run_id) {
-                        let pollResult = response.data;
-                        while (pollResult?.status === 'running') {
-                          await new Promise(r => setTimeout(r, 5000));
-                          const pollResp = await supabase.functions.invoke('apify-fetch-reviews', {
-                            body: { business_id: activeBusiness.id, platform: platformFilter, run_id: pollResult.run_id },
-                          });
-                          pollResult = pollResp.data;
-                          if (pollResp.error) throw new Error(pollResp.error.message);
-                        }
-                        response = { ...response, data: pollResult };
-                      }
-                      if (response.error) throw new Error(response.error.message);
-                      const result = response.data;
+                      const result = await invokeApifyFetchWithPolling(platformFilter);
                       if (result?.error) {
+                        toast({ title: "Hata", description: result.error, variant: "destructive" });
+                      } else {
+                        toast({
+                          title: `${config.label} Yorumları Çekildi! 🎉`,
+                          description: `${result.inserted} yorum eklendi.`,
+                        });
+                        refetch();
+                      }
                         toast({ title: "Hata", description: result.error, variant: "destructive" });
                       } else {
                         toast({
