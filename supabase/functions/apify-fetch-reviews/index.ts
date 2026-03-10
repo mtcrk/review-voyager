@@ -207,26 +207,27 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Apify requires place_id
-    if (!business.place_id) {
-      return new Response(
-        JSON.stringify({ error: "Google Place ID bulunamadı. Apify çekimi için önce işletmeyi Google ile bağlamanız gerekiyor." }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Build Apify actor input
+    // Build Apify actor input - use place_id if available, otherwise construct Google Maps search URL
     const providers = PLATFORM_TO_APIFY_PROVIDER[platform] || [];
     const actorInput: any = {
-      startIds: [business.place_id],
       scrapeReviewPictures: false,
       scrapeReviewResponses: true,
     };
+
+    if (business.place_id) {
+      actorInput.startIds = [business.place_id];
+    } else {
+      // Construct Google Maps search URL from business name + city
+      const searchQuery = encodeURIComponent(`${business.name} ${business.city || ""}`).trim();
+      actorInput.startUrls = [`https://www.google.com/maps/search/${searchQuery}`];
+      console.log(`No place_id, using Google Maps search URL for: ${business.name} ${business.city || ""}`);
+    }
+
     if (providers.length > 0) {
       actorInput.providers = providers;
     }
 
-    console.log(`Starting Apify actor for business ${business_id}, platform: ${platform}, place_id: ${business.place_id}`);
+    console.log(`Starting Apify actor for business ${business_id}, platform: ${platform}, place_id: ${business.place_id || "N/A (using search URL)"}`);
 
     // Start actor run (async)
     const startResp = await fetch(
