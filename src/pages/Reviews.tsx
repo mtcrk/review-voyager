@@ -610,8 +610,28 @@ export default function Reviews() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold text-foreground mb-2">Yorumlar</h1>
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-3xl font-semibold text-foreground">Yorumlar</h1>
+            {businesses.length > 1 && (
+              <Select value={locationFilter} onValueChange={(v) => { setLocationFilter(v); setCurrentPage(1); }}>
+                <SelectTrigger className="w-[200px] h-9 text-sm">
+                  <MapPin className="h-4 w-4 mr-1.5 text-muted-foreground" />
+                  <SelectValue placeholder="Lokasyon" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">{activeBusiness?.name || "Aktif Lokasyon"}</SelectItem>
+                  <SelectItem value="all">Tüm Lokasyonlar</SelectItem>
+                  {businesses.filter(b => b.id !== activeBusiness?.id).map(b => (
+                    <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
           <p className="text-muted-foreground">
+            {locationFilter !== "active" && locationFilter !== "all" 
+              ? `${businessNameMap[locationFilter] || ""} — ` 
+              : locationFilter === "all" ? "Tüm lokasyonlar — " : ""}
             {reviews.length} yorum • {pendingCount} beklemede • {repliedCount} yanıtlandı
           </p>
         </div>
