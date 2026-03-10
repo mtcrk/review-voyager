@@ -161,7 +161,7 @@ Deno.serve(async (req) => {
     // If run_id is provided, we're checking an existing run
     if (run_id) {
       console.log(`Checking existing run: ${run_id}`);
-      const runData = await pollRunStatus(run_id, APIFY_API_TOKEN, 55000);
+      const runData = await pollRunStatus(run_id, APIFY_API_TOKEN, 4000);
       
       if (!runData) {
         return new Response(
