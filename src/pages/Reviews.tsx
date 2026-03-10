@@ -97,10 +97,55 @@ export default function Reviews() {
   const sortField: SortField = sortOption === "name_az" ? "reviewer_name" : sortOption?.includes("rating") ? "rating" : "posted_at";
   const sortOrder: SortOrder = sortOption === "oldest" || sortOption === "rating_low" || sortOption === "name_az" ? "asc" : "desc";
   const [isFetchingBooking, setIsFetchingBooking] = useState(false);
+  const [isAutoDiscovering, setIsAutoDiscovering] = useState(false);
   
   // Inline platform setup
   const [platformUrlInput, setPlatformUrlInput] = useState("");
   const [savingPlatformUrl, setSavingPlatformUrl] = useState(false);
+
+  // Auto-discover platform URL
+  const handleAutoDiscover = async (platform: string) => {
+    if (!activeBusiness) return;
+    setIsAutoDiscovering(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("discover-platforms", {
+        body: { business_name: activeBusiness.name, city: activeBusiness.city || "" },
+      });
+      if (error) throw error;
+      const match = data?.results?.find((r: any) => r.platform === platform);
+      if (match?.url) {
+        // Auto-save the discovered URL
+        const config = platformSetupConfig[platform];
+        if (config) {
+          const parsedId = parseUrlId(match.url, platform);
+          // Delete old reviews
+          await supabase.from("reviews").delete()
+            .eq("business_id", activeBusiness.id).eq("platform", platform);
+          // Save to DB
+          await supabase.from("businesses").update({ [config.dbField]: parsedId })
+            .eq("id", activeBusiness.id);
+          // Fetch reviews
+          const result = await invokeApifyFetchWithPolling(platform);
+          if (result?.error) {
+            toast({ title: "Hata", description: result.error, variant: "destructive" });
+          } else {
+            toast({
+              title: `${config.label} Yorumları Çekildi! 🎉`,
+              description: `${result.inserted} yeni yorum eklendi.`,
+            });
+            refetch();
+            refetchBusinesses();
+          }
+        }
+      } else {
+        toast({ title: "Bulunamadı", description: `${platform} profili otomatik bulunamadı. Lütfen URL'yi manuel yapıştırın.`, variant: "destructive" });
+      }
+    } catch (err: any) {
+      toast({ title: "Hata", description: err.message || "Otomatik arama başarısız.", variant: "destructive" });
+    } finally {
+      setIsAutoDiscovering(false);
+    }
+  };
 
   // Platform setup config for Wextractor-based platforms
   const platformSetupConfig: Record<string, {
@@ -829,20 +874,36 @@ export default function Reviews() {
                 }
               </p>
               {!hasId ? (
-                <div className="flex gap-2 items-center">
-                  <Input
-                    placeholder={config.placeholder}
-                    value={platformUrlInput}
-                    onChange={(e) => setPlatformUrlInput(e.target.value)}
-                    disabled={savingPlatformUrl}
-                    className="flex-1"
-                  />
-                  <Button 
-                    onClick={() => handlePlatformSetup(platformFilter)} 
-                    disabled={!platformUrlInput.trim() || savingPlatformUrl}
+                <div className="space-y-3">
+                  <div className="flex gap-2 items-center">
+                    <Input
+                      placeholder={config.placeholder}
+                      value={platformUrlInput}
+                      onChange={(e) => setPlatformUrlInput(e.target.value)}
+                      disabled={savingPlatformUrl || isAutoDiscovering}
+                      className="flex-1"
+                    />
+                    <Button 
+                      onClick={() => handlePlatformSetup(platformFilter)} 
+                      disabled={!platformUrlInput.trim() || savingPlatformUrl || isAutoDiscovering}
+                    >
+                      {savingPlatformUrl ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
+                      {savingPlatformUrl ? "Çekiliyor..." : "Yorumları Çek"}
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-px flex-1 bg-border" />
+                    <span className="text-xs text-muted-foreground">veya</span>
+                    <div className="h-px flex-1 bg-border" />
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleAutoDiscover(platformFilter)}
+                    disabled={isAutoDiscovering || savingPlatformUrl}
+                    className="w-full"
                   >
-                    {savingPlatformUrl ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
-                    {savingPlatformUrl ? "Çekiliyor..." : "Yorumları Çek"}
+                    {isAutoDiscovering ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Search className="h-4 w-4 mr-2" />}
+                    {isAutoDiscovering ? "Aranıyor..." : `${config.label} Profilini Otomatik Bul`}
                   </Button>
                 </div>
               ) : (
