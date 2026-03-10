@@ -69,11 +69,13 @@ function toSafeIsoDate(input?: string | null): string {
   if (!input) return new Date().toISOString();
   const parsed = new Date(input);
   return Number.isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString();
+}
 
 function canUseWextractorFallback(platform: string): boolean {
   return ["booking", "tripadvisor", "trustpilot", "hotelscom", "all"].includes(platform);
 }
 
+async function pollRunStatus(runId: string, token: string, maxWaitMs = 55000): Promise<any> {
   const start = Date.now();
   while (Date.now() - start < maxWaitMs) {
     const resp = await fetch(`${APIFY_BASE}/actor-runs/${runId}?token=${token}`);
@@ -84,8 +86,8 @@ function canUseWextractorFallback(platform: string): boolean {
     if (status === "FAILED" || status === "ABORTED" || status === "TIMED-OUT") {
       return { ...data.data, __failed: true };
     }
-    // Wait 3 seconds before next poll
-    await new Promise(r => setTimeout(r, 3000));
+    // Wait 1 second before next poll
+    await new Promise(r => setTimeout(r, 1000));
   }
   return null; // Timed out waiting
 }
@@ -159,7 +161,7 @@ Deno.serve(async (req) => {
     // If run_id is provided, we're checking an existing run
     if (run_id) {
       console.log(`Checking existing run: ${run_id}`);
-      const runData = await pollRunStatus(run_id, APIFY_API_TOKEN, 55000);
+      const runData = await pollRunStatus(run_id, APIFY_API_TOKEN, 4000);
       
       if (!runData) {
         return new Response(
@@ -278,48 +280,13 @@ Deno.serve(async (req) => {
 
     console.log(`Actor run started: ${newRunId}, dataset: ${datasetId}`);
 
-    // Try to wait for completion within this request
-    const runData = await pollRunStatus(newRunId, APIFY_API_TOKEN, 50000);
-
-    if (!runData) {
-      // Still running - return run_id for frontend to poll
-      return new Response(
-        JSON.stringify({ status: "running", run_id: newRunId, message: "Actor is still running. Call again with run_id to check." }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    if (runData.__failed || !runData.defaultDatasetId) {
-      if (canUseWextractorFallback(platform)) {
-        console.log(`Apify run ${runData.status} for ${platform}, trying Wextractor fallback`);
-        return await handleWextractorFallback(req, supabase, business, platform, business_id);
-      }
-
-      return new Response(
-        JSON.stringify({
-          success: false,
-          status: "failed",
-          run_id: newRunId,
-          message: `Apify run failed: ${runData.statusMessage || runData.status || "Unknown error"}`,
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Run completed - fetch and insert results
-    const items = await fetchDatasetItems(runData.defaultDatasetId, APIFY_API_TOKEN);
-
-    if ((platform === "hotelscom" || platform === "booking") && items.length === 0 && canUseWextractorFallback(platform)) {
-      console.log(`Apify returned 0 for ${platform}, trying Wextractor fallback`);
-      return await handleWextractorFallback(req, supabase, business, platform, business_id);
-    }
-
-    const result = await insertReviews(supabase, items, business_id, platform === "hotelscom" ? "hotelscom" : undefined);
-
-    await logSuccess(supabase, business_id, platform, items.length, result.inserted, result.skipped);
-
+    // Return immediately; frontend will poll with run_id
     return new Response(
-      JSON.stringify({ success: true, ...result, fetched: items.length }),
+      JSON.stringify({
+        status: "running",
+        run_id: newRunId,
+        message: "Actor started. Call again with run_id to check progress.",
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
 
