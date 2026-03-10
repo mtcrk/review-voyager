@@ -168,18 +168,43 @@ Deno.serve(async (req) => {
         );
       }
 
+      if (runData.__failed || !runData.defaultDatasetId) {
+        if (canUseWextractorFallback(platform)) {
+          const { data: businessForFallback } = await supabaseAuth
+            .from("businesses")
+            .select("id, place_id, name, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url")
+            .eq("id", business_id)
+            .maybeSingle();
+
+          if (businessForFallback) {
+            console.log(`Apify run ${runData.status} for ${platform}, trying Wextractor fallback`);
+            return await handleWextractorFallback(req, supabase, businessForFallback, platform, business_id);
+          }
+        }
+
+        return new Response(
+          JSON.stringify({
+            success: false,
+            status: "failed",
+            run_id,
+            message: `Apify run failed: ${runData.statusMessage || runData.status || "Unknown error"}`,
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
       const datasetId = runData.defaultDatasetId;
       const items = await fetchDatasetItems(datasetId, APIFY_API_TOKEN);
 
-      if (platform === "hotelscom" && items.length === 0) {
+      if ((platform === "hotelscom" || platform === "booking") && items.length === 0) {
         const { data: businessForFallback } = await supabaseAuth
           .from("businesses")
           .select("id, place_id, name, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url")
           .eq("id", business_id)
           .maybeSingle();
 
-        if (businessForFallback?.hotelscom_url) {
-          console.log("Apify returned 0 for hotelscom, trying Wextractor fallback");
+        if (businessForFallback && canUseWextractorFallback(platform)) {
+          console.log(`Apify returned 0 for ${platform}, trying Wextractor fallback`);
           return await handleWextractorFallback(req, supabase, businessForFallback, platform, business_id);
         }
       }
