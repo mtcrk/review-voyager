@@ -147,8 +147,10 @@ export default function Reviews() {
       if (match) return `${match[1]}/${match[2]}`;
     }
     if (platform === "tripadvisor") {
-      const slugMatch = trimmed.match(/(?:Hotel|Restaurant|Attraction)_Review-g\d+-d(\d+)/i);
-      if (slugMatch) return slugMatch[1];
+      // Store the full TripAdvisor URL for the dedicated scraper
+      const urlMatch = trimmed.match(/(https?:\/\/(?:www\.)?tripadvisor\.[a-z.]+\/(?:Hotel|Restaurant|Attraction)_Review[^\s]*)/i);
+      if (urlMatch) return urlMatch[1];
+      // If just a numeric ID, return as-is
       const numericMatch = trimmed.match(/(?:^|\D)(\d{5,})(?:\D|$)/);
       if (numericMatch) return numericMatch[1];
     }
