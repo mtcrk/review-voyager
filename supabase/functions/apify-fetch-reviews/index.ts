@@ -196,7 +196,7 @@ Deno.serve(async (req) => {
     // Get business
     const { data: business, error: bizError } = await supabaseAuth
       .from("businesses")
-      .select("id, place_id, name, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url")
+      .select("id, place_id, name, city, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url")
       .eq("id", business_id)
       .maybeSingle();
 
