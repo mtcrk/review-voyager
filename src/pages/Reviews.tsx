@@ -242,22 +242,35 @@ export default function Reviews() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 25;
 
+  // Determine which business IDs to query
+  const queryBusinessIds = useMemo(() => {
+    if (locationFilter === "all") return businesses.map(b => b.id);
+    if (locationFilter === "active") return activeBusiness ? [activeBusiness.id] : [];
+    return [locationFilter]; // specific business id
+  }, [locationFilter, activeBusiness, businesses]);
+
+  const businessNameMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    businesses.forEach(b => { map[b.id] = b.name; });
+    return map;
+  }, [businesses]);
+
   // Fetch reviews from Supabase
   const { data: reviews = [], isLoading, refetch } = useQuery({
-    queryKey: ['reviews', activeBusiness?.id],
+    queryKey: ['reviews', queryBusinessIds],
     queryFn: async () => {
-      if (!activeBusiness) return [];
+      if (queryBusinessIds.length === 0) return [];
 
       const { data, error } = await supabase
         .from('reviews')
         .select('*')
-        .eq('business_id', activeBusiness.id)
+        .in('business_id', queryBusinessIds)
         .order('posted_at', { ascending: false });
 
       if (error) throw error;
       return data || [];
     },
-    enabled: !!activeBusiness,
+    enabled: queryBusinessIds.length > 0,
   });
 
   // Filtered and sorted reviews
