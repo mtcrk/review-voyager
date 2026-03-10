@@ -219,7 +219,7 @@ Deno.serve(async (req) => {
     } else {
       // Construct Google Maps search URL from business name + city
       const searchQuery = encodeURIComponent(`${business.name} ${business.city || ""}`).trim();
-      actorInput.startUrls = [`https://www.google.com/maps/search/${searchQuery}`];
+      actorInput.startUrls = [{ url: `https://www.google.com/maps/search/${searchQuery}` }];
       console.log(`No place_id, using Google Maps search URL for: ${business.name} ${business.city || ""}`);
     }
 
