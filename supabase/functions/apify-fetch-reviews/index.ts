@@ -28,9 +28,9 @@ const PROVIDER_MAP: Record<string, string> = {
 const PLATFORM_TO_APIFY_PROVIDER: Record<string, string[]> = {
   booking: ["booking"],
   tripadvisor: ["tripadvisor"],
-  hotelscom: ["expedia"],
+  hotelscom: ["hotels", "expedia"],
   expedia: ["expedia"],
-  all: ["booking", "tripadvisor", "expedia", "airbnb", "yelp"], // exclude google - already fetched via GBP API
+  all: ["booking", "tripadvisor", "expedia", "hotels", "airbnb", "yelp"], // exclude google - already fetched via GBP API
 };
 
 interface ApifyReview {
