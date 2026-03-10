@@ -814,14 +814,6 @@ export default function Reviews() {
                         });
                         refetch();
                       }
-                        toast({ title: "Hata", description: result.error, variant: "destructive" });
-                      } else {
-                        toast({
-                          title: `${config.label} Yorumları Çekildi! 🎉`,
-                          description: `${result.inserted} yorum eklendi.`,
-                        });
-                        refetch();
-                      }
                     } catch (err: any) {
                       toast({ title: "Hata", description: err.message, variant: "destructive" });
                     } finally {
