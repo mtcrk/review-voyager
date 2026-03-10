@@ -405,50 +405,85 @@ async function logSuccess(supabase: any, businessId: string, platform: string, f
 
 // ====== Wextractor Fallback (for businesses without Google Place ID) ======
 
-function getWextractorPlatformId(business: any, platform: string): string | null {
+function getWextractorPlatformIds(business: any, platform: string): string[] {
   switch (platform) {
-    case "booking": return business.booking_hotel_id;
+    case "booking": {
+      const id = business.booking_hotel_id ? String(business.booking_hotel_id).trim() : "";
+      return id ? [id] : [];
+    }
     case "tripadvisor": {
       const raw = business.tripadvisor_id;
-      if (!raw) return null;
-      const slugMatch = String(raw).match(/(?:Hotel|Restaurant|Attraction)_Review-g\d+-d(\d+)/i);
-      if (slugMatch) return slugMatch[1];
-      const dMatch = String(raw).match(/-d(\d+)/i);
-      if (dMatch) return dMatch[1];
-      return String(raw).trim();
+      if (!raw) return [];
+      const value = String(raw).trim();
+      const ids = new Set<string>();
+      const slugMatch = value.match(/(?:Hotel|Restaurant|Attraction)_Review-g\d+-d(\d+)/i);
+      if (slugMatch?.[1]) ids.add(slugMatch[1]);
+      const dMatch = value.match(/-d(\d+)/i);
+      if (dMatch?.[1]) ids.add(dMatch[1]);
+      if (value) ids.add(value);
+      return Array.from(ids);
     }
-    case "trustpilot": return business.trustpilot_url;
+    case "trustpilot": {
+      const url = business.trustpilot_url ? String(business.trustpilot_url).trim() : "";
+      return url ? [url] : [];
+    }
     case "hotelscom": {
       const raw = business.hotelscom_url;
-      if (!raw) return null;
+      if (!raw) return [];
       const value = String(raw).trim();
+      const ids = new Set<string>();
 
-      // Accept raw numeric IDs, ho-prefixed IDs, or Hotels.com URLs containing the ID
-      const hoMatch = value.match(/^ho(\d+)$/i);
-      if (hoMatch) return hoMatch[1];
+      // Try as-is
+      if (value) ids.add(value);
+
+      // URL patterns
+      const slashHoMatch = value.match(/\/ho(\d+)/i);
+      if (slashHoMatch?.[1]) {
+        ids.add(slashHoMatch[1]);
+        ids.add(`ho${slashHoMatch[1]}`);
+      }
 
       const idParamMatch = value.match(/[?&]id=(\d+)/i);
-      if (idParamMatch) return idParamMatch[1];
+      if (idParamMatch?.[1]) {
+        ids.add(idParamMatch[1]);
+        ids.add(`ho${idParamMatch[1]}`);
+      }
 
-      const slashHoMatch = value.match(/\/ho(\d+)/i);
-      if (slashHoMatch) return slashHoMatch[1];
+      // ho-prefixed and numeric variants
+      const hoMatch = value.match(/^ho(\d+)$/i);
+      if (hoMatch?.[1]) {
+        ids.add(hoMatch[1]);
+        ids.add(`ho${hoMatch[1]}`);
+      }
 
       const numericMatch = value.match(/(\d{4,})/);
-      if (numericMatch) return numericMatch[1];
+      if (numericMatch?.[1]) {
+        ids.add(numericMatch[1]);
+        ids.add(`ho${numericMatch[1]}`);
+      }
 
-      return value.replace(/^ho/i, "");
+      return Array.from(ids);
     }
-    default: return null;
+    default:
+      return [];
   }
 }
 
-function buildWextractorUrl(platform: string, platformId: string, token: string): string | null {
+function buildWextractorUrls(platform: string, platformId: string, token: string): string[] {
   switch (platform) {
-    case "booking": return `https://wextractor.com/api/v1/reviews/booking?id=${encodeURIComponent(platformId)}&auth_token=${token}`;
-    case "tripadvisor": return `https://wextractor.com/api/v1/reviews/tripadvisor?id=${encodeURIComponent(platformId)}&auth_token=${token}`;
-    case "trustpilot": return `https://wextractor.com/api/v1/reviews/trustpilot?id=${encodeURIComponent(platformId)}&auth_token=${token}`;
-    case "hotelscom": return `https://wextractor.com/api/v1/reviews/expedia?id=${encodeURIComponent(platformId)}&auth_token=${token}`;
-    default: return null;
+    case "booking":
+      return [`https://wextractor.com/api/v1/reviews/booking?id=${encodeURIComponent(platformId)}&auth_token=${token}`];
+    case "tripadvisor":
+      return [`https://wextractor.com/api/v1/reviews/tripadvisor?id=${encodeURIComponent(platformId)}&auth_token=${token}`];
+    case "trustpilot":
+      return [`https://wextractor.com/api/v1/reviews/trustpilot?id=${encodeURIComponent(platformId)}&auth_token=${token}`];
+    case "hotelscom":
+      return [
+        `https://wextractor.com/api/v1/reviews/expedia?id=${encodeURIComponent(platformId)}&auth_token=${token}`,
+        `https://wextractor.com/api/v1/reviews/hotelscom?id=${encodeURIComponent(platformId)}&auth_token=${token}`,
+      ];
+    default:
+      return [];
   }
 }
 
@@ -471,82 +506,102 @@ async function handleWextractorFallback(req: Request, supabase: any, business: a
   let totalFetched = 0;
 
   for (const p of platforms) {
-    const platformId = getWextractorPlatformId(business, p);
-    if (!platformId) continue;
+    const platformIds = getWextractorPlatformIds(business, p);
+    if (platformIds.length === 0) continue;
 
-    const apiUrl = buildWextractorUrl(p, platformId, WEXTRACTOR_API_TOKEN);
-    if (!apiUrl) continue;
+    let foundAnyForPlatform = false;
 
-    try {
-      // Fetch first page
-      const resp = await fetch(`${apiUrl}&offset=0`);
-      if (!resp.ok) {
-        console.error(`Wextractor ${p} error: ${resp.status}`);
-        continue;
-      }
-      const data = await resp.json();
-      const reviews = data.reviews || [];
-      totalFetched += reviews.length;
+    for (const platformId of platformIds) {
+      const apiUrls = buildWextractorUrls(p, platformId, WEXTRACTOR_API_TOKEN);
+      if (apiUrls.length === 0) continue;
 
-      // Transform to our format
-      const transformed = reviews.map((review: any) => {
-        const reviewerName = review.reviewer || review.author || review.author_name || "Anonymous";
-        const reviewDate = review.datetime || review.date;
-        const posText = review.pros || review.positive || "";
-        const negText = review.cons || review.negative || "";
-        const reviewId = review.id || `${p}-${platformId}-${reviewerName}-${reviewDate}`;
+      for (const apiUrl of apiUrls) {
+        try {
+          console.log(`Wextractor try => platform=${p}, id=${platformId}, url=${apiUrl.split("&auth_token=")[0]}`);
 
-        let normalizedRating = typeof review.rating === "string" ? parseFloat(review.rating) : (review.rating || 3);
-        if (p === "booking" && normalizedRating > 5) normalizedRating = Math.round(normalizedRating / 2);
+          // Fetch first page
+          const resp = await fetch(`${apiUrl}&offset=0`);
+          if (!resp.ok) {
+            const errBody = await resp.text().catch(() => "");
+            console.error(`Wextractor ${p} error: ${resp.status} (${platformId}) ${errBody}`);
+            continue;
+          }
 
-        let reviewText = review.text || "";
-        if (p === "booking") {
-          const parts: string[] = [];
-          if (posText) parts.push(`👍 ${posText}`);
-          if (negText) parts.push(`👎 ${negText}`);
-          if (parts.length > 0) reviewText = parts.join("\n\n");
+          const data = await resp.json();
+          const reviews = data.reviews || [];
+          if (reviews.length === 0) {
+            continue;
+          }
+
+          totalFetched += reviews.length;
+          foundAnyForPlatform = true;
+
+          // Transform to our format
+          const transformed = reviews.map((review: any) => {
+            const reviewerName = review.reviewer || review.author || review.author_name || "Anonymous";
+            const reviewDate = review.datetime || review.date;
+            const posText = review.pros || review.positive || "";
+            const negText = review.cons || review.negative || "";
+            const reviewId = review.id || `${p}-${platformId}-${reviewerName}-${reviewDate}`;
+
+            let normalizedRating = typeof review.rating === "string" ? parseFloat(review.rating) : (review.rating || 3);
+            if (p === "booking" && normalizedRating > 5) normalizedRating = Math.round(normalizedRating / 2);
+
+            let reviewText = review.text || "";
+            if (p === "booking") {
+              const parts: string[] = [];
+              if (posText) parts.push(`👍 ${posText}`);
+              if (negText) parts.push(`👎 ${negText}`);
+              if (parts.length > 0) reviewText = parts.join("\n\n");
+            }
+            if (review.title && reviewText) reviewText = `${review.title}\n\n${reviewText}`;
+            else if (review.title) reviewText = review.title;
+
+            return {
+              business_id: businessId,
+              platform: p,
+              google_review_id: reviewId,
+              reviewer_name: reviewerName,
+              rating: normalizedRating,
+              text: reviewText || null,
+              posted_at: toSafeIsoDate(reviewDate),
+              status: "pending_reply",
+              sentiment: normalizedRating >= 4 ? "positive" : normalizedRating >= 3 ? "neutral" : "negative",
+            };
+          });
+
+          // Dedup & insert
+          const allIds = transformed.map((r: any) => r.google_review_id);
+          const existingIds = new Set<string>();
+          for (let i = 0; i < allIds.length; i += 200) {
+            const batch = allIds.slice(i, i + 200);
+            const { data: existing } = await supabase
+              .from("reviews")
+              .select("google_review_id")
+              .eq("business_id", businessId)
+              .eq("platform", p)
+              .in("google_review_id", batch);
+            if (existing) for (const row of existing) existingIds.add(row.google_review_id!);
+          }
+
+          const newReviews = transformed.filter((r: any) => !existingIds.has(r.google_review_id));
+          totalSkipped += transformed.length - newReviews.length;
+
+          for (let i = 0; i < newReviews.length; i += 100) {
+            const batch = newReviews.slice(i, i + 100);
+            const { data: inserted, error } = await supabase.from("reviews").insert(batch).select("id");
+            if (error) console.error(`Wextractor insert error:`, error.message);
+            else totalInserted += inserted?.length || 0;
+          }
+
+          // Stop trying other IDs/endpoints for this platform once we got data
+          break;
+        } catch (err: any) {
+          console.error(`Wextractor fallback error for ${p}:`, err.message);
         }
-        if (review.title && reviewText) reviewText = `${review.title}\n\n${reviewText}`;
-        else if (review.title) reviewText = review.title;
-
-        return {
-          business_id: businessId,
-          platform: p,
-          google_review_id: reviewId,
-          reviewer_name: reviewerName,
-          rating: normalizedRating,
-          text: reviewText || null,
-          posted_at: toSafeIsoDate(reviewDate),
-          status: "pending_reply",
-          sentiment: normalizedRating >= 4 ? "positive" : normalizedRating >= 3 ? "neutral" : "negative",
-        };
-      });
-
-      // Dedup & insert
-      const allIds = transformed.map((r: any) => r.google_review_id);
-      const existingIds = new Set<string>();
-      for (let i = 0; i < allIds.length; i += 200) {
-        const batch = allIds.slice(i, i + 200);
-        const { data: existing } = await supabase
-          .from("reviews")
-          .select("google_review_id")
-          .eq("business_id", businessId)
-          .eq("platform", p)
-          .in("google_review_id", batch);
-        if (existing) for (const row of existing) existingIds.add(row.google_review_id!);
       }
 
-      const newReviews = transformed.filter((r: any) => !existingIds.has(r.google_review_id));
-      totalSkipped += transformed.length - newReviews.length;
-
-      for (let i = 0; i < newReviews.length; i += 100) {
-        const batch = newReviews.slice(i, i + 100);
-        const { data: inserted, error } = await supabase.from("reviews").insert(batch).select("id");
-        if (error) console.error(`Wextractor insert error:`, error.message);
-        else totalInserted += inserted?.length || 0;
-      }
-    } catch (err: any) {
-      console.error(`Wextractor fallback error for ${p}:`, err.message);
+      if (foundAnyForPlatform) break;
     }
   }
 
