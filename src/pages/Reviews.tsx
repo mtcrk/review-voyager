@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Star, Copy, Send, CheckCircle2, Search, Filter, ArrowUpDown, RefreshCw, Sparkles, Download, Globe, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Star, Copy, Send, CheckCircle2, Search, Filter, ArrowUpDown, RefreshCw, Sparkles, Download, Globe, ChevronLeft, ChevronRight, Loader2, MapPin } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -67,7 +67,8 @@ const platformLabels: Record<string, { label: string; color: string }> = {
 };
 
 export default function Reviews() {
-  const { activeBusiness, refetchBusinesses } = useBusiness();
+  const { activeBusiness, businesses, refetchBusinesses } = useBusiness();
+  const [locationFilter, setLocationFilter] = useState<string>("active");
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
   const urlPlatform = searchParams.get("platform") as PlatformFilter | null;
@@ -241,22 +242,35 @@ export default function Reviews() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 25;
 
+  // Determine which business IDs to query
+  const queryBusinessIds = useMemo(() => {
+    if (locationFilter === "all") return businesses.map(b => b.id);
+    if (locationFilter === "active") return activeBusiness ? [activeBusiness.id] : [];
+    return [locationFilter]; // specific business id
+  }, [locationFilter, activeBusiness, businesses]);
+
+  const businessNameMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    businesses.forEach(b => { map[b.id] = b.name; });
+    return map;
+  }, [businesses]);
+
   // Fetch reviews from Supabase
   const { data: reviews = [], isLoading, refetch } = useQuery({
-    queryKey: ['reviews', activeBusiness?.id],
+    queryKey: ['reviews', queryBusinessIds],
     queryFn: async () => {
-      if (!activeBusiness) return [];
+      if (queryBusinessIds.length === 0) return [];
 
       const { data, error } = await supabase
         .from('reviews')
         .select('*')
-        .eq('business_id', activeBusiness.id)
+        .in('business_id', queryBusinessIds)
         .order('posted_at', { ascending: false });
 
       if (error) throw error;
       return data || [];
     },
-    enabled: !!activeBusiness,
+    enabled: queryBusinessIds.length > 0,
   });
 
   // Filtered and sorted reviews
@@ -596,8 +610,28 @@ export default function Reviews() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold text-foreground mb-2">Yorumlar</h1>
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-3xl font-semibold text-foreground">Yorumlar</h1>
+            {businesses.length > 1 && (
+              <Select value={locationFilter} onValueChange={(v) => { setLocationFilter(v); setCurrentPage(1); }}>
+                <SelectTrigger className="w-[200px] h-9 text-sm">
+                  <MapPin className="h-4 w-4 mr-1.5 text-muted-foreground" />
+                  <SelectValue placeholder="Lokasyon" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">{activeBusiness?.name || "Aktif Lokasyon"}</SelectItem>
+                  <SelectItem value="all">Tüm Lokasyonlar</SelectItem>
+                  {businesses.filter(b => b.id !== activeBusiness?.id).map(b => (
+                    <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
           <p className="text-muted-foreground">
+            {locationFilter !== "active" && locationFilter !== "all" 
+              ? `${businessNameMap[locationFilter] || ""} — ` 
+              : locationFilter === "all" ? "Tüm lokasyonlar — " : ""}
             {reviews.length} yorum • {pendingCount} beklemede • {repliedCount} yanıtlandı
           </p>
         </div>
@@ -912,6 +946,7 @@ export default function Reviews() {
                   </button>
                 </TableHead>
                 <TableHead className="font-semibold min-w-[200px]">Yorum</TableHead>
+                {locationFilter !== "active" && <TableHead className="font-semibold">Lokasyon</TableHead>}
                 <TableHead className="font-semibold">Platform</TableHead>
                 <TableHead className="font-semibold">Duygu</TableHead>
                 <TableHead className="font-semibold">
@@ -950,6 +985,13 @@ export default function Reviews() {
                         ))}
                       </div>
                     </TableCell>
+                    {locationFilter !== "active" && (
+                      <TableCell>
+                        <span className="text-xs font-medium text-muted-foreground truncate max-w-[120px] block">
+                          {businessNameMap[review.business_id] || "—"}
+                        </span>
+                      </TableCell>
+                    )}
                     <TableCell onClick={(e) => e.stopPropagation()}>
                       {review.text ? (
                         <Popover>
