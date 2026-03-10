@@ -25,10 +25,11 @@ const PROVIDER_MAP: Record<string, string> = {
 
 // Our platform names → Apify provider filter values
 const PLATFORM_TO_APIFY_PROVIDER: Record<string, string[]> = {
-  booking: ["booking.com"],
+  booking: ["booking"],
   tripadvisor: ["tripadvisor"],
-  hotelscom: ["expedia"], // Hotels.com uses expedia actor
-  all: ["booking.com", "tripadvisor", "expedia", "airbnb", "yelp"], // exclude google - already fetched via GBP API
+  hotelscom: ["hotels"],
+  expedia: ["expedia"],
+  all: ["booking", "tripadvisor", "expedia", "hotels", "airbnb", "yelp"], // exclude google - already fetched via GBP API
 };
 
 interface ApifyReview {
