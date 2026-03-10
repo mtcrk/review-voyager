@@ -985,6 +985,13 @@ export default function Reviews() {
                         ))}
                       </div>
                     </TableCell>
+                    {locationFilter !== "active" && (
+                      <TableCell>
+                        <span className="text-xs font-medium text-muted-foreground truncate max-w-[120px] block">
+                          {businessNameMap[review.business_id] || "—"}
+                        </span>
+                      </TableCell>
+                    )}
                     <TableCell onClick={(e) => e.stopPropagation()}>
                       {review.text ? (
                         <Popover>
