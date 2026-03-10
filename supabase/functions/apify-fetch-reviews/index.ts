@@ -506,82 +506,102 @@ async function handleWextractorFallback(req: Request, supabase: any, business: a
   let totalFetched = 0;
 
   for (const p of platforms) {
-    const platformId = getWextractorPlatformId(business, p);
-    if (!platformId) continue;
+    const platformIds = getWextractorPlatformIds(business, p);
+    if (platformIds.length === 0) continue;
 
-    const apiUrl = buildWextractorUrl(p, platformId, WEXTRACTOR_API_TOKEN);
-    if (!apiUrl) continue;
+    let foundAnyForPlatform = false;
 
-    try {
-      // Fetch first page
-      const resp = await fetch(`${apiUrl}&offset=0`);
-      if (!resp.ok) {
-        console.error(`Wextractor ${p} error: ${resp.status}`);
-        continue;
-      }
-      const data = await resp.json();
-      const reviews = data.reviews || [];
-      totalFetched += reviews.length;
+    for (const platformId of platformIds) {
+      const apiUrls = buildWextractorUrls(p, platformId, WEXTRACTOR_API_TOKEN);
+      if (apiUrls.length === 0) continue;
 
-      // Transform to our format
-      const transformed = reviews.map((review: any) => {
-        const reviewerName = review.reviewer || review.author || review.author_name || "Anonymous";
-        const reviewDate = review.datetime || review.date;
-        const posText = review.pros || review.positive || "";
-        const negText = review.cons || review.negative || "";
-        const reviewId = review.id || `${p}-${platformId}-${reviewerName}-${reviewDate}`;
+      for (const apiUrl of apiUrls) {
+        try {
+          console.log(`Wextractor try => platform=${p}, id=${platformId}, url=${apiUrl.split("&auth_token=")[0]}`);
 
-        let normalizedRating = typeof review.rating === "string" ? parseFloat(review.rating) : (review.rating || 3);
-        if (p === "booking" && normalizedRating > 5) normalizedRating = Math.round(normalizedRating / 2);
+          // Fetch first page
+          const resp = await fetch(`${apiUrl}&offset=0`);
+          if (!resp.ok) {
+            const errBody = await resp.text().catch(() => "");
+            console.error(`Wextractor ${p} error: ${resp.status} (${platformId}) ${errBody}`);
+            continue;
+          }
 
-        let reviewText = review.text || "";
-        if (p === "booking") {
-          const parts: string[] = [];
-          if (posText) parts.push(`👍 ${posText}`);
-          if (negText) parts.push(`👎 ${negText}`);
-          if (parts.length > 0) reviewText = parts.join("\n\n");
+          const data = await resp.json();
+          const reviews = data.reviews || [];
+          if (reviews.length === 0) {
+            continue;
+          }
+
+          totalFetched += reviews.length;
+          foundAnyForPlatform = true;
+
+          // Transform to our format
+          const transformed = reviews.map((review: any) => {
+            const reviewerName = review.reviewer || review.author || review.author_name || "Anonymous";
+            const reviewDate = review.datetime || review.date;
+            const posText = review.pros || review.positive || "";
+            const negText = review.cons || review.negative || "";
+            const reviewId = review.id || `${p}-${platformId}-${reviewerName}-${reviewDate}`;
+
+            let normalizedRating = typeof review.rating === "string" ? parseFloat(review.rating) : (review.rating || 3);
+            if (p === "booking" && normalizedRating > 5) normalizedRating = Math.round(normalizedRating / 2);
+
+            let reviewText = review.text || "";
+            if (p === "booking") {
+              const parts: string[] = [];
+              if (posText) parts.push(`👍 ${posText}`);
+              if (negText) parts.push(`👎 ${negText}`);
+              if (parts.length > 0) reviewText = parts.join("\n\n");
+            }
+            if (review.title && reviewText) reviewText = `${review.title}\n\n${reviewText}`;
+            else if (review.title) reviewText = review.title;
+
+            return {
+              business_id: businessId,
+              platform: p,
+              google_review_id: reviewId,
+              reviewer_name: reviewerName,
+              rating: normalizedRating,
+              text: reviewText || null,
+              posted_at: toSafeIsoDate(reviewDate),
+              status: "pending_reply",
+              sentiment: normalizedRating >= 4 ? "positive" : normalizedRating >= 3 ? "neutral" : "negative",
+            };
+          });
+
+          // Dedup & insert
+          const allIds = transformed.map((r: any) => r.google_review_id);
+          const existingIds = new Set<string>();
+          for (let i = 0; i < allIds.length; i += 200) {
+            const batch = allIds.slice(i, i + 200);
+            const { data: existing } = await supabase
+              .from("reviews")
+              .select("google_review_id")
+              .eq("business_id", businessId)
+              .eq("platform", p)
+              .in("google_review_id", batch);
+            if (existing) for (const row of existing) existingIds.add(row.google_review_id!);
+          }
+
+          const newReviews = transformed.filter((r: any) => !existingIds.has(r.google_review_id));
+          totalSkipped += transformed.length - newReviews.length;
+
+          for (let i = 0; i < newReviews.length; i += 100) {
+            const batch = newReviews.slice(i, i + 100);
+            const { data: inserted, error } = await supabase.from("reviews").insert(batch).select("id");
+            if (error) console.error(`Wextractor insert error:`, error.message);
+            else totalInserted += inserted?.length || 0;
+          }
+
+          // Stop trying other IDs/endpoints for this platform once we got data
+          break;
+        } catch (err: any) {
+          console.error(`Wextractor fallback error for ${p}:`, err.message);
         }
-        if (review.title && reviewText) reviewText = `${review.title}\n\n${reviewText}`;
-        else if (review.title) reviewText = review.title;
-
-        return {
-          business_id: businessId,
-          platform: p,
-          google_review_id: reviewId,
-          reviewer_name: reviewerName,
-          rating: normalizedRating,
-          text: reviewText || null,
-          posted_at: toSafeIsoDate(reviewDate),
-          status: "pending_reply",
-          sentiment: normalizedRating >= 4 ? "positive" : normalizedRating >= 3 ? "neutral" : "negative",
-        };
-      });
-
-      // Dedup & insert
-      const allIds = transformed.map((r: any) => r.google_review_id);
-      const existingIds = new Set<string>();
-      for (let i = 0; i < allIds.length; i += 200) {
-        const batch = allIds.slice(i, i + 200);
-        const { data: existing } = await supabase
-          .from("reviews")
-          .select("google_review_id")
-          .eq("business_id", businessId)
-          .eq("platform", p)
-          .in("google_review_id", batch);
-        if (existing) for (const row of existing) existingIds.add(row.google_review_id!);
       }
 
-      const newReviews = transformed.filter((r: any) => !existingIds.has(r.google_review_id));
-      totalSkipped += transformed.length - newReviews.length;
-
-      for (let i = 0; i < newReviews.length; i += 100) {
-        const batch = newReviews.slice(i, i + 100);
-        const { data: inserted, error } = await supabase.from("reviews").insert(batch).select("id");
-        if (error) console.error(`Wextractor insert error:`, error.message);
-        else totalInserted += inserted?.length || 0;
-      }
-    } catch (err: any) {
-      console.error(`Wextractor fallback error for ${p}:`, err.message);
+      if (foundAnyForPlatform) break;
     }
   }
 
