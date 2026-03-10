@@ -21,7 +21,7 @@ function extractPlatformId(platform: string, url: string): string | null {
     switch (platform) {
       case "tripadvisor": {
         // e.g. tripadvisor.com/Hotel_Review-g293974-d325309-Reviews-...
-        // Wextractor expects numeric place id (the number after -d)
+        // Extract numeric place id (the number after -d)
         const slugMatch = url.match(/(?:Hotel|Restaurant|Attraction)_Review-g\d+-d(\d+)/i);
         if (slugMatch) return slugMatch[1];
         const locMatch = url.match(/-d(\d+)/i);
