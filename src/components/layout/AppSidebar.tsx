@@ -64,6 +64,7 @@ const commonItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Lokasyonlar", url: "/locations", icon: Building2 },
   { title: "İstatistikler", url: "/statistics", icon: BarChart3 },
+  { title: "Rapor Oluştur", url: "/report", icon: FileText },
   { title: "Ayarlar", url: "/settings", icon: Settings },
 ];
 
