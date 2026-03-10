@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -211,46 +211,109 @@ export default function Reviews() {
     return trimmed;
   };
 
-  const APIFY_POLL_INTERVAL_MS = 2000;
-  const APIFY_POLL_TIMEOUT_MS = 120000;
+  const APIFY_POLL_INTERVAL_MS = 3000;
+  const pendingRunsRef = useRef<Map<string, { runId: string; platform: string; functionName: string }>>(new Map());
+  const [hasPendingRuns, setHasPendingRuns] = useState(false);
 
-  const invokeApifyFetchWithPolling = async (platform: string) => {
+  // Fire-and-forget: start actor, return immediately
+  const invokeApifyFetchStart = async (platform: string) => {
     if (!activeBusiness) throw new Error("İşletme bulunamadı");
 
-    // Use dedicated TripAdvisor scraper for restaurants
     const functionName = platform === "tripadvisor" 
       ? "tripadvisor-fetch-reviews" 
       : "apify-fetch-reviews";
 
-    let response = await supabase.functions.invoke(functionName, {
+    const response = await supabase.functions.invoke(functionName, {
       body: { business_id: activeBusiness.id, ...(platform !== "tripadvisor" ? { platform } : {}) },
     });
 
     if (response.error) {
-      // Try to extract the actual error message from the response data
       const errorBody = response.data;
       const msg = errorBody?.error || response.error.message || "Bilinmeyen hata";
       throw new Error(msg);
     }
 
-    let result: any = response.data;
-    const startedAt = Date.now();
+    const result = response.data;
 
-    while (result?.status === "running" && result?.run_id) {
-      if (Date.now() - startedAt > APIFY_POLL_TIMEOUT_MS) {
-        throw new Error("Çekim uzun sürüyor, lütfen 1 dakika sonra tekrar deneyin.");
-      }
+    // If already completed (fast response), return directly
+    if (result?.success) return result;
 
-      await new Promise((resolve) => setTimeout(resolve, APIFY_POLL_INTERVAL_MS));
-
-      const pollResp = await supabase.functions.invoke(functionName, {
-        body: { business_id: activeBusiness.id, ...(platform !== "tripadvisor" ? { platform } : {}), run_id: result.run_id },
-      });
-
-      if (pollResp.error) throw new Error(pollResp.error.message);
-      result = pollResp.data;
+    // If running, add to pending runs for background polling
+    if (result?.status === "running" && result?.run_id) {
+      const key = `${activeBusiness.id}-${platform}`;
+      pendingRunsRef.current.set(key, { runId: result.run_id, platform, functionName });
+      setHasPendingRuns(true);
+      return { status: "started", run_id: result.run_id };
     }
 
+    return result;
+  };
+
+  // Background polling for pending runs
+  useEffect(() => {
+    if (!hasPendingRuns || !activeBusiness) return;
+
+    const interval = setInterval(async () => {
+      const entries = Array.from(pendingRunsRef.current.entries());
+      if (entries.length === 0) {
+        setHasPendingRuns(false);
+        return;
+      }
+
+      for (const [key, { runId, platform, functionName }] of entries) {
+        try {
+          const pollResp = await supabase.functions.invoke(functionName, {
+            body: { business_id: activeBusiness.id, ...(platform !== "tripadvisor" ? { platform } : {}), run_id: runId },
+          });
+
+          if (pollResp.error) continue;
+          const result = pollResp.data;
+
+          if (result?.status === "running") continue; // Still running
+
+          // Completed (success or failure)
+          pendingRunsRef.current.delete(key);
+          if (pendingRunsRef.current.size === 0) setHasPendingRuns(false);
+
+          if (result?.success) {
+            toast({
+              title: `${platformLabels[platform]?.label || platform} Yorumları Çekildi! 🎉`,
+              description: `${result.inserted} yeni yorum eklendi${result.skipped ? `, ${result.skipped} zaten mevcut` : ''}.`,
+            });
+            refetch();
+          } else {
+            toast({
+              title: "Hata",
+              description: result?.message || result?.error || "Yorum çekme başarısız.",
+              variant: "destructive",
+            });
+          }
+        } catch {
+          // Silently retry on network errors
+        }
+      }
+    }, APIFY_POLL_INTERVAL_MS);
+
+    return () => clearInterval(interval);
+  }, [hasPendingRuns, activeBusiness]);
+
+  // Legacy wrapper for places that still use the old API (platform setup with URL)
+  const invokeApifyFetchWithPolling = async (platform: string) => {
+    const result = await invokeApifyFetchStart(platform);
+    if (result?.status === "started") {
+      // Wait for background poll to complete
+      return new Promise<any>((resolve) => {
+        const key = `${activeBusiness!.id}-${platform}`;
+        const checkInterval = setInterval(() => {
+          if (!pendingRunsRef.current.has(key)) {
+            clearInterval(checkInterval);
+            resolve({ inserted: 0, skipped: 0, status: "completed_in_background" });
+          }
+        }, 1000);
+        // Safety timeout
+        setTimeout(() => { clearInterval(checkInterval); resolve({ inserted: 0, skipped: 0, status: "completed_in_background" }); }, 300000);
+      });
+    }
     return result;
   };
 
@@ -738,10 +801,15 @@ export default function Reviews() {
                 if (!activeBusiness) return;
                 setIsFetchingBooking(true);
                 try {
-                  const result = await invokeApifyFetchWithPolling(platformFilter);
-                  if (result?.error) {
+                  const result = await invokeApifyFetchStart(platformFilter);
+                  if (result?.status === "started") {
+                    toast({
+                      title: `${platformLabels[platformFilter]?.label} Çekim Başlatıldı`,
+                      description: "Yorumlar arka planda çekiliyor. Tamamlandığında bildirileceksiniz.",
+                    });
+                  } else if (result?.error) {
                     toast({ title: "Hata", description: result.error, variant: "destructive" });
-                  } else {
+                  } else if (result?.success) {
                     toast({
                       title: `${platformLabels[platformFilter]?.label} Yorumları Çekildi`,
                       description: `${result.inserted} yeni yorum eklendi, ${result.skipped} zaten mevcut.`,
@@ -754,10 +822,10 @@ export default function Reviews() {
                   setIsFetchingBooking(false);
                 }
               }}
-              disabled={isFetchingBooking}
+              disabled={isFetchingBooking || hasPendingRuns}
             >
-              {isFetchingBooking ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
-              {isFetchingBooking ? 'Çekiliyor...' : `${platformLabels[platformFilter]?.label} Yorumları Çek`}
+              {(isFetchingBooking || hasPendingRuns) ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
+              {hasPendingRuns ? 'Çekiliyor...' : isFetchingBooking ? 'Başlatılıyor...' : `${platformLabels[platformFilter]?.label} Yorumları Çek`}
             </Button>
           )}
         </div>
@@ -912,10 +980,15 @@ export default function Reviews() {
                   onClick={async () => {
                     setIsFetchingBooking(true);
                     try {
-                      const result = await invokeApifyFetchWithPolling(platformFilter);
-                      if (result?.error) {
+                      const result = await invokeApifyFetchStart(platformFilter);
+                      if (result?.status === "started") {
+                        toast({
+                          title: `${config.label} Çekim Başlatıldı`,
+                          description: "Yorumlar arka planda çekiliyor. Tamamlandığında bildirileceksiniz.",
+                        });
+                      } else if (result?.error) {
                         toast({ title: "Hata", description: result.error, variant: "destructive" });
-                      } else {
+                      } else if (result?.success) {
                         toast({
                           title: `${config.label} Yorumları Çekildi! 🎉`,
                           description: `${result.inserted} yorum eklendi.`,
@@ -928,10 +1001,10 @@ export default function Reviews() {
                       setIsFetchingBooking(false);
                     }
                   }}
-                  disabled={isFetchingBooking}
+                  disabled={isFetchingBooking || hasPendingRuns}
                 >
-                  {isFetchingBooking ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
-                  {isFetchingBooking ? "Çekiliyor..." : `${config.label} Yorumlarını Çek`}
+                  {(isFetchingBooking || hasPendingRuns) ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
+                  {hasPendingRuns ? "Çekiliyor..." : isFetchingBooking ? "Başlatılıyor..." : `${config.label} Yorumlarını Çek`}
                 </Button>
               )}
             </div>
