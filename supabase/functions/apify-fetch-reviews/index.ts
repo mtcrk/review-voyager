@@ -165,14 +165,6 @@ Deno.serve(async (req) => {
       }
 
       if (!isTerminalStatus(runData.status)) {
-        if (canUseWextractorFallback(platform) && hasBeenRunningTooLong(runData)) {
-          const businessForFallback = await getBusinessForFallback(supabaseAuth, business_id);
-          if (businessForFallback && getWextractorPlatformIds(businessForFallback, platform).length > 0) {
-            console.log(`Apify run exceeded ${RUNNING_FALLBACK_THRESHOLD_MS}ms for ${platform}, trying Wextractor fallback`);
-            return await handleWextractorFallback(req, supabase, businessForFallback, platform, business_id);
-          }
-        }
-
         return new Response(
           JSON.stringify({ status: "running", run_id, message: "Actor is still running. Try again in a few seconds." }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -180,14 +172,6 @@ Deno.serve(async (req) => {
       }
 
       if (runData.status !== "SUCCEEDED" || !runData.defaultDatasetId) {
-        if (canUseWextractorFallback(platform)) {
-          const businessForFallback = await getBusinessForFallback(supabaseAuth, business_id);
-          if (businessForFallback && getWextractorPlatformIds(businessForFallback, platform).length > 0) {
-            console.log(`Apify run ${runData.status} for ${platform}, trying Wextractor fallback`);
-            return await handleWextractorFallback(req, supabase, businessForFallback, platform, business_id);
-          }
-        }
-
         return new Response(
           JSON.stringify({
             success: false,
@@ -201,15 +185,6 @@ Deno.serve(async (req) => {
 
       const datasetId = runData.defaultDatasetId;
       const items = await fetchDatasetItems(datasetId, APIFY_API_TOKEN);
-
-      if (items.length === 0 && canUseWextractorFallback(platform)) {
-        const businessForFallback = await getBusinessForFallback(supabaseAuth, business_id);
-
-        if (businessForFallback && getWextractorPlatformIds(businessForFallback, platform).length > 0) {
-          console.log(`Apify returned 0 for ${platform}, trying Wextractor fallback`);
-          return await handleWextractorFallback(req, supabase, businessForFallback, platform, business_id);
-        }
-      }
 
       const result = await insertReviews(supabase, items, business_id, platform === "hotelscom" ? "hotelscom" : undefined);
 
