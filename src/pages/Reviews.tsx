@@ -683,7 +683,7 @@ export default function Reviews() {
               {isFetchingBooking ? 'Çekiliyor...' : 'Google Yorumları Çek'}
             </Button>
           )}
-          {platformFilter !== "all" && platformFilter !== "google" && (
+          {platformFilter !== "all" && platformFilter !== "google" && activeBusiness && platformSetupConfig[platformFilter]?.getIdFromBusiness(activeBusiness) && (
             <Button 
               size="sm" 
               onClick={async () => {
