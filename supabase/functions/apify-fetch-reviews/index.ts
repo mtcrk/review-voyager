@@ -28,8 +28,7 @@ const PLATFORM_TO_APIFY_PROVIDER: Record<string, string[]> = {
   booking: ["booking.com"],
   tripadvisor: ["tripadvisor"],
   hotelscom: ["expedia"], // Hotels.com uses expedia actor
-  google: ["google-maps"],
-  all: [], // empty = all providers
+  all: ["booking.com", "tripadvisor", "expedia", "airbnb", "yelp"], // exclude google - already fetched via GBP API
 };
 
 interface ApifyReview {
