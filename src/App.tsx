@@ -182,6 +182,15 @@ const App = () => (
               }
             />
             <Route
+              path="/report"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <Report />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
               path="/chat"
               element={
                 <ProtectedRoute>
