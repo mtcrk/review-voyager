@@ -217,27 +217,11 @@ Deno.serve(async (req) => {
     if (business.place_id) {
       actorInput.startIds = [business.place_id];
     } else {
-      // No place_id — try to build a platform-specific URL for startUrls
-      const platformUrls: string[] = [];
-
-      if ((platform === "booking" || platform === "all") && business.booking_hotel_id) {
-        platformUrls.push(`https://www.booking.com/hotel/${business.booking_hotel_id}.html`);
-      }
-      if ((platform === "hotelscom" || platform === "all") && business.hotelscom_url) {
-        // hotelscom_url stores the numeric ID (e.g. "374286")
-        const hotelId = business.hotelscom_url;
-        platformUrls.push(`https://www.hotels.com/ho${hotelId}`);
-      }
-
-      if (platformUrls.length > 0) {
-        actorInput.startUrls = platformUrls.map(url => ({ url }));
-        console.log(`No place_id, using platform URLs:`, platformUrls);
-      } else {
-        // Last resort: Google Maps search
-        const searchQuery = encodeURIComponent(`${business.name} ${business.city || ""}`).trim();
-        actorInput.startUrls = [{ url: `https://www.google.com/maps/search/${searchQuery}` }];
-        console.log(`No place_id or platform URLs, using Google Maps search for: ${business.name}`);
-      }
+      // This actor only understands Google Maps URLs/Place IDs, not platform-specific URLs.
+      // Use Google Maps search as fallback to let the actor find the hotel.
+      const searchQuery = encodeURIComponent(`${business.name} ${business.city || ""}`).trim();
+      actorInput.startUrls = [{ url: `https://www.google.com/maps/search/${searchQuery}` }];
+      console.log(`No place_id, using Google Maps search for: ${business.name} ${business.city || ""}`);
     }
 
     if (providers.length > 0) {
