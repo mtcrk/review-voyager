@@ -7,28 +7,20 @@ const corsHeaders = {
 };
 
 const APIFY_BASE = "https://api.apify.com/v2";
-const ACTOR_ID = "louisdeconinck~tripadvisor-review-scraper";
+const ACTOR_ID = "maxcopell~tripadvisor-reviews";
 
 interface TripAdvisorReview {
-  reviewId?: string;
+  id?: string;
   title?: string;
   text?: string;
   rating?: number;
   publishedDate?: string;
+  lang?: string;
   user?: {
     username?: string;
-    displayName?: string;
+    name?: string;
+    firstName?: string;
   };
-  userProfile?: {
-    displayName?: string;
-  };
-  // Alternative field names the actor might use
-  reviewTitle?: string;
-  reviewText?: string;
-  reviewRating?: number | string;
-  reviewDate?: string;
-  authorName?: string;
-  author?: string;
 }
 
 function toSafeIsoDate(input?: string | null): string {
@@ -91,7 +83,6 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    // Auth check
     const supabaseAuth = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
       global: { headers: { Authorization: authHeader } },
     });
@@ -169,21 +160,20 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Build TripAdvisor URL from stored ID
-    // tripadvisor_id could be a full URL or just a numeric ID
+    // Build TripAdvisor URL from stored value
     let tripAdvisorUrl = business.tripadvisor_id;
     if (!tripAdvisorUrl.startsWith("http")) {
-      // If it's just a numeric ID, we can't construct a reliable URL
-      // Try common URL patterns
+      // If stored as numeric ID, construct URL
       tripAdvisorUrl = `https://www.tripadvisor.com/Restaurant_Review-d${tripAdvisorUrl}-Reviews`;
     }
-    // Clean up URL - remove query params and fragments
     tripAdvisorUrl = tripAdvisorUrl.split('?')[0].split('#')[0];
 
-    console.log(`Starting TripAdvisor actor for business ${business_id}, URL: ${tripAdvisorUrl}`);
+    console.log(`Starting TripAdvisor actor (maxcopell/tripadvisor-reviews) for business ${business_id}, URL: ${tripAdvisorUrl}`);
 
     const actorInput = {
       startUrls: [{ url: tripAdvisorUrl }],
+      maxItemsPerQuery: 200,
+      scrapeReviewerInfo: true,
     };
 
     const startResp = await fetch(
@@ -231,29 +221,22 @@ Deno.serve(async (req) => {
 
 async function insertReviews(supabase: any, items: TripAdvisorReview[], businessId: string) {
   const transformed = items
-    .filter(item => {
-      const text = item.text || item.reviewText || item.title || item.reviewTitle;
-      return !!text;
-    })
+    .filter(item => item.text || item.title)
     .map(item => {
-      const reviewId = item.reviewId || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const reviewId = item.id || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       
-      let rating = item.rating || item.reviewRating;
-      if (typeof rating === "string") rating = parseFloat(rating);
+      let rating = item.rating;
       if (!rating || isNaN(Number(rating))) rating = 3;
       rating = Math.min(5, Math.max(1, Math.round(Number(rating))));
 
-      let text = item.text || item.reviewText || "";
-      const title = item.title || item.reviewTitle;
-      if (title && text) text = `${title}\n\n${text}`;
-      else if (title) text = title;
+      let text = item.text || "";
+      if (item.title && text) text = `${item.title}\n\n${text}`;
+      else if (item.title) text = item.title;
 
       const reviewerName = 
-        item.user?.displayName || item.user?.username || 
-        item.userProfile?.displayName || 
-        item.authorName || item.author || "Anonymous";
+        item.user?.name || item.user?.username || item.user?.firstName || "Anonymous";
 
-      const postedAt = toSafeIsoDate(item.publishedDate || item.reviewDate);
+      const postedAt = toSafeIsoDate(item.publishedDate);
 
       return {
         business_id: businessId,
@@ -307,7 +290,7 @@ async function logSuccess(supabase: any, businessId: string, fetched: number, in
   await supabase.from("integration_logs").insert({
     business_id: businessId,
     provider: "apify",
-    action: "tripadvisor_dedicated_reviews_fetch",
+    action: "tripadvisor_reviews_fetch",
     status: "success",
     meta: { fetched, inserted, skipped },
   });
