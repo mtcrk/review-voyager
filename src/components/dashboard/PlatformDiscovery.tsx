@@ -114,10 +114,13 @@ export function PlatformDiscovery() {
 
       // Trigger initial review fetch
       try {
-        await supabase.functions.invoke("apify-fetch-reviews", {
+        const functionName = result.platform === "tripadvisor" 
+          ? "tripadvisor-fetch-reviews" 
+          : "apify-fetch-reviews";
+        await supabase.functions.invoke(functionName, {
           body: {
             business_id: activeBusiness.id,
-            platform: result.platform,
+            ...(result.platform !== "tripadvisor" ? { platform: result.platform } : {}),
           },
         });
         toast({
