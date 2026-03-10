@@ -114,11 +114,10 @@ export function PlatformDiscovery() {
 
       // Trigger initial review fetch
       try {
-        await supabase.functions.invoke("wextractor-fetch-reviews", {
+        await supabase.functions.invoke("apify-fetch-reviews", {
           body: {
             business_id: activeBusiness.id,
             platform: result.platform,
-            fetch_all: true,
           },
         });
         toast({
