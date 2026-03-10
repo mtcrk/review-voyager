@@ -112,8 +112,9 @@ export default function Reviews() {
         body: { business_name: activeBusiness.name, city: activeBusiness.city || "" },
       });
       if (error) throw error;
-      const match = data?.results?.find((r: any) => r.platform === platform);
-      if (match?.url) {
+      // Only accept high-confidence matches to avoid wrong associations
+      const match = data?.results?.find((r: any) => r.platform === platform && r.confidence === "high");
+      if (match?.url && match?.extractedId) {
         // Auto-save the discovered URL
         const config = platformSetupConfig[platform];
         if (config) {
