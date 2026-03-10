@@ -80,7 +80,7 @@ async function pollRunStatus(runId: string, token: string, maxWaitMs = 55000): P
     const status = data.data?.status;
     if (status === "SUCCEEDED") return data.data;
     if (status === "FAILED" || status === "ABORTED" || status === "TIMED-OUT") {
-      throw new Error(`Actor run ${status}: ${data.data?.statusMessage || "Unknown error"}`);
+      return { ...data.data, __failed: true };
     }
     // Wait 3 seconds before next poll
     await new Promise(r => setTimeout(r, 3000));
