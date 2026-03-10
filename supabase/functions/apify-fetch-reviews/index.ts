@@ -264,6 +264,12 @@ Deno.serve(async (req) => {
 
     // Run completed - fetch and insert results
     const items = await fetchDatasetItems(runData.defaultDatasetId, APIFY_API_TOKEN);
+
+    if (platform === "hotelscom" && items.length === 0 && business.hotelscom_url) {
+      console.log("Apify returned 0 for hotelscom, trying Wextractor fallback");
+      return await handleWextractorFallback(req, supabase, business, platform, business_id);
+    }
+
     const result = await insertReviews(supabase, items, business_id, platform === "hotelscom" ? "hotelscom" : undefined);
 
     await logSuccess(supabase, business_id, platform, items.length, result.inserted, result.skipped);
