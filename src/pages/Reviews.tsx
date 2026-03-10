@@ -178,7 +178,12 @@ export default function Reviews() {
       body: { business_id: activeBusiness.id, ...(platform !== "tripadvisor" ? { platform } : {}) },
     });
 
-    if (response.error) throw new Error(response.error.message);
+    if (response.error) {
+      // Try to extract the actual error message from the response data
+      const errorBody = response.data;
+      const msg = errorBody?.error || response.error.message || "Bilinmeyen hata";
+      throw new Error(msg);
+    }
 
     let result: any = response.data;
     const startedAt = Date.now();
