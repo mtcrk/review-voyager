@@ -191,6 +191,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
               path="/chat"
               element={
                 <ProtectedRoute>
