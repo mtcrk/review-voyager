@@ -69,9 +69,11 @@ function toSafeIsoDate(input?: string | null): string {
   if (!input) return new Date().toISOString();
   const parsed = new Date(input);
   return Number.isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString();
+
+function canUseWextractorFallback(platform: string): boolean {
+  return ["booking", "tripadvisor", "trustpilot", "hotelscom", "all"].includes(platform);
 }
 
-async function pollRunStatus(runId: string, token: string, maxWaitMs = 55000): Promise<any> {
   const start = Date.now();
   while (Date.now() - start < maxWaitMs) {
     const resp = await fetch(`${APIFY_BASE}/actor-runs/${runId}?token=${token}`);
@@ -80,7 +82,7 @@ async function pollRunStatus(runId: string, token: string, maxWaitMs = 55000): P
     const status = data.data?.status;
     if (status === "SUCCEEDED") return data.data;
     if (status === "FAILED" || status === "ABORTED" || status === "TIMED-OUT") {
-      throw new Error(`Actor run ${status}: ${data.data?.statusMessage || "Unknown error"}`);
+      return { ...data.data, __failed: true };
     }
     // Wait 3 seconds before next poll
     await new Promise(r => setTimeout(r, 3000));
@@ -166,18 +168,43 @@ Deno.serve(async (req) => {
         );
       }
 
+      if (runData.__failed || !runData.defaultDatasetId) {
+        if (canUseWextractorFallback(platform)) {
+          const { data: businessForFallback } = await supabaseAuth
+            .from("businesses")
+            .select("id, place_id, name, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url")
+            .eq("id", business_id)
+            .maybeSingle();
+
+          if (businessForFallback) {
+            console.log(`Apify run ${runData.status} for ${platform}, trying Wextractor fallback`);
+            return await handleWextractorFallback(req, supabase, businessForFallback, platform, business_id);
+          }
+        }
+
+        return new Response(
+          JSON.stringify({
+            success: false,
+            status: "failed",
+            run_id,
+            message: `Apify run failed: ${runData.statusMessage || runData.status || "Unknown error"}`,
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
       const datasetId = runData.defaultDatasetId;
       const items = await fetchDatasetItems(datasetId, APIFY_API_TOKEN);
 
-      if (platform === "hotelscom" && items.length === 0) {
+      if ((platform === "hotelscom" || platform === "booking") && items.length === 0) {
         const { data: businessForFallback } = await supabaseAuth
           .from("businesses")
           .select("id, place_id, name, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url")
           .eq("id", business_id)
           .maybeSingle();
 
-        if (businessForFallback?.hotelscom_url) {
-          console.log("Apify returned 0 for hotelscom, trying Wextractor fallback");
+        if (businessForFallback && canUseWextractorFallback(platform)) {
+          console.log(`Apify returned 0 for ${platform}, trying Wextractor fallback`);
           return await handleWextractorFallback(req, supabase, businessForFallback, platform, business_id);
         }
       }
@@ -262,11 +289,28 @@ Deno.serve(async (req) => {
       );
     }
 
+    if (runData.__failed || !runData.defaultDatasetId) {
+      if (canUseWextractorFallback(platform)) {
+        console.log(`Apify run ${runData.status} for ${platform}, trying Wextractor fallback`);
+        return await handleWextractorFallback(req, supabase, business, platform, business_id);
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: false,
+          status: "failed",
+          run_id: newRunId,
+          message: `Apify run failed: ${runData.statusMessage || runData.status || "Unknown error"}`,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Run completed - fetch and insert results
     const items = await fetchDatasetItems(runData.defaultDatasetId, APIFY_API_TOKEN);
 
-    if (platform === "hotelscom" && items.length === 0 && business.hotelscom_url) {
-      console.log("Apify returned 0 for hotelscom, trying Wextractor fallback");
+    if ((platform === "hotelscom" || platform === "booking") && items.length === 0 && canUseWextractorFallback(platform)) {
+      console.log(`Apify returned 0 for ${platform}, trying Wextractor fallback`);
       return await handleWextractorFallback(req, supabase, business, platform, business_id);
     }
 
