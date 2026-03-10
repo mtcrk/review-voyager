@@ -289,11 +289,28 @@ Deno.serve(async (req) => {
       );
     }
 
+    if (runData.__failed || !runData.defaultDatasetId) {
+      if (canUseWextractorFallback(platform)) {
+        console.log(`Apify run ${runData.status} for ${platform}, trying Wextractor fallback`);
+        return await handleWextractorFallback(req, supabase, business, platform, business_id);
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: false,
+          status: "failed",
+          run_id: newRunId,
+          message: `Apify run failed: ${runData.statusMessage || runData.status || "Unknown error"}`,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Run completed - fetch and insert results
     const items = await fetchDatasetItems(runData.defaultDatasetId, APIFY_API_TOKEN);
 
-    if (platform === "hotelscom" && items.length === 0 && business.hotelscom_url) {
-      console.log("Apify returned 0 for hotelscom, trying Wextractor fallback");
+    if ((platform === "hotelscom" || platform === "booking") && items.length === 0 && canUseWextractorFallback(platform)) {
+      console.log(`Apify returned 0 for ${platform}, trying Wextractor fallback`);
       return await handleWextractorFallback(req, supabase, business, platform, business_id);
     }
 
