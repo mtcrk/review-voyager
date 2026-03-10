@@ -269,12 +269,12 @@ Deno.serve(async (req) => {
   }
 });
 
-async function insertReviews(supabase: any, items: ApifyReview[], businessId: string) {
+async function insertReviews(supabase: any, items: ApifyReview[], businessId: string, forcedPlatform?: string) {
   // Transform reviews
   const transformed = items
     .filter(item => item.reviewText || item.reviewTitle)
     .map(item => {
-      const platform = normalizePlatform(item.provider);
+      const platform = forcedPlatform || normalizePlatform(item.provider);
       const rating = normalizeRating(item.reviewRating, item.provider);
       let text = item.reviewText || "";
       if (item.reviewTitle && text) text = `${item.reviewTitle}\n\n${text}`;
