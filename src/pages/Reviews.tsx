@@ -946,6 +946,7 @@ export default function Reviews() {
                   </button>
                 </TableHead>
                 <TableHead className="font-semibold min-w-[200px]">Yorum</TableHead>
+                {locationFilter !== "active" && <TableHead className="font-semibold">Lokasyon</TableHead>}
                 <TableHead className="font-semibold">Platform</TableHead>
                 <TableHead className="font-semibold">Duygu</TableHead>
                 <TableHead className="font-semibold">
