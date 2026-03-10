@@ -176,10 +176,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Get business with place_id
+    // Get business
     const { data: business, error: bizError } = await supabaseAuth
       .from("businesses")
-      .select("id, place_id, name")
+      .select("id, place_id, name, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url")
       .eq("id", business_id)
       .maybeSingle();
 
@@ -190,11 +190,10 @@ Deno.serve(async (req) => {
       );
     }
 
+    // If no place_id, fall back to Wextractor-style direct platform scraping
     if (!business.place_id) {
-      return new Response(
-        JSON.stringify({ error: "Bu işletmenin Google Place ID'si henüz yapılandırılmamış. Önce Google Business bağlantısını tamamlayın." }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      console.log("No place_id found, falling back to Wextractor");
+      return await handleWextractorFallback(req, supabase, business, platform, business_id);
     }
 
     // Build Apify actor input
@@ -336,4 +335,146 @@ async function logSuccess(supabase: any, businessId: string, platform: string, f
     status: "success",
     meta: { fetched, inserted, skipped },
   });
+}
+
+// ====== Wextractor Fallback (for businesses without Google Place ID) ======
+
+function getWextractorPlatformId(business: any, platform: string): string | null {
+  switch (platform) {
+    case "booking": return business.booking_hotel_id;
+    case "tripadvisor": {
+      const raw = business.tripadvisor_id;
+      if (!raw) return null;
+      const slugMatch = String(raw).match(/(?:Hotel|Restaurant|Attraction)_Review-g\d+-d(\d+)/i);
+      if (slugMatch) return slugMatch[1];
+      const dMatch = String(raw).match(/-d(\d+)/i);
+      if (dMatch) return dMatch[1];
+      return String(raw).trim();
+    }
+    case "trustpilot": return business.trustpilot_url;
+    case "hotelscom": return business.hotelscom_url;
+    default: return null;
+  }
+}
+
+function buildWextractorUrl(platform: string, platformId: string, token: string): string | null {
+  switch (platform) {
+    case "booking": return `https://wextractor.com/api/v1/reviews/booking?id=${encodeURIComponent(platformId)}&auth_token=${token}`;
+    case "tripadvisor": return `https://wextractor.com/api/v1/reviews/tripadvisor?id=${encodeURIComponent(platformId)}&auth_token=${token}`;
+    case "trustpilot": return `https://wextractor.com/api/v1/reviews/trustpilot?id=${encodeURIComponent(platformId)}&auth_token=${token}`;
+    case "hotelscom": return `https://wextractor.com/api/v1/reviews/expedia?id=${encodeURIComponent(platformId)}&auth_token=${token}`;
+    default: return null;
+  }
+}
+
+async function handleWextractorFallback(req: Request, supabase: any, business: any, platform: string, businessId: string) {
+  const WEXTRACTOR_API_TOKEN = Deno.env.get("WEXTRACTOR_API_TOKEN");
+  if (!WEXTRACTOR_API_TOKEN) {
+    return new Response(
+      JSON.stringify({ error: "Google Place ID eksik ve Wextractor API token da yapılandırılmamış." }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
+  // If platform is "all", try each platform
+  const platforms = platform === "all" 
+    ? ["booking", "tripadvisor", "trustpilot", "hotelscom"] 
+    : [platform];
+
+  let totalInserted = 0;
+  let totalSkipped = 0;
+  let totalFetched = 0;
+
+  for (const p of platforms) {
+    const platformId = getWextractorPlatformId(business, p);
+    if (!platformId) continue;
+
+    const apiUrl = buildWextractorUrl(p, platformId, WEXTRACTOR_API_TOKEN);
+    if (!apiUrl) continue;
+
+    try {
+      // Fetch first page
+      const resp = await fetch(`${apiUrl}&offset=0`);
+      if (!resp.ok) {
+        console.error(`Wextractor ${p} error: ${resp.status}`);
+        continue;
+      }
+      const data = await resp.json();
+      const reviews = data.reviews || [];
+      totalFetched += reviews.length;
+
+      // Transform to our format
+      const transformed = reviews.map((review: any) => {
+        const reviewerName = review.reviewer || review.author || review.author_name || "Anonymous";
+        const reviewDate = review.datetime || review.date;
+        const posText = review.pros || review.positive || "";
+        const negText = review.cons || review.negative || "";
+        const reviewId = review.id || `${p}-${platformId}-${reviewerName}-${reviewDate}`;
+
+        let normalizedRating = typeof review.rating === "string" ? parseFloat(review.rating) : (review.rating || 3);
+        if (p === "booking" && normalizedRating > 5) normalizedRating = Math.round(normalizedRating / 2);
+
+        let reviewText = review.text || "";
+        if (p === "booking") {
+          const parts: string[] = [];
+          if (posText) parts.push(`👍 ${posText}`);
+          if (negText) parts.push(`👎 ${negText}`);
+          if (parts.length > 0) reviewText = parts.join("\n\n");
+        }
+        if (review.title && reviewText) reviewText = `${review.title}\n\n${reviewText}`;
+        else if (review.title) reviewText = review.title;
+
+        return {
+          business_id: businessId,
+          platform: p,
+          google_review_id: reviewId,
+          reviewer_name: reviewerName,
+          rating: normalizedRating,
+          text: reviewText || null,
+          posted_at: toSafeIsoDate(reviewDate),
+          status: "pending_reply",
+          sentiment: normalizedRating >= 4 ? "positive" : normalizedRating >= 3 ? "neutral" : "negative",
+        };
+      });
+
+      // Dedup & insert
+      const allIds = transformed.map((r: any) => r.google_review_id);
+      const existingIds = new Set<string>();
+      for (let i = 0; i < allIds.length; i += 200) {
+        const batch = allIds.slice(i, i + 200);
+        const { data: existing } = await supabase
+          .from("reviews")
+          .select("google_review_id")
+          .eq("business_id", businessId)
+          .eq("platform", p)
+          .in("google_review_id", batch);
+        if (existing) for (const row of existing) existingIds.add(row.google_review_id!);
+      }
+
+      const newReviews = transformed.filter((r: any) => !existingIds.has(r.google_review_id));
+      totalSkipped += transformed.length - newReviews.length;
+
+      for (let i = 0; i < newReviews.length; i += 100) {
+        const batch = newReviews.slice(i, i + 100);
+        const { data: inserted, error } = await supabase.from("reviews").insert(batch).select("id");
+        if (error) console.error(`Wextractor insert error:`, error.message);
+        else totalInserted += inserted?.length || 0;
+      }
+    } catch (err: any) {
+      console.error(`Wextractor fallback error for ${p}:`, err.message);
+    }
+  }
+
+  await supabase.from("integration_logs").insert({
+    business_id: businessId,
+    provider: "wextractor-fallback",
+    action: `${platform}_reviews_fetch`,
+    status: "success",
+    meta: { fetched: totalFetched, inserted: totalInserted, skipped: totalSkipped },
+  });
+
+  return new Response(
+    JSON.stringify({ success: true, fetched: totalFetched, inserted: totalInserted, skipped: totalSkipped }),
+    { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+  );
 }
