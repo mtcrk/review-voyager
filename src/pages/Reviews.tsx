@@ -181,9 +181,22 @@ export default function Reviews() {
         .eq('id', activeBusiness.id);
       if (updateError) throw updateError;
 
-      const response = await supabase.functions.invoke('wextractor-fetch-reviews', {
-        body: { business_id: activeBusiness.id, platform, fetch_all: true },
+      let response = await supabase.functions.invoke('apify-fetch-reviews', {
+        body: { business_id: activeBusiness.id, platform },
       });
+      // Handle async polling
+      if (response.data?.status === 'running' && response.data?.run_id) {
+        let pollResult = response.data;
+        while (pollResult?.status === 'running') {
+          await new Promise(r => setTimeout(r, 5000));
+          const pollResp = await supabase.functions.invoke('apify-fetch-reviews', {
+            body: { business_id: activeBusiness.id, platform, run_id: pollResult.run_id },
+          });
+          pollResult = pollResp.data;
+          if (pollResp.error) throw new Error(pollResp.error.message);
+        }
+        response = { ...response, data: pollResult };
+      }
       
       if (response.error) throw new Error(response.error.message);
       const result = response.data;
