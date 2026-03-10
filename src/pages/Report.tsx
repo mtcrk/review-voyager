@@ -69,21 +69,6 @@ export default function Report() {
     enabled: !!activeBusiness,
   });
 
-  // Fetch reply logs
-  const { data: replyLogs = [] } = useQuery({
-    queryKey: ["reply-logs-report", activeBusiness?.id],
-    queryFn: async () => {
-      if (!activeBusiness) return [];
-      const { data, error } = await supabase
-        .from("reply_logs")
-        .select("*")
-        .eq("business_id", activeBusiness.id)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!activeBusiness,
-  });
 
   // Filter reviews by date range
   const reviews = useMemo(() => {
