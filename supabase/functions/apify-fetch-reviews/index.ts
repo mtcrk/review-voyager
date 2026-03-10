@@ -17,6 +17,7 @@ const PROVIDER_MAP: Record<string, string> = {
   expedia: "expedia",
   "hotels.com": "hotelscom",
   hotelscom: "hotelscom",
+  "hotels": "hotelscom",
   google: "google",
   "google-maps": "google",
   yelp: "yelp",
