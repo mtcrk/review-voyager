@@ -374,7 +374,26 @@ function getWextractorPlatformId(business: any, platform: string): string | null
       return String(raw).trim();
     }
     case "trustpilot": return business.trustpilot_url;
-    case "hotelscom": return business.hotelscom_url;
+    case "hotelscom": {
+      const raw = business.hotelscom_url;
+      if (!raw) return null;
+      const value = String(raw).trim();
+
+      // Accept raw numeric IDs, ho-prefixed IDs, or Hotels.com URLs containing the ID
+      const hoMatch = value.match(/^ho(\d+)$/i);
+      if (hoMatch) return hoMatch[1];
+
+      const idParamMatch = value.match(/[?&]id=(\d+)/i);
+      if (idParamMatch) return idParamMatch[1];
+
+      const slashHoMatch = value.match(/\/ho(\d+)/i);
+      if (slashHoMatch) return slashHoMatch[1];
+
+      const numericMatch = value.match(/(\d{4,})/);
+      if (numericMatch) return numericMatch[1];
+
+      return value.replace(/^ho/i, "");
+    }
     default: return null;
   }
 }
