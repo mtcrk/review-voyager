@@ -1,0 +1,1 @@
+UPDATE businesses SET place_id = 'ChIJvVDglxC3yhQR3gaoLNJtRpk' WHERE id = 'a0eda611-ccc2-4fea-863d-be2131e7fbf2'
