@@ -176,10 +176,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Get business with place_id
+    // Get business
     const { data: business, error: bizError } = await supabaseAuth
       .from("businesses")
-      .select("id, place_id, name")
+      .select("id, place_id, name, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url")
       .eq("id", business_id)
       .maybeSingle();
 
@@ -190,11 +190,10 @@ Deno.serve(async (req) => {
       );
     }
 
+    // If no place_id, fall back to Wextractor-style direct platform scraping
     if (!business.place_id) {
-      return new Response(
-        JSON.stringify({ error: "Bu işletmenin Google Place ID'si henüz yapılandırılmamış. Önce Google Business bağlantısını tamamlayın." }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      console.log("No place_id found, falling back to Wextractor");
+      return await handleWextractorFallback(req, supabase, business, platform, business_id);
     }
 
     // Build Apify actor input
