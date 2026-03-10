@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,6 +34,7 @@ import { useBusiness } from "@/contexts/BusinessContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useReviewFetch } from "@/contexts/ReviewFetchContext";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 
@@ -68,6 +69,7 @@ const platformLabels: Record<string, { label: string; color: string }> = {
 
 export default function Reviews() {
   const { activeBusiness, businesses, refetchBusinesses } = useBusiness();
+  const { startFetch, hasPendingRuns, setOnFetchComplete } = useReviewFetch();
   const [locationFilter, setLocationFilter] = useState<string>("active");
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
@@ -211,108 +213,28 @@ export default function Reviews() {
     return trimmed;
   };
 
-  const APIFY_POLL_INTERVAL_MS = 3000;
-  const pendingRunsRef = useRef<Map<string, { runId: string; platform: string; functionName: string }>>(new Map());
-  const [hasPendingRuns, setHasPendingRuns] = useState(false);
-
-  // Fire-and-forget: start actor, return immediately
+  // Fire-and-forget using global context
   const invokeApifyFetchStart = async (platform: string) => {
     if (!activeBusiness) throw new Error("İşletme bulunamadı");
-
-    const functionName = platform === "tripadvisor" 
-      ? "tripadvisor-fetch-reviews" 
-      : "apify-fetch-reviews";
-
-    const response = await supabase.functions.invoke(functionName, {
-      body: { business_id: activeBusiness.id, ...(platform !== "tripadvisor" ? { platform } : {}) },
+    return startFetch({
+      businessId: activeBusiness.id,
+      businessName: activeBusiness.name,
+      platform,
     });
-
-    if (response.error) {
-      const errorBody = response.data;
-      const msg = errorBody?.error || response.error.message || "Bilinmeyen hata";
-      throw new Error(msg);
-    }
-
-    const result = response.data;
-
-    // If already completed (fast response), return directly
-    if (result?.success) return result;
-
-    // If running, add to pending runs for background polling
-    if (result?.status === "running" && result?.run_id) {
-      const key = `${activeBusiness.id}-${platform}`;
-      pendingRunsRef.current.set(key, { runId: result.run_id, platform, functionName });
-      setHasPendingRuns(true);
-      return { status: "started", run_id: result.run_id };
-    }
-
-    return result;
   };
 
-  // Background polling for pending runs
+  // Register refetch callback so global context can refresh reviews list
   useEffect(() => {
-    if (!hasPendingRuns || !activeBusiness) return;
-
-    const interval = setInterval(async () => {
-      const entries = Array.from(pendingRunsRef.current.entries());
-      if (entries.length === 0) {
-        setHasPendingRuns(false);
-        return;
-      }
-
-      for (const [key, { runId, platform, functionName }] of entries) {
-        try {
-          const pollResp = await supabase.functions.invoke(functionName, {
-            body: { business_id: activeBusiness.id, ...(platform !== "tripadvisor" ? { platform } : {}), run_id: runId },
-          });
-
-          if (pollResp.error) continue;
-          const result = pollResp.data;
-
-          if (result?.status === "running") continue; // Still running
-
-          // Completed (success or failure)
-          pendingRunsRef.current.delete(key);
-          if (pendingRunsRef.current.size === 0) setHasPendingRuns(false);
-
-          if (result?.success) {
-            toast({
-              title: `${platformLabels[platform]?.label || platform} Yorumları Çekildi! 🎉`,
-              description: `${result.inserted} yeni yorum eklendi${result.skipped ? `, ${result.skipped} zaten mevcut` : ''}.`,
-            });
-            refetch();
-          } else {
-            toast({
-              title: "Hata",
-              description: result?.message || result?.error || "Yorum çekme başarısız.",
-              variant: "destructive",
-            });
-          }
-        } catch {
-          // Silently retry on network errors
-        }
-      }
-    }, APIFY_POLL_INTERVAL_MS);
-
-    return () => clearInterval(interval);
-  }, [hasPendingRuns, activeBusiness]);
+    setOnFetchComplete(() => refetch);
+    return () => setOnFetchComplete(undefined);
+  }, [setOnFetchComplete]);
 
   // Legacy wrapper for places that still use the old API (platform setup with URL)
   const invokeApifyFetchWithPolling = async (platform: string) => {
     const result = await invokeApifyFetchStart(platform);
     if (result?.status === "started") {
-      // Wait for background poll to complete
-      return new Promise<any>((resolve) => {
-        const key = `${activeBusiness!.id}-${platform}`;
-        const checkInterval = setInterval(() => {
-          if (!pendingRunsRef.current.has(key)) {
-            clearInterval(checkInterval);
-            resolve({ inserted: 0, skipped: 0, status: "completed_in_background" });
-          }
-        }, 1000);
-        // Safety timeout
-        setTimeout(() => { clearInterval(checkInterval); resolve({ inserted: 0, skipped: 0, status: "completed_in_background" }); }, 300000);
-      });
+      // Return immediately; background poll in context will handle completion
+      return { inserted: 0, skipped: 0, status: "completed_in_background" };
     }
     return result;
   };
