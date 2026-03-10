@@ -69,9 +69,11 @@ function toSafeIsoDate(input?: string | null): string {
   if (!input) return new Date().toISOString();
   const parsed = new Date(input);
   return Number.isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString();
+
+function canUseWextractorFallback(platform: string): boolean {
+  return ["booking", "tripadvisor", "trustpilot", "hotelscom", "all"].includes(platform);
 }
 
-async function pollRunStatus(runId: string, token: string, maxWaitMs = 55000): Promise<any> {
   const start = Date.now();
   while (Date.now() - start < maxWaitMs) {
     const resp = await fetch(`${APIFY_BASE}/actor-runs/${runId}?token=${token}`);
