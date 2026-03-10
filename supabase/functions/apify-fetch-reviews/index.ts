@@ -280,48 +280,13 @@ Deno.serve(async (req) => {
 
     console.log(`Actor run started: ${newRunId}, dataset: ${datasetId}`);
 
-    // Try to wait for completion within this request
-    const runData = await pollRunStatus(newRunId, APIFY_API_TOKEN, 50000);
-
-    if (!runData) {
-      // Still running - return run_id for frontend to poll
-      return new Response(
-        JSON.stringify({ status: "running", run_id: newRunId, message: "Actor is still running. Call again with run_id to check." }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    if (runData.__failed || !runData.defaultDatasetId) {
-      if (canUseWextractorFallback(platform)) {
-        console.log(`Apify run ${runData.status} for ${platform}, trying Wextractor fallback`);
-        return await handleWextractorFallback(req, supabase, business, platform, business_id);
-      }
-
-      return new Response(
-        JSON.stringify({
-          success: false,
-          status: "failed",
-          run_id: newRunId,
-          message: `Apify run failed: ${runData.statusMessage || runData.status || "Unknown error"}`,
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Run completed - fetch and insert results
-    const items = await fetchDatasetItems(runData.defaultDatasetId, APIFY_API_TOKEN);
-
-    if ((platform === "hotelscom" || platform === "booking") && items.length === 0 && canUseWextractorFallback(platform)) {
-      console.log(`Apify returned 0 for ${platform}, trying Wextractor fallback`);
-      return await handleWextractorFallback(req, supabase, business, platform, business_id);
-    }
-
-    const result = await insertReviews(supabase, items, business_id, platform === "hotelscom" ? "hotelscom" : undefined);
-
-    await logSuccess(supabase, business_id, platform, items.length, result.inserted, result.skipped);
-
+    // Return immediately; frontend will poll with run_id
     return new Response(
-      JSON.stringify({ success: true, ...result, fetched: items.length }),
+      JSON.stringify({
+        status: "running",
+        run_id: newRunId,
+        message: "Actor started. Call again with run_id to check progress.",
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
 
