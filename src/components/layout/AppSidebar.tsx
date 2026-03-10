@@ -22,6 +22,7 @@ import {
   ShieldCheck,
   Hotel,
   LogOut,
+  FileText,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -63,6 +64,7 @@ const commonItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Lokasyonlar", url: "/locations", icon: Building2 },
   { title: "İstatistikler", url: "/statistics", icon: BarChart3 },
+  { title: "Rapor Oluştur", url: "/report", icon: FileText },
   { title: "Ayarlar", url: "/settings", icon: Settings },
 ];
 
@@ -261,7 +263,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {commonItems.slice(0, 3).map((item) => {
+              {commonItems.slice(0, 4).map((item) => {
                 const isActive = location.pathname === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
