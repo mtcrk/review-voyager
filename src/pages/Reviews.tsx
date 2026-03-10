@@ -874,20 +874,36 @@ export default function Reviews() {
                 }
               </p>
               {!hasId ? (
-                <div className="flex gap-2 items-center">
-                  <Input
-                    placeholder={config.placeholder}
-                    value={platformUrlInput}
-                    onChange={(e) => setPlatformUrlInput(e.target.value)}
-                    disabled={savingPlatformUrl}
-                    className="flex-1"
-                  />
-                  <Button 
-                    onClick={() => handlePlatformSetup(platformFilter)} 
-                    disabled={!platformUrlInput.trim() || savingPlatformUrl}
+                <div className="space-y-3">
+                  <div className="flex gap-2 items-center">
+                    <Input
+                      placeholder={config.placeholder}
+                      value={platformUrlInput}
+                      onChange={(e) => setPlatformUrlInput(e.target.value)}
+                      disabled={savingPlatformUrl || isAutoDiscovering}
+                      className="flex-1"
+                    />
+                    <Button 
+                      onClick={() => handlePlatformSetup(platformFilter)} 
+                      disabled={!platformUrlInput.trim() || savingPlatformUrl || isAutoDiscovering}
+                    >
+                      {savingPlatformUrl ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
+                      {savingPlatformUrl ? "Çekiliyor..." : "Yorumları Çek"}
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-px flex-1 bg-border" />
+                    <span className="text-xs text-muted-foreground">veya</span>
+                    <div className="h-px flex-1 bg-border" />
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleAutoDiscover(platformFilter)}
+                    disabled={isAutoDiscovering || savingPlatformUrl}
+                    className="w-full"
                   >
-                    {savingPlatformUrl ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
-                    {savingPlatformUrl ? "Çekiliyor..." : "Yorumları Çek"}
+                    {isAutoDiscovering ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Search className="h-4 w-4 mr-2" />}
+                    {isAutoDiscovering ? "Aranıyor..." : `${config.label} Profilini Otomatik Bul`}
                   </Button>
                 </div>
               ) : (
