@@ -801,10 +801,15 @@ export default function Reviews() {
                 if (!activeBusiness) return;
                 setIsFetchingBooking(true);
                 try {
-                  const result = await invokeApifyFetchWithPolling(platformFilter);
-                  if (result?.error) {
+                  const result = await invokeApifyFetchStart(platformFilter);
+                  if (result?.status === "started") {
+                    toast({
+                      title: `${platformLabels[platformFilter]?.label} Çekim Başlatıldı`,
+                      description: "Yorumlar arka planda çekiliyor. Tamamlandığında bildirileceksiniz.",
+                    });
+                  } else if (result?.error) {
                     toast({ title: "Hata", description: result.error, variant: "destructive" });
-                  } else {
+                  } else if (result?.success) {
                     toast({
                       title: `${platformLabels[platformFilter]?.label} Yorumları Çekildi`,
                       description: `${result.inserted} yeni yorum eklendi, ${result.skipped} zaten mevcut.`,
@@ -817,10 +822,10 @@ export default function Reviews() {
                   setIsFetchingBooking(false);
                 }
               }}
-              disabled={isFetchingBooking}
+              disabled={isFetchingBooking || hasPendingRuns}
             >
-              {isFetchingBooking ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
-              {isFetchingBooking ? 'Çekiliyor...' : `${platformLabels[platformFilter]?.label} Yorumları Çek`}
+              {(isFetchingBooking || hasPendingRuns) ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
+              {hasPendingRuns ? 'Çekiliyor...' : isFetchingBooking ? 'Başlatılıyor...' : `${platformLabels[platformFilter]?.label} Yorumları Çek`}
             </Button>
           )}
         </div>
