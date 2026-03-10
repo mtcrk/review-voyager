@@ -28,9 +28,9 @@ const PROVIDER_MAP: Record<string, string> = {
 const PLATFORM_TO_APIFY_PROVIDER: Record<string, string[]> = {
   booking: ["booking"],
   tripadvisor: ["tripadvisor"],
-  hotelscom: ["expedia"],
+  hotelscom: ["hotels", "expedia"],
   expedia: ["expedia"],
-  all: ["booking", "tripadvisor", "expedia", "airbnb", "yelp"], // exclude google - already fetched via GBP API
+  all: ["booking", "tripadvisor", "expedia", "hotels", "airbnb", "yelp"], // exclude google - already fetched via GBP API
 };
 
 interface ApifyReview {
@@ -168,7 +168,21 @@ Deno.serve(async (req) => {
 
       const datasetId = runData.defaultDatasetId;
       const items = await fetchDatasetItems(datasetId, APIFY_API_TOKEN);
-      const result = await insertReviews(supabase, items, business_id);
+
+      if (platform === "hotelscom" && items.length === 0) {
+        const { data: businessForFallback } = await supabaseAuth
+          .from("businesses")
+          .select("id, place_id, name, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url")
+          .eq("id", business_id)
+          .maybeSingle();
+
+        if (businessForFallback?.hotelscom_url) {
+          console.log("Apify returned 0 for hotelscom, trying Wextractor fallback");
+          return await handleWextractorFallback(req, supabase, businessForFallback, platform, business_id);
+        }
+      }
+
+      const result = await insertReviews(supabase, items, business_id, platform === "hotelscom" ? "hotelscom" : undefined);
 
       await logSuccess(supabase, business_id, platform, items.length, result.inserted, result.skipped);
 
@@ -250,7 +264,13 @@ Deno.serve(async (req) => {
 
     // Run completed - fetch and insert results
     const items = await fetchDatasetItems(runData.defaultDatasetId, APIFY_API_TOKEN);
-    const result = await insertReviews(supabase, items, business_id);
+
+    if (platform === "hotelscom" && items.length === 0 && business.hotelscom_url) {
+      console.log("Apify returned 0 for hotelscom, trying Wextractor fallback");
+      return await handleWextractorFallback(req, supabase, business, platform, business_id);
+    }
+
+    const result = await insertReviews(supabase, items, business_id, platform === "hotelscom" ? "hotelscom" : undefined);
 
     await logSuccess(supabase, business_id, platform, items.length, result.inserted, result.skipped);
 
@@ -269,12 +289,12 @@ Deno.serve(async (req) => {
   }
 });
 
-async function insertReviews(supabase: any, items: ApifyReview[], businessId: string) {
+async function insertReviews(supabase: any, items: ApifyReview[], businessId: string, forcedPlatform?: string) {
   // Transform reviews
   const transformed = items
     .filter(item => item.reviewText || item.reviewTitle)
     .map(item => {
-      const platform = normalizePlatform(item.provider);
+      const platform = forcedPlatform || normalizePlatform(item.provider);
       const rating = normalizeRating(item.reviewRating, item.provider);
       let text = item.reviewText || "";
       if (item.reviewTitle && text) text = `${item.reviewTitle}\n\n${text}`;
@@ -354,7 +374,26 @@ function getWextractorPlatformId(business: any, platform: string): string | null
       return String(raw).trim();
     }
     case "trustpilot": return business.trustpilot_url;
-    case "hotelscom": return business.hotelscom_url;
+    case "hotelscom": {
+      const raw = business.hotelscom_url;
+      if (!raw) return null;
+      const value = String(raw).trim();
+
+      // Accept raw numeric IDs, ho-prefixed IDs, or Hotels.com URLs containing the ID
+      const hoMatch = value.match(/^ho(\d+)$/i);
+      if (hoMatch) return hoMatch[1];
+
+      const idParamMatch = value.match(/[?&]id=(\d+)/i);
+      if (idParamMatch) return idParamMatch[1];
+
+      const slashHoMatch = value.match(/\/ho(\d+)/i);
+      if (slashHoMatch) return slashHoMatch[1];
+
+      const numericMatch = value.match(/(\d{4,})/);
+      if (numericMatch) return numericMatch[1];
+
+      return value.replace(/^ho/i, "");
+    }
     default: return null;
   }
 }
