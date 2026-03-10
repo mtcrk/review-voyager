@@ -86,8 +86,8 @@ async function pollRunStatus(runId: string, token: string, maxWaitMs = 55000): P
     if (status === "FAILED" || status === "ABORTED" || status === "TIMED-OUT") {
       return { ...data.data, __failed: true };
     }
-    // Wait 3 seconds before next poll
-    await new Promise(r => setTimeout(r, 3000));
+    // Wait 1 second before next poll
+    await new Promise(r => setTimeout(r, 1000));
   }
   return null; // Timed out waiting
 }
