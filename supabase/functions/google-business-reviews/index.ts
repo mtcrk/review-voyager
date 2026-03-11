@@ -190,6 +190,7 @@ Deno.serve(async (req) => {
             (rating as number) >= 4 ? "positive" : (rating as number) >= 3 ? "neutral" : "negative";
 
           // Insert new review
+          const replyComment = review.reviewReply?.comment || null;
           const { error: insertError } = await supabaseAdmin.from("reviews").insert({
             business_id: biz.id,
             platform: "google",
@@ -201,6 +202,7 @@ Deno.serve(async (req) => {
             posted_at: postedAt,
             status: hasReply ? "replied" : "pending_reply",
             replied_at: hasReply ? review.reviewReply?.updateTime : null,
+            approved_reply: hasReply ? replyComment : null,
             sentiment,
             photos: photos.length > 0 ? photos : [],
           });
