@@ -145,7 +145,7 @@ export default function ChatWithReviewsPage() {
             <Brain className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold text-foreground">Yorumlarla Sohbet</h1>
+            <h1 className="text-lg md:text-2xl font-semibold text-foreground">Yorumlarla Sohbet</h1>
             <p className="text-sm text-muted-foreground">
               {activeBusiness.name} — AI'a yorumlarınız hakkında her şeyi sorun
             </p>
