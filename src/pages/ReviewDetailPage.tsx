@@ -376,7 +376,18 @@ const ReviewDetailPage = () => {
           <Card className="rounded-xl shadow-sm border">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">AI Suggested Reply</CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-lg">
+                    {review.approved_reply && (review.status === 'replied' || review.status === 'approved') 
+                      ? 'Mevcut Yanıt' 
+                      : 'AI Suggested Reply'}
+                  </CardTitle>
+                  {review.approved_reply && review.status === 'replied' && (
+                    <Badge variant="outline" className="text-xs text-emerald-600 border-emerald-200 bg-emerald-50">
+                      Yanıtlandı
+                    </Badge>
+                  )}
+                </div>
                 <div className="flex items-center gap-2">
                   {/* Tone Selector */}
                   <div className="flex rounded-lg border bg-muted/30 p-1">
