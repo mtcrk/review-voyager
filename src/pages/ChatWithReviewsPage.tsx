@@ -232,7 +232,7 @@ export default function ChatWithReviewsPage() {
         )}
 
         {/* Input Bar */}
-        <div className="px-8 py-4 border-t bg-background">
+        <div className="px-4 md:px-8 py-3 md:py-4 border-t bg-background">
           <form
             onSubmit={(e) => {
               e.preventDefault();
