@@ -55,8 +55,9 @@ function normalizeRating(rating: number | string | null | undefined, provider: s
   if (rating == null) return 3;
   const num = typeof rating === "string" ? parseFloat(rating) : rating;
   if (isNaN(num)) return 3;
-  // Booking.com and Expedia use 1-10 scale
-  if ((provider === "booking" || provider === "booking.com" || provider === "expedia") && num > 5) {
+  // Booking.com, Expedia, and Hotels.com use 1-10 scale
+  const p = provider.toLowerCase();
+  if ((p === "booking" || p === "booking.com" || p === "expedia" || p === "hotels" || p === "hotelscom" || p === "hotels.com") && num > 5) {
     return Math.round(num / 2);
   }
   return Math.min(5, Math.max(1, Math.round(num)));
