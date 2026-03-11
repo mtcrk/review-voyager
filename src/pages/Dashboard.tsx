@@ -255,7 +255,16 @@ export default function Dashboard() {
           {/* Feature Widgets */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <div className="space-y-0">
-              <RepScoreWidget score={calculateRepScore(effectiveReviews as ReviewData[])} />
+              <RepScoreWidget score={calculateRepScore(effectiveReviews.map(r => ({
+                rating: r.rating,
+                text: r.text,
+                platform: (r as any).platform || 'google',
+                posted_at: r.posted_at,
+                status: r.status,
+                sentiment: r.sentiment,
+                approved_reply: r.approved_reply,
+                replied_at: r.replied_at,
+              })))} />
             </div>
             <div className="space-y-0">
               <PriorityActions reviews={effectiveReviews} />
