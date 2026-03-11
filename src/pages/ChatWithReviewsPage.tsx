@@ -137,15 +137,15 @@ export default function ChatWithReviewsPage() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)]">
+    <div className="flex flex-col h-[calc(100vh-3.5rem)] md:h-screen">
       {/* Header */}
-      <div className="px-8 pt-6 pb-4 border-b bg-background">
+      <div className="px-4 md:px-8 pt-4 md:pt-6 pb-3 md:pb-4 border-b bg-background">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-primary/10">
             <Brain className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold text-foreground">Yorumlarla Sohbet</h1>
+            <h1 className="text-lg md:text-2xl font-semibold text-foreground">Yorumlarla Sohbet</h1>
             <p className="text-sm text-muted-foreground">
               {activeBusiness.name} — AI'a yorumlarınız hakkında her şeyi sorun
             </p>
@@ -156,7 +156,7 @@ export default function ChatWithReviewsPage() {
       {/* Chat Area */}
       <div className="flex-1 overflow-hidden flex flex-col">
         {messages.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-8">
+          <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-8">
             <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
               <Sparkles className="w-10 h-10 text-primary" />
             </div>
@@ -183,7 +183,7 @@ export default function ChatWithReviewsPage() {
             </div>
           </div>
         ) : (
-          <ScrollArea className="flex-1 px-8 py-6" ref={scrollRef}>
+          <ScrollArea className="flex-1 px-4 md:px-8 py-4 md:py-6" ref={scrollRef}>
             <div className="max-w-3xl mx-auto space-y-6">
               {messages.map((msg, i) => (
                 <div
@@ -232,7 +232,7 @@ export default function ChatWithReviewsPage() {
         )}
 
         {/* Input Bar */}
-        <div className="px-8 py-4 border-t bg-background">
+        <div className="px-4 md:px-8 py-3 md:py-4 border-t bg-background">
           <form
             onSubmit={(e) => {
               e.preventDefault();
