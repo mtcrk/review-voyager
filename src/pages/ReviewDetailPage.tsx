@@ -43,12 +43,14 @@ const ReviewDetailPage = () => {
     enabled: !!id,
   });
 
-  // Set initial AI reply when review loads
+  // Set initial AI reply when review loads — prioritize approved_reply (existing response)
   useEffect(() => {
-    if (review?.suggested_reply) {
+    if (review?.approved_reply) {
+      setAiReply(review.approved_reply);
+    } else if (review?.suggested_reply) {
       setAiReply(review.suggested_reply);
-    } else if (review && !review.suggested_reply) {
-      // Auto-generate if no reply exists
+    } else if (review && !review.suggested_reply && !review.approved_reply) {
+      // Auto-generate only if no reply exists at all
       regenerateMutation.mutate();
     }
   }, [review?.id]); // eslint-disable-line react-hooks/exhaustive-deps
