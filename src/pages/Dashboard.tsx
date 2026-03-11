@@ -18,6 +18,8 @@ import { DEMO_REVIEWS, DEMO_METRICS } from "@/lib/demoData";
 import { useTranslation } from "react-i18next";
 import { SetupWizard } from "@/components/dashboard/SetupWizard";
 import { PlatformDiscovery } from "@/components/dashboard/PlatformDiscovery";
+import { RepScoreWidget } from "@/components/dashboard/RepScoreWidget";
+import { calculateRepScore, ReviewData } from "@/lib/repScore";
 
 
 export default function Dashboard() {
