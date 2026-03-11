@@ -255,18 +255,68 @@ const Index = () => {
               </button>
             </div>
 
-            {/* Mobile Menu */}
+            {/* Mobile Menu Button */}
             <div className="md:hidden flex items-center gap-2">
               <LanguageSwitcher />
               <button 
-                onClick={() => navigate("/onboarding")}
-                className="px-4 py-2 rounded-md text-sm font-medium text-white transition-all"
-                style={{ backgroundColor: '#7A5AF8' }}
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 rounded-md text-foreground hover:bg-muted transition-colors"
               >
-                {t('nav.getStarted')}
+                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
             </div>
           </div>
+
+          {/* Mobile Menu Dropdown */}
+          {mobileMenuOpen && (
+            <div className="md:hidden border-t border-border bg-card py-4 px-2 space-y-1">
+              <button
+                onClick={() => { scrollToSection("automations"); setMobileMenuOpen(false); }}
+                className="block w-full text-left px-4 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors"
+              >
+                {t('nav.automations', 'Automations')}
+              </button>
+              <button
+                onClick={() => { scrollToSection("pricing"); setMobileMenuOpen(false); }}
+                className="block w-full text-left px-4 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors"
+              >
+                {t('landing.earlyAccess.badge', 'Erken Erişim')}
+              </button>
+              <button
+                onClick={() => { navigate("/hub"); setMobileMenuOpen(false); }}
+                className="block w-full text-left px-4 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors"
+              >
+                {t('nav.hub', 'Hub')}
+              </button>
+              <button
+                onClick={() => { navigate(user ? "/dashboard" : "/login"); setMobileMenuOpen(false); }}
+                className="block w-full text-left px-4 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors"
+              >
+                {user ? t('nav.dashboard') : t('nav.login')}
+              </button>
+              <button
+                onClick={() => { navigate("/contact"); setMobileMenuOpen(false); }}
+                className="block w-full text-left px-4 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors"
+              >
+                {t('nav.contact', 'Contact')}
+              </button>
+              <button
+                onClick={() => { navigate("/about"); setMobileMenuOpen(false); }}
+                className="block w-full text-left px-4 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors"
+              >
+                {t('about.badge', 'Hakkımızda')}
+              </button>
+              <div className="pt-2 px-4">
+                <button 
+                  onClick={() => { navigate("/onboarding"); setMobileMenuOpen(false); }}
+                  className="w-full px-5 py-3 rounded-md text-sm font-medium text-white transition-all"
+                  style={{ backgroundColor: '#7A5AF8' }}
+                >
+                  {t('nav.getStarted')}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </nav>
 
