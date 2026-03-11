@@ -165,32 +165,86 @@ serve(async (req) => {
       const refresh_token = requestBody.refresh_token;
       
       for (const business of businesses) {
-        // Insert business (without refresh token - it goes to separate secure table)
-        const { data: insertedBusiness, error: insertError } = await supabaseClient
+        // Check if user already has a business with this google_location_id or an unconnected business
+        const { data: existingByLocation } = await supabaseClient
           .from("businesses")
-          .insert({
-            user_id: user.id,
-            name: business.name,
-            place_id: business.place_id,
-            google_account_id: business.account_id,
-            google_location_id: business.location_id,
-            google_connected: true,
-          })
-          .select()
-          .single();
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("google_location_id", business.location_id)
+          .maybeSingle();
 
-        if (insertError) {
-          console.error("Error inserting business:", insertError);
-          throw insertError;
+        let businessId: string;
+
+        if (existingByLocation) {
+          // Update existing business that already has this location
+          const { data: updated, error: updateError } = await supabaseClient
+            .from("businesses")
+            .update({
+              name: business.name,
+              place_id: business.place_id,
+              google_account_id: business.account_id,
+              google_location_id: business.location_id,
+              google_connected: true,
+            })
+            .eq("id", existingByLocation.id)
+            .select()
+            .single();
+
+          if (updateError) throw updateError;
+          businessId = updated.id;
+        } else {
+          // Check if user has an unconnected business we can update
+          const { data: unconnected } = await supabaseClient
+            .from("businesses")
+            .select("id")
+            .eq("user_id", user.id)
+            .eq("google_connected", false)
+            .limit(1)
+            .maybeSingle();
+
+          if (unconnected) {
+            const { data: updated, error: updateError } = await supabaseClient
+              .from("businesses")
+              .update({
+                name: business.name,
+                place_id: business.place_id,
+                google_account_id: business.account_id,
+                google_location_id: business.location_id,
+                google_connected: true,
+              })
+              .eq("id", unconnected.id)
+              .select()
+              .single();
+
+            if (updateError) throw updateError;
+            businessId = updated.id;
+          } else {
+            // Create new business
+            const { data: inserted, error: insertError } = await supabaseClient
+              .from("businesses")
+              .insert({
+                user_id: user.id,
+                name: business.name,
+                place_id: business.place_id,
+                google_account_id: business.account_id,
+                google_location_id: business.location_id,
+                google_connected: true,
+              })
+              .select()
+              .single();
+
+            if (insertError) throw insertError;
+            businessId = inserted.id;
+          }
         }
 
-        // Store refresh token in secure credentials table (service role only)
+        // Upsert refresh token in secure credentials table
         const { error: credError } = await supabaseAdmin
           .from("business_credentials")
-          .insert({
-            business_id: insertedBusiness.id,
+          .upsert({
+            business_id: businessId,
             google_refresh_token: refresh_token,
-          });
+          }, { onConflict: "business_id" });
 
         if (credError) {
           console.error("Error storing credentials:", credError);
