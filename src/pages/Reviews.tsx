@@ -40,7 +40,7 @@ import { tr } from "date-fns/locale";
 
 type SortField = "posted_at" | "rating" | "reviewer_name";
 type SortOrder = "asc" | "desc";
-type StatusFilter = "all" | "pending" | "approved" | "replied";
+type StatusFilter = "all" | "pending" | "approved" | "replied" | "not_replied";
 type SentimentFilter = "all" | "positive" | "negative" | "neutral";
 type PlatformFilter = "all" | "google" | "booking" | "tripadvisor" | "trustpilot" | "hotelscom";
 type RatingFilter = "all" | "1" | "2" | "3" | "4" | "5";
