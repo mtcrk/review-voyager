@@ -224,6 +224,16 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/rep-score"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <RepScore />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
             <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

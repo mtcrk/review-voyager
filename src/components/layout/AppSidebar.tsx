@@ -63,6 +63,7 @@ interface PlatformConfig {
 
 const commonItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Rep Score", url: "/rep-score", icon: Trophy },
   { title: "Lokasyonlar", url: "/locations", icon: Building2 },
   { title: "İstatistikler", url: "/statistics", icon: BarChart3 },
   { title: "Rapor Oluştur", url: "/report", icon: FileText },
