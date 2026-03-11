@@ -163,16 +163,24 @@ Deno.serve(async (req) => {
             .maybeSingle();
 
           if (existing) {
-            // Update if reply status changed
-            if (hasReply && existing.status !== "replied") {
-              await supabaseAdmin
-                .from("reviews")
-                .update({
-                  status: "replied",
-                  replied_at: review.reviewReply?.updateTime || new Date().toISOString(),
-                })
-                .eq("id", existing.id);
-              updatedCount++;
+            // Update if reply status changed or reply text missing
+            if (hasReply) {
+              const replyText = review.reviewReply?.comment || null;
+              const updates: Record<string, any> = {};
+              if (existing.status !== "replied") {
+                updates.status = "replied";
+                updates.replied_at = review.reviewReply?.updateTime || new Date().toISOString();
+              }
+              if (replyText) {
+                updates.approved_reply = replyText;
+              }
+              if (Object.keys(updates).length > 0) {
+                await supabaseAdmin
+                  .from("reviews")
+                  .update(updates)
+                  .eq("id", existing.id);
+                updatedCount++;
+              }
             }
             continue;
           }
