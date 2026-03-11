@@ -225,9 +225,11 @@ export default function Reviews() {
 
   // Register refetch callback so global context can refresh reviews list
   useEffect(() => {
-    setOnFetchComplete(() => refetch);
+    setOnFetchComplete(() => {
+      queryClient.invalidateQueries({ queryKey: ['reviews'] });
+    });
     return () => setOnFetchComplete(undefined);
-  }, [setOnFetchComplete]);
+  }, [setOnFetchComplete, queryClient]);
 
   // Legacy wrapper for places that still use the old API (platform setup with URL)
   const invokeApifyFetchWithPolling = async (platform: string) => {
