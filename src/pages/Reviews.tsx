@@ -776,8 +776,9 @@ export default function Reviews() {
             <SelectContent>
               <SelectItem value="all">Tüm Durumlar</SelectItem>
               <SelectItem value="pending">Beklemede</SelectItem>
+              <SelectItem value="not_replied">Yanıtlanmamış</SelectItem>
+              <SelectItem value="replied">Yanıtlanmış</SelectItem>
               <SelectItem value="approved">Onaylandı</SelectItem>
-              <SelectItem value="replied">Yanıtlandı</SelectItem>
             </SelectContent>
           </Select>
           <Select value={sentimentFilter} onValueChange={(v) => { setSentimentFilter(v as SentimentFilter); setCurrentPage(1); }}>
