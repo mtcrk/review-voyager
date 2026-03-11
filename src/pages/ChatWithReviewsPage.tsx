@@ -156,7 +156,7 @@ export default function ChatWithReviewsPage() {
       {/* Chat Area */}
       <div className="flex-1 overflow-hidden flex flex-col">
         {messages.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-8">
+          <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-8">
             <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
               <Sparkles className="w-10 h-10 text-primary" />
             </div>
