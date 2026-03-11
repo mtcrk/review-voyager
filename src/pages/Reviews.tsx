@@ -336,7 +336,8 @@ export default function Reviews() {
     // Status filter
     if (statusFilter !== "all") {
       result = result.filter((r) => {
-        if (statusFilter === "pending") return !r.status || r.status === "pending";
+        if (statusFilter === "pending") return !r.status || r.status === "pending" || r.status === "pending_reply";
+        if (statusFilter === "not_replied") return !r.approved_reply && r.status !== "replied";
         return r.status === statusFilter;
       });
     }
