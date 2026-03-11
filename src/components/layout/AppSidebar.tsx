@@ -192,7 +192,7 @@ export function AppSidebar() {
   const currentPlatform = platforms.find(p => p.id === selectedPlatform);
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+    <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border">
       <SidebarHeader className="border-b border-sidebar-border p-4">
         <button 
           onClick={() => navigate("/dashboard")}
