@@ -43,12 +43,14 @@ const ReviewDetailPage = () => {
     enabled: !!id,
   });
 
-  // Set initial AI reply when review loads
+  // Set initial AI reply when review loads — prioritize approved_reply (existing response)
   useEffect(() => {
-    if (review?.suggested_reply) {
+    if (review?.approved_reply) {
+      setAiReply(review.approved_reply);
+    } else if (review?.suggested_reply) {
       setAiReply(review.suggested_reply);
-    } else if (review && !review.suggested_reply) {
-      // Auto-generate if no reply exists
+    } else if (review && !review.suggested_reply && !review.approved_reply) {
+      // Auto-generate only if no reply exists at all
       regenerateMutation.mutate();
     }
   }, [review?.id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -374,7 +376,18 @@ const ReviewDetailPage = () => {
           <Card className="rounded-xl shadow-sm border">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">AI Suggested Reply</CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-lg">
+                    {review.approved_reply && (review.status === 'replied' || review.status === 'approved') 
+                      ? 'Mevcut Yanıt' 
+                      : 'AI Suggested Reply'}
+                  </CardTitle>
+                  {review.approved_reply && review.status === 'replied' && (
+                    <Badge variant="outline" className="text-xs text-emerald-600 border-emerald-200 bg-emerald-50">
+                      Yanıtlandı
+                    </Badge>
+                  )}
+                </div>
                 <div className="flex items-center gap-2">
                   {/* Tone Selector */}
                   <div className="flex rounded-lg border bg-muted/30 p-1">

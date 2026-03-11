@@ -40,7 +40,7 @@ import { tr } from "date-fns/locale";
 
 type SortField = "posted_at" | "rating" | "reviewer_name";
 type SortOrder = "asc" | "desc";
-type StatusFilter = "all" | "pending" | "approved" | "replied";
+type StatusFilter = "all" | "pending" | "approved" | "replied" | "not_replied";
 type SentimentFilter = "all" | "positive" | "negative" | "neutral";
 type PlatformFilter = "all" | "google" | "booking" | "tripadvisor" | "trustpilot" | "hotelscom";
 type RatingFilter = "all" | "1" | "2" | "3" | "4" | "5";
@@ -336,7 +336,8 @@ export default function Reviews() {
     // Status filter
     if (statusFilter !== "all") {
       result = result.filter((r) => {
-        if (statusFilter === "pending") return !r.status || r.status === "pending";
+        if (statusFilter === "pending") return !r.status || r.status === "pending" || r.status === "pending_reply";
+        if (statusFilter === "not_replied") return !r.approved_reply && r.status !== "replied";
         return r.status === statusFilter;
       });
     }
@@ -775,8 +776,9 @@ export default function Reviews() {
             <SelectContent>
               <SelectItem value="all">Tüm Durumlar</SelectItem>
               <SelectItem value="pending">Beklemede</SelectItem>
+              <SelectItem value="not_replied">Yanıtlanmamış</SelectItem>
+              <SelectItem value="replied">Yanıtlanmış</SelectItem>
               <SelectItem value="approved">Onaylandı</SelectItem>
-              <SelectItem value="replied">Yanıtlandı</SelectItem>
             </SelectContent>
           </Select>
           <Select value={sentimentFilter} onValueChange={(v) => { setSentimentFilter(v as SentimentFilter); setCurrentPage(1); }}>
