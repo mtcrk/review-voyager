@@ -7,6 +7,8 @@ import { MessageSquare, Send, Loader2, Sparkles, Bot, User } from "lucide-react"
 import { useBusiness } from "@/contexts/BusinessContext";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import { useNavigate } from "react-router-dom";
+import { useChatHistory } from "@/hooks/useChatHistory";
 
 interface Message {
   role: "user" | "assistant";
@@ -22,20 +24,24 @@ const SUGGESTED_QUESTIONS = [
 
 export function ChatWithReviews() {
   const { activeBusiness } = useBusiness();
-  const [messages, setMessages] = useState<Message[]>([]);
+  const navigate = useNavigate();
+  const {
+    activeConversationId, messages, setMessages,
+    startNewConversation, saveMessage,
+  } = useChatHistory(activeBusiness?.id);
+
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Auto-scroll to bottom when messages change
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
 
-  const streamChat = async (userMessage: string) => {
+  const streamChat = async (userMessage: string, conversationId: string) => {
     if (!activeBusiness?.id) {
       toast.error("Lütfen önce bir işletme seçin");
       return;
@@ -55,15 +61,9 @@ export function ChatWithReviews() {
       }),
     });
 
-    if (resp.status === 429) {
-      throw new Error("Rate limit aşıldı. Lütfen biraz bekleyin.");
-    }
-    if (resp.status === 402) {
-      throw new Error("Kredi yetersiz. Lütfen kredi ekleyin.");
-    }
-    if (!resp.ok || !resp.body) {
-      throw new Error("Bağlantı hatası");
-    }
+    if (resp.status === 429) throw new Error("Rate limit aşıldı. Lütfen biraz bekleyin.");
+    if (resp.status === 402) throw new Error("Kredi yetersiz. Lütfen kredi ekleyin.");
+    if (!resp.ok || !resp.body) throw new Error("Bağlantı hatası");
 
     const reader = resp.body.getReader();
     const decoder = new TextDecoder();
@@ -109,6 +109,10 @@ export function ChatWithReviews() {
         }
       }
     }
+
+    if (assistantContent) {
+      await saveMessage(conversationId, "assistant", assistantContent);
+    }
   };
 
   const handleSend = async (messageToSend?: string) => {
@@ -120,11 +124,16 @@ export function ChatWithReviews() {
     setIsLoading(true);
 
     try {
-      await streamChat(userMessage);
+      let convId = activeConversationId;
+      if (!convId) {
+        convId = await startNewConversation(userMessage);
+        if (!convId) throw new Error("Sohbet oluşturulamadı");
+      }
+      await saveMessage(convId, "user", userMessage);
+      await streamChat(userMessage, convId);
     } catch (error) {
       console.error("Chat error:", error);
       toast.error(error instanceof Error ? error.message : "Bir hata oluştu");
-      // Remove last user message on error
       setMessages(prev => prev.slice(0, -1));
     } finally {
       setIsLoading(false);
@@ -135,16 +144,21 @@ export function ChatWithReviews() {
   return (
     <Card className="shadow-card h-[500px] flex flex-col">
       <CardHeader className="pb-3 border-b">
-        <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <MessageSquare className="h-5 w-5 text-primary" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <MessageSquare className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">Yorumlarınızla Sohbet</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                AI'a yorumlarınız hakkında sorular sorun
+              </p>
+            </div>
           </div>
-          <div>
-            <CardTitle className="text-lg">Yorumlarınızla Sohbet</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              AI'a yorumlarınız hakkında sorular sorun
-            </p>
-          </div>
+          <Button variant="ghost" size="sm" onClick={() => navigate("/chat")} className="text-xs text-muted-foreground">
+            Tüm Sohbetler →
+          </Button>
         </div>
       </CardHeader>
       
