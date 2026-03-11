@@ -253,7 +253,10 @@ export default function Dashboard() {
           </div>
 
           {/* Feature Widgets */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="space-y-0">
+              <RepScoreWidget score={calculateRepScore(effectiveReviews as ReviewData[])} />
+            </div>
             <div className="space-y-0">
               <PriorityActions reviews={effectiveReviews} />
               {isDemoMode && <UpgradeCTA feature={t('dashboard.demo.features.priorityActions', 'Öncelikli İşlemler')} />}
