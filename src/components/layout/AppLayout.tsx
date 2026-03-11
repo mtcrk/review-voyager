@@ -1,4 +1,4 @@
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { ReviewFetchBanner } from "./ReviewFetchBanner";
 
@@ -12,6 +12,11 @@ export function AppLayout({ children }: AppLayoutProps) {
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
         <main className="flex-1 overflow-auto">
+          {/* Mobile header with sidebar trigger */}
+          <header className="sticky top-0 z-40 flex h-14 items-center border-b border-border bg-background px-4 md:hidden">
+            <SidebarTrigger />
+            <span className="ml-3 text-sm font-semibold text-foreground">VoyageRespond</span>
+          </header>
           <ReviewFetchBanner />
           {children}
         </main>
