@@ -18,6 +18,8 @@ import { DEMO_REVIEWS, DEMO_METRICS } from "@/lib/demoData";
 import { useTranslation } from "react-i18next";
 import { SetupWizard } from "@/components/dashboard/SetupWizard";
 import { PlatformDiscovery } from "@/components/dashboard/PlatformDiscovery";
+import { RepScoreWidget } from "@/components/dashboard/RepScoreWidget";
+import { calculateRepScore, ReviewData } from "@/lib/repScore";
 
 
 export default function Dashboard() {
@@ -251,7 +253,19 @@ export default function Dashboard() {
           </div>
 
           {/* Feature Widgets */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="space-y-0">
+              <RepScoreWidget score={calculateRepScore(effectiveReviews.map(r => ({
+                rating: r.rating,
+                text: r.text,
+                platform: (r as any).platform || 'google',
+                posted_at: r.posted_at,
+                status: r.status,
+                sentiment: r.sentiment,
+                approved_reply: r.approved_reply,
+                replied_at: r.replied_at,
+              })))} />
+            </div>
             <div className="space-y-0">
               <PriorityActions reviews={effectiveReviews} />
               {isDemoMode && <UpgradeCTA feature={t('dashboard.demo.features.priorityActions', 'Öncelikli İşlemler')} />}

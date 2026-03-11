@@ -45,6 +45,7 @@ import DemoPage from "./pages/DemoPage";
 import About from "./pages/About";
 import Locations from "./pages/Locations";
 import EmailCenter from "./pages/EmailCenter";
+import RepScore from "./pages/RepScore";
 
 const queryClient = new QueryClient();
 
@@ -219,6 +220,16 @@ const App = () => (
                 <ProtectedRoute>
                   <AppLayout>
                     <EmailCenter />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/rep-score"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <RepScore />
                   </AppLayout>
                 </ProtectedRoute>
               }
