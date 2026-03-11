@@ -137,9 +137,9 @@ export default function ChatWithReviewsPage() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)]">
+    <div className="flex flex-col h-[calc(100vh-3.5rem)] md:h-screen">
       {/* Header */}
-      <div className="px-8 pt-6 pb-4 border-b bg-background">
+      <div className="px-4 md:px-8 pt-4 md:pt-6 pb-3 md:pb-4 border-b bg-background">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-primary/10">
             <Brain className="h-6 w-6 text-primary" />
