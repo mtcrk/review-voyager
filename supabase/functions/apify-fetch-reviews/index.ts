@@ -208,32 +208,45 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Build Apify actor input
-    const providers = PLATFORM_TO_APIFY_PROVIDER[platform] || [];
-    const actorInput: any = {
-      scrapeReviewPictures: false,
-      scrapeReviewResponses: true,
-    };
+    // Determine which actor to use
+    let actorId = ACTOR_ID;
+    let actorInput: any;
 
-    if (business.place_id) {
-      actorInput.startIds = [business.place_id];
+    // Use dedicated Hotels.com scraper when platform is hotelscom and URL is available
+    if (platform === "hotelscom" && business.hotelscom_url) {
+      actorId = HOTELSCOM_ACTOR_ID;
+      const hotelId = business.hotelscom_url.replace(/\D/g, ""); // Extract numeric ID
+      actorInput = {
+        startUrls: [`https://www.hotels.com/ho${hotelId}/`],
+        maxItems: 1000,
+      };
+      console.log(`Using dedicated Hotels.com scraper for hotel ID: ${hotelId}`);
     } else {
-      // This actor only understands Google Maps URLs/Place IDs, not platform-specific URLs.
-      // Use Google Maps search as fallback to let the actor find the hotel.
-      const searchQuery = encodeURIComponent(`${business.name} ${business.city || ""}`).trim();
-      actorInput.startUrls = [{ url: `https://www.google.com/maps/search/${searchQuery}` }];
-      console.log(`No place_id, using Google Maps search for: ${business.name} ${business.city || ""}`);
+      // Use the general hotel-review-aggregator
+      const providers = PLATFORM_TO_APIFY_PROVIDER[platform] || [];
+      actorInput = {
+        scrapeReviewPictures: false,
+        scrapeReviewResponses: true,
+      };
+
+      if (business.place_id) {
+        actorInput.startIds = [business.place_id];
+      } else {
+        const searchQuery = encodeURIComponent(`${business.name} ${business.city || ""}`).trim();
+        actorInput.startUrls = [{ url: `https://www.google.com/maps/search/${searchQuery}` }];
+        console.log(`No place_id, using Google Maps search for: ${business.name} ${business.city || ""}`);
+      }
+
+      if (providers.length > 0) {
+        actorInput.providers = providers;
+      }
     }
 
-    if (providers.length > 0) {
-      actorInput.providers = providers;
-    }
-
-    console.log(`Starting Apify actor for business ${business_id}, platform: ${platform}, place_id: ${business.place_id || "N/A (using search URL)"}`);
+    console.log(`Starting Apify actor ${actorId} for business ${business_id}, platform: ${platform}`);
 
     // Start actor run (async)
     const startResp = await fetch(
-      `${APIFY_BASE}/acts/${ACTOR_ID}/runs?token=${APIFY_API_TOKEN}`,
+      `${APIFY_BASE}/acts/${actorId}/runs?token=${APIFY_API_TOKEN}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
