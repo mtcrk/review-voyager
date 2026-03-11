@@ -16,7 +16,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { t } = useTranslation();
-  
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const automationOptions = [
     {
