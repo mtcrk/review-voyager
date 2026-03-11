@@ -80,6 +80,15 @@ export default function RepScore() {
           <p className="text-muted-foreground">
             Tüm platformlardan tek bir itibar puanı — 7 bileşen, 1000 puan üzerinden
           </p>
+          {activeBusiness && (
+            <div className="flex items-center gap-2 mt-2 text-sm">
+              <MapPin className="h-4 w-4 text-primary" />
+              <span className="font-medium text-foreground">{activeBusiness.name}</span>
+              {activeBusiness.city && (
+                <span className="text-muted-foreground">• {activeBusiness.city}</span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Score Hero */}
