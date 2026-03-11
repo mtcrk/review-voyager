@@ -343,7 +343,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Weekly Strip */}
-                <div className="grid grid-cols-7 gap-3">
+                <div className="grid grid-cols-7 gap-1.5 md:gap-3">
                   {weeklyData.map((dayData, index) => {
                     const colors = dayData.avgRating > 0 
                       ? getDayHeatColor(dayData.avgRating)
@@ -354,7 +354,7 @@ export default function Dashboard() {
                       <button
                         key={index}
                         onClick={() => setSelectedDay(dayData.date)}
-                        className={`p-4 rounded-lg transition-all duration-200 ${
+                        className={`p-2 md:p-4 rounded-lg transition-all duration-200 ${
                           isSelected ? 'shadow-md scale-105' : 'shadow-soft hover:shadow-card hover:scale-[1.02]'
                         }`}
                         style={{
@@ -363,10 +363,10 @@ export default function Dashboard() {
                           borderColor: isSelected ? colors.border : 'transparent',
                         }}
                       >
-                        <div className="space-y-2 text-center">
-                          <div className="text-xs font-semibold" style={{ color: colors.text }}>{dayData.day}</div>
-                          <div className="text-lg font-bold" style={{ color: colors.text }}>{dayData.dayNumber}</div>
-                          <div className="text-[10px] font-medium" style={{ color: colors.text }}>{dayData.reviewCount} yorum</div>
+                        <div className="space-y-1 md:space-y-2 text-center">
+                          <div className="text-[10px] md:text-xs font-semibold" style={{ color: colors.text }}>{dayData.day}</div>
+                          <div className="text-sm md:text-lg font-bold" style={{ color: colors.text }}>{dayData.dayNumber}</div>
+                          <div className="text-[9px] md:text-[10px] font-medium" style={{ color: colors.text }}>{dayData.reviewCount} yorum</div>
                         </div>
                       </button>
                     );
