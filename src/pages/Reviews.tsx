@@ -1032,7 +1032,7 @@ export default function Reviews() {
                   </button>
                 </TableHead>
                 <TableHead className="font-semibold">Durum</TableHead>
-                <TableHead className="font-semibold min-w-[280px]">AI Yanıt</TableHead>
+                <TableHead className="font-semibold min-w-[280px]">Yanıt</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -1112,8 +1112,13 @@ export default function Reviews() {
                           <Popover>
                             <PopoverTrigger asChild>
                               <div className="flex-1 max-w-[200px] cursor-pointer hover:text-foreground transition-colors">
-                                {review.approved_reply && (
-                                  <Badge variant="outline" className="mb-1 text-[10px] px-1.5 py-0 bg-green-50 text-green-700 border-green-200">Yanıt</Badge>
+                {review.approved_reply && (
+                                  <Badge variant="outline" className="mb-1 text-[10px] px-1.5 py-0 bg-green-50 text-green-700 border-green-200">
+                                    {review.reply_source === 'google_api' ? '🌐 Google' : review.suggested_reply ? '✨ AI' : '✏️ Manuel'}
+                                  </Badge>
+                                )}
+                                {!review.approved_reply && review.suggested_reply && (
+                                  <Badge variant="outline" className="mb-1 text-[10px] px-1.5 py-0 bg-purple-50 text-purple-700 border-purple-200">AI Öneri</Badge>
                                 )}
                                 <p className="text-xs text-muted-foreground line-clamp-2">
                                   {review.approved_reply || review.suggested_reply}
@@ -1123,7 +1128,9 @@ export default function Reviews() {
                             <PopoverContent className="w-80 max-h-60 overflow-auto" side="left">
                               {review.approved_reply && (
                                 <div className="mb-2">
-                                  <Badge variant="outline" className="mb-1 text-xs bg-green-50 text-green-700 border-green-200">Gönderilen Yanıt</Badge>
+                                  <Badge variant="outline" className="mb-1 text-xs bg-green-50 text-green-700 border-green-200">
+                                    {review.reply_source === 'google_api' ? 'Google\'a Gönderildi' : review.suggested_reply ? 'AI Yanıt (Onaylandı)' : 'Manuel Yanıt'}
+                                  </Badge>
                                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{review.approved_reply}</p>
                                 </div>
                               )}
