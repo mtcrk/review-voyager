@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,6 +13,7 @@ import { useState, useEffect } from "react";
 
 export default function Settings() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, profile, refreshProfile } = useAuth();
   const [fullName, setFullName] = useState('');
   const [saving, setSaving] = useState(false);
@@ -87,7 +88,7 @@ export default function Settings() {
         </Button>
       </div>
 
-      <Tabs defaultValue="profile" className="space-y-6">
+      <Tabs defaultValue={searchParams.get('tab') || 'profile'} className="space-y-6">
         <TabsList className="bg-muted/30">
           <TabsTrigger value="profile">Profil</TabsTrigger>
           <TabsTrigger value="business">İşletme Bilgileri</TabsTrigger>

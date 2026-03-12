@@ -29,7 +29,7 @@ export function DemoModeBanner({ onDismiss }: DemoModeBannerProps) {
         </div>
         <div className="flex items-center gap-3">
           <Button
-            onClick={() => navigate("/settings")}
+            onClick={() => navigate("/settings?tab=google")}
             className="gradient-primary text-white"
           >
             {t('dashboard.demo.connectCta', 'Google Business Bağla')}
