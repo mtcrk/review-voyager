@@ -1107,16 +1107,35 @@ export default function Reviews() {
                       </Badge>
                     </TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
-                      {review.suggested_reply ? (
+                      {(review.approved_reply || review.suggested_reply) ? (
                         <div className="flex items-start gap-2">
                           <Popover>
                             <PopoverTrigger asChild>
-                              <p className="text-xs text-muted-foreground line-clamp-2 flex-1 max-w-[200px] cursor-pointer hover:text-foreground transition-colors">
-                                {review.suggested_reply}
-                              </p>
+                              <div className="flex-1 max-w-[200px] cursor-pointer hover:text-foreground transition-colors">
+                                {review.approved_reply && (
+                                  <Badge variant="outline" className="mb-1 text-[10px] px-1.5 py-0 bg-green-50 text-green-700 border-green-200">Yanıt</Badge>
+                                )}
+                                <p className="text-xs text-muted-foreground line-clamp-2">
+                                  {review.approved_reply || review.suggested_reply}
+                                </p>
+                              </div>
                             </PopoverTrigger>
                             <PopoverContent className="w-80 max-h-60 overflow-auto" side="left">
-                              <p className="text-sm leading-relaxed whitespace-pre-wrap">{review.suggested_reply}</p>
+                              {review.approved_reply && (
+                                <div className="mb-2">
+                                  <Badge variant="outline" className="mb-1 text-xs bg-green-50 text-green-700 border-green-200">Gönderilen Yanıt</Badge>
+                                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{review.approved_reply}</p>
+                                </div>
+                              )}
+                              {review.suggested_reply && review.approved_reply && (
+                                <div className="border-t pt-2 mt-2">
+                                  <Badge variant="outline" className="mb-1 text-xs">AI Öneri</Badge>
+                                  <p className="text-sm leading-relaxed whitespace-pre-wrap text-muted-foreground">{review.suggested_reply}</p>
+                                </div>
+                              )}
+                              {review.suggested_reply && !review.approved_reply && (
+                                <p className="text-sm leading-relaxed whitespace-pre-wrap">{review.suggested_reply}</p>
+                              )}
                             </PopoverContent>
                           </Popover>
                           <div className="flex gap-1 shrink-0">
@@ -1126,7 +1145,7 @@ export default function Reviews() {
                               className="h-7 w-7"
                               title="Kopyala"
                               onClick={async () => {
-                                await navigator.clipboard.writeText(review.suggested_reply!);
+                                await navigator.clipboard.writeText(review.approved_reply || review.suggested_reply!);
                                 toast({ title: "Kopyalandı ✓", description: "Yanıt panoya kopyalandı." });
                               }}
                             >
