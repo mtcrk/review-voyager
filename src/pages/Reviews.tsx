@@ -1128,7 +1128,9 @@ export default function Reviews() {
                             <PopoverContent className="w-80 max-h-60 overflow-auto" side="left">
                               {review.approved_reply && (
                                 <div className="mb-2">
-                                  <Badge variant="outline" className="mb-1 text-xs bg-green-50 text-green-700 border-green-200">Gönderilen Yanıt</Badge>
+                                  <Badge variant="outline" className="mb-1 text-xs bg-green-50 text-green-700 border-green-200">
+                                    {review.reply_source === 'google_api' ? 'Google\'a Gönderildi' : review.suggested_reply ? 'AI Yanıt (Onaylandı)' : 'Manuel Yanıt'}
+                                  </Badge>
                                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{review.approved_reply}</p>
                                 </div>
                               )}
