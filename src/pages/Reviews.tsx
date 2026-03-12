@@ -1032,7 +1032,7 @@ export default function Reviews() {
                   </button>
                 </TableHead>
                 <TableHead className="font-semibold">Durum</TableHead>
-                <TableHead className="font-semibold min-w-[280px]">AI Yanıt</TableHead>
+                <TableHead className="font-semibold min-w-[280px]">Yanıt</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
