@@ -88,7 +88,7 @@ export default function Settings() {
         </Button>
       </div>
 
-      <Tabs defaultValue="profile" className="space-y-6">
+      <Tabs defaultValue={searchParams.get('tab') || 'profile'} className="space-y-6">
         <TabsList className="bg-muted/30">
           <TabsTrigger value="profile">Profil</TabsTrigger>
           <TabsTrigger value="business">İşletme Bilgileri</TabsTrigger>
