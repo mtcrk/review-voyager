@@ -222,7 +222,20 @@ export default function Settings() {
                   </div>
                   <Badge variant="secondary">Bağlı Değil</Badge>
                 </div>
-                <Button className="w-full">Google Business'a Bağlan</Button>
+                <Button
+                  className="w-full"
+                  onClick={handleGoogleConnect}
+                  disabled={googleConnecting}
+                >
+                  {googleConnecting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Bağlanıyor...
+                    </>
+                  ) : (
+                    "Google Business'a Bağlan"
+                  )}
+                </Button>
               </div>
 
               <div className="space-y-3">
