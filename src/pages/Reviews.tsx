@@ -1112,8 +1112,13 @@ export default function Reviews() {
                           <Popover>
                             <PopoverTrigger asChild>
                               <div className="flex-1 max-w-[200px] cursor-pointer hover:text-foreground transition-colors">
-                                {review.approved_reply && (
-                                  <Badge variant="outline" className="mb-1 text-[10px] px-1.5 py-0 bg-green-50 text-green-700 border-green-200">Yanıt</Badge>
+                {review.approved_reply && (
+                                  <Badge variant="outline" className="mb-1 text-[10px] px-1.5 py-0 bg-green-50 text-green-700 border-green-200">
+                                    {review.reply_source === 'google_api' ? '🌐 Google' : review.suggested_reply ? '✨ AI' : '✏️ Manuel'}
+                                  </Badge>
+                                )}
+                                {!review.approved_reply && review.suggested_reply && (
+                                  <Badge variant="outline" className="mb-1 text-[10px] px-1.5 py-0 bg-purple-50 text-purple-700 border-purple-200">AI Öneri</Badge>
                                 )}
                                 <p className="text-xs text-muted-foreground line-clamp-2">
                                   {review.approved_reply || review.suggested_reply}
