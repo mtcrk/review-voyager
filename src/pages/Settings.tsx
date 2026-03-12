@@ -13,6 +13,7 @@ import { useState, useEffect } from "react";
 
 export default function Settings() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, profile, refreshProfile } = useAuth();
   const [fullName, setFullName] = useState('');
   const [saving, setSaving] = useState(false);
