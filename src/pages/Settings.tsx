@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { LogOut } from "lucide-react";
+import { Loader2, LogOut } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
@@ -17,6 +17,7 @@ export default function Settings() {
   const { user, profile, refreshProfile } = useAuth();
   const [fullName, setFullName] = useState('');
   const [saving, setSaving] = useState(false);
+  const [googleConnecting, setGoogleConnecting] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -54,7 +55,7 @@ export default function Settings() {
       if (error) throw error;
 
       await refreshProfile();
-      
+
       toast({
         title: "Başarılı",
         description: "Profil bilgileriniz güncellendi.",
@@ -67,6 +68,40 @@ export default function Settings() {
       });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleGoogleConnect = async () => {
+    setGoogleConnecting(true);
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        throw new Error("Lütfen önce giriş yapın");
+      }
+
+      const response = await supabase.functions.invoke('google-business-auth', {
+        body: { action: 'initiate' },
+      });
+
+      if (response.error) throw response.error;
+
+      if (!response.data?.authUrl) {
+        throw new Error("Google bağlantı adresi alınamadı");
+      }
+
+      window.location.href = response.data.authUrl;
+    } catch (error: any) {
+      toast({
+        title: "Bağlantı Hatası",
+        description: error.message || "Google Business bağlantısı başlatılamadı.",
+        variant: "destructive",
+      });
+    } finally {
+      setGoogleConnecting(false);
     }
   };
 
@@ -187,7 +222,20 @@ export default function Settings() {
                   </div>
                   <Badge variant="secondary">Bağlı Değil</Badge>
                 </div>
-                <Button className="w-full">Google Business'a Bağlan</Button>
+                <Button
+                  className="w-full"
+                  onClick={handleGoogleConnect}
+                  disabled={googleConnecting}
+                >
+                  {googleConnecting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Bağlanıyor...
+                    </>
+                  ) : (
+                    "Google Business'a Bağlan"
+                  )}
+                </Button>
               </div>
 
               <div className="space-y-3">
