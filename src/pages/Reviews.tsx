@@ -1145,7 +1145,7 @@ export default function Reviews() {
                               className="h-7 w-7"
                               title="Kopyala"
                               onClick={async () => {
-                                await navigator.clipboard.writeText(review.suggested_reply!);
+                                await navigator.clipboard.writeText(review.approved_reply || review.suggested_reply!);
                                 toast({ title: "Kopyalandı ✓", description: "Yanıt panoya kopyalandı." });
                               }}
                             >
