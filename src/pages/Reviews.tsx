@@ -731,15 +731,15 @@ export default function Reviews() {
             <RefreshCw className="h-4 w-4 mr-2" />
             Yenile
           </Button>
-          {activeBusiness?.google_connected && (
+          {targetBusiness?.google_connected && (
             <Button 
               size="sm" 
               onClick={async () => {
-                if (!activeBusiness) return;
+                if (!targetBusiness) return;
                 setIsFetchingBooking(true);
                 try {
                   const response = await supabase.functions.invoke('google-business-reviews', {
-                    body: { business_id: activeBusiness.id },
+                    body: { business_id: targetBusiness.id },
                   });
                   if (response.error) throw new Error(response.error.message);
                   const result = response.data;
