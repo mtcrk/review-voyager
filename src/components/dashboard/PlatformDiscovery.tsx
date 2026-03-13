@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/contexts/BusinessContext";
+import { useReviewFetch } from "@/contexts/ReviewFetchContext";
 import { toast } from "@/hooks/use-toast";
 import { Search, Check, X, ExternalLink, Loader2, Sparkles, Star, Hotel, Map, Building2 } from "lucide-react";
 
@@ -33,6 +34,7 @@ const platformDbField: Record<string, string> = {
 
 export function PlatformDiscovery() {
   const { activeBusiness, refetchBusinesses } = useBusiness();
+  const { startFetch } = useReviewFetch();
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<PlatformResult[]>([]);
   const [searched, setSearched] = useState(false);
@@ -88,16 +90,22 @@ export function PlatformDiscovery() {
   };
 
   const handleConfirm = async (result: PlatformResult) => {
-    if (!activeBusiness || !result.extractedId) return;
+    if (!activeBusiness) return;
     setConfirming(result.url);
 
     try {
       const field = platformDbField[result.platform];
       if (!field) throw new Error("Bilinmeyen platform");
 
+      const valueToStore = result.platform === "tripadvisor"
+        ? (result.url ? result.url.split("?")[0].split("#")[0] : result.extractedId)
+        : result.extractedId;
+
+      if (!valueToStore) throw new Error("Geçerli platform kimliği bulunamadı");
+
       const { error } = await supabase
         .from("businesses")
-        .update({ [field]: result.extractedId })
+        .update({ [field]: valueToStore })
         .eq("id", activeBusiness.id);
 
       if (error) throw error;
@@ -106,27 +114,36 @@ export function PlatformDiscovery() {
 
       toast({
         title: `${result.platformLabel} bağlandı!`,
-        description: "Yorumlar otomatik olarak çekilecek.",
+        description: "İlk senkronizasyon başlatılıyor.",
       });
 
       // Remove confirmed platform results
       setResults((prev) => prev.filter((r) => r.platform !== result.platform));
 
-      // Trigger initial review fetch
+      // Trigger initial review fetch in global background poll flow
       try {
-        const functionName = result.platform === "tripadvisor" 
-          ? "tripadvisor-fetch-reviews" 
+        const functionName = result.platform === "tripadvisor"
+          ? "tripadvisor-fetch-reviews"
           : "apify-fetch-reviews";
-        await supabase.functions.invoke(functionName, {
-          body: {
-            business_id: activeBusiness.id,
-            ...(result.platform !== "tripadvisor" ? { platform: result.platform } : {}),
-          },
+
+        const fetchResult = await startFetch({
+          businessId: activeBusiness.id,
+          businessName: activeBusiness.name,
+          platform: result.platform,
+          functionName,
         });
-        toast({
-          title: "Yorumlar çekiliyor",
-          description: `${result.platformLabel} yorumları arka planda çekiliyor...`,
-        });
+
+        if (fetchResult?.status === "started") {
+          toast({
+            title: "Yorumlar çekiliyor",
+            description: `${result.platformLabel} yorumları arka planda çekiliyor...`,
+          });
+        } else if (fetchResult?.success) {
+          toast({
+            title: "Yorumlar çekildi",
+            description: `${fetchResult.inserted ?? 0} yeni yorum eklendi.`,
+          });
+        }
       } catch {
         // Non-critical, reviews will be fetched on next cron
       }
@@ -241,7 +258,7 @@ export function PlatformDiscovery() {
                   >
                     <X className="h-4 w-4" />
                   </Button>
-                  {result.extractedId && (
+                  {(result.extractedId || (result.platform === "tripadvisor" && result.url)) && (
                     <Button
                       size="icon"
                       className="h-8 w-8"

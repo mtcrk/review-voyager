@@ -161,11 +161,22 @@ Deno.serve(async (req) => {
     }
 
     // Build TripAdvisor URL from stored value
-    let tripAdvisorUrl = business.tripadvisor_id;
-    if (!tripAdvisorUrl.startsWith("http")) {
-      // If stored as numeric ID, construct URL
-      tripAdvisorUrl = `https://www.tripadvisor.com/Restaurant_Review-d${tripAdvisorUrl}-Reviews`;
+    const storedTripadvisorValue = business.tripadvisor_id.trim();
+    let tripAdvisorUrl = storedTripadvisorValue;
+
+    if (!storedTripadvisorValue.startsWith("http")) {
+      const numericId = storedTripadvisorValue.match(/(\d{5,})/)?.[1];
+      if (!numericId) {
+        return new Response(
+          JSON.stringify({ error: "TripAdvisor URL/ID formatı geçersiz. Lütfen tam TripAdvisor URL'si kaydedin." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Hotel-first fallback for numeric IDs (project is hotel-focused)
+      tripAdvisorUrl = `https://www.tripadvisor.com/Hotel_Review-d${numericId}-Reviews`;
     }
+
     tripAdvisorUrl = tripAdvisorUrl.split('?')[0].split('#')[0];
 
     console.log(`Starting TripAdvisor actor (maxcopell/tripadvisor-reviews) for business ${business_id}, URL: ${tripAdvisorUrl}`);
