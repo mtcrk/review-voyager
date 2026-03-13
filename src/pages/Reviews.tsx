@@ -901,6 +901,7 @@ export default function Reviews() {
         if (!targetBusiness) return null;
         const hasId = config.getIdFromBusiness(targetBusiness);
         const platformReviews = reviews.filter((r: any) => r.platform === platformFilter);
+        if (platformReviews.length > 0 || !config) return null;
         return (
           <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-transparent shadow-card">
             <div className="p-6">
