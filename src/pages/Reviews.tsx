@@ -268,7 +268,19 @@ export default function Reviews() {
 
   const handlePlatformSetup = async (platform: string) => {
     const config = platformSetupConfig[platform];
-    if (!activeBusiness || !platformUrlInput.trim() || !config) return;
+    const targetBusiness = getTargetBusiness();
+
+    if (!targetBusiness || !platformUrlInput.trim() || !config) {
+      if (!targetBusiness) {
+        toast({
+          title: "Lokasyon seçin",
+          description: "Bu işlem için tek bir lokasyon seçmelisiniz.",
+          variant: "destructive",
+        });
+      }
+      return;
+    }
+
     setSavingPlatformUrl(true);
     const parsedId = parseUrlId(platformUrlInput, platform);
     try {
@@ -276,13 +288,13 @@ export default function Reviews() {
       await supabase
         .from("reviews")
         .delete()
-        .eq("business_id", activeBusiness.id)
+        .eq("business_id", targetBusiness.id)
         .eq("platform", platform);
 
       const { error: updateError } = await supabase
         .from('businesses')
         .update({ [config.dbField]: parsedId })
-        .eq('id', activeBusiness.id);
+        .eq('id', targetBusiness.id);
       if (updateError) throw updateError;
 
       const result = await invokeApifyFetchWithPolling(platform);
