@@ -9,6 +9,7 @@ const corsHeaders = {
 const APIFY_BASE = "https://api.apify.com/v2";
 const ACTOR_ID = "tri_angle~hotel-review-aggregator";
 const HOTELSCOM_ACTOR_ID = "memo23~hotels-scraper";
+const TRUSTPILOT_ACTOR_ID = "zen-studio~trustpilot-review-scraper";
 
 // Map Apify provider names to our platform names
 const PROVIDER_MAP: Record<string, string> = {
