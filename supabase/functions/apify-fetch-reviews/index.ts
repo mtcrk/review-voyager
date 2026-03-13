@@ -9,6 +9,7 @@ const corsHeaders = {
 const APIFY_BASE = "https://api.apify.com/v2";
 const ACTOR_ID = "tri_angle~hotel-review-aggregator";
 const HOTELSCOM_ACTOR_ID = "memo23~hotels-scraper";
+const TRUSTPILOT_ACTOR_ID = "zen-studio~trustpilot-review-scraper";
 
 // Map Apify provider names to our platform names
 const PROVIDER_MAP: Record<string, string> = {
@@ -222,6 +223,33 @@ Deno.serve(async (req) => {
         maxItems: 1000,
       };
       console.log(`Using dedicated Hotels.com scraper for hotel ID: ${hotelId}`);
+    } else if (platform === "trustpilot") {
+      // Trustpilot is NOT supported by hotel-review-aggregator, use dedicated actor
+      if (!business.trustpilot_url) {
+        return new Response(
+          JSON.stringify({ error: "Trustpilot URL bulunamadı. Lütfen önce Trustpilot URL'sini ekleyin." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      actorId = TRUSTPILOT_ACTOR_ID;
+      // trustpilot_url stores domain like "example.com" or full URL
+      const domain = business.trustpilot_url.replace(/^https?:\/\/(www\.)?trustpilot\.[a-z.]+\/review\//i, "").replace(/\/.*$/, "");
+      const businessUrl = `https://www.trustpilot.com/review/${domain}`;
+      actorInput = {
+        businessUrl,
+        maxResults: 200,
+      };
+      console.log(`Using dedicated Trustpilot scraper for: ${businessUrl}`);
+    } else if (platform === "booking" && business.booking_hotel_id && !business.place_id) {
+      // Booking.com with direct URL when place_id is missing
+      const bookingUrl = `https://www.booking.com/hotel/${business.booking_hotel_id}.html`;
+      actorInput = {
+        startUrls: [{ url: bookingUrl }],
+        providers: ["booking"],
+        scrapeReviewPictures: false,
+        scrapeReviewResponses: true,
+      };
+      console.log(`Using direct Booking URL (no place_id): ${bookingUrl}`);
     } else {
       // Use the general hotel-review-aggregator
       const providers = PLATFORM_TO_APIFY_PROVIDER[platform] || [];
@@ -291,25 +319,49 @@ Deno.serve(async (req) => {
   }
 });
 
-async function insertReviews(supabase: any, items: ApifyReview[], businessId: string, forcedPlatform?: string) {
-  // Transform reviews
+async function insertReviews(supabase: any, items: any[], businessId: string, forcedPlatform?: string) {
+  // Transform reviews - handle both aggregator format and Trustpilot format
   const transformed = items
-    .filter(item => item.reviewText || item.reviewTitle)
+    .filter(item => item.reviewText || item.reviewTitle || item.text || item.title)
     .map(item => {
-      const platform = forcedPlatform || normalizePlatform(item.provider);
-      const rating = normalizeRating(item.reviewRating, item.provider);
-      let text = item.reviewText || "";
-      if (item.reviewTitle && text) text = `${item.reviewTitle}\n\n${text}`;
-      else if (item.reviewTitle) text = item.reviewTitle;
+      // Detect Trustpilot dedicated scraper format
+      const isTrustpilotFormat = item.author || item.consumer;
+      const platform = forcedPlatform || (isTrustpilotFormat ? "trustpilot" : normalizePlatform(item.provider || "unknown"));
+      
+      let rating: number;
+      let text: string;
+      let reviewerName: string;
+      let postedAt: string;
+      let reviewId: string;
+
+      if (isTrustpilotFormat) {
+        // Trustpilot dedicated scraper format
+        rating = Math.min(5, Math.max(1, Math.round(Number(item.rating || item.stars || 3))));
+        text = item.text || item.reviewText || "";
+        if (item.title && text) text = `${item.title}\n\n${text}`;
+        else if (item.title) text = item.title;
+        reviewerName = item.author?.name || item.consumer?.displayName || item.authorName || "Anonymous";
+        postedAt = toSafeIsoDate(item.date || item.createdAt || item.publishedDate);
+        reviewId = item.id || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      } else {
+        // Hotel-review-aggregator format
+        rating = normalizeRating(item.reviewRating, item.provider || "");
+        text = item.reviewText || "";
+        if (item.reviewTitle && text) text = `${item.reviewTitle}\n\n${text}`;
+        else if (item.reviewTitle) text = item.reviewTitle;
+        reviewerName = item.authorName || "Anonymous";
+        postedAt = toSafeIsoDate(item.reviewDate);
+        reviewId = item.reviewId || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      }
 
       return {
         business_id: businessId,
         platform,
-        google_review_id: `apify-${item.provider}-${item.reviewId}`,
-        reviewer_name: item.authorName || "Anonymous",
+        google_review_id: `apify-${platform}-${reviewId}`,
+        reviewer_name: reviewerName,
         rating,
         text: text || null,
-        posted_at: toSafeIsoDate(item.reviewDate),
+        posted_at: postedAt,
         status: "pending_reply",
         sentiment: rating >= 4 ? "positive" : rating >= 3 ? "neutral" : "negative",
       };
