@@ -34,6 +34,7 @@ const platformDbField: Record<string, string> = {
 
 export function PlatformDiscovery() {
   const { activeBusiness, refetchBusinesses } = useBusiness();
+  const { startFetch } = useReviewFetch();
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<PlatformResult[]>([]);
   const [searched, setSearched] = useState(false);
