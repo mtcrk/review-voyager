@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/contexts/BusinessContext";
+import { useReviewFetch } from "@/contexts/ReviewFetchContext";
 import { toast } from "@/hooks/use-toast";
 import { Search, Check, X, ExternalLink, Loader2, Sparkles, Star, Hotel, Map, Building2 } from "lucide-react";
 
