@@ -898,7 +898,7 @@ export default function Reviews() {
       {/* Platform Setup Card - shows when a specific wextractor platform is selected and not configured */}
       {platformFilter !== "all" && platformFilter !== "google" && platformSetupConfig[platformFilter] && (() => {
         const config = platformSetupConfig[platformFilter];
-        const hasId = config.getIdFromBusiness(activeBusiness);
+        const hasId = targetBusiness ? config.getIdFromBusiness(targetBusiness) : null;
         const platformReviews = reviews.filter((r: any) => r.platform === platformFilter);
         if (platformReviews.length > 0 || !config) return null;
         return (
