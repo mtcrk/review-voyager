@@ -131,6 +131,12 @@ export default function Reviews() {
           const result = await invokeApifyFetchWithPolling(platform);
           if (result?.error) {
             toast({ title: "Hata", description: result.error, variant: "destructive" });
+          } else if (result?.status === "started") {
+            toast({
+              title: `${config.label} yorumları çekiliyor`,
+              description: "İlk senkronizasyon arka planda başladı. Tamamlanınca bildirim göreceksiniz.",
+            });
+            refetchBusinesses();
           } else {
             toast({
               title: `${config.label} Yorumları Çekildi! 🎉`,
@@ -233,12 +239,7 @@ export default function Reviews() {
 
   // Legacy wrapper for places that still use the old API (platform setup with URL)
   const invokeApifyFetchWithPolling = async (platform: string) => {
-    const result = await invokeApifyFetchStart(platform);
-    if (result?.status === "started") {
-      // Return immediately; background poll in context will handle completion
-      return { inserted: 0, skipped: 0, status: "completed_in_background" };
-    }
-    return result;
+    return invokeApifyFetchStart(platform);
   };
 
   const handlePlatformSetup = async (platform: string) => {
@@ -263,6 +264,13 @@ export default function Reviews() {
       const result = await invokeApifyFetchWithPolling(platform);
       if (result?.error) {
         toast({ title: "Hata", description: result.error, variant: "destructive" });
+      } else if (result?.status === "started") {
+        toast({
+          title: `${config.label} yorumları çekiliyor`,
+          description: "İlk senkronizasyon arka planda başladı. Tamamlanınca bildirim göreceksiniz.",
+        });
+        setPlatformUrlInput("");
+        refetchBusinesses();
       } else {
         toast({
           title: "Yorumlar Çekildi! 🎉",
