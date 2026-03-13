@@ -105,15 +105,32 @@ export default function Reviews() {
   const [platformUrlInput, setPlatformUrlInput] = useState("");
   const [savingPlatformUrl, setSavingPlatformUrl] = useState(false);
 
+  const getTargetBusiness = () => {
+    if (!activeBusiness) return null;
+    if (locationFilter === "active") return activeBusiness;
+    if (locationFilter === "all") return null;
+    return businesses.find((b) => b.id === locationFilter) || null;
+  };
+
   // Auto-discover platform URL
   const handleAutoDiscover = async (platform: string) => {
-    if (!activeBusiness) return;
+    const targetBusiness = getTargetBusiness();
+    if (!targetBusiness) {
+      toast({
+        title: "Lokasyon seçin",
+        description: "Bu işlem için tek bir lokasyon seçmelisiniz.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsAutoDiscovering(true);
     try {
       const { data, error } = await supabase.functions.invoke("discover-platforms", {
-        body: { business_name: activeBusiness.name, city: activeBusiness.city || "" },
+        body: { business_name: targetBusiness.name, city: targetBusiness.city || "" },
       });
       if (error) throw error;
+
       // Only accept high-confidence matches to avoid wrong associations
       const match = data?.results?.find((r: any) => r.platform === platform && r.confidence === "high");
       if (match?.url && match?.extractedId) {
@@ -122,11 +139,16 @@ export default function Reviews() {
         if (config) {
           const parsedId = parseUrlId(match.url, platform);
           // Delete old reviews
-          await supabase.from("reviews").delete()
-            .eq("business_id", activeBusiness.id).eq("platform", platform);
+          await supabase
+            .from("reviews")
+            .delete()
+            .eq("business_id", targetBusiness.id)
+            .eq("platform", platform);
           // Save to DB
-          await supabase.from("businesses").update({ [config.dbField]: parsedId })
-            .eq("id", activeBusiness.id);
+          await supabase
+            .from("businesses")
+            .update({ [config.dbField]: parsedId })
+            .eq("id", targetBusiness.id);
           // Fetch reviews
           const result = await invokeApifyFetchWithPolling(platform);
           if (result?.error) {
@@ -221,10 +243,12 @@ export default function Reviews() {
 
   // Fire-and-forget using global context
   const invokeApifyFetchStart = async (platform: string) => {
-    if (!activeBusiness) throw new Error("İşletme bulunamadı");
+    const targetBusiness = getTargetBusiness();
+    if (!targetBusiness) throw new Error("Bu işlem için tek bir lokasyon seçmelisiniz");
+
     return startFetch({
-      businessId: activeBusiness.id,
-      businessName: activeBusiness.name,
+      businessId: targetBusiness.id,
+      businessName: targetBusiness.name,
       platform,
     });
   };
