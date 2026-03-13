@@ -764,11 +764,11 @@ export default function Reviews() {
               {isFetchingBooking ? 'Çekiliyor...' : 'Google Yorumları Çek'}
             </Button>
           )}
-          {platformFilter !== "all" && platformFilter !== "google" && activeBusiness && platformSetupConfig[platformFilter]?.getIdFromBusiness(activeBusiness) && (
+          {platformFilter !== "all" && platformFilter !== "google" && targetBusiness && platformSetupConfig[platformFilter]?.getIdFromBusiness(targetBusiness) && (
             <Button 
               size="sm" 
               onClick={async () => {
-                if (!activeBusiness) return;
+                if (!targetBusiness) return;
                 setIsFetchingBooking(true);
                 try {
                   const result = await invokeApifyFetchStart(platformFilter);
