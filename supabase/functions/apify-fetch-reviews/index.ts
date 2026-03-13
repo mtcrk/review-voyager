@@ -223,6 +223,33 @@ Deno.serve(async (req) => {
         maxItems: 1000,
       };
       console.log(`Using dedicated Hotels.com scraper for hotel ID: ${hotelId}`);
+    } else if (platform === "trustpilot") {
+      // Trustpilot is NOT supported by hotel-review-aggregator, use dedicated actor
+      if (!business.trustpilot_url) {
+        return new Response(
+          JSON.stringify({ error: "Trustpilot URL bulunamadı. Lütfen önce Trustpilot URL'sini ekleyin." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      actorId = TRUSTPILOT_ACTOR_ID;
+      // trustpilot_url stores domain like "example.com" or full URL
+      const domain = business.trustpilot_url.replace(/^https?:\/\/(www\.)?trustpilot\.[a-z.]+\/review\//i, "").replace(/\/.*$/, "");
+      const businessUrl = `https://www.trustpilot.com/review/${domain}`;
+      actorInput = {
+        businessUrl,
+        maxResults: 200,
+      };
+      console.log(`Using dedicated Trustpilot scraper for: ${businessUrl}`);
+    } else if (platform === "booking" && business.booking_hotel_id && !business.place_id) {
+      // Booking.com with direct URL when place_id is missing
+      const bookingUrl = `https://www.booking.com/hotel/${business.booking_hotel_id}.html`;
+      actorInput = {
+        startUrls: [{ url: bookingUrl }],
+        providers: ["booking"],
+        scrapeReviewPictures: false,
+        scrapeReviewResponses: true,
+      };
+      console.log(`Using direct Booking URL (no place_id): ${bookingUrl}`);
     } else {
       // Use the general hotel-review-aggregator
       const providers = PLATFORM_TO_APIFY_PROVIDER[platform] || [];
