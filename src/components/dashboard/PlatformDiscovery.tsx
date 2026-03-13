@@ -258,7 +258,7 @@ export function PlatformDiscovery() {
                   >
                     <X className="h-4 w-4" />
                   </Button>
-                  {result.extractedId && (
+                  {(result.extractedId || (result.platform === "tripadvisor" && result.url)) && (
                     <Button
                       size="icon"
                       className="h-8 w-8"
