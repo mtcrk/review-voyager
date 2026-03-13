@@ -105,15 +105,32 @@ export default function Reviews() {
   const [platformUrlInput, setPlatformUrlInput] = useState("");
   const [savingPlatformUrl, setSavingPlatformUrl] = useState(false);
 
+  const getTargetBusiness = () => {
+    if (!activeBusiness) return null;
+    if (locationFilter === "active") return activeBusiness;
+    if (locationFilter === "all") return null;
+    return businesses.find((b) => b.id === locationFilter) || null;
+  };
+
   // Auto-discover platform URL
   const handleAutoDiscover = async (platform: string) => {
-    if (!activeBusiness) return;
+    const targetBusiness = getTargetBusiness();
+    if (!targetBusiness) {
+      toast({
+        title: "Lokasyon seçin",
+        description: "Bu işlem için tek bir lokasyon seçmelisiniz.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsAutoDiscovering(true);
     try {
       const { data, error } = await supabase.functions.invoke("discover-platforms", {
-        body: { business_name: activeBusiness.name, city: activeBusiness.city || "" },
+        body: { business_name: targetBusiness.name, city: targetBusiness.city || "" },
       });
       if (error) throw error;
+
       // Only accept high-confidence matches to avoid wrong associations
       const match = data?.results?.find((r: any) => r.platform === platform && r.confidence === "high");
       if (match?.url && match?.extractedId) {
@@ -122,11 +139,16 @@ export default function Reviews() {
         if (config) {
           const parsedId = parseUrlId(match.url, platform);
           // Delete old reviews
-          await supabase.from("reviews").delete()
-            .eq("business_id", activeBusiness.id).eq("platform", platform);
+          await supabase
+            .from("reviews")
+            .delete()
+            .eq("business_id", targetBusiness.id)
+            .eq("platform", platform);
           // Save to DB
-          await supabase.from("businesses").update({ [config.dbField]: parsedId })
-            .eq("id", activeBusiness.id);
+          await supabase
+            .from("businesses")
+            .update({ [config.dbField]: parsedId })
+            .eq("id", targetBusiness.id);
           // Fetch reviews
           const result = await invokeApifyFetchWithPolling(platform);
           if (result?.error) {
@@ -221,10 +243,12 @@ export default function Reviews() {
 
   // Fire-and-forget using global context
   const invokeApifyFetchStart = async (platform: string) => {
-    if (!activeBusiness) throw new Error("İşletme bulunamadı");
+    const targetBusiness = getTargetBusiness();
+    if (!targetBusiness) throw new Error("Bu işlem için tek bir lokasyon seçmelisiniz");
+
     return startFetch({
-      businessId: activeBusiness.id,
-      businessName: activeBusiness.name,
+      businessId: targetBusiness.id,
+      businessName: targetBusiness.name,
       platform,
     });
   };
@@ -244,7 +268,19 @@ export default function Reviews() {
 
   const handlePlatformSetup = async (platform: string) => {
     const config = platformSetupConfig[platform];
-    if (!activeBusiness || !platformUrlInput.trim() || !config) return;
+    const targetBusiness = getTargetBusiness();
+
+    if (!targetBusiness || !platformUrlInput.trim() || !config) {
+      if (!targetBusiness) {
+        toast({
+          title: "Lokasyon seçin",
+          description: "Bu işlem için tek bir lokasyon seçmelisiniz.",
+          variant: "destructive",
+        });
+      }
+      return;
+    }
+
     setSavingPlatformUrl(true);
     const parsedId = parseUrlId(platformUrlInput, platform);
     try {
@@ -252,13 +288,13 @@ export default function Reviews() {
       await supabase
         .from("reviews")
         .delete()
-        .eq("business_id", activeBusiness.id)
+        .eq("business_id", targetBusiness.id)
         .eq("platform", platform);
 
       const { error: updateError } = await supabase
         .from('businesses')
         .update({ [config.dbField]: parsedId })
-        .eq('id', activeBusiness.id);
+        .eq('id', targetBusiness.id);
       if (updateError) throw updateError;
 
       const result = await invokeApifyFetchWithPolling(platform);
@@ -638,8 +674,9 @@ export default function Reviews() {
     }
   };
 
-  const pendingCount = reviews.filter((r) => !r.status || r.status === "pending").length;
+  const pendingCount = reviews.filter((r) => !r.status || r.status === "pending" || r.status === "pending_reply").length;
   const repliedCount = reviews.filter((r) => r.status === "replied").length;
+  const targetBusiness = getTargetBusiness();
 
   if (!activeBusiness) {
     return (
@@ -694,15 +731,15 @@ export default function Reviews() {
             <RefreshCw className="h-4 w-4 mr-2" />
             Yenile
           </Button>
-          {activeBusiness?.google_connected && (
+          {targetBusiness?.google_connected && (
             <Button 
               size="sm" 
               onClick={async () => {
-                if (!activeBusiness) return;
+                if (!targetBusiness) return;
                 setIsFetchingBooking(true);
                 try {
                   const response = await supabase.functions.invoke('google-business-reviews', {
-                    body: { business_id: activeBusiness.id },
+                    body: { business_id: targetBusiness.id },
                   });
                   if (response.error) throw new Error(response.error.message);
                   const result = response.data;
@@ -727,11 +764,11 @@ export default function Reviews() {
               {isFetchingBooking ? 'Çekiliyor...' : 'Google Yorumları Çek'}
             </Button>
           )}
-          {platformFilter !== "all" && platformFilter !== "google" && activeBusiness && platformSetupConfig[platformFilter]?.getIdFromBusiness(activeBusiness) && (
+          {platformFilter !== "all" && platformFilter !== "google" && targetBusiness && platformSetupConfig[platformFilter]?.getIdFromBusiness(targetBusiness) && (
             <Button 
               size="sm" 
               onClick={async () => {
-                if (!activeBusiness) return;
+                if (!targetBusiness) return;
                 setIsFetchingBooking(true);
                 try {
                   const result = await invokeApifyFetchStart(platformFilter);
@@ -861,7 +898,8 @@ export default function Reviews() {
       {/* Platform Setup Card - shows when a specific wextractor platform is selected and not configured */}
       {platformFilter !== "all" && platformFilter !== "google" && platformSetupConfig[platformFilter] && (() => {
         const config = platformSetupConfig[platformFilter];
-        const hasId = config.getIdFromBusiness(activeBusiness);
+        if (!targetBusiness) return null;
+        const hasId = config.getIdFromBusiness(targetBusiness);
         const platformReviews = reviews.filter((r: any) => r.platform === platformFilter);
         if (platformReviews.length > 0 || !config) return null;
         return (
@@ -947,7 +985,7 @@ export default function Reviews() {
       })()}
 
       {/* Google empty state */}
-      {filteredReviews.length === 0 && platformFilter === "google" && activeBusiness.google_connected && (
+      {filteredReviews.length === 0 && platformFilter === "google" && targetBusiness?.google_connected && (
         <Card className="p-8 shadow-card border-dashed border-2 border-primary/30 bg-primary/5">
           <div className="max-w-lg mx-auto text-center space-y-4">
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
@@ -959,11 +997,11 @@ export default function Reviews() {
             </p>
             <Button
               onClick={async () => {
-                if (!activeBusiness) return;
+                if (!targetBusiness) return;
                 setIsFetchingBooking(true);
                 try {
                   const response = await supabase.functions.invoke('google-business-reviews', {
-                    body: { business_id: activeBusiness.id },
+                    body: { business_id: targetBusiness.id },
                   });
                   if (response.error) throw new Error(response.error.message);
                   const result = response.data;
