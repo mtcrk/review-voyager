@@ -676,6 +676,7 @@ export default function Reviews() {
 
   const pendingCount = reviews.filter((r) => !r.status || r.status === "pending").length;
   const repliedCount = reviews.filter((r) => r.status === "replied").length;
+  const targetBusiness = getTargetBusiness();
 
   if (!activeBusiness) {
     return (
