@@ -984,7 +984,7 @@ export default function Reviews() {
       })()}
 
       {/* Google empty state */}
-      {filteredReviews.length === 0 && platformFilter === "google" && activeBusiness.google_connected && (
+      {filteredReviews.length === 0 && platformFilter === "google" && targetBusiness?.google_connected && (
         <Card className="p-8 shadow-card border-dashed border-2 border-primary/30 bg-primary/5">
           <div className="max-w-lg mx-auto text-center space-y-4">
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
@@ -996,11 +996,11 @@ export default function Reviews() {
             </p>
             <Button
               onClick={async () => {
-                if (!activeBusiness) return;
+                if (!targetBusiness) return;
                 setIsFetchingBooking(true);
                 try {
                   const response = await supabase.functions.invoke('google-business-reviews', {
-                    body: { business_id: activeBusiness.id },
+                    body: { business_id: targetBusiness.id },
                   });
                   if (response.error) throw new Error(response.error.message);
                   const result = response.data;
