@@ -46,6 +46,8 @@ import About from "./pages/About";
 import Locations from "./pages/Locations";
 import EmailCenter from "./pages/EmailCenter";
 import RepScore from "./pages/RepScore";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 
 const queryClient = new QueryClient();
 
@@ -74,6 +76,8 @@ const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="/demo" element={<DemoPage />} />
             <Route path="/about" element={<About />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/automations/instagram-sales" element={<InstagramSales />} />
             <Route path="/automations/google-reviews" element={<GoogleReviews />} />
             <Route path="/automations/whatsapp" element={<WhatsAppAutomation />} />
