@@ -1,13 +1,18 @@
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Bingbot
 Allow: /
+Crawl-delay: 2
 
 User-agent: Twitterbot
 Allow: /
 
 User-agent: facebookexternalhit
+Allow: /
+
+User-agent: LinkedInBot
 Allow: /
 
 User-agent: *
@@ -23,5 +28,10 @@ Disallow: /tiktok-inbox
 Disallow: /tiktok-dm
 Disallow: /locations
 Disallow: /statistics
+Disallow: /rep-score
+Disallow: /report
+Disallow: /onboarding
+Disallow: /auth/callback
+Disallow: /reset-password
 
 Sitemap: https://voyagerespond.com/sitemap.xml
