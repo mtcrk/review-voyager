@@ -46,6 +46,8 @@ import About from "./pages/About";
 import Locations from "./pages/Locations";
 import EmailCenter from "./pages/EmailCenter";
 import RepScore from "./pages/RepScore";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 
 const queryClient = new QueryClient();
 
