@@ -48,6 +48,9 @@ import EmailCenter from "./pages/EmailCenter";
 import RepScore from "./pages/RepScore";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import GoogleYorumCevapOrnekleri from "./pages/seo/GoogleYorumCevapOrnekleri";
+import RestoranYorumCevaplari from "./pages/seo/RestoranYorumCevaplari";
+import OtelYorumCevaplari from "./pages/seo/OtelYorumCevaplari";
 
 const queryClient = new QueryClient();
 
@@ -78,6 +81,9 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
+            <Route path="/google-yorum-cevap-ornekleri" element={<GoogleYorumCevapOrnekleri />} />
+            <Route path="/restoran-yorum-cevaplari" element={<RestoranYorumCevaplari />} />
+            <Route path="/otel-yorum-cevaplari" element={<OtelYorumCevaplari />} />
             <Route path="/automations/instagram-sales" element={<InstagramSales />} />
             <Route path="/automations/google-reviews" element={<GoogleReviews />} />
             <Route path="/automations/whatsapp" element={<WhatsAppAutomation />} />
