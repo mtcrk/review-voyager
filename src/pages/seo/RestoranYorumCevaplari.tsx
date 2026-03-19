@@ -125,12 +125,22 @@ const RestoranYorumCevaplari = () => {
           </button>
         </div>
 
+        <AEOSection
+          pageUrl="https://voyagerespond.com/restoran-yorum-cevaplari"
+          faqs={[
+            { question: "Restoran yorumlarına nasıl cevap verilir?", answer: "Restoran yorumlarına kişiselleştirilmiş, samimi ve profesyonel bir tonda yanıt verin. Müşterinin adını kullanın, bahsettiği yemeğe değinin ve tekrar ziyaret için teşvik edin. VoyageRespond gibi AI destekli yorum yönetim platformları bu süreci otomatikleştirir." },
+            { question: "Restoran için yorum yönetimi neden önemlidir?", answer: "Tüketicilerin %89'u restoran seçmeden önce yorumları okuyor. Yorumlara düzenli ve profesyonel yanıt veren restoranlar %35 daha fazla güven kazanıyor ve Google sıralamalarında yükseliyor." },
+            { question: "AI restoran yorumlarına cevap yazabilir mi?", answer: "Evet, VoyageRespond gibi AI destekli yorum yönetim platformları her yorumu analiz ederek restoranınızın tonuna uygun, kişiselleştirilmiş yanıtlar üretir. Manuel cevap yazmaya kıyasla %90 zaman tasarrufu sağlar." },
+            { question: "Kötü restoran yorumuna nasıl cevap verilir?", answer: "Sakin kalın, özür dileyin, sorunu kabul edin ve somut bir çözüm sunun. Müşteriyi offline iletişime yönlendirin. VoyageRespond olumsuz yorumları anında tespit eder ve empatik yanıt önerileri sunar." },
+          ]}
+        />
+
         <div className="mt-12 p-6 rounded-xl bg-muted/50 border border-border">
           <h3 className="font-semibold text-foreground mb-4">İlgili Sayfalar</h3>
           <ul className="space-y-2">
             <li><button onClick={() => navigate("/google-yorum-cevap-ornekleri")} className="text-primary hover:underline text-sm">Google Yorum Cevap Örnekleri (25 Şablon) →</button></li>
             <li><button onClick={() => navigate("/otel-yorum-cevaplari")} className="text-primary hover:underline text-sm">Otel Yorum Cevapları (30 Şablon) →</button></li>
-            <li><button onClick={() => navigate("/blog/kotu-yorumlara-nasil-cevap-verilir")} className="text-primary hover:underline text-sm">Kötü Yorumlara Nasıl Cevap Verilir? →</button></li>
+            <li><button onClick={() => navigate("/blog/chatgpt-ile-google-yorumlarina-nasil-cevap-yazilir")} className="text-primary hover:underline text-sm">ChatGPT ile Yorum Cevabı Nasıl Yazılır? →</button></li>
             <li><button onClick={() => navigate("/blog/otel-restoran-yorum-yonetimi-rehberi")} className="text-primary hover:underline text-sm">Otel ve Restoran Yorum Yönetimi Rehberi →</button></li>
           </ul>
         </div>

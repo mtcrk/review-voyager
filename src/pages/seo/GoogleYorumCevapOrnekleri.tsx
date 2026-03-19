@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowRight, Copy, Check, MessageSquare } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { useEffect, useState } from "react";
+import AEOSection from "@/components/seo/AEOSection";
 
 const templates = [
   { category: "⭐⭐⭐⭐⭐ Olumlu Yorumlar", items: [
