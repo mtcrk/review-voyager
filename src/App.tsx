@@ -81,6 +81,9 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
+            <Route path="/google-yorum-cevap-ornekleri" element={<GoogleYorumCevapOrnekleri />} />
+            <Route path="/restoran-yorum-cevaplari" element={<RestoranYorumCevaplari />} />
+            <Route path="/otel-yorum-cevaplari" element={<OtelYorumCevaplari />} />
             <Route path="/automations/instagram-sales" element={<InstagramSales />} />
             <Route path="/automations/google-reviews" element={<GoogleReviews />} />
             <Route path="/automations/whatsapp" element={<WhatsAppAutomation />} />

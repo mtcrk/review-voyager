@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Copy, Check, Star, MessageSquare } from "lucide-react";
+import { ArrowRight, Copy, Check, MessageSquare } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { useEffect, useState } from "react";
 
