@@ -804,6 +804,78 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Mid-Page Blog Section — Müşteriler bunları da okuyor */}
+      <section className="container mx-auto px-6 py-20">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            Müşteriler bunları da okuyor
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            İşletme sahiplerinin en çok okuduğu yorum yönetimi rehberleri.
+          </p>
+        </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+          {blogPosts.slice(0, 4).map((post) => (
+            <button
+              key={post.slug}
+              onClick={() => navigate(`/blog/${post.slug}`)}
+              className="text-left p-6 rounded-xl border border-border bg-card hover:shadow-xl hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 group"
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                  <Tag className="w-3 h-3" />
+                  {post.category}
+                </span>
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  {post.readTime}
+                </span>
+              </div>
+              <h3 className="font-semibold text-foreground text-sm leading-snug group-hover:text-primary transition-colors mb-2">
+                {post.title}
+              </h3>
+              <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{post.description}</p>
+              <span className="text-xs text-primary font-medium inline-flex items-center gap-1 group-hover:gap-2 transition-all">
+                Devamını oku <ArrowRight className="w-3 h-3" />
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Blog as Product Feature — AI ile daha iyi yanıt yazmayı öğrenin */}
+      <section className="container mx-auto px-6 py-16">
+        <div className="max-w-3xl mx-auto">
+          <div className="relative overflow-hidden rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/5 via-background to-background p-10 md:p-14">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-purple-500 to-blue-500"></div>
+            <div className="text-center space-y-5">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
+                <BookOpen className="w-3.5 h-3.5" />
+                Ücretsiz Rehberler
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+                AI ile daha iyi yanıt yazmayı öğrenin
+              </h2>
+              <p className="text-muted-foreground max-w-xl mx-auto leading-relaxed">
+                Gerçek örnekler ve hazır şablonlarla müşteri yorumlarına nasıl profesyonel cevap vereceğinizi keşfedin.
+              </p>
+              <div className="pt-2">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => navigate("/blog")}
+                  className="text-base px-8 py-6 hover:bg-primary/5 border-primary/20 hover:border-primary/40 transition-all duration-300"
+                >
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  Tüm rehberleri keşfet
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Testimonials Section */}
       <Testimonials />
 
