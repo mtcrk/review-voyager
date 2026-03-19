@@ -232,6 +232,15 @@ const Index = () => {
                 {t('nav.contact', 'Contact')}
               </button>
               <button
+                onClick={() => navigate("/blog")}
+                className="text-base font-medium transition-colors relative"
+                style={{ color: '#7A5AF8' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#6D28D9'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#7A5AF8'}
+              >
+                📚 Rehberler
+              </button>
+              <button
                 onClick={() => navigate("/about")}
                 className="text-base font-medium transition-colors"
                 style={{ color: '#1F2937' }}
