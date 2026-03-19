@@ -921,7 +921,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="border-t border-border bg-card/50 backdrop-blur-sm mt-20">
         <div className="container mx-auto px-6 py-12">
-          <div className="grid md:grid-cols-3 gap-8 mb-8">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <img src={voyageRespondLogo} alt="VoyageRespond" className="h-6 w-6" />
@@ -937,7 +937,17 @@ const Index = () => {
                 <button onClick={() => scrollToSection("pricing")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing.earlyAccess.badge', 'Erken Erişim')}</button>
                 <button onClick={() => navigate("/contact")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('nav.contact', 'İletişim')}</button>
                 <button onClick={() => navigate("/about")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('about.badge', 'Hakkımızda')}</button>
+                <button onClick={() => navigate("/blog")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Blog</button>
                 <button onClick={() => navigate("/hub")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Hub</button>
+              </div>
+            </div>
+            <div>
+              <h4 className="font-semibold text-foreground mb-3">Popüler Rehberler</h4>
+              <div className="space-y-2">
+                <button onClick={() => navigate("/blog/google-yorumlarina-nasil-yanit-verilir")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Google yorumlarına nasıl cevap verilir</button>
+                <button onClick={() => navigate("/blog/kotu-yorumlara-nasil-cevap-verilir")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Kötü yorumlara cevap örnekleri</button>
+                <button onClick={() => navigate("/blog/otel-restoran-yorum-yonetimi-rehberi")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Yorum yönetimi nasıl yapılır</button>
+                <button onClick={() => navigate("/google-yorum-cevap-ornekleri")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Hazır yorum cevapları</button>
               </div>
             </div>
             <div>
