@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { MessageSquare, Star, Phone, Check, ArrowRight, Clock, Lock, Music2, Eye, TrendingUp, Sparkles, Target, Users, Zap, Shield, Menu, X } from "lucide-react";
+import { MessageSquare, Star, Phone, Check, ArrowRight, Clock, Lock, Music2, Eye, TrendingUp, Sparkles, Target, Users, Zap, Shield, Menu, X, BookOpen, Tag } from "lucide-react";
 import { useState } from "react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 
@@ -12,6 +12,7 @@ import { TrustBadges } from "@/components/landing/TrustBadges";
 import { APIComplianceBanner } from "@/components/landing/APIComplianceBanner";
 import { ProductVideo } from "@/components/landing/ProductVideo";
 import { AIVisibilityDemo } from "@/components/landing/AIVisibilityDemo";
+import { blogPosts } from "@/lib/blogPosts";
 const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -231,6 +232,15 @@ const Index = () => {
                 {t('nav.contact', 'Contact')}
               </button>
               <button
+                onClick={() => navigate("/blog")}
+                className="text-base font-medium transition-colors relative"
+                style={{ color: '#7A5AF8' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#6D28D9'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#7A5AF8'}
+              >
+                📚 Rehberler
+              </button>
+              <button
                 onClick={() => navigate("/about")}
                 className="text-base font-medium transition-colors"
                 style={{ color: '#1F2937' }}
@@ -299,6 +309,13 @@ const Index = () => {
                 className="block w-full text-left px-4 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors"
               >
                 {t('nav.contact', 'Contact')}
+              </button>
+              <button
+                onClick={() => { navigate("/blog"); setMobileMenuOpen(false); }}
+                className="block w-full text-left px-4 py-3 rounded-lg text-base font-medium hover:bg-muted transition-colors"
+                style={{ color: '#7A5AF8' }}
+              >
+                📚 Rehberler
               </button>
               <button
                 onClick={() => { navigate("/about"); setMobileMenuOpen(false); }}
@@ -377,6 +394,35 @@ const Index = () => {
             >
               {t('landing.tryDemo', 'Try AI Reply Demo')}
             </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Hero Blog Strip — En Çok Okunan Rehberler */}
+      <section className="container mx-auto px-6 pb-16 -mt-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center gap-2 mb-6 justify-center">
+            <BookOpen className="w-4 h-4 text-primary" />
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">En Çok Okunan Rehberler</h3>
+          </div>
+          <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory" style={{ scrollbarWidth: 'none' }}>
+            {[
+              { slug: "google-yorumlarina-nasil-yanit-verilir", title: "Google yorumlarına nasıl cevap verilir", desc: "Adım adım profesyonel yanıt rehberi" },
+              { slug: "kotu-yorumlara-nasil-cevap-verilir", title: "Kötü yorumlara nasıl cevap verilir", desc: "Olumsuz yorumları fırsata çevirin" },
+              { slug: "google-yorum-cevap-ornekleri", title: "20 hazır Google yorum cevabı", desc: "Kopyala-yapıştır yanıt şablonları" },
+            ].map((item) => (
+              <button
+                key={item.slug}
+                onClick={() => navigate(`/blog/${item.slug}`)}
+                className="min-w-[260px] snap-start flex-shrink-0 p-5 rounded-xl border border-border bg-card hover:shadow-lg hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 text-left group"
+              >
+                <h4 className="font-semibold text-foreground text-sm group-hover:text-primary transition-colors mb-1.5">{item.title}</h4>
+                <p className="text-xs text-muted-foreground">{item.desc}</p>
+                <span className="text-xs text-primary font-medium mt-2 inline-flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  Oku <ArrowRight className="w-3 h-3" />
+                </span>
+              </button>
+            ))}
           </div>
         </div>
       </section>
@@ -758,6 +804,78 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Mid-Page Blog Section — Müşteriler bunları da okuyor */}
+      <section className="container mx-auto px-6 py-20">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            Müşteriler bunları da okuyor
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            İşletme sahiplerinin en çok okuduğu yorum yönetimi rehberleri.
+          </p>
+        </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+          {blogPosts.slice(0, 4).map((post) => (
+            <button
+              key={post.slug}
+              onClick={() => navigate(`/blog/${post.slug}`)}
+              className="text-left p-6 rounded-xl border border-border bg-card hover:shadow-xl hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 group"
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                  <Tag className="w-3 h-3" />
+                  {post.category}
+                </span>
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  {post.readTime}
+                </span>
+              </div>
+              <h3 className="font-semibold text-foreground text-sm leading-snug group-hover:text-primary transition-colors mb-2">
+                {post.title}
+              </h3>
+              <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{post.description}</p>
+              <span className="text-xs text-primary font-medium inline-flex items-center gap-1 group-hover:gap-2 transition-all">
+                Devamını oku <ArrowRight className="w-3 h-3" />
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Blog as Product Feature — AI ile daha iyi yanıt yazmayı öğrenin */}
+      <section className="container mx-auto px-6 py-16">
+        <div className="max-w-3xl mx-auto">
+          <div className="relative overflow-hidden rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/5 via-background to-background p-10 md:p-14">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-purple-500 to-blue-500"></div>
+            <div className="text-center space-y-5">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
+                <BookOpen className="w-3.5 h-3.5" />
+                Ücretsiz Rehberler
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+                AI ile daha iyi yanıt yazmayı öğrenin
+              </h2>
+              <p className="text-muted-foreground max-w-xl mx-auto leading-relaxed">
+                Gerçek örnekler ve hazır şablonlarla müşteri yorumlarına nasıl profesyonel cevap vereceğinizi keşfedin.
+              </p>
+              <div className="pt-2">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => navigate("/blog")}
+                  className="text-base px-8 py-6 hover:bg-primary/5 border-primary/20 hover:border-primary/40 transition-all duration-300"
+                >
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  Tüm rehberleri keşfet
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Testimonials Section */}
       <Testimonials />
 
@@ -803,7 +921,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="border-t border-border bg-card/50 backdrop-blur-sm mt-20">
         <div className="container mx-auto px-6 py-12">
-          <div className="grid md:grid-cols-3 gap-8 mb-8">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <img src={voyageRespondLogo} alt="VoyageRespond" className="h-6 w-6" />
@@ -819,7 +937,17 @@ const Index = () => {
                 <button onClick={() => scrollToSection("pricing")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing.earlyAccess.badge', 'Erken Erişim')}</button>
                 <button onClick={() => navigate("/contact")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('nav.contact', 'İletişim')}</button>
                 <button onClick={() => navigate("/about")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('about.badge', 'Hakkımızda')}</button>
+                <button onClick={() => navigate("/blog")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Blog</button>
                 <button onClick={() => navigate("/hub")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Hub</button>
+              </div>
+            </div>
+            <div>
+              <h4 className="font-semibold text-foreground mb-3">Popüler Rehberler</h4>
+              <div className="space-y-2">
+                <button onClick={() => navigate("/blog/google-yorumlarina-nasil-yanit-verilir")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Google yorumlarına nasıl cevap verilir</button>
+                <button onClick={() => navigate("/blog/kotu-yorumlara-nasil-cevap-verilir")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Kötü yorumlara cevap örnekleri</button>
+                <button onClick={() => navigate("/blog/otel-restoran-yorum-yonetimi-rehberi")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Yorum yönetimi nasıl yapılır</button>
+                <button onClick={() => navigate("/google-yorum-cevap-ornekleri")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Hazır yorum cevapları</button>
               </div>
             </div>
             <div>
