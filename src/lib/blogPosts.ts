@@ -601,9 +601,7 @@ Yorumlara cevap vermek, **ücretsiz** ve **en etkili** dijital pazarlama stratej
 **Yorumlara manuel cevap vermek yerine otomatik yönetmek ister misiniz? [VoyageRespond'u 3 ay ücretsiz deneyin →](https://voyagerespond.com/onboarding)**
     `,
   },
-];
 
-  {
     slug: "google-yorum-cevap-araclari-2026",
     title: "Google Yorumlarına Cevap Vermek İçin En İyi Araçlar (2026)",
     description: "Google yorum yönetimi için en iyi AI araçlarını karşılaştırdık. VoyageRespond, Birdeye, Podium ve daha fazlası — hangisi sizin için en uygun?",
