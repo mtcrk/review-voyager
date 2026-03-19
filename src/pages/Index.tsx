@@ -311,6 +311,13 @@ const Index = () => {
                 {t('nav.contact', 'Contact')}
               </button>
               <button
+                onClick={() => { navigate("/blog"); setMobileMenuOpen(false); }}
+                className="block w-full text-left px-4 py-3 rounded-lg text-base font-medium hover:bg-muted transition-colors"
+                style={{ color: '#7A5AF8' }}
+              >
+                📚 Rehberler
+              </button>
+              <button
                 onClick={() => { navigate("/about"); setMobileMenuOpen(false); }}
                 className="block w-full text-left px-4 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors"
               >
