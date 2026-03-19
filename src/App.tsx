@@ -48,6 +48,9 @@ import EmailCenter from "./pages/EmailCenter";
 import RepScore from "./pages/RepScore";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import GoogleYorumCevapOrnekleri from "./pages/seo/GoogleYorumCevapOrnekleri";
+import RestoranYorumCevaplari from "./pages/seo/RestoranYorumCevaplari";
+import OtelYorumCevaplari from "./pages/seo/OtelYorumCevaplari";
 
 const queryClient = new QueryClient();
 
