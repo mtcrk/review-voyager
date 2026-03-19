@@ -398,6 +398,35 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Hero Blog Strip — En Çok Okunan Rehberler */}
+      <section className="container mx-auto px-6 pb-16 -mt-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center gap-2 mb-6 justify-center">
+            <BookOpen className="w-4 h-4 text-primary" />
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">En Çok Okunan Rehberler</h3>
+          </div>
+          <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory" style={{ scrollbarWidth: 'none' }}>
+            {[
+              { slug: "google-yorumlarina-nasil-yanit-verilir", title: "Google yorumlarına nasıl cevap verilir", desc: "Adım adım profesyonel yanıt rehberi" },
+              { slug: "kotu-yorumlara-nasil-cevap-verilir", title: "Kötü yorumlara nasıl cevap verilir", desc: "Olumsuz yorumları fırsata çevirin" },
+              { slug: "google-yorum-cevap-ornekleri", title: "20 hazır Google yorum cevabı", desc: "Kopyala-yapıştır yanıt şablonları" },
+            ].map((item) => (
+              <button
+                key={item.slug}
+                onClick={() => navigate(`/blog/${item.slug}`)}
+                className="min-w-[260px] snap-start flex-shrink-0 p-5 rounded-xl border border-border bg-card hover:shadow-lg hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 text-left group"
+              >
+                <h4 className="font-semibold text-foreground text-sm group-hover:text-primary transition-colors mb-1.5">{item.title}</h4>
+                <p className="text-xs text-muted-foreground">{item.desc}</p>
+                <span className="text-xs text-primary font-medium mt-2 inline-flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  Oku <ArrowRight className="w-3 h-3" />
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
        {/* Freemium CTA Section */}
        <section className="container mx-auto px-6 py-20 md:py-28">
          <div className="max-w-3xl mx-auto">
