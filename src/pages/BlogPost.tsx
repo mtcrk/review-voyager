@@ -3,6 +3,7 @@ import { ArrowLeft, Clock, Tag, Share2 } from "lucide-react";
 import { getBlogPost, blogPosts } from "@/lib/blogPosts";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { useEffect } from "react";
+import AEOSection from "@/components/seo/AEOSection";
 
 const BlogPost = () => {
   const navigate = useNavigate();
