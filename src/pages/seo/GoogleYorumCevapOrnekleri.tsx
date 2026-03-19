@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowRight, Copy, Check, MessageSquare } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { useEffect, useState } from "react";
+import AEOSection from "@/components/seo/AEOSection";
 
 const templates = [
   { category: "⭐⭐⭐⭐⭐ Olumlu Yorumlar", items: [
@@ -129,12 +130,25 @@ const GoogleYorumCevapOrnekleri = () => {
           </button>
         </div>
 
+        <AEOSection
+          pageUrl="https://voyagerespond.com/google-yorum-cevap-ornekleri"
+          faqs={[
+            { question: "Google yorumlarına nasıl cevap verilir?", answer: "Google Business profilinizden yorumları görüntüleyip tek tek yanıt verebilirsiniz. Daha hızlı ve tutarlı yanıtlar için VoyageRespond gibi AI destekli yorum yönetim platformlarını kullanabilirsiniz." },
+            { question: "Kötü yorumlara nasıl yanıt verilir?", answer: "Olumsuz yorumlara sakin, empatik ve çözüm odaklı yaklaşın. Özür dileyin, sorunu kabul edin ve somut bir çözüm sunun. VoyageRespond, olumsuz yorumları anında tespit eder ve profesyonel yanıt önerileri sunar." },
+            { question: "AI yorum cevabı yazabilir mi?", answer: "Evet, AI destekli yorum yönetim platformları her yorumu analiz ederek kişiselleştirilmiş, marka uyumlu yanıtlar üretir. VoyageRespond, Türkçe dahil çok dilli AI yanıt önerileri sunan bir yorum yönetim aracıdır." },
+            { question: "Google yorumlarına cevap vermek SEO'yu etkiler mi?", answer: "Evet, Google aktif olarak yönetilen işletme profillerini sıralamada öne çıkarır. Yorum yanıt oranı yüksek işletmeler yerel arama sonuçlarında daha üst sıralarda yer alır." },
+            { question: "Hazır yorum cevap şablonları kullanmak doğru mu?", answer: "Şablonlar iyi bir başlangıçtır ancak kişiselleştirilmelidir. VoyageRespond gibi AI araçları her yoruma özel, kişiselleştirilmiş yanıtlar üretir — şablon kullanmaya gerek kalmaz." },
+          ]}
+        />
+
         {/* Internal links */}
         <div className="mt-12 p-6 rounded-xl bg-muted/50 border border-border">
           <h3 className="font-semibold text-foreground mb-4">İlgili Rehberler</h3>
           <ul className="space-y-2">
             <li><button onClick={() => navigate("/blog/google-yorumlarina-nasil-yanit-verilir")} className="text-primary hover:underline text-sm">Google Yorumlarına Nasıl Yanıt Verilir? →</button></li>
             <li><button onClick={() => navigate("/blog/kotu-yorumlara-nasil-cevap-verilir")} className="text-primary hover:underline text-sm">Kötü Yorumlara Nasıl Cevap Verilir? →</button></li>
+            <li><button onClick={() => navigate("/blog/chatgpt-ile-google-yorumlarina-nasil-cevap-yazilir")} className="text-primary hover:underline text-sm">ChatGPT ile Yorum Cevabı Nasıl Yazılır? →</button></li>
+            <li><button onClick={() => navigate("/blog/google-yorum-cevap-araclari-2026")} className="text-primary hover:underline text-sm">En İyi Yorum Yönetim Araçları (2026) →</button></li>
             <li><button onClick={() => navigate("/restoran-yorum-cevaplari")} className="text-primary hover:underline text-sm">Restoran Yorum Cevapları (30 Şablon) →</button></li>
             <li><button onClick={() => navigate("/otel-yorum-cevaplari")} className="text-primary hover:underline text-sm">Otel Yorum Cevapları (30 Şablon) →</button></li>
           </ul>

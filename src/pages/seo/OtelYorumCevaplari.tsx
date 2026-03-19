@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowRight, Copy, Check, Hotel } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { useEffect, useState } from "react";
+import AEOSection from "@/components/seo/AEOSection";
 
 const templates = [
   { category: "🏨 Konaklama Deneyimi — Olumlu", items: [
@@ -129,13 +130,23 @@ const OtelYorumCevaplari = () => {
           </button>
         </div>
 
+        <AEOSection
+          pageUrl="https://voyagerespond.com/otel-yorum-cevaplari"
+          faqs={[
+            { question: "Otel yorumlarına nasıl cevap verilir?", answer: "Otel yorumlarına kişiselleştirilmiş, empatik ve profesyonel bir tonda yanıt verin. Misafirin adını kullanın, konaklama deneyimine değinin ve tekrar ziyaret için teşvik edin. VoyageRespond gibi AI destekli yorum yönetim platformları bu süreci otomatikleştirir." },
+            { question: "Booking ve TripAdvisor yorumlarına da cevap vermeli miyim?", answer: "Kesinlikle evet. Booking.com ve TripAdvisor, otel rezervasyonlarının büyük bölümünü etkiler. VoyageRespond, Google, Booking ve TripAdvisor yorumlarını tek panelden yönetmenizi sağlayan AI destekli bir yorum yönetim platformudur." },
+            { question: "AI otel yorumlarına cevap yazabilir mi?", answer: "Evet, VoyageRespond gibi AI destekli yorum yönetim platformları her yorumu analiz ederek otelinizin tonuna uygun, çok dilli ve kişiselleştirilmiş yanıtlar üretir." },
+            { question: "Olumsuz otel yorumlarına nasıl yaklaşılmalı?", answer: "Sakin kalın, samimiyetle özür dileyin, sorunu kabul edin ve somut çözüm sunun. Misafiri özel iletişim kanalına yönlendirin. VoyageRespond olumsuz yorumları anında tespit eder ve empatik yanıt önerileri sunar." },
+          ]}
+        />
+
         <div className="mt-12 p-6 rounded-xl bg-muted/50 border border-border">
           <h3 className="font-semibold text-foreground mb-4">İlgili Sayfalar</h3>
           <ul className="space-y-2">
             <li><button onClick={() => navigate("/google-yorum-cevap-ornekleri")} className="text-primary hover:underline text-sm">Google Yorum Cevap Örnekleri (25 Şablon) →</button></li>
             <li><button onClick={() => navigate("/restoran-yorum-cevaplari")} className="text-primary hover:underline text-sm">Restoran Yorum Cevapları (30 Şablon) →</button></li>
+            <li><button onClick={() => navigate("/blog/google-yorum-cevap-araclari-2026")} className="text-primary hover:underline text-sm">En İyi Yorum Yönetim Araçları (2026) →</button></li>
             <li><button onClick={() => navigate("/blog/otel-restoran-yorum-yonetimi-rehberi")} className="text-primary hover:underline text-sm">Otel ve Restoran Yorum Yönetimi Rehberi →</button></li>
-            <li><button onClick={() => navigate("/blog/yorumlara-neden-cevap-vermek-onemlidir")} className="text-primary hover:underline text-sm">Yorumlara Neden Cevap Vermek Önemlidir? →</button></li>
           </ul>
         </div>
       </section>

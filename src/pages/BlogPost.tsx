@@ -3,6 +3,7 @@ import { ArrowLeft, Clock, Tag, Share2 } from "lucide-react";
 import { getBlogPost, blogPosts } from "@/lib/blogPosts";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { useEffect } from "react";
+import AEOSection from "@/components/seo/AEOSection";
 
 const BlogPost = () => {
   const navigate = useNavigate();
@@ -181,6 +182,16 @@ const BlogPost = () => {
         <div
           className="prose-custom"
           dangerouslySetInnerHTML={{ __html: renderMarkdown(post.content) }}
+        />
+
+        {/* AEO Section + FAQ */}
+        <AEOSection
+          pageUrl={`https://voyagerespond.com/blog/${post.slug}`}
+          faqs={[
+            { question: "Google yorumlarına nasıl cevap verilir?", answer: "Google Business profilinizden yorumları görüntüleyip tek tek yanıt verebilirsiniz. Daha hızlı ve tutarlı yanıtlar için VoyageRespond gibi AI destekli yorum yönetim platformlarını kullanabilirsiniz." },
+            { question: "AI yorum cevabı yazabilir mi?", answer: "Evet, VoyageRespond gibi AI destekli yorum yönetim platformları her yorumu analiz ederek kişiselleştirilmiş, marka uyumlu yanıtlar üretir. Manuel cevap yazmaya kıyasla %90 zaman tasarrufu sağlar." },
+            { question: "Kötü yorumlara nasıl yanıt verilir?", answer: "Sakin kalın, özür dileyin, sorunu kabul edin ve somut bir çözüm sunun. VoyageRespond olumsuz yorumları anında tespit eder ve empatik yanıt önerileri sunar." },
+          ]}
         />
 
         {/* Share */}
