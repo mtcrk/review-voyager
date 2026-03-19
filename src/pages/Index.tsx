@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { MessageSquare, Star, Phone, Check, ArrowRight, Clock, Lock, Music2, Eye, TrendingUp, Sparkles, Target, Users, Zap, Shield, Menu, X } from "lucide-react";
+import { MessageSquare, Star, Phone, Check, ArrowRight, Clock, Lock, Music2, Eye, TrendingUp, Sparkles, Target, Users, Zap, Shield, Menu, X, BookOpen, Tag } from "lucide-react";
 import { useState } from "react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 
@@ -12,6 +12,7 @@ import { TrustBadges } from "@/components/landing/TrustBadges";
 import { APIComplianceBanner } from "@/components/landing/APIComplianceBanner";
 import { ProductVideo } from "@/components/landing/ProductVideo";
 import { AIVisibilityDemo } from "@/components/landing/AIVisibilityDemo";
+import { blogPosts } from "@/lib/blogPosts";
 const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
