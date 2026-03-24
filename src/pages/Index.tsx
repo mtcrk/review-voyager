@@ -960,13 +960,7 @@ const Index = () => {
               </div>
             </div>
             <div>
-              <h4 className="font-semibold text-foreground mb-3">{t('footer.address', 'Adres')}</h4>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Bilkent Cyberpark, Üniversiteler Mah.<br />
-                Bilkent Blv., 06520 Çankaya<br />
-                Ankara, Türkiye
-              </p>
-              <p className="text-sm text-muted-foreground mt-2">support@voyagerespond.com</p>
+              <p className="text-sm text-muted-foreground">support@voyagerespond.com</p>
             </div>
           </div>
           <div className="border-t border-border pt-6 flex flex-col md:flex-row items-center justify-center gap-6 text-sm text-muted-foreground">
