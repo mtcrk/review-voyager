@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { MessageSquare, Star, Phone, Check, ArrowRight, Clock, Lock, Music2, Eye, TrendingUp, Sparkles, Target, Users, Zap, Shield, Menu, X, BookOpen, Tag } from "lucide-react";
 import { useState } from "react";
-import { toast } from "@/hooks/use-toast";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 
 import { useAuth } from "@/contexts/AuthContext";
