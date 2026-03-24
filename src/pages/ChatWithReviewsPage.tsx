@@ -155,54 +155,58 @@ export default function ChatWithReviewsPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-3.5rem)] md:h-screen">
+    <div className="flex h-[calc(100vh-3.5rem)] overflow-hidden md:h-screen">
       {/* Conversation Sidebar */}
       <div
         className={`${
           showSidebar ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-        } fixed md:relative z-20 w-72 h-full border-r bg-background flex flex-col transition-transform duration-200`}
+        } fixed inset-y-0 left-0 z-20 h-full w-[320px] max-w-[85vw] shrink-0 overflow-hidden border-r bg-background transition-transform duration-200 md:relative md:w-80 lg:w-72`}
       >
-        <div className="p-3 border-b flex items-center justify-between">
-          <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-            <History className="h-4 w-4" />
-            Sohbet Geçmişi
-          </h3>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { newChat(); setShowSidebar(false); }}>
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
-        <ScrollArea className="flex-1">
-          <div className="p-2 space-y-1">
-            {conversations.length === 0 && (
-              <p className="text-xs text-muted-foreground text-center py-4">
-                Henüz sohbet yok
-              </p>
-            )}
-            {conversations.map((conv) => (
-              <div
-                key={conv.id}
-                className={`group flex items-center gap-2 rounded-lg px-3 py-2 text-sm cursor-pointer transition-colors ${
-                  activeConversationId === conv.id
-                    ? "bg-accent text-accent-foreground"
-                    : "hover:bg-muted"
-                }`}
-                onClick={() => { loadMessages(conv.id); setShowSidebar(false); }}
-              >
-                <MessageSquare className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
-                <span className="flex-1 truncate min-w-0">{conv.title}</span>
-                <button
-                  className="h-6 w-6 flex-shrink-0 flex items-center justify-center rounded hover:bg-destructive/10"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    deleteConversation(conv.id);
-                  }}
-                >
-                  <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                </button>
-              </div>
-            ))}
+        <div className="flex h-full flex-col">
+          <div className="p-3 border-b flex items-center justify-between">
+            <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <History className="h-4 w-4" />
+              Sohbet Geçmişi
+            </h3>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { newChat(); setShowSidebar(false); }}>
+              <Plus className="h-4 w-4" />
+            </Button>
           </div>
-        </ScrollArea>
+          <ScrollArea className="flex-1">
+            <div className="p-2 space-y-1">
+              {conversations.length === 0 && (
+                <p className="text-xs text-muted-foreground text-center py-4">
+                  Henüz sohbet yok
+                </p>
+              )}
+              {conversations.map((conv) => (
+                <div
+                  key={conv.id}
+                  className={`group flex w-full max-w-full items-center gap-2 overflow-hidden rounded-lg px-3 py-2 text-sm cursor-pointer transition-colors ${
+                    activeConversationId === conv.id
+                      ? "bg-accent text-accent-foreground"
+                      : "hover:bg-muted"
+                  }`}
+                  onClick={() => { loadMessages(conv.id); setShowSidebar(false); }}
+                >
+                  <MessageSquare className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
+                  <span className="block min-w-0 flex-1 truncate">{conv.title}</span>
+                  <button
+                    type="button"
+                    aria-label="Sohbeti sil"
+                    className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded hover:bg-destructive/10"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteConversation(conv.id);
+                    }}
+                  >
+                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+        </div>
       </div>
 
       {/* Sidebar overlay for mobile */}
