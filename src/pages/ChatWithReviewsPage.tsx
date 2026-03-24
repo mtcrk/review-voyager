@@ -193,7 +193,7 @@ export default function ChatWithReviewsPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="h-6 w-6 flex-shrink-0"
                   onClick={(e) => {
                     e.stopPropagation();
                     deleteConversation(conv.id);
