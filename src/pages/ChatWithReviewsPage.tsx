@@ -4,13 +4,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  MessageSquare, Send, Loader2, Sparkles, Bot, User, Brain,
-  Plus, Trash2, History, ChevronLeft
+  MessageSquare,
+  Send,
+  Loader2,
+  Sparkles,
+  Bot,
+  User,
+  Brain,
+  Plus,
+  Trash2,
+  History,
+  ChevronLeft,
 } from "lucide-react";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
-import { useChatHistory, type ChatMessage } from "@/hooks/useChatHistory";
+import { useChatHistory } from "@/hooks/useChatHistory";
 
 const SUGGESTED_QUESTIONS = [
   "Son 30 gündeki negatif yorumların ortak sorunu ne?",
@@ -24,14 +33,22 @@ const SUGGESTED_QUESTIONS = [
 export default function ChatWithReviewsPage() {
   const { activeBusiness } = useBusiness();
   const {
-    conversations, activeConversationId, messages, setMessages,
-    loadingHistory, loadMessages, startNewConversation, saveMessage,
-    deleteConversation, newChat,
+    conversations,
+    activeConversationId,
+    messages,
+    setMessages,
+    loadingHistory,
+    loadMessages,
+    startNewConversation,
+    saveMessage,
+    deleteConversation,
+    newChat,
   } = useChatHistory(activeBusiness?.id);
 
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [historyPanelOpen, setHistoryPanelOpen] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -107,7 +124,6 @@ export default function ChatWithReviewsPage() {
       }
     }
 
-    // Save assistant response to DB
     if (assistantContent) {
       await saveMessage(conversationId, "assistant", assistantContent);
     }
@@ -122,17 +138,13 @@ export default function ChatWithReviewsPage() {
     setIsLoading(true);
 
     try {
-      // Create conversation if needed
       let convId = activeConversationId;
       if (!convId) {
         convId = await startNewConversation(userMessage);
         if (!convId) throw new Error("Sohbet oluşturulamadı");
       }
 
-      // Save user message
       await saveMessage(convId, "user", userMessage);
-
-      // Stream AI response
       await streamChat(userMessage, convId);
     } catch (error) {
       console.error("Chat error:", error);
@@ -156,38 +168,58 @@ export default function ChatWithReviewsPage() {
 
   return (
     <div className="flex h-[calc(100vh-3.5rem)] overflow-hidden md:h-screen">
-      {/* Conversation Sidebar */}
-      <div
-        className={`${
-          showSidebar ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-        } fixed inset-y-0 left-0 z-20 h-full w-[320px] max-w-[85vw] shrink-0 overflow-hidden border-r bg-background transition-transform duration-200 md:relative md:w-80 lg:w-72`}
+      <aside
+        className={`${showSidebar ? "translate-x-0" : "-translate-x-full"} fixed inset-y-0 left-0 z-30 h-full w-[320px] max-w-[85vw] overflow-hidden border-r bg-background transition-transform duration-200 md:relative md:inset-auto md:z-0 md:max-w-none md:translate-x-0 ${
+          historyPanelOpen ? "md:w-80 md:opacity-100" : "md:w-0 md:border-r-0 md:opacity-0 md:pointer-events-none"
+        }`}
       >
-        <div className="flex h-full flex-col">
-          <div className="p-3 border-b flex items-center justify-between">
-            <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+        <div className="flex h-full w-[320px] max-w-[85vw] flex-col bg-background md:w-full md:max-w-none">
+          <div className="flex items-center justify-between border-b p-3">
+            <h3 className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
               <History className="h-4 w-4" />
               Sohbet Geçmişi
             </h3>
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { newChat(); setShowSidebar(false); }}>
-              <Plus className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => {
+                  newChat();
+                  setShowSidebar(false);
+                }}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hidden h-8 w-8 md:inline-flex"
+                onClick={() => setHistoryPanelOpen(false)}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
+
           <ScrollArea className="flex-1">
-            <div className="p-2 space-y-1">
+            <div className="space-y-1 p-2">
               {conversations.length === 0 && (
-                <p className="text-xs text-muted-foreground text-center py-4">
-                  Henüz sohbet yok
-                </p>
+                <p className="py-4 text-center text-xs text-muted-foreground">Henüz sohbet yok</p>
               )}
+
               {conversations.map((conv) => (
                 <div
                   key={conv.id}
-                  className={`group flex w-full max-w-full items-center gap-2 overflow-hidden rounded-lg px-3 py-2 text-sm cursor-pointer transition-colors ${
+                  className={`group flex w-full max-w-full items-center gap-2 overflow-hidden rounded-lg px-3 py-2 text-sm transition-colors ${
                     activeConversationId === conv.id
                       ? "bg-accent text-accent-foreground"
                       : "hover:bg-muted"
                   }`}
-                  onClick={() => { loadMessages(conv.id); setShowSidebar(false); }}
+                  onClick={() => {
+                    loadMessages(conv.id);
+                    setShowSidebar(false);
+                  }}
                 >
                   <MessageSquare className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
                   <span className="block min-w-0 flex-1 truncate">{conv.title}</span>
@@ -207,89 +239,100 @@ export default function ChatWithReviewsPage() {
             </div>
           </ScrollArea>
         </div>
-      </div>
+      </aside>
 
-      {/* Sidebar overlay for mobile */}
       {showSidebar && (
         <div
-          className="fixed inset-0 z-10 bg-black/30 md:hidden"
+          className="fixed inset-0 z-20 bg-black/30 md:hidden"
           onClick={() => setShowSidebar(false)}
         />
       )}
 
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Header */}
-        <div className="px-4 md:px-8 pt-4 md:pt-6 pb-3 md:pb-4 border-b bg-background">
+      <div className="flex min-w-0 flex-1 flex-col transition-all duration-200">
+        <div className="border-b bg-background px-4 pb-3 pt-4 md:px-8 md:pb-4 md:pt-6">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden h-9 w-9"
+              className="h-9 w-9 md:hidden"
               onClick={() => setShowSidebar(true)}
             >
               <History className="h-5 w-5" />
             </Button>
-            <div className="p-2.5 rounded-xl bg-primary/10">
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="hidden gap-2 md:inline-flex"
+              onClick={() => setHistoryPanelOpen((prev) => !prev)}
+            >
+              <ChevronLeft
+                className={`h-4 w-4 transition-transform duration-200 ${
+                  historyPanelOpen ? "rotate-0" : "rotate-180"
+                }`}
+              />
+              {historyPanelOpen ? "Geçmişi Gizle" : "Geçmişi Göster"}
+            </Button>
+
+            <div className="rounded-xl bg-primary/10 p-2.5">
               <Brain className="h-6 w-6 text-primary" />
             </div>
-            <div className="flex-1 min-w-0">
-              <h1 className="text-lg md:text-2xl font-semibold text-foreground">Yorumlarla Sohbet</h1>
-              <p className="text-sm text-muted-foreground truncate">
+
+            <div className="min-w-0 flex-1">
+              <h1 className="text-lg font-semibold text-foreground md:text-2xl">Yorumlarla Sohbet</h1>
+              <p className="truncate text-sm text-muted-foreground">
                 {activeBusiness.name} — AI'a yorumlarınız hakkında her şeyi sorun
               </p>
             </div>
-            <Button variant="outline" size="sm" onClick={newChat} className="hidden sm:flex gap-1.5">
+
+            <Button variant="outline" size="sm" onClick={newChat} className="hidden gap-1.5 sm:flex">
               <Plus className="h-4 w-4" />
               Yeni Sohbet
             </Button>
           </div>
         </div>
 
-        {/* Chat Area */}
-        <div className="flex-1 overflow-hidden flex flex-col">
+        <div className="flex flex-1 flex-col overflow-hidden">
           {loadingHistory ? (
-            <div className="flex-1 flex items-center justify-center">
-              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+            <div className="flex flex-1 items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           ) : messages.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-8">
-              <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
-                <Sparkles className="w-10 h-10 text-primary" />
+            <div className="flex flex-1 flex-col items-center justify-center p-4 md:p-8">
+              <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10">
+                <Sparkles className="h-10 w-10 text-primary" />
               </div>
-              <h2 className="text-xl font-medium text-foreground mb-2">
-                Yorumlarınız hakkında soru sorun
-              </h2>
-              <p className="text-muted-foreground text-center mb-8 max-w-md">
+              <h2 className="mb-2 text-xl font-medium text-foreground">Yorumlarınız hakkında soru sorun</h2>
+              <p className="mb-8 max-w-md text-center text-muted-foreground">
                 AI, tüm yorumlarınızı analiz ederek sorularınıza detaylı yanıtlar verir.
                 Trendler, müşteri duyguları, iyileştirme önerileri ve daha fazlası.
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-2xl">
+              <div className="grid w-full max-w-2xl grid-cols-1 gap-3 sm:grid-cols-2">
                 {SUGGESTED_QUESTIONS.map((question, i) => (
                   <Button
                     key={i}
                     variant="outline"
-                    className="text-left h-auto py-3 px-4 text-sm justify-start hover:bg-accent/50 transition-colors"
+                    className="h-auto justify-start px-4 py-3 text-left text-sm transition-colors hover:bg-accent/50"
                     onClick={() => handleSend(question)}
                     disabled={isLoading}
                   >
-                    <MessageSquare className="h-4 w-4 mr-2 flex-shrink-0 text-primary" />
+                    <MessageSquare className="mr-2 h-4 w-4 flex-shrink-0 text-primary" />
                     <span className="line-clamp-2">{question}</span>
                   </Button>
                 ))}
               </div>
             </div>
           ) : (
-            <ScrollArea className="flex-1 px-4 md:px-8 py-4 md:py-6" ref={scrollRef}>
-              <div className="max-w-3xl mx-auto space-y-6">
+            <ScrollArea className="flex-1 px-4 py-4 md:px-8 md:py-6" ref={scrollRef}>
+              <div className="mx-auto max-w-3xl space-y-6">
                 {messages.map((msg, i) => (
                   <div
                     key={i}
                     className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                   >
                     {msg.role === "assistant" && (
-                      <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
-                        <Bot className="w-5 h-5 text-primary" />
+                      <div className="mt-1 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                        <Bot className="h-5 w-5 text-primary" />
                       </div>
                     )}
                     <div
@@ -300,7 +343,7 @@ export default function ChatWithReviewsPage() {
                       }`}
                     >
                       {msg.role === "assistant" ? (
-                        <div className="prose prose-sm dark:prose-invert max-w-none">
+                        <div className="prose prose-sm max-w-none dark:prose-invert">
                           <ReactMarkdown>{msg.content}</ReactMarkdown>
                         </div>
                       ) : (
@@ -308,19 +351,19 @@ export default function ChatWithReviewsPage() {
                       )}
                     </div>
                     {msg.role === "user" && (
-                      <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center flex-shrink-0 mt-1">
-                        <User className="w-5 h-5 text-primary-foreground" />
+                      <div className="mt-1 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-primary">
+                        <User className="h-5 w-5 text-primary-foreground" />
                       </div>
                     )}
                   </div>
                 ))}
                 {isLoading && messages[messages.length - 1]?.role === "user" && (
-                  <div className="flex gap-3 justify-start">
-                    <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
-                      <Bot className="w-5 h-5 text-primary" />
+                  <div className="flex justify-start gap-3">
+                    <div className="mt-1 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                      <Bot className="h-5 w-5 text-primary" />
                     </div>
-                    <div className="bg-muted rounded-2xl px-5 py-3">
-                      <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                    <div className="rounded-2xl bg-muted px-5 py-3">
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                     </div>
                   </div>
                 )}
@@ -328,14 +371,13 @@ export default function ChatWithReviewsPage() {
             </ScrollArea>
           )}
 
-          {/* Input Bar */}
-          <div className="px-4 md:px-8 py-3 md:py-4 border-t bg-background">
+          <div className="border-t bg-background px-4 py-3 md:px-8 md:py-4">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 handleSend();
               }}
-              className="max-w-3xl mx-auto flex gap-3"
+              className="mx-auto flex max-w-3xl gap-3"
             >
               <Input
                 ref={inputRef}
@@ -343,7 +385,7 @@ export default function ChatWithReviewsPage() {
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Yorumlarınız hakkında bir soru sorun..."
                 disabled={isLoading}
-                className="flex-1 h-12 text-base"
+                className="h-12 flex-1 text-base"
               />
               <Button
                 type="submit"
@@ -352,9 +394,9 @@ export default function ChatWithReviewsPage() {
                 className="h-12 px-6"
               >
                 {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="h-5 w-5 animate-spin" />
                 ) : (
-                  <Send className="w-5 h-5" />
+                  <Send className="h-5 w-5" />
                 )}
               </Button>
             </form>
