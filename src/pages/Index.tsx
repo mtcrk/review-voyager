@@ -931,7 +931,7 @@ const Index = () => {
                 {t('footer.description', 'AI-powered review management & visibility optimization platform.')}
               </p>
               <a
-                href="https://www.instagram.com/voyagerespond"
+                href="https://instagram.com/voyagerespond"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
