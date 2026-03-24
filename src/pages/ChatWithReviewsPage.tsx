@@ -189,18 +189,16 @@ export default function ChatWithReviewsPage() {
                 onClick={() => { loadMessages(conv.id); setShowSidebar(false); }}
               >
                 <MessageSquare className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
-                <span className="flex-1 truncate">{conv.title}</span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 flex-shrink-0"
+                <span className="flex-1 truncate min-w-0">{conv.title}</span>
+                <button
+                  className="h-6 w-6 flex-shrink-0 flex items-center justify-center rounded hover:bg-destructive/10"
                   onClick={(e) => {
                     e.stopPropagation();
                     deleteConversation(conv.id);
                   }}
                 >
-                  <Trash2 className="h-3 w-3 text-destructive" />
-                </Button>
+                  <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                </button>
               </div>
             ))}
           </div>
