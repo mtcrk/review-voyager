@@ -211,28 +211,35 @@ export default function ChatWithReviewsPage() {
               {conversations.map((conv) => (
                 <div
                   key={conv.id}
-                  className={`group flex w-full max-w-full items-center gap-2 overflow-hidden rounded-lg px-3 py-2 text-sm transition-colors ${
+                  className={`grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
                     activeConversationId === conv.id
                       ? "bg-accent text-accent-foreground"
                       : "hover:bg-muted"
                   }`}
-                  onClick={() => {
-                    loadMessages(conv.id);
-                    setShowSidebar(false);
-                  }}
                 >
-                  <MessageSquare className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
-                  <span className="block min-w-0 flex-1 truncate">{conv.title}</span>
+                  <button
+                    type="button"
+                    className="contents"
+                    onClick={() => {
+                      loadMessages(conv.id);
+                      setShowSidebar(false);
+                    }}
+                  >
+                    <MessageSquare className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                    <span className="block min-w-0 truncate text-left">{conv.title}</span>
+                  </button>
+
                   <button
                     type="button"
                     aria-label="Sohbeti sil"
-                    className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded hover:bg-destructive/10"
+                    title="Sohbeti sil"
+                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md border border-border bg-background text-destructive transition-colors hover:bg-destructive/10"
                     onClick={(e) => {
                       e.stopPropagation();
                       deleteConversation(conv.id);
                     }}
                   >
-                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                    <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
               ))}
