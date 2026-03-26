@@ -1,14 +1,19 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Eye, MousePointerClick, Search, AlertCircle } from "lucide-react";
+import { Eye, MousePointerClick, Search, AlertCircle, CalendarIcon } from "lucide-react";
 import { useGooglePerformance } from "@/hooks/useGooglePerformance";
 import { useBusiness } from "@/contexts/BusinessContext";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar,
 } from "recharts";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format, subDays } from "date-fns";
+import { tr } from "date-fns/locale";
 
 const CHART_COLORS = {
   maps: "hsl(var(--primary))",
@@ -16,9 +21,30 @@ const CHART_COLORS = {
   actions: "hsl(var(--chart-3, 160 60% 45%))",
 };
 
+const PRESET_RANGES = [
+  { label: "Son 7 gün", days: 7 },
+  { label: "Son 30 gün", days: 30 },
+  { label: "Son 90 gün", days: 90 },
+  { label: "Son 6 ay", days: 180 },
+] as const;
+
 export default function GooglePerformance() {
   const { activeBusiness } = useBusiness();
-  const { data, isLoading, error } = useGooglePerformance();
+
+  const [range, setRange] = useState<{ from: Date; to: Date }>({
+    from: subDays(new Date(), 30),
+    to: new Date(),
+  });
+
+  const dateRange = useMemo(
+    () => ({
+      startDate: format(range.from, "yyyy-MM-dd"),
+      endDate: format(range.to, "yyyy-MM-dd"),
+    }),
+    [range]
+  );
+
+  const { data, isLoading, error } = useGooglePerformance(dateRange);
 
   // Merge impression data by date for the chart
   const impressionChartData = useMemo(() => {
@@ -108,8 +134,48 @@ export default function GooglePerformance() {
       <div>
         <h1 className="text-3xl font-semibold text-foreground">Google Performance</h1>
         <p className="text-muted-foreground mt-1">
-          {data.summary.periodStart} — {data.summary.periodEnd} · {activeBusiness.name}
+          {activeBusiness.name}
         </p>
+      </div>
+
+      {/* Date Range Filter */}
+      <div className="flex flex-wrap items-center gap-2">
+        {PRESET_RANGES.map((preset) => {
+          const isActive =
+            Math.round((range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24)) === preset.days;
+          return (
+            <Button
+              key={preset.days}
+              variant={isActive ? "default" : "outline"}
+              size="sm"
+              onClick={() => setRange({ from: subDays(new Date(), preset.days), to: new Date() })}
+            >
+              {preset.label}
+            </Button>
+          );
+        })}
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="gap-2">
+              <CalendarIcon className="h-4 w-4" />
+              {format(range.from, "dd MMM", { locale: tr })} – {format(range.to, "dd MMM yyyy", { locale: tr })}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="end">
+            <Calendar
+              mode="range"
+              selected={{ from: range.from, to: range.to }}
+              onSelect={(r) => {
+                if (r?.from && r?.to) setRange({ from: r.from, to: r.to });
+                else if (r?.from) setRange({ from: r.from, to: r.from });
+              }}
+              numberOfMonths={2}
+              disabled={{ after: new Date() }}
+              locale={tr}
+            />
+          </PopoverContent>
+        </Popover>
       </div>
 
       {/* Summary Cards */}

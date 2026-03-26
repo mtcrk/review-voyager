@@ -320,7 +320,8 @@ Deno.serve(async (req) => {
     // Admin client for credentials
     const adminClient = createClient(supabaseUrl, serviceKey);
 
-    const { business_id } = await req.json();
+    const reqBody = await req.json();
+    const { business_id, start_date, end_date } = reqBody;
     if (!business_id) {
       return new Response(
         JSON.stringify({ error: "business_id required" }),
@@ -346,10 +347,12 @@ Deno.serve(async (req) => {
 
     // Date ranges
     const now = new Date();
-    const thirtyDaysAgo = new Date(now);
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const startDate = toDateObj(thirtyDaysAgo);
-    const endDate = toDateObj(now);
+    const rangeEnd = end_date ? new Date(end_date) : now;
+    const rangeStart = start_date
+      ? new Date(start_date)
+      : new Date(rangeEnd.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const startDate = toDateObj(rangeStart);
+    const endDate = toDateObj(rangeEnd);
     const periodStart = dateStr(startDate.year, startDate.month, startDate.day);
     const periodEnd = dateStr(endDate.year, endDate.month, endDate.day);
 
