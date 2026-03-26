@@ -38,7 +38,7 @@ export function useGooglePerformance() {
       if (!activeBusiness?.google_location_id) return null;
 
       const { data, error } = await supabase.functions.invoke("google-performance-metrics", {
-        body: { businessId: activeBusiness.id },
+        body: { business_id: activeBusiness.id },
       });
 
       if (error) throw error;
