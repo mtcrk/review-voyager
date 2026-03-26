@@ -12,7 +12,7 @@ import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { format, subDays, subMonths } from "date-fns";
+import { format, subDays } from "date-fns";
 import { tr } from "date-fns/locale";
 
 const CHART_COLORS = {
