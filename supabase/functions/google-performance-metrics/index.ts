@@ -119,8 +119,13 @@ async function fetchDailyMetrics(
       throw new Error(`Rate limit. Retry after ${retryAfter || "60"}s`);
     }
     if (res.status === 403) {
-      await res.text();
-      throw new Error("Bu lokasyon için Performance API erişiminiz yok.");
+      const body = await res.text();
+      console.error("Daily metrics 403 body:", body);
+      throw new Error(body.includes("SERVICE_DISABLED")
+        ? "Google Performance API bu OAuth projesinde aktif değil."
+        : body.includes("PERMISSION_DENIED") || body.includes("The caller does not have permission")
+          ? "Bu Google hesabı/lokasyon için Performance verisi erişimi reddedildi."
+          : "Bu lokasyon için Performance API erişiminiz yok.");
     }
     if (res.status === 401) {
       await res.text();
@@ -172,7 +177,8 @@ async function fetchSearchKeywords(
       throw new Error("Rate limit on search keywords");
     }
     if (res.status === 403 || res.status === 401) {
-      await res.text();
+      const body = await res.text();
+      console.error(`Search keywords ${res.status} body:`, body);
       return { searchKeywordsCounts: [] };
     }
     if (!res.ok) {
