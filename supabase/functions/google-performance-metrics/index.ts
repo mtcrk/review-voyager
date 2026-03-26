@@ -287,6 +287,23 @@ function buildSummary(
   };
 }
 
+function hasAnyPerformanceData(
+  metricData: { impressions?: Record<string, Array<{ date: string; value: number }>>; actions?: Record<string, Array<{ date: string; value: number }>> } | null | undefined,
+  keywords: Array<{ keyword: string; impressions: number }> | null | undefined,
+) {
+  const impressionCount = Object.values(metricData?.impressions || {}).reduce(
+    (sum, series) => sum + (Array.isArray(series) ? series.length : 0),
+    0,
+  );
+
+  const actionCount = Object.values(metricData?.actions || {}).reduce(
+    (sum, series) => sum + (Array.isArray(series) ? series.length : 0),
+    0,
+  );
+
+  return impressionCount > 0 || actionCount > 0 || (keywords?.length || 0) > 0;
+}
+
 // ── Main handler ───────────────────────────────────────────────
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -369,7 +386,7 @@ Deno.serve(async (req) => {
       .limit(1)
       .single();
 
-    if (cached) {
+    if (cached && hasAnyPerformanceData((cached.metric_data as any) || null, (cached.search_keywords as any[]) || [])) {
       console.log("Returning cached performance metrics");
       return new Response(
         JSON.stringify({
@@ -386,6 +403,10 @@ Deno.serve(async (req) => {
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    if (cached) {
+      console.log("Ignoring empty cached performance metrics and refetching from Google");
     }
 
     // Get access token
@@ -412,6 +433,16 @@ Deno.serve(async (req) => {
     const summary = buildSummary(impressions, actions, searchKeywords, periodStart, periodEnd);
 
     const metricData = { impressions, actions };
+
+    if (!hasAnyPerformanceData(metricData, searchKeywords)) {
+      return new Response(
+        JSON.stringify({
+          error:
+            "Google Performance API şu an bu lokasyon için boş veri döndürüyor. Google Cloud ekranında kullanım da 0 görünüyorsa, uygulamadaki OAuth client ile API’yi enable ettiğiniz proje farklı olabilir.",
+        }),
+        { status: 424, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     // Cache result
     await adminClient.from("performance_metrics_cache").insert({
@@ -446,6 +477,8 @@ Deno.serve(async (req) => {
               ? 401
               : message.includes("zaman aşımına uğradı")
                 ? 504
+                : message.includes("boş veri döndürüyor")
+                  ? 424
                 : 500;
     return new Response(
       JSON.stringify({ error: message }),
