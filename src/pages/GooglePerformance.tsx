@@ -1,12 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Eye, MousePointerClick, Phone, MapPin, Globe, Search, TrendingUp, AlertCircle } from "lucide-react";
+import { Eye, MousePointerClick, Search, AlertCircle } from "lucide-react";
 import { useGooglePerformance } from "@/hooks/useGooglePerformance";
 import { useBusiness } from "@/contexts/BusinessContext";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, Cell,
+  BarChart, Bar,
 } from "recharts";
 import { useMemo } from "react";
 
