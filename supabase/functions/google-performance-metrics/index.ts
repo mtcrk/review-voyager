@@ -154,7 +154,8 @@ async function fetchSearchKeywords(
   params.set("monthly_range.end_month.year", String(endMonth.year));
   params.set("monthly_range.end_month.month", String(endMonth.month));
 
-  const url = `${PERF_API_BASE}/${locationId}/searchkeywords/impressions/monthly?${params}`;
+  const locPath = locationId.startsWith("locations/") ? locationId : `locations/${locationId}`;
+  const url = `${PERF_API_BASE}/${locPath}/searchkeywords/impressions/monthly?${params}`;
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000);
