@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { FunctionsHttpError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/contexts/BusinessContext";
 
@@ -37,12 +38,25 @@ export function useGooglePerformance() {
     queryFn: async (): Promise<PerformanceData | null> => {
       if (!activeBusiness?.google_location_id) return null;
 
-      const { data, error } = await supabase.functions.invoke("google-performance-metrics", {
-        body: { business_id: activeBusiness.id },
-      });
+      try {
+        const { data, error } = await supabase.functions.invoke("google-performance-metrics", {
+          body: { business_id: activeBusiness.id },
+        });
 
-      if (error) throw error;
-      return data as PerformanceData;
+        if (error) {
+          if (error instanceof FunctionsHttpError) {
+            const payload = await error.context.json().catch(() => null);
+            throw new Error(payload?.error || error.message);
+          }
+          throw error;
+        }
+
+        return data as PerformanceData;
+      } catch (error) {
+        throw error instanceof Error
+          ? error
+          : new Error("Performance verileri alınamadı.");
+      }
     },
     enabled: !!activeBusiness?.google_location_id,
     staleTime: 6 * 60 * 60 * 1000, // 6 hours

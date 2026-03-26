@@ -426,9 +426,21 @@ Deno.serve(async (req) => {
   } catch (err) {
     console.error("Performance metrics error:", err);
     const message = err instanceof Error ? err.message : "Bilinmeyen hata";
+    const status =
+      message === "Unauthorized"
+        ? 401
+        : message === "Google bağlantısı bulunamadı. Lütfen önce Google Business hesabınızı bağlayın."
+          ? 400
+          : message === "Bu lokasyon için Performance API erişiminiz yok."
+            ? 403
+            : message.includes("Google bağlantınızı yenileyin")
+              ? 401
+              : message.includes("zaman aşımına uğradı")
+                ? 504
+                : 500;
     return new Response(
       JSON.stringify({ error: message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });
