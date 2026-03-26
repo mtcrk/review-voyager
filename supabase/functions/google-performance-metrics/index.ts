@@ -8,7 +8,7 @@ const corsHeaders = {
 
 const CACHE_HOURS = 6;
 const PERF_API_BASE =
-  "https://businessprofileperformance.googleapis.com/v1/locations";
+  "https://businessprofileperformance.googleapis.com/v1";
 
 interface DateObj {
   year: number;
