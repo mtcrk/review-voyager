@@ -228,25 +228,30 @@ function parseDailyMetrics(raw: any) {
 
   const series = raw?.multiDailyMetricTimeSeries || [];
   for (const s of series) {
-    const metricName = s.dailyMetric;
-    const key = metricMap[metricName];
-    if (!key) continue;
+    // Google wraps each metric inside dailyMetricTimeSeries array
+    const innerSeries = s.dailyMetricTimeSeries || [s];
+    for (const inner of innerSeries) {
+      const metricName = inner.dailyMetric;
+      const key = metricMap[metricName];
+      if (!key) continue;
 
-    const points: Array<{ date: string; value: number }> = [];
-    const tsData = s.timeSeries?.datedValues || [];
-    for (const dv of tsData) {
-      const d = dv.date;
-      if (!d) continue;
-      points.push({
-        date: dateStr(d.year, d.month, d.day),
-        value: parseInt(dv.value || "0", 10),
-      });
-    }
+      const points: Array<{ date: string; value: number }> = [];
+      const tsData = inner.timeSeries?.datedValues || [];
+      for (const dv of tsData) {
+        const d = dv.date;
+        if (!d) continue;
+        const val = parseInt(dv.value || "0", 10);
+        points.push({
+          date: dateStr(d.year, d.month, d.day),
+          value: val,
+        });
+      }
 
-    if (impressionKeys.has(key)) {
-      impressions[key] = points;
-    } else {
-      actions[key] = points;
+      if (impressionKeys.has(key)) {
+        impressions[key] = points;
+      } else {
+        actions[key] = points;
+      }
     }
   }
 
