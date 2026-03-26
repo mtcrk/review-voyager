@@ -98,17 +98,19 @@ function normalizePerformanceData(payload: unknown): PerformanceData {
   };
 }
 
-export function useGooglePerformance() {
+export function useGooglePerformance(dateRange?: { startDate: string; endDate: string }) {
   const { activeBusiness } = useBusiness();
 
   return useQuery({
-    queryKey: ["google-performance", activeBusiness?.id],
+    queryKey: ["google-performance", activeBusiness?.id, dateRange?.startDate, dateRange?.endDate],
     queryFn: async (): Promise<PerformanceData | null> => {
       if (!activeBusiness?.google_location_id) return null;
 
-      const { data, error } = await supabase.functions.invoke("google-performance-metrics", {
-        body: { business_id: activeBusiness.id },
-      });
+      const body: Record<string, string> = { business_id: activeBusiness.id };
+      if (dateRange?.startDate) body.start_date = dateRange.startDate;
+      if (dateRange?.endDate) body.end_date = dateRange.endDate;
+
+      const { data, error } = await supabase.functions.invoke("google-performance-metrics", { body });
 
       if (error) {
         // Try to extract the actual error message from the response
