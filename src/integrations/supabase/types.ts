@@ -392,6 +392,50 @@ export type Database = {
           },
         ]
       }
+      performance_metrics_cache: {
+        Row: {
+          business_id: string
+          created_at: string
+          fetched_at: string
+          id: string
+          location_id: string
+          metric_data: Json
+          period_end: string
+          period_start: string
+          search_keywords: Json | null
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          fetched_at?: string
+          id?: string
+          location_id: string
+          metric_data?: Json
+          period_end: string
+          period_start: string
+          search_keywords?: Json | null
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          fetched_at?: string
+          id?: string
+          location_id?: string
+          metric_data?: Json
+          period_end?: string
+          period_start?: string
+          search_keywords?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_metrics_cache_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
