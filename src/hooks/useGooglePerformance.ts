@@ -61,9 +61,4 @@ export function useGooglePerformance() {
     staleTime: 6 * 60 * 60 * 1000, // 6 hours
     retry: 1,
   });
-    },
-    enabled: !!activeBusiness?.google_location_id,
-    staleTime: 6 * 60 * 60 * 1000, // 6 hours
-    retry: 1,
-  });
 }
