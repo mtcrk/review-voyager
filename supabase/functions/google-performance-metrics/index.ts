@@ -100,7 +100,8 @@ async function fetchDailyMetrics(
   params.set("dailyRange.end_date.month", String(endDate.month));
   params.set("dailyRange.end_date.day", String(endDate.day));
 
-  const url = `${PERF_API_BASE}/${locationId}:fetchMultiDailyMetricsTimeSeries?${params}`;
+  const locPath = locationId.startsWith("locations/") ? locationId : `locations/${locationId}`;
+  const url = `${PERF_API_BASE}/${locPath}:fetchMultiDailyMetricsTimeSeries?${params}`;
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000);
