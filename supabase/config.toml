@@ -42,5 +42,8 @@ verify_jwt = false
 [functions.google-business-info]
 verify_jwt = false
 
+[functions.google-performance-metrics]
+verify_jwt = false
+
 [functions.notify-new-signup]
 verify_jwt = false
