@@ -136,12 +136,7 @@ async function fetchDailyMetrics(
       throw new Error(`Daily metrics API error [${res.status}]: ${body}`);
     }
 
-    const rawBody = await res.text();
-    console.log("=== DAILY METRICS RAW RESPONSE ===");
-    console.log("URL:", url);
-    console.log("Status:", res.status);
-    console.log("Body (first 2000 chars):", rawBody.substring(0, 2000));
-    return JSON.parse(rawBody);
+    return await res.json();
   } catch (e) {
     clearTimeout(timeout);
     if (e instanceof DOMException && e.name === "AbortError") {
@@ -192,11 +187,7 @@ async function fetchSearchKeywords(
       return { searchKeywordsCounts: [] };
     }
 
-    const rawBody = await res.text();
-    console.log("=== SEARCH KEYWORDS RAW RESPONSE ===");
-    console.log("Status:", res.status);
-    console.log("Body (first 2000 chars):", rawBody.substring(0, 2000));
-    return JSON.parse(rawBody);
+    return await res.json();
   } catch (e) {
     clearTimeout(timeout);
     console.error("Search keywords fetch failed:", e);
