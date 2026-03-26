@@ -62,8 +62,8 @@ export default function GooglePerformance() {
     addSeries(data.dailyMetrics.impressions.desktop_search, "search");
     addSeries(data.dailyMetrics.impressions.mobile_search, "search");
     return Array.from(dateMap.entries())
-      .map(([date, vals]) => ({ date: date.slice(5), maps: vals.maps || 0, search: vals.search || 0 }))
-      .sort((a, b) => a.date.localeCompare(b.date));
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, vals]) => ({ date: format(new Date(date), "dd MMM yy", { locale: tr }), maps: vals.maps || 0, search: vals.search || 0 }));
   }, [data]);
 
   // Merge action data
@@ -81,8 +81,8 @@ export default function GooglePerformance() {
     addSeries(data.dailyMetrics.actions.call_clicks, "calls");
     addSeries(data.dailyMetrics.actions.direction_requests, "directions");
     return Array.from(dateMap.entries())
-      .map(([date, vals]) => ({ date: date.slice(5), website: vals.website || 0, calls: vals.calls || 0, directions: vals.directions || 0 }))
-      .sort((a, b) => a.date.localeCompare(b.date));
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, vals]) => ({ date: format(new Date(date), "dd MMM yy", { locale: tr }), website: vals.website || 0, calls: vals.calls || 0, directions: vals.directions || 0 }));
   }, [data]);
 
   if (!activeBusiness?.google_location_id) {
