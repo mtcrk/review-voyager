@@ -20,6 +20,7 @@ import { SetupWizard } from "@/components/dashboard/SetupWizard";
 import { PlatformDiscovery } from "@/components/dashboard/PlatformDiscovery";
 import { RepScoreWidget } from "@/components/dashboard/RepScoreWidget";
 import { calculateRepScore, ReviewData } from "@/lib/repScore";
+import { GooglePerformanceWidget } from "@/components/dashboard/GooglePerformanceWidget";
 
 
 export default function Dashboard() {
@@ -298,6 +299,9 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
               {isDemoMode && <UpgradeCTA feature={t('dashboard.demo.features.chatWithReviews', 'Yorumlarla Sohbet')} />}
+            </div>
+            <div className="space-y-0">
+              <GooglePerformanceWidget />
             </div>
             <div className="space-y-0">
               <CompetitorComparison />
