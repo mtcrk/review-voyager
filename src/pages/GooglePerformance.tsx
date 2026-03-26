@@ -91,7 +91,7 @@ export default function GooglePerformance() {
         <Card className="p-12 text-center">
           <AlertCircle className="h-12 w-12 mx-auto text-destructive mb-4" />
           <h2 className="text-xl font-semibold text-foreground mb-2">Veri Yüklenemedi</h2>
-          <p className="text-muted-foreground">{(error as Error)?.message || "Performance verileri alınamadı."}</p>
+          <p className="text-muted-foreground">{(error as Error)?.message || "Performance verileri alınamadı. Google bağlantınızı veya bu lokasyon için erişim iznini kontrol edin."}</p>
         </Card>
       </div>
     );
