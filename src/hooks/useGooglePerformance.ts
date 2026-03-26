@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { FunctionsHttpError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/contexts/BusinessContext";
 
@@ -38,25 +37,30 @@ export function useGooglePerformance() {
     queryFn: async (): Promise<PerformanceData | null> => {
       if (!activeBusiness?.google_location_id) return null;
 
-      try {
-        const { data, error } = await supabase.functions.invoke("google-performance-metrics", {
-          body: { business_id: activeBusiness.id },
-        });
+      const { data, error } = await supabase.functions.invoke("google-performance-metrics", {
+        body: { business_id: activeBusiness.id },
+      });
 
-        if (error) {
-          if (error instanceof FunctionsHttpError) {
-            const payload = await error.context.json().catch(() => null);
-            throw new Error(payload?.error || error.message);
+      if (error) {
+        // Try to extract the actual error message from the response
+        let message = error.message || "Performance verileri alınamadı.";
+        try {
+          if (error.context && typeof error.context.json === "function") {
+            const payload = await error.context.json();
+            if (payload?.error) message = payload.error;
           }
-          throw error;
+        } catch {
+          // ignore parse errors
         }
-
-        return data as PerformanceData;
-      } catch (error) {
-        throw error instanceof Error
-          ? error
-          : new Error("Performance verileri alınamadı.");
+        throw new Error(message);
       }
+
+      return data as PerformanceData;
+    },
+    enabled: !!activeBusiness?.google_location_id,
+    staleTime: 6 * 60 * 60 * 1000, // 6 hours
+    retry: 1,
+  });
     },
     enabled: !!activeBusiness?.google_location_id,
     staleTime: 6 * 60 * 60 * 1000, // 6 hours
