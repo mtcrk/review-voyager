@@ -8,7 +8,7 @@ const corsHeaders = {
 
 const CACHE_HOURS = 6;
 const PERF_API_BASE =
-  "https://businessprofileperformance.googleapis.com/v1/locations";
+  "https://businessprofileperformance.googleapis.com/v1";
 
 interface DateObj {
   year: number;
@@ -100,7 +100,8 @@ async function fetchDailyMetrics(
   params.set("dailyRange.end_date.month", String(endDate.month));
   params.set("dailyRange.end_date.day", String(endDate.day));
 
-  const url = `${PERF_API_BASE}/${locationId}:fetchMultiDailyMetricsTimeSeries?${params}`;
+  const locPath = locationId.startsWith("locations/") ? locationId : `locations/${locationId}`;
+  const url = `${PERF_API_BASE}/${locPath}:fetchMultiDailyMetricsTimeSeries?${params}`;
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000);
@@ -153,7 +154,8 @@ async function fetchSearchKeywords(
   params.set("monthly_range.end_month.year", String(endMonth.year));
   params.set("monthly_range.end_month.month", String(endMonth.month));
 
-  const url = `${PERF_API_BASE}/${locationId}/searchkeywords/impressions/monthly?${params}`;
+  const locPath = locationId.startsWith("locations/") ? locationId : `locations/${locationId}`;
+  const url = `${PERF_API_BASE}/${locPath}/searchkeywords/impressions/monthly?${params}`;
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000);
