@@ -29,6 +29,75 @@ export interface PerformanceData {
   };
 }
 
+const emptySeries = () => [] as { date: string; value: number }[];
+
+const createEmptyPerformanceData = (): PerformanceData => ({
+  dailyMetrics: {
+    impressions: {
+      desktop_maps: emptySeries(),
+      desktop_search: emptySeries(),
+      mobile_maps: emptySeries(),
+      mobile_search: emptySeries(),
+    },
+    actions: {
+      website_clicks: emptySeries(),
+      call_clicks: emptySeries(),
+      direction_requests: emptySeries(),
+      bookings: emptySeries(),
+      food_orders: emptySeries(),
+      conversations: emptySeries(),
+    },
+  },
+  searchKeywords: [],
+  summary: {
+    totalImpressions: 0,
+    totalActions: 0,
+    topKeyword: "",
+    periodStart: "",
+    periodEnd: "",
+  },
+});
+
+function normalizePerformanceData(payload: unknown): PerformanceData {
+  const fallback = createEmptyPerformanceData();
+
+  if (!payload || typeof payload !== "object") {
+    return fallback;
+  }
+
+  const source = payload as Partial<PerformanceData>;
+  const impressions = source.dailyMetrics?.impressions;
+  const actions = source.dailyMetrics?.actions;
+  const summary = source.summary;
+
+  return {
+    dailyMetrics: {
+      impressions: {
+        desktop_maps: Array.isArray(impressions?.desktop_maps) ? impressions.desktop_maps : [],
+        desktop_search: Array.isArray(impressions?.desktop_search) ? impressions.desktop_search : [],
+        mobile_maps: Array.isArray(impressions?.mobile_maps) ? impressions.mobile_maps : [],
+        mobile_search: Array.isArray(impressions?.mobile_search) ? impressions.mobile_search : [],
+      },
+      actions: {
+        website_clicks: Array.isArray(actions?.website_clicks) ? actions.website_clicks : [],
+        call_clicks: Array.isArray(actions?.call_clicks) ? actions.call_clicks : [],
+        direction_requests: Array.isArray(actions?.direction_requests) ? actions.direction_requests : [],
+        bookings: Array.isArray(actions?.bookings) ? actions.bookings : [],
+        food_orders: Array.isArray(actions?.food_orders) ? actions.food_orders : [],
+        conversations: Array.isArray(actions?.conversations) ? actions.conversations : [],
+      },
+    },
+    searchKeywords: Array.isArray(source.searchKeywords) ? source.searchKeywords : [],
+    summary: {
+      totalImpressions: typeof summary?.totalImpressions === "number" ? summary.totalImpressions : 0,
+      totalActions: typeof summary?.totalActions === "number" ? summary.totalActions : 0,
+      topKeyword: typeof summary?.topKeyword === "string" ? summary.topKeyword : "",
+      periodStart: typeof summary?.periodStart === "string" ? summary.periodStart : "",
+      periodEnd: typeof summary?.periodEnd === "string" ? summary.periodEnd : "",
+    },
+  };
+}
+
 export function useGooglePerformance() {
   const { activeBusiness } = useBusiness();
 
@@ -55,7 +124,7 @@ export function useGooglePerformance() {
         throw new Error(message);
       }
 
-      return data as PerformanceData;
+      return normalizePerformanceData(data);
     },
     enabled: !!activeBusiness?.google_location_id,
     staleTime: 6 * 60 * 60 * 1000, // 6 hours
