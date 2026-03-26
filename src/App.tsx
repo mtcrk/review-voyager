@@ -51,6 +51,7 @@ import BlogPost from "./pages/BlogPost";
 import GoogleYorumCevapOrnekleri from "./pages/seo/GoogleYorumCevapOrnekleri";
 import RestoranYorumCevaplari from "./pages/seo/RestoranYorumCevaplari";
 import OtelYorumCevaplari from "./pages/seo/OtelYorumCevaplari";
+import GooglePerformance from "./pages/GooglePerformance";
 
 const queryClient = new QueryClient();
 
@@ -230,6 +231,16 @@ const App = () => (
                 <ProtectedRoute>
                   <AppLayout>
                     <EmailCenter />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/performance"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <GooglePerformance />
                   </AppLayout>
                 </ProtectedRoute>
               }
