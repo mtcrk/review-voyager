@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MousePointerClick } from "lucide-react";
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell,
+  Tooltip, ResponsiveContainer, Cell,
   PieChart, Pie,
 } from "recharts";
 import { useMemo } from "react";
