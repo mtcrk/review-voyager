@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useAuth } from "@/contexts/AuthContext";
+import { ExitIntentPopup } from "@/components/ExitIntentPopup";
+import { Play } from "lucide-react";
 
 export default function DemoPage() {
   const { t } = useTranslation();
@@ -48,6 +50,7 @@ export default function DemoPage() {
         },
       });
 
+      sessionStorage.setItem("demo_form_submitted", "1");
       setSubmitted(true);
     } catch {
       setError("Bir hata oluştu, lütfen tekrar deneyin.");
@@ -58,6 +61,7 @@ export default function DemoPage() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#0F0A1F" }}>
+      <ExitIntentPopup disabled={submitted} />
       {/* Navbar */}
       <nav className="sticky top-0 z-50 border-b border-white/10 backdrop-blur-lg" style={{ backgroundColor: "rgba(15, 10, 31, 0.95)" }}>
         <div className="container mx-auto px-4 sm:px-6">
@@ -115,6 +119,17 @@ export default function DemoPage() {
                 <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
                   Klinikler, oteller ve restoranlar zaten kullanıyor.
                 </p>
+              </div>
+
+              {/* Demo Video Placeholder */}
+              <div className="mb-8 md:mb-10 rounded-2xl border border-purple-500/30 overflow-hidden relative" style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.08), rgba(124,58,237,0.02))", boxShadow: "0 0 30px rgba(124,58,237,0.15)" }}>
+                <div className="flex flex-col items-center justify-center py-16 sm:py-20 px-6">
+                  <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: "rgba(124,58,237,0.2)" }}>
+                    <Play className="w-7 h-7 text-purple-400 ml-0.5" />
+                  </div>
+                  <p className="text-white/60 text-sm font-medium">Demo videosu yakında</p>
+                  <p className="text-white/30 text-xs mt-1">AI ile yorum yanıtlama — gerçek zamanlı</p>
+                </div>
               </div>
 
               {/* Form */}
