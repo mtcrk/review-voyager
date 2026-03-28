@@ -541,11 +541,11 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
             {automationOptions.map((option) => (
               <div
                 key={option.id}
-                className={`relative p-8 rounded-xl border ${option.borderColor} ${option.bgColor} transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group ${
+                className={`relative p-6 sm:p-8 rounded-xl border ${option.borderColor} ${option.bgColor} transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group ${
                   option.status === "coming-soon" ? "opacity-70" : ""
                 }`}
               >
@@ -712,7 +712,7 @@ const Index = () => {
         <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-3xl mx-auto">
             {/* Main Card */}
-            <div className="relative rounded-2xl border border-primary/20 bg-card p-10 md:p-14 shadow-xl overflow-hidden">
+            <div className="relative rounded-2xl border border-primary/20 bg-card p-6 sm:p-10 md:p-14 shadow-xl overflow-hidden">
               {/* Subtle gradient accent */}
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-purple-500 to-blue-500"></div>
               
@@ -900,7 +900,7 @@ const Index = () => {
 
       {/* Bottom CTA Section */}
       <section className="container mx-auto px-6 py-20">
-        <div className="border border-primary/20 rounded-2xl p-12 md:p-16 text-center relative overflow-hidden shadow-2xl">
+        <div className="border border-primary/20 rounded-2xl p-8 sm:p-12 md:p-16 text-center relative overflow-hidden shadow-2xl">
           <div className="absolute inset-0 gradient-hero opacity-80"></div>
           <div className="absolute inset-0 gradient-hero-overlay"></div>
           <div className="absolute inset-0 gradient-mesh opacity-20"></div>
@@ -911,11 +911,11 @@ const Index = () => {
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
               {t('landing.ctaSubtitle', 'Get your free AI Visibility Score and see how your business appears to AI assistants.')}
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
               <Button 
                 size="lg" 
                 onClick={() => navigate("/onboarding")} 
-                className="relative overflow-hidden gradient-primary text-white shadow-lg text-lg px-10 hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
+                className="relative overflow-hidden gradient-primary text-white shadow-lg text-base sm:text-lg px-8 sm:px-10 w-full sm:w-auto min-h-[48px] hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
               >
                 <span className="relative z-10">{t('landing.heroCta', 'See Your AI Visibility Score')}</span>
                 <ArrowRight className="w-5 h-5 ml-2 relative z-10" />
@@ -925,7 +925,7 @@ const Index = () => {
                 size="lg" 
                 variant="outline"
                 onClick={() => navigate("/automations/google-reviews")} 
-                className="text-lg px-8 hover:bg-muted transition-all duration-300"
+                className="text-base sm:text-lg px-6 sm:px-8 w-full sm:w-auto min-h-[48px] hover:bg-muted transition-all duration-300"
               >
                 {t('landing.learnMore', 'Learn More')}
               </Button>
