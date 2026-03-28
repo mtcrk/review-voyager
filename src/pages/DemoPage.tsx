@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useAuth } from "@/contexts/AuthContext";
+import { ExitIntentPopup } from "@/components/ExitIntentPopup";
+import { Play } from "lucide-react";
 
 export default function DemoPage() {
   const { t } = useTranslation();
