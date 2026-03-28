@@ -50,6 +50,7 @@ export default function DemoPage() {
         },
       });
 
+      sessionStorage.setItem("demo_form_submitted", "1");
       setSubmitted(true);
     } catch {
       setError("Bir hata oluştu, lütfen tekrar deneyin.");
@@ -117,6 +118,17 @@ export default function DemoPage() {
                 <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
                   Klinikler, oteller ve restoranlar zaten kullanıyor.
                 </p>
+              </div>
+
+              {/* Demo Video Placeholder */}
+              <div className="mb-8 md:mb-10 rounded-2xl border border-purple-500/30 overflow-hidden relative" style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.08), rgba(124,58,237,0.02))", boxShadow: "0 0 30px rgba(124,58,237,0.15)" }}>
+                <div className="flex flex-col items-center justify-center py-16 sm:py-20 px-6">
+                  <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: "rgba(124,58,237,0.2)" }}>
+                    <Play className="w-7 h-7 text-purple-400 ml-0.5" />
+                  </div>
+                  <p className="text-white/60 text-sm font-medium">Demo videosu yakında</p>
+                  <p className="text-white/30 text-xs mt-1">AI ile yorum yanıtlama — gerçek zamanlı</p>
+                </div>
               </div>
 
               {/* Form */}
