@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { CheckCircle, ArrowLeft } from "lucide-react";
+import demoGif from "@/assets/voyagerespond-demo.gif";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +10,7 @@ import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useAuth } from "@/contexts/AuthContext";
 import { ExitIntentPopup } from "@/components/ExitIntentPopup";
-import { Play } from "lucide-react";
+
 
 export default function DemoPage() {
   const { t } = useTranslation();
@@ -121,15 +122,14 @@ export default function DemoPage() {
                 </p>
               </div>
 
-              {/* Demo Video Placeholder */}
-              <div className="mb-8 md:mb-10 rounded-2xl border border-purple-500/30 overflow-hidden relative" style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.08), rgba(124,58,237,0.02))", boxShadow: "0 0 30px rgba(124,58,237,0.15)" }}>
-                <div className="flex flex-col items-center justify-center py-16 sm:py-20 px-6">
-                  <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: "rgba(124,58,237,0.2)" }}>
-                    <Play className="w-7 h-7 text-purple-400 ml-0.5" />
-                  </div>
-                  <p className="text-white/60 text-sm font-medium">Demo videosu yakında</p>
-                  <p className="text-white/30 text-xs mt-1">AI ile yorum yanıtlama — gerçek zamanlı</p>
-                </div>
+              {/* Demo GIF */}
+              <div className="mb-8 md:mb-10 rounded-2xl border border-purple-500/30 overflow-hidden relative" style={{ boxShadow: "0 0 30px rgba(124,58,237,0.15)" }}>
+                <img
+                  src={demoGif}
+                  alt="VoyageRespond AI yorum yanıtlama demosu"
+                  className="w-full h-auto"
+                  loading="eager"
+                />
               </div>
 
               {/* Form */}
