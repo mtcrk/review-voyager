@@ -38,7 +38,15 @@ export default function DemoPage() {
         });
 
       if (dbError) throw dbError;
-      setSubmitted(true);
+
+      // Send email notification
+      await supabase.functions.invoke("notify-demo-request", {
+        body: {
+          name: form.name.trim(),
+          business_name: form.business_name.trim(),
+          contact: form.contact.trim(),
+        },
+      });
     } catch {
       setError("Bir hata oluştu, lütfen tekrar deneyin.");
     } finally {
