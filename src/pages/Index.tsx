@@ -332,7 +332,14 @@ const Index = () => {
               >
                 {t('about.badge', 'Hakkımızda')}
               </button>
-              <div className="pt-2 px-4">
+              <div className="pt-2 px-4 space-y-2">
+                <button 
+                  onClick={() => { navigate("/demo"); setMobileMenuOpen(false); }}
+                  className="w-full px-5 py-3 rounded-md text-sm font-medium transition-all border"
+                  style={{ color: '#7A5AF8', borderColor: '#7A5AF8' }}
+                >
+                  Demo Talep Et
+                </button>
                 <button 
                   onClick={() => { navigate("/onboarding"); setMobileMenuOpen(false); }}
                   className="w-full px-5 py-3 rounded-md text-sm font-medium text-white transition-all"
