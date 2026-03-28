@@ -47,6 +47,8 @@ export default function DemoPage() {
           contact: form.contact.trim(),
         },
       });
+
+      setSubmitted(true);
     } catch {
       setError("Bir hata oluştu, lütfen tekrar deneyin.");
     } finally {
