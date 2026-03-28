@@ -170,7 +170,7 @@ const Index = () => {
     <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Navbar */}
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg" style={{ backgroundColor: '#FFFFFF', borderBottomColor: '#E2E8F0' }}>
-        <div className="container mx-auto px-6">
+        <div className="container mx-auto px-4 sm:px-6">
           <div className="flex h-20 items-center justify-between">
             {/* Logo - Left */}
             <button 
