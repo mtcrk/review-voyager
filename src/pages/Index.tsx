@@ -415,7 +415,7 @@ const Index = () => {
       </section>
 
       {/* Hero Blog Strip — En Çok Okunan Rehberler */}
-      <section className="container mx-auto px-6 pb-16 -mt-4">
+      <section className="container mx-auto px-4 sm:px-6 pb-16 -mt-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-2 mb-6 justify-center">
             <BookOpen className="w-4 h-4 text-primary" />
@@ -444,9 +444,9 @@ const Index = () => {
       </section>
 
        {/* Freemium CTA Section */}
-       <section className="container mx-auto px-6 py-20 md:py-28">
+       <section className="container mx-auto px-4 sm:px-6 py-12 sm:py-20 md:py-28">
          <div className="max-w-3xl mx-auto">
-           <div className="relative overflow-hidden rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/5 via-background to-background p-12 md:p-16 text-center">
+           <div className="relative overflow-hidden rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/5 via-background to-background p-8 sm:p-12 md:p-16 text-center">
              {/* Subtle gradient background */}
              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-50"></div>
              
@@ -484,7 +484,7 @@ const Index = () => {
        </section>
 
        {/* Demo Teaser Section */}
-       <section className="container mx-auto px-6 py-20">
+       <section className="container mx-auto px-4 sm:px-6 py-12 sm:py-20">
          <div className="text-center mb-12">
            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4">
              <Sparkles className="w-4 h-4" />
@@ -498,7 +498,7 @@ const Index = () => {
            </p>
          </div>
 
-         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
+         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-5xl mx-auto">
            {[
              { icon: Eye, title: t('landing.demoTeaser.cards.visibility', 'AI Visibility Skoru'), desc: t('landing.demoTeaser.cards.visibilityDesc', 'İşletmeniz yapay zekada nasıl görünüyor?') },
              { icon: MessageSquare, title: t('landing.demoTeaser.cards.aiReply', 'AI Yanıt Önerileri'), desc: t('landing.demoTeaser.cards.aiReplyDesc', 'Her yoruma profesyonel AI yanıtlar') },
@@ -531,7 +531,7 @@ const Index = () => {
       {/* Automation Options Grid */}
       <section id="automations" className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 gradient-features"></div>
-        <div className="container mx-auto px-6 relative z-10">
+          <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               {t('landing.automationsTitle', 'Choose Your Automations')}
@@ -586,7 +586,7 @@ const Index = () => {
       </section>
 
       {/* Use Cases Section */}
-      <section className="container mx-auto px-6 py-20">
+      <section className="container mx-auto px-4 sm:px-6 py-12 sm:py-20">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             {t('landing.useCasesTitle', 'Use one automation — or combine multiple channels')}
@@ -615,7 +615,7 @@ const Index = () => {
       {/* How It Works */}
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 gradient-features"></div>
-        <div className="container mx-auto px-6 relative z-10">
+          <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               {t('landing.howItWorksTitle', 'How It Works')}
@@ -642,7 +642,7 @@ const Index = () => {
       {/* Enterprise / Built for Scale Section */}
       <section className="relative py-24 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-foreground/[0.03] to-transparent"></div>
-        <div className="container mx-auto px-6 relative z-10">
+          <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold tracking-wide uppercase mb-4">
               <TrendingUp className="w-3.5 h-3.5" />
@@ -660,18 +660,18 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto mb-12">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-5xl mx-auto mb-12">
             {[
               { icon: Target, value: '30K+', label: t('landing.enterprise.stat1', 'Reviews managed per location') },
               { icon: MessageSquare, value: '< 2min', label: t('landing.enterprise.stat2', 'Average response time') },
               { icon: Users, value: '50+', label: t('landing.enterprise.stat3', 'Locations from one dashboard') },
               { icon: Sparkles, value: '12+', label: t('landing.enterprise.stat4', 'Languages auto-detected') },
             ].map((stat, i) => (
-              <div key={i} className="text-center p-6 rounded-xl bg-card border border-border hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+              <div key={i} className="text-center p-4 sm:p-6 rounded-xl bg-card border border-border hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-4">
                   <stat.icon className="w-6 h-6 text-primary" />
                 </div>
-                <div className="text-3xl font-bold text-foreground mb-1">{stat.value}</div>
+                <div className="text-2xl sm:text-3xl font-bold text-foreground mb-1">{stat.value}</div>
                 <div className="text-sm text-muted-foreground">{stat.label}</div>
               </div>
             ))}
@@ -709,7 +709,7 @@ const Index = () => {
       {/* Early Access Section - YC Style */}
       <section id="pricing" className="relative py-24 overflow-hidden">
         <div className="absolute inset-0 gradient-pricing"></div>
-        <div className="container mx-auto px-6 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="max-w-3xl mx-auto">
             {/* Main Card */}
             <div className="relative rounded-2xl border border-primary/20 bg-card p-6 sm:p-10 md:p-14 shadow-xl overflow-hidden">
@@ -790,7 +790,7 @@ const Index = () => {
       </section>
 
       {/* AI Visibility Value Section */}
-      <section className="container mx-auto px-6 py-16">
+      <section className="container mx-auto px-4 sm:px-6 py-12 sm:py-16">
         <div className="max-w-4xl mx-auto">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div>
@@ -821,7 +821,7 @@ const Index = () => {
       </section>
 
       {/* Mid-Page Blog Section — Müşteriler bunları da okuyor */}
-      <section className="container mx-auto px-6 py-20">
+      <section className="container mx-auto px-4 sm:px-6 py-12 sm:py-20">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Müşteriler bunları da okuyor
@@ -830,7 +830,7 @@ const Index = () => {
             İşletme sahiplerinin en çok okuduğu yorum yönetimi rehberleri.
           </p>
         </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-6xl mx-auto">
           {blogPosts.slice(0, 4).map((post) => (
             <button
               key={post.slug}
@@ -860,9 +860,9 @@ const Index = () => {
       </section>
 
       {/* Blog as Product Feature — AI ile daha iyi yanıt yazmayı öğrenin */}
-      <section className="container mx-auto px-6 py-16">
+      <section className="container mx-auto px-4 sm:px-6 py-12 sm:py-16">
         <div className="max-w-3xl mx-auto">
-          <div className="relative overflow-hidden rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/5 via-background to-background p-10 md:p-14">
+          <div className="relative overflow-hidden rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/5 via-background to-background p-6 sm:p-10 md:p-14">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-purple-500 to-blue-500"></div>
             <div className="text-center space-y-5">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
@@ -899,7 +899,7 @@ const Index = () => {
       <TrustBadges />
 
       {/* Bottom CTA Section */}
-      <section className="container mx-auto px-6 py-20">
+      <section className="container mx-auto px-4 sm:px-6 py-12 sm:py-20">
         <div className="border border-primary/20 rounded-2xl p-8 sm:p-12 md:p-16 text-center relative overflow-hidden shadow-2xl">
           <div className="absolute inset-0 gradient-hero opacity-80"></div>
           <div className="absolute inset-0 gradient-hero-overlay"></div>
@@ -936,8 +936,8 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="border-t border-border bg-card/50 backdrop-blur-sm mt-20">
-        <div className="container mx-auto px-6 py-12">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
+        <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
+          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <img src={voyageRespondLogo} alt="VoyageRespond" className="h-6 w-6" />
