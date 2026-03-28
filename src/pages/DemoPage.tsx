@@ -172,7 +172,8 @@ export default function DemoPage() {
               <p className="text-xs text-center mt-4" style={{ color: "rgba(255,255,255,0.3)" }}>
                 Bilgileriniz gizli tutulur ve yalnızca demo randevusu için kullanılır.
               </p>
-            </div>
+              </div>
+            </>
           ) : (
             <div className="text-center space-y-6">
               <div className="flex justify-center">
