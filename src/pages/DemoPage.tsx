@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Sparkles, CheckCircle, ArrowLeft } from "lucide-react";
+import { CheckCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -84,24 +84,44 @@ export default function DemoPage() {
       </nav>
 
       {/* Content */}
-      <section className="container mx-auto px-6 py-20 flex items-center justify-center min-h-[calc(100vh-64px)]">
-        <div className="w-full max-w-md">
+      <section className="container mx-auto px-6 py-10 md:py-16">
+        <div className="w-full max-w-xl mx-auto">
           {!submitted ? (
-            <div className="rounded-2xl p-8 border border-white/10" style={{ backgroundColor: "rgba(255,255,255,0.05)" }}>
-              {/* Badge */}
-              <div className="flex justify-center mb-6">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-purple-500/30 text-sm font-medium" style={{ backgroundColor: "rgba(124, 58, 237, 0.15)", color: "#C4B5FD" }}>
-                  <Sparkles className="w-4 h-4" />
-                  Ücretsiz Demo
+            <>
+              {/* Value Proposition */}
+              <div className="text-center mb-8 md:mb-10">
+                <h1 className="text-2xl md:text-4xl font-bold text-white mb-3 leading-tight">
+                  Olumsuz Yorumlar Cevapsız mı Kalıyor?
+                </h1>
+                <p className="text-sm md:text-base mb-6" style={{ color: "#A78BFA" }}>
+                  VoyageRespond, yapay zeka ile Google yorumlarınıza 8 saniyede profesyonel Türkçe yanıt üretir.
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-6 justify-center mb-5">
+                  <div className="flex items-center gap-2 text-white/90 text-sm">
+                    <span className="text-lg">⚡</span>
+                    <span>8 saniyede profesyonel yanıt</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-white/90 text-sm">
+                    <span className="text-lg">🇹🇷</span>
+                    <span>Kusursuz Türkçe, markanıza özel ton</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-white/90 text-sm">
+                    <span className="text-lg">📊</span>
+                    <span>Tüm yorumlarınız tek panelde</span>
+                  </div>
                 </div>
+
+                <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
+                  Klinikler, oteller ve restoranlar zaten kullanıyor.
+                </p>
               </div>
 
-              <h1 className="text-3xl md:text-4xl font-bold text-white text-center mb-3">
-                Ücretsiz Demo Talep Et
-              </h1>
-              <p className="text-center mb-8" style={{ color: "#A78BFA" }}>
-                Yapay zeka ile yorum yönetimini 2 dakikada görün.
-              </p>
+              {/* Form */}
+              <div className="rounded-2xl p-6 md:p-8 border border-white/10" style={{ backgroundColor: "rgba(255,255,255,0.05)" }}>
+                <h2 className="text-xl md:text-2xl font-bold text-white text-center mb-6">
+                  2 Dakikalık Demo İçin Bilgilerinizi Bırakın
+                </h2>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
@@ -152,7 +172,8 @@ export default function DemoPage() {
               <p className="text-xs text-center mt-4" style={{ color: "rgba(255,255,255,0.3)" }}>
                 Bilgileriniz gizli tutulur ve yalnızca demo randevusu için kullanılır.
               </p>
-            </div>
+              </div>
+            </>
           ) : (
             <div className="text-center space-y-6">
               <div className="flex justify-center">
