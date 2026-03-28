@@ -61,6 +61,7 @@ export default function DemoPage() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#0F0A1F" }}>
+      <ExitIntentPopup disabled={submitted} />
       {/* Navbar */}
       <nav className="sticky top-0 z-50 border-b border-white/10 backdrop-blur-lg" style={{ backgroundColor: "rgba(15, 10, 31, 0.95)" }}>
         <div className="container mx-auto px-4 sm:px-6">
