@@ -255,6 +255,15 @@ const Index = () => {
             <div className="hidden md:flex items-center gap-3">
               <LanguageSwitcher />
               <button 
+                onClick={() => navigate("/demo")}
+                className="px-5 py-2.5 rounded-md text-sm font-medium transition-all duration-200 border"
+                style={{ color: '#7A5AF8', borderColor: '#7A5AF8' }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#7A5AF8'; e.currentTarget.style.color = '#FFFFFF'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#7A5AF8'; }}
+              >
+                Demo Talep Et
+              </button>
+              <button 
                 onClick={() => navigate("/onboarding")}
                 className="px-5 py-2.5 rounded-md text-sm font-medium text-white transition-all duration-200 shadow-sm hover:shadow-md"
                 style={{ backgroundColor: '#7A5AF8' }}
@@ -323,7 +332,14 @@ const Index = () => {
               >
                 {t('about.badge', 'Hakkımızda')}
               </button>
-              <div className="pt-2 px-4">
+              <div className="pt-2 px-4 space-y-2">
+                <button 
+                  onClick={() => { navigate("/demo"); setMobileMenuOpen(false); }}
+                  className="w-full px-5 py-3 rounded-md text-sm font-medium transition-all border"
+                  style={{ color: '#7A5AF8', borderColor: '#7A5AF8' }}
+                >
+                  Demo Talep Et
+                </button>
                 <button 
                   onClick={() => { navigate("/onboarding"); setMobileMenuOpen(false); }}
                   className="w-full px-5 py-3 rounded-md text-sm font-medium text-white transition-all"
@@ -389,10 +405,10 @@ const Index = () => {
             <Button 
               size="lg" 
               variant="outline"
-              onClick={() => scrollToSection("demo")} 
+              onClick={() => navigate("/demo")} 
               className="text-lg px-10 py-7 hover:bg-muted transition-all duration-300"
             >
-              {t('landing.tryDemo', 'Try AI Reply Demo')}
+              Ücretsiz Dene
             </Button>
           </div>
         </div>

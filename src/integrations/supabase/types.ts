@@ -231,6 +231,30 @@ export type Database = {
           },
         ]
       }
+      demo_requests: {
+        Row: {
+          business_name: string
+          contact: string
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          business_name: string
+          contact: string
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          business_name?: string
+          contact?: string
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       email_campaigns: {
         Row: {
           body_html: string
