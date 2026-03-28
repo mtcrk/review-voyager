@@ -62,14 +62,19 @@ export function ExitIntentPopup({ disabled = false }: ExitIntentPopupProps) {
     setLoading(true);
     setError("");
     try {
+      const payload = {
+        name: "Exit Popup Lead",
+        business_name: "—",
+        contact: email.trim(),
+      };
       const { error: dbError } = await supabase
         .from("demo_requests" as any)
-        .insert({
-          name: "Exit Popup Lead",
-          business_name: "—",
-          contact: email.trim(),
-        });
+        .insert(payload);
       if (dbError) throw dbError;
+
+      // Send admin notification email
+      await supabase.functions.invoke("notify-demo-request", { body: payload });
+
       setSubmitted(true);
     } catch {
       setError("Bir hata oluştu, tekrar deneyin.");
