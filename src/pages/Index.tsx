@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { MessageSquare, Star, Phone, Check, ArrowRight, Clock, Lock, Music2, Eye, TrendingUp, Sparkles, Target, Users, Zap, Shield, Menu, X, BookOpen, Tag } from "lucide-react";
 import { useState } from "react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
+import demoGif from "@/assets/voyagerespond-demo.gif";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from 'react-i18next';
@@ -410,6 +411,22 @@ const Index = () => {
             >
               Ücretsiz Dene
             </Button>
+          </div>
+
+          {/* Demo GIF Card */}
+          <div className="pt-12 max-w-sm mx-auto animate-fade-in" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>
+            <div className="relative rounded-2xl overflow-hidden border border-primary/20 shadow-2xl shadow-primary/10">
+              <div className="absolute -inset-[1px] rounded-2xl bg-gradient-to-b from-primary/30 via-transparent to-primary/10 pointer-events-none" />
+              <img
+                src={demoGif}
+                alt="VoyageRespond AI yorum yanıtlama demosu"
+                className="w-full h-auto rounded-2xl"
+                loading="eager"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground mt-3 text-center">
+              AI ile olumsuz yoruma 8 saniyede profesyonel yanıt
+            </p>
           </div>
         </div>
       </section>
