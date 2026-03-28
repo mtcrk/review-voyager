@@ -12,10 +12,10 @@ export default function About() {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Navbar */}
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white" style={{ borderBottomColor: '#E2E8F0' }}>
-        <div className="container mx-auto px-6">
+        <div className="container mx-auto px-4 sm:px-6">
           <div className="flex h-20 items-center justify-between">
             <button
               onClick={() => navigate("/")}
@@ -49,12 +49,12 @@ export default function About() {
       </nav>
 
       {/* Hero */}
-      <section className="container mx-auto px-6 pt-20 pb-16 text-center">
+      <section className="container mx-auto px-4 sm:px-6 pt-12 sm:pt-20 pb-12 sm:pb-16 text-center">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-6">
           <Building2 className="w-4 h-4" />
           {t('about.badge', 'Hakkımızda')}
         </div>
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
           {t('about.title', 'Yapay Zeka ile İşletmelerin')}{' '}
           <span className="bg-gradient-to-r from-purple-600 via-primary to-blue-600 bg-clip-text text-transparent">
             {t('about.titleHighlight', 'Çevrimiçi İtibarını Yönetiyoruz')}
@@ -66,9 +66,9 @@ export default function About() {
       </section>
 
       {/* Mission & Values */}
-      <section className="container mx-auto px-6 py-16">
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          <div className="text-center p-8 rounded-2xl border border-border bg-card hover:shadow-lg transition-shadow">
+      <section className="container mx-auto px-4 sm:px-6 py-12 sm:py-16">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
+          <div className="text-center p-6 sm:p-8 rounded-2xl border border-border bg-card hover:shadow-lg transition-shadow">
             <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
               <Target className="w-7 h-7 text-primary" />
             </div>
@@ -80,7 +80,7 @@ export default function About() {
             </p>
           </div>
 
-          <div className="text-center p-8 rounded-2xl border border-border bg-card hover:shadow-lg transition-shadow">
+          <div className="text-center p-6 sm:p-8 rounded-2xl border border-border bg-card hover:shadow-lg transition-shadow">
             <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
               <Sparkles className="w-7 h-7 text-primary" />
             </div>
@@ -92,7 +92,7 @@ export default function About() {
             </p>
           </div>
 
-          <div className="text-center p-8 rounded-2xl border border-border bg-card hover:shadow-lg transition-shadow">
+          <div className="text-center p-6 sm:p-8 rounded-2xl border border-border bg-card hover:shadow-lg transition-shadow">
             <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
               <Users className="w-7 h-7 text-primary" />
             </div>
@@ -107,7 +107,7 @@ export default function About() {
       </section>
 
       {/* What We Do */}
-      <section className="container mx-auto px-6 py-16">
+      <section className="container mx-auto px-4 sm:px-6 py-12 sm:py-16">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mb-12">
             {t('about.whatWeDo.title', 'Ne Yapıyoruz?')}
@@ -142,8 +142,8 @@ export default function About() {
       </section>
 
       {/* CTA */}
-      <section className="container mx-auto px-6 py-20">
-        <div className="max-w-3xl mx-auto text-center rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/5 via-background to-background p-12">
+      <section className="container mx-auto px-4 sm:px-6 py-12 sm:py-20">
+        <div className="max-w-3xl mx-auto text-center rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/5 via-background to-background p-8 sm:p-12">
           <h2 className="text-3xl font-bold text-foreground mb-4">
             {t('about.cta.title', 'İşletmenizi Büyütmeye Başlayın')}
           </h2>
@@ -153,7 +153,7 @@ export default function About() {
           <Button
             size="lg"
             onClick={() => navigate("/onboarding")}
-            className="gradient-primary text-white shadow-lg text-lg px-10 py-6 hover:shadow-2xl transition-all duration-300 hover:scale-105"
+            className="gradient-primary text-white shadow-lg text-base sm:text-lg px-8 sm:px-10 py-6 w-full sm:w-auto min-h-[48px] hover:shadow-2xl transition-all duration-300 hover:scale-105"
           >
             {t('landing.heroCta', 'See Your AI Visibility Score')}
             <ArrowRight className="w-5 h-5 ml-2" />
@@ -163,8 +163,8 @@ export default function About() {
 
       {/* Footer */}
       <footer className="border-t border-border bg-card/50 backdrop-blur-sm">
-        <div className="container mx-auto px-6 py-12">
-          <div className="grid md:grid-cols-3 gap-8 mb-8">
+        <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <img src={voyageRespondLogo} alt="VoyageRespond" className="h-6 w-6" />

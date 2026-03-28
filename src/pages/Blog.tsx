@@ -19,7 +19,7 @@ const Blog = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
-        <div className="container mx-auto px-6">
+        <div className="container mx-auto px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between">
             <button
               onClick={() => navigate("/")}
@@ -48,8 +48,8 @@ const Blog = () => {
       </nav>
 
       {/* Hero */}
-      <section className="container mx-auto px-6 py-16 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+      <section className="container mx-auto px-4 sm:px-6 py-10 sm:py-16 text-center">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">
           Blog
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -58,8 +58,8 @@ const Blog = () => {
       </section>
 
       {/* Blog Posts Grid */}
-      <section className="container mx-auto px-6 pb-20">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      <section className="container mx-auto px-4 sm:px-6 pb-20">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
           {blogPosts.map((post) => (
             <article
               key={post.slug}
@@ -108,8 +108,8 @@ const Blog = () => {
       </section>
 
       {/* CTA */}
-      <section className="container mx-auto px-6 pb-20">
-        <div className="max-w-3xl mx-auto text-center p-12 rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/5 via-background to-background">
+      <section className="container mx-auto px-4 sm:px-6 pb-20">
+        <div className="max-w-3xl mx-auto text-center p-8 sm:p-12 rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/5 via-background to-background">
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
             Yorumlarınızı AI ile yönetmeye başlayın
           </h2>
@@ -118,7 +118,7 @@ const Blog = () => {
           </p>
           <button
             onClick={() => navigate("/onboarding")}
-            className="px-8 py-3 rounded-md text-white font-medium transition-all hover:shadow-lg"
+            className="px-8 py-3 rounded-md text-white font-medium transition-all hover:shadow-lg min-h-[48px]"
             style={{ backgroundColor: "#7A5AF8" }}
           >
             Ücretsiz Dene
@@ -128,7 +128,7 @@ const Blog = () => {
 
       {/* Footer */}
       <footer className="border-t border-border bg-card/50">
-        <div className="container mx-auto px-6 py-8">
+        <div className="container mx-auto px-4 sm:px-6 py-8">
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>© 2024 VoyageRespond</span>
             <span className="hidden md:block">•</span>

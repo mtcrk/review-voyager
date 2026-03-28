@@ -367,7 +367,7 @@ const Hub = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
-        <div className="container mx-auto px-6">
+        <div className="container mx-auto px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between">
             <button
               onClick={() => navigate("/")}
@@ -401,7 +401,7 @@ const Hub = () => {
 
       {/* Hero */}
       <div className="border-b bg-card/50">
-        <div className="container mx-auto px-6 py-12">
+        <div className="container mx-auto px-4 sm:px-6 py-12">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
               <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
@@ -431,7 +431,7 @@ const Hub = () => {
       {/* CTA Banner for non-logged-in users */}
       {!user && hasOnboardingSelection && (
         <div className="bg-primary/5 border-b border-primary/20">
-          <div className="container mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="container mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-foreground font-medium">
               🚀 Bu otomasyonları kullanmaya başlamak için hesap oluşturun — 3 ay ücretsiz!
             </p>
@@ -448,7 +448,7 @@ const Hub = () => {
       )}
 
       {/* Filters */}
-      <div className="container mx-auto px-6 py-6">
+      <div className="container mx-auto px-4 sm:px-6 py-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
             {tabs.map((tab) => (
@@ -478,7 +478,7 @@ const Hub = () => {
       </div>
 
       {/* Automation Cards */}
-      <div className="container mx-auto px-6 pb-12">
+      <div className="container mx-auto px-4 sm:px-6 pb-12">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredAutomations.map((automation) => (
             <div

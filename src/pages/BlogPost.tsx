@@ -111,7 +111,7 @@ const BlogPost = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
-        <div className="container mx-auto px-6">
+        <div className="container mx-auto px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between">
             <button
               onClick={() => navigate("/")}
@@ -140,7 +140,7 @@ const BlogPost = () => {
       </nav>
 
       {/* Article */}
-      <article className="container mx-auto px-6 py-12 max-w-3xl">
+      <article className="container mx-auto px-4 sm:px-6 py-12 max-w-3xl">
         {/* Back */}
         <button
           onClick={() => navigate("/blog")}
@@ -221,7 +221,7 @@ const BlogPost = () => {
 
       {/* Related Posts */}
       {otherPosts.length > 0 && (
-        <section className="container mx-auto px-6 py-12 max-w-3xl">
+        <section className="container mx-auto px-4 sm:px-6 py-12 max-w-3xl">
           <h2 className="text-2xl font-bold text-foreground mb-6">Diğer Yazılar</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {otherPosts.map((p) => (
@@ -242,7 +242,7 @@ const BlogPost = () => {
       )}
 
       {/* CTA */}
-      <section className="container mx-auto px-6 py-16 max-w-3xl">
+      <section className="container mx-auto px-4 sm:px-6 py-16 max-w-3xl">
         <div className="text-center p-10 rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/5 via-background to-background">
           <h2 className="text-2xl font-bold text-foreground mb-3">
             Yapay zeka ile yorum yönetimine başlayın
@@ -260,7 +260,7 @@ const BlogPost = () => {
 
       {/* Footer */}
       <footer className="border-t border-border bg-card/50">
-        <div className="container mx-auto px-6 py-8">
+        <div className="container mx-auto px-4 sm:px-6 py-8">
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>© 2024 VoyageRespond</span>
             <span className="hidden md:block">•</span>
