@@ -60,7 +60,7 @@ export default function DemoPage() {
     <div className="min-h-screen" style={{ backgroundColor: "#0F0A1F" }}>
       {/* Navbar */}
       <nav className="sticky top-0 z-50 border-b border-white/10 backdrop-blur-lg" style={{ backgroundColor: "rgba(15, 10, 31, 0.95)" }}>
-        <div className="container mx-auto px-6">
+        <div className="container mx-auto px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between">
             <button onClick={() => navigate("/")} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <img src={voyageRespondLogo} alt="VoyageRespond" className="h-6 w-6" />
@@ -84,7 +84,7 @@ export default function DemoPage() {
       </nav>
 
       {/* Content */}
-      <section className="container mx-auto px-6 py-10 md:py-16">
+      <section className="container mx-auto px-4 sm:px-6 py-10 md:py-16">
         <div className="w-full max-w-xl mx-auto">
           {!submitted ? (
             <>
