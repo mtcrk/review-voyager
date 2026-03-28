@@ -167,7 +167,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Navbar */}
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg" style={{ backgroundColor: '#FFFFFF', borderBottomColor: '#E2E8F0' }}>
         <div className="container mx-auto px-6">
@@ -354,7 +354,7 @@ const Index = () => {
       </nav>
 
       {/* Hero Section - AI Visibility Focused */}
-      <section className="container mx-auto px-6 pt-32 pb-20 md:pt-40 md:pb-28 relative overflow-hidden">
+      <section className="container mx-auto px-4 sm:px-6 pt-20 pb-14 md:pt-40 md:pb-28 relative overflow-hidden">
         <div className="absolute inset-0 gradient-hero"></div>
         <div className="absolute inset-0 gradient-hero-overlay"></div>
         <div className="absolute inset-0 gradient-mesh"></div>
@@ -365,13 +365,13 @@ const Index = () => {
             {t('landing.aiVisibilityBadge', 'Powered by AI Visibility Engine')}
           </div>
           
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight tracking-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-foreground leading-tight tracking-tight">
             {t('landing.heroLine1', 'Be Found by Google.')}<br />
             <span className="bg-gradient-to-r from-purple-600 via-primary to-blue-600 bg-clip-text text-transparent">
               {t('landing.heroLine2', 'Be Discovered by AI.')}
             </span>
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg md:text-2xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
             {t('landing.heroSubtitle', 'AI-powered review management that boosts your visibility on Google Search and AI assistants.')}<br className="hidden md:block" />
             {t('landing.heroSubtitle2', 'Get your AI Visibility Score, smart reply suggestions, and real-time performance insights.')}
           </p>
@@ -392,11 +392,11 @@ const Index = () => {
             </div>
           </div>
           
-          <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
             <Button 
               size="lg" 
               onClick={() => navigate("/onboarding")} 
-              className="relative overflow-hidden gradient-primary text-white shadow-lg text-lg px-10 py-7 hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
+              className="relative overflow-hidden gradient-primary text-white shadow-lg text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 w-full sm:w-auto hover:shadow-2xl transition-all duration-300 hover:scale-105 group min-h-[48px]"
             >
               <span className="relative z-10">{t('landing.heroCta', 'See Your AI Visibility Score')}</span>
               <ArrowRight className="w-5 h-5 ml-2 relative z-10" />
@@ -406,7 +406,7 @@ const Index = () => {
               size="lg" 
               variant="outline"
               onClick={() => navigate("/demo")} 
-              className="text-lg px-10 py-7 hover:bg-muted transition-all duration-300"
+              className="text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 w-full sm:w-auto hover:bg-muted transition-all duration-300 min-h-[48px]"
             >
               Ücretsiz Dene
             </Button>
