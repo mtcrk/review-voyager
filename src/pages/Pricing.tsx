@@ -172,7 +172,7 @@ const Pricing = () => {
 
       {/* Hero */}
       <section className="container mx-auto px-4 sm:px-6 py-16 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">
           Pay for the platform.<br />
           <span className="text-primary">Activate the automations you need.</span>
         </h1>
