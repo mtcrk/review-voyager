@@ -54,10 +54,12 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
 
       setBusinesses(data || []);
       
-      // Set first business as active if not already set
-      if (data && data.length > 0 && !activeBusiness) {
-        setActiveBusiness(data[0]);
-      } else if (!data || data.length === 0) {
+      if (data && data.length > 0) {
+        // Update activeBusiness with fresh data, or set first if none selected
+        const currentId = activeBusiness?.id;
+        const updated = currentId ? data.find(b => b.id === currentId) : null;
+        setActiveBusiness(updated || data[0]);
+      } else {
         setActiveBusiness(null);
       }
     } catch (error) {
