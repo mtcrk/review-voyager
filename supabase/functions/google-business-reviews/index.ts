@@ -96,35 +96,59 @@ Deno.serve(async (req) => {
         // Refresh access token
         const accessToken = await refreshAccessToken(credentials.google_refresh_token);
 
-        // Fetch reviews from Google Business Profile API
-        // Full resource path: accounts/{accountId}/locations/{locationId}
-        const reviewsUrl = `https://mybusiness.googleapis.com/v4/${biz.google_account_id}/${biz.google_location_id}/reviews`;
-        console.log(`Fetching reviews from: ${reviewsUrl}`);
+        // Fetch reviews from Google Business Profile API with pagination
+        const baseReviewsUrl = `https://mybusiness.googleapis.com/v4/${biz.google_account_id}/${biz.google_location_id}/reviews`;
+        console.log(`Fetching reviews from: ${baseReviewsUrl}`);
 
-        const reviewsResponse = await fetch(reviewsUrl, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
+        const reviews: any[] = [];
+        let nextPageToken: string | undefined = undefined;
+        let pageCount = 0;
+        const MAX_PAGES = 50; // Safety limit (~50 reviews per page = ~2500 max)
 
-        if (!reviewsResponse.ok) {
-          const errorText = await reviewsResponse.text();
-          console.error(`Google API error for ${biz.name}:`, errorText);
+        do {
+          const url = new URL(baseReviewsUrl);
+          url.searchParams.set("pageSize", "50");
+          if (nextPageToken) {
+            url.searchParams.set("pageToken", nextPageToken);
+          }
 
-          // Log the error
-          await supabaseAdmin.from("integration_logs").insert({
-            business_id: biz.id,
-            provider: "google",
-            action: "fetch_reviews",
-            status: "error",
-            http_status: reviewsResponse.status,
-            error_message: errorText.substring(0, 500),
+          const reviewsResponse = await fetch(url.toString(), {
+            headers: { Authorization: `Bearer ${accessToken}` },
           });
 
-          results.push({ business: biz.name, error: `HTTP ${reviewsResponse.status}` });
-          continue;
+          if (!reviewsResponse.ok) {
+            const errorText = await reviewsResponse.text();
+            console.error(`Google API error for ${biz.name} (page ${pageCount}):`, errorText);
+
+            // Log the error only if first page fails
+            if (pageCount === 0) {
+              await supabaseAdmin.from("integration_logs").insert({
+                business_id: biz.id,
+                provider: "google",
+                action: "fetch_reviews",
+                status: "error",
+                http_status: reviewsResponse.status,
+                error_message: errorText.substring(0, 500),
+              });
+              results.push({ business: biz.name, error: `HTTP ${reviewsResponse.status}` });
+            }
+            break;
+          }
+
+          const reviewsData = await reviewsResponse.json();
+          const pageReviews = reviewsData.reviews || [];
+          reviews.push(...pageReviews);
+          nextPageToken = reviewsData.nextPageToken;
+          pageCount++;
+
+          console.log(`Page ${pageCount}: fetched ${pageReviews.length} reviews, total so far: ${reviews.length}`);
+        } while (nextPageToken && pageCount < MAX_PAGES);
+
+        if (pageCount === 0 && reviews.length === 0) {
+          continue; // Error was already logged above
         }
 
-        const reviewsData = await reviewsResponse.json();
-        const reviews = reviewsData.reviews || [];
+        console.log(`Total reviews fetched for ${biz.name}: ${reviews.length} across ${pageCount} pages`);
         let insertedCount = 0;
         let updatedCount = 0;
 
