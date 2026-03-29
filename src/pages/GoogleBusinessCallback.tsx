@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useBusiness } from '@/contexts/BusinessContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -18,6 +19,7 @@ interface GoogleBusiness {
 export default function GoogleBusinessCallback() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { refetchBusinesses } = useBusiness();
   const [loading, setLoading] = useState(true);
   const [businesses, setBusinesses] = useState<GoogleBusiness[]>([]);
   const [selectedBusinesses, setSelectedBusinesses] = useState<Set<string>>(new Set());
@@ -136,12 +138,14 @@ export default function GoogleBusinessCallback() {
         console.warn("Auto-fetch business info failed:", infoError);
       }
 
+      await refetchBusinesses();
+
       toast({
         title: 'Başarılı',
         description: `${selectedBusinesses.size} işletme eklendi`,
       });
 
-      navigate('/dashboard');
+      navigate('/dashboard', { replace: true });
     } catch (error: any) {
       console.error('Save error:', error);
       toast({
