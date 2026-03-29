@@ -6,24 +6,60 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Loader2, LogOut } from "lucide-react";
+import { Loader2, LogOut, Bell, BellOff, BellRing, AlertTriangle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBusiness } from "@/contexts/BusinessContext";
 import { useState, useEffect } from "react";
+
+type NotificationType = "instant" | "negative_only" | "none";
+
+const notificationOptions: { value: NotificationType; label: string; description: string; icon: any }[] = [
+  {
+    value: "instant",
+    label: "Tüm Yorumlar",
+    description: "Her yeni yorum geldiğinde e-posta bildirimi alın",
+    icon: BellRing,
+  },
+  {
+    value: "negative_only",
+    label: "Sadece Olumsuz",
+    description: "Yalnızca 1-3 yıldızlı yorumlarda bildirim alın",
+    icon: AlertTriangle,
+  },
+  {
+    value: "none",
+    label: "Kapalı",
+    description: "E-posta bildirimi almayın",
+    icon: BellOff,
+  },
+];
 
 export default function Settings() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, profile, refreshProfile } = useAuth();
+  const { activeBusiness } = useBusiness();
   const [fullName, setFullName] = useState('');
   const [saving, setSaving] = useState(false);
   const [googleConnecting, setGoogleConnecting] = useState(false);
+  const [notificationType, setNotificationType] = useState<NotificationType>("instant");
+  const [savingNotification, setSavingNotification] = useState(false);
 
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name);
     }
   }, [profile]);
+
+  // Load notification preference from active business
+  useEffect(() => {
+    if (activeBusiness) {
+      // Cast to access the new column (types may not be updated yet)
+      const biz = activeBusiness as any;
+      setNotificationType(biz.review_notification_type || "instant");
+    }
+  }, [activeBusiness]);
 
   const handleLogout = async () => {
     try {
@@ -68,6 +104,35 @@ export default function Settings() {
       });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSaveNotification = async (type: NotificationType) => {
+    if (!activeBusiness) return;
+
+    setSavingNotification(true);
+    setNotificationType(type);
+
+    try {
+      const { error } = await supabase
+        .from('businesses')
+        .update({ review_notification_type: type } as any)
+        .eq('id', activeBusiness.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Başarılı",
+        description: "Bildirim tercihiniz güncellendi.",
+      });
+    } catch (error) {
+      toast({
+        title: "Hata",
+        description: "Bildirim tercihi güncellenirken bir hata oluştu.",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingNotification(false);
     }
   };
 
@@ -275,13 +340,60 @@ export default function Settings() {
         <TabsContent value="notifications" className="space-y-6">
           <Card className="shadow-card">
             <CardHeader>
-              <CardTitle>Bildirim Tercihleri</CardTitle>
-              <CardDescription>Bildirimleri nasıl alacağınızı yönetin</CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5" />
+                Yorum Bildirimleri
+              </CardTitle>
+              <CardDescription>
+                Yeni yorumlar geldiğinde nasıl bildirim almak istediğinizi seçin.
+                {activeBusiness && (
+                  <span className="block mt-1 font-medium text-foreground">
+                    İşletme: {activeBusiness.name}
+                  </span>
+                )}
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Bildirim ayarları yakında.
-              </p>
+              <div className="space-y-3">
+                {notificationOptions.map((option) => {
+                  const Icon = option.icon;
+                  const isSelected = notificationType === option.value;
+
+                  return (
+                    <button
+                      key={option.value}
+                      onClick={() => handleSaveNotification(option.value)}
+                      disabled={savingNotification}
+                      className={`w-full flex items-start gap-4 p-4 rounded-lg border-2 transition-all text-left ${
+                        isSelected
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/40 hover:bg-muted/30"
+                      }`}
+                    >
+                      <div className={`p-2 rounded-lg ${isSelected ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1">
+                        <p className={`font-medium ${isSelected ? "text-primary" : "text-foreground"}`}>
+                          {option.label}
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-0.5">
+                          {option.description}
+                        </p>
+                      </div>
+                      {isSelected && (
+                        <Badge variant="default" className="mt-1">Aktif</Badge>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="mt-6 p-4 rounded-lg bg-muted/30 border border-border">
+                <p className="text-sm text-muted-foreground">
+                  <strong>Bildirimler nasıl çalışır?</strong> Yeni yorumlar çekildiğinde, tercihlerinize göre kayıtlı e-posta adresinize ({user?.email}) bildirim gönderilir. E-postada yorum detayı ve AI tarafından önerilen yanıt yer alır.
+                </p>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
