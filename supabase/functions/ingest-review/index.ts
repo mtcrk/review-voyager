@@ -130,6 +130,31 @@ serve(async (req) => {
 
     console.log("Review ingested successfully:", newReview.id);
 
+    // Send notification email
+    try {
+      await fetch(`${supabaseUrl}/functions/v1/notify-new-review`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${supabaseKey}`,
+        },
+        body: JSON.stringify({
+          business_id: businessRecord.id,
+          reviews: [{
+            id: newReview.id,
+            reviewer_name: review.reviewer || review.reviewer_name,
+            rating: review.rating,
+            text: review.text,
+            suggested_reply: suggestedReply,
+            posted_at: review.posted_at,
+          }],
+        }),
+      });
+      console.log("Review notification sent");
+    } catch (notifyErr) {
+      console.error("Failed to send review notification:", notifyErr);
+    }
+
     return new Response(
       JSON.stringify({
         message: "Review ingested successfully",

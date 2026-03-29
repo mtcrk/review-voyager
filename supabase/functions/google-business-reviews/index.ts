@@ -235,6 +235,39 @@ Deno.serve(async (req) => {
           else console.error("Insert error:", insertError);
         }
 
+        // Send notification for new reviews
+        if (insertedCount > 0) {
+          try {
+            // Collect newly inserted reviews (pending_reply, no approved_reply)
+            const { data: newReviews } = await supabaseAdmin
+              .from("reviews")
+              .select("id, reviewer_name, rating, text, suggested_reply, posted_at")
+              .eq("business_id", biz.id)
+              .eq("status", "pending_reply")
+              .is("approved_reply", null)
+              .order("created_at", { ascending: false })
+              .limit(insertedCount);
+
+            if (newReviews && newReviews.length > 0) {
+              await fetch(`${supabaseUrl}/functions/v1/notify-new-review`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${serviceRoleKey}`,
+                },
+                body: JSON.stringify({
+                  business_id: biz.id,
+                  reviews: newReviews,
+                }),
+              });
+              console.log(`Notification sent for ${newReviews.length} new reviews`);
+            }
+          } catch (notifyErr) {
+            console.error("Failed to send review notification:", notifyErr);
+            // Don't fail the whole process if notification fails
+          }
+        }
+
         // Log success
         await supabaseAdmin.from("integration_logs").insert({
           business_id: biz.id,

@@ -62,6 +62,7 @@ export type Database = {
           name: string
           parent_business_id: string | null
           place_id: string | null
+          review_notification_type: string
           tone: string | null
           tripadvisor_id: string | null
           trustpilot_url: string | null
@@ -83,6 +84,7 @@ export type Database = {
           name: string
           parent_business_id?: string | null
           place_id?: string | null
+          review_notification_type?: string
           tone?: string | null
           tripadvisor_id?: string | null
           trustpilot_url?: string | null
@@ -104,6 +106,7 @@ export type Database = {
           name?: string
           parent_business_id?: string | null
           place_id?: string | null
+          review_notification_type?: string
           tone?: string | null
           tripadvisor_id?: string | null
           trustpilot_url?: string | null

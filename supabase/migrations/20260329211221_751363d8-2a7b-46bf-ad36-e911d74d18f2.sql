@@ -1,0 +1,1 @@
+ALTER TABLE public.businesses ADD COLUMN review_notification_type text NOT NULL DEFAULT 'instant';
