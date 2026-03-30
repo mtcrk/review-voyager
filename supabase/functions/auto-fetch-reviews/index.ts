@@ -8,6 +8,275 @@ const corsHeaders = {
 
 const APIFY_BASE = "https://api.apify.com/v2";
 const ACTOR_ID = "tri_angle~hotel-review-aggregator";
+const TRUSTPILOT_ACTOR_ID = "zen-studio~trustpilot-review-scraper";
+
+const PROVIDER_MAP: Record<string, string> = {
+  "booking.com": "booking", booking: "booking",
+  tripadvisor: "tripadvisor",
+  expedia: "hotelscom", "hotels.com": "hotelscom", hotelscom: "hotelscom", hotels: "hotelscom",
+};
+
+function normalizeRating(rating: number | string | null | undefined, provider: string): number {
+  if (rating == null) return 3;
+  const num = typeof rating === "string" ? parseFloat(rating) : rating;
+  if (isNaN(num)) return 3;
+  const p = provider.toLowerCase();
+  if ((p === "booking" || p === "booking.com" || p === "expedia" || p === "hotels" || p === "hotelscom" || p === "hotels.com") && num > 5) {
+    return Math.round(num / 2);
+  }
+  return Math.min(5, Math.max(1, Math.round(num)));
+}
+
+function toSafeIsoDate(input?: string | null): string {
+  if (!input) return new Date().toISOString();
+  const parsed = new Date(input);
+  return Number.isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString();
+}
+
+interface FetchJob {
+  business: any;
+  platform: string;
+  actorId: string;
+  actorInput: any;
+}
+
+function buildFetchJobs(biz: any): FetchJob[] {
+  const jobs: FetchJob[] = [];
+
+  // Booking.com — always use direct URL if booking_hotel_id exists
+  if (biz.booking_hotel_id) {
+    jobs.push({
+      business: biz,
+      platform: "booking",
+      actorId: ACTOR_ID,
+      actorInput: {
+        startUrls: [{ url: `https://www.booking.com/hotel/${biz.booking_hotel_id}.html` }],
+        providers: ["booking"],
+        scrapeReviewPictures: false,
+        scrapeReviewResponses: true,
+      },
+    });
+  } else if (biz.place_id) {
+    // Fallback: use place_id with aggregator for booking
+    jobs.push({
+      business: biz,
+      platform: "booking",
+      actorId: ACTOR_ID,
+      actorInput: {
+        startIds: [biz.place_id],
+        providers: ["booking"],
+        scrapeReviewPictures: false,
+        scrapeReviewResponses: true,
+      },
+    });
+  }
+
+  // TripAdvisor — use tripadvisor_id URL if available, otherwise place_id
+  if (biz.tripadvisor_id) {
+    const taUrl = biz.tripadvisor_id.startsWith("http")
+      ? biz.tripadvisor_id
+      : `https://www.tripadvisor.com/Hotel_Review-${biz.tripadvisor_id}`;
+    jobs.push({
+      business: biz,
+      platform: "tripadvisor",
+      actorId: ACTOR_ID,
+      actorInput: {
+        startUrls: [{ url: taUrl }],
+        providers: ["tripadvisor"],
+        scrapeReviewPictures: false,
+        scrapeReviewResponses: true,
+      },
+    });
+  } else if (biz.place_id) {
+    jobs.push({
+      business: biz,
+      platform: "tripadvisor",
+      actorId: ACTOR_ID,
+      actorInput: {
+        startIds: [biz.place_id],
+        providers: ["tripadvisor"],
+        scrapeReviewPictures: false,
+        scrapeReviewResponses: true,
+      },
+    });
+  }
+
+  // Hotels.com / Expedia — use place_id with aggregator
+  if (biz.place_id) {
+    jobs.push({
+      business: biz,
+      platform: "hotelscom",
+      actorId: ACTOR_ID,
+      actorInput: {
+        startIds: [biz.place_id],
+        providers: ["hotels", "expedia"],
+        scrapeReviewPictures: false,
+        scrapeReviewResponses: true,
+      },
+    });
+  }
+
+  // Trustpilot — dedicated actor
+  if (biz.trustpilot_url) {
+    const domain = biz.trustpilot_url.replace(/^https?:\/\/(www\.)?trustpilot\.[a-z.]+\/review\//i, "").replace(/\/.*$/, "");
+    jobs.push({
+      business: biz,
+      platform: "trustpilot",
+      actorId: TRUSTPILOT_ACTOR_ID,
+      actorInput: {
+        businessUrl: `https://www.trustpilot.com/review/${domain}`,
+        maxResults: 50,
+      },
+    });
+  }
+
+  return jobs;
+}
+
+async function runActorAndWait(actorId: string, input: any, token: string, maxWaitMs = 120000): Promise<any[]> {
+  const startResp = await fetch(
+    `${APIFY_BASE}/acts/${actorId}/runs?token=${token}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    }
+  );
+
+  if (!startResp.ok) {
+    const errBody = await startResp.text();
+    throw new Error(`Apify start failed: ${startResp.status} - ${errBody}`);
+  }
+
+  const startData = await startResp.json();
+  const runId = startData.data?.id;
+  if (!runId) throw new Error("No run ID returned");
+
+  // Poll for completion
+  const start = Date.now();
+  while (Date.now() - start < maxWaitMs) {
+    await new Promise(r => setTimeout(r, 5000));
+    const statusResp = await fetch(`${APIFY_BASE}/actor-runs/${runId}?token=${token}`);
+    if (!statusResp.ok) continue;
+    const statusData = await statusResp.json();
+    const status = statusData.data?.status;
+    if (status === "SUCCEEDED") {
+      const datasetId = statusData.data?.defaultDatasetId;
+      if (!datasetId) return [];
+      const itemsResp = await fetch(
+        `${APIFY_BASE}/datasets/${datasetId}/items?token=${token}&format=json&limit=1000`
+      );
+      if (!itemsResp.ok) throw new Error(`Dataset fetch failed: ${itemsResp.status}`);
+      return await itemsResp.json();
+    }
+    if (["FAILED", "ABORTED", "TIMED-OUT"].includes(status)) {
+      throw new Error(`Apify run ${status}`);
+    }
+  }
+  throw new Error("Apify run timed out");
+}
+
+function transformItems(items: any[], businessId: string, platform: string): any[] {
+  return items
+    .filter(item => item.reviewText || item.reviewTitle || item.text || item.title)
+    .map(item => {
+      const isTrustpilotFormat = item.author || item.consumer;
+      const resolvedPlatform = isTrustpilotFormat ? "trustpilot" : (PROVIDER_MAP[item.provider?.toLowerCase()] || platform);
+
+      let rating: number;
+      let text: string;
+      let reviewerName: string;
+      let postedAt: string;
+      let reviewId: string;
+
+      if (isTrustpilotFormat) {
+        rating = Math.min(5, Math.max(1, Math.round(Number(item.rating || item.stars || 3))));
+        text = item.text || item.reviewText || "";
+        if (item.title && text) text = `${item.title}\n\n${text}`;
+        else if (item.title) text = item.title;
+        reviewerName = item.author?.name || item.consumer?.displayName || item.authorName || "Anonymous";
+        postedAt = toSafeIsoDate(item.date || item.createdAt || item.publishedDate);
+        reviewId = item.id || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      } else {
+        rating = normalizeRating(item.reviewRating, item.provider || "");
+        text = item.reviewText || "";
+        if (item.reviewTitle && text) text = `${item.reviewTitle}\n\n${text}`;
+        else if (item.reviewTitle) text = item.reviewTitle;
+        reviewerName = item.authorName || "Anonymous";
+        postedAt = toSafeIsoDate(item.reviewDate);
+        reviewId = item.reviewId || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      }
+
+      return {
+        business_id: businessId,
+        platform: resolvedPlatform,
+        google_review_id: `apify-${resolvedPlatform}-${reviewId}`,
+        reviewer_name: reviewerName,
+        rating,
+        text: text || null,
+        posted_at: postedAt,
+        status: "pending_reply",
+        sentiment: rating >= 4 ? "positive" : rating >= 3 ? "neutral" : "negative",
+      };
+    });
+}
+
+async function insertNewReviews(supabase: any, reviews: any[], businessId: string) {
+  if (reviews.length === 0) return { inserted: 0, newReviews: [] };
+
+  // Batch check existing
+  const existingIds = new Set<string>();
+  const allIds = reviews.map(r => r.google_review_id);
+  const BATCH = 200;
+  for (let i = 0; i < allIds.length; i += BATCH) {
+    const batch = allIds.slice(i, i + BATCH);
+    const { data: existing } = await supabase
+      .from("reviews")
+      .select("google_review_id")
+      .eq("business_id", businessId)
+      .in("google_review_id", batch);
+    if (existing) {
+      for (const row of existing) existingIds.add(row.google_review_id);
+    }
+  }
+
+  const newReviews = reviews.filter(r => !existingIds.has(r.google_review_id));
+  let inserted = 0;
+  const insertedReviews: any[] = [];
+
+  const INSERT_BATCH = 100;
+  for (let i = 0; i < newReviews.length; i += INSERT_BATCH) {
+    const batch = newReviews.slice(i, i + INSERT_BATCH);
+    const { data, error } = await supabase.from("reviews").insert(batch).select("id, reviewer_name, rating, text, suggested_reply, platform");
+    if (error) {
+      console.error(`Insert error:`, error.message);
+    } else if (data) {
+      inserted += data.length;
+      insertedReviews.push(...data);
+    }
+  }
+
+  return { inserted, newReviews: insertedReviews };
+}
+
+async function sendNotification(supabaseUrl: string, serviceKey: string, businessId: string, reviews: any[]) {
+  if (reviews.length === 0) return;
+
+  try {
+    const resp = await fetch(`${supabaseUrl}/functions/v1/notify-new-review`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${serviceKey}`,
+      },
+      body: JSON.stringify({ business_id: businessId, reviews }),
+    });
+    const result = await resp.json();
+    console.log(`Notification sent for ${reviews.length} reviews:`, result);
+  } catch (err: any) {
+    console.error(`Failed to send notification for business ${businessId}:`, err.message);
+  }
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -27,15 +296,15 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get all businesses with a place_id
+    // Get all businesses with any platform configured
     const { data: businesses, error: bizError } = await supabase
       .from("businesses")
-      .select("id, place_id, name")
-      .not("place_id", "is", null);
+      .select("id, place_id, name, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url, city")
+      .or("place_id.not.is.null,booking_hotel_id.not.is.null,tripadvisor_id.not.is.null,trustpilot_url.not.is.null");
 
     if (bizError) throw bizError;
     if (!businesses || businesses.length === 0) {
-      return new Response(JSON.stringify({ message: "No businesses with place_id" }), {
+      return new Response(JSON.stringify({ message: "No businesses with platform IDs" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -43,129 +312,34 @@ Deno.serve(async (req) => {
     const results: any[] = [];
 
     for (const biz of businesses) {
-      try {
-        // Start Apify actor run
-        const startResp = await fetch(
-          `${APIFY_BASE}/acts/${ACTOR_ID}/runs?token=${APIFY_API_TOKEN}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              startIds: [biz.place_id],
-              scrapeReviewPictures: false,
-              scrapeReviewResponses: true,
-              providers: ["booking", "tripadvisor", "expedia", "hotels"],
-            }),
-          }
-        );
+      const jobs = buildFetchJobs(biz);
+      const allNewReviews: any[] = [];
 
-        if (!startResp.ok) {
-          const errBody = await startResp.text();
-          results.push({ business: biz.name, error: `Apify start failed: ${startResp.status} - ${errBody}` });
-          continue;
-        }
+      for (const job of jobs) {
+        try {
+          console.log(`[${biz.name}] Fetching ${job.platform} reviews...`);
+          const items = await runActorAndWait(job.actorId, job.actorInput, APIFY_API_TOKEN);
+          const transformed = transformItems(items, biz.id, job.platform);
+          const { inserted, newReviews } = await insertNewReviews(supabase, transformed, biz.id);
 
-        const startData = await startResp.json();
-        const runId = startData.data?.id;
-        const datasetId = startData.data?.defaultDatasetId;
+          allNewReviews.push(...newReviews);
 
-        if (!runId) {
-          results.push({ business: biz.name, error: "No run ID returned" });
-          continue;
-        }
-
-        // Poll for completion (max 120s)
-        let runData = null;
-        const maxWait = 120000;
-        const start = Date.now();
-        while (Date.now() - start < maxWait) {
-          await new Promise(r => setTimeout(r, 5000));
-          const statusResp = await fetch(`${APIFY_BASE}/actor-runs/${runId}?token=${APIFY_API_TOKEN}`);
-          if (!statusResp.ok) continue;
-          const statusData = await statusResp.json();
-          const status = statusData.data?.status;
-          if (status === "SUCCEEDED") {
-            runData = statusData.data;
-            break;
-          }
-          if (["FAILED", "ABORTED", "TIMED-OUT"].includes(status)) {
-            results.push({ business: biz.name, error: `Apify run ${status}` });
-            break;
-          }
-        }
-
-        if (!runData || !runData.defaultDatasetId) {
-          if (!results.find(r => r.business === biz.name)) {
-            results.push({ business: biz.name, error: "Apify run timed out" });
-          }
-          continue;
-        }
-
-        // Fetch dataset items
-        const itemsResp = await fetch(
-          `${APIFY_BASE}/datasets/${runData.defaultDatasetId}/items?token=${APIFY_API_TOKEN}&format=json&limit=1000`
-        );
-        if (!itemsResp.ok) {
-          results.push({ business: biz.name, error: `Dataset fetch failed: ${itemsResp.status}` });
-          continue;
-        }
-
-        const items = await itemsResp.json();
-        let insertedCount = 0;
-
-        const PROVIDER_MAP: Record<string, string> = {
-          "booking.com": "booking", booking: "booking",
-          tripadvisor: "tripadvisor",
-          expedia: "hotelscom", "hotels.com": "hotelscom", hotelscom: "hotelscom", hotels: "hotelscom",
-        };
-
-        for (const item of items) {
-          if (!item.reviewText && !item.reviewTitle) continue;
-
-          const platform = PROVIDER_MAP[item.provider?.toLowerCase()] || item.provider?.toLowerCase() || "unknown";
-          const reviewId = `apify-${item.provider}-${item.reviewId}`;
-
-          let rating = typeof item.reviewRating === "string" ? parseFloat(item.reviewRating) : (item.reviewRating || 3);
-          if (isNaN(rating)) rating = 3;
-          if ((platform === "booking" || item.provider === "expedia") && rating > 5) {
-            rating = Math.round(rating / 2);
-          }
-          rating = Math.min(5, Math.max(1, Math.round(rating)));
-
-          let text = item.reviewText || "";
-          if (item.reviewTitle && text) text = `${item.reviewTitle}\n\n${text}`;
-          else if (item.reviewTitle) text = item.reviewTitle;
-
-          const postedAt = item.reviewDate ? new Date(item.reviewDate) : new Date();
-          const safeDate = isNaN(postedAt.getTime()) ? new Date().toISOString() : postedAt.toISOString();
-
-          const { data: existing } = await supabase
-            .from("reviews")
-            .select("id")
-            .eq("business_id", biz.id)
-            .eq("google_review_id", reviewId)
-            .maybeSingle();
-
-          if (existing) continue;
-
-          const { error: insertError } = await supabase.from("reviews").insert({
-            business_id: biz.id,
-            platform,
-            google_review_id: reviewId,
-            reviewer_name: item.authorName || "Anonymous",
-            rating,
-            text: text || null,
-            posted_at: safeDate,
-            status: "pending_reply",
-            sentiment: rating >= 4 ? "positive" : rating >= 3 ? "neutral" : "negative",
+          results.push({
+            business: biz.name,
+            platform: job.platform,
+            fetched: items.length,
+            inserted,
           });
-
-          if (!insertError) insertedCount++;
+          console.log(`[${biz.name}] ${job.platform}: ${items.length} fetched, ${inserted} new`);
+        } catch (err: any) {
+          results.push({ business: biz.name, platform: job.platform, error: err.message });
+          console.error(`[${biz.name}] ${job.platform} error:`, err.message);
         }
+      }
 
-        results.push({ business: biz.name, fetched: items.length, inserted: insertedCount });
-      } catch (err: any) {
-        results.push({ business: biz.name, error: err.message });
+      // Send notification for all new reviews from all platforms
+      if (allNewReviews.length > 0) {
+        await sendNotification(supabaseUrl, supabaseServiceKey, biz.id, allNewReviews);
       }
     }
 
