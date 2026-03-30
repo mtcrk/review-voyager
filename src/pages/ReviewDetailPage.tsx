@@ -31,7 +31,7 @@ const ReviewDetailPage = () => {
 
       const { data, error } = await supabase
         .from('reviews')
-        .select('*')
+        .select('*, businesses(*)')
         .eq('id', id)
         .maybeSingle();
 
@@ -82,29 +82,59 @@ const ReviewDetailPage = () => {
     mutationFn: async () => {
       if (!id || !aiReply) throw new Error('Missing data');
 
-      // Copy to clipboard
-      await navigator.clipboard.writeText(aiReply);
-      
-      // Update status
-      const { error } = await supabase
-        .from('reviews')
-        .update({ 
-          status: 'replied',
-          approved_reply: aiReply,
-          replied_at: new Date().toISOString(),
-        })
-        .eq('id', id);
+      // Check if this is a Google review with google_review_name (can send via API)
+      const biz = review as any;
+      const canSendViaAPI = biz?.platform === 'google' && biz?.google_review_name && biz?.businesses?.google_connected;
 
-      if (error) throw error;
+      if (canSendViaAPI) {
+        // Send via Google API through approve-reply edge function
+        const { data: userData } = await supabase.auth.getUser();
+        const { data, error } = await supabase.functions.invoke('approve-reply', {
+          body: {
+            reviewId: id,
+            approvedReply: aiReply,
+            sendToGoogle: true,
+            userId: userData?.user?.id,
+          },
+        });
+
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+
+        return data;
+      } else {
+        // Non-Google or no API access — copy to clipboard and mark as replied
+        await navigator.clipboard.writeText(aiReply);
+        
+        const { error } = await supabase
+          .from('reviews')
+          .update({ 
+            status: 'replied',
+            approved_reply: aiReply,
+            replied_at: new Date().toISOString(),
+          })
+          .eq('id', id);
+
+        if (error) throw error;
+        return { copied: true };
+      }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['review', id] });
       queryClient.invalidateQueries({ queryKey: ['reviews'] });
-      toast.success("Reply copied to clipboard. Paste it into Google Business.");
+      if (data?.googleStatus === 'sent') {
+        toast.success("Yanıt Google'a başarıyla gönderildi! ✅");
+      } else if (data?.googleStatus === 'failed') {
+        toast.error("Yanıt onaylandı ama Google'a gönderilemedi. Hata: " + (data?.review?.google_reply_error_message || "Bilinmeyen hata"));
+      } else if (data?.copied) {
+        toast.success("Yanıt panoya kopyalandı. Platforma yapıştırın.");
+      } else {
+        toast.success("Yanıt onaylandı!");
+      }
       setTimeout(() => navigate('/reviews'), 1500);
     },
     onError: () => {
-      toast.error("Failed to send reply");
+      toast.error("Yanıt gönderilemedi");
     },
   });
 
