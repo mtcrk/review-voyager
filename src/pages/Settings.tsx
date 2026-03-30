@@ -192,10 +192,30 @@ export default function Settings() {
             </Badge>
           )}
         </div>
-        <Button variant="outline" onClick={handleLogout}>
+        <Button variant="outline" onClick={() => setShowLogoutDialog(true)}>
           <LogOut className="mr-2 h-4 w-4" />
           Çıkış Yap
         </Button>
+
+        <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Çıkış yapmak istediğinize emin misiniz?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Oturumunuz sonlandırılacak ve giriş sayfasına yönlendirileceksiniz.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>İptal</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={handleLogout}
+              >
+                Evet, Çıkış Yap
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       <Tabs defaultValue={searchParams.get('tab') || 'profile'} className="space-y-6">

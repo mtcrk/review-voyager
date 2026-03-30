@@ -472,11 +472,7 @@ export function AppSidebar() {
                   tooltip="Çıkış Yap"
                 >
                   <button
-                    onClick={async () => {
-                      await supabase.auth.signOut();
-                      toast({ title: "Çıkış Yapıldı", description: "Başarıyla çıkış yaptınız." });
-                      navigate('/login');
-                    }}
+                    onClick={() => setShowLogoutDialog(true)}
                     className="flex items-center gap-3 transition-smooth w-full text-left text-destructive"
                   >
                     <LogOut className="h-5 w-5" />
@@ -484,6 +480,30 @@ export function AppSidebar() {
                   </button>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+
+              <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Çıkış yapmak istediğinize emin misiniz?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Oturumunuz sonlandırılacak ve giriş sayfasına yönlendirileceksiniz.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>İptal</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      onClick={async () => {
+                        await supabase.auth.signOut();
+                        toast({ title: "Çıkış Yapıldı", description: "Başarıyla çıkış yaptınız." });
+                        navigate('/login');
+                      }}
+                    >
+                      Evet, Çıkış Yap
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
