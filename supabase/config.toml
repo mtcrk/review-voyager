@@ -47,3 +47,6 @@ verify_jwt = false
 
 [functions.notify-new-signup]
 verify_jwt = false
+
+[functions.notify-new-review]
+verify_jwt = false
