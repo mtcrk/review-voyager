@@ -31,7 +31,7 @@ const ReviewDetailPage = () => {
 
       const { data, error } = await supabase
         .from('reviews')
-        .select('*')
+        .select('*, businesses(*)')
         .eq('id', id)
         .maybeSingle();
 
@@ -83,7 +83,8 @@ const ReviewDetailPage = () => {
       if (!id || !aiReply) throw new Error('Missing data');
 
       // Check if this is a Google review with google_review_name (can send via API)
-      const canSendViaAPI = review?.platform === 'google' && review?.google_review_name && review?.businesses?.google_connected !== false;
+      const biz = review as any;
+      const canSendViaAPI = biz?.platform === 'google' && biz?.google_review_name && biz?.businesses?.google_connected;
 
       if (canSendViaAPI) {
         // Send via Google API through approve-reply edge function
