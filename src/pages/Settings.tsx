@@ -55,6 +55,7 @@ export default function Settings() {
   const [googleConnecting, setGoogleConnecting] = useState(false);
   const [notificationType, setNotificationType] = useState<NotificationType>("instant");
   const [savingNotification, setSavingNotification] = useState(false);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   useEffect(() => {
     if (profile) {

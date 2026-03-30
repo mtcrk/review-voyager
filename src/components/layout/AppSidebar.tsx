@@ -92,6 +92,7 @@ export function AppSidebar() {
   const [tiktokConnected, setTiktokConnected] = useState(false);
   const [googleConnected, setGoogleConnected] = useState(false);
   const [autoSelected, setAutoSelected] = useState(false);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   // Check platform connections
   useEffect(() => {
