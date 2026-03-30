@@ -1,4 +1,14 @@
 import { useState, useEffect } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
 import { 
   LayoutDashboard, 
@@ -82,6 +92,7 @@ export function AppSidebar() {
   const [tiktokConnected, setTiktokConnected] = useState(false);
   const [googleConnected, setGoogleConnected] = useState(false);
   const [autoSelected, setAutoSelected] = useState(false);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   // Check platform connections
   useEffect(() => {
@@ -462,11 +473,7 @@ export function AppSidebar() {
                   tooltip="Çıkış Yap"
                 >
                   <button
-                    onClick={async () => {
-                      await supabase.auth.signOut();
-                      toast({ title: "Çıkış Yapıldı", description: "Başarıyla çıkış yaptınız." });
-                      navigate('/login');
-                    }}
+                    onClick={() => setShowLogoutDialog(true)}
                     className="flex items-center gap-3 transition-smooth w-full text-left text-destructive"
                   >
                     <LogOut className="h-5 w-5" />
@@ -474,6 +481,30 @@ export function AppSidebar() {
                   </button>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+
+              <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Çıkış yapmak istediğinize emin misiniz?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Oturumunuz sonlandırılacak ve giriş sayfasına yönlendirileceksiniz.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>İptal</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      onClick={async () => {
+                        await supabase.auth.signOut();
+                        toast({ title: "Çıkış Yapıldı", description: "Başarıyla çıkış yaptınız." });
+                        navigate('/login');
+                      }}
+                    >
+                      Evet, Çıkış Yap
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
