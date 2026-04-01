@@ -116,8 +116,8 @@ export default function DemoPage() {
     gtagEvent("change_tone", "demo", toneName);
   };
 
-  const handleCTAClick = () => {
-    trackEvent("demo_cta_click", { location: hasGenerated ? "post_reply" : "sidebar", user_logged_in: user ? "yes" : "no" });
+  const handleCTAClick = (label: string) => {
+    gtagEvent("cta_click", "conversion", label);
     navigate(user ? "/dashboard" : "/register");
   };
 
