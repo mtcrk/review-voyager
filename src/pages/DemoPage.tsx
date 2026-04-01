@@ -69,7 +69,6 @@ export default function DemoPage() {
 
     const toneName = TONES.find(t => t.id === selectedTone)?.label || selectedTone;
     gtagEvent("generate_reply", "demo", toneName);
-    });
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-reply", {
