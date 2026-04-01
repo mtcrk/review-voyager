@@ -10,9 +10,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 // GA4 event helper
-const trackEvent = (eventName: string, params?: Record<string, string | number>) => {
-  if (typeof window !== "undefined" && (window as any).gtag) {
-    (window as any).gtag("event", eventName, params);
+const gtagEvent = (eventName: string, category: string, label: string) => {
+  if (typeof (window as any).gtag === "function") {
+    (window as any).gtag("event", eventName, {
+      event_category: category,
+      event_label: label,
+    });
   }
 };
 
