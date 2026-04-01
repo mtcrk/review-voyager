@@ -108,7 +108,7 @@ export default function DemoPage() {
     setRating(sample.rating);
     setReviewerName(sample.name);
     setGeneratedReply("");
-    trackEvent("demo_sample_click", { sample_name: sample.name, sample_rating: sample.rating });
+    gtagEvent("click_example_review", "demo", sample.name);
   };
 
   const handleToneSelect = (toneId: string) => {
