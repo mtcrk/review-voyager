@@ -1,215 +1,375 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { CheckCircle, ArrowLeft } from "lucide-react";
-import demoGif from "@/assets/voyagerespond-demo.gif";
+import { Star, Sparkles, Copy, Check, RotateCcw, ArrowRight, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useAuth } from "@/contexts/AuthContext";
-import { ExitIntentPopup } from "@/components/ExitIntentPopup";
+import { toast } from "sonner";
 
+const TONES = [
+  { id: "friendly", label: "Samimi", emoji: "😊" },
+  { id: "formal", label: "Resmi", emoji: "👔" },
+  { id: "empathetic", label: "Empatik", emoji: "🤝" },
+  { id: "grateful", label: "Minnettar", emoji: "🙏" },
+  { id: "apologetic", label: "Özür Dileyen", emoji: "💐" },
+  { id: "enthusiastic", label: "Heyecanlı", emoji: "🎉" },
+];
+
+const SAMPLE_REVIEWS = [
+  { text: "Yemekler çok lezzetliydi, personel ilgiliydi ama bekleme süresi biraz uzundu.", rating: 4, name: "Ayşe K." },
+  { text: "Oda temiz değildi, klima çalışmıyordu. Çok hayal kırıklığına uğradık.", rating: 1, name: "Mehmet Y." },
+  { text: "Harika bir deneyimdi! Kesinlikle tekrar geleceğiz. Herkese tavsiye ederiz.", rating: 5, name: "Elif D." },
+];
 
 export default function DemoPage() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [submitted, setSubmitted] = useState(false);
+  const [reviewText, setReviewText] = useState("");
+  const [reviewerName, setReviewerName] = useState("");
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [selectedTone, setSelectedTone] = useState("friendly");
+  const [generatedReply, setGeneratedReply] = useState("");
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({ name: "", business_name: "", contact: "" });
-  const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
+  const canGenerate = reviewText.trim().length > 10 && rating > 0;
 
-    if (!form.name.trim() || !form.business_name.trim() || !form.contact.trim()) {
-      setError("Lütfen tüm alanları doldurun.");
-      return;
-    }
-
+  const handleGenerate = async () => {
+    if (!canGenerate) return;
     setLoading(true);
+    setGeneratedReply("");
+
     try {
-      const { error: dbError } = await supabase
-        .from("demo_requests" as any)
-        .insert({
-          name: form.name.trim(),
-          business_name: form.business_name.trim(),
-          contact: form.contact.trim(),
-        });
-
-      if (dbError) throw dbError;
-
-      // Send email notification
-      await supabase.functions.invoke("notify-demo-request", {
+      const { data, error } = await supabase.functions.invoke("generate-reply", {
         body: {
-          name: form.name.trim(),
-          business_name: form.business_name.trim(),
-          contact: form.contact.trim(),
+          review_text: reviewText.trim(),
+          reviewer_name: reviewerName.trim() || undefined,
+          rating,
+          tone: selectedTone,
+          language: "auto",
+          business_name: "Demo İşletme",
         },
       });
 
-      sessionStorage.setItem("demo_form_submitted", "1");
-      setSubmitted(true);
+      if (error) throw error;
+      setGeneratedReply(data.reply);
     } catch {
-      setError("Bir hata oluştu, lütfen tekrar deneyin.");
+      toast.error("Yanıt oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleCopy = () => {
+    navigator.clipboard.writeText(generatedReply);
+    setCopied(true);
+    toast.success("Yanıt panoya kopyalandı!");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleSampleReview = (sample: typeof SAMPLE_REVIEWS[0]) => {
+    setReviewText(sample.text);
+    setRating(sample.rating);
+    setReviewerName(sample.name);
+    setGeneratedReply("");
+  };
+
+  const handleReset = () => {
+    setReviewText("");
+    setReviewerName("");
+    setRating(0);
+    setSelectedTone("friendly");
+    setGeneratedReply("");
+  };
+
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#0F0A1F" }}>
-      <ExitIntentPopup disabled={submitted} />
+    <div className="min-h-screen bg-background">
       {/* Navbar */}
-      <nav className="sticky top-0 z-50 border-b border-white/10 backdrop-blur-lg" style={{ backgroundColor: "rgba(15, 10, 31, 0.95)" }}>
+      <nav className="sticky top-0 z-50 border-b border-border/60 backdrop-blur-xl bg-background/80">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between">
-            <button onClick={() => navigate("/")} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <img src={voyageRespondLogo} alt="VoyageRespond" className="h-6 w-6" />
-              <span className="text-base text-white">
+            <button onClick={() => navigate("/")} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+              <img src={voyageRespondLogo} alt="VoyageRespond" className="h-7 w-7" />
+              <span className="text-base tracking-tight text-foreground">
                 <span className="font-normal">Voyage</span>
                 <span className="font-semibold">Respond</span>
               </span>
             </button>
-            <div className="flex items-center gap-3">
+
+            <div className="hidden md:flex items-center gap-4">
               <LanguageSwitcher />
-              <button
-                onClick={() => navigate(user ? "/dashboard" : "/register")}
-                className="px-4 py-2 rounded-md text-sm font-medium text-white transition-all shadow-sm hover:shadow-md"
-                style={{ backgroundColor: "#7C3AED" }}
-              >
-                {user ? t("nav.dashboard") : t("nav.getStarted")}
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Content */}
-      <section className="container mx-auto px-4 sm:px-6 py-10 md:py-16">
-        <div className="w-full max-w-xl mx-auto">
-          {!submitted ? (
-            <>
-              {/* Value Proposition */}
-              <div className="text-center mb-8 md:mb-10">
-                <h1 className="text-2xl md:text-4xl font-bold text-white mb-3 leading-tight">
-                  Olumsuz Yorumlar Cevapsız mı Kalıyor?
-                </h1>
-                <p className="text-sm md:text-base mb-6" style={{ color: "#A78BFA" }}>
-                  VoyageRespond, yapay zeka ile Google yorumlarınıza 8 saniyede profesyonel Türkçe yanıt üretir.
-                </p>
-
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-6 justify-center mb-5">
-                  <div className="flex items-center gap-2 text-white/90 text-sm">
-                    <span className="text-lg">⚡</span>
-                    <span>8 saniyede profesyonel yanıt</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-white/90 text-sm">
-                    <span className="text-lg">🇹🇷</span>
-                    <span>Kusursuz Türkçe, markanıza özel ton</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-white/90 text-sm">
-                    <span className="text-lg">📊</span>
-                    <span>Tüm yorumlarınız tek panelde</span>
-                  </div>
-                </div>
-
-                <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
-                  Klinikler, oteller ve restoranlar zaten kullanıyor.
-                </p>
-              </div>
-
-              {/* Demo GIF */}
-              <div className="mb-8 md:mb-10 rounded-2xl border border-purple-500/30 overflow-hidden relative" style={{ boxShadow: "0 0 30px rgba(124,58,237,0.15)" }}>
-                <img
-                  src={demoGif}
-                  alt="VoyageRespond AI yorum yanıtlama demosu"
-                  className="w-full h-auto"
-                  loading="eager"
-                />
-              </div>
-
-              {/* Form */}
-              <div className="rounded-2xl p-6 md:p-8 border border-white/10" style={{ backgroundColor: "rgba(255,255,255,0.05)" }}>
-                <h2 className="text-xl md:text-2xl font-bold text-white text-center mb-6">
-                  2 Dakikalık Demo İçin Bilgilerinizi Bırakın
-                </h2>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1.5">İsim</label>
-                  <Input
-                    placeholder="Adınız Soyadınız"
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus-visible:ring-purple-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1.5">İşletme Adı</label>
-                  <Input
-                    placeholder="İşletmenizin adı"
-                    value={form.business_name}
-                    onChange={(e) => setForm({ ...form, business_name: e.target.value })}
-                    className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus-visible:ring-purple-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1.5">Telefon veya E-posta</label>
-                  <Input
-                    placeholder="İletişim bilginiz"
-                    value={form.contact}
-                    onChange={(e) => setForm({ ...form, contact: e.target.value })}
-                    className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus-visible:ring-purple-500"
-                    required
-                  />
-                </div>
-
-                {error && (
-                  <p className="text-sm text-red-400 text-center">{error}</p>
-                )}
-
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full text-white font-semibold py-6 text-base hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: "#7C3AED" }}
-                >
-                  {loading ? "Gönderiliyor..." : "Demo Talep Et"}
-                </Button>
-              </form>
-
-              <p className="text-xs text-center mt-4" style={{ color: "rgba(255,255,255,0.3)" }}>
-                Bilgileriniz gizli tutulur ve yalnızca demo randevusu için kullanılır.
-              </p>
-              </div>
-            </>
-          ) : (
-            <div className="text-center space-y-6">
-              <div className="flex justify-center">
-                <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(124, 58, 237, 0.2)" }}>
-                  <CheckCircle className="w-8 h-8" style={{ color: "#A78BFA" }} />
-                </div>
-              </div>
-              <h2 className="text-2xl font-bold text-white">Talebiniz alındı!</h2>
-              <p style={{ color: "#A78BFA" }}>
-                En kısa sürede sizinle iletişime geçeceğiz.
-              </p>
+              <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
+                Ana Sayfa
+              </Button>
               <Button
-                variant="outline"
-                onClick={() => navigate("/")}
-                className="border-white/20 text-white hover:bg-white/10"
+                size="sm"
+                onClick={() => navigate(user ? "/dashboard" : "/register")}
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
               >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Ana Sayfaya Dön
+                {user ? "Dashboard" : "Ücretsiz Başla"}
+                <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+
+            <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
+
+          {mobileMenuOpen && (
+            <div className="md:hidden pb-4 space-y-2">
+              <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => { navigate("/"); setMobileMenuOpen(false); }}>
+                Ana Sayfa
+              </Button>
+              <Button size="sm" className="w-full bg-primary text-primary-foreground" onClick={() => { navigate(user ? "/dashboard" : "/register"); setMobileMenuOpen(false); }}>
+                {user ? "Dashboard" : "Ücretsiz Başla"}
               </Button>
             </div>
           )}
+        </div>
+      </nav>
+
+      {/* Hero */}
+      <section className="container mx-auto px-4 sm:px-6 pt-12 pb-6 text-center">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
+          <Sparkles className="w-4 h-4" />
+          Ücretsiz Deneyin — Kayıt Gerekmez
+        </div>
+        <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-4 tracking-tight leading-tight">
+          AI ile Profesyonel Yorum Yanıtları
+        </h1>
+        <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+          Bir yorum yazın, ton seçin — yapay zeka saniyeler içinde profesyonel bir yanıt oluştursun.
+        </p>
+      </section>
+
+      {/* Main Demo Area */}
+      <section className="container mx-auto px-4 sm:px-6 pb-20">
+        <div className="max-w-4xl mx-auto">
+          {/* Sample Reviews */}
+          <div className="mb-8">
+            <p className="text-sm font-medium text-muted-foreground mb-3">Örnek bir yorum deneyin:</p>
+            <div className="flex flex-wrap gap-2">
+              {SAMPLE_REVIEWS.map((sample, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleSampleReview(sample)}
+                  className="text-left px-4 py-2.5 rounded-xl border border-border bg-card hover:border-primary/40 hover:bg-primary/5 transition-all text-sm max-w-xs"
+                >
+                  <div className="flex items-center gap-1 mb-1">
+                    {Array.from({ length: 5 }).map((_, s) => (
+                      <Star key={s} className={`w-3 h-3 ${s < sample.rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
+                    ))}
+                    <span className="text-xs text-muted-foreground ml-1">— {sample.name}</span>
+                  </div>
+                  <p className="text-muted-foreground line-clamp-2">{sample.text}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Left: Input */}
+            <div className="space-y-5">
+              <div className="rounded-2xl border border-border bg-card p-6 space-y-5">
+                <h2 className="text-lg font-semibold text-foreground">Yorum Bilgileri</h2>
+
+                {/* Rating */}
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">Yıldız Puanı</label>
+                  <div className="flex gap-1.5">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() => setRating(star)}
+                        onMouseEnter={() => setHoverRating(star)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        className="transition-transform hover:scale-110"
+                      >
+                        <Star
+                          className={`w-8 h-8 transition-colors ${
+                            star <= (hoverRating || rating)
+                              ? "fill-amber-400 text-amber-400"
+                              : "text-muted-foreground/30"
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Reviewer Name */}
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">Yorumcunun Adı (opsiyonel)</label>
+                  <input
+                    type="text"
+                    value={reviewerName}
+                    onChange={(e) => setReviewerName(e.target.value)}
+                    placeholder="Örn: Ayşe K."
+                    className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-foreground text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+                  />
+                </div>
+
+                {/* Review Text */}
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">Yorum Metni</label>
+                  <Textarea
+                    value={reviewText}
+                    onChange={(e) => setReviewText(e.target.value)}
+                    placeholder="Müşterinin yazdığı yorumu buraya yapıştırın veya yazın..."
+                    rows={5}
+                    className="rounded-xl border-border bg-background resize-none text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground/60 mt-1.5">
+                    {reviewText.length < 10 ? `En az 10 karakter yazın (${reviewText.length}/10)` : `${reviewText.length} karakter`}
+                  </p>
+                </div>
+              </div>
+
+              {/* Tone Selection */}
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <h2 className="text-lg font-semibold text-foreground mb-3">Yanıt Tonu</h2>
+                <div className="grid grid-cols-3 gap-2">
+                  {TONES.map((tone) => (
+                    <button
+                      key={tone.id}
+                      onClick={() => setSelectedTone(tone.id)}
+                      className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                        selectedTone === tone.id
+                          ? "bg-primary text-primary-foreground shadow-md"
+                          : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                      }`}
+                    >
+                      <span>{tone.emoji}</span>
+                      <span>{tone.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Generate Button */}
+              <Button
+                onClick={handleGenerate}
+                disabled={!canGenerate || loading}
+                className="w-full py-6 text-base font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
+              >
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                    AI Yanıt Üretiyor...
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-5 h-5" />
+                    Yanıt Oluştur
+                  </div>
+                )}
+              </Button>
+            </div>
+
+            {/* Right: Output */}
+            <div className="space-y-5">
+              <div className={`rounded-2xl border bg-card p-6 min-h-[400px] flex flex-col transition-all ${
+                generatedReply ? "border-primary/30 shadow-lg shadow-primary/5" : "border-border"
+              }`}>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-foreground">AI Yanıtı</h2>
+                  {generatedReply && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleReset}
+                        className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground"
+                        title="Sıfırla"
+                      >
+                        <RotateCcw className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {generatedReply ? (
+                  <div className="flex-1 flex flex-col">
+                    {/* Reply Content */}
+                    <div className="flex-1 rounded-xl bg-primary/5 border border-primary/10 p-5 mb-4">
+                      <p className="text-foreground leading-relaxed whitespace-pre-wrap">{generatedReply}</p>
+                    </div>
+
+                    {/* Meta */}
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                        <Sparkles className="w-3 h-3" />
+                        AI Üretildi
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-xs font-medium">
+                        {TONES.find(t => t.id === selectedTone)?.emoji} {TONES.find(t => t.id === selectedTone)?.label}
+                      </span>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={handleCopy}
+                        variant="outline"
+                        className="flex-1 rounded-xl"
+                      >
+                        {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+                        {copied ? "Kopyalandı!" : "Yanıtı Kopyala"}
+                      </Button>
+                      <Button
+                        onClick={handleGenerate}
+                        variant="outline"
+                        disabled={loading}
+                        className="rounded-xl"
+                        title="Yeniden oluştur"
+                      >
+                        <RotateCcw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+                      </Button>
+                    </div>
+                  </div>
+                ) : loading ? (
+                  <div className="flex-1 flex flex-col items-center justify-center text-center">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                      <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                    </div>
+                    <p className="text-muted-foreground font-medium">AI yanıtınızı oluşturuyor...</p>
+                    <p className="text-xs text-muted-foreground/60 mt-1">Genellikle 3-5 saniye sürer</p>
+                  </div>
+                ) : (
+                  <div className="flex-1 flex flex-col items-center justify-center text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
+                      <Sparkles className="w-7 h-7 text-muted-foreground/40" />
+                    </div>
+                    <p className="text-muted-foreground font-medium mb-1">Henüz yanıt oluşturulmadı</p>
+                    <p className="text-sm text-muted-foreground/60 max-w-[250px]">
+                      Sol taraftaki formu doldurun ve "Yanıt Oluştur" butonuna tıklayın
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* CTA Card */}
+              <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6 text-center">
+                <h3 className="text-base font-semibold text-foreground mb-2">
+                  Tüm yorumlarınızı tek panelden yönetin
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Google, Booking, TripAdvisor — hepsine AI ile anında yanıt verin.
+                </p>
+                <Button
+                  onClick={() => navigate(user ? "/dashboard" : "/register")}
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl"
+                >
+                  {user ? "Dashboard'a Git" : "Ücretsiz Başla"}
+                  <ArrowRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </div>
