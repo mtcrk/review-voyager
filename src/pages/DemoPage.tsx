@@ -29,6 +29,18 @@ const SAMPLE_REVIEWS = [
   { text: "Yemekler çok lezzetliydi, personel ilgiliydi ama bekleme süresi biraz uzundu.", rating: 4, name: "Ayşe K." },
   { text: "Oda temiz değildi, klima çalışmıyordu. Çok hayal kırıklığına uğradık.", rating: 1, name: "Mehmet Y." },
   { text: "Harika bir deneyimdi! Kesinlikle tekrar geleceğiz. Herkese tavsiye ederiz.", rating: 5, name: "Elif D." },
+  { text: "Kahvaltı çeşitleri yeterli değildi, ama manzara muhteşemdi.", rating: 3, name: "Ali R." },
+  { text: "Check-in sırasında 40 dakika bekledik. Kabul edilemez.", rating: 2, name: "Selin T." },
+  { text: "Spa hizmeti harikaydı, masaj çok profesyoneldi. Teşekkürler!", rating: 5, name: "Deniz A." },
+  { text: "Gürültülü bir oda verdiler, uyuyamadık. Şikayet ettik ama çözüm sunulmadı.", rating: 1, name: "Burak M." },
+  { text: "Fiyat/performans oranı gayet iyi. Temiz, düzenli ve güler yüzlü personel.", rating: 4, name: "Zeynep Ç." },
+  { text: "Akşam yemeğinde servis çok yavaştı ama yemekler lezzetliydi.", rating: 3, name: "Hakan S." },
+  { text: "Çocuklu aileler için mükemmel! Çocuk kulübü ve havuz çok iyiydi.", rating: 5, name: "Fatma B." },
+  { text: "WiFi sürekli kopuyordu, iş seyahati için uygun değil.", rating: 2, name: "Emre K." },
+  { text: "Personel çok ilgiliydi, özellikle resepsiyon görevlisi Ahmet Bey'e teşekkürler.", rating: 5, name: "Merve Y." },
+  { text: "Havuz alanı çok kalabalıktı, şezlong bulmak imkansızdı.", rating: 2, name: "Oğuz D." },
+  { text: "Restoranda vegan seçenekler çok kısıtlıydı. Geliştirilmeli.", rating: 3, name: "Canan E." },
+  { text: "Her şey mükemmeldi! 3. gelişimiz ve her seferinde aynı kalite. Bravo!", rating: 5, name: "Kemal Ö." },
 ];
 
 export default function DemoPage() {
