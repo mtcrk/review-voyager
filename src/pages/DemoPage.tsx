@@ -10,9 +10,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 // GA4 event helper
-const trackEvent = (eventName: string, params?: Record<string, string | number>) => {
-  if (typeof window !== "undefined" && (window as any).gtag) {
-    (window as any).gtag("event", eventName, params);
+const gtagEvent = (eventName: string, category: string, label: string) => {
+  if (typeof (window as any).gtag === "function") {
+    (window as any).gtag("event", eventName, {
+      event_category: category,
+      event_label: label,
+    });
   }
 };
 
@@ -64,11 +67,8 @@ export default function DemoPage() {
     setLoading(true);
     setGeneratedReply("");
 
-    trackEvent("demo_generate_reply", {
-      tone: selectedTone,
-      rating,
-      review_length: reviewText.length,
-    });
+    const toneName = TONES.find(t => t.id === selectedTone)?.label || selectedTone;
+    gtagEvent("generate_reply", "demo", toneName);
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-reply", {
@@ -85,7 +85,7 @@ export default function DemoPage() {
       if (error) throw error;
       setGeneratedReply(data.reply);
       setHasGenerated(true);
-      trackEvent("demo_reply_generated", { tone: selectedTone, rating });
+      // reply generated tracked via generate_reply event above
     } catch {
       toast.error("Yanıt oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.");
     } finally {
@@ -97,7 +97,8 @@ export default function DemoPage() {
     navigator.clipboard.writeText(generatedReply);
     setCopied(true);
     toast.success("Yanıt panoya kopyalandı!");
-    trackEvent("demo_copy_reply");
+    const toneName = TONES.find(t => t.id === selectedTone)?.label || selectedTone;
+    gtagEvent("copy_reply", "demo", toneName);
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -106,16 +107,17 @@ export default function DemoPage() {
     setRating(sample.rating);
     setReviewerName(sample.name);
     setGeneratedReply("");
-    trackEvent("demo_sample_click", { sample_name: sample.name, sample_rating: sample.rating });
+    gtagEvent("click_example_review", "demo", sample.name);
   };
 
   const handleToneSelect = (toneId: string) => {
     setSelectedTone(toneId);
-    trackEvent("demo_tone_select", { tone: toneId });
+    const toneName = TONES.find(t => t.id === toneId)?.label || toneId;
+    gtagEvent("change_tone", "demo", toneName);
   };
 
-  const handleCTAClick = () => {
-    trackEvent("demo_cta_click", { location: hasGenerated ? "post_reply" : "sidebar", user_logged_in: user ? "yes" : "no" });
+  const handleCTAClick = (label: string) => {
+    gtagEvent("cta_click", "conversion", label);
     navigate(user ? "/dashboard" : "/register");
   };
 
@@ -148,7 +150,7 @@ export default function DemoPage() {
               </Button>
               <Button
                 size="sm"
-                onClick={handleCTAClick}
+                onClick={() => handleCTAClick("header_free_trial")}
                 className="bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 {user ? "Dashboard" : "Ücretsiz Başla"}
@@ -166,7 +168,7 @@ export default function DemoPage() {
               <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => { navigate("/"); setMobileMenuOpen(false); }}>
                 Ana Sayfa
               </Button>
-              <Button size="sm" className="w-full bg-primary text-primary-foreground" onClick={() => { handleCTAClick(); setMobileMenuOpen(false); }}>
+              <Button size="sm" className="w-full bg-primary text-primary-foreground" onClick={() => { handleCTAClick("header_free_trial"); setMobileMenuOpen(false); }}>
                 {user ? "Dashboard" : "Ücretsiz Başla"}
               </Button>
             </div>
@@ -257,7 +259,7 @@ export default function DemoPage() {
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         key={star}
-                        onClick={() => setRating(star)}
+                        onClick={() => { setRating(star); gtagEvent("change_rating", "demo", String(star)); }}
                         onMouseEnter={() => setHoverRating(star)}
                         onMouseLeave={() => setHoverRating(0)}
                         className="transition-transform hover:scale-110"
@@ -414,7 +416,7 @@ export default function DemoPage() {
                           </p>
                           <Button
                             size="sm"
-                            onClick={handleCTAClick}
+                            onClick={() => handleCTAClick("free_trial_3_month")}
                             className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg shadow-md shadow-primary/20"
                           >
                             3 Ay Ücretsiz Başla
@@ -455,7 +457,7 @@ export default function DemoPage() {
                     Google, Booking, TripAdvisor — hepsine AI ile anında yanıt verin.
                   </p>
                   <Button
-                    onClick={handleCTAClick}
+                    onClick={() => handleCTAClick("free_trial_3_month")}
                     className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl"
                   >
                     {user ? "Dashboard'a Git" : "Ücretsiz Başla"}
