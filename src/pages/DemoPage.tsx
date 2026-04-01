@@ -173,7 +173,7 @@ export default function DemoPage() {
             </div>
           </div>
 
-          <div className="grid lg:grid-cols-5 gap-6">
+          <div className="grid lg:grid-cols-2 gap-8">
             {/* Left: Input — wider */}
             <div className="lg:col-span-3 space-y-5">
               <div className="rounded-2xl border border-border bg-card p-6 lg:p-8 space-y-6">
