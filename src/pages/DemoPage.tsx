@@ -222,12 +222,12 @@ export default function DemoPage() {
             <p className="text-sm font-medium text-muted-foreground mb-3">
               👇 Bir örneğe tıklayın, hemen sonucu görün:
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-12 lg:px-12 xl:-mx-20 xl:px-20">
               {SAMPLE_REVIEWS.map((sample, i) => (
                 <button
                   key={i}
                   onClick={() => handleSampleReview(sample)}
-                  className="group text-left px-5 py-4 rounded-xl border border-border bg-card hover:border-primary/40 hover:bg-primary/5 transition-all text-sm cursor-pointer"
+                  className="group text-left px-5 py-4 rounded-xl border border-border bg-card hover:border-primary/40 hover:bg-primary/5 transition-all text-sm cursor-pointer flex-shrink-0 w-[280px]"
                 >
                   <div className="flex items-center gap-1 mb-1.5">
                     {Array.from({ length: 5 }).map((_, s) => (
