@@ -29,6 +29,18 @@ const SAMPLE_REVIEWS = [
   { text: "Yemekler çok lezzetliydi, personel ilgiliydi ama bekleme süresi biraz uzundu.", rating: 4, name: "Ayşe K." },
   { text: "Oda temiz değildi, klima çalışmıyordu. Çok hayal kırıklığına uğradık.", rating: 1, name: "Mehmet Y." },
   { text: "Harika bir deneyimdi! Kesinlikle tekrar geleceğiz. Herkese tavsiye ederiz.", rating: 5, name: "Elif D." },
+  { text: "Kahvaltı çeşitleri yeterli değildi, ama manzara muhteşemdi.", rating: 3, name: "Ali R." },
+  { text: "Check-in sırasında 40 dakika bekledik. Kabul edilemez.", rating: 2, name: "Selin T." },
+  { text: "Spa hizmeti harikaydı, masaj çok profesyoneldi. Teşekkürler!", rating: 5, name: "Deniz A." },
+  { text: "Gürültülü bir oda verdiler, uyuyamadık. Şikayet ettik ama çözüm sunulmadı.", rating: 1, name: "Burak M." },
+  { text: "Fiyat/performans oranı gayet iyi. Temiz, düzenli ve güler yüzlü personel.", rating: 4, name: "Zeynep Ç." },
+  { text: "Akşam yemeğinde servis çok yavaştı ama yemekler lezzetliydi.", rating: 3, name: "Hakan S." },
+  { text: "Çocuklu aileler için mükemmel! Çocuk kulübü ve havuz çok iyiydi.", rating: 5, name: "Fatma B." },
+  { text: "WiFi sürekli kopuyordu, iş seyahati için uygun değil.", rating: 2, name: "Emre K." },
+  { text: "Personel çok ilgiliydi, özellikle resepsiyon görevlisi Ahmet Bey'e teşekkürler.", rating: 5, name: "Merve Y." },
+  { text: "Havuz alanı çok kalabalıktı, şezlong bulmak imkansızdı.", rating: 2, name: "Oğuz D." },
+  { text: "Restoranda vegan seçenekler çok kısıtlıydı. Geliştirilmeli.", rating: 3, name: "Canan E." },
+  { text: "Her şey mükemmeldi! 3. gelişimiz ve her seferinde aynı kalite. Bravo!", rating: 5, name: "Kemal Ö." },
 ];
 
 export default function DemoPage() {
@@ -185,7 +197,7 @@ export default function DemoPage() {
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Users className="w-4 h-4 text-primary" />
-            <span>150+ İşletme Kullanıyor</span>
+            <span>25+ İşletme Kullanıyor</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Zap className="w-4 h-4 text-primary" />
@@ -210,12 +222,12 @@ export default function DemoPage() {
             <p className="text-sm font-medium text-muted-foreground mb-3">
               👇 Bir örneğe tıklayın, hemen sonucu görün:
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-12 lg:px-12 xl:-mx-20 xl:px-20">
               {SAMPLE_REVIEWS.map((sample, i) => (
                 <button
                   key={i}
                   onClick={() => handleSampleReview(sample)}
-                  className="group text-left px-5 py-4 rounded-xl border border-border bg-card hover:border-primary/40 hover:bg-primary/5 transition-all text-sm cursor-pointer"
+                  className="group text-left px-5 py-4 rounded-xl border border-border bg-card hover:border-primary/40 hover:bg-primary/5 transition-all text-sm cursor-pointer flex-shrink-0 w-[280px]"
                 >
                   <div className="flex items-center gap-1 mb-1.5">
                     {Array.from({ length: 5 }).map((_, s) => (
