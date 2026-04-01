@@ -86,7 +86,7 @@ export default function DemoPage() {
       if (error) throw error;
       setGeneratedReply(data.reply);
       setHasGenerated(true);
-      trackEvent("demo_reply_generated", { tone: selectedTone, rating });
+      // reply generated tracked via generate_reply event above
     } catch {
       toast.error("Yanıt oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.");
     } finally {
