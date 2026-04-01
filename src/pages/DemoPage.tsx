@@ -135,12 +135,12 @@ export default function DemoPage() {
       </nav>
 
       {/* Hero */}
-      <section className="container mx-auto px-4 sm:px-6 pt-12 pb-6 text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
+      <section className="container mx-auto px-4 sm:px-6 pt-8 pb-4 text-center">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
           <Sparkles className="w-4 h-4" />
           Ücretsiz Deneyin — Kayıt Gerekmez
         </div>
-        <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-4 tracking-tight leading-tight">
+        <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-3 tracking-tight leading-tight">
           AI ile Profesyonel Yorum Yanıtları
         </h1>
         <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
@@ -149,8 +149,8 @@ export default function DemoPage() {
       </section>
 
       {/* Main Demo Area */}
-      <section className="container mx-auto px-4 sm:px-6 pb-20">
-        <div className="max-w-6xl mx-auto">
+      <section className="px-4 sm:px-6 lg:px-12 xl:px-20 pb-20">
+        <div className="max-w-[1400px] mx-auto">
           {/* Sample Reviews */}
           <div className="mb-8">
             <p className="text-sm font-medium text-muted-foreground mb-3">Örnek bir yorum deneyin:</p>
