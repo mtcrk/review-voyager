@@ -98,7 +98,8 @@ export default function DemoPage() {
     navigator.clipboard.writeText(generatedReply);
     setCopied(true);
     toast.success("Yanıt panoya kopyalandı!");
-    trackEvent("demo_copy_reply");
+    const toneName = TONES.find(t => t.id === selectedTone)?.label || selectedTone;
+    gtagEvent("copy_reply", "demo", toneName);
     setTimeout(() => setCopied(false), 2000);
   };
 
