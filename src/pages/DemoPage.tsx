@@ -168,7 +168,7 @@ export default function DemoPage() {
               <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => { navigate("/"); setMobileMenuOpen(false); }}>
                 Ana Sayfa
               </Button>
-              <Button size="sm" className="w-full bg-primary text-primary-foreground" onClick={() => { handleCTAClick(); setMobileMenuOpen(false); }}>
+              <Button size="sm" className="w-full bg-primary text-primary-foreground" onClick={() => { handleCTAClick("header_free_trial"); setMobileMenuOpen(false); }}>
                 {user ? "Dashboard" : "Ücretsiz Başla"}
               </Button>
             </div>
