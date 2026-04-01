@@ -197,7 +197,7 @@ export default function DemoPage() {
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Users className="w-4 h-4 text-primary" />
-            <span>150+ İşletme Kullanıyor</span>
+            <span>25+ İşletme Kullanıyor</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Zap className="w-4 h-4 text-primary" />
