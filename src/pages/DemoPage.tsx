@@ -457,7 +457,7 @@ export default function DemoPage() {
                     Google, Booking, TripAdvisor — hepsine AI ile anında yanıt verin.
                   </p>
                   <Button
-                    onClick={handleCTAClick}
+                    onClick={() => handleCTAClick("free_trial_3_month")}
                     className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl"
                   >
                     {user ? "Dashboard'a Git" : "Ücretsiz Başla"}
