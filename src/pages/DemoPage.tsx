@@ -273,8 +273,8 @@ export default function DemoPage() {
             </div>
 
             {/* Right: Output */}
-            <div className="lg:col-span-2 space-y-5">
-              <div className={`rounded-2xl border bg-card p-6 lg:p-8 min-h-[520px] flex flex-col transition-all ${
+            <div className="space-y-5">
+              <div className={`rounded-2xl border bg-card p-6 lg:p-8 min-h-[580px] flex flex-col transition-all ${
                 generatedReply ? "border-primary/30 shadow-lg shadow-primary/5" : "border-border"
               }`}>
                 <div className="flex items-center justify-between mb-4">
