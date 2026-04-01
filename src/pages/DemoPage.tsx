@@ -416,7 +416,7 @@ export default function DemoPage() {
                           </p>
                           <Button
                             size="sm"
-                            onClick={handleCTAClick}
+                            onClick={() => handleCTAClick("free_trial_3_month")}
                             className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg shadow-md shadow-primary/20"
                           >
                             3 Ay Ücretsiz Başla
