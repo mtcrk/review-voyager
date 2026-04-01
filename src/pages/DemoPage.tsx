@@ -222,7 +222,7 @@ export default function DemoPage() {
                     value={reviewText}
                     onChange={(e) => setReviewText(e.target.value)}
                     placeholder="Müşterinin yazdığı yorumu buraya yapıştırın veya yazın..."
-                    rows={6}
+                    rows={8}
                     className="rounded-xl border-border bg-background resize-none text-sm"
                   />
                   <p className="text-xs text-muted-foreground/60 mt-1.5">
