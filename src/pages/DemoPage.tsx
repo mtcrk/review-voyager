@@ -259,7 +259,7 @@ export default function DemoPage() {
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         key={star}
-                        onClick={() => setRating(star)}
+                        onClick={() => { setRating(star); gtagEvent("change_rating", "demo", String(star)); }}
                         onMouseEnter={() => setHoverRating(star)}
                         onMouseLeave={() => setHoverRating(0)}
                         className="transition-transform hover:scale-110"
