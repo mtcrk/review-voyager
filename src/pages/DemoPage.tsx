@@ -175,7 +175,7 @@ export default function DemoPage() {
 
           <div className="grid lg:grid-cols-2 gap-8">
             {/* Left: Input — wider */}
-            <div className="lg:col-span-3 space-y-5">
+            <div className="space-y-5">
               <div className="rounded-2xl border border-border bg-card p-6 lg:p-8 space-y-6">
                 <h2 className="text-lg font-semibold text-foreground">Yorum Bilgileri</h2>
 
