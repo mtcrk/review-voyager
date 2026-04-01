@@ -150,22 +150,22 @@ export default function DemoPage() {
 
       {/* Main Demo Area */}
       <section className="container mx-auto px-4 sm:px-6 pb-20">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           {/* Sample Reviews */}
           <div className="mb-8">
             <p className="text-sm font-medium text-muted-foreground mb-3">Örnek bir yorum deneyin:</p>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {SAMPLE_REVIEWS.map((sample, i) => (
                 <button
                   key={i}
                   onClick={() => handleSampleReview(sample)}
-                  className="text-left px-4 py-2.5 rounded-xl border border-border bg-card hover:border-primary/40 hover:bg-primary/5 transition-all text-sm max-w-xs"
+                  className="text-left px-5 py-4 rounded-xl border border-border bg-card hover:border-primary/40 hover:bg-primary/5 transition-all text-sm"
                 >
-                  <div className="flex items-center gap-1 mb-1">
+                  <div className="flex items-center gap-1 mb-1.5">
                     {Array.from({ length: 5 }).map((_, s) => (
-                      <Star key={s} className={`w-3 h-3 ${s < sample.rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
+                      <Star key={s} className={`w-3.5 h-3.5 ${s < sample.rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
                     ))}
-                    <span className="text-xs text-muted-foreground ml-1">— {sample.name}</span>
+                    <span className="text-xs text-muted-foreground ml-1.5">— {sample.name}</span>
                   </div>
                   <p className="text-muted-foreground line-clamp-2">{sample.text}</p>
                 </button>
@@ -173,10 +173,10 @@ export default function DemoPage() {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Left: Input */}
-            <div className="space-y-5">
-              <div className="rounded-2xl border border-border bg-card p-6 space-y-5">
+          <div className="grid lg:grid-cols-5 gap-6">
+            {/* Left: Input — wider */}
+            <div className="lg:col-span-3 space-y-5">
+              <div className="rounded-2xl border border-border bg-card p-6 lg:p-8 space-y-6">
                 <h2 className="text-lg font-semibold text-foreground">Yorum Bilgileri</h2>
 
                 {/* Rating */}
@@ -192,7 +192,7 @@ export default function DemoPage() {
                         className="transition-transform hover:scale-110"
                       >
                         <Star
-                          className={`w-8 h-8 transition-colors ${
+                          className={`w-9 h-9 transition-colors ${
                             star <= (hoverRating || rating)
                               ? "fill-amber-400 text-amber-400"
                               : "text-muted-foreground/30"
@@ -211,7 +211,7 @@ export default function DemoPage() {
                     value={reviewerName}
                     onChange={(e) => setReviewerName(e.target.value)}
                     placeholder="Örn: Ayşe K."
-                    className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-foreground text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
                   />
                 </div>
 
@@ -222,7 +222,7 @@ export default function DemoPage() {
                     value={reviewText}
                     onChange={(e) => setReviewText(e.target.value)}
                     placeholder="Müşterinin yazdığı yorumu buraya yapıştırın veya yazın..."
-                    rows={5}
+                    rows={6}
                     className="rounded-xl border-border bg-background resize-none text-sm"
                   />
                   <p className="text-xs text-muted-foreground/60 mt-1.5">
@@ -232,21 +232,21 @@ export default function DemoPage() {
               </div>
 
               {/* Tone Selection */}
-              <div className="rounded-2xl border border-border bg-card p-6">
-                <h2 className="text-lg font-semibold text-foreground mb-3">Yanıt Tonu</h2>
-                <div className="grid grid-cols-3 gap-2">
+              <div className="rounded-2xl border border-border bg-card p-6 lg:p-8">
+                <h2 className="text-lg font-semibold text-foreground mb-4">Yanıt Tonu</h2>
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                   {TONES.map((tone) => (
                     <button
                       key={tone.id}
                       onClick={() => setSelectedTone(tone.id)}
-                      className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                      className={`flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl text-sm font-medium transition-all ${
                         selectedTone === tone.id
                           ? "bg-primary text-primary-foreground shadow-md"
                           : "bg-muted/50 text-muted-foreground hover:bg-muted"
                       }`}
                     >
-                      <span>{tone.emoji}</span>
-                      <span>{tone.label}</span>
+                      <span className="text-lg">{tone.emoji}</span>
+                      <span className="text-xs">{tone.label}</span>
                     </button>
                   ))}
                 </div>
@@ -273,8 +273,8 @@ export default function DemoPage() {
             </div>
 
             {/* Right: Output */}
-            <div className="space-y-5">
-              <div className={`rounded-2xl border bg-card p-6 min-h-[400px] flex flex-col transition-all ${
+            <div className="lg:col-span-2 space-y-5">
+              <div className={`rounded-2xl border bg-card p-6 lg:p-8 min-h-[520px] flex flex-col transition-all ${
                 generatedReply ? "border-primary/30 shadow-lg shadow-primary/5" : "border-border"
               }`}>
                 <div className="flex items-center justify-between mb-4">
@@ -294,12 +294,10 @@ export default function DemoPage() {
 
                 {generatedReply ? (
                   <div className="flex-1 flex flex-col">
-                    {/* Reply Content */}
                     <div className="flex-1 rounded-xl bg-primary/5 border border-primary/10 p-5 mb-4">
                       <p className="text-foreground leading-relaxed whitespace-pre-wrap">{generatedReply}</p>
                     </div>
 
-                    {/* Meta */}
                     <div className="flex items-center gap-2 mb-4">
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
                         <Sparkles className="w-3 h-3" />
@@ -310,7 +308,6 @@ export default function DemoPage() {
                       </span>
                     </div>
 
-                    {/* Actions */}
                     <div className="flex gap-2">
                       <Button
                         onClick={handleCopy}
