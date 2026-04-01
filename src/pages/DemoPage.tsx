@@ -150,7 +150,7 @@ export default function DemoPage() {
               </Button>
               <Button
                 size="sm"
-                onClick={handleCTAClick}
+                onClick={() => handleCTAClick("header_free_trial")}
                 className="bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 {user ? "Dashboard" : "Ücretsiz Başla"}
