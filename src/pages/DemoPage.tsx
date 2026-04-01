@@ -113,7 +113,8 @@ export default function DemoPage() {
 
   const handleToneSelect = (toneId: string) => {
     setSelectedTone(toneId);
-    trackEvent("demo_tone_select", { tone: toneId });
+    const toneName = TONES.find(t => t.id === toneId)?.label || toneId;
+    gtagEvent("change_tone", "demo", toneName);
   };
 
   const handleCTAClick = () => {
