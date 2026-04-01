@@ -135,12 +135,12 @@ export default function DemoPage() {
       </nav>
 
       {/* Hero */}
-      <section className="container mx-auto px-4 sm:px-6 pt-12 pb-6 text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
+      <section className="container mx-auto px-4 sm:px-6 pt-8 pb-4 text-center">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
           <Sparkles className="w-4 h-4" />
           Ücretsiz Deneyin — Kayıt Gerekmez
         </div>
-        <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-4 tracking-tight leading-tight">
+        <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-3 tracking-tight leading-tight">
           AI ile Profesyonel Yorum Yanıtları
         </h1>
         <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
@@ -149,8 +149,8 @@ export default function DemoPage() {
       </section>
 
       {/* Main Demo Area */}
-      <section className="container mx-auto px-4 sm:px-6 pb-20">
-        <div className="max-w-6xl mx-auto">
+      <section className="px-4 sm:px-6 lg:px-12 xl:px-20 pb-20">
+        <div className="max-w-[1400px] mx-auto">
           {/* Sample Reviews */}
           <div className="mb-8">
             <p className="text-sm font-medium text-muted-foreground mb-3">Örnek bir yorum deneyin:</p>
@@ -173,9 +173,9 @@ export default function DemoPage() {
             </div>
           </div>
 
-          <div className="grid lg:grid-cols-5 gap-6">
+          <div className="grid lg:grid-cols-2 gap-8">
             {/* Left: Input — wider */}
-            <div className="lg:col-span-3 space-y-5">
+            <div className="space-y-5">
               <div className="rounded-2xl border border-border bg-card p-6 lg:p-8 space-y-6">
                 <h2 className="text-lg font-semibold text-foreground">Yorum Bilgileri</h2>
 
@@ -222,7 +222,7 @@ export default function DemoPage() {
                     value={reviewText}
                     onChange={(e) => setReviewText(e.target.value)}
                     placeholder="Müşterinin yazdığı yorumu buraya yapıştırın veya yazın..."
-                    rows={6}
+                    rows={8}
                     className="rounded-xl border-border bg-background resize-none text-sm"
                   />
                   <p className="text-xs text-muted-foreground/60 mt-1.5">
@@ -273,8 +273,8 @@ export default function DemoPage() {
             </div>
 
             {/* Right: Output */}
-            <div className="lg:col-span-2 space-y-5">
-              <div className={`rounded-2xl border bg-card p-6 lg:p-8 min-h-[520px] flex flex-col transition-all ${
+            <div className="space-y-5">
+              <div className={`rounded-2xl border bg-card p-6 lg:p-8 min-h-[580px] flex flex-col transition-all ${
                 generatedReply ? "border-primary/30 shadow-lg shadow-primary/5" : "border-border"
               }`}>
                 <div className="flex items-center justify-between mb-4">
