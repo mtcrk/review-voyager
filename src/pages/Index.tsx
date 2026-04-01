@@ -11,7 +11,7 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { t } = useTranslation();
+  useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
