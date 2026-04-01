@@ -67,10 +67,8 @@ export default function DemoPage() {
     setLoading(true);
     setGeneratedReply("");
 
-    trackEvent("demo_generate_reply", {
-      tone: selectedTone,
-      rating,
-      review_length: reviewText.length,
+    const toneName = TONES.find(t => t.id === selectedTone)?.label || selectedTone;
+    gtagEvent("generate_reply", "demo", toneName);
     });
 
     try {
