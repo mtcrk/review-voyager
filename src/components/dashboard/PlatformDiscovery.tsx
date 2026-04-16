@@ -26,6 +26,22 @@ const platformIcons: Record<string, React.ReactNode> = {
   expedia: <Building2 className="h-5 w-5 text-yellow-600" />,
 };
 
+const platformBadgeStyles: Record<string, string> = {
+  tripadvisor: "bg-green-100 text-green-700 border-green-200",
+  booking: "bg-blue-100 text-blue-700 border-blue-200",
+  trustpilot: "bg-emerald-100 text-emerald-700 border-emerald-200",
+  hotelscom: "bg-red-100 text-red-700 border-red-200",
+  expedia: "bg-yellow-100 text-yellow-700 border-yellow-200",
+};
+
+const platformDisplayName: Record<string, string> = {
+  tripadvisor: "TripAdvisor",
+  booking: "Booking.com",
+  trustpilot: "Trustpilot",
+  hotelscom: "Hotels.com",
+  expedia: "Expedia",
+};
+
 const platformDbField: Record<string, string> = {
   tripadvisor: "tripadvisor_id",
   booking: "booking_hotel_id",
@@ -227,7 +243,13 @@ export function PlatformDiscovery() {
               >
                 <span className="mt-0.5">{platformIcons[result.platform] || <Building2 className="h-5 w-5" />}</span>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
+                    <Badge
+                      variant="outline"
+                      className={`text-[10px] px-1.5 py-0 font-semibold ${platformBadgeStyles[result.platform] || ""}`}
+                    >
+                      {platformDisplayName[result.platform] || result.platform}
+                    </Badge>
                     <span className="font-medium text-sm truncate">{result.title}</span>
                     <Badge
                       variant={result.confidence === "high" ? "default" : "secondary"}
