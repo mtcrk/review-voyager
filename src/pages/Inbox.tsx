@@ -354,6 +354,35 @@ export default function Inbox() {
                 </button>
               );
             })}
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between pt-4 border-t border-border">
+                <p className="text-xs text-muted-foreground">
+                  {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filtered.length)} / {filtered.length}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Önceki
+                  </Button>
+                  <span className="text-sm text-muted-foreground px-2">
+                    {currentPage} / {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Sonraki
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
