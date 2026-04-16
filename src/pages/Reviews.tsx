@@ -211,7 +211,7 @@ export default function Reviews() {
     expedia: {
       label: "Expedia",
       placeholder: "Expedia URL'sini yapıştırın (örn. .../h12345.Hotel-Information)",
-      hint: "Expedia'da otelinizin sayfasını açın, URL'yi kopyalayıp buraya yapıştırın. Otel kimliğini otomatik çıkaracağız.",
+      hint: "Expedia'da otelinizin sayfasını açın ve tam URL'yi yapıştırın. Bu bağlantıyı tam URL olarak kaydedeceğiz.",
       dbField: "expedia_hotel_id",
       getIdFromBusiness: (b) => b.expedia_hotel_id,
     },
@@ -243,6 +243,9 @@ export default function Reviews() {
       if (match) return match[1];
     }
     if (platform === "expedia") {
+      if (/^https?:\/\/(?:www\.)?expedia\./i.test(trimmed) || /^https?:\/\/expe\.app\.link\//i.test(trimmed)) {
+        return trimmed.split("#")[0].split("?")[0];
+      }
       const m1 = trimmed.match(/h(\d{4,})\.Hotel-Information/i);
       if (m1) return m1[1];
       const m2 = trimmed.match(/[?&]hotelId=(\d{4,})/i);

@@ -76,6 +76,78 @@ function toSafeIsoDate(input?: string | null): string {
   return Number.isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString();
 }
 
+function sanitizeStoredUrl(input?: string | null): string | null {
+  if (!input) return null;
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+  return trimmed.split("#")[0].split("?")[0];
+}
+
+function extractExpediaHotelId(value?: string | null): string | null {
+  const sanitized = sanitizeStoredUrl(value);
+  if (!sanitized) return null;
+  if (/^\d{4,}$/.test(sanitized)) return sanitized;
+
+  const match = sanitized.match(/h(\d{4,})\.Hotel-Information/i)
+    || sanitized.match(/[?&]hotelId=(\d{4,})/i)
+    || sanitized.match(/\/hotels?\/(\d{4,})/i);
+
+  return match?.[1] ?? null;
+}
+
+async function resolveExpediaUrl(business: { name: string; city?: string | null; expedia_hotel_id?: string | null }): Promise<string | null> {
+  const storedValue = business.expedia_hotel_id?.trim();
+  if (!storedValue) return null;
+
+  if (/^https?:\/\/(?:www\.)?expedia\./i.test(storedValue) || /^https?:\/\/expe\.app\.link\//i.test(storedValue)) {
+    return sanitizeStoredUrl(storedValue);
+  }
+
+  const hotelId = extractExpediaHotelId(storedValue);
+  if (!hotelId) return null;
+
+  const firecrawlApiKey = Deno.env.get("FIRECRAWL_API_KEY");
+  if (!firecrawlApiKey) return null;
+
+  const searchQueries = [
+    `${business.name} ${business.city || ""} site:expedia.com ${hotelId}`.trim(),
+    `${business.name} ${business.city || ""} site:expedia.com`.trim(),
+  ];
+
+  for (const query of searchQueries) {
+    try {
+      const response = await fetch("https://api.firecrawl.dev/v1/search", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${firecrawlApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query, limit: 5 }),
+      });
+
+      if (!response.ok) {
+        console.error(`Firecrawl Expedia search failed: ${response.status}`);
+        continue;
+      }
+
+      const data = await response.json();
+      for (const item of data.data || []) {
+        const candidateUrl = sanitizeStoredUrl(item.url);
+        if (!candidateUrl || !/^https?:\/\/(?:www\.)?expedia\./i.test(candidateUrl)) continue;
+
+        const candidateHotelId = extractExpediaHotelId(candidateUrl);
+        if (candidateHotelId === hotelId) {
+          return candidateUrl;
+        }
+      }
+    } catch (error) {
+      console.error("Error resolving Expedia URL:", error);
+    }
+  }
+
+  return null;
+}
+
 
 async function getRunStatus(runId: string, token: string): Promise<any> {
   const resp = await fetch(`${APIFY_BASE}/actor-runs/${runId}?token=${token}`);
@@ -188,6 +260,21 @@ Deno.serve(async (req) => {
       const datasetId = runData.defaultDatasetId;
       const items = await fetchDatasetItems(datasetId, APIFY_API_TOKEN);
 
+      const actorMessage = items.find((item: any) => typeof item?.message === "string")?.message;
+      const hasReviewPayload = items.some((item: any) => item.reviewText || item.reviewTitle || item.text || item.title || item.reviewOriginalText || item.reviewTranslatedText);
+
+      if (items.length > 0 && !hasReviewPayload && actorMessage) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            status: "failed",
+            run_id,
+            message: actorMessage,
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
       const cappedItems = (platform === "hotelscom" || platform === "expedia" || platform === "tripcom") ? items.slice(0, 200) : items;
       const forcedPlatform = (platform === "hotelscom" || platform === "expedia" || platform === "trustpilot" || platform === "tripcom") ? platform : undefined;
       const result = await insertReviews(supabase, cappedItems, business_id, forcedPlatform);
@@ -232,10 +319,17 @@ Deno.serve(async (req) => {
     } else if (platform === "expedia" && business.expedia_hotel_id) {
       // Use dedicated memo23/expedia-scraper - reliable and actively maintained
       actorId = EXPEDIA_ACTOR_ID;
-      const expediaUrl = `https://www.expedia.com/h${business.expedia_hotel_id}.Hotel-Information`;
+      const expediaUrl = await resolveExpediaUrl(business);
+      if (!expediaUrl) {
+        return new Response(
+          JSON.stringify({ error: "Expedia URL bulunamadı. Lütfen Expedia sayfasının tam URL'sini yeniden kaydedin." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
       actorInput = {
         startUrls: [expediaUrl],
         maxItems: 200,
+        includeCategoryRatings: false,
       };
       console.log(`Using memo23/expedia-scraper for: ${expediaUrl}`);
     } else if (platform === "tripcom") {
