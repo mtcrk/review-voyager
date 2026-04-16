@@ -248,6 +248,8 @@ function buildEmailHtml(opts: {
         </div>
       </div>
 
+      ${aiOverviewBlock}
+
       <h3 style="margin:0 0 10px 0;font-size:15px;color:#111827;">Platform Bazında</h3>
       <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
         <thead>
@@ -264,13 +266,15 @@ function buildEmailHtml(opts: {
       <div style="display:flex;gap:16px;margin-bottom:20px;">
         <div style="flex:1;background:#fef2f2;padding:16px;border-radius:8px;">
           <h4 style="margin:0 0 10px 0;font-size:13px;color:#dc2626;">⚠️ Şikayet Konuları</h4>
-          <ul style="margin:0;padding-left:18px;font-size:13px;color:#374151;">${issuesList}</ul>
+          <ul style="margin:0;padding-left:18px;font-size:13px;color:#374151;line-height:1.6;">${issuesItems}</ul>
         </div>
         <div style="flex:1;background:#f0fdf4;padding:16px;border-radius:8px;">
           <h4 style="margin:0 0 10px 0;font-size:13px;color:#16a34a;">✓ Övgü Konuları</h4>
-          <ul style="margin:0;padding-left:18px;font-size:13px;color:#374151;">${praisesList}</ul>
+          <ul style="margin:0;padding-left:18px;font-size:13px;color:#374151;line-height:1.6;">${praisesItems}</ul>
         </div>
       </div>
+
+      ${recommendationsBlock}
 
       ${sampleCards ? `<h3 style="margin:0 0 10px 0;font-size:15px;color:#111827;">Örnek Yorumlar</h3>${sampleCards}` : ""}
 
