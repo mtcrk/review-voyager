@@ -367,20 +367,32 @@ export default function Reviews() {
     return map;
   }, [businesses]);
 
-  // Fetch reviews from Supabase
+  // Fetch reviews from Supabase (paginated to bypass 1000-row limit)
   const { data: reviews = [], isLoading, refetch } = useQuery({
     queryKey: ['reviews', queryBusinessIds],
     queryFn: async () => {
       if (queryBusinessIds.length === 0) return [];
 
-      const { data, error } = await supabase
-        .from('reviews')
-        .select('*')
-        .in('business_id', queryBusinessIds)
-        .order('posted_at', { ascending: false });
+      const pageSize = 1000;
+      let from = 0;
+      const all: any[] = [];
 
-      if (error) throw error;
-      return data || [];
+      while (true) {
+        const { data, error } = await supabase
+          .from('reviews')
+          .select('*')
+          .in('business_id', queryBusinessIds)
+          .order('posted_at', { ascending: false })
+          .range(from, from + pageSize - 1);
+
+        if (error) throw error;
+        if (!data || data.length === 0) break;
+        all.push(...data);
+        if (data.length < pageSize) break;
+        from += pageSize;
+      }
+
+      return all;
     },
     enabled: queryBusinessIds.length > 0,
   });
