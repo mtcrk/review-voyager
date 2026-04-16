@@ -21,6 +21,8 @@ import { PlatformDiscovery } from "@/components/dashboard/PlatformDiscovery";
 import { RepScoreWidget } from "@/components/dashboard/RepScoreWidget";
 import { calculateRepScore, ReviewData } from "@/lib/repScore";
 import { GooglePerformanceWidget } from "@/components/dashboard/GooglePerformanceWidget";
+import { FirstSuccessModal } from "@/components/dashboard/FirstSuccessModal";
+import { useReviewFetch } from "@/contexts/ReviewFetchContext";
 
 
 export default function Dashboard() {
@@ -28,6 +30,7 @@ export default function Dashboard() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { activeBusiness, loading: businessLoading, refetchBusinesses } = useBusiness();
+  const { hasPendingRuns } = useReviewFetch();
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => 
     startOfWeek(new Date(), { weekStartsOn: 1 })
   );
@@ -167,6 +170,7 @@ export default function Dashboard() {
         onBusinessCreated={refetchBusinesses}
         onDismiss={() => setOnboardingDismissed(true)}
       />
+      <FirstSuccessModal />
       
       <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto p-8 space-y-10">
@@ -315,7 +319,21 @@ export default function Dashboard() {
             </div>
           ) : effectiveReviews.length === 0 ? (
             <Card className="p-12 text-center shadow-card space-y-4">
-              {activeBusiness?.google_connected ? (
+              {hasPendingRuns ? (
+                <>
+                  <div className="flex justify-center">
+                    <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-foreground text-lg font-medium">Yorumların çekiliyor...</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Bu işlem 1-2 dakika sürebilir. Bittiğinde sana haber vereceğiz.
+                    </p>
+                  </div>
+                </>
+              ) : activeBusiness?.google_connected ? (
                 <>
                   <div className="flex justify-center">
                     <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">

@@ -53,6 +53,7 @@ import GoogleYorumCevapOrnekleri from "./pages/seo/GoogleYorumCevapOrnekleri";
 import RestoranYorumCevaplari from "./pages/seo/RestoranYorumCevaplari";
 import OtelYorumCevaplari from "./pages/seo/OtelYorumCevaplari";
 import GooglePerformance from "./pages/GooglePerformance";
+import Inbox from "./pages/Inbox";
 
 const queryClient = new QueryClient();
 
@@ -153,6 +154,16 @@ const App = () => (
                 <ProtectedRoute>
                   <AppLayout>
                     <Dashboard />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/inbox"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <Inbox />
                   </AppLayout>
                 </ProtectedRoute>
               }

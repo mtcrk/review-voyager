@@ -75,6 +75,7 @@ interface PlatformConfig {
 
 const commonItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Tüm Yorumlar", url: "/inbox", icon: Inbox, highlight: true },
   { title: "Rep Score", url: "/rep-score", icon: Trophy },
   { title: "Lokasyonlar", url: "/locations", icon: Building2 },
   { title: "İstatistikler", url: "/statistics", icon: BarChart3 },
@@ -280,8 +281,9 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {commonItems.slice(0, 5).map((item) => {
+              {commonItems.slice(0, 6).map((item) => {
                 const isActive = location.pathname === item.url;
+                const showInboxBadge = item.url === "/inbox" && unreadCount > 0;
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
@@ -291,10 +293,16 @@ export function AppSidebar() {
                     >
                       <NavLink
                         to={item.url}
+                        onClick={() => { if (showInboxBadge) markAllRead(); }}
                         className="flex items-center gap-3 transition-smooth"
                       >
-                        <item.icon className="h-5 w-5" />
-                        <span>{item.title}</span>
+                        <item.icon className={`h-5 w-5 ${(item as any).highlight ? "text-primary" : ""}`} />
+                        <span className="flex-1">{item.title}</span>
+                        {showInboxBadge && (
+                          <Badge className="h-5 min-w-5 px-1.5 text-xs bg-destructive text-destructive-foreground hover:bg-destructive">
+                            {unreadCount > 99 ? "99+" : unreadCount}
+                          </Badge>
+                        )}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
