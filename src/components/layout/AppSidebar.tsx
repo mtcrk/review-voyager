@@ -60,6 +60,7 @@ import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/contexts/BusinessContext";
+import { useNewReviews } from "@/contexts/NewReviewsContext";
 import logo from "@/assets/logo.png";
 
 type Platform = "google" | "tiktok" | "instagram" | "whatsapp";
@@ -87,6 +88,7 @@ export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { activeBusiness } = useBusiness();
+  const { unreadCount, markAllRead } = useNewReviews();
   
   const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null);
   const [tiktokConnected, setTiktokConnected] = useState(false);
