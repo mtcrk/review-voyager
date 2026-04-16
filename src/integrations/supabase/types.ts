@@ -66,6 +66,7 @@ export type Database = {
           review_notification_type: string
           tone: string | null
           tripadvisor_id: string | null
+          tripcom_hotel_id: string | null
           trustpilot_url: string | null
           user_id: string
           weekly_report_enabled: boolean
@@ -89,6 +90,7 @@ export type Database = {
           review_notification_type?: string
           tone?: string | null
           tripadvisor_id?: string | null
+          tripcom_hotel_id?: string | null
           trustpilot_url?: string | null
           user_id: string
           weekly_report_enabled?: boolean
@@ -112,6 +114,7 @@ export type Database = {
           review_notification_type?: string
           tone?: string | null
           tripadvisor_id?: string | null
+          tripcom_hotel_id?: string | null
           trustpilot_url?: string | null
           user_id?: string
           weekly_report_enabled?: boolean

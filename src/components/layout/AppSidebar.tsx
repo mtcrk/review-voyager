@@ -179,6 +179,7 @@ export function AppSidebar() {
     { title: "TripAdvisor Yorumları", url: "/reviews?platform=tripadvisor", icon: MapPin },
     { title: "Expedia Yorumları", url: "/reviews?platform=expedia", icon: Building2 },
     { title: "Hotels.com Yorumları", url: "/reviews?platform=hotelscom", icon: Hotel },
+    { title: "Trip.com Yorumları", url: "/reviews?platform=tripcom", icon: Building2 },
   ];
 
   const handlePlatformSelect = async (platform: PlatformConfig) => {
