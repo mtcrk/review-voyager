@@ -42,7 +42,7 @@ type SortField = "posted_at" | "rating" | "reviewer_name";
 type SortOrder = "asc" | "desc";
 type StatusFilter = "all" | "pending" | "approved" | "replied" | "not_replied";
 type SentimentFilter = "all" | "positive" | "negative" | "neutral";
-type PlatformFilter = "all" | "google" | "booking" | "tripadvisor" | "expedia" | "hotelscom";
+type PlatformFilter = "all" | "google" | "booking" | "tripadvisor" | "expedia" | "hotelscom" | "tripcom";
 type RatingFilter = "all" | "1" | "2" | "3" | "4" | "5";
 type SortOption = "newest" | "oldest" | "rating_high" | "rating_low" | "name_az";
 
@@ -65,6 +65,7 @@ const platformLabels: Record<string, { label: string; color: string }> = {
   tripadvisor: { label: "TripAdvisor", color: "bg-green-50 text-green-700 border-green-200" },
   expedia: { label: "Expedia", color: "bg-yellow-50 text-yellow-700 border-yellow-200" },
   hotelscom: { label: "Hotels.com", color: "bg-red-50 text-red-700 border-red-200" },
+  tripcom: { label: "Trip.com", color: "bg-orange-50 text-orange-700 border-orange-200" },
 };
 
 export default function Reviews() {
@@ -214,6 +215,13 @@ export default function Reviews() {
       dbField: "expedia_hotel_id",
       getIdFromBusiness: (b) => b.expedia_hotel_id,
     },
+    tripcom: {
+      label: "Trip.com",
+      placeholder: "Trip.com URL'sini veya hotel ID'sini yapıştırın",
+      hint: "Trip.com'da otelinizin sayfasını açın, URL'yi kopyalayıp buraya yapıştırın. Hotel ID'yi otomatik çıkaracağız.",
+      dbField: "tripcom_hotel_id",
+      getIdFromBusiness: (b) => (b as any).tripcom_hotel_id,
+    },
   };
 
   const parseUrlId = (input: string, platform: string): string => {
@@ -241,6 +249,13 @@ export default function Reviews() {
       if (m2) return m2[1];
       const m3 = trimmed.match(/\/hotels?\/(\d{4,})/i);
       if (m3) return m3[1];
+      if (/^\d{4,}$/.test(trimmed)) return trimmed;
+    }
+    if (platform === "tripcom") {
+      const m1 = trimmed.match(/[?&]hotelId=(\d{4,})/i);
+      if (m1) return m1[1];
+      const m2 = trimmed.match(/hotel-detail-(\d{4,})/i);
+      if (m2) return m2[1];
       if (/^\d{4,}$/.test(trimmed)) return trimmed;
     }
     return trimmed;
