@@ -43,6 +43,9 @@ interface FetchJob {
 function buildFetchJobs(biz: any): FetchJob[] {
   const jobs: FetchJob[] = [];
 
+  // Daily fetch limit per platform — economical mode
+  const MAX_PER_QUERY = 50;
+
   // Booking.com — always use direct URL if booking_hotel_id exists
   if (biz.booking_hotel_id) {
     jobs.push({
@@ -52,12 +55,12 @@ function buildFetchJobs(biz: any): FetchJob[] {
       actorInput: {
         startUrls: [{ url: `https://www.booking.com/hotel/${biz.booking_hotel_id}.html` }],
         providers: ["booking"],
+        maxReviewsPerQuery: MAX_PER_QUERY,
         scrapeReviewPictures: false,
         scrapeReviewResponses: true,
       },
     });
   } else if (biz.place_id) {
-    // Fallback: use place_id with aggregator for booking
     jobs.push({
       business: biz,
       platform: "booking",
@@ -65,13 +68,14 @@ function buildFetchJobs(biz: any): FetchJob[] {
       actorInput: {
         startIds: [biz.place_id],
         providers: ["booking"],
+        maxReviewsPerQuery: MAX_PER_QUERY,
         scrapeReviewPictures: false,
         scrapeReviewResponses: true,
       },
     });
   }
 
-  // TripAdvisor — use tripadvisor_id URL if available, otherwise place_id
+  // TripAdvisor
   if (biz.tripadvisor_id) {
     const taUrl = biz.tripadvisor_id.startsWith("http")
       ? biz.tripadvisor_id
@@ -83,6 +87,7 @@ function buildFetchJobs(biz: any): FetchJob[] {
       actorInput: {
         startUrls: [{ url: taUrl }],
         providers: ["tripadvisor"],
+        maxReviewsPerQuery: MAX_PER_QUERY,
         scrapeReviewPictures: false,
         scrapeReviewResponses: true,
       },
@@ -95,13 +100,14 @@ function buildFetchJobs(biz: any): FetchJob[] {
       actorInput: {
         startIds: [biz.place_id],
         providers: ["tripadvisor"],
+        maxReviewsPerQuery: MAX_PER_QUERY,
         scrapeReviewPictures: false,
         scrapeReviewResponses: true,
       },
     });
   }
 
-  // Hotels.com / Expedia — use place_id with aggregator
+  // Hotels.com / Expedia
   if (biz.place_id) {
     jobs.push({
       business: biz,
@@ -110,13 +116,14 @@ function buildFetchJobs(biz: any): FetchJob[] {
       actorInput: {
         startIds: [biz.place_id],
         providers: ["hotels", "expedia"],
+        maxReviewsPerQuery: MAX_PER_QUERY,
         scrapeReviewPictures: false,
         scrapeReviewResponses: true,
       },
     });
   }
 
-  // Expedia — direct URL when expedia_hotel_id is set
+  // Expedia direct
   if (biz.expedia_hotel_id) {
     jobs.push({
       business: biz,
@@ -125,13 +132,14 @@ function buildFetchJobs(biz: any): FetchJob[] {
       actorInput: {
         startUrls: [{ url: `https://www.expedia.com/h${biz.expedia_hotel_id}.Hotel-Information` }],
         providers: ["expedia"],
+        maxReviewsPerQuery: MAX_PER_QUERY,
         scrapeReviewPictures: false,
         scrapeReviewResponses: true,
       },
     });
   }
 
-  // Trustpilot — dedicated actor
+  // Trustpilot
   if (biz.trustpilot_url) {
     const domain = biz.trustpilot_url.replace(/^https?:\/\/(www\.)?trustpilot\.[a-z.]+\/review\//i, "").replace(/\/.*$/, "");
     jobs.push({
@@ -140,7 +148,7 @@ function buildFetchJobs(biz: any): FetchJob[] {
       actorId: TRUSTPILOT_ACTOR_ID,
       actorInput: {
         businessUrl: `https://www.trustpilot.com/review/${domain}`,
-        maxResults: 50,
+        maxResults: MAX_PER_QUERY,
       },
     });
   }
@@ -329,6 +337,7 @@ Deno.serve(async (req) => {
     for (const biz of businesses) {
       const jobs = buildFetchJobs(biz);
       const allNewReviews: any[] = [];
+      const platformResults: { platform: string; fetched: number; inserted: number; error?: string }[] = [];
 
       for (const job of jobs) {
         try {
@@ -338,6 +347,7 @@ Deno.serve(async (req) => {
           const { inserted, newReviews } = await insertNewReviews(supabase, transformed, biz.id);
 
           allNewReviews.push(...newReviews);
+          platformResults.push({ platform: job.platform, fetched: items.length, inserted });
 
           results.push({
             business: biz.name,
@@ -347,14 +357,33 @@ Deno.serve(async (req) => {
           });
           console.log(`[${biz.name}] ${job.platform}: ${items.length} fetched, ${inserted} new`);
         } catch (err: any) {
+          platformResults.push({ platform: job.platform, fetched: 0, inserted: 0, error: err.message });
           results.push({ business: biz.name, platform: job.platform, error: err.message });
           console.error(`[${biz.name}] ${job.platform} error:`, err.message);
         }
       }
 
-      // Send notification for all new reviews from all platforms
+      // Per-review instant notifications (existing behavior)
       if (allNewReviews.length > 0) {
         await sendNotification(supabaseUrl, supabaseServiceKey, biz.id, allNewReviews);
+      }
+
+      // Daily summary report (always sent if there are new reviews OR errors)
+      try {
+        await fetch(`${supabaseUrl}/functions/v1/notify-fetch-summary`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${supabaseServiceKey}`,
+          },
+          body: JSON.stringify({
+            business_id: biz.id,
+            new_reviews: allNewReviews,
+            platform_results: platformResults,
+          }),
+        });
+      } catch (err: any) {
+        console.error(`[${biz.name}] summary email failed:`, err.message);
       }
     }
 
