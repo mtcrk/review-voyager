@@ -341,8 +341,8 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
   const transformed = items
     .filter(item => item.reviewText || item.reviewTitle || item.text || item.title)
     .map(item => {
-      // Detect Trustpilot dedicated scraper format
       const isTrustpilotFormat = item.author || item.consumer;
+      const isExpediaDedicated = forcedPlatform === "expedia" && (item.userName || item.submissionTime || item.overallSatisfaction != null);
       const platform = forcedPlatform || (isTrustpilotFormat ? "trustpilot" : normalizePlatform(item.provider || "unknown"));
       
       let rating: number;
@@ -351,8 +351,17 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
       let postedAt: string;
       let reviewId: string;
 
-      if (isTrustpilotFormat) {
-        // Trustpilot dedicated scraper format
+      if (isExpediaDedicated) {
+        // Dedicated Expedia scraper format (tri_angle/expedia-hotels-com-reviews-scraper)
+        const rawRating = Number(item.overallSatisfaction ?? item.rating ?? 3);
+        rating = rawRating > 5 ? Math.round(rawRating / 2) : Math.min(5, Math.max(1, Math.round(rawRating)));
+        text = item.text || item.reviewText || "";
+        if (item.title && text) text = `${item.title}\n\n${text}`;
+        else if (item.title) text = item.title;
+        reviewerName = item.userName || item.authorName || "Anonymous";
+        postedAt = toSafeIsoDate(item.submissionTime || item.reviewDate || item.date);
+        reviewId = item.id || item.reviewId || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      } else if (isTrustpilotFormat) {
         rating = Math.min(5, Math.max(1, Math.round(Number(item.rating || item.stars || 3))));
         text = item.text || item.reviewText || "";
         if (item.title && text) text = `${item.title}\n\n${text}`;
@@ -361,7 +370,6 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
         postedAt = toSafeIsoDate(item.date || item.createdAt || item.publishedDate);
         reviewId = item.id || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       } else {
-        // Hotel-review-aggregator format
         rating = normalizeRating(item.reviewRating, item.provider || "");
         text = item.reviewText || "";
         if (item.reviewTitle && text) text = `${item.reviewTitle}\n\n${text}`;
