@@ -54,6 +54,8 @@ export default function Inbox() {
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(PLATFORM_OPTIONS);
   const [statusTab, setStatusTab] = useState<StatusTab>("all");
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 50;
 
   // Default: tüm işletmeler seçili
   useEffect(() => {
