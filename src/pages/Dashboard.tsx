@@ -516,5 +516,4 @@ export default function Dashboard() {
         </>
       );
     }
-  );
 }
