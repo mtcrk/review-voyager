@@ -214,6 +214,13 @@ export default function Reviews() {
       dbField: "hotelscom_url",
       getIdFromBusiness: (b) => b.hotelscom_url,
     },
+    expedia: {
+      label: "Expedia",
+      placeholder: "Expedia URL'sini yapıştırın (örn. .../h12345.Hotel-Information)",
+      hint: "Expedia'da otelinizin sayfasını açın, URL'yi kopyalayıp buraya yapıştırın. Otel kimliğini otomatik çıkaracağız.",
+      dbField: "expedia_hotel_id",
+      getIdFromBusiness: (b) => b.expedia_hotel_id,
+    },
   };
 
   const parseUrlId = (input: string, platform: string): string => {
