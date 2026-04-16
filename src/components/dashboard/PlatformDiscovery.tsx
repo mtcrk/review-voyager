@@ -23,6 +23,7 @@ const platformIcons: Record<string, React.ReactNode> = {
   booking: <Hotel className="h-5 w-5 text-blue-700" />,
   trustpilot: <Star className="h-5 w-5 text-emerald-500" />,
   hotelscom: <Building2 className="h-5 w-5 text-red-600" />,
+  expedia: <Building2 className="h-5 w-5 text-yellow-600" />,
 };
 
 const platformDbField: Record<string, string> = {
@@ -30,6 +31,7 @@ const platformDbField: Record<string, string> = {
   booking: "booking_hotel_id",
   trustpilot: "trustpilot_url",
   hotelscom: "hotelscom_url",
+  expedia: "expedia_hotel_id",
 };
 
 export function PlatformDiscovery() {
@@ -63,6 +65,7 @@ export function PlatformDiscovery() {
         booking: activeBusiness.booking_hotel_id,
         trustpilot: activeBusiness.trustpilot_url,
         hotelscom: activeBusiness.hotelscom_url,
+        expedia: (activeBusiness as any).expedia_hotel_id,
       };
 
       const filtered = (data.results || []).filter(
@@ -172,7 +175,8 @@ export function PlatformDiscovery() {
     activeBusiness.tripadvisor_id &&
     activeBusiness.booking_hotel_id &&
     activeBusiness.trustpilot_url &&
-    activeBusiness.hotelscom_url
+    activeBusiness.hotelscom_url &&
+    (activeBusiness as any).expedia_hotel_id
   );
 
   if (allConnected) return null;

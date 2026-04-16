@@ -38,9 +38,19 @@ function extractPlatformId(platform: string, url: string): string | null {
         return match ? match[1] : null;
       }
       case "hotelscom": {
-        // e.g. hotels.com/ho123456 or expedia.com/Hotel.h3670
-        const match = url.match(/h[oe](\d+)/i);
+        // e.g. hotels.com/ho123456
+        const match = url.match(/ho(\d+)/i);
         return match ? match[1] : null;
+      }
+      case "expedia": {
+        // e.g. expedia.com/h12345.Hotel-Information or .../hotels/12345
+        const m1 = url.match(/h(\d{4,})\.Hotel-Information/i);
+        if (m1) return m1[1];
+        const m2 = url.match(/[?&]hotelId=(\d{4,})/i);
+        if (m2) return m2[1];
+        const m3 = url.match(/\/hotels?\/(\d{4,})/i);
+        if (m3) return m3[1];
+        return null;
       }
       default:
         return null;
@@ -96,6 +106,7 @@ Deno.serve(async (req) => {
     const platforms = [
       { key: "tripadvisor", label: "TripAdvisor", site: "tripadvisor.com" },
       { key: "booking", label: "Booking.com", site: "booking.com" },
+      { key: "expedia", label: "Expedia", site: "expedia.com" },
       { key: "trustpilot", label: "Trustpilot", site: "trustpilot.com" },
       { key: "hotelscom", label: "Hotels.com", site: "hotels.com" },
     ];
