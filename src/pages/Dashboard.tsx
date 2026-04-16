@@ -13,6 +13,8 @@ import { useNavigate } from "react-router-dom";
 import { PriorityActions } from "@/components/dashboard/PriorityActions";
 import { CompetitorComparison } from "@/components/dashboard/CompetitorComparison";
 import { DemoModeBanner } from "@/components/dashboard/DemoModeBanner";
+import { AllBusinessesView } from "@/components/dashboard/AllBusinessesView";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { UpgradeCTA } from "@/components/dashboard/UpgradeCTA";
 import { DEMO_REVIEWS, DEMO_METRICS } from "@/lib/demoData";
 import { useTranslation } from "react-i18next";
@@ -29,7 +31,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const { activeBusiness, loading: businessLoading, refetchBusinesses } = useBusiness();
+  const { activeBusiness, businesses, loading: businessLoading, refetchBusinesses } = useBusiness();
   const { hasPendingRuns } = useReviewFetch();
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => 
     startOfWeek(new Date(), { weekStartsOn: 1 })
@@ -173,7 +175,35 @@ export default function Dashboard() {
       <FirstSuccessModal />
       
       <div className="min-h-screen bg-background">
-        <div className="max-w-7xl mx-auto p-8 space-y-10">
+        <div className="max-w-7xl mx-auto p-8 space-y-6">
+          {activeBusiness && businesses.length > 1 ? (
+            <Tabs defaultValue="active" className="w-full">
+              <TabsList>
+                <TabsTrigger value="active">Aktif Otel</TabsTrigger>
+                <TabsTrigger value="all">Tüm Oteller ({businesses.length})</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="all" className="mt-6">
+                <AllBusinessesView />
+              </TabsContent>
+
+              <TabsContent value="active" className="mt-6 space-y-10">
+                <DashboardActiveContent />
+              </TabsContent>
+            </Tabs>
+          ) : (
+            <div className="space-y-10">
+              <DashboardActiveContent />
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+
+  function DashboardActiveContent() {
+    return (
+      <>
           {/* Business Name Header */}
           {activeBusiness && (
             <div className="flex items-start justify-between gap-4">
@@ -483,8 +513,7 @@ export default function Dashboard() {
               )}
             </>
           )}
-        </div>
-      </div>
-    </>
-  );
+        </>
+      );
+    }
 }
