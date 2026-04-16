@@ -220,7 +220,7 @@ Deno.serve(async (req) => {
       const hotelId = business.hotelscom_url.replace(/\D/g, ""); // Extract numeric ID
       actorInput = {
         startUrls: [`https://www.hotels.com/ho${hotelId}/`],
-        maxItems: 1000,
+        maxItems: 200,
       };
       console.log(`Using dedicated Hotels.com scraper for hotel ID: ${hotelId}`);
     } else if (platform === "expedia" && business.expedia_hotel_id) {
@@ -228,6 +228,7 @@ Deno.serve(async (req) => {
       actorInput = {
         startUrls: [{ url: expediaUrl }],
         providers: ["expedia"],
+        maxReviewsPerQuery: 200,
         scrapeReviewPictures: false,
         scrapeReviewResponses: true,
       };
@@ -255,6 +256,7 @@ Deno.serve(async (req) => {
       actorInput = {
         startUrls: [{ url: bookingUrl }],
         providers: ["booking"],
+        maxReviewsPerQuery: 200,
         scrapeReviewPictures: false,
         scrapeReviewResponses: true,
       };
@@ -263,6 +265,7 @@ Deno.serve(async (req) => {
       // Use the general hotel-review-aggregator
       const providers = PLATFORM_TO_APIFY_PROVIDER[platform] || [];
       actorInput = {
+        maxReviewsPerQuery: 200,
         scrapeReviewPictures: false,
         scrapeReviewResponses: true,
       };
