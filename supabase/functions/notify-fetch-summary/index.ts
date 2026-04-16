@@ -161,8 +161,36 @@ function buildEmailHtml(opts: {
   summary: ReturnType<typeof summarizeIssuesPraises>;
   sampleReviews: ReviewLite[];
   aiSummary: Awaited<ReturnType<typeof generateAISummary>>;
+  yesterdayCount: number;
+  unansweredCount: number;
 }): string {
-  const { businessName, totalNew, avgRating, platformResults, summary, sampleReviews, aiSummary } = opts;
+  const { businessName, totalNew, avgRating, platformResults, summary, sampleReviews, aiSummary, yesterdayCount, unansweredCount } = opts;
+
+  // Urgency banner: 3+ negative reviews
+  const urgencyBanner = summary.negativeCount >= 3
+    ? `<div style="background:linear-gradient(135deg,#dc2626 0%,#b91c1c 100%);color:white;padding:14px 20px;border-radius:10px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+        <div style="font-size:20px;">⚠️</div>
+        <div>
+          <div style="font-weight:700;font-size:14px;">Acil Aksiyon Gerekli</div>
+          <div style="font-size:12px;opacity:0.9;margin-top:2px;">${summary.negativeCount} olumsuz yorum bugün geldi — hemen yanıtlamayı düşünün.</div>
+        </div>
+      </div>`
+    : "";
+
+  // Trend vs yesterday
+  let trendBadge = "";
+  if (yesterdayCount > 0) {
+    const diff = totalNew - yesterdayCount;
+    const pct = Math.round((diff / yesterdayCount) * 100);
+    const isUp = diff > 0;
+    const isFlat = diff === 0;
+    const color = isFlat ? "#6b7280" : isUp ? "#16a34a" : "#dc2626";
+    const arrow = isFlat ? "→" : isUp ? "↑" : "↓";
+    trendBadge = `<div style="font-size:11px;color:${color};margin-top:4px;font-weight:600;">${arrow} Dün: ${yesterdayCount} ${isFlat ? "" : `(${isUp ? "+" : ""}${pct}%)`}</div>`;
+  } else if (totalNew > 0) {
+    trendBadge = `<div style="font-size:11px;color:#16a34a;margin-top:4px;font-weight:600;">↑ Dün: 0</div>`;
+  }
+
 
   const platformRows = platformResults
     .map(
@@ -228,13 +256,24 @@ function buildEmailHtml(opts: {
       <p style="margin:0;opacity:0.9;font-size:14px;">${businessName}</p>
     </div>
 
+    ${urgencyBanner}
+
+    ${unansweredCount > 0 ? `<div style="background:#eff6ff;border:1px solid #bfdbfe;padding:14px 18px;border-radius:10px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <div>
+        <div style="font-weight:600;font-size:13px;color:#1e40af;">📬 ${unansweredCount} yeni yorum yanıt bekliyor</div>
+        <div style="font-size:12px;color:#3730a3;margin-top:2px;">Hızlı yanıt itibar puanınızı yükseltir.</div>
+      </div>
+      <a href="${APP_URL}/reviews?status=unanswered" style="background:#1e40af;color:white;padding:8px 14px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;">Yanıtla →</a>
+    </div>` : ""}
+
     <div style="background:white;border-radius:12px;padding:24px;margin-bottom:16px;border:1px solid #e5e7eb;">
-      <div style="display:flex;gap:16px;margin-bottom:20px;">
-        <div style="flex:1;background:#f9fafb;padding:16px;border-radius:8px;text-align:center;">
+      <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:120px;background:#f9fafb;padding:16px;border-radius:8px;text-align:center;">
           <div style="font-size:28px;font-weight:700;color:#7A5AF8;">${totalNew}</div>
           <div style="font-size:12px;color:#6b7280;margin-top:4px;">Yeni Yorum</div>
+          ${trendBadge}
         </div>
-        <div style="flex:1;background:#f9fafb;padding:16px;border-radius:8px;text-align:center;">
+        <div style="flex:1;min-width:120px;background:#f9fafb;padding:16px;border-radius:8px;text-align:center;">
           <div style="font-size:28px;font-weight:700;color:${getRatingColor(avgRating)};">${avgRating.toFixed(1)}★</div>
           <div style="font-size:12px;color:#6b7280;margin-top:4px;">Ort. Puan</div>
         </div>
@@ -312,6 +351,26 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
     const { business_id, new_reviews = [], platform_results = [] } = await req.json();
 
+    // Yesterday's count for trend comparison
+    const { count: yesterdayCount } = await supabase
+      .from("reviews")
+      .select("id", { count: "exact", head: true })
+      .eq("business_id", business_id)
+      .gte("posted_at", new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString())
+      .lt("posted_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+
+    // Unanswered count among new reviews
+    const newReviewIds = (new_reviews as any[]).map((r) => r.id).filter(Boolean);
+    let unansweredCount = 0;
+    if (newReviewIds.length > 0) {
+      const { count } = await supabase
+        .from("reviews")
+        .select("id", { count: "exact", head: true })
+        .in("id", newReviewIds)
+        .is("approved_reply", null);
+      unansweredCount = count || 0;
+    }
+
     if (!business_id) {
       return new Response(JSON.stringify({ error: "business_id required" }), {
         status: 400,
@@ -359,10 +418,13 @@ Deno.serve(async (req) => {
       summary,
       sampleReviews: reviews,
       aiSummary,
+      yesterdayCount: yesterdayCount || 0,
+      unansweredCount,
     });
 
+    const urgencyPrefix = summary.negativeCount >= 3 ? "🚨 ACİL — " : "📊 ";
     const subject = totalNew > 0
-      ? `📊 ${business.name} — ${totalNew} yeni yorum (${avgRating.toFixed(1)}★)`
+      ? `${urgencyPrefix}${business.name} — ${totalNew} yeni yorum (${avgRating.toFixed(1)}★)`
       : `⚠️ ${business.name} — Yorum çekme uyarısı`;
 
     const recipients = new Set<string>([ADMIN_EMAIL]);
