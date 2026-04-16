@@ -11,6 +11,7 @@ const ACTOR_ID = "tri_angle~hotel-review-aggregator";
 const HOTELSCOM_ACTOR_ID = "memo23~hotels-scraper";
 const TRUSTPILOT_ACTOR_ID = "zen-studio~trustpilot-review-scraper";
 const EXPEDIA_ACTOR_ID = "memo23~expedia-scraper";
+const TRIPCOM_ACTOR_ID = "shahidirfan~trip-com-hotel-reviews-scraper";
 
 // Map Apify provider names to our platform names
 const PROVIDER_MAP: Record<string, string> = {
@@ -187,8 +188,8 @@ Deno.serve(async (req) => {
       const datasetId = runData.defaultDatasetId;
       const items = await fetchDatasetItems(datasetId, APIFY_API_TOKEN);
 
-      const cappedItems = (platform === "hotelscom" || platform === "expedia") ? items.slice(0, 200) : items;
-      const forcedPlatform = (platform === "hotelscom" || platform === "expedia" || platform === "trustpilot") ? platform : undefined;
+      const cappedItems = (platform === "hotelscom" || platform === "expedia" || platform === "tripcom") ? items.slice(0, 200) : items;
+      const forcedPlatform = (platform === "hotelscom" || platform === "expedia" || platform === "trustpilot" || platform === "tripcom") ? platform : undefined;
       const result = await insertReviews(supabase, cappedItems, business_id, forcedPlatform);
 
       await logSuccess(supabase, business_id, platform, items.length, result.inserted, result.skipped);
@@ -202,7 +203,7 @@ Deno.serve(async (req) => {
     // Get business
     const { data: business, error: bizError } = await supabaseAuth
       .from("businesses")
-      .select("id, place_id, name, city, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url, expedia_hotel_id")
+      .select("id, place_id, name, city, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url, expedia_hotel_id, tripcom_hotel_id")
       .eq("id", business_id)
       .maybeSingle();
 
@@ -237,6 +238,20 @@ Deno.serve(async (req) => {
         maxItems: 200,
       };
       console.log(`Using memo23/expedia-scraper for: ${expediaUrl}`);
+    } else if (platform === "tripcom") {
+      // Trip.com requires dedicated actor - shahidirfan/trip-com-hotel-reviews-scraper
+      if (!business.tripcom_hotel_id) {
+        return new Response(
+          JSON.stringify({ error: "Trip.com hotel ID bulunamadı. Lütfen önce Trip.com URL'sini ekleyin." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      actorId = TRIPCOM_ACTOR_ID;
+      actorInput = {
+        hotelId: parseInt(business.tripcom_hotel_id, 10),
+        results_wanted: 200,
+      };
+      console.log(`Using Trip.com scraper for hotel ID: ${business.tripcom_hotel_id}`);
     } else if (platform === "trustpilot") {
       // Trustpilot is NOT supported by hotel-review-aggregator, use dedicated actor
       if (!business.trustpilot_url) {
