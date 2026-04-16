@@ -187,8 +187,9 @@ Deno.serve(async (req) => {
       const datasetId = runData.defaultDatasetId;
       const items = await fetchDatasetItems(datasetId, APIFY_API_TOKEN);
 
-      const cappedItems = platform === "hotelscom" ? items.slice(0, 200) : items;
-      const result = await insertReviews(supabase, cappedItems, business_id, platform === "hotelscom" ? "hotelscom" : undefined);
+      const cappedItems = (platform === "hotelscom" || platform === "expedia") ? items.slice(0, 200) : items;
+      const forcedPlatform = (platform === "hotelscom" || platform === "expedia" || platform === "trustpilot") ? platform : undefined;
+      const result = await insertReviews(supabase, cappedItems, business_id, forcedPlatform);
 
       await logSuccess(supabase, business_id, platform, items.length, result.inserted, result.skipped);
 
