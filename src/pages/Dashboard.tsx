@@ -31,7 +31,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const { activeBusiness, loading: businessLoading, refetchBusinesses } = useBusiness();
+  const { activeBusiness, businesses, loading: businessLoading, refetchBusinesses } = useBusiness();
   const { hasPendingRuns } = useReviewFetch();
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => 
     startOfWeek(new Date(), { weekStartsOn: 1 })
