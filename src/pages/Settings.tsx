@@ -435,3 +435,46 @@ export default function Settings() {
     </div>
   );
 }
+
+function BrowserPushCard() {
+  const { pushPermission, requestPushPermission } = useNewReviews();
+
+  const status =
+    pushPermission === "granted"
+      ? { label: "Aktif", variant: "default" as const, description: "Yeni yorum geldiğinde tarayıcı bildirimi alacaksın." }
+      : pushPermission === "denied"
+      ? { label: "Reddedildi", variant: "destructive" as const, description: "Tarayıcı ayarlarından bu site için bildirimleri tekrar etkinleştirmen gerekiyor." }
+      : pushPermission === "unsupported"
+      ? { label: "Desteklenmiyor", variant: "secondary" as const, description: "Tarayıcın bildirim API'sini desteklemiyor." }
+      : { label: "Pasif", variant: "secondary" as const, description: "Tarayıcı bildirimlerini etkinleştir, sekmen kapalıyken bile yeni yorumdan haberdar ol." };
+
+  return (
+    <Card className="shadow-card">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <BellRing className="h-5 w-5" />
+          Tarayıcı Bildirimleri
+        </CardTitle>
+        <CardDescription>
+          Sekmen açık değilken bile yeni yorum geldiğinde anlık tarayıcı bildirimi al.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="font-medium text-sm">Durum:</span>
+              <Badge variant={status.variant}>{status.label}</Badge>
+            </div>
+            <p className="text-sm text-muted-foreground">{status.description}</p>
+          </div>
+          {pushPermission === "default" && (
+            <Button onClick={requestPushPermission} size="sm" className="ml-4">
+              Etkinleştir
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
