@@ -160,8 +160,9 @@ function buildEmailHtml(opts: {
   platformResults: PlatformResult[];
   summary: ReturnType<typeof summarizeIssuesPraises>;
   sampleReviews: ReviewLite[];
+  aiSummary: Awaited<ReturnType<typeof generateAISummary>>;
 }): string {
-  const { businessName, totalNew, avgRating, platformResults, summary, sampleReviews } = opts;
+  const { businessName, totalNew, avgRating, platformResults, summary, sampleReviews, aiSummary } = opts;
 
   const platformRows = platformResults
     .map(
@@ -175,13 +176,33 @@ function buildEmailHtml(opts: {
     )
     .join("");
 
-  const issuesList = summary.topIssues.length
-    ? summary.topIssues.map(([kw, n]) => `<li style="margin-bottom:4px;"><strong>${kw}</strong> <span style="color:#9ca3af;">(${n}x)</span></li>`).join("")
-    : `<li style="color:#9ca3af;">Belirgin şikayet yok</li>`;
+  const issuesItems = aiSummary?.topIssues?.length
+    ? aiSummary.topIssues.map((s) => `<li style="margin-bottom:6px;">${s}</li>`).join("")
+    : summary.topIssues.length
+      ? summary.topIssues.map(([kw, n]) => `<li style="margin-bottom:4px;"><strong>${kw}</strong> <span style="color:#9ca3af;">(${n}x)</span></li>`).join("")
+      : `<li style="color:#9ca3af;">Belirgin şikayet yok</li>`;
 
-  const praisesList = summary.topPraises.length
-    ? summary.topPraises.map(([kw, n]) => `<li style="margin-bottom:4px;"><strong>${kw}</strong> <span style="color:#9ca3af;">(${n}x)</span></li>`).join("")
-    : `<li style="color:#9ca3af;">Belirgin övgü yok</li>`;
+  const praisesItems = aiSummary?.topPraises?.length
+    ? aiSummary.topPraises.map((s) => `<li style="margin-bottom:6px;">${s}</li>`).join("")
+    : summary.topPraises.length
+      ? summary.topPraises.map(([kw, n]) => `<li style="margin-bottom:4px;"><strong>${kw}</strong> <span style="color:#9ca3af;">(${n}x)</span></li>`).join("")
+      : `<li style="color:#9ca3af;">Belirgin övgü yok</li>`;
+
+  const aiOverviewBlock = aiSummary?.overview
+    ? `<div style="background:linear-gradient(135deg,#faf5ff 0%,#f5f3ff 100%);border:1px solid #ddd6fe;padding:16px;border-radius:8px;margin-bottom:20px;">
+        <div style="font-size:11px;color:#7A5AF8;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">🤖 AI Özet</div>
+        <div style="font-size:14px;color:#111827;line-height:1.6;">${aiSummary.overview}</div>
+      </div>`
+    : "";
+
+  const recommendationsBlock = aiSummary?.recommendations?.length
+    ? `<div style="background:#fffbeb;border:1px solid #fde68a;padding:16px;border-radius:8px;margin-bottom:20px;">
+        <h4 style="margin:0 0 10px 0;font-size:13px;color:#b45309;">💡 Öneriler</h4>
+        <ul style="margin:0;padding-left:18px;font-size:13px;color:#374151;line-height:1.6;">
+          ${aiSummary.recommendations.map((r) => `<li style="margin-bottom:4px;">${r}</li>`).join("")}
+        </ul>
+      </div>`
+    : "";
 
   const sampleCards = sampleReviews
     .slice(0, 3)
