@@ -70,9 +70,9 @@ const Onboarding = () => {
       status: "available",
     },
     {
-      id: "trustpilot",
-      title: "Trustpilot",
-      description: "Avrupa pazarı güvenilirlik yorumlarını takip et",
+      id: "expedia",
+      title: "Expedia",
+      description: "Expedia rezervasyon yorumlarını takip et",
       icon: Globe,
       status: "available",
     },
