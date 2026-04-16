@@ -34,12 +34,13 @@ import { tr } from "date-fns/locale";
 const PLATFORM_META: Record<string, { label: string; classes: string }> = {
   google: { label: "Google", classes: "bg-blue-50 text-blue-700 border-blue-200" },
   booking: { label: "Booking.com", classes: "bg-indigo-50 text-indigo-700 border-indigo-200" },
+  expedia: { label: "Expedia", classes: "bg-yellow-50 text-yellow-700 border-yellow-200" },
   tripadvisor: { label: "TripAdvisor", classes: "bg-green-50 text-green-700 border-green-200" },
   trustpilot: { label: "Trustpilot", classes: "bg-emerald-50 text-emerald-700 border-emerald-200" },
   hotelscom: { label: "Hotels.com", classes: "bg-red-50 text-red-700 border-red-200" },
 };
 
-const PLATFORM_OPTIONS = ["google", "booking", "tripadvisor", "trustpilot", "hotelscom"];
+const PLATFORM_OPTIONS = ["google", "booking", "expedia", "tripadvisor", "trustpilot", "hotelscom"];
 
 type StatusTab = "all" | "unanswered" | "negative";
 
