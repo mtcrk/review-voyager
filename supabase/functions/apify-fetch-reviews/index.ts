@@ -353,10 +353,11 @@ Deno.serve(async (req) => {
 async function insertReviews(supabase: any, items: any[], businessId: string, forcedPlatform?: string) {
   // Transform reviews - handle both aggregator format and Trustpilot format
   const transformed = items
-    .filter(item => item.reviewText || item.reviewTitle || item.text || item.title)
+    .filter(item => item.reviewText || item.reviewTitle || item.text || item.title || item.reviewOriginalText || item.reviewTranslatedText)
     .map(item => {
       const isTrustpilotFormat = item.author || item.consumer;
       const isExpediaDedicated = forcedPlatform === "expedia" && (item.userName || item.submissionTime || item.overallSatisfaction != null);
+      const isTripcomDedicated = forcedPlatform === "tripcom";
       const platform = forcedPlatform || (isTrustpilotFormat ? "trustpilot" : normalizePlatform(item.provider || "unknown"));
       
       let rating: number;
@@ -365,7 +366,17 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
       let postedAt: string;
       let reviewId: string;
 
-      if (isExpediaDedicated) {
+      if (isTripcomDedicated) {
+        // Trip.com scraper format (shahidirfan/trip-com-hotel-reviews-scraper) — rating is 0-10
+        const rawRating = Number(item.reviewRating ?? 6);
+        rating = rawRating > 5 ? Math.round(rawRating / 2) : Math.min(5, Math.max(1, Math.round(rawRating)));
+        const original = item.reviewOriginalText || "";
+        const translated = item.reviewTranslatedText || "";
+        text = translated && translated !== original ? `${original}\n\n[Translated]\n${translated}` : (original || translated || "");
+        reviewerName = item.reviewerName || "Anonymous";
+        postedAt = toSafeIsoDate(item.reviewDate);
+        reviewId = item.reviewId ? String(item.reviewId) : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      } else if (isExpediaDedicated) {
         // Dedicated Expedia scraper format (tri_angle/expedia-hotels-com-reviews-scraper)
         const rawRating = Number(item.overallSatisfaction ?? item.rating ?? 3);
         rating = rawRating > 5 ? Math.round(rawRating / 2) : Math.min(5, Math.max(1, Math.round(rawRating)));
