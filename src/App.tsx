@@ -7,6 +7,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BusinessProvider } from "@/contexts/BusinessContext";
 import { ReviewFetchProvider } from "@/contexts/ReviewFetchContext";
+import { NewReviewsProvider } from "@/contexts/NewReviewsContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
@@ -59,6 +60,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <BusinessProvider>
+        <NewReviewsProvider>
         <ReviewFetchProvider>
         <TooltipProvider>
           <Toaster />
@@ -260,6 +262,7 @@ const App = () => (
           </BrowserRouter>
         </TooltipProvider>
         </ReviewFetchProvider>
+        </NewReviewsProvider>
       </BusinessProvider>
     </AuthProvider>
   </QueryClientProvider>
