@@ -418,10 +418,13 @@ Deno.serve(async (req) => {
       summary,
       sampleReviews: reviews,
       aiSummary,
+      yesterdayCount: yesterdayCount || 0,
+      unansweredCount,
     });
 
+    const urgencyPrefix = summary.negativeCount >= 3 ? "🚨 ACİL — " : "📊 ";
     const subject = totalNew > 0
-      ? `📊 ${business.name} — ${totalNew} yeni yorum (${avgRating.toFixed(1)}★)`
+      ? `${urgencyPrefix}${business.name} — ${totalNew} yeni yorum (${avgRating.toFixed(1)}★)`
       : `⚠️ ${business.name} — Yorum çekme uyarısı`;
 
     const recipients = new Set<string>([ADMIN_EMAIL]);
