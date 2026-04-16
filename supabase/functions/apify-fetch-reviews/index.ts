@@ -10,6 +10,7 @@ const APIFY_BASE = "https://api.apify.com/v2";
 const ACTOR_ID = "tri_angle~hotel-review-aggregator";
 const HOTELSCOM_ACTOR_ID = "memo23~hotels-scraper";
 const TRUSTPILOT_ACTOR_ID = "zen-studio~trustpilot-review-scraper";
+const EXPEDIA_ACTOR_ID = "tri_angle~expedia-hotels-com-reviews-scraper";
 
 // Map Apify provider names to our platform names
 const PROVIDER_MAP: Record<string, string> = {
@@ -186,8 +187,9 @@ Deno.serve(async (req) => {
       const datasetId = runData.defaultDatasetId;
       const items = await fetchDatasetItems(datasetId, APIFY_API_TOKEN);
 
-      const cappedItems = platform === "hotelscom" ? items.slice(0, 200) : items;
-      const result = await insertReviews(supabase, cappedItems, business_id, platform === "hotelscom" ? "hotelscom" : undefined);
+      const cappedItems = (platform === "hotelscom" || platform === "expedia") ? items.slice(0, 200) : items;
+      const forcedPlatform = (platform === "hotelscom" || platform === "expedia" || platform === "trustpilot") ? platform : undefined;
+      const result = await insertReviews(supabase, cappedItems, business_id, forcedPlatform);
 
       await logSuccess(supabase, business_id, platform, items.length, result.inserted, result.skipped);
 
@@ -227,17 +229,15 @@ Deno.serve(async (req) => {
       };
       console.log(`Using dedicated Hotels.com scraper for hotel ID: ${hotelId}`);
     } else if (platform === "expedia" && business.expedia_hotel_id) {
-      // Expedia: aggregator works best with Google Maps search + expedia provider filter
-      // Direct Expedia URLs often return 0 results because the aggregator scrapes via Google Maps
-      const searchQuery = encodeURIComponent(`${business.name} ${business.city || ""}`).trim();
+      // Use dedicated Expedia scraper - aggregator returns 0 results due to bot protection
+      actorId = EXPEDIA_ACTOR_ID;
+      const expediaUrl = `https://www.expedia.com/h${business.expedia_hotel_id}.Hotel-Information`;
       actorInput = {
-        startUrls: [{ url: `https://www.google.com/maps/search/${searchQuery}` }],
-        providers: ["expedia"],
-        maxReviewsPerQuery: 200,
-        scrapeReviewPictures: false,
-        scrapeReviewResponses: true,
+        startUrls: [{ url: expediaUrl }],
+        maxReviewsPerHotel: 200,
+        sortBy: "newest_first",
       };
-      console.log(`Using Google Maps search for Expedia: ${business.name} ${business.city || ""} (hotel_id: ${business.expedia_hotel_id})`);
+      console.log(`Using dedicated Expedia scraper for: ${expediaUrl}`);
     } else if (platform === "trustpilot") {
       // Trustpilot is NOT supported by hotel-review-aggregator, use dedicated actor
       if (!business.trustpilot_url) {
@@ -341,8 +341,8 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
   const transformed = items
     .filter(item => item.reviewText || item.reviewTitle || item.text || item.title)
     .map(item => {
-      // Detect Trustpilot dedicated scraper format
       const isTrustpilotFormat = item.author || item.consumer;
+      const isExpediaDedicated = forcedPlatform === "expedia" && (item.userName || item.submissionTime || item.overallSatisfaction != null);
       const platform = forcedPlatform || (isTrustpilotFormat ? "trustpilot" : normalizePlatform(item.provider || "unknown"));
       
       let rating: number;
@@ -351,8 +351,17 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
       let postedAt: string;
       let reviewId: string;
 
-      if (isTrustpilotFormat) {
-        // Trustpilot dedicated scraper format
+      if (isExpediaDedicated) {
+        // Dedicated Expedia scraper format (tri_angle/expedia-hotels-com-reviews-scraper)
+        const rawRating = Number(item.overallSatisfaction ?? item.rating ?? 3);
+        rating = rawRating > 5 ? Math.round(rawRating / 2) : Math.min(5, Math.max(1, Math.round(rawRating)));
+        text = item.text || item.reviewText || "";
+        if (item.title && text) text = `${item.title}\n\n${text}`;
+        else if (item.title) text = item.title;
+        reviewerName = item.userName || item.authorName || "Anonymous";
+        postedAt = toSafeIsoDate(item.submissionTime || item.reviewDate || item.date);
+        reviewId = item.id || item.reviewId || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      } else if (isTrustpilotFormat) {
         rating = Math.min(5, Math.max(1, Math.round(Number(item.rating || item.stars || 3))));
         text = item.text || item.reviewText || "";
         if (item.title && text) text = `${item.title}\n\n${text}`;
@@ -361,7 +370,6 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
         postedAt = toSafeIsoDate(item.date || item.createdAt || item.publishedDate);
         reviewId = item.id || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       } else {
-        // Hotel-review-aggregator format
         rating = normalizeRating(item.reviewRating, item.provider || "");
         text = item.reviewText || "";
         if (item.reviewTitle && text) text = `${item.reviewTitle}\n\n${text}`;
