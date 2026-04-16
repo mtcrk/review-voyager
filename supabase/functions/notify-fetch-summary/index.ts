@@ -161,8 +161,36 @@ function buildEmailHtml(opts: {
   summary: ReturnType<typeof summarizeIssuesPraises>;
   sampleReviews: ReviewLite[];
   aiSummary: Awaited<ReturnType<typeof generateAISummary>>;
+  yesterdayCount: number;
+  unansweredCount: number;
 }): string {
-  const { businessName, totalNew, avgRating, platformResults, summary, sampleReviews, aiSummary } = opts;
+  const { businessName, totalNew, avgRating, platformResults, summary, sampleReviews, aiSummary, yesterdayCount, unansweredCount } = opts;
+
+  // Urgency banner: 3+ negative reviews
+  const urgencyBanner = summary.negativeCount >= 3
+    ? `<div style="background:linear-gradient(135deg,#dc2626 0%,#b91c1c 100%);color:white;padding:14px 20px;border-radius:10px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+        <div style="font-size:20px;">⚠️</div>
+        <div>
+          <div style="font-weight:700;font-size:14px;">Acil Aksiyon Gerekli</div>
+          <div style="font-size:12px;opacity:0.9;margin-top:2px;">${summary.negativeCount} olumsuz yorum bugün geldi — hemen yanıtlamayı düşünün.</div>
+        </div>
+      </div>`
+    : "";
+
+  // Trend vs yesterday
+  let trendBadge = "";
+  if (yesterdayCount > 0) {
+    const diff = totalNew - yesterdayCount;
+    const pct = Math.round((diff / yesterdayCount) * 100);
+    const isUp = diff > 0;
+    const isFlat = diff === 0;
+    const color = isFlat ? "#6b7280" : isUp ? "#16a34a" : "#dc2626";
+    const arrow = isFlat ? "→" : isUp ? "↑" : "↓";
+    trendBadge = `<div style="font-size:11px;color:${color};margin-top:4px;font-weight:600;">${arrow} Dün: ${yesterdayCount} ${isFlat ? "" : `(${isUp ? "+" : ""}${pct}%)`}</div>`;
+  } else if (totalNew > 0) {
+    trendBadge = `<div style="font-size:11px;color:#16a34a;margin-top:4px;font-weight:600;">↑ Dün: 0</div>`;
+  }
+
 
   const platformRows = platformResults
     .map(
