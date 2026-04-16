@@ -317,6 +317,7 @@ export function AppSidebar() {
               <SidebarMenu>
                 {currentPlatform.menuItems.map((item) => {
                   const isActive = (location.pathname + location.search) === item.url || location.pathname === item.url;
+                  const showBadge = item.url.includes("/reviews") && unreadCount > 0;
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
@@ -326,10 +327,16 @@ export function AppSidebar() {
                       >
                         <NavLink
                           to={item.url}
+                          onClick={() => { if (showBadge) markAllRead(); }}
                           className="flex items-center gap-3 transition-smooth"
                         >
                           <item.icon className="h-5 w-5" />
-                          <span>{item.title}</span>
+                          <span className="flex-1">{item.title}</span>
+                          {showBadge && (
+                            <Badge className="h-5 min-w-5 px-1.5 text-xs bg-destructive text-destructive-foreground hover:bg-destructive">
+                              {unreadCount > 99 ? "99+" : unreadCount}
+                            </Badge>
+                          )}
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
