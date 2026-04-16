@@ -293,7 +293,7 @@ export default function Inbox() {
           </Card>
         ) : (
           <div className="space-y-2">
-            {filtered.map((r: any) => {
+            {paginated.map((r: any) => {
               const platform = PLATFORM_META[r.platform || "google"] || PLATFORM_META.google;
               const isAnswered = !!r.approved_reply || r.status === "replied";
               const isNegative = r.rating <= 3;
