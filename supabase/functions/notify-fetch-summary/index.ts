@@ -312,6 +312,26 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
     const { business_id, new_reviews = [], platform_results = [] } = await req.json();
 
+    // Yesterday's count for trend comparison
+    const { count: yesterdayCount } = await supabase
+      .from("reviews")
+      .select("id", { count: "exact", head: true })
+      .eq("business_id", business_id)
+      .gte("posted_at", new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString())
+      .lt("posted_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+
+    // Unanswered count among new reviews
+    const newReviewIds = (new_reviews as any[]).map((r) => r.id).filter(Boolean);
+    let unansweredCount = 0;
+    if (newReviewIds.length > 0) {
+      const { count } = await supabase
+        .from("reviews")
+        .select("id", { count: "exact", head: true })
+        .in("id", newReviewIds)
+        .is("approved_reply", null);
+      unansweredCount = count || 0;
+    }
+
     if (!business_id) {
       return new Response(JSON.stringify({ error: "business_id required" }), {
         status: 400,
