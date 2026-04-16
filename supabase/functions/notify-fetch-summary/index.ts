@@ -256,13 +256,24 @@ function buildEmailHtml(opts: {
       <p style="margin:0;opacity:0.9;font-size:14px;">${businessName}</p>
     </div>
 
+    ${urgencyBanner}
+
+    ${unansweredCount > 0 ? `<div style="background:#eff6ff;border:1px solid #bfdbfe;padding:14px 18px;border-radius:10px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <div>
+        <div style="font-weight:600;font-size:13px;color:#1e40af;">📬 ${unansweredCount} yeni yorum yanıt bekliyor</div>
+        <div style="font-size:12px;color:#3730a3;margin-top:2px;">Hızlı yanıt itibar puanınızı yükseltir.</div>
+      </div>
+      <a href="${APP_URL}/reviews?status=unanswered" style="background:#1e40af;color:white;padding:8px 14px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;">Yanıtla →</a>
+    </div>` : ""}
+
     <div style="background:white;border-radius:12px;padding:24px;margin-bottom:16px;border:1px solid #e5e7eb;">
-      <div style="display:flex;gap:16px;margin-bottom:20px;">
-        <div style="flex:1;background:#f9fafb;padding:16px;border-radius:8px;text-align:center;">
+      <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:120px;background:#f9fafb;padding:16px;border-radius:8px;text-align:center;">
           <div style="font-size:28px;font-weight:700;color:#7A5AF8;">${totalNew}</div>
           <div style="font-size:12px;color:#6b7280;margin-top:4px;">Yeni Yorum</div>
+          ${trendBadge}
         </div>
-        <div style="flex:1;background:#f9fafb;padding:16px;border-radius:8px;text-align:center;">
+        <div style="flex:1;min-width:120px;background:#f9fafb;padding:16px;border-radius:8px;text-align:center;">
           <div style="font-size:28px;font-weight:700;color:${getRatingColor(avgRating)};">${avgRating.toFixed(1)}★</div>
           <div style="font-size:12px;color:#6b7280;margin-top:4px;">Ort. Puan</div>
         </div>
