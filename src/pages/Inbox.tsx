@@ -54,6 +54,8 @@ export default function Inbox() {
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(PLATFORM_OPTIONS);
   const [statusTab, setStatusTab] = useState<StatusTab>("all");
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 50;
 
   // Default: tüm işletmeler seçili
   useEffect(() => {
@@ -119,6 +121,18 @@ export default function Inbox() {
     const negative = reviews.filter((r: any) => r.rating <= 3).length;
     return { total: reviews.length, unanswered, negative };
   }, [reviews]);
+
+  // Reset to page 1 whenever filters change
+  useEffect(() => {
+    setPage(1);
+  }, [selectedBusinessIds, selectedPlatforms, statusTab, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const paginated = useMemo(
+    () => filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [filtered, currentPage]
+  );
 
   const toggleBusiness = (id: string) => {
     setSelectedBusinessIds((prev) =>
@@ -279,7 +293,7 @@ export default function Inbox() {
           </Card>
         ) : (
           <div className="space-y-2">
-            {filtered.map((r: any) => {
+            {paginated.map((r: any) => {
               const platform = PLATFORM_META[r.platform || "google"] || PLATFORM_META.google;
               const isAnswered = !!r.approved_reply || r.status === "replied";
               const isNegative = r.rating <= 3;
@@ -340,6 +354,35 @@ export default function Inbox() {
                 </button>
               );
             })}
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between pt-4 border-t border-border">
+                <p className="text-xs text-muted-foreground">
+                  {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filtered.length)} / {filtered.length}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Önceki
+                  </Button>
+                  <span className="text-sm text-muted-foreground px-2">
+                    {currentPage} / {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Sonraki
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
