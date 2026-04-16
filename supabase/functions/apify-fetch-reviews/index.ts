@@ -221,6 +221,8 @@ Deno.serve(async (req) => {
       actorInput = {
         startUrls: [`https://www.hotels.com/ho${hotelId}/`],
         maxItems: 200,
+        maxReviewsPerHotel: 200,
+        sortBy: "newest_first",
       };
       console.log(`Using dedicated Hotels.com scraper for hotel ID: ${hotelId}`);
     } else if (platform === "expedia" && business.expedia_hotel_id) {
