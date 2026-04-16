@@ -175,7 +175,35 @@ export default function Dashboard() {
       <FirstSuccessModal />
       
       <div className="min-h-screen bg-background">
-        <div className="max-w-7xl mx-auto p-8 space-y-10">
+        <div className="max-w-7xl mx-auto p-8 space-y-6">
+          {activeBusiness && businesses.length > 1 ? (
+            <Tabs defaultValue="active" className="w-full">
+              <TabsList>
+                <TabsTrigger value="active">Aktif Otel</TabsTrigger>
+                <TabsTrigger value="all">Tüm Oteller ({businesses.length})</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="all" className="mt-6">
+                <AllBusinessesView />
+              </TabsContent>
+
+              <TabsContent value="active" className="mt-6 space-y-10">
+                <DashboardActiveContent />
+              </TabsContent>
+            </Tabs>
+          ) : (
+            <div className="space-y-10">
+              <DashboardActiveContent />
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+
+  function DashboardActiveContent() {
+    return (
+      <>
           {/* Business Name Header */}
           {activeBusiness && (
             <div className="flex items-start justify-between gap-4">
