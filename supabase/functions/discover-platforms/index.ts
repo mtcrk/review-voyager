@@ -115,7 +115,6 @@ Deno.serve(async (req) => {
       { key: "tripadvisor", label: "TripAdvisor", site: "tripadvisor.com" },
       { key: "booking", label: "Booking.com", site: "booking.com" },
       { key: "expedia", label: "Expedia", site: "expedia.com" },
-      { key: "trustpilot", label: "Trustpilot", site: "trustpilot.com" },
       { key: "hotelscom", label: "Hotels.com", site: "hotels.com" },
       { key: "tripcom", label: "Trip.com", site: "trip.com" },
     ];
