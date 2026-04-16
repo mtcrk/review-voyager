@@ -373,7 +373,7 @@ Deno.serve(async (req) => {
       actorInput = {
         startUrls: [{ url: bookingUrl }],
         providers: ["booking"],
-        maxReviewsPerQuery: 200,
+        maxReviewsPerQuery: 50,
         scrapeReviewPictures: false,
         scrapeReviewResponses: true,
       };
@@ -382,7 +382,7 @@ Deno.serve(async (req) => {
       // Use the general hotel-review-aggregator
       const providers = PLATFORM_TO_APIFY_PROVIDER[platform] || [];
       actorInput = {
-        maxReviewsPerQuery: 200,
+        maxReviewsPerQuery: 50,
         scrapeReviewPictures: false,
         scrapeReviewResponses: true,
       };
