@@ -5,7 +5,7 @@ const platformLabels: Record<string, string> = {
   google: "Google",
   booking: "Booking.com",
   tripadvisor: "TripAdvisor",
-  trustpilot: "Trustpilot",
+  expedia: "Expedia",
   hotelscom: "Hotels.com",
 };
 
