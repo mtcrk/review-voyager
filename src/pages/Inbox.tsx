@@ -78,14 +78,23 @@ export default function Inbox() {
     queryKey: ["inbox-reviews", selectedBusinessIds.join(",")],
     queryFn: async () => {
       if (selectedBusinessIds.length === 0) return [];
-      const { data, error } = await supabase
-        .from("reviews")
-        .select("*")
-        .in("business_id", selectedBusinessIds)
-        .order("posted_at", { ascending: false })
-        .limit(500);
-      if (error) throw error;
-      return data || [];
+      const pageSize = 1000;
+      let from = 0;
+      const all: any[] = [];
+      while (true) {
+        const { data, error } = await supabase
+          .from("reviews")
+          .select("*")
+          .in("business_id", selectedBusinessIds)
+          .order("posted_at", { ascending: false })
+          .range(from, from + pageSize - 1);
+        if (error) throw error;
+        if (!data || data.length === 0) break;
+        all.push(...data);
+        if (data.length < pageSize) break;
+        from += pageSize;
+      }
+      return all;
     },
     enabled: selectedBusinessIds.length > 0,
   });
