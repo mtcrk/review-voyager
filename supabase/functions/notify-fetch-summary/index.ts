@@ -30,6 +30,96 @@ function getRatingColor(rating: number): string {
   return "#dc2626";
 }
 
+async function generateAISummary(reviews: ReviewLite[], businessName: string): Promise<{
+  overview: string;
+  topIssues: string[];
+  topPraises: string[];
+  recommendations: string[];
+} | null> {
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  if (!LOVABLE_API_KEY || reviews.length === 0) return null;
+
+  const reviewsText = reviews
+    .filter((r) => r.text)
+    .slice(0, 30)
+    .map((r, i) => `${i + 1}. [${r.rating}★ ${r.platform || ""}] ${r.reviewer_name || "Anonim"}: "${r.text}"`)
+    .join("\n");
+
+  if (!reviewsText) return null;
+
+  try {
+    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          {
+            role: "system",
+            content: `Sen bir otel/işletme yorum analisti uzmanısın. Türkçe, kısa ve net yaz. Yorumlardaki kalıpları, somut şikayet ve övgü temalarını çıkar. Genel ifadeler ('iyi hizmet') yerine spesifik konular ('kahvaltıda çeşit azlığı', 'resepsiyon karşılama sıcaklığı') kullan.`,
+          },
+          {
+            role: "user",
+            content: `${businessName} için son ${reviews.length} yorumu analiz et:\n\n${reviewsText}\n\nÇıkarımlarını yapılandırılmış formatta döndür.`,
+          },
+        ],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "review_analysis",
+              description: "Yorumlardan çıkarılan analiz",
+              parameters: {
+                type: "object",
+                properties: {
+                  overview: {
+                    type: "string",
+                    description: "1-2 cümlelik genel durum özeti (Türkçe)",
+                  },
+                  topIssues: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "En çok geçen 3-5 spesifik şikayet teması (her biri kısa, 3-7 kelime)",
+                  },
+                  topPraises: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "En çok geçen 3-5 spesifik övgü teması (her biri kısa, 3-7 kelime)",
+                  },
+                  recommendations: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "İşletmeye 2-3 somut aksiyon önerisi (her biri 1 cümle)",
+                  },
+                },
+                required: ["overview", "topIssues", "topPraises", "recommendations"],
+                additionalProperties: false,
+              },
+            },
+          },
+        ],
+        tool_choice: { type: "function", function: { name: "review_analysis" } },
+      }),
+    });
+
+    if (!resp.ok) {
+      console.error("AI gateway error:", resp.status, await resp.text());
+      return null;
+    }
+
+    const data = await resp.json();
+    const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+    if (!args) return null;
+    return JSON.parse(args);
+  } catch (e) {
+    console.error("AI summary failed:", e);
+    return null;
+  }
+}
+
 function summarizeIssuesPraises(reviews: ReviewLite[]) {
   const negatives = reviews.filter((r) => r.rating <= 3 && r.text);
   const positives = reviews.filter((r) => r.rating >= 4 && r.text);
@@ -70,8 +160,9 @@ function buildEmailHtml(opts: {
   platformResults: PlatformResult[];
   summary: ReturnType<typeof summarizeIssuesPraises>;
   sampleReviews: ReviewLite[];
+  aiSummary: Awaited<ReturnType<typeof generateAISummary>>;
 }): string {
-  const { businessName, totalNew, avgRating, platformResults, summary, sampleReviews } = opts;
+  const { businessName, totalNew, avgRating, platformResults, summary, sampleReviews, aiSummary } = opts;
 
   const platformRows = platformResults
     .map(
@@ -85,13 +176,33 @@ function buildEmailHtml(opts: {
     )
     .join("");
 
-  const issuesList = summary.topIssues.length
-    ? summary.topIssues.map(([kw, n]) => `<li style="margin-bottom:4px;"><strong>${kw}</strong> <span style="color:#9ca3af;">(${n}x)</span></li>`).join("")
-    : `<li style="color:#9ca3af;">Belirgin şikayet yok</li>`;
+  const issuesItems = aiSummary?.topIssues?.length
+    ? aiSummary.topIssues.map((s) => `<li style="margin-bottom:6px;">${s}</li>`).join("")
+    : summary.topIssues.length
+      ? summary.topIssues.map(([kw, n]) => `<li style="margin-bottom:4px;"><strong>${kw}</strong> <span style="color:#9ca3af;">(${n}x)</span></li>`).join("")
+      : `<li style="color:#9ca3af;">Belirgin şikayet yok</li>`;
 
-  const praisesList = summary.topPraises.length
-    ? summary.topPraises.map(([kw, n]) => `<li style="margin-bottom:4px;"><strong>${kw}</strong> <span style="color:#9ca3af;">(${n}x)</span></li>`).join("")
-    : `<li style="color:#9ca3af;">Belirgin övgü yok</li>`;
+  const praisesItems = aiSummary?.topPraises?.length
+    ? aiSummary.topPraises.map((s) => `<li style="margin-bottom:6px;">${s}</li>`).join("")
+    : summary.topPraises.length
+      ? summary.topPraises.map(([kw, n]) => `<li style="margin-bottom:4px;"><strong>${kw}</strong> <span style="color:#9ca3af;">(${n}x)</span></li>`).join("")
+      : `<li style="color:#9ca3af;">Belirgin övgü yok</li>`;
+
+  const aiOverviewBlock = aiSummary?.overview
+    ? `<div style="background:linear-gradient(135deg,#faf5ff 0%,#f5f3ff 100%);border:1px solid #ddd6fe;padding:16px;border-radius:8px;margin-bottom:20px;">
+        <div style="font-size:11px;color:#7A5AF8;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">🤖 AI Özet</div>
+        <div style="font-size:14px;color:#111827;line-height:1.6;">${aiSummary.overview}</div>
+      </div>`
+    : "";
+
+  const recommendationsBlock = aiSummary?.recommendations?.length
+    ? `<div style="background:#fffbeb;border:1px solid #fde68a;padding:16px;border-radius:8px;margin-bottom:20px;">
+        <h4 style="margin:0 0 10px 0;font-size:13px;color:#b45309;">💡 Öneriler</h4>
+        <ul style="margin:0;padding-left:18px;font-size:13px;color:#374151;line-height:1.6;">
+          ${aiSummary.recommendations.map((r) => `<li style="margin-bottom:4px;">${r}</li>`).join("")}
+        </ul>
+      </div>`
+    : "";
 
   const sampleCards = sampleReviews
     .slice(0, 3)
@@ -137,6 +248,8 @@ function buildEmailHtml(opts: {
         </div>
       </div>
 
+      ${aiOverviewBlock}
+
       <h3 style="margin:0 0 10px 0;font-size:15px;color:#111827;">Platform Bazında</h3>
       <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
         <thead>
@@ -153,13 +266,15 @@ function buildEmailHtml(opts: {
       <div style="display:flex;gap:16px;margin-bottom:20px;">
         <div style="flex:1;background:#fef2f2;padding:16px;border-radius:8px;">
           <h4 style="margin:0 0 10px 0;font-size:13px;color:#dc2626;">⚠️ Şikayet Konuları</h4>
-          <ul style="margin:0;padding-left:18px;font-size:13px;color:#374151;">${issuesList}</ul>
+          <ul style="margin:0;padding-left:18px;font-size:13px;color:#374151;line-height:1.6;">${issuesItems}</ul>
         </div>
         <div style="flex:1;background:#f0fdf4;padding:16px;border-radius:8px;">
           <h4 style="margin:0 0 10px 0;font-size:13px;color:#16a34a;">✓ Övgü Konuları</h4>
-          <ul style="margin:0;padding-left:18px;font-size:13px;color:#374151;">${praisesList}</ul>
+          <ul style="margin:0;padding-left:18px;font-size:13px;color:#374151;line-height:1.6;">${praisesItems}</ul>
         </div>
       </div>
+
+      ${recommendationsBlock}
 
       ${sampleCards ? `<h3 style="margin:0 0 10px 0;font-size:15px;color:#111827;">Örnek Yorumlar</h3>${sampleCards}` : ""}
 
@@ -234,6 +349,7 @@ Deno.serve(async (req) => {
       ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / totalNew
       : 0;
     const summary = summarizeIssuesPraises(reviews);
+    const aiSummary = await generateAISummary(reviews, business.name);
 
     const html = buildEmailHtml({
       businessName: business.name,
@@ -242,6 +358,7 @@ Deno.serve(async (req) => {
       platformResults: platform_results as PlatformResult[],
       summary,
       sampleReviews: reviews,
+      aiSummary,
     });
 
     const subject = totalNew > 0
