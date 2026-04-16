@@ -10,7 +10,7 @@ const APIFY_BASE = "https://api.apify.com/v2";
 const ACTOR_ID = "tri_angle~hotel-review-aggregator";
 const HOTELSCOM_ACTOR_ID = "memo23~hotels-scraper";
 const TRUSTPILOT_ACTOR_ID = "zen-studio~trustpilot-review-scraper";
-const EXPEDIA_ACTOR_ID = "tri_angle~expedia-hotels-com-reviews-scraper";
+const EXPEDIA_ACTOR_ID = "memo23~expedia-scraper";
 
 // Map Apify provider names to our platform names
 const PROVIDER_MAP: Record<string, string> = {
@@ -229,15 +229,14 @@ Deno.serve(async (req) => {
       };
       console.log(`Using dedicated Hotels.com scraper for hotel ID: ${hotelId}`);
     } else if (platform === "expedia" && business.expedia_hotel_id) {
-      // Use dedicated Expedia scraper - aggregator returns 0 results due to bot protection
+      // Use dedicated memo23/expedia-scraper - reliable and actively maintained
       actorId = EXPEDIA_ACTOR_ID;
       const expediaUrl = `https://www.expedia.com/h${business.expedia_hotel_id}.Hotel-Information`;
       actorInput = {
-        startUrls: [{ url: expediaUrl }],
-        maxReviewsPerHotel: 200,
-        sortBy: "newest_first",
+        startUrls: [expediaUrl],
+        maxItems: 200,
       };
-      console.log(`Using dedicated Expedia scraper for: ${expediaUrl}`);
+      console.log(`Using memo23/expedia-scraper for: ${expediaUrl}`);
     } else if (platform === "trustpilot") {
       // Trustpilot is NOT supported by hotel-review-aggregator, use dedicated actor
       if (!business.trustpilot_url) {
