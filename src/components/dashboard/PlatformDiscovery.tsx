@@ -121,8 +121,9 @@ export function PlatformDiscovery() {
       const field = platformDbField[result.platform];
       if (!field) throw new Error("Bilinmeyen platform");
 
-      const valueToStore = result.platform === "tripadvisor"
-        ? (result.url ? result.url.split("?")[0].split("#")[0] : result.extractedId)
+      const sanitizedUrl = result.url ? result.url.split("?")[0].split("#")[0] : null;
+      const valueToStore = result.platform === "tripadvisor" || result.platform === "expedia"
+        ? (sanitizedUrl || result.extractedId)
         : result.extractedId;
 
       if (!valueToStore) throw new Error("Geçerli platform kimliği bulunamadı");
