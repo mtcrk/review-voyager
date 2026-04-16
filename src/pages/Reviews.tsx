@@ -869,6 +869,7 @@ export default function Reviews() {
               <SelectItem value="tripadvisor">TripAdvisor</SelectItem>
               <SelectItem value="expedia">Expedia</SelectItem>
               <SelectItem value="hotelscom">Hotels.com</SelectItem>
+              <SelectItem value="tripcom">Trip.com</SelectItem>
             </SelectContent>
           </Select>
           <Select value={ratingFilter} onValueChange={(v) => { setRatingFilter(v as RatingFilter); setCurrentPage(1); }}>
