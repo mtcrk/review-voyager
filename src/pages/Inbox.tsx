@@ -27,7 +27,9 @@ import {
   CheckCircle2,
   MessageSquare,
   Loader2,
+  Languages,
 } from "lucide-react";
+import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { tr } from "date-fns/locale";
 
@@ -56,6 +58,29 @@ export default function Inbox() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 50;
+  const [translations, setTranslations] = useState<Record<string, string>>({});
+  const [translatingId, setTranslatingId] = useState<string | null>(null);
+
+  const handleTranslate = async (e: React.MouseEvent, reviewId: string, text: string) => {
+    e.stopPropagation();
+    if (translations[reviewId] || translatingId) return;
+    setTranslatingId(reviewId);
+    try {
+      const { data, error } = await supabase.functions.invoke("translate-text", {
+        body: { text, target: "Turkish" },
+      });
+      if (error) throw error;
+      if (data?.translation) {
+        setTranslations((prev) => ({ ...prev, [reviewId]: data.translation }));
+      } else {
+        toast.error("Çeviri alınamadı");
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Çeviri başarısız");
+    } finally {
+      setTranslatingId(null);
+    }
+  };
 
   // Default: tüm işletmeler seçili
   useEffect(() => {
@@ -334,7 +359,30 @@ export default function Inbox() {
                       </div>
 
                       {r.text && (
-                        <p className="text-sm text-foreground/80 line-clamp-2">{r.text}</p>
+                        <div className="flex items-start gap-2">
+                          <p className="text-sm text-foreground/80 line-clamp-2 flex-1">{r.text}</p>
+                          {!translations[r.id] && (
+                            <button
+                              onClick={(e) => handleTranslate(e, r.id, r.text)}
+                              disabled={translatingId === r.id}
+                              className="shrink-0 inline-flex items-center gap-1 text-xs text-primary hover:underline disabled:opacity-50"
+                              title="Türkçe'ye çevir"
+                            >
+                              {translatingId === r.id ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <Languages className="h-3 w-3" />
+                              )}
+                              Çevir
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+                      {translations[r.id] && (
+                        <div className="mt-1.5 px-2 py-1.5 bg-muted/50 rounded text-sm text-foreground/70 italic border-l-2 border-primary/40">
+                          🇹🇷 {translations[r.id]}
+                        </div>
                       )}
 
                       <div className="flex items-center gap-2 mt-2">
