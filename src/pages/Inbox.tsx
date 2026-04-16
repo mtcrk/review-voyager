@@ -122,6 +122,18 @@ export default function Inbox() {
     return { total: reviews.length, unanswered, negative };
   }, [reviews]);
 
+  // Reset to page 1 whenever filters change
+  useEffect(() => {
+    setPage(1);
+  }, [selectedBusinessIds, selectedPlatforms, statusTab, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const paginated = useMemo(
+    () => filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [filtered, currentPage]
+  );
+
   const toggleBusiness = (id: string) => {
     setSelectedBusinessIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
