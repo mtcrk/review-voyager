@@ -10,6 +10,7 @@ import { Loader2, LogOut, Bell, BellOff, BellRing, AlertTriangle } from "lucide-
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBusiness } from "@/contexts/BusinessContext";
+import { useNewReviews } from "@/contexts/NewReviewsContext";
 import { useState, useEffect } from "react";
 import {
   AlertDialog,
@@ -427,6 +428,8 @@ export default function Settings() {
               </div>
             </CardContent>
           </Card>
+
+          <BrowserPushCard />
         </TabsContent>
       </Tabs>
     </div>
