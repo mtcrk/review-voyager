@@ -228,17 +228,15 @@ Deno.serve(async (req) => {
       };
       console.log(`Using dedicated Hotels.com scraper for hotel ID: ${hotelId}`);
     } else if (platform === "expedia" && business.expedia_hotel_id) {
-      // Expedia: aggregator works best with Google Maps search + expedia provider filter
-      // Direct Expedia URLs often return 0 results because the aggregator scrapes via Google Maps
-      const searchQuery = encodeURIComponent(`${business.name} ${business.city || ""}`).trim();
+      // Use dedicated Expedia scraper - aggregator returns 0 results due to bot protection
+      actorId = EXPEDIA_ACTOR_ID;
+      const expediaUrl = `https://www.expedia.com/h${business.expedia_hotel_id}.Hotel-Information`;
       actorInput = {
-        startUrls: [{ url: `https://www.google.com/maps/search/${searchQuery}` }],
-        providers: ["expedia"],
-        maxReviewsPerQuery: 200,
-        scrapeReviewPictures: false,
-        scrapeReviewResponses: true,
+        startUrls: [{ url: expediaUrl }],
+        maxReviewsPerHotel: 200,
+        sortBy: "newest_first",
       };
-      console.log(`Using Google Maps search for Expedia: ${business.name} ${business.city || ""} (hotel_id: ${business.expedia_hotel_id})`);
+      console.log(`Using dedicated Expedia scraper for: ${expediaUrl}`);
     } else if (platform === "trustpilot") {
       // Trustpilot is NOT supported by hotel-review-aggregator, use dedicated actor
       if (!business.trustpilot_url) {
