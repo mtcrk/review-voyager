@@ -10,7 +10,7 @@ const APIFY_BASE = "https://api.apify.com/v2";
 const ACTOR_ID = "tri_angle~hotel-review-aggregator";
 const HOTELSCOM_ACTOR_ID = "memo23~hotels-scraper";
 const TRUSTPILOT_ACTOR_ID = "zen-studio~trustpilot-review-scraper";
-const EXPEDIA_ACTOR_ID = "memo23~expedia-scraper";
+const EXPEDIA_ACTOR_ID = "shahidirfan~expedia-reviews-scraper";
 const TRIPCOM_ACTOR_ID = "shahidirfan~trip-com-hotel-reviews-scraper";
 
 // Map Apify provider names to our platform names
@@ -261,7 +261,10 @@ Deno.serve(async (req) => {
       const items = await fetchDatasetItems(datasetId, APIFY_API_TOKEN);
 
       const actorMessage = items.find((item: any) => typeof item?.message === "string")?.message;
-      const hasReviewPayload = items.some((item: any) => item.reviewText || item.reviewTitle || item.text || item.title || item.reviewOriginalText || item.reviewTranslatedText);
+      const hasReviewPayload = items.some((item: any) =>
+        item.reviewText || item.reviewTitle || item.text || item.title ||
+        item.reviewOriginalText || item.reviewTranslatedText || item.review_text
+      );
 
       if (items.length > 0 && !hasReviewPayload && actorMessage) {
         return new Response(
@@ -317,7 +320,7 @@ Deno.serve(async (req) => {
       };
       console.log(`Using dedicated Hotels.com scraper for hotel ID: ${hotelId}`);
     } else if (platform === "expedia" && business.expedia_hotel_id) {
-      // Use dedicated memo23/expedia-scraper - reliable and actively maintained
+      // Use shahidirfan/expedia-reviews-scraper - works reliably with residential proxies
       actorId = EXPEDIA_ACTOR_ID;
       const expediaUrl = await resolveExpediaUrl(business);
       if (!expediaUrl) {
@@ -327,11 +330,12 @@ Deno.serve(async (req) => {
         );
       }
       actorInput = {
-        startUrls: [expediaUrl],
-        maxItems: 200,
-        includeCategoryRatings: false,
+        startUrl: expediaUrl,
+        results_wanted: 200,
+        max_pages: 20,
+        proxyConfiguration: { useApifyProxy: true, apifyProxyGroups: ["RESIDENTIAL"] },
       };
-      console.log(`Using memo23/expedia-scraper for: ${expediaUrl}`);
+      console.log(`Using shahidirfan/expedia-reviews-scraper for: ${expediaUrl}`);
     } else if (platform === "tripcom") {
       // Trip.com requires dedicated actor - shahidirfan/trip-com-hotel-reviews-scraper
       if (!business.tripcom_hotel_id) {
@@ -447,10 +451,15 @@ Deno.serve(async (req) => {
 async function insertReviews(supabase: any, items: any[], businessId: string, forcedPlatform?: string) {
   // Transform reviews - handle both aggregator format and Trustpilot format
   const transformed = items
-    .filter(item => item.reviewText || item.reviewTitle || item.text || item.title || item.reviewOriginalText || item.reviewTranslatedText)
+    .filter(item =>
+      item.reviewText || item.reviewTitle || item.text || item.title ||
+      item.reviewOriginalText || item.reviewTranslatedText || item.review_text
+    )
     .map(item => {
       const isTrustpilotFormat = item.author || item.consumer;
-      const isExpediaDedicated = forcedPlatform === "expedia" && (item.userName || item.submissionTime || item.overallSatisfaction != null);
+      const isExpediaDedicated = forcedPlatform === "expedia" && (
+        item.review_text || item.traveler_name || item.published_date || item.hotel_id
+      );
       const isTripcomDedicated = forcedPlatform === "tripcom";
       const platform = forcedPlatform || (isTrustpilotFormat ? "trustpilot" : normalizePlatform(item.provider || "unknown"));
       
@@ -471,15 +480,15 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
         postedAt = toSafeIsoDate(item.reviewDate);
         reviewId = item.reviewId ? String(item.reviewId) : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       } else if (isExpediaDedicated) {
-        // Dedicated Expedia scraper format (tri_angle/expedia-hotels-com-reviews-scraper)
-        const rawRating = Number(item.overallSatisfaction ?? item.rating ?? 3);
+        // Dedicated Expedia scraper format (shahidirfan/expedia-reviews-scraper) — rating 0-10
+        const rawRating = Number(item.rating ?? item.overallSatisfaction ?? 6);
         rating = rawRating > 5 ? Math.round(rawRating / 2) : Math.min(5, Math.max(1, Math.round(rawRating)));
-        text = item.text || item.reviewText || "";
+        text = item.review_text || item.text || item.reviewText || "";
         if (item.title && text) text = `${item.title}\n\n${text}`;
         else if (item.title) text = item.title;
-        reviewerName = item.userName || item.authorName || "Anonymous";
-        postedAt = toSafeIsoDate(item.submissionTime || item.reviewDate || item.date);
-        reviewId = item.id || item.reviewId || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        reviewerName = item.traveler_name || item.userName || item.authorName || "Anonymous";
+        postedAt = toSafeIsoDate(item.published_date || item.submissionTime || item.reviewDate || item.date);
+        reviewId = item.review_id || item.id || item.reviewId || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       } else if (isTrustpilotFormat) {
         rating = Math.min(5, Math.max(1, Math.round(Number(item.rating || item.stars || 3))));
         text = item.text || item.reviewText || "";
