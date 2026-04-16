@@ -349,6 +349,7 @@ Deno.serve(async (req) => {
       ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / totalNew
       : 0;
     const summary = summarizeIssuesPraises(reviews);
+    const aiSummary = await generateAISummary(reviews, business.name);
 
     const html = buildEmailHtml({
       businessName: business.name,
@@ -357,6 +358,7 @@ Deno.serve(async (req) => {
       platformResults: platform_results as PlatformResult[],
       summary,
       sampleReviews: reviews,
+      aiSummary,
     });
 
     const subject = totalNew > 0
