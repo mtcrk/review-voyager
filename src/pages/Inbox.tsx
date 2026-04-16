@@ -28,7 +28,7 @@ import {
   MessageSquare,
   Loader2,
 } from "lucide-react";
-import { format, formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import { tr } from "date-fns/locale";
 
 const PLATFORM_META: Record<string, { label: string; classes: string }> = {
