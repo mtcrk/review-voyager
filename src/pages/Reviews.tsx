@@ -42,7 +42,7 @@ type SortField = "posted_at" | "rating" | "reviewer_name";
 type SortOrder = "asc" | "desc";
 type StatusFilter = "all" | "pending" | "approved" | "replied" | "not_replied";
 type SentimentFilter = "all" | "positive" | "negative" | "neutral";
-type PlatformFilter = "all" | "google" | "booking" | "tripadvisor" | "trustpilot" | "hotelscom";
+type PlatformFilter = "all" | "google" | "booking" | "tripadvisor" | "expedia" | "hotelscom";
 type RatingFilter = "all" | "1" | "2" | "3" | "4" | "5";
 type SortOption = "newest" | "oldest" | "rating_high" | "rating_low" | "name_az";
 
@@ -63,7 +63,7 @@ const platformLabels: Record<string, { label: string; color: string }> = {
   google: { label: "Google", color: "bg-blue-50 text-blue-700 border-blue-200" },
   booking: { label: "Booking.com", color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
   tripadvisor: { label: "TripAdvisor", color: "bg-green-50 text-green-700 border-green-200" },
-  trustpilot: { label: "Trustpilot", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  expedia: { label: "Expedia", color: "bg-yellow-50 text-yellow-700 border-yellow-200" },
   hotelscom: { label: "Hotels.com", color: "bg-red-50 text-red-700 border-red-200" },
 };
 
@@ -200,13 +200,6 @@ export default function Reviews() {
       dbField: "tripadvisor_id",
       getIdFromBusiness: (b) => b.tripadvisor_id,
     },
-    trustpilot: {
-      label: "Trustpilot",
-      placeholder: "Trustpilot URL'sini yapıştırın",
-      hint: "Trustpilot'ta işletmenizin sayfasını açın, URL'yi kopyalayıp buraya yapıştırın.",
-      dbField: "trustpilot_url",
-      getIdFromBusiness: (b) => b.trustpilot_url,
-    },
     hotelscom: {
       label: "Hotels.com",
       placeholder: "Hotels.com URL'sini yapıştırın",
@@ -236,10 +229,6 @@ export default function Reviews() {
       // If just a numeric ID, return as-is
       const numericMatch = trimmed.match(/(?:^|\D)(\d{5,})(?:\D|$)/);
       if (numericMatch) return numericMatch[1];
-    }
-    if (platform === "trustpilot") {
-      const match = trimmed.match(/trustpilot\.com\/review\/([^\s/?#]+)/i);
-      if (match) return match[1];
     }
     if (platform === "hotelscom") {
       const match = trimmed.match(/h[oe](\d+)/i);
@@ -863,7 +852,7 @@ export default function Reviews() {
               <SelectItem value="google">Google</SelectItem>
               <SelectItem value="booking">Booking.com</SelectItem>
               <SelectItem value="tripadvisor">TripAdvisor</SelectItem>
-              <SelectItem value="trustpilot">Trustpilot</SelectItem>
+              <SelectItem value="expedia">Expedia</SelectItem>
               <SelectItem value="hotelscom">Hotels.com</SelectItem>
             </SelectContent>
           </Select>

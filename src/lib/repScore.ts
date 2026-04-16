@@ -30,7 +30,7 @@ export interface ReviewData {
   replied_at: string | null;
 }
 
-const SUPPORTED_PLATFORMS = ['google', 'booking', 'tripadvisor', 'trustpilot', 'hotelscom'];
+const SUPPORTED_PLATFORMS = ['google', 'booking', 'tripadvisor', 'expedia', 'hotelscom'];
 
 export function calculateRepScore(reviews: ReviewData[]): RepScoreResult {
   if (reviews.length === 0) {

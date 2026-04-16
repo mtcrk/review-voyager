@@ -122,7 +122,7 @@ export default function About() {
             <div className="p-6 rounded-xl border border-border bg-card">
               <h3 className="text-lg font-semibold text-foreground mb-2">💬 Akıllı Yanıt Önerileri</h3>
               <p className="text-muted-foreground">
-                {t('about.whatWeDo.smartReply', 'Yapay zeka destekli, markanızın tonuna uygun otomatik yorum yanıtı önerileri. Google, Booking, TripAdvisor ve Trustpilot desteği.')}
+                {t('about.whatWeDo.smartReply', 'Yapay zeka destekli, markanızın tonuna uygun otomatik yorum yanıtı önerileri. Google, Booking, TripAdvisor ve Expedia desteği.')}
               </p>
             </div>
             <div className="p-6 rounded-xl border border-border bg-card">

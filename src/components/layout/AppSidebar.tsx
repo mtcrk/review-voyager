@@ -177,7 +177,7 @@ export function AppSidebar() {
   const reviewPlatforms = [
     { title: "Booking Yorumları", url: "/reviews?platform=booking", icon: BedDouble },
     { title: "TripAdvisor Yorumları", url: "/reviews?platform=tripadvisor", icon: MapPin },
-    { title: "Trustpilot Yorumları", url: "/reviews?platform=trustpilot", icon: ShieldCheck },
+    { title: "Expedia Yorumları", url: "/reviews?platform=expedia", icon: Building2 },
     { title: "Hotels.com Yorumları", url: "/reviews?platform=hotelscom", icon: Hotel },
   ];
 

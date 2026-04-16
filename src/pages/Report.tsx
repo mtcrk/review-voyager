@@ -168,7 +168,7 @@ export default function Report() {
       google: "Google",
       booking: "Booking",
       tripadvisor: "TripAdvisor",
-      trustpilot: "Trustpilot",
+      expedia: "Expedia",
       hotelscom: "Hotels.com",
     };
     return Object.entries(stats.platformCounts).map(([key, count]) => ({
@@ -256,7 +256,7 @@ export default function Report() {
       google: "Google",
       booking: "Booking",
       tripadvisor: "TripAdvisor",
-      trustpilot: "Trustpilot",
+      expedia: "Expedia",
       hotelscom: "Hotels.com",
     };
     const platformRows = Object.entries(stats.platformCounts)

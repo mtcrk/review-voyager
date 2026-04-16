@@ -79,7 +79,7 @@ const Hub = () => {
     "google-reviews": "google",
     "booking": "google", // booking/tripadvisor automations are under google tab
     "tripadvisor": "google",
-    "trustpilot": "google",
+    "expedia": "google",
     "instagram": "instagram",
   };
 
