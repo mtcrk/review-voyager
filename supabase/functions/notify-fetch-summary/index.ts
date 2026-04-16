@@ -30,6 +30,96 @@ function getRatingColor(rating: number): string {
   return "#dc2626";
 }
 
+async function generateAISummary(reviews: ReviewLite[], businessName: string): Promise<{
+  overview: string;
+  topIssues: string[];
+  topPraises: string[];
+  recommendations: string[];
+} | null> {
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  if (!LOVABLE_API_KEY || reviews.length === 0) return null;
+
+  const reviewsText = reviews
+    .filter((r) => r.text)
+    .slice(0, 30)
+    .map((r, i) => `${i + 1}. [${r.rating}★ ${r.platform || ""}] ${r.reviewer_name || "Anonim"}: "${r.text}"`)
+    .join("\n");
+
+  if (!reviewsText) return null;
+
+  try {
+    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          {
+            role: "system",
+            content: `Sen bir otel/işletme yorum analisti uzmanısın. Türkçe, kısa ve net yaz. Yorumlardaki kalıpları, somut şikayet ve övgü temalarını çıkar. Genel ifadeler ('iyi hizmet') yerine spesifik konular ('kahvaltıda çeşit azlığı', 'resepsiyon karşılama sıcaklığı') kullan.`,
+          },
+          {
+            role: "user",
+            content: `${businessName} için son ${reviews.length} yorumu analiz et:\n\n${reviewsText}\n\nÇıkarımlarını yapılandırılmış formatta döndür.`,
+          },
+        ],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "review_analysis",
+              description: "Yorumlardan çıkarılan analiz",
+              parameters: {
+                type: "object",
+                properties: {
+                  overview: {
+                    type: "string",
+                    description: "1-2 cümlelik genel durum özeti (Türkçe)",
+                  },
+                  topIssues: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "En çok geçen 3-5 spesifik şikayet teması (her biri kısa, 3-7 kelime)",
+                  },
+                  topPraises: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "En çok geçen 3-5 spesifik övgü teması (her biri kısa, 3-7 kelime)",
+                  },
+                  recommendations: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "İşletmeye 2-3 somut aksiyon önerisi (her biri 1 cümle)",
+                  },
+                },
+                required: ["overview", "topIssues", "topPraises", "recommendations"],
+                additionalProperties: false,
+              },
+            },
+          },
+        ],
+        tool_choice: { type: "function", function: { name: "review_analysis" } },
+      }),
+    });
+
+    if (!resp.ok) {
+      console.error("AI gateway error:", resp.status, await resp.text());
+      return null;
+    }
+
+    const data = await resp.json();
+    const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+    if (!args) return null;
+    return JSON.parse(args);
+  } catch (e) {
+    console.error("AI summary failed:", e);
+    return null;
+  }
+}
+
 function summarizeIssuesPraises(reviews: ReviewLite[]) {
   const negatives = reviews.filter((r) => r.rating <= 3 && r.text);
   const positives = reviews.filter((r) => r.rating >= 4 && r.text);
