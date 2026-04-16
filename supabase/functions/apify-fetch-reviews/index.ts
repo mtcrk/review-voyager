@@ -199,7 +199,7 @@ Deno.serve(async (req) => {
     // Get business
     const { data: business, error: bizError } = await supabaseAuth
       .from("businesses")
-      .select("id, place_id, name, city, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url")
+      .select("id, place_id, name, city, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url, expedia_hotel_id")
       .eq("id", business_id)
       .maybeSingle();
 
@@ -223,6 +223,15 @@ Deno.serve(async (req) => {
         maxItems: 1000,
       };
       console.log(`Using dedicated Hotels.com scraper for hotel ID: ${hotelId}`);
+    } else if (platform === "expedia" && business.expedia_hotel_id) {
+      const expediaUrl = `https://www.expedia.com/h${business.expedia_hotel_id}.Hotel-Information`;
+      actorInput = {
+        startUrls: [{ url: expediaUrl }],
+        providers: ["expedia"],
+        scrapeReviewPictures: false,
+        scrapeReviewResponses: true,
+      };
+      console.log(`Using direct Expedia URL: ${expediaUrl}`);
     } else if (platform === "trustpilot") {
       // Trustpilot is NOT supported by hotel-review-aggregator, use dedicated actor
       if (!business.trustpilot_url) {

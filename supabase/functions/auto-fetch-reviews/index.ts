@@ -116,6 +116,21 @@ function buildFetchJobs(biz: any): FetchJob[] {
     });
   }
 
+  // Expedia — direct URL when expedia_hotel_id is set
+  if (biz.expedia_hotel_id) {
+    jobs.push({
+      business: biz,
+      platform: "expedia",
+      actorId: ACTOR_ID,
+      actorInput: {
+        startUrls: [{ url: `https://www.expedia.com/h${biz.expedia_hotel_id}.Hotel-Information` }],
+        providers: ["expedia"],
+        scrapeReviewPictures: false,
+        scrapeReviewResponses: true,
+      },
+    });
+  }
+
   // Trustpilot — dedicated actor
   if (biz.trustpilot_url) {
     const domain = biz.trustpilot_url.replace(/^https?:\/\/(www\.)?trustpilot\.[a-z.]+\/review\//i, "").replace(/\/.*$/, "");
@@ -299,8 +314,8 @@ Deno.serve(async (req) => {
     // Get all businesses with any platform configured
     const { data: businesses, error: bizError } = await supabase
       .from("businesses")
-      .select("id, place_id, name, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url, city")
-      .or("place_id.not.is.null,booking_hotel_id.not.is.null,tripadvisor_id.not.is.null,trustpilot_url.not.is.null");
+      .select("id, place_id, name, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url, expedia_hotel_id, city")
+      .or("place_id.not.is.null,booking_hotel_id.not.is.null,tripadvisor_id.not.is.null,trustpilot_url.not.is.null,expedia_hotel_id.not.is.null");
 
     if (bizError) throw bizError;
     if (!businesses || businesses.length === 0) {

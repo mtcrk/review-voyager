@@ -214,6 +214,13 @@ export default function Reviews() {
       dbField: "hotelscom_url",
       getIdFromBusiness: (b) => b.hotelscom_url,
     },
+    expedia: {
+      label: "Expedia",
+      placeholder: "Expedia URL'sini yapıştırın (örn. .../h12345.Hotel-Information)",
+      hint: "Expedia'da otelinizin sayfasını açın, URL'yi kopyalayıp buraya yapıştırın. Otel kimliğini otomatik çıkaracağız.",
+      dbField: "expedia_hotel_id",
+      getIdFromBusiness: (b) => b.expedia_hotel_id,
+    },
   };
 
   const parseUrlId = (input: string, platform: string): string => {
@@ -237,6 +244,15 @@ export default function Reviews() {
     if (platform === "hotelscom") {
       const match = trimmed.match(/h[oe](\d+)/i);
       if (match) return match[1];
+    }
+    if (platform === "expedia") {
+      const m1 = trimmed.match(/h(\d{4,})\.Hotel-Information/i);
+      if (m1) return m1[1];
+      const m2 = trimmed.match(/[?&]hotelId=(\d{4,})/i);
+      if (m2) return m2[1];
+      const m3 = trimmed.match(/\/hotels?\/(\d{4,})/i);
+      if (m3) return m3[1];
+      if (/^\d{4,}$/.test(trimmed)) return trimmed;
     }
     return trimmed;
   };
