@@ -52,6 +52,14 @@ function extractPlatformId(platform: string, url: string): string | null {
         if (m3) return m3[1];
         return null;
       }
+      case "tripcom": {
+        // e.g. trip.com/hotels/...-detail-12345 or ?hotelId=12345
+        const m1 = url.match(/[?&]hotelId=(\d{4,})/i);
+        if (m1) return m1[1];
+        const m2 = url.match(/hotel-detail-(\d{4,})/i);
+        if (m2) return m2[1];
+        return null;
+      }
       default:
         return null;
     }
@@ -109,6 +117,7 @@ Deno.serve(async (req) => {
       { key: "expedia", label: "Expedia", site: "expedia.com" },
       { key: "trustpilot", label: "Trustpilot", site: "trustpilot.com" },
       { key: "hotelscom", label: "Hotels.com", site: "hotels.com" },
+      { key: "tripcom", label: "Trip.com", site: "trip.com" },
     ];
 
     const searchQuery = city

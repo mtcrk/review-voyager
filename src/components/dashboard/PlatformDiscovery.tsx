@@ -24,6 +24,7 @@ const platformIcons: Record<string, React.ReactNode> = {
   trustpilot: <Star className="h-5 w-5 text-emerald-500" />,
   hotelscom: <Building2 className="h-5 w-5 text-red-600" />,
   expedia: <Building2 className="h-5 w-5 text-yellow-600" />,
+  tripcom: <Building2 className="h-5 w-5 text-orange-600" />,
 };
 
 const platformBadgeStyles: Record<string, string> = {
@@ -32,6 +33,7 @@ const platformBadgeStyles: Record<string, string> = {
   trustpilot: "bg-emerald-100 text-emerald-700 border-emerald-200",
   hotelscom: "bg-red-100 text-red-700 border-red-200",
   expedia: "bg-yellow-100 text-yellow-700 border-yellow-200",
+  tripcom: "bg-orange-100 text-orange-700 border-orange-200",
 };
 
 const platformDisplayName: Record<string, string> = {
@@ -40,6 +42,7 @@ const platformDisplayName: Record<string, string> = {
   trustpilot: "Trustpilot",
   hotelscom: "Hotels.com",
   expedia: "Expedia",
+  tripcom: "Trip.com",
 };
 
 const platformDbField: Record<string, string> = {
@@ -48,6 +51,7 @@ const platformDbField: Record<string, string> = {
   trustpilot: "trustpilot_url",
   hotelscom: "hotelscom_url",
   expedia: "expedia_hotel_id",
+  tripcom: "tripcom_hotel_id",
 };
 
 export function PlatformDiscovery() {
@@ -82,6 +86,7 @@ export function PlatformDiscovery() {
         trustpilot: activeBusiness.trustpilot_url,
         hotelscom: activeBusiness.hotelscom_url,
         expedia: (activeBusiness as any).expedia_hotel_id,
+        tripcom: (activeBusiness as any).tripcom_hotel_id,
       };
 
       const filtered = (data.results || []).filter(
