@@ -2,8 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { LayoutGrid, Loader2 } from "lucide-react";
 import { useMultiLocationData } from "@/hooks/useMultiLocationData";
 import { PlatformRatingsMatrix } from "@/components/locations/PlatformRatingsMatrix";
-import { useBusiness } from "@/contexts/BusinessContext";
-import { toast } from "@/hooks/use-toast";
 
 export default function PlatformRatings() {
   const navigate = useNavigate();
