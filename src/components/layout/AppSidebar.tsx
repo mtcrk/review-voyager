@@ -320,7 +320,39 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Platform-specific Menu Items */}
+        {/* Lokasyonlar (collapsible) */}
+        <Collapsible defaultOpen={location.pathname.startsWith("/locations")} className="group/loc-collapsible">
+          <SidebarGroup>
+            {open ? (
+              <CollapsibleTrigger asChild>
+                <SidebarGroupLabel className="text-xs text-muted-foreground px-3 cursor-pointer hover:text-foreground transition-colors flex items-center">
+                  <Building2 className="h-4 w-4 mr-2" />
+                  Lokasyonlar
+                  <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/loc-collapsible:rotate-180" />
+                </SidebarGroupLabel>
+              </CollapsibleTrigger>
+            ) : null}
+            <CollapsibleContent>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {locationItems.map((item) => {
+                    const isActive = location.pathname === item.url;
+                    return (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
+                          <NavLink to={item.url} className="flex items-center gap-3 transition-smooth">
+                            <item.icon className="h-5 w-5" />
+                            <span>{item.title}</span>
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
         {currentPlatform && (
           <SidebarGroup>
             {open && (
