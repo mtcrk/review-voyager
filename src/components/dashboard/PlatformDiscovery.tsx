@@ -143,8 +143,8 @@ export function PlatformDiscovery() {
         description: "İlk senkronizasyon başlatılıyor.",
       });
 
-      // Remove confirmed platform results
-      setResults((prev) => prev.filter((r) => r.platform !== result.platform));
+      // Mark this specific result as connected (keep other results visible)
+      setConnectedUrls((prev) => [...prev, result.url]);
 
       // Trigger initial review fetch in global background poll flow
       try {
