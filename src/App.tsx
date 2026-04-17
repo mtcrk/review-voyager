@@ -54,6 +54,7 @@ import RestoranYorumCevaplari from "./pages/seo/RestoranYorumCevaplari";
 import OtelYorumCevaplari from "./pages/seo/OtelYorumCevaplari";
 import GooglePerformance from "./pages/GooglePerformance";
 import Inbox from "./pages/Inbox";
+import GoogleAccounts from "./pages/GoogleAccounts";
 
 const queryClient = new QueryClient();
 
@@ -264,6 +265,16 @@ const App = () => (
                 <ProtectedRoute>
                   <AppLayout>
                     <RepScore />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/google-accounts"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <GoogleAccounts />
                   </AppLayout>
                 </ProtectedRoute>
               }

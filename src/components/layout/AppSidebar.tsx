@@ -78,6 +78,7 @@ const commonItems = [
   { title: "Tüm Yorumlar", url: "/inbox", icon: Inbox, highlight: true },
   { title: "Rep Score", url: "/rep-score", icon: Trophy },
   { title: "Lokasyonlar", url: "/locations", icon: Building2 },
+  { title: "Google Hesapları", url: "/google-accounts", icon: Star },
   { title: "İstatistikler", url: "/statistics", icon: BarChart3 },
   { title: "Google Performance", url: "/performance", icon: TrendingUp },
   { title: "Rapor Oluştur", url: "/report", icon: FileText },
