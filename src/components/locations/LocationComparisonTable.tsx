@@ -1,12 +1,26 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, MessageSquare, Clock, TrendingUp } from "lucide-react";
+import { Star, Clock, TrendingUp } from "lucide-react";
 import { LocationMetrics } from "@/hooks/useMultiLocationData";
 import { Progress } from "@/components/ui/progress";
 
 interface Props {
   locations: LocationMetrics[];
   onSelectLocation: (id: string) => void;
+}
+
+const PLATFORM_META: Record<string, { label: string; dot: string; text: string; bg: string }> = {
+  google: { label: "Google", dot: "bg-blue-500", text: "text-blue-700", bg: "bg-blue-50" },
+  booking: { label: "Booking", dot: "bg-indigo-500", text: "text-indigo-700", bg: "bg-indigo-50" },
+  tripadvisor: { label: "TripAdvisor", dot: "bg-emerald-500", text: "text-emerald-700", bg: "bg-emerald-50" },
+  hotelscom: { label: "Hotels.com", dot: "bg-rose-500", text: "text-rose-700", bg: "bg-rose-50" },
+  expedia: { label: "Expedia", dot: "bg-amber-500", text: "text-amber-700", bg: "bg-amber-50" },
+  trustpilot: { label: "Trustpilot", dot: "bg-teal-500", text: "text-teal-700", bg: "bg-teal-50" },
+  tripcom: { label: "Trip.com", dot: "bg-orange-500", text: "text-orange-700", bg: "bg-orange-50" },
+};
+
+function platformMeta(key: string) {
+  return PLATFORM_META[key] || { label: key, dot: "bg-muted-foreground", text: "text-foreground", bg: "bg-muted" };
 }
 
 export function LocationComparisonTable({ locations, onSelectLocation }: Props) {
