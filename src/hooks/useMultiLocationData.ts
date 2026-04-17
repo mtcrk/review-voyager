@@ -16,6 +16,7 @@ export interface LocationMetrics {
   weeklyReviews: number;
   sentimentBreakdown: { positive: number; neutral: number; negative: number };
   ratingTrend: { date: string; avgRating: number; count: number }[];
+  platformBreakdown: Record<string, { count: number; avgRating: number }>;
 }
 
 export function useMultiLocationData() {
