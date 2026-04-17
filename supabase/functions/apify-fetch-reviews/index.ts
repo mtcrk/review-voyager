@@ -498,6 +498,11 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
           it.responseFromOwnerText, it.ownerResponse, it.ownerReply, it.replyText,
           it.managementResponse, it.hotelResponse, it.hotelReply, it.reply,
           it.response, it.responseText, it.replyContent,
+          // Booking voyager scraper
+          it.propertyResponse, it.propertyReply, it.hostResponse, it.hostReply,
+          // TripAdvisor / Hotels.com / Expedia variants
+          it.managementResponseText, it.responseFromManagement, it.hotelResponseText,
+          it.responseFromHotel, it.responseFromProperty,
         ];
         for (const c of candidates) {
           if (typeof c === "string" && c.trim()) return { text: c.trim(), date: null };
