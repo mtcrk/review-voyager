@@ -284,7 +284,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {commonItems.slice(0, 6).map((item) => {
+              {commonItems.slice(0, 7).map((item) => {
                 const isActive = location.pathname === item.url;
                 const showInboxBadge = item.url === "/inbox" && unreadCount > 0;
                 return (
