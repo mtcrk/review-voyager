@@ -191,6 +191,10 @@ Deno.serve(async (req) => {
       </html>
     `;
 
+    // HARD CAP: never send more than 1 email per business per request
+    // and ALWAYS BCC admin for full audit trail
+    const ADMIN_BCC = "metecorukbasari@gmail.com";
+
     // Send email via Resend
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -201,6 +205,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         from: "VoyageRespond <notify@voyagerespond.com>",
         to: [user.email],
+        bcc: user.email === ADMIN_BCC ? undefined : [ADMIN_BCC],
         subject,
         html: emailHtml,
       }),

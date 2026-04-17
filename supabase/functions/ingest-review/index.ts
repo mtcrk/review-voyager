@@ -130,29 +130,52 @@ serve(async (req) => {
 
     console.log("Review ingested successfully:", newReview.id);
 
-    // Send notification email
-    try {
-      await fetch(`${supabaseUrl}/functions/v1/notify-new-review`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${supabaseKey}`,
-        },
-        body: JSON.stringify({
-          business_id: businessRecord.id,
-          reviews: [{
-            id: newReview.id,
-            reviewer_name: review.reviewer || review.reviewer_name,
-            rating: review.rating,
-            text: review.text,
-            suggested_reply: suggestedReply,
-            posted_at: review.posted_at,
-          }],
-        }),
-      });
-      console.log("Review notification sent");
-    } catch (notifyErr) {
-      console.error("Failed to send review notification:", notifyErr);
+    // SAFETY: Only send instant notification if business is on 'instant' mode
+    // AND we haven't sent more than 5 notifications for this business in the last hour
+    // (protects against backfill / scrape bursts blowing up email quota)
+    const { data: bizCheck } = await supabase
+      .from("businesses")
+      .select("review_notification_type")
+      .eq("id", businessRecord.id)
+      .single();
+
+    if (bizCheck?.review_notification_type === "instant") {
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      const { count: recentCount } = await supabase
+        .from("reviews")
+        .select("id", { count: "exact", head: true })
+        .eq("business_id", businessRecord.id)
+        .gte("created_at", oneHourAgo);
+
+      if ((recentCount ?? 0) > 5) {
+        console.log(`Skipping notification — burst detected (${recentCount} reviews in last hour for business ${businessRecord.id})`);
+      } else {
+        try {
+          await fetch(`${supabaseUrl}/functions/v1/notify-new-review`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${supabaseKey}`,
+            },
+            body: JSON.stringify({
+              business_id: businessRecord.id,
+              reviews: [{
+                id: newReview.id,
+                reviewer_name: review.reviewer || review.reviewer_name,
+                rating: review.rating,
+                text: review.text,
+                suggested_reply: suggestedReply,
+                posted_at: review.posted_at,
+              }],
+            }),
+          });
+          console.log("Review notification sent");
+        } catch (notifyErr) {
+          console.error("Failed to send review notification:", notifyErr);
+        }
+      }
+    } else {
+      console.log(`Notification skipped — business is on '${bizCheck?.review_notification_type}' mode`);
     }
 
     return new Response(
