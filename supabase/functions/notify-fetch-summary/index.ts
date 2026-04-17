@@ -153,7 +153,7 @@ function summarizeIssuesPraises(reviews: ReviewLite[]) {
   return { topIssues, topPraises, negativeCount: negatives.length, positiveCount: positives.length };
 }
 
-function buildEmailHtml(opts: {
+function buildLocationSection(opts: {
   businessName: string;
   totalNew: number;
   avgRating: number;
