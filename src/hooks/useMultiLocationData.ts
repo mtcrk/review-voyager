@@ -101,6 +101,23 @@ export function useMultiLocationData() {
           }))
           .sort((a, b) => a.date.localeCompare(b.date));
 
+        // Platform breakdown (count + avg rating per platform)
+        const platformAgg = new Map<string, { sum: number; count: number }>();
+        bizReviews.forEach((r) => {
+          const p = (r.platform || "google").toLowerCase();
+          const entry = platformAgg.get(p) || { sum: 0, count: 0 };
+          entry.sum += r.rating;
+          entry.count += 1;
+          platformAgg.set(p, entry);
+        });
+        const platformBreakdown: Record<string, { count: number; avgRating: number }> = {};
+        platformAgg.forEach((v, k) => {
+          platformBreakdown[k] = {
+            count: v.count,
+            avgRating: Math.round((v.sum / v.count) * 10) / 10,
+          };
+        });
+
         return {
           id: biz.id,
           name: biz.name,
@@ -115,6 +132,7 @@ export function useMultiLocationData() {
           weeklyReviews,
           sentimentBreakdown: { positive, neutral, negative },
           ratingTrend,
+          platformBreakdown,
         };
       });
     },
