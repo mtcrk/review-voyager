@@ -566,6 +566,10 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
         reviewId = item.reviewId || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       }
 
+      const reply = extractOwnerReply(item);
+      ownerReply = reply.text;
+      ownerReplyAt = reply.date ? toSafeIsoDate(reply.date) : (ownerReply ? postedAt : null);
+
       return {
         business_id: businessId,
         platform,
@@ -574,8 +578,11 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
         rating,
         text: text || null,
         posted_at: postedAt,
-        status: "pending_reply",
+        status: ownerReply ? "replied" : "pending_reply",
         sentiment: rating >= 4 ? "positive" : rating >= 3 ? "neutral" : "negative",
+        approved_reply: ownerReply,
+        replied_at: ownerReplyAt,
+        reply_source: ownerReply ? "platform" : null,
       };
     });
 
