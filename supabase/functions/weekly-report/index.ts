@@ -302,6 +302,7 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           from: "VoyageRespond <notify@voyagerespond.com>",
           to: [email],
+          ...(extraRecipients.length > 0 ? { bcc: extraRecipients } : {}),
           subject: `📊 Günlük Rapor · ${total} yeni yorum${critical.length > 0 ? ` · 🚨 ${critical.length} kritik` : ""}`,
           html: htmlContent,
         }),
