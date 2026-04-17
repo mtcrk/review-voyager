@@ -369,16 +369,14 @@ Deno.serve(async (req) => {
       };
       console.log(`Using dedicated Trustpilot scraper for: ${businessUrl}`);
     } else if (platform === "booking" && business.booking_hotel_id) {
-      // Booking.com with direct URL — always prefer booking_hotel_id when available
+      // Booking.com — use dedicated voyager scraper (much more reliable than aggregator)
       const bookingUrl = `https://www.booking.com/hotel/${business.booking_hotel_id}.html`;
+      actorId = BOOKING_ACTOR_ID;
       actorInput = {
         startUrls: [{ url: bookingUrl }],
-        providers: ["booking"],
-        maxReviewsPerQuery: 50,
-        scrapeReviewPictures: false,
-        scrapeReviewResponses: true,
+        maxReviewsPerHotel: 200,
       };
-      console.log(`Using direct Booking URL: ${bookingUrl}`);
+      console.log(`Using dedicated Booking scraper for: ${bookingUrl}`);
     } else {
       // Use the general hotel-review-aggregator
       const providers = PLATFORM_TO_APIFY_PROVIDER[platform] || [];
