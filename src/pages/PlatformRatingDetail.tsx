@@ -31,6 +31,9 @@ export default function PlatformRatingDetail() {
   const location = locations.find((l) => l.id === id);
   const business = businesses.find((b) => b.id === id);
 
+  const queryClient = useQueryClient();
+  const [refreshing, setRefreshing] = useState(false);
+
   // Latest reviews per platform (top 3 each)
   const { data: recentReviews = [] } = useQuery({
     queryKey: ["platform-detail-reviews", id],
@@ -47,6 +50,42 @@ export default function PlatformRatingDetail() {
     },
     enabled: !!id,
   });
+
+  // Platform rankings (TripAdvisor #X of Y in area, etc.)
+  const { data: rankings = [] } = useQuery({
+    queryKey: ["platform-rankings", id],
+    queryFn: async () => {
+      if (!id) return [];
+      const { data, error } = await supabase
+        .from("platform_rankings")
+        .select("*")
+        .eq("business_id", id);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!id,
+  });
+
+  const handleRefreshRankings = async () => {
+    if (!id) return;
+    setRefreshing(true);
+    try {
+      const { error } = await supabase.functions.invoke("fetch-platform-ranking", {
+        body: { business_id: id },
+      });
+      if (error) throw error;
+      await queryClient.invalidateQueries({ queryKey: ["platform-rankings", id] });
+      toast({ title: "Sıralama güncellendi", description: "Platform sıralamaları yenilendi." });
+    } catch (e: any) {
+      toast({
+        title: "Hata",
+        description: e.message || "Sıralama çekilemedi.",
+        variant: "destructive",
+      });
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   if (isLoading) {
     return (
