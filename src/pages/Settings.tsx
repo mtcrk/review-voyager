@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useNewReviews } from "@/contexts/NewReviewsContext";
 import { useState, useEffect } from "react";
+import { PasswordChangeCard } from "@/components/settings/PasswordChangeCard";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -271,6 +272,8 @@ export default function Settings() {
               </Button>
             </CardContent>
           </Card>
+
+          <PasswordChangeCard />
         </TabsContent>
 
         {/* Business Info Tab */}
