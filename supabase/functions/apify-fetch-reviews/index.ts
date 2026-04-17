@@ -320,8 +320,8 @@ Deno.serve(async (req) => {
       const hotelId = business.hotelscom_url.replace(/\D/g, ""); // Extract numeric ID
       actorInput = {
         startUrls: [`https://www.hotels.com/ho${hotelId}/`],
-        maxItems: 200,
-        maxReviewsPerHotel: 200,
+        maxItems: 1000,
+        maxReviewsPerHotel: 1000,
         sortBy: "newest_first",
       };
       console.log(`Using dedicated Hotels.com scraper for hotel ID: ${hotelId}`);
@@ -337,8 +337,8 @@ Deno.serve(async (req) => {
       }
       actorInput = {
         startUrl: expediaUrl,
-        results_wanted: 200,
-        max_pages: 20,
+        results_wanted: 1000,
+        max_pages: 100,
         proxyConfiguration: { useApifyProxy: true, apifyProxyGroups: ["RESIDENTIAL"] },
       };
       console.log(`Using shahidirfan/expedia-reviews-scraper for: ${expediaUrl}`);
@@ -353,7 +353,7 @@ Deno.serve(async (req) => {
       actorId = TRIPCOM_ACTOR_ID;
       actorInput = {
         hotelId: parseInt(business.tripcom_hotel_id, 10),
-        results_wanted: 200,
+        results_wanted: 1000,
       };
       console.log(`Using Trip.com scraper for hotel ID: ${business.tripcom_hotel_id}`);
     } else if (platform === "trustpilot") {
@@ -370,7 +370,7 @@ Deno.serve(async (req) => {
       const businessUrl = `https://www.trustpilot.com/review/${domain}`;
       actorInput = {
         businessUrl,
-        maxResults: 200,
+        maxResults: 1000,
       };
       console.log(`Using dedicated Trustpilot scraper for: ${businessUrl}`);
     } else if (platform === "booking" && business.booking_hotel_id) {
@@ -390,7 +390,7 @@ Deno.serve(async (req) => {
       // Use the general hotel-review-aggregator
       const providers = PLATFORM_TO_APIFY_PROVIDER[platform] || [];
       actorInput = {
-        maxReviewsPerQuery: 50,
+        maxReviewsPerQuery: 1000,
         scrapeReviewPictures: false,
         scrapeReviewResponses: true,
       };
