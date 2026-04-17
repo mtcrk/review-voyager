@@ -271,6 +271,8 @@ export default function Settings() {
               </Button>
             </CardContent>
           </Card>
+
+          <PasswordChangeCard />
         </TabsContent>
 
         {/* Business Info Tab */}
