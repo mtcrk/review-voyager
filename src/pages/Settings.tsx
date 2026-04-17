@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Loader2, LogOut, Bell, BellOff, BellRing, AlertTriangle } from "lucide-react";
+import { Loader2, LogOut, Bell, BellOff, BellRing, AlertTriangle, Mail, Send } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBusiness } from "@/contexts/BusinessContext";
@@ -432,10 +433,113 @@ export default function Settings() {
             </CardContent>
           </Card>
 
+          <WeeklyReportCard />
           <BrowserPushCard />
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+function WeeklyReportCard() {
+  const { user } = useAuth();
+  const [businesses, setBusinesses] = useState<{ id: string; name: string; weekly_report_enabled: boolean }[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
+
+  const load = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('businesses')
+      .select('id, name, weekly_report_enabled')
+      .eq('user_id', user.id)
+      .order('name');
+    setBusinesses(data || []);
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, [user]);
+
+  const toggle = async (id: string, value: boolean) => {
+    setSavingId(id);
+    setBusinesses(prev => prev.map(b => b.id === id ? { ...b, weekly_report_enabled: value } : b));
+    const { error } = await supabase.from('businesses').update({ weekly_report_enabled: value }).eq('id', id);
+    setSavingId(null);
+    if (error) {
+      toast({ title: "Hata", description: "Güncellenemedi.", variant: "destructive" });
+      load();
+    }
+  };
+
+  const toggleAll = async (value: boolean) => {
+    if (!user) return;
+    setBusinesses(prev => prev.map(b => ({ ...b, weekly_report_enabled: value })));
+    await supabase.from('businesses').update({ weekly_report_enabled: value }).eq('user_id', user.id);
+    toast({ title: value ? "Tüm raporlar açıldı" : "Tüm raporlar kapatıldı" });
+  };
+
+  const sendNow = async () => {
+    setSending(true);
+    try {
+      const { error } = await supabase.functions.invoke('weekly-report', { body: {} });
+      if (error) throw error;
+      toast({ title: "Rapor gönderildi", description: `${user?.email} adresine birazdan ulaşacak.` });
+    } catch (e: any) {
+      toast({ title: "Hata", description: e.message || "Rapor gönderilemedi", variant: "destructive" });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const allOn = businesses.length > 0 && businesses.every(b => b.weekly_report_enabled);
+
+  return (
+    <Card className="shadow-card">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Mail className="h-5 w-5" />
+          Haftalık E-posta Raporu
+        </CardTitle>
+        <CardDescription>
+          Her Pazartesi sabah 11:00'de seçili işletmelerinin haftalık özetini {user?.email} adresine gönderiyoruz.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30 gap-3 flex-wrap">
+          <div className="flex items-center gap-3 flex-wrap">
+            <Button onClick={sendNow} disabled={sending} size="sm">
+              {sending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
+              Şimdi Test Raporu Gönder
+            </Button>
+            {businesses.length > 1 && (
+              <Button variant="outline" size="sm" onClick={() => toggleAll(!allOn)}>
+                {allOn ? "Hepsini kapat" : "Hepsini aç"}
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Yükleniyor...</div>
+        ) : businesses.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Henüz işletme yok.</p>
+        ) : (
+          <div className="space-y-2">
+            {businesses.map((b) => (
+              <div key={b.id} className="flex items-center justify-between p-3 rounded-lg border">
+                <span className="text-sm font-medium truncate pr-3">{b.name}</span>
+                <Switch
+                  checked={b.weekly_report_enabled}
+                  disabled={savingId === b.id}
+                  onCheckedChange={(v) => toggle(b.id, v)}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
