@@ -151,6 +151,16 @@ const App = () => (
               }
             />
             <Route
+              path="/locations/platform-ratings"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <PlatformRatings />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/dashboard"
               element={
                 <ProtectedRoute>
