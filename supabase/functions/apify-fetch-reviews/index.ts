@@ -12,6 +12,7 @@ const HOTELSCOM_ACTOR_ID = "memo23~hotels-scraper";
 const TRUSTPILOT_ACTOR_ID = "zen-studio~trustpilot-review-scraper";
 const EXPEDIA_ACTOR_ID = "shahidirfan~expedia-reviews-scraper";
 const TRIPCOM_ACTOR_ID = "shahidirfan~trip-com-hotel-reviews-scraper";
+const BOOKING_ACTOR_ID = "voyager~booking-reviews-scraper";
 
 // Map Apify provider names to our platform names
 const PROVIDER_MAP: Record<string, string> = {
@@ -263,7 +264,8 @@ Deno.serve(async (req) => {
       const actorMessage = items.find((item: any) => typeof item?.message === "string")?.message;
       const hasReviewPayload = items.some((item: any) =>
         item.reviewText || item.reviewTitle || item.text || item.title ||
-        item.reviewOriginalText || item.reviewTranslatedText || item.review_text
+        item.reviewOriginalText || item.reviewTranslatedText || item.review_text ||
+        item.reviewTextLiked || item.reviewTextDisliked || item.likedText || item.dislikedText
       );
 
       if (items.length > 0 && !hasReviewPayload && actorMessage) {
@@ -278,8 +280,8 @@ Deno.serve(async (req) => {
         );
       }
 
-      const cappedItems = (platform === "hotelscom" || platform === "expedia" || platform === "tripcom") ? items.slice(0, 200) : items;
-      const forcedPlatform = (platform === "hotelscom" || platform === "expedia" || platform === "trustpilot" || platform === "tripcom") ? platform : undefined;
+      const cappedItems = (platform === "hotelscom" || platform === "expedia" || platform === "tripcom" || platform === "booking") ? items.slice(0, 200) : items;
+      const forcedPlatform = (platform === "hotelscom" || platform === "expedia" || platform === "trustpilot" || platform === "tripcom" || platform === "booking") ? platform : undefined;
       const result = await insertReviews(supabase, cappedItems, business_id, forcedPlatform);
 
       await logSuccess(supabase, business_id, platform, items.length, result.inserted, result.skipped);
@@ -368,16 +370,14 @@ Deno.serve(async (req) => {
       };
       console.log(`Using dedicated Trustpilot scraper for: ${businessUrl}`);
     } else if (platform === "booking" && business.booking_hotel_id) {
-      // Booking.com with direct URL — always prefer booking_hotel_id when available
+      // Booking.com — use dedicated voyager scraper (much more reliable than aggregator)
       const bookingUrl = `https://www.booking.com/hotel/${business.booking_hotel_id}.html`;
+      actorId = BOOKING_ACTOR_ID;
       actorInput = {
         startUrls: [{ url: bookingUrl }],
-        providers: ["booking"],
-        maxReviewsPerQuery: 50,
-        scrapeReviewPictures: false,
-        scrapeReviewResponses: true,
+        maxReviewsPerHotel: 200,
       };
-      console.log(`Using direct Booking URL: ${bookingUrl}`);
+      console.log(`Using dedicated Booking scraper for: ${bookingUrl}`);
     } else {
       // Use the general hotel-review-aggregator
       const providers = PLATFORM_TO_APIFY_PROVIDER[platform] || [];
@@ -449,11 +449,12 @@ Deno.serve(async (req) => {
 });
 
 async function insertReviews(supabase: any, items: any[], businessId: string, forcedPlatform?: string) {
-  // Transform reviews - handle both aggregator format and Trustpilot format
+  // Transform reviews - handle multiple actor formats
   const transformed = items
     .filter(item =>
       item.reviewText || item.reviewTitle || item.text || item.title ||
-      item.reviewOriginalText || item.reviewTranslatedText || item.review_text
+      item.reviewOriginalText || item.reviewTranslatedText || item.review_text ||
+      item.reviewTextLiked || item.reviewTextDisliked || item.likedText || item.dislikedText
     )
     .map(item => {
       const isTrustpilotFormat = item.author || item.consumer;
@@ -461,15 +462,32 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
         item.review_text || item.traveler_name || item.published_date || item.hotel_id
       );
       const isTripcomDedicated = forcedPlatform === "tripcom";
+      const isBookingDedicated = forcedPlatform === "booking";
       const platform = forcedPlatform || (isTrustpilotFormat ? "trustpilot" : normalizePlatform(item.provider || "unknown"));
-      
+
       let rating: number;
       let text: string;
       let reviewerName: string;
       let postedAt: string;
       let reviewId: string;
 
-      if (isTripcomDedicated) {
+      if (isBookingDedicated) {
+        // voyager/booking-reviews-scraper — rating is 0-10 scale
+        const rawRating = Number(item.rating ?? item.reviewScore ?? item.reviewRating ?? 6);
+        rating = rawRating > 5 ? Math.round(rawRating / 2) : Math.min(5, Math.max(1, Math.round(rawRating)));
+        const liked = item.reviewTextLiked || item.likedText || "";
+        const disliked = item.reviewTextDisliked || item.dislikedText || "";
+        const title = item.reviewTitle || item.title || "";
+        const parts: string[] = [];
+        if (title) parts.push(title);
+        if (liked) parts.push(`👍 ${liked}`);
+        if (disliked) parts.push(`👎 ${disliked}`);
+        if (!parts.length && (item.reviewText || item.text)) parts.push(item.reviewText || item.text);
+        text = parts.join("\n\n");
+        reviewerName = item.userName || item.reviewerName || item.authorName || item.guestName || "Anonymous";
+        postedAt = toSafeIsoDate(item.reviewDate || item.date || item.publishedDate);
+        reviewId = item.reviewId || item.id || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      } else if (isTripcomDedicated) {
         // Trip.com scraper format (shahidirfan/trip-com-hotel-reviews-scraper) — rating is 0-10
         const rawRating = Number(item.reviewRating ?? 6);
         rating = rawRating > 5 ? Math.round(rawRating / 2) : Math.min(5, Math.max(1, Math.round(rawRating)));
