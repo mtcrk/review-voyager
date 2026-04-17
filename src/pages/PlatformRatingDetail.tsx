@@ -236,23 +236,55 @@ export default function PlatformRatingDetail() {
                     </Badge>
                   </div>
 
-                  {/* Ranking */}
-                  {ranking && ranking.rank && ranking.total_in_area && (
-                    <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900">
-                      <Trophy className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                      <div className="text-xs">
-                        <p className="font-semibold text-foreground">
-                          {ranking.area_name || location.city || "Bölge"}
-                          {"'de "}
-                          <span className="text-amber-700 dark:text-amber-300">{ranking.total_in_area}</span>
-                          {" otel arasında "}
-                          <span className="text-amber-700 dark:text-amber-300">{ranking.rank}.</span>
-                          {" sırada"}
-                        </p>
-                        <p className="text-muted-foreground mt-0.5">
-                          Güncellendi: {formatDistanceToNow(new Date(ranking.fetched_at), { addSuffix: true, locale: tr })}
-                        </p>
-                      </div>
+                  {/* Ranking + competitive metrics */}
+                  {ranking && (ranking.rank || (ranking.raw as any)?.property_rating || (ranking.raw as any)?.property_review_count) && (
+                    <div className="space-y-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900">
+                      {ranking.rank && ranking.total_in_area && (
+                        <div className="flex items-start gap-2">
+                          <Trophy className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                          <p className="text-xs font-semibold text-foreground">
+                            {ranking.area_name || location.city || "Bölge"}
+                            {"'de "}
+                            <span className="text-amber-700 dark:text-amber-300">{ranking.total_in_area}</span>
+                            {" otel arasında "}
+                            <span className="text-amber-700 dark:text-amber-300">{ranking.rank}.</span>
+                            {" sırada"}
+                          </p>
+                        </div>
+                      )}
+
+                      {(() => {
+                        const raw = (ranking.raw as any) || {};
+                        const items: { label: string; value: string }[] = [];
+                        if (raw.property_rating != null) {
+                          const scale = raw.rating_scale || 5;
+                          items.push({ label: "Platform puanı", value: `${raw.property_rating} / ${scale}` });
+                        }
+                        if (raw.property_review_count != null) {
+                          items.push({ label: "Platform yorum sayısı", value: Number(raw.property_review_count).toLocaleString("tr-TR") });
+                        }
+                        if (raw.property_category) {
+                          items.push({ label: "Kategori", value: raw.property_category });
+                        }
+                        if (raw.award) {
+                          items.push({ label: "Ödül", value: raw.award });
+                        }
+                        if (items.length === 0) return null;
+                        return (
+                          <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 pl-6">
+                            {items.map((it) => (
+                              <div key={it.label} className="text-[11px]">
+                                <p className="text-muted-foreground">{it.label}</p>
+                                <p className="font-medium text-foreground truncate">{it.value}</p>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })()}
+
+                      <p className="text-[10px] text-muted-foreground pl-6">
+                        Güncellendi: {formatDistanceToNow(new Date(ranking.fetched_at), { addSuffix: true, locale: tr })}
+                      </p>
                     </div>
                   )}
 
