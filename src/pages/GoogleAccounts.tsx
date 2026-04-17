@@ -100,7 +100,7 @@ export default function GoogleAccounts() {
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+                      <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
                       <p className="font-medium text-foreground truncate">{b.name}</p>
                     </div>
                     {b.city && (
