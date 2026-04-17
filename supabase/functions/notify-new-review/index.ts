@@ -93,7 +93,32 @@ Deno.serve(async (req) => {
       );
     }
 
-    const filteredReviews = reviews;
+    // ============================================================
+    // HARD GUARD #3: Per-review idempotency.
+    // Skip any review that has ALREADY been notified (email_logs).
+    // resend_id format: "review:<review_id>"
+    // ============================================================
+    const reviewIds = reviews.map((r: any) => r.id).filter(Boolean);
+    const dedupeKeys = reviewIds.map((id: string) => `review:${id}`);
+
+    const { data: alreadySent } = await supabase
+      .from("email_logs")
+      .select("resend_id")
+      .eq("business_id", business_id)
+      .in("resend_id", dedupeKeys);
+
+    const sentSet = new Set((alreadySent ?? []).map((r: any) => r.resend_id));
+    const filteredReviews = reviews.filter(
+      (r: any) => r.id && !sentSet.has(`review:${r.id}`)
+    );
+
+    if (filteredReviews.length === 0) {
+      console.log(`Skipping — all ${reviews.length} reviews already notified for "${business.name}"`);
+      return new Response(
+        JSON.stringify({ message: "All reviews already notified", skipped: reviews.length }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(business.user_id);
 
