@@ -66,31 +66,6 @@ export function LocationComparisonTable({ locations, onSelectLocation }: Props) 
                         <span className="font-semibold text-foreground">{loc.averageRating}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-4">
-                      {Object.keys(loc.platformBreakdown).length === 0 ? (
-                        <span className="text-xs text-muted-foreground">—</span>
-                      ) : (
-                        <div className="flex flex-wrap gap-1.5 max-w-[260px]">
-                          {Object.entries(loc.platformBreakdown)
-                            .sort((a, b) => b[1].count - a[1].count)
-                            .map(([key, val]) => {
-                              const meta = platformMeta(key);
-                              return (
-                                <div
-                                  key={key}
-                                  className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md ${meta.bg} ${meta.text} text-xs`}
-                                  title={`${meta.label} • ${val.count} yorum`}
-                                >
-                                  <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
-                                  <span className="font-medium">{meta.label}</span>
-                                  <span className="font-semibold">{val.avgRating}★</span>
-                                  <span className="opacity-60">({val.count})</span>
-                                </div>
-                              );
-                            })}
-                        </div>
-                      )}
-                    </td>
                     <td className="text-center px-4 py-4">
                       <span className="font-medium text-foreground">{loc.totalReviews}</span>
                     </td>
