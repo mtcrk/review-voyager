@@ -202,7 +202,8 @@ export function PlatformDiscovery() {
     (activeBusiness as any).expedia_hotel_id
   );
 
-  if (allConnected) return null;
+  // Keep card open if user has search results to interact with, even if all platforms got connected
+  if (allConnected && !searched) return null;
 
   return (
     <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-transparent shadow-card">
