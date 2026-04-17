@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Loader2, LogOut, Bell, BellOff, BellRing, AlertTriangle } from "lucide-react";
+import { Loader2, LogOut, Bell, BellOff, BellRing, AlertTriangle, Mail, Send } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBusiness } from "@/contexts/BusinessContext";
@@ -432,6 +433,7 @@ export default function Settings() {
             </CardContent>
           </Card>
 
+          <WeeklyReportCard />
           <BrowserPushCard />
         </TabsContent>
       </Tabs>
