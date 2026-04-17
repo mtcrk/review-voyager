@@ -1,0 +1,1 @@
+UPDATE public.businesses SET weekly_report_enabled = true WHERE user_id IN ('0eb29204-222d-498d-bda1-13ce1f256ab7', '442f2b16-8917-4e6b-86ea-78ea7e2f324e');
