@@ -1386,6 +1386,32 @@ export default function Reviews() {
                 </div>
               </div>
 
+              {/* Existing Reply (from platform / approved) */}
+              {selectedReview.approved_reply && (
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-semibold text-foreground">Mevcut Yanıt</h3>
+                    <Badge variant="outline" className="text-xs">
+                      {selectedReview.reply_source === 'platform'
+                        ? 'Platform'
+                        : selectedReview.reply_source === 'ai'
+                        ? 'AI'
+                        : selectedReview.reply_source === 'manual'
+                        ? 'Manuel'
+                        : 'Yanıtlandı'}
+                    </Badge>
+                  </div>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground">
+                    {selectedReview.approved_reply}
+                  </p>
+                  {selectedReview.replied_at && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {format(new Date(selectedReview.replied_at), 'd MMM yyyy', { locale: tr })}
+                    </p>
+                  )}
+                </div>
+              )}
+
               {/* Summary */}
               {selectedReview.summary && (
                 <div>
