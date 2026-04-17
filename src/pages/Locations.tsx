@@ -6,6 +6,7 @@ import { useMultiLocationData } from "@/hooks/useMultiLocationData";
 import { LocationOverviewStats } from "@/components/locations/LocationOverviewStats";
 import { LocationHighlights } from "@/components/locations/LocationHighlights";
 import { LocationComparisonTable } from "@/components/locations/LocationComparisonTable";
+import { PlatformRatingsMatrix } from "@/components/locations/PlatformRatingsMatrix";
 import { LocationTrendChart } from "@/components/locations/LocationTrendChart";
 import { LocationMapView } from "@/components/locations/LocationMapView";
 import { BusinessOnboarding } from "@/components/BusinessOnboarding";
@@ -93,6 +94,9 @@ export default function Locations() {
 
       {/* Highlights (best/worst) */}
       <LocationHighlights locations={locations} />
+
+      {/* Platform Ratings Matrix - per platform per location */}
+      <PlatformRatingsMatrix locations={locations} onSelectLocation={handleSelectLocation} />
 
       {/* Comparison Table */}
       <LocationComparisonTable locations={locations} onSelectLocation={handleSelectLocation} />
