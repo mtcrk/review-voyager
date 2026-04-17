@@ -264,7 +264,8 @@ Deno.serve(async (req) => {
       const actorMessage = items.find((item: any) => typeof item?.message === "string")?.message;
       const hasReviewPayload = items.some((item: any) =>
         item.reviewText || item.reviewTitle || item.text || item.title ||
-        item.reviewOriginalText || item.reviewTranslatedText || item.review_text
+        item.reviewOriginalText || item.reviewTranslatedText || item.review_text ||
+        item.reviewTextLiked || item.reviewTextDisliked || item.likedText || item.dislikedText
       );
 
       if (items.length > 0 && !hasReviewPayload && actorMessage) {
@@ -279,8 +280,8 @@ Deno.serve(async (req) => {
         );
       }
 
-      const cappedItems = (platform === "hotelscom" || platform === "expedia" || platform === "tripcom") ? items.slice(0, 200) : items;
-      const forcedPlatform = (platform === "hotelscom" || platform === "expedia" || platform === "trustpilot" || platform === "tripcom") ? platform : undefined;
+      const cappedItems = (platform === "hotelscom" || platform === "expedia" || platform === "tripcom" || platform === "booking") ? items.slice(0, 200) : items;
+      const forcedPlatform = (platform === "hotelscom" || platform === "expedia" || platform === "trustpilot" || platform === "tripcom" || platform === "booking") ? platform : undefined;
       const result = await insertReviews(supabase, cappedItems, business_id, forcedPlatform);
 
       await logSuccess(supabase, business_id, platform, items.length, result.inserted, result.skipped);
