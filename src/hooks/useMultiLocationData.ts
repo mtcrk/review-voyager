@@ -38,13 +38,13 @@ export function useMultiLocationData() {
 
       // Fetch ALL reviews (paginated to bypass Supabase 1000-row limit)
       const businessIds = businesses.map((b) => b.id);
-      const reviews: { id: string; business_id: string; rating: number; status: string | null; sentiment: string | null; posted_at: string }[] = [];
+      const reviews: { id: string; business_id: string; rating: number; status: string | null; sentiment: string | null; posted_at: string; platform: string | null }[] = [];
       const PAGE_SIZE = 1000;
       let from = 0;
       while (true) {
         const { data: page, error: revError } = await supabase
           .from("reviews")
-          .select("id, business_id, rating, status, sentiment, posted_at")
+          .select("id, business_id, rating, status, sentiment, posted_at, platform")
           .in("business_id", businessIds)
           .order("posted_at", { ascending: false })
           .range(from, from + PAGE_SIZE - 1);
