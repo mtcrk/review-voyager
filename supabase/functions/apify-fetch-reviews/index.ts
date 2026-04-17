@@ -377,9 +377,13 @@ Deno.serve(async (req) => {
       // Booking.com — use dedicated voyager scraper (much more reliable than aggregator)
       const bookingUrl = `https://www.booking.com/hotel/${business.booking_hotel_id}.html`;
       actorId = BOOKING_ACTOR_ID;
+      // voyager~booking-reviews-scraper supports several limit fields; set them all to be safe
       actorInput = {
         startUrls: [{ url: bookingUrl }],
         maxReviewsPerHotel: 1000,
+        maxReviews: 1000,
+        maxItems: 1000,
+        sortBy: "newest_first",
       };
       console.log(`Using dedicated Booking scraper for: ${bookingUrl}`);
     } else {
