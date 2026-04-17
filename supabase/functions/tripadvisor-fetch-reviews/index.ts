@@ -21,6 +21,24 @@ interface TripAdvisorReview {
     name?: string;
     firstName?: string;
   };
+  ownerResponse?: { text?: string; publishedDate?: string } | string | null;
+  responseFromOwnerText?: string | null;
+  responseFromOwnerDate?: string | null;
+  managementResponse?: { text?: string; publishedDate?: string } | string | null;
+}
+
+function extractTAOwnerReply(it: any): { text: string | null; date: string | null } {
+  const candidates = [it.ownerResponse, it.managementResponse, it.responseFromOwnerText, it.response];
+  for (const c of candidates) {
+    if (typeof c === "string" && c.trim()) return { text: c.trim(), date: null };
+    if (c && typeof c === "object") {
+      const t = c.text || c.body || c.message || "";
+      const d = c.publishedDate || c.date || null;
+      if (t) return { text: String(t).trim(), date: d };
+    }
+  }
+  if (it.responseFromOwnerDate) return { text: null, date: it.responseFromOwnerDate };
+  return { text: null, date: null };
 }
 
 function toSafeIsoDate(input?: string | null): string {
@@ -249,6 +267,10 @@ async function insertReviews(supabase: any, items: TripAdvisorReview[], business
 
       const postedAt = toSafeIsoDate(item.publishedDate);
 
+      const reply = extractTAOwnerReply(item);
+      const ownerReply = reply.text;
+      const ownerReplyAt = reply.date ? toSafeIsoDate(reply.date) : (ownerReply ? postedAt : null);
+
       return {
         business_id: businessId,
         platform: "tripadvisor",
@@ -257,31 +279,35 @@ async function insertReviews(supabase: any, items: TripAdvisorReview[], business
         rating: Number(rating),
         text: text || null,
         posted_at: postedAt,
-        status: "pending_reply",
+        status: ownerReply ? "replied" : "pending_reply",
         sentiment: Number(rating) >= 4 ? "positive" : Number(rating) >= 3 ? "neutral" : "negative",
+        approved_reply: ownerReply,
+        replied_at: ownerReplyAt,
+        reply_source: ownerReply ? "platform" : null,
       };
     });
 
   // Check existing
-  const existingIds = new Set<string>();
+  const existingMap = new Map<string, { id: string; approved_reply: string | null; reply_source: string | null }>();
   const allIds = transformed.map(r => r.google_review_id);
   const CHECK_BATCH = 200;
   for (let i = 0; i < allIds.length; i += CHECK_BATCH) {
     const batch = allIds.slice(i, i + CHECK_BATCH);
     const { data: existing } = await supabase
       .from("reviews")
-      .select("google_review_id")
+      .select("id, google_review_id, approved_reply, reply_source")
       .eq("business_id", businessId)
       .in("google_review_id", batch);
     if (existing) {
-      for (const row of existing) existingIds.add(row.google_review_id!);
+      for (const row of existing) existingMap.set(row.google_review_id!, row);
     }
   }
 
-  const newReviews = transformed.filter(r => !existingIds.has(r.google_review_id));
-  const skipped = transformed.length - newReviews.length;
+  const newReviews = transformed.filter(r => !existingMap.has(r.google_review_id));
   let inserted = 0;
+  let updated = 0;
 
+  // Insert new
   const INSERT_BATCH = 100;
   for (let i = 0; i < newReviews.length; i += INSERT_BATCH) {
     const batch = newReviews.slice(i, i + INSERT_BATCH);
@@ -293,8 +319,29 @@ async function insertReviews(supabase: any, items: TripAdvisorReview[], business
     }
   }
 
-  console.log(`TripAdvisor: ${inserted} inserted, ${skipped} skipped out of ${transformed.length} total`);
-  return { inserted, skipped, total: transformed.length };
+  // Update owner replies for existing reviews that didn't have one yet
+  for (const r of transformed) {
+    const existing = existingMap.get(r.google_review_id);
+    if (!existing) continue;
+    if (!r.approved_reply) continue;
+    if (existing.approved_reply && existing.reply_source !== "platform") continue;
+    if (existing.approved_reply === r.approved_reply) continue;
+
+    const { error } = await supabase
+      .from("reviews")
+      .update({
+        approved_reply: r.approved_reply,
+        replied_at: r.replied_at,
+        reply_source: "platform",
+        status: "replied",
+      })
+      .eq("id", existing.id);
+    if (!error) updated += 1;
+  }
+
+  const skipped = transformed.length - newReviews.length - updated;
+  console.log(`TripAdvisor: ${inserted} inserted, ${updated} updated, ${skipped} skipped out of ${transformed.length} total`);
+  return { inserted, updated, skipped, total: transformed.length };
 }
 
 async function logSuccess(supabase: any, businessId: string, fetched: number, inserted: number, skipped: number) {

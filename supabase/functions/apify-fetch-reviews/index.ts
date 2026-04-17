@@ -668,19 +668,22 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
     }
   }
 
-  // Batch reply-only upsert for existing reviews
-  const UPDATE_BATCH = 100;
-  for (let i = 0; i < replyUpdates.length; i += UPDATE_BATCH) {
-    const batch = replyUpdates.slice(i, i + UPDATE_BATCH);
-    const { data, error } = await supabase
+  // Per-row update for existing reviews (upsert would null-out business_id)
+  for (const u of replyUpdates) {
+    const { error } = await supabase
       .from("reviews")
-      .upsert(batch, { onConflict: "id" })
-      .select("id");
+      .update({
+        approved_reply: u.approved_reply,
+        replied_at: u.replied_at,
+        reply_source: u.reply_source,
+        status: u.status,
+      })
+      .eq("id", u.id);
 
     if (error) {
-      console.error(`Batch reply upsert error at ${i}:`, error.message);
+      console.error(`Reply update error for ${u.id}:`, error.message);
     } else {
-      updated += data?.length || 0;
+      updated += 1;
     }
   }
 
