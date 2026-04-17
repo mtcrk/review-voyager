@@ -478,6 +478,39 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
       let reviewerName: string;
       let postedAt: string;
       let reviewId: string;
+      let ownerReply: string | null = null;
+      let ownerReplyAt: string | null = null;
+
+      // Generic owner-response extractor (covers most actor shapes)
+      const extractOwnerReply = (it: any): { text: string | null; date: string | null } => {
+        // Aggregator: reviewResponses is an array of strings or objects
+        if (Array.isArray(it.reviewResponses) && it.reviewResponses.length > 0) {
+          const first = it.reviewResponses[0];
+          if (typeof first === "string" && first.trim()) return { text: first.trim(), date: null };
+          if (first && typeof first === "object") {
+            const t = first.text || first.responseText || first.body || first.message || "";
+            const d = first.date || first.responseDate || first.createdAt || null;
+            if (t) return { text: String(t).trim(), date: d };
+          }
+        }
+        // Common single-field variants across actors
+        const candidates = [
+          it.responseFromOwnerText, it.ownerResponse, it.ownerReply, it.replyText,
+          it.managementResponse, it.hotelResponse, it.hotelReply, it.reply,
+          it.response, it.responseText, it.replyContent,
+        ];
+        for (const c of candidates) {
+          if (typeof c === "string" && c.trim()) return { text: c.trim(), date: null };
+          if (c && typeof c === "object") {
+            const t = c.text || c.body || c.message || c.content || "";
+            const d = c.date || c.createdAt || c.responseDate || null;
+            if (t) return { text: String(t).trim(), date: d };
+          }
+        }
+        const dateCandidates = [it.responseFromOwnerDate, it.ownerResponseDate, it.replyDate, it.responseDate];
+        const d = dateCandidates.find(x => typeof x === "string" && x);
+        return { text: null, date: d || null };
+      };
 
       if (isBookingDedicated) {
         // voyager/booking-reviews-scraper — rating is 0-10 scale
