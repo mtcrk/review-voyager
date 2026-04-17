@@ -37,6 +37,7 @@ import { toast } from "@/hooks/use-toast";
 import { useReviewFetch } from "@/contexts/ReviewFetchContext";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
+import { ReviewTranslator } from "@/components/reviews/ReviewTranslator";
 
 type SortField = "posted_at" | "rating" | "reviewer_name";
 type SortOrder = "asc" | "desc";
@@ -1375,7 +1376,12 @@ export default function Reviews() {
             <div className="mt-6 space-y-6">
               {/* Review Text */}
               <div>
-                <h3 className="text-sm font-semibold text-foreground mb-2">Yorum</h3>
+                <div className="flex items-center justify-between mb-2 gap-2">
+                  <h3 className="text-sm font-semibold text-foreground">Yorum</h3>
+                  {selectedReview.text && (
+                    <ReviewTranslator text={selectedReview.text} />
+                  )}
+                </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   {selectedReview.text || 'Yorum metni yok'}
                 </p>
