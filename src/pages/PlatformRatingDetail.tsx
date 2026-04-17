@@ -242,9 +242,12 @@ export default function PlatformRatingDetail() {
                       <Trophy className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                       <div className="text-xs">
                         <p className="font-semibold text-foreground">
-                          {ranking.area_name || location.city || "Bölge"}'de{" "}
-                          <span className="text-amber-700 dark:text-amber-300">{ranking.total_in_area}</span> otel arasında{" "}
-                          <span className="text-amber-700 dark:text-amber-300">{ranking.rank}.</span> sırada
+                          {ranking.area_name || location.city || "Bölge"}
+                          {"'de "}
+                          <span className="text-amber-700 dark:text-amber-300">{ranking.total_in_area}</span>
+                          {" otel arasında "}
+                          <span className="text-amber-700 dark:text-amber-300">{ranking.rank}.</span>
+                          {" sırada"}
                         </p>
                         <p className="text-muted-foreground mt-0.5">
                           Güncellendi: {formatDistanceToNow(new Date(ranking.fetched_at), { addSuffix: true, locale: tr })}
