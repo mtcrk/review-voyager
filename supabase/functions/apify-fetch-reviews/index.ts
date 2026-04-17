@@ -383,7 +383,7 @@ Deno.serve(async (req) => {
         maxReviewsPerHotel: 1000,
         maxReviews: 1000,
         maxItems: 1000,
-        sortBy: "newest_first",
+        sortBy: "bayesian_review_score",
       };
       console.log(`Using dedicated Booking scraper for: ${bookingUrl}`);
     } else {
