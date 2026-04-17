@@ -35,6 +35,7 @@ import {
   FileText,
   Trophy,
   TrendingUp,
+  LayoutGrid,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -79,12 +80,16 @@ const commonItems = [
   { title: "Tüm Yorumlar", url: "/inbox", icon: Inbox, highlight: true },
   { title: "Yorumlar", url: "/reviews", icon: MessageSquare },
   { title: "Rep Score", url: "/rep-score", icon: Trophy },
-  { title: "Lokasyonlar", url: "/locations", icon: Building2 },
   { title: "Google Hesapları", url: "/google-accounts", icon: Star },
   { title: "İstatistikler", url: "/statistics", icon: BarChart3 },
   { title: "Google Performance", url: "/performance", icon: TrendingUp },
   { title: "Rapor Oluştur", url: "/report", icon: FileText },
   { title: "Ayarlar", url: "/settings", icon: Settings },
+];
+
+const locationItems = [
+  { title: "Tüm Lokasyonlar", url: "/locations", icon: Building2 },
+  { title: "Platform Puanları", url: "/locations/platform-ratings", icon: LayoutGrid },
 ];
 
 export function AppSidebar() {
@@ -315,7 +320,39 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Platform-specific Menu Items */}
+        {/* Lokasyonlar (collapsible) */}
+        <Collapsible defaultOpen={location.pathname.startsWith("/locations")} className="group/loc-collapsible">
+          <SidebarGroup>
+            {open ? (
+              <CollapsibleTrigger asChild>
+                <SidebarGroupLabel className="text-xs text-muted-foreground px-3 cursor-pointer hover:text-foreground transition-colors flex items-center">
+                  <Building2 className="h-4 w-4 mr-2" />
+                  Lokasyonlar
+                  <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/loc-collapsible:rotate-180" />
+                </SidebarGroupLabel>
+              </CollapsibleTrigger>
+            ) : null}
+            <CollapsibleContent>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {locationItems.map((item) => {
+                    const isActive = location.pathname === item.url;
+                    return (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
+                          <NavLink to={item.url} className="flex items-center gap-3 transition-smooth">
+                            <item.icon className="h-5 w-5" />
+                            <span>{item.title}</span>
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
         {currentPlatform && (
           <SidebarGroup>
             {open && (
