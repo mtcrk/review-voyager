@@ -379,7 +379,7 @@ Deno.serve(async (req) => {
       actorId = BOOKING_ACTOR_ID;
       actorInput = {
         startUrls: [{ url: bookingUrl }],
-        maxReviewsPerHotel: 200,
+        maxReviewsPerHotel: 1000,
       };
       console.log(`Using dedicated Booking scraper for: ${bookingUrl}`);
     } else {
