@@ -35,14 +35,24 @@ export function useMultiLocationData() {
       if (bizError) throw bizError;
       if (!businesses || businesses.length === 0) return [];
 
-      // Fetch all reviews for these businesses
+      // Fetch ALL reviews (paginated to bypass Supabase 1000-row limit)
       const businessIds = businesses.map((b) => b.id);
-      const { data: reviews, error: revError } = await supabase
-        .from("reviews")
-        .select("id, business_id, rating, status, sentiment, posted_at")
-        .in("business_id", businessIds);
-
-      if (revError) throw revError;
+      const reviews: { id: string; business_id: string; rating: number; status: string | null; sentiment: string | null; posted_at: string }[] = [];
+      const PAGE_SIZE = 1000;
+      let from = 0;
+      while (true) {
+        const { data: page, error: revError } = await supabase
+          .from("reviews")
+          .select("id, business_id, rating, status, sentiment, posted_at")
+          .in("business_id", businessIds)
+          .order("posted_at", { ascending: false })
+          .range(from, from + PAGE_SIZE - 1);
+        if (revError) throw revError;
+        if (!page || page.length === 0) break;
+        reviews.push(...page);
+        if (page.length < PAGE_SIZE) break;
+        from += PAGE_SIZE;
+      }
 
       const now = new Date();
       const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
