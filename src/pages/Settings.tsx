@@ -510,7 +510,7 @@ function WeeklyReportCard() {
           <div className="flex items-center gap-3 flex-wrap">
             <Button onClick={sendNow} disabled={sending} size="sm">
               {sending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
-              Şimdi Test Raporu Gönder
+              Şimdi Raporu Gönder
             </Button>
             {businesses.length > 1 && (
               <Button variant="outline" size="sm" onClick={() => toggleAll(!allOn)}>
