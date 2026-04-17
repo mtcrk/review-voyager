@@ -252,7 +252,6 @@ export default function PlatformRatingDetail() {
                       </div>
                     </div>
                   )}
-                  </div>
 
                   {/* Distribution */}
                   <div className="space-y-1">
