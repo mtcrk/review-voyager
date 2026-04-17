@@ -79,6 +79,17 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
+    // Optional: extra BCC recipients (comma-separated emails) — copies every report to these too
+    let extraRecipients: string[] = [];
+    try {
+      if (req.method === "POST") {
+        const body = await req.json().catch(() => ({}));
+        if (body?.bcc) {
+          extraRecipients = String(body.bcc).split(",").map((e: string) => e.trim()).filter(Boolean);
+        }
+      }
+    } catch (_) {}
+
     const { data: businesses, error: bizError } = await supabase
       .from("businesses")
       .select("id, name, user_id, weekly_report_enabled")
@@ -291,6 +302,7 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           from: "VoyageRespond <notify@voyagerespond.com>",
           to: [email],
+          ...(extraRecipients.length > 0 ? { bcc: extraRecipients } : {}),
           subject: `📊 Günlük Rapor · ${total} yeni yorum${critical.length > 0 ? ` · 🚨 ${critical.length} kritik` : ""}`,
           html: htmlContent,
         }),
