@@ -26,7 +26,19 @@ serve(async (req) => {
       throw new Error("Missing access token");
     }
 
-    // User client for RLS-protected queries (with caller auth context)
+    // Service role client for accessing secure credentials table
+    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
+
+    // Validate the caller's JWT explicitly using the admin client.
+    // (verify_jwt is disabled at the gateway level, so we must verify here.)
+    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(accessToken);
+
+    if (userError || !user) {
+      console.error("Auth validation failed:", userError?.message);
+      throw new Error("Unauthorized");
+    }
+
+    // User-scoped client for RLS-protected queries
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
       global: {
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -36,15 +48,6 @@ serve(async (req) => {
         persistSession: false,
       },
     });
-
-    // Service role client for accessing secure credentials table
-    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
-
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-
-    if (userError || !user) {
-      throw new Error("Unauthorized");
-    }
 
     const requestBody = await req.json();
     const { action, code, businesses } = requestBody;
