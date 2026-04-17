@@ -14,6 +14,7 @@ import { useBusiness } from "@/contexts/BusinessContext";
 import { useNewReviews } from "@/contexts/NewReviewsContext";
 import { useState, useEffect } from "react";
 import { PasswordChangeCard } from "@/components/settings/PasswordChangeCard";
+import { invokeAuthedFunction } from "@/lib/invokeAuthedFunction";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -154,25 +155,15 @@ export default function Settings() {
     setGoogleConnecting(true);
 
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session) {
-        throw new Error("Lütfen önce giriş yapın");
-      }
-
-      const response = await supabase.functions.invoke('google-business-auth', {
+      const response = await invokeAuthedFunction<{ authUrl?: string }>('google-business-auth', {
         body: { action: 'initiate' },
       });
 
-      if (response.error) throw response.error;
-
-      if (!response.data?.authUrl) {
+      if (!response?.authUrl) {
         throw new Error("Google bağlantı adresi alınamadı");
       }
 
-      window.location.href = response.data.authUrl;
+      window.location.href = response.authUrl;
     } catch (error: any) {
       toast({
         title: "Bağlantı Hatası",

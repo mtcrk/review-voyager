@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { Building2, MapPin, Globe, CheckCircle2, Loader2, Search, ExternalLink } from 'lucide-react';
 import { getCompanyNameFromEmail } from '@/lib/emailValidation';
+import { invokeAuthedFunction } from '@/lib/invokeAuthedFunction';
 
 interface BusinessOnboardingProps {
   open: boolean;
@@ -120,29 +121,12 @@ export function BusinessOnboarding({ open, onBusinessCreated, onDismiss }: Busin
   const handleGoogleConnect = async () => {
     setLoading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error('Lütfen önce giriş yapın');
-      }
-
-      const response = await supabase.functions.invoke('google-business-auth', {
+      const response = await invokeAuthedFunction<{ authUrl?: string }>('google-business-auth', {
         body: { action: 'initiate' },
       });
 
-      if (response.error) {
-        if (response.error.message?.includes('403') || response.error.message?.includes('permission')) {
-          toast({
-            title: 'Google API Onayı Bekleniyor',
-            description: 'Google Business API izni henüz onaylanmadı. Şimdilik manuel ekleme ile devam edebilirsiniz.',
-            duration: 7000,
-          });
-          return;
-        }
-        throw response.error;
-      }
-
-      if (response.data?.authUrl) {
-        window.location.href = response.data.authUrl;
+      if (response?.authUrl) {
+        window.location.href = response.authUrl;
       }
     } catch (error: any) {
       console.error('Google connect error:', error);

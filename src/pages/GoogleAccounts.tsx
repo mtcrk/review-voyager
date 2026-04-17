@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, Plus, Star, CheckCircle2, AlertCircle } from "lucide-react";
+import { invokeAuthedFunction } from "@/lib/invokeAuthedFunction";
 
 export default function GoogleAccounts() {
   const { businesses, loading } = useBusiness();
@@ -16,17 +16,13 @@ export default function GoogleAccounts() {
   const handleConnect = async () => {
     setConnecting(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Lütfen önce giriş yapın");
-
-      const response = await supabase.functions.invoke("google-business-auth", {
+      const response = await invokeAuthedFunction<{ authUrl?: string }>("google-business-auth", {
         body: { action: "initiate" },
       });
 
-      if (response.error) throw response.error;
-      if (!response.data?.authUrl) throw new Error("Google bağlantı adresi alınamadı");
+      if (!response?.authUrl) throw new Error("Google bağlantı adresi alınamadı");
 
-      window.location.href = response.data.authUrl;
+      window.location.href = response.authUrl;
     } catch (error: any) {
       toast({
         title: "Bağlantı Hatası",

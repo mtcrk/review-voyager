@@ -62,6 +62,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useNewReviews } from "@/contexts/NewReviewsContext";
 import logo from "@/assets/logo.png";
+import { invokeAuthedFunction } from "@/lib/invokeAuthedFunction";
 
 type Platform = "google" | "tiktok" | "instagram" | "whatsapp";
 
@@ -193,12 +194,11 @@ export function AppSidebar() {
     // Not connected — trigger OAuth for Google
     if (platform.id === "google") {
       try {
-        const response = await supabase.functions.invoke('google-business-auth', {
+        const response = await invokeAuthedFunction<{ authUrl?: string }>('google-business-auth', {
           body: { action: 'initiate' },
         });
-        if (response.error) throw response.error;
-        if (response.data?.authUrl) {
-          window.location.href = response.data.authUrl;
+        if (response?.authUrl) {
+          window.location.href = response.authUrl;
         }
       } catch (error: any) {
         console.error('Google connect error:', error);
