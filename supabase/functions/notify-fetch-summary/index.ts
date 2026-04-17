@@ -349,83 +349,124 @@ Deno.serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
-    const { business_id, new_reviews = [], platform_results = [] } = await req.json();
+    const body = await req.json();
 
-    // Yesterday's count for trend comparison
-    const { count: yesterdayCount } = await supabase
-      .from("reviews")
-      .select("id", { count: "exact", head: true })
-      .eq("business_id", business_id)
-      .gte("posted_at", new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString())
-      .lt("posted_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+    // Normalize payload: support both old (single business) and new (user + locations) formats
+    let userId: string | undefined = body.user_id;
+    let locations: Array<{
+      business_id: string;
+      business_name?: string;
+      city?: string | null;
+      new_reviews: ReviewLite[];
+      platform_results: PlatformResult[];
+    }> = [];
 
-    // Unanswered count among new reviews
-    const newReviewIds = (new_reviews as any[]).map((r) => r.id).filter(Boolean);
-    let unansweredCount = 0;
-    if (newReviewIds.length > 0) {
-      const { count } = await supabase
-        .from("reviews")
-        .select("id", { count: "exact", head: true })
-        .in("id", newReviewIds)
-        .is("approved_reply", null);
-      unansweredCount = count || 0;
-    }
-
-    if (!business_id) {
-      return new Response(JSON.stringify({ error: "business_id required" }), {
+    if (body.locations && Array.isArray(body.locations)) {
+      locations = body.locations;
+    } else if (body.business_id) {
+      // Legacy single-business payload
+      locations = [{
+        business_id: body.business_id,
+        new_reviews: body.new_reviews || [],
+        platform_results: body.platform_results || [],
+      }];
+    } else {
+      return new Response(JSON.stringify({ error: "user_id+locations or business_id required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Skip if nothing new and no errors worth reporting
-    const hasErrors = (platform_results as PlatformResult[]).some((p) => p.error);
-    if (new_reviews.length === 0 && !hasErrors) {
+    // Skip if nothing new and no errors across all locations
+    const hasAnyContent = locations.some((loc) =>
+      loc.new_reviews.length > 0 || loc.platform_results.some((p) => p.error)
+    );
+    if (!hasAnyContent) {
       return new Response(JSON.stringify({ skipped: true, reason: "no new reviews" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const { data: business } = await supabase
+    // Resolve business names + user_id (for legacy single-business path)
+    const bizIds = locations.map((l) => l.business_id);
+    const { data: bizRows } = await supabase
       .from("businesses")
-      .select("id, name, user_id")
-      .eq("id", business_id)
-      .single();
+      .select("id, name, user_id, city")
+      .in("id", bizIds);
+    const bizMap = new Map((bizRows || []).map((b) => [b.id, b]));
 
-    if (!business) {
-      return new Response(JSON.stringify({ error: "Business not found" }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (!userId) {
+      const firstBiz = bizRows?.[0];
+      if (firstBiz) userId = firstBiz.user_id;
     }
 
-    const { data: { user } } = await supabase.auth.admin.getUserById(business.user_id);
-    const ownerEmail = user?.email;
+    // Enrich locations with name/city + compute per-location stats
+    const enrichedLocations = await Promise.all(locations.map(async (loc) => {
+      const biz = bizMap.get(loc.business_id);
+      const name = loc.business_name || biz?.name || "İşletme";
+      const reviews = loc.new_reviews || [];
+      const totalNew = reviews.length;
+      const avgRating = totalNew > 0
+        ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / totalNew
+        : 0;
+      const summary = summarizeIssuesPraises(reviews);
 
-    const reviews = new_reviews as ReviewLite[];
-    const totalNew = reviews.length;
-    const avgRating = totalNew > 0
-      ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / totalNew
-      : 0;
-    const summary = summarizeIssuesPraises(reviews);
-    const aiSummary = await generateAISummary(reviews, business.name);
+      // Yesterday count
+      const { count: yesterdayCount } = await supabase
+        .from("reviews")
+        .select("id", { count: "exact", head: true })
+        .eq("business_id", loc.business_id)
+        .gte("posted_at", new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString())
+        .lt("posted_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
 
-    const html = buildEmailHtml({
-      businessName: business.name,
-      totalNew,
-      avgRating,
-      platformResults: platform_results as PlatformResult[],
-      summary,
-      sampleReviews: reviews,
-      aiSummary,
-      yesterdayCount: yesterdayCount || 0,
-      unansweredCount,
-    });
+      // Unanswered count
+      const newReviewIds = reviews.map((r) => r.id).filter(Boolean);
+      let unansweredCount = 0;
+      if (newReviewIds.length > 0) {
+        const { count } = await supabase
+          .from("reviews")
+          .select("id", { count: "exact", head: true })
+          .in("id", newReviewIds)
+          .is("approved_reply", null);
+        unansweredCount = count || 0;
+      }
 
-    const urgencyPrefix = summary.negativeCount >= 3 ? "🚨 ACİL — " : "📊 ";
-    const subject = totalNew > 0
-      ? `${urgencyPrefix}${business.name} — ${totalNew} yeni yorum (${avgRating.toFixed(1)}★)`
-      : `⚠️ ${business.name} — Yorum çekme uyarısı`;
+      const aiSummary = totalNew > 0 ? await generateAISummary(reviews, name) : null;
+
+      return {
+        business_id: loc.business_id,
+        name,
+        city: loc.city || biz?.city || null,
+        totalNew,
+        avgRating,
+        summary,
+        aiSummary,
+        platformResults: loc.platform_results || [],
+        sampleReviews: reviews,
+        yesterdayCount: yesterdayCount || 0,
+        unansweredCount,
+      };
+    }));
+
+    // Resolve owner email
+    let ownerEmail: string | undefined;
+    if (userId) {
+      const { data: { user } } = await supabase.auth.admin.getUserById(userId);
+      ownerEmail = user?.email;
+    }
+
+    // Build email
+    const html = buildConsolidatedEmailHtml(enrichedLocations);
+
+    const totalAcrossAll = enrichedLocations.reduce((s, l) => s + l.totalNew, 0);
+    const totalNegative = enrichedLocations.reduce((s, l) => s + l.summary.negativeCount, 0);
+    const urgencyPrefix = totalNegative >= 3 ? "🚨 ACİL — " : "📊 ";
+    const locLabel = enrichedLocations.length > 1
+      ? `${enrichedLocations.length} lokasyon`
+      : enrichedLocations[0].name;
+    const subject = totalAcrossAll > 0
+      ? `${urgencyPrefix}${locLabel} — ${totalAcrossAll} yeni yorum`
+      : `⚠️ ${locLabel} — Yorum çekme uyarısı`;
 
     const recipients = new Set<string>([ADMIN_EMAIL]);
     if (ownerEmail) recipients.add(ownerEmail);
@@ -445,9 +486,9 @@ Deno.serve(async (req) => {
     });
 
     const result = await res.json();
-    console.log(`Summary email sent to ${Array.from(recipients).join(", ")}:`, result);
+    console.log(`Consolidated summary sent to ${Array.from(recipients).join(", ")} (${enrichedLocations.length} locations):`, result);
 
-    return new Response(JSON.stringify({ success: true, recipients: Array.from(recipients) }), {
+    return new Response(JSON.stringify({ success: true, recipients: Array.from(recipients), locations: enrichedLocations.length }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: any) {
