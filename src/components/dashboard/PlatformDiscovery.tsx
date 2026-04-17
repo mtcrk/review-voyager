@@ -244,10 +244,12 @@ export function PlatformDiscovery() {
           </div>
         ) : (
           <div className="space-y-3">
-            {visibleResults.map((result) => (
+            {visibleResults.map((result) => {
+              const isConnected = connectedUrls.includes(result.url);
+              return (
               <div
                 key={result.url}
-                className="flex items-start gap-3 p-3 rounded-lg border bg-background"
+                className={`flex items-start gap-3 p-3 rounded-lg border ${isConnected ? "bg-emerald-50 border-emerald-200" : "bg-background"}`}
               >
                 <span className="mt-0.5">{platformIcons[result.platform] || <Building2 className="h-5 w-5" />}</span>
                 <div className="flex-1 min-w-0">
@@ -259,12 +261,18 @@ export function PlatformDiscovery() {
                       {platformDisplayName[result.platform] || result.platform}
                     </Badge>
                     <span className="font-medium text-sm truncate">{result.title}</span>
-                    <Badge
-                      variant={result.confidence === "high" ? "default" : "secondary"}
-                      className="text-[10px] px-1.5 py-0"
-                    >
-                      {result.confidence === "high" ? "Eşleşme ✓" : result.confidence === "medium" ? "Olası" : "Düşük"}
-                    </Badge>
+                    {isConnected ? (
+                      <Badge className="text-[10px] px-1.5 py-0 bg-emerald-600 hover:bg-emerald-600">
+                        Bağlandı ✓
+                      </Badge>
+                    ) : (
+                      <Badge
+                        variant={result.confidence === "high" ? "default" : "secondary"}
+                        className="text-[10px] px-1.5 py-0"
+                      >
+                        {result.confidence === "high" ? "Eşleşme ✓" : result.confidence === "medium" ? "Olası" : "Düşük"}
+                      </Badge>
+                    )}
                   </div>
                   <p className="text-xs text-muted-foreground truncate">{result.description || result.url}</p>
                   {result.extractedId && (
@@ -283,33 +291,38 @@ export function PlatformDiscovery() {
                   >
                     <ExternalLink className="h-4 w-4" />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-destructive"
-                    onClick={() => handleDismiss(result.url)}
-                    title="Reddet"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                  {(result.extractedId || (result.platform === "tripadvisor" && result.url)) && (
-                    <Button
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => handleConfirm(result)}
-                      disabled={confirming === result.url}
-                      title="Onayla ve bağla"
-                    >
-                      {confirming === result.url ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Check className="h-4 w-4" />
+                  {!isConnected && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive"
+                        onClick={() => handleDismiss(result.url)}
+                        title="Reddet"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                      {(result.extractedId || (result.platform === "tripadvisor" && result.url)) && (
+                        <Button
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handleConfirm(result)}
+                          disabled={confirming === result.url}
+                          title="Onayla ve bağla"
+                        >
+                          {confirming === result.url ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Check className="h-4 w-4" />
+                          )}
+                        </Button>
                       )}
-                    </Button>
+                    </>
                   )}
                 </div>
               </div>
-            ))}
+              );
+            })}
             <Button variant="ghost" size="sm" onClick={handleDiscover} disabled={loading}>
               {loading ? "Aranıyor..." : "Tekrar Ara"}
             </Button>
