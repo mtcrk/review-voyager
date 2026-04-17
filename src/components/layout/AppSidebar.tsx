@@ -79,12 +79,16 @@ const commonItems = [
   { title: "Tüm Yorumlar", url: "/inbox", icon: Inbox, highlight: true },
   { title: "Yorumlar", url: "/reviews", icon: MessageSquare },
   { title: "Rep Score", url: "/rep-score", icon: Trophy },
-  { title: "Lokasyonlar", url: "/locations", icon: Building2 },
   { title: "Google Hesapları", url: "/google-accounts", icon: Star },
   { title: "İstatistikler", url: "/statistics", icon: BarChart3 },
   { title: "Google Performance", url: "/performance", icon: TrendingUp },
   { title: "Rapor Oluştur", url: "/report", icon: FileText },
   { title: "Ayarlar", url: "/settings", icon: Settings },
+];
+
+const locationItems = [
+  { title: "Tüm Lokasyonlar", url: "/locations", icon: Building2 },
+  { title: "Platform Puanları", url: "/locations/platform-ratings", icon: LayoutGrid },
 ];
 
 export function AppSidebar() {
