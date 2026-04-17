@@ -37,6 +37,7 @@ import { toast } from "@/hooks/use-toast";
 import { useReviewFetch } from "@/contexts/ReviewFetchContext";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
+import { ReviewTranslator } from "@/components/reviews/ReviewTranslator";
 
 type SortField = "posted_at" | "rating" | "reviewer_name";
 type SortOrder = "asc" | "desc";
