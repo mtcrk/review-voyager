@@ -21,10 +21,15 @@ serve(async (req) => {
       throw new Error("Missing authorization header");
     }
 
+    const accessToken = authHeader.replace(/^Bearer\s+/i, "").trim();
+    if (!accessToken) {
+      throw new Error("Missing access token");
+    }
+
     // User client for RLS-protected queries (with caller auth context)
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
       global: {
-        headers: { Authorization: authHeader },
+        headers: { Authorization: `Bearer ${accessToken}` },
       },
       auth: {
         autoRefreshToken: false,
@@ -35,9 +40,7 @@ serve(async (req) => {
     // Service role client for accessing secure credentials table
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
 
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(
-      authHeader.replace("Bearer ", "")
-    );
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
 
     if (userError || !user) {
       throw new Error("Unauthorized");

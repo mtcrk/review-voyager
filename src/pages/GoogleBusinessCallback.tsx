@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { invokeAuthedFunction } from '@/lib/invokeAuthedFunction';
 
 interface GoogleBusiness {
   account_id: string;
@@ -50,22 +51,19 @@ export default function GoogleBusinessCallback() {
 
   const exchangeCode = async (code: string) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error('Not authenticated');
-      }
-
-      const response = await supabase.functions.invoke('google-business-auth', {
+      const response = await invokeAuthedFunction<{
+        businesses?: GoogleBusiness[];
+        refresh_token?: string;
+      }>('google-business-auth', {
         body: { action: 'exchange', code },
       });
 
-      if (response.error) throw response.error;
-
-      setBusinesses(response.data.businesses || []);
-      setRefreshToken(response.data.refresh_token);
+      const businessResults = response?.businesses || [];
+      setBusinesses(businessResults);
+      setRefreshToken(response?.refresh_token || '');
       
       // Auto-select all businesses
-      const allIds = new Set<string>(response.data.businesses.map((b: GoogleBusiness) => b.location_id));
+      const allIds = new Set<string>(businessResults.map((b) => b.location_id));
       setSelectedBusinesses(allIds);
     } catch (error: any) {
       console.error('Exchange error:', error);
@@ -106,15 +104,13 @@ export default function GoogleBusinessCallback() {
     try {
       const selectedBizList = businesses.filter(b => selectedBusinesses.has(b.location_id));
 
-      const { error } = await supabase.functions.invoke('google-business-auth', {
+      await invokeAuthedFunction('google-business-auth', {
         body: {
           action: 'save',
           businesses: selectedBizList,
           refresh_token: refreshToken,
         },
       });
-
-      if (error) throw error;
 
       // Auto-fetch business info (coordinates, address, etc.) for each saved business
       try {
@@ -128,7 +124,7 @@ export default function GoogleBusinessCallback() {
             userBusinesses
               .filter(b => b.google_location_id)
               .map(b =>
-                supabase.functions.invoke("google-business-info", {
+                invokeAuthedFunction("google-business-info", {
                   body: { business_id: b.id },
                 })
               )
