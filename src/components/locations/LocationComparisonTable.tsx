@@ -1,12 +1,26 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, MessageSquare, Clock, TrendingUp } from "lucide-react";
+import { Star, Clock, TrendingUp } from "lucide-react";
 import { LocationMetrics } from "@/hooks/useMultiLocationData";
 import { Progress } from "@/components/ui/progress";
 
 interface Props {
   locations: LocationMetrics[];
   onSelectLocation: (id: string) => void;
+}
+
+const PLATFORM_META: Record<string, { label: string; dot: string; text: string; bg: string }> = {
+  google: { label: "Google", dot: "bg-blue-500", text: "text-blue-700", bg: "bg-blue-50" },
+  booking: { label: "Booking", dot: "bg-indigo-500", text: "text-indigo-700", bg: "bg-indigo-50" },
+  tripadvisor: { label: "TripAdvisor", dot: "bg-emerald-500", text: "text-emerald-700", bg: "bg-emerald-50" },
+  hotelscom: { label: "Hotels.com", dot: "bg-rose-500", text: "text-rose-700", bg: "bg-rose-50" },
+  expedia: { label: "Expedia", dot: "bg-amber-500", text: "text-amber-700", bg: "bg-amber-50" },
+  trustpilot: { label: "Trustpilot", dot: "bg-teal-500", text: "text-teal-700", bg: "bg-teal-50" },
+  tripcom: { label: "Trip.com", dot: "bg-orange-500", text: "text-orange-700", bg: "bg-orange-50" },
+};
+
+function platformMeta(key: string) {
+  return PLATFORM_META[key] || { label: key, dot: "bg-muted-foreground", text: "text-foreground", bg: "bg-muted" };
 }
 
 export function LocationComparisonTable({ locations, onSelectLocation }: Props) {
@@ -26,8 +40,9 @@ export function LocationComparisonTable({ locations, onSelectLocation }: Props) 
             <thead>
               <tr className="border-b border-border bg-muted/30">
                 <th className="text-left px-5 py-3 font-medium text-muted-foreground">Lokasyon</th>
-                <th className="text-center px-4 py-3 font-medium text-muted-foreground">Puan</th>
-                <th className="text-center px-4 py-3 font-medium text-muted-foreground">Toplam Yorum</th>
+                <th className="text-center px-4 py-3 font-medium text-muted-foreground">Genel Puan</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Platform Puanları</th>
+                <th className="text-center px-4 py-3 font-medium text-muted-foreground">Toplam</th>
                 <th className="text-center px-4 py-3 font-medium text-muted-foreground">Bu Hafta</th>
                 <th className="text-center px-4 py-3 font-medium text-muted-foreground">Yanıt Oranı</th>
                 <th className="text-center px-4 py-3 font-medium text-muted-foreground">Bekleyen</th>
@@ -65,6 +80,31 @@ export function LocationComparisonTable({ locations, onSelectLocation }: Props) 
                         <Star className="h-3.5 w-3.5 text-amber-400 fill-amber-400" />
                         <span className="font-semibold text-foreground">{loc.averageRating}</span>
                       </div>
+                    </td>
+                    <td className="px-4 py-4">
+                      {Object.keys(loc.platformBreakdown).length === 0 ? (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      ) : (
+                        <div className="flex flex-wrap gap-1.5 max-w-[260px]">
+                          {Object.entries(loc.platformBreakdown)
+                            .sort((a, b) => b[1].count - a[1].count)
+                            .map(([key, val]) => {
+                              const meta = platformMeta(key);
+                              return (
+                                <div
+                                  key={key}
+                                  className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md ${meta.bg} ${meta.text} text-xs`}
+                                  title={`${meta.label} • ${val.count} yorum`}
+                                >
+                                  <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
+                                  <span className="font-medium">{meta.label}</span>
+                                  <span className="font-semibold">{val.avgRating}★</span>
+                                  <span className="opacity-60">({val.count})</span>
+                                </div>
+                              );
+                            })}
+                        </div>
+                      )}
                     </td>
                     <td className="text-center px-4 py-4">
                       <span className="font-medium text-foreground">{loc.totalReviews}</span>
