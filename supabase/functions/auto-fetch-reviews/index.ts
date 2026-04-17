@@ -199,6 +199,32 @@ async function runActorAndWait(actorId: string, input: any, token: string, maxWa
   throw new Error("Apify run timed out");
 }
 
+function extractOwnerReply(it: any): { text: string | null; date: string | null } {
+  if (Array.isArray(it.reviewResponses) && it.reviewResponses.length > 0) {
+    const first = it.reviewResponses[0];
+    if (typeof first === "string" && first.trim()) return { text: first.trim(), date: null };
+    if (first && typeof first === "object") {
+      const t = first.text || first.responseText || first.body || first.message || "";
+      const d = first.date || first.responseDate || first.createdAt || null;
+      if (t) return { text: String(t).trim(), date: d };
+    }
+  }
+  const candidates = [
+    it.responseFromOwnerText, it.ownerResponse, it.ownerReply, it.replyText,
+    it.managementResponse, it.hotelResponse, it.hotelReply, it.reply,
+    it.response, it.responseText, it.replyContent,
+  ];
+  for (const c of candidates) {
+    if (typeof c === "string" && c.trim()) return { text: c.trim(), date: null };
+    if (c && typeof c === "object") {
+      const t = c.text || c.body || c.message || c.content || "";
+      const d = c.date || c.createdAt || c.responseDate || null;
+      if (t) return { text: String(t).trim(), date: d };
+    }
+  }
+  return { text: null, date: null };
+}
+
 function transformItems(items: any[], businessId: string, platform: string): any[] {
   return items
     .filter(item => item.reviewText || item.reviewTitle || item.text || item.title)
@@ -230,6 +256,10 @@ function transformItems(items: any[], businessId: string, platform: string): any
         reviewId = item.reviewId || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       }
 
+      const reply = extractOwnerReply(item);
+      const ownerReply = reply.text;
+      const ownerReplyAt = reply.date ? toSafeIsoDate(reply.date) : (ownerReply ? postedAt : null);
+
       return {
         business_id: businessId,
         platform: resolvedPlatform,
@@ -238,8 +268,11 @@ function transformItems(items: any[], businessId: string, platform: string): any
         rating,
         text: text || null,
         posted_at: postedAt,
-        status: "pending_reply",
+        status: ownerReply ? "replied" : "pending_reply",
         sentiment: rating >= 4 ? "positive" : rating >= 3 ? "neutral" : "negative",
+        approved_reply: ownerReply,
+        replied_at: ownerReplyAt,
+        reply_source: ownerReply ? "platform" : null,
       };
     });
 }
