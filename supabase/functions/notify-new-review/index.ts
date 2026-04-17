@@ -209,6 +209,19 @@ Deno.serve(async (req) => {
     const result = await res.json();
     console.log(`Notification email sent to ${user.email} for ${reviewCount} reviews:`, result);
 
+    // Idempotency: log one row per review so we never re-send for the same review
+    if (res.ok) {
+      const logRows = filteredReviews.map((r: any) => ({
+        business_id,
+        recipient_email: user.email,
+        subject,
+        status: "sent",
+        resend_id: `review:${r.id}`,
+      }));
+      const { error: logErr } = await supabase.from("email_logs").insert(logRows);
+      if (logErr) console.error("Failed to write email_logs:", logErr);
+    }
+
     return new Response(JSON.stringify({ success: true, emailsSent: 1, reviewsNotified: reviewCount }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
