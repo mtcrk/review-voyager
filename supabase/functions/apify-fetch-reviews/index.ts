@@ -288,7 +288,7 @@ Deno.serve(async (req) => {
       const forcedPlatform = (platform === "hotelscom" || platform === "expedia" || platform === "trustpilot" || platform === "tripcom" || platform === "booking") ? platform : undefined;
       const result = await insertReviews(supabase, cappedItems, business_id, forcedPlatform);
 
-      await logSuccess(supabase, business_id, platform, items.length, result.inserted, result.skipped);
+      await logSuccess(supabase, business_id, platform, items.length, result.inserted, result.updated, result.skipped);
 
       return new Response(
         JSON.stringify({ success: true, ...result, fetched: items.length }),
@@ -587,24 +587,69 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
     });
 
   // Batch check existing reviews
-  const existingIds = new Set<string>();
+  const existingReviews = new Map<string, {
+    id: string;
+    approved_reply: string | null;
+    reply_source: string | null;
+    replied_at: string | null;
+    status: string | null;
+  }>();
   const allIds = transformed.map(r => r.google_review_id);
   const CHECK_BATCH = 200;
   for (let i = 0; i < allIds.length; i += CHECK_BATCH) {
     const batch = allIds.slice(i, i + CHECK_BATCH);
     const { data: existing } = await supabase
       .from("reviews")
-      .select("google_review_id")
+      .select("id, google_review_id, approved_reply, reply_source, replied_at, status")
       .eq("business_id", businessId)
       .in("google_review_id", batch);
     if (existing) {
-      for (const row of existing) existingIds.add(row.google_review_id!);
+      for (const row of existing) {
+        if (row.google_review_id) {
+          existingReviews.set(row.google_review_id, row);
+        }
+      }
     }
   }
 
-  const newReviews = transformed.filter(r => !existingIds.has(r.google_review_id));
-  const skipped = transformed.length - newReviews.length;
+  const newReviews: typeof transformed = [];
+  const replyUpdates: Array<{
+    id: string;
+    approved_reply: string;
+    replied_at: string | null;
+    reply_source: "platform";
+    status: "replied";
+  }> = [];
+
+  for (const review of transformed) {
+    const existing = existingReviews.get(review.google_review_id);
+
+    if (!existing) {
+      newReviews.push(review);
+      continue;
+    }
+
+    const canApplyPlatformReply = Boolean(review.approved_reply) && (!existing.approved_reply || existing.reply_source === "platform");
+    const replyChanged = canApplyPlatformReply && (
+      existing.approved_reply !== review.approved_reply ||
+      existing.reply_source !== "platform" ||
+      existing.status !== "replied" ||
+      existing.replied_at !== review.replied_at
+    );
+
+    if (replyChanged && review.approved_reply) {
+      replyUpdates.push({
+        id: existing.id,
+        approved_reply: review.approved_reply,
+        replied_at: review.replied_at,
+        reply_source: "platform",
+        status: "replied",
+      });
+    }
+  }
+
   let inserted = 0;
+  let updated = 0;
 
   // Batch insert
   const INSERT_BATCH = 100;
@@ -618,17 +663,42 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
     }
   }
 
-  console.log(`Done: ${inserted} inserted, ${skipped} skipped out of ${transformed.length} total`);
-  return { inserted, skipped, total: transformed.length };
+  // Batch reply-only upsert for existing reviews
+  const UPDATE_BATCH = 100;
+  for (let i = 0; i < replyUpdates.length; i += UPDATE_BATCH) {
+    const batch = replyUpdates.slice(i, i + UPDATE_BATCH);
+    const { data, error } = await supabase
+      .from("reviews")
+      .upsert(batch, { onConflict: "id" })
+      .select("id");
+
+    if (error) {
+      console.error(`Batch reply upsert error at ${i}:`, error.message);
+    } else {
+      updated += data?.length || 0;
+    }
+  }
+
+  const skipped = transformed.length - newReviews.length - replyUpdates.length;
+  console.log(`Done: ${inserted} inserted, ${updated} updated, ${skipped} skipped out of ${transformed.length} total`);
+  return { inserted, updated, skipped, total: transformed.length };
 }
 
-async function logSuccess(supabase: any, businessId: string, platform: string, fetched: number, inserted: number, skipped: number) {
+async function logSuccess(
+  supabase: any,
+  businessId: string,
+  platform: string,
+  fetched: number,
+  inserted: number,
+  updated: number,
+  skipped: number,
+) {
   await supabase.from("integration_logs").insert({
     business_id: businessId,
     provider: "apify",
     action: `${platform}_reviews_fetch`,
     status: "success",
-    meta: { fetched, inserted, skipped },
+    meta: { fetched, inserted, updated, skipped },
   });
 }
 
