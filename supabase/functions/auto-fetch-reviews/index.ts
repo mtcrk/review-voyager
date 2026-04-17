@@ -322,7 +322,7 @@ Deno.serve(async (req) => {
     // Get all businesses with any platform configured
     const { data: businesses, error: bizError } = await supabase
       .from("businesses")
-      .select("id, place_id, name, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url, expedia_hotel_id, city")
+      .select("id, user_id, place_id, name, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url, expedia_hotel_id, city")
       .or("place_id.not.is.null,booking_hotel_id.not.is.null,tripadvisor_id.not.is.null,trustpilot_url.not.is.null,expedia_hotel_id.not.is.null");
 
     if (bizError) throw bizError;
@@ -333,6 +333,14 @@ Deno.serve(async (req) => {
     }
 
     const results: any[] = [];
+    // Group fetch results by user_id for consolidated reporting
+    const userReports: Map<string, Array<{
+      business_id: string;
+      business_name: string;
+      city: string | null;
+      new_reviews: any[];
+      platform_results: { platform: string; fetched: number; inserted: number; error?: string }[];
+    }>> = new Map();
 
     for (const biz of businesses) {
       const jobs = buildFetchJobs(biz);
@@ -349,12 +357,7 @@ Deno.serve(async (req) => {
           allNewReviews.push(...newReviews);
           platformResults.push({ platform: job.platform, fetched: items.length, inserted });
 
-          results.push({
-            business: biz.name,
-            platform: job.platform,
-            fetched: items.length,
-            inserted,
-          });
+          results.push({ business: biz.name, platform: job.platform, fetched: items.length, inserted });
           console.log(`[${biz.name}] ${job.platform}: ${items.length} fetched, ${inserted} new`);
         } catch (err: any) {
           platformResults.push({ platform: job.platform, fetched: 0, inserted: 0, error: err.message });
@@ -368,7 +371,22 @@ Deno.serve(async (req) => {
         await sendNotification(supabaseUrl, supabaseServiceKey, biz.id, allNewReviews);
       }
 
-      // Daily summary report (always sent if there are new reviews OR errors)
+      // Collect for consolidated user-level report
+      const hasErrors = platformResults.some((p) => p.error);
+      if (allNewReviews.length > 0 || hasErrors) {
+        if (!userReports.has(biz.user_id)) userReports.set(biz.user_id, []);
+        userReports.get(biz.user_id)!.push({
+          business_id: biz.id,
+          business_name: biz.name,
+          city: biz.city,
+          new_reviews: allNewReviews,
+          platform_results: platformResults,
+        });
+      }
+    }
+
+    // Send ONE consolidated email per user (covers all their locations)
+    for (const [userId, locations] of userReports.entries()) {
       try {
         await fetch(`${supabaseUrl}/functions/v1/notify-fetch-summary`, {
           method: "POST",
@@ -376,14 +394,11 @@ Deno.serve(async (req) => {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${supabaseServiceKey}`,
           },
-          body: JSON.stringify({
-            business_id: biz.id,
-            new_reviews: allNewReviews,
-            platform_results: platformResults,
-          }),
+          body: JSON.stringify({ user_id: userId, locations }),
         });
+        console.log(`Consolidated report sent to user ${userId} (${locations.length} locations)`);
       } catch (err: any) {
-        console.error(`[${biz.name}] summary email failed:`, err.message);
+        console.error(`Consolidated report failed for user ${userId}:`, err.message);
       }
     }
 
