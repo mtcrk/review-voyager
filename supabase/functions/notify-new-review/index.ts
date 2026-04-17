@@ -93,7 +93,32 @@ Deno.serve(async (req) => {
       );
     }
 
-    const filteredReviews = reviews;
+    // ============================================================
+    // HARD GUARD #3: Per-review idempotency.
+    // Skip any review that has ALREADY been notified (email_logs).
+    // resend_id format: "review:<review_id>"
+    // ============================================================
+    const reviewIds = reviews.map((r: any) => r.id).filter(Boolean);
+    const dedupeKeys = reviewIds.map((id: string) => `review:${id}`);
+
+    const { data: alreadySent } = await supabase
+      .from("email_logs")
+      .select("resend_id")
+      .eq("business_id", business_id)
+      .in("resend_id", dedupeKeys);
+
+    const sentSet = new Set((alreadySent ?? []).map((r: any) => r.resend_id));
+    const filteredReviews = reviews.filter(
+      (r: any) => r.id && !sentSet.has(`review:${r.id}`)
+    );
+
+    if (filteredReviews.length === 0) {
+      console.log(`Skipping — all ${reviews.length} reviews already notified for "${business.name}"`);
+      return new Response(
+        JSON.stringify({ message: "All reviews already notified", skipped: reviews.length }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(business.user_id);
 
@@ -183,6 +208,19 @@ Deno.serve(async (req) => {
 
     const result = await res.json();
     console.log(`Notification email sent to ${user.email} for ${reviewCount} reviews:`, result);
+
+    // Idempotency: log one row per review so we never re-send for the same review
+    if (res.ok) {
+      const logRows = filteredReviews.map((r: any) => ({
+        business_id,
+        recipient_email: user.email,
+        subject,
+        status: "sent",
+        resend_id: `review:${r.id}`,
+      }));
+      const { error: logErr } = await supabase.from("email_logs").insert(logRows);
+      if (logErr) console.error("Failed to write email_logs:", logErr);
+    }
 
     return new Response(JSON.stringify({ success: true, emailsSent: 1, reviewsNotified: reviewCount }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
