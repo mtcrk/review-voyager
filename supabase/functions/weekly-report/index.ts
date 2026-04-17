@@ -151,14 +151,34 @@ Deno.serve(async (req) => {
 </body>
 </html>`;
 
-      // Use Supabase's built-in email sending (via auth hooks or direct SMTP)
-      // For now, log the report - actual email sending requires SMTP config
-      console.log(`Weekly report generated for ${email}:`);
-      console.log(`- ${totalNewReviews} new reviews, avg ${avgRating}`);
-      console.log(`- ${pending} pending replies`);
-      console.log(`- Locations: ${userBizList.map((b) => b.name).join(", ")}`);
+      // Send via Resend
+      const resendKey = Deno.env.get("RESEND_API_KEY");
+      if (!resendKey) {
+        console.error("RESEND_API_KEY missing");
+        continue;
+      }
 
-      // Store the report data for frontend retrieval
+      const resendRes = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${resendKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: "VoyageRespond <notify@voyagerespond.com>",
+          to: [email],
+          subject: `📊 Haftalık Raporunuz - ${totalNewReviews} yeni yorum`,
+          html: htmlContent,
+        }),
+      });
+
+      if (!resendRes.ok) {
+        const errText = await resendRes.text();
+        console.error(`Resend failed for ${email}:`, resendRes.status, errText);
+        continue;
+      }
+
+      console.log(`Weekly report sent to ${email}: ${totalNewReviews} reviews, ${pending} pending`);
       emailsSent++;
     }
 
