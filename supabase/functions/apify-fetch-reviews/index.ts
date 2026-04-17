@@ -261,7 +261,7 @@ Deno.serve(async (req) => {
       const datasetId = runData.defaultDatasetId;
       const items = await fetchDatasetItems(datasetId, APIFY_API_TOKEN);
 
-      const actorMessage = items.find((item: any) => typeof item?.message === "string")?.message;
+      const actorMessage = (items.find((item: any) => typeof item?.message === "string") as any)?.message;
       const hasReviewPayload = items.some((item: any) =>
         item.reviewText || item.reviewTitle || item.text || item.title ||
         item.reviewOriginalText || item.reviewTranslatedText || item.review_text ||
