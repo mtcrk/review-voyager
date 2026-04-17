@@ -95,6 +95,9 @@ export default function Locations() {
       {/* Highlights (best/worst) */}
       <LocationHighlights locations={locations} />
 
+      {/* Platform Ratings Matrix - per platform per location */}
+      <PlatformRatingsMatrix locations={locations} onSelectLocation={handleSelectLocation} />
+
       {/* Comparison Table */}
       <LocationComparisonTable locations={locations} onSelectLocation={handleSelectLocation} />
 
