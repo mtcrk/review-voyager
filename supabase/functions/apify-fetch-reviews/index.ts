@@ -12,6 +12,7 @@ const HOTELSCOM_ACTOR_ID = "memo23~hotels-scraper";
 const TRUSTPILOT_ACTOR_ID = "zen-studio~trustpilot-review-scraper";
 const EXPEDIA_ACTOR_ID = "shahidirfan~expedia-reviews-scraper";
 const TRIPCOM_ACTOR_ID = "shahidirfan~trip-com-hotel-reviews-scraper";
+const BOOKING_ACTOR_ID = "voyager~booking-reviews-scraper";
 
 // Map Apify provider names to our platform names
 const PROVIDER_MAP: Record<string, string> = {
