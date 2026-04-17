@@ -62,6 +62,7 @@ export function PlatformDiscovery() {
   const [searched, setSearched] = useState(false);
   const [confirming, setConfirming] = useState<string | null>(null);
   const [dismissed, setDismissed] = useState<string[]>([]);
+  const [connectedUrls, setConnectedUrls] = useState<string[]>([]);
 
   const handleDiscover = async () => {
     if (!activeBusiness) return;
