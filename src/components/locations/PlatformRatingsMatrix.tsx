@@ -7,6 +7,8 @@ interface Props {
   onSelectLocation: (id: string) => void;
 }
 
+// Note: clicking a row navigates to the location's platform detail page (handled by parent).
+
 const PLATFORMS: { key: string; label: string; dot: string }[] = [
   { key: "google", label: "Google", dot: "bg-blue-500" },
   { key: "booking", label: "Booking", dot: "bg-indigo-500" },

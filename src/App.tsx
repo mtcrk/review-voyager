@@ -46,6 +46,7 @@ import DemoPage from "./pages/DemoPage";
 import About from "./pages/About";
 import Locations from "./pages/Locations";
 import PlatformRatings from "./pages/PlatformRatings";
+import PlatformRatingDetail from "./pages/PlatformRatingDetail";
 import EmailCenter from "./pages/EmailCenter";
 import RepScore from "./pages/RepScore";
 import Blog from "./pages/Blog";
@@ -156,6 +157,16 @@ const App = () => (
                 <ProtectedRoute>
                   <AppLayout>
                     <PlatformRatings />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/locations/platform-ratings/:id"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <PlatformRatingDetail />
                   </AppLayout>
                 </ProtectedRoute>
               }

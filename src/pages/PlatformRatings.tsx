@@ -2,24 +2,13 @@ import { useNavigate } from "react-router-dom";
 import { LayoutGrid, Loader2 } from "lucide-react";
 import { useMultiLocationData } from "@/hooks/useMultiLocationData";
 import { PlatformRatingsMatrix } from "@/components/locations/PlatformRatingsMatrix";
-import { useBusiness } from "@/contexts/BusinessContext";
-import { toast } from "@/hooks/use-toast";
 
 export default function PlatformRatings() {
   const navigate = useNavigate();
-  const { businesses, setActiveBusiness } = useBusiness();
   const { data: locations = [], isLoading } = useMultiLocationData();
 
   const handleSelectLocation = (id: string) => {
-    const selected = businesses.find((b) => b.id === id);
-    if (selected) {
-      setActiveBusiness(selected);
-      toast({
-        title: `${selected.name} seçildi`,
-        description: "Dashboard bu lokasyona göre güncellendi.",
-      });
-      navigate("/dashboard");
-    }
+    navigate(`/locations/platform-ratings/${id}`);
   };
 
   if (isLoading) {
