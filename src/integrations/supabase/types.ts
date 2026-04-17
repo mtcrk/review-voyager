@@ -469,6 +469,53 @@ export type Database = {
           },
         ]
       }
+      platform_rankings: {
+        Row: {
+          area_name: string | null
+          business_id: string
+          created_at: string
+          fetched_at: string
+          id: string
+          platform: string
+          rank: number | null
+          raw: Json | null
+          source_url: string | null
+          total_in_area: number | null
+        }
+        Insert: {
+          area_name?: string | null
+          business_id: string
+          created_at?: string
+          fetched_at?: string
+          id?: string
+          platform: string
+          rank?: number | null
+          raw?: Json | null
+          source_url?: string | null
+          total_in_area?: number | null
+        }
+        Update: {
+          area_name?: string | null
+          business_id?: string
+          created_at?: string
+          fetched_at?: string
+          id?: string
+          platform?: string
+          rank?: number | null
+          raw?: Json | null
+          source_url?: string | null
+          total_in_area?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_rankings_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
