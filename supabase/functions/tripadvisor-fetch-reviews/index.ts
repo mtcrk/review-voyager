@@ -21,6 +21,24 @@ interface TripAdvisorReview {
     name?: string;
     firstName?: string;
   };
+  ownerResponse?: { text?: string; publishedDate?: string } | string | null;
+  responseFromOwnerText?: string | null;
+  responseFromOwnerDate?: string | null;
+  managementResponse?: { text?: string; publishedDate?: string } | string | null;
+}
+
+function extractTAOwnerReply(it: any): { text: string | null; date: string | null } {
+  const candidates = [it.ownerResponse, it.managementResponse, it.responseFromOwnerText, it.response];
+  for (const c of candidates) {
+    if (typeof c === "string" && c.trim()) return { text: c.trim(), date: null };
+    if (c && typeof c === "object") {
+      const t = c.text || c.body || c.message || "";
+      const d = c.publishedDate || c.date || null;
+      if (t) return { text: String(t).trim(), date: d };
+    }
+  }
+  if (it.responseFromOwnerDate) return { text: null, date: it.responseFromOwnerDate };
+  return { text: null, date: null };
 }
 
 function toSafeIsoDate(input?: string | null): string {
