@@ -138,6 +138,20 @@ export default function PlatformRatingDetail() {
           </Button>
           <h1 className="text-2xl font-bold text-foreground">{location.name}</h1>
           {location.city && <p className="text-sm text-muted-foreground">{location.city}</p>}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefreshRankings}
+            disabled={refreshing}
+            className="mt-2"
+          >
+            {refreshing ? (
+              <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+            ) : (
+              <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+            )}
+            Sıralamayı Yenile
+          </Button>
         </div>
         <div className="flex items-center gap-6 bg-card border rounded-xl px-5 py-3">
           <div className="text-center">
@@ -182,6 +196,8 @@ export default function PlatformRatingDetail() {
             }));
             const maxCount = Math.max(...dist.map((d) => d.count), 1);
 
+            const ranking = rankings.find((r: any) => r.platform === key);
+
             return (
               <Card key={key} className="hover:shadow-md transition-shadow">
                 <CardHeader className="pb-3 border-b">
@@ -218,6 +234,24 @@ export default function PlatformRatingDetail() {
                       <TrendingUp className="h-3 w-3 mr-1" />
                       {Math.round((stats.count / location.totalReviews) * 100)}%
                     </Badge>
+                  </div>
+
+                  {/* Ranking */}
+                  {ranking && ranking.rank && ranking.total_in_area && (
+                    <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900">
+                      <Trophy className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                      <div className="text-xs">
+                        <p className="font-semibold text-foreground">
+                          {ranking.area_name || location.city || "Bölge"}'de{" "}
+                          <span className="text-amber-700 dark:text-amber-300">{ranking.total_in_area}</span> otel arasında{" "}
+                          <span className="text-amber-700 dark:text-amber-300">{ranking.rank}.</span> sırada
+                        </p>
+                        <p className="text-muted-foreground mt-0.5">
+                          Güncellendi: {formatDistanceToNow(new Date(ranking.fetched_at), { addSuffix: true, locale: tr })}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                   </div>
 
                   {/* Distribution */}
