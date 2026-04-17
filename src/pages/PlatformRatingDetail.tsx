@@ -1,12 +1,14 @@
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Star, MessageSquare, ExternalLink, Loader2, TrendingUp, Calendar } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, Star, MessageSquare, ExternalLink, Loader2, TrendingUp, Calendar, Trophy, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useMultiLocationData } from "@/hooks/useMultiLocationData";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { tr } from "date-fns/locale";
 
@@ -29,6 +31,9 @@ export default function PlatformRatingDetail() {
   const location = locations.find((l) => l.id === id);
   const business = businesses.find((b) => b.id === id);
 
+  const queryClient = useQueryClient();
+  const [refreshing, setRefreshing] = useState(false);
+
   // Latest reviews per platform (top 3 each)
   const { data: recentReviews = [] } = useQuery({
     queryKey: ["platform-detail-reviews", id],
@@ -45,6 +50,42 @@ export default function PlatformRatingDetail() {
     },
     enabled: !!id,
   });
+
+  // Platform rankings (TripAdvisor #X of Y in area, etc.)
+  const { data: rankings = [] } = useQuery({
+    queryKey: ["platform-rankings", id],
+    queryFn: async () => {
+      if (!id) return [];
+      const { data, error } = await supabase
+        .from("platform_rankings")
+        .select("*")
+        .eq("business_id", id);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!id,
+  });
+
+  const handleRefreshRankings = async () => {
+    if (!id) return;
+    setRefreshing(true);
+    try {
+      const { error } = await supabase.functions.invoke("fetch-platform-ranking", {
+        body: { business_id: id },
+      });
+      if (error) throw error;
+      await queryClient.invalidateQueries({ queryKey: ["platform-rankings", id] });
+      toast({ title: "Sıralama güncellendi", description: "Platform sıralamaları yenilendi." });
+    } catch (e: any) {
+      toast({
+        title: "Hata",
+        description: e.message || "Sıralama çekilemedi.",
+        variant: "destructive",
+      });
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -97,6 +138,20 @@ export default function PlatformRatingDetail() {
           </Button>
           <h1 className="text-2xl font-bold text-foreground">{location.name}</h1>
           {location.city && <p className="text-sm text-muted-foreground">{location.city}</p>}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefreshRankings}
+            disabled={refreshing}
+            className="mt-2"
+          >
+            {refreshing ? (
+              <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+            ) : (
+              <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+            )}
+            Sıralamayı Yenile
+          </Button>
         </div>
         <div className="flex items-center gap-6 bg-card border rounded-xl px-5 py-3">
           <div className="text-center">
@@ -141,6 +196,8 @@ export default function PlatformRatingDetail() {
             }));
             const maxCount = Math.max(...dist.map((d) => d.count), 1);
 
+            const ranking = rankings.find((r: any) => r.platform === key);
+
             return (
               <Card key={key} className="hover:shadow-md transition-shadow">
                 <CardHeader className="pb-3 border-b">
@@ -178,6 +235,26 @@ export default function PlatformRatingDetail() {
                       {Math.round((stats.count / location.totalReviews) * 100)}%
                     </Badge>
                   </div>
+
+                  {/* Ranking */}
+                  {ranking && ranking.rank && ranking.total_in_area && (
+                    <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900">
+                      <Trophy className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                      <div className="text-xs">
+                        <p className="font-semibold text-foreground">
+                          {ranking.area_name || location.city || "Bölge"}
+                          {"'de "}
+                          <span className="text-amber-700 dark:text-amber-300">{ranking.total_in_area}</span>
+                          {" otel arasında "}
+                          <span className="text-amber-700 dark:text-amber-300">{ranking.rank}.</span>
+                          {" sırada"}
+                        </p>
+                        <p className="text-muted-foreground mt-0.5">
+                          Güncellendi: {formatDistanceToNow(new Date(ranking.fetched_at), { addSuffix: true, locale: tr })}
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Distribution */}
                   <div className="space-y-1">
