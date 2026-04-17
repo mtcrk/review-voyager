@@ -6,7 +6,6 @@ import { useMultiLocationData } from "@/hooks/useMultiLocationData";
 import { LocationOverviewStats } from "@/components/locations/LocationOverviewStats";
 import { LocationHighlights } from "@/components/locations/LocationHighlights";
 import { LocationComparisonTable } from "@/components/locations/LocationComparisonTable";
-import { PlatformRatingsMatrix } from "@/components/locations/PlatformRatingsMatrix";
 import { LocationTrendChart } from "@/components/locations/LocationTrendChart";
 import { LocationMapView } from "@/components/locations/LocationMapView";
 import { BusinessOnboarding } from "@/components/BusinessOnboarding";
