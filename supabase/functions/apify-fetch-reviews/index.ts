@@ -280,7 +280,11 @@ Deno.serve(async (req) => {
         );
       }
 
-      const cappedItems = (platform === "hotelscom" || platform === "expedia" || platform === "tripcom" || platform === "booking") ? items.slice(0, 200) : items;
+      const cappedItems = platform === "booking"
+        ? items.slice(0, 1000)
+        : (platform === "hotelscom" || platform === "expedia" || platform === "tripcom")
+          ? items.slice(0, 200)
+          : items;
       const forcedPlatform = (platform === "hotelscom" || platform === "expedia" || platform === "trustpilot" || platform === "tripcom" || platform === "booking") ? platform : undefined;
       const result = await insertReviews(supabase, cappedItems, business_id, forcedPlatform);
 
@@ -375,7 +379,7 @@ Deno.serve(async (req) => {
       actorId = BOOKING_ACTOR_ID;
       actorInput = {
         startUrls: [{ url: bookingUrl }],
-        maxReviewsPerHotel: 200,
+        maxReviewsPerHotel: 1000,
       };
       console.log(`Using dedicated Booking scraper for: ${bookingUrl}`);
     } else {
