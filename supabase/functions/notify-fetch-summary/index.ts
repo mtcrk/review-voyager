@@ -153,7 +153,7 @@ function summarizeIssuesPraises(reviews: ReviewLite[]) {
   return { topIssues, topPraises, negativeCount: negatives.length, positiveCount: positives.length };
 }
 
-function buildEmailHtml(opts: {
+function buildLocationSection(opts: {
   businessName: string;
   totalNew: number;
   avgRating: number;
@@ -247,26 +247,22 @@ function buildEmailHtml(opts: {
     })
     .join("");
 
-  return `<!DOCTYPE html>
-<html><head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-  <div style="max-width:640px;margin:0 auto;padding:24px;">
-    <div style="background:linear-gradient(135deg,#7A5AF8 0%,#635BFF 100%);border-radius:12px;padding:28px;color:white;margin-bottom:20px;">
-      <h1 style="margin:0 0 6px 0;font-size:22px;font-weight:700;">📊 Günlük Yorum Raporu</h1>
-      <p style="margin:0;opacity:0.9;font-size:14px;">${businessName}</p>
-    </div>
-
-    ${urgencyBanner}
-
-    ${unansweredCount > 0 ? `<div style="background:#eff6ff;border:1px solid #bfdbfe;padding:14px 18px;border-radius:10px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-      <div>
-        <div style="font-weight:600;font-size:13px;color:#1e40af;">📬 ${unansweredCount} yeni yorum yanıt bekliyor</div>
-        <div style="font-size:12px;color:#3730a3;margin-top:2px;">Hızlı yanıt itibar puanınızı yükseltir.</div>
-      </div>
-      <a href="${APP_URL}/reviews?status=unanswered" style="background:#1e40af;color:white;padding:8px 14px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;">Yanıtla →</a>
-    </div>` : ""}
-
+  return `
     <div style="background:white;border-radius:12px;padding:24px;margin-bottom:16px;border:1px solid #e5e7eb;">
+      <div style="border-bottom:1px solid #f3f4f6;padding-bottom:14px;margin-bottom:18px;">
+        <h2 style="margin:0;font-size:17px;font-weight:700;color:#111827;">📍 ${businessName}</h2>
+      </div>
+
+      ${urgencyBanner}
+
+      ${unansweredCount > 0 ? `<div style="background:#eff6ff;border:1px solid #bfdbfe;padding:14px 18px;border-radius:10px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+        <div>
+          <div style="font-weight:600;font-size:13px;color:#1e40af;">📬 ${unansweredCount} yeni yorum yanıt bekliyor</div>
+          <div style="font-size:12px;color:#3730a3;margin-top:2px;">Hızlı yanıt itibar puanınızı yükseltir.</div>
+        </div>
+        <a href="${APP_URL}/reviews?status=unanswered" style="background:#1e40af;color:white;padding:8px 14px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;">Yanıtla →</a>
+      </div>` : ""}
+
       <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
         <div style="flex:1;min-width:120px;background:#f9fafb;padding:16px;border-radius:8px;text-align:center;">
           <div style="font-size:28px;font-weight:700;color:#7A5AF8;">${totalNew}</div>
@@ -277,11 +273,11 @@ function buildEmailHtml(opts: {
           <div style="font-size:28px;font-weight:700;color:${getRatingColor(avgRating)};">${avgRating.toFixed(1)}★</div>
           <div style="font-size:12px;color:#6b7280;margin-top:4px;">Ort. Puan</div>
         </div>
-        <div style="flex:1;background:#f9fafb;padding:16px;border-radius:8px;text-align:center;">
+        <div style="flex:1;min-width:120px;background:#f9fafb;padding:16px;border-radius:8px;text-align:center;">
           <div style="font-size:28px;font-weight:700;color:#16a34a;">${summary.positiveCount}</div>
           <div style="font-size:12px;color:#6b7280;margin-top:4px;">Olumlu</div>
         </div>
-        <div style="flex:1;background:#f9fafb;padding:16px;border-radius:8px;text-align:center;">
+        <div style="flex:1;min-width:120px;background:#f9fafb;padding:16px;border-radius:8px;text-align:center;">
           <div style="font-size:28px;font-weight:700;color:#dc2626;">${summary.negativeCount}</div>
           <div style="font-size:12px;color:#6b7280;margin-top:4px;">Olumsuz</div>
         </div>
@@ -289,7 +285,7 @@ function buildEmailHtml(opts: {
 
       ${aiOverviewBlock}
 
-      <h3 style="margin:0 0 10px 0;font-size:15px;color:#111827;">Platform Bazında</h3>
+      <h3 style="margin:0 0 10px 0;font-size:14px;color:#111827;">Platform Bazında</h3>
       <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
         <thead>
           <tr style="background:#f9fafb;">
@@ -302,12 +298,12 @@ function buildEmailHtml(opts: {
         <tbody>${platformRows}</tbody>
       </table>
 
-      <div style="display:flex;gap:16px;margin-bottom:20px;">
-        <div style="flex:1;background:#fef2f2;padding:16px;border-radius:8px;">
+      <div style="display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:200px;background:#fef2f2;padding:16px;border-radius:8px;">
           <h4 style="margin:0 0 10px 0;font-size:13px;color:#dc2626;">⚠️ Şikayet Konuları</h4>
           <ul style="margin:0;padding-left:18px;font-size:13px;color:#374151;line-height:1.6;">${issuesItems}</ul>
         </div>
-        <div style="flex:1;background:#f0fdf4;padding:16px;border-radius:8px;">
+        <div style="flex:1;min-width:200px;background:#f0fdf4;padding:16px;border-radius:8px;">
           <h4 style="margin:0 0 10px 0;font-size:13px;color:#16a34a;">✓ Övgü Konuları</h4>
           <ul style="margin:0;padding-left:18px;font-size:13px;color:#374151;line-height:1.6;">${praisesItems}</ul>
         </div>
@@ -315,13 +311,97 @@ function buildEmailHtml(opts: {
 
       ${recommendationsBlock}
 
-      ${sampleCards ? `<h3 style="margin:0 0 10px 0;font-size:15px;color:#111827;">Örnek Yorumlar</h3>${sampleCards}` : ""}
+      ${sampleCards ? `<h3 style="margin:0 0 10px 0;font-size:14px;color:#111827;">Örnek Yorumlar</h3>${sampleCards}` : ""}
+    </div>`;
+}
 
-      <div style="text-align:center;margin-top:24px;">
-        <a href="${APP_URL}/reviews" style="display:inline-block;background:#7A5AF8;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">
-          Tüm Yorumları Gör →
-        </a>
+function buildConsolidatedEmailHtml(locations: Array<{
+  name: string;
+  city: string | null;
+  totalNew: number;
+  avgRating: number;
+  summary: ReturnType<typeof summarizeIssuesPraises>;
+  aiSummary: Awaited<ReturnType<typeof generateAISummary>>;
+  platformResults: PlatformResult[];
+  sampleReviews: ReviewLite[];
+  yesterdayCount: number;
+  unansweredCount: number;
+}>): string {
+  const totalNewAll = locations.reduce((s, l) => s + l.totalNew, 0);
+  const totalNegAll = locations.reduce((s, l) => s + l.summary.negativeCount, 0);
+  const totalUnansweredAll = locations.reduce((s, l) => s + l.unansweredCount, 0);
+  const isMulti = locations.length > 1;
+
+  // Overview header for multi-location
+  const portfolioOverview = isMulti ? `
+    <div style="background:white;border-radius:12px;padding:20px;margin-bottom:16px;border:1px solid #e5e7eb;">
+      <div style="font-size:11px;color:#7A5AF8;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Portföy Özeti</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:100px;text-align:center;">
+          <div style="font-size:24px;font-weight:700;color:#7A5AF8;">${locations.length}</div>
+          <div style="font-size:11px;color:#6b7280;">Lokasyon</div>
+        </div>
+        <div style="flex:1;min-width:100px;text-align:center;">
+          <div style="font-size:24px;font-weight:700;color:#111827;">${totalNewAll}</div>
+          <div style="font-size:11px;color:#6b7280;">Toplam Yeni</div>
+        </div>
+        <div style="flex:1;min-width:100px;text-align:center;">
+          <div style="font-size:24px;font-weight:700;color:#16a34a;">${locations.reduce((s, l) => s + l.summary.positiveCount, 0)}</div>
+          <div style="font-size:11px;color:#6b7280;">Olumlu</div>
+        </div>
+        <div style="flex:1;min-width:100px;text-align:center;">
+          <div style="font-size:24px;font-weight:700;color:#dc2626;">${totalNegAll}</div>
+          <div style="font-size:11px;color:#6b7280;">Olumsuz</div>
+        </div>
+        <div style="flex:1;min-width:100px;text-align:center;">
+          <div style="font-size:24px;font-weight:700;color:#1e40af;">${totalUnansweredAll}</div>
+          <div style="font-size:11px;color:#6b7280;">Yanıt Bekleyen</div>
+        </div>
       </div>
+    </div>` : "";
+
+  // Sort: most negative first (urgency), then by total new
+  const sorted = [...locations].sort((a, b) => {
+    if (b.summary.negativeCount !== a.summary.negativeCount) return b.summary.negativeCount - a.summary.negativeCount;
+    return b.totalNew - a.totalNew;
+  });
+
+  const sections = sorted.map((loc) => buildLocationSection({
+    businessName: loc.name + (loc.city ? ` · ${loc.city}` : ""),
+    totalNew: loc.totalNew,
+    avgRating: loc.avgRating,
+    platformResults: loc.platformResults,
+    summary: loc.summary,
+    sampleReviews: loc.sampleReviews,
+    aiSummary: loc.aiSummary,
+    yesterdayCount: loc.yesterdayCount,
+    unansweredCount: loc.unansweredCount,
+  })).join("\n");
+
+  const headerTitle = isMulti
+    ? `📊 Günlük Yorum Raporu — ${locations.length} Lokasyon`
+    : `📊 Günlük Yorum Raporu`;
+  const headerSub = isMulti
+    ? `Tüm lokasyonlarınızın özeti`
+    : locations[0].name;
+
+  return `<!DOCTYPE html>
+<html><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <div style="max-width:680px;margin:0 auto;padding:24px;">
+    <div style="background:linear-gradient(135deg,#7A5AF8 0%,#635BFF 100%);border-radius:12px;padding:28px;color:white;margin-bottom:20px;">
+      <h1 style="margin:0 0 6px 0;font-size:22px;font-weight:700;">${headerTitle}</h1>
+      <p style="margin:0;opacity:0.9;font-size:14px;">${headerSub}</p>
+    </div>
+
+    ${portfolioOverview}
+
+    ${sections}
+
+    <div style="text-align:center;margin-top:8px;margin-bottom:20px;">
+      <a href="${APP_URL}/reviews" style="display:inline-block;background:#7A5AF8;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">
+        Tüm Yorumları Gör →
+      </a>
     </div>
 
     <div style="text-align:center;padding-top:12px;">
@@ -349,83 +429,124 @@ Deno.serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
-    const { business_id, new_reviews = [], platform_results = [] } = await req.json();
+    const body = await req.json();
 
-    // Yesterday's count for trend comparison
-    const { count: yesterdayCount } = await supabase
-      .from("reviews")
-      .select("id", { count: "exact", head: true })
-      .eq("business_id", business_id)
-      .gte("posted_at", new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString())
-      .lt("posted_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+    // Normalize payload: support both old (single business) and new (user + locations) formats
+    let userId: string | undefined = body.user_id;
+    let locations: Array<{
+      business_id: string;
+      business_name?: string;
+      city?: string | null;
+      new_reviews: ReviewLite[];
+      platform_results: PlatformResult[];
+    }> = [];
 
-    // Unanswered count among new reviews
-    const newReviewIds = (new_reviews as any[]).map((r) => r.id).filter(Boolean);
-    let unansweredCount = 0;
-    if (newReviewIds.length > 0) {
-      const { count } = await supabase
-        .from("reviews")
-        .select("id", { count: "exact", head: true })
-        .in("id", newReviewIds)
-        .is("approved_reply", null);
-      unansweredCount = count || 0;
-    }
-
-    if (!business_id) {
-      return new Response(JSON.stringify({ error: "business_id required" }), {
+    if (body.locations && Array.isArray(body.locations)) {
+      locations = body.locations;
+    } else if (body.business_id) {
+      // Legacy single-business payload
+      locations = [{
+        business_id: body.business_id,
+        new_reviews: body.new_reviews || [],
+        platform_results: body.platform_results || [],
+      }];
+    } else {
+      return new Response(JSON.stringify({ error: "user_id+locations or business_id required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Skip if nothing new and no errors worth reporting
-    const hasErrors = (platform_results as PlatformResult[]).some((p) => p.error);
-    if (new_reviews.length === 0 && !hasErrors) {
+    // Skip if nothing new and no errors across all locations
+    const hasAnyContent = locations.some((loc) =>
+      loc.new_reviews.length > 0 || loc.platform_results.some((p) => p.error)
+    );
+    if (!hasAnyContent) {
       return new Response(JSON.stringify({ skipped: true, reason: "no new reviews" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const { data: business } = await supabase
+    // Resolve business names + user_id (for legacy single-business path)
+    const bizIds = locations.map((l) => l.business_id);
+    const { data: bizRows } = await supabase
       .from("businesses")
-      .select("id, name, user_id")
-      .eq("id", business_id)
-      .single();
+      .select("id, name, user_id, city")
+      .in("id", bizIds);
+    const bizMap = new Map((bizRows || []).map((b) => [b.id, b]));
 
-    if (!business) {
-      return new Response(JSON.stringify({ error: "Business not found" }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (!userId) {
+      const firstBiz = bizRows?.[0];
+      if (firstBiz) userId = firstBiz.user_id;
     }
 
-    const { data: { user } } = await supabase.auth.admin.getUserById(business.user_id);
-    const ownerEmail = user?.email;
+    // Enrich locations with name/city + compute per-location stats
+    const enrichedLocations = await Promise.all(locations.map(async (loc) => {
+      const biz = bizMap.get(loc.business_id);
+      const name = loc.business_name || biz?.name || "İşletme";
+      const reviews = loc.new_reviews || [];
+      const totalNew = reviews.length;
+      const avgRating = totalNew > 0
+        ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / totalNew
+        : 0;
+      const summary = summarizeIssuesPraises(reviews);
 
-    const reviews = new_reviews as ReviewLite[];
-    const totalNew = reviews.length;
-    const avgRating = totalNew > 0
-      ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / totalNew
-      : 0;
-    const summary = summarizeIssuesPraises(reviews);
-    const aiSummary = await generateAISummary(reviews, business.name);
+      // Yesterday count
+      const { count: yesterdayCount } = await supabase
+        .from("reviews")
+        .select("id", { count: "exact", head: true })
+        .eq("business_id", loc.business_id)
+        .gte("posted_at", new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString())
+        .lt("posted_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
 
-    const html = buildEmailHtml({
-      businessName: business.name,
-      totalNew,
-      avgRating,
-      platformResults: platform_results as PlatformResult[],
-      summary,
-      sampleReviews: reviews,
-      aiSummary,
-      yesterdayCount: yesterdayCount || 0,
-      unansweredCount,
-    });
+      // Unanswered count
+      const newReviewIds = reviews.map((r) => r.id).filter(Boolean);
+      let unansweredCount = 0;
+      if (newReviewIds.length > 0) {
+        const { count } = await supabase
+          .from("reviews")
+          .select("id", { count: "exact", head: true })
+          .in("id", newReviewIds)
+          .is("approved_reply", null);
+        unansweredCount = count || 0;
+      }
 
-    const urgencyPrefix = summary.negativeCount >= 3 ? "🚨 ACİL — " : "📊 ";
-    const subject = totalNew > 0
-      ? `${urgencyPrefix}${business.name} — ${totalNew} yeni yorum (${avgRating.toFixed(1)}★)`
-      : `⚠️ ${business.name} — Yorum çekme uyarısı`;
+      const aiSummary = totalNew > 0 ? await generateAISummary(reviews, name) : null;
+
+      return {
+        business_id: loc.business_id,
+        name,
+        city: loc.city || biz?.city || null,
+        totalNew,
+        avgRating,
+        summary,
+        aiSummary,
+        platformResults: loc.platform_results || [],
+        sampleReviews: reviews,
+        yesterdayCount: yesterdayCount || 0,
+        unansweredCount,
+      };
+    }));
+
+    // Resolve owner email
+    let ownerEmail: string | undefined;
+    if (userId) {
+      const { data: { user } } = await supabase.auth.admin.getUserById(userId);
+      ownerEmail = user?.email;
+    }
+
+    // Build email
+    const html = buildConsolidatedEmailHtml(enrichedLocations);
+
+    const totalAcrossAll = enrichedLocations.reduce((s, l) => s + l.totalNew, 0);
+    const totalNegative = enrichedLocations.reduce((s, l) => s + l.summary.negativeCount, 0);
+    const urgencyPrefix = totalNegative >= 3 ? "🚨 ACİL — " : "📊 ";
+    const locLabel = enrichedLocations.length > 1
+      ? `${enrichedLocations.length} lokasyon`
+      : enrichedLocations[0].name;
+    const subject = totalAcrossAll > 0
+      ? `${urgencyPrefix}${locLabel} — ${totalAcrossAll} yeni yorum`
+      : `⚠️ ${locLabel} — Yorum çekme uyarısı`;
 
     const recipients = new Set<string>([ADMIN_EMAIL]);
     if (ownerEmail) recipients.add(ownerEmail);
@@ -445,9 +566,9 @@ Deno.serve(async (req) => {
     });
 
     const result = await res.json();
-    console.log(`Summary email sent to ${Array.from(recipients).join(", ")}:`, result);
+    console.log(`Consolidated summary sent to ${Array.from(recipients).join(", ")} (${enrichedLocations.length} locations):`, result);
 
-    return new Response(JSON.stringify({ success: true, recipients: Array.from(recipients) }), {
+    return new Response(JSON.stringify({ success: true, recipients: Array.from(recipients), locations: enrichedLocations.length }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: any) {
