@@ -76,6 +76,7 @@ interface PlatformConfig {
 const commonItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Tüm Yorumlar", url: "/inbox", icon: Inbox, highlight: true },
+  { title: "Yorumlar", url: "/reviews", icon: MessageSquare },
   { title: "Rep Score", url: "/rep-score", icon: Trophy },
   { title: "Lokasyonlar", url: "/locations", icon: Building2 },
   { title: "Google Hesapları", url: "/google-accounts", icon: Star },
@@ -283,7 +284,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {commonItems.slice(0, 6).map((item) => {
+              {commonItems.slice(0, 7).map((item) => {
                 const isActive = location.pathname === item.url;
                 const showInboxBadge = item.url === "/inbox" && unreadCount > 0;
                 return (
