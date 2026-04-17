@@ -247,26 +247,22 @@ function buildEmailHtml(opts: {
     })
     .join("");
 
-  return `<!DOCTYPE html>
-<html><head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-  <div style="max-width:640px;margin:0 auto;padding:24px;">
-    <div style="background:linear-gradient(135deg,#7A5AF8 0%,#635BFF 100%);border-radius:12px;padding:28px;color:white;margin-bottom:20px;">
-      <h1 style="margin:0 0 6px 0;font-size:22px;font-weight:700;">📊 Günlük Yorum Raporu</h1>
-      <p style="margin:0;opacity:0.9;font-size:14px;">${businessName}</p>
-    </div>
-
-    ${urgencyBanner}
-
-    ${unansweredCount > 0 ? `<div style="background:#eff6ff;border:1px solid #bfdbfe;padding:14px 18px;border-radius:10px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-      <div>
-        <div style="font-weight:600;font-size:13px;color:#1e40af;">📬 ${unansweredCount} yeni yorum yanıt bekliyor</div>
-        <div style="font-size:12px;color:#3730a3;margin-top:2px;">Hızlı yanıt itibar puanınızı yükseltir.</div>
-      </div>
-      <a href="${APP_URL}/reviews?status=unanswered" style="background:#1e40af;color:white;padding:8px 14px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;">Yanıtla →</a>
-    </div>` : ""}
-
+  return `
     <div style="background:white;border-radius:12px;padding:24px;margin-bottom:16px;border:1px solid #e5e7eb;">
+      <div style="border-bottom:1px solid #f3f4f6;padding-bottom:14px;margin-bottom:18px;">
+        <h2 style="margin:0;font-size:17px;font-weight:700;color:#111827;">📍 ${businessName}</h2>
+      </div>
+
+      ${urgencyBanner}
+
+      ${unansweredCount > 0 ? `<div style="background:#eff6ff;border:1px solid #bfdbfe;padding:14px 18px;border-radius:10px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+        <div>
+          <div style="font-weight:600;font-size:13px;color:#1e40af;">📬 ${unansweredCount} yeni yorum yanıt bekliyor</div>
+          <div style="font-size:12px;color:#3730a3;margin-top:2px;">Hızlı yanıt itibar puanınızı yükseltir.</div>
+        </div>
+        <a href="${APP_URL}/reviews?status=unanswered" style="background:#1e40af;color:white;padding:8px 14px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;">Yanıtla →</a>
+      </div>` : ""}
+
       <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
         <div style="flex:1;min-width:120px;background:#f9fafb;padding:16px;border-radius:8px;text-align:center;">
           <div style="font-size:28px;font-weight:700;color:#7A5AF8;">${totalNew}</div>
@@ -277,11 +273,11 @@ function buildEmailHtml(opts: {
           <div style="font-size:28px;font-weight:700;color:${getRatingColor(avgRating)};">${avgRating.toFixed(1)}★</div>
           <div style="font-size:12px;color:#6b7280;margin-top:4px;">Ort. Puan</div>
         </div>
-        <div style="flex:1;background:#f9fafb;padding:16px;border-radius:8px;text-align:center;">
+        <div style="flex:1;min-width:120px;background:#f9fafb;padding:16px;border-radius:8px;text-align:center;">
           <div style="font-size:28px;font-weight:700;color:#16a34a;">${summary.positiveCount}</div>
           <div style="font-size:12px;color:#6b7280;margin-top:4px;">Olumlu</div>
         </div>
-        <div style="flex:1;background:#f9fafb;padding:16px;border-radius:8px;text-align:center;">
+        <div style="flex:1;min-width:120px;background:#f9fafb;padding:16px;border-radius:8px;text-align:center;">
           <div style="font-size:28px;font-weight:700;color:#dc2626;">${summary.negativeCount}</div>
           <div style="font-size:12px;color:#6b7280;margin-top:4px;">Olumsuz</div>
         </div>
@@ -289,7 +285,7 @@ function buildEmailHtml(opts: {
 
       ${aiOverviewBlock}
 
-      <h3 style="margin:0 0 10px 0;font-size:15px;color:#111827;">Platform Bazında</h3>
+      <h3 style="margin:0 0 10px 0;font-size:14px;color:#111827;">Platform Bazında</h3>
       <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
         <thead>
           <tr style="background:#f9fafb;">
@@ -302,12 +298,12 @@ function buildEmailHtml(opts: {
         <tbody>${platformRows}</tbody>
       </table>
 
-      <div style="display:flex;gap:16px;margin-bottom:20px;">
-        <div style="flex:1;background:#fef2f2;padding:16px;border-radius:8px;">
+      <div style="display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:200px;background:#fef2f2;padding:16px;border-radius:8px;">
           <h4 style="margin:0 0 10px 0;font-size:13px;color:#dc2626;">⚠️ Şikayet Konuları</h4>
           <ul style="margin:0;padding-left:18px;font-size:13px;color:#374151;line-height:1.6;">${issuesItems}</ul>
         </div>
-        <div style="flex:1;background:#f0fdf4;padding:16px;border-radius:8px;">
+        <div style="flex:1;min-width:200px;background:#f0fdf4;padding:16px;border-radius:8px;">
           <h4 style="margin:0 0 10px 0;font-size:13px;color:#16a34a;">✓ Övgü Konuları</h4>
           <ul style="margin:0;padding-left:18px;font-size:13px;color:#374151;line-height:1.6;">${praisesItems}</ul>
         </div>
@@ -315,13 +311,97 @@ function buildEmailHtml(opts: {
 
       ${recommendationsBlock}
 
-      ${sampleCards ? `<h3 style="margin:0 0 10px 0;font-size:15px;color:#111827;">Örnek Yorumlar</h3>${sampleCards}` : ""}
+      ${sampleCards ? `<h3 style="margin:0 0 10px 0;font-size:14px;color:#111827;">Örnek Yorumlar</h3>${sampleCards}` : ""}
+    </div>`;
+}
 
-      <div style="text-align:center;margin-top:24px;">
-        <a href="${APP_URL}/reviews" style="display:inline-block;background:#7A5AF8;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">
-          Tüm Yorumları Gör →
-        </a>
+function buildConsolidatedEmailHtml(locations: Array<{
+  name: string;
+  city: string | null;
+  totalNew: number;
+  avgRating: number;
+  summary: ReturnType<typeof summarizeIssuesPraises>;
+  aiSummary: Awaited<ReturnType<typeof generateAISummary>>;
+  platformResults: PlatformResult[];
+  sampleReviews: ReviewLite[];
+  yesterdayCount: number;
+  unansweredCount: number;
+}>): string {
+  const totalNewAll = locations.reduce((s, l) => s + l.totalNew, 0);
+  const totalNegAll = locations.reduce((s, l) => s + l.summary.negativeCount, 0);
+  const totalUnansweredAll = locations.reduce((s, l) => s + l.unansweredCount, 0);
+  const isMulti = locations.length > 1;
+
+  // Overview header for multi-location
+  const portfolioOverview = isMulti ? `
+    <div style="background:white;border-radius:12px;padding:20px;margin-bottom:16px;border:1px solid #e5e7eb;">
+      <div style="font-size:11px;color:#7A5AF8;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Portföy Özeti</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:100px;text-align:center;">
+          <div style="font-size:24px;font-weight:700;color:#7A5AF8;">${locations.length}</div>
+          <div style="font-size:11px;color:#6b7280;">Lokasyon</div>
+        </div>
+        <div style="flex:1;min-width:100px;text-align:center;">
+          <div style="font-size:24px;font-weight:700;color:#111827;">${totalNewAll}</div>
+          <div style="font-size:11px;color:#6b7280;">Toplam Yeni</div>
+        </div>
+        <div style="flex:1;min-width:100px;text-align:center;">
+          <div style="font-size:24px;font-weight:700;color:#16a34a;">${locations.reduce((s, l) => s + l.summary.positiveCount, 0)}</div>
+          <div style="font-size:11px;color:#6b7280;">Olumlu</div>
+        </div>
+        <div style="flex:1;min-width:100px;text-align:center;">
+          <div style="font-size:24px;font-weight:700;color:#dc2626;">${totalNegAll}</div>
+          <div style="font-size:11px;color:#6b7280;">Olumsuz</div>
+        </div>
+        <div style="flex:1;min-width:100px;text-align:center;">
+          <div style="font-size:24px;font-weight:700;color:#1e40af;">${totalUnansweredAll}</div>
+          <div style="font-size:11px;color:#6b7280;">Yanıt Bekleyen</div>
+        </div>
       </div>
+    </div>` : "";
+
+  // Sort: most negative first (urgency), then by total new
+  const sorted = [...locations].sort((a, b) => {
+    if (b.summary.negativeCount !== a.summary.negativeCount) return b.summary.negativeCount - a.summary.negativeCount;
+    return b.totalNew - a.totalNew;
+  });
+
+  const sections = sorted.map((loc) => buildLocationSection({
+    businessName: loc.name + (loc.city ? ` · ${loc.city}` : ""),
+    totalNew: loc.totalNew,
+    avgRating: loc.avgRating,
+    platformResults: loc.platformResults,
+    summary: loc.summary,
+    sampleReviews: loc.sampleReviews,
+    aiSummary: loc.aiSummary,
+    yesterdayCount: loc.yesterdayCount,
+    unansweredCount: loc.unansweredCount,
+  })).join("\n");
+
+  const headerTitle = isMulti
+    ? `📊 Günlük Yorum Raporu — ${locations.length} Lokasyon`
+    : `📊 Günlük Yorum Raporu`;
+  const headerSub = isMulti
+    ? `Tüm lokasyonlarınızın özeti`
+    : locations[0].name;
+
+  return `<!DOCTYPE html>
+<html><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <div style="max-width:680px;margin:0 auto;padding:24px;">
+    <div style="background:linear-gradient(135deg,#7A5AF8 0%,#635BFF 100%);border-radius:12px;padding:28px;color:white;margin-bottom:20px;">
+      <h1 style="margin:0 0 6px 0;font-size:22px;font-weight:700;">${headerTitle}</h1>
+      <p style="margin:0;opacity:0.9;font-size:14px;">${headerSub}</p>
+    </div>
+
+    ${portfolioOverview}
+
+    ${sections}
+
+    <div style="text-align:center;margin-top:8px;margin-bottom:20px;">
+      <a href="${APP_URL}/reviews" style="display:inline-block;background:#7A5AF8;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">
+        Tüm Yorumları Gör →
+      </a>
     </div>
 
     <div style="text-align:center;padding-top:12px;">
