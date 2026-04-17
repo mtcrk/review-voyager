@@ -1148,18 +1148,11 @@ export default function Reviews() {
                         </span>
                       </TableCell>
                     )}
-                    <TableCell onClick={(e) => e.stopPropagation()}>
+                    <TableCell>
                       {review.text ? (
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <p className="text-xs text-muted-foreground line-clamp-2 max-w-[200px] cursor-pointer hover:text-foreground transition-colors">
-                              {review.text}
-                            </p>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-96 max-h-72 overflow-auto" side="bottom">
-                            <p className="text-sm leading-relaxed whitespace-pre-wrap">{review.text}</p>
-                          </PopoverContent>
-                        </Popover>
+                        <p className="text-xs text-muted-foreground line-clamp-2 max-w-[200px]">
+                          {review.text}
+                        </p>
                       ) : (
                         <span className="text-xs text-muted-foreground italic">Metin yok</span>
                       )}
