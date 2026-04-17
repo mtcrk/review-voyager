@@ -193,26 +193,27 @@ serve(async (req) => {
           if (updateError) throw updateError;
           businessId = updated.id;
         } else {
-          // Check if user has an unconnected business we can update
-          const { data: unconnected } = await supabaseClient
+          // Try to match an existing unconnected business by name (case-insensitive)
+          const { data: nameMatch } = await supabaseClient
             .from("businesses")
             .select("id")
             .eq("user_id", user.id)
             .eq("google_connected", false)
+            .ilike("name", business.name)
             .limit(1)
             .maybeSingle();
 
-          if (unconnected) {
+          if (nameMatch) {
+            // Update matched business — keep its existing name
             const { data: updated, error: updateError } = await supabaseClient
               .from("businesses")
               .update({
-                name: business.name,
                 place_id: business.place_id,
                 google_account_id: business.account_id,
                 google_location_id: business.location_id,
                 google_connected: true,
               })
-              .eq("id", unconnected.id)
+              .eq("id", nameMatch.id)
               .select()
               .single();
 
