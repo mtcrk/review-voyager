@@ -29,10 +29,10 @@ async function scrapeRanking(url: string, areaHint?: string | null): Promise<Ran
   const apiKey = Deno.env.get("FIRECRAWL_API_KEY");
   if (!apiKey) throw new Error("FIRECRAWL_API_KEY is not configured");
 
-  const prompt = `Extract the hotel/property ranking on this listing page.
-Look for phrases like "ranked #23 of 153 hotels in Bodrum", "23. sırada", "#23 of 153", "Bodrum City bölgesindeki 153 otel arasında 23. sırada", etc.
-Return JSON with: rank (integer, the position number), total_in_area (integer, total properties in the area), area_name (string, location/city name like "Bodrum").
-If a value cannot be found, set it to null.`;
+  const prompt = `Extract competitive metrics from this hotel/property listing page.
+Find the ranking phrase like "ranked #23 of 153 hotels in Bodrum" / "Bodrum'daki 153 otel arasında 23. sırada".
+Also extract: the property's overall rating (e.g. 4.5/5 or 8.7/10), the property's total review count on this platform, the property's category/class (e.g. "5-star hotel", "Boutique Hotel"), and any traveler ranking badge (e.g. "Travelers' Choice 2024").
+Return JSON. Use null for missing values. Do not invent numbers.`;
 
   const schema = {
     type: "object",
@@ -40,6 +40,11 @@ If a value cannot be found, set it to null.`;
       rank: { type: ["integer", "null"] },
       total_in_area: { type: ["integer", "null"] },
       area_name: { type: ["string", "null"] },
+      property_rating: { type: ["number", "null"] },
+      rating_scale: { type: ["integer", "null"], description: "5 or 10" },
+      property_review_count: { type: ["integer", "null"] },
+      property_category: { type: ["string", "null"] },
+      award: { type: ["string", "null"] },
     },
     required: ["rank", "total_in_area", "area_name"],
   };
