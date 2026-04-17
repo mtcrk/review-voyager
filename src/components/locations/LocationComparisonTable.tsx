@@ -26,9 +26,8 @@ export function LocationComparisonTable({ locations, onSelectLocation }: Props) 
             <thead>
               <tr className="border-b border-border bg-muted/30">
                 <th className="text-left px-5 py-3 font-medium text-muted-foreground">Lokasyon</th>
-                <th className="text-center px-4 py-3 font-medium text-muted-foreground">Genel Puan</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Platform Puanları</th>
-                <th className="text-center px-4 py-3 font-medium text-muted-foreground">Toplam</th>
+                <th className="text-center px-4 py-3 font-medium text-muted-foreground">Puan</th>
+                <th className="text-center px-4 py-3 font-medium text-muted-foreground">Toplam Yorum</th>
                 <th className="text-center px-4 py-3 font-medium text-muted-foreground">Bu Hafta</th>
                 <th className="text-center px-4 py-3 font-medium text-muted-foreground">Yanıt Oranı</th>
                 <th className="text-center px-4 py-3 font-medium text-muted-foreground">Bekleyen</th>
