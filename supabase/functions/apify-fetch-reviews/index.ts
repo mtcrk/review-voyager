@@ -449,11 +449,12 @@ Deno.serve(async (req) => {
 });
 
 async function insertReviews(supabase: any, items: any[], businessId: string, forcedPlatform?: string) {
-  // Transform reviews - handle both aggregator format and Trustpilot format
+  // Transform reviews - handle multiple actor formats
   const transformed = items
     .filter(item =>
       item.reviewText || item.reviewTitle || item.text || item.title ||
-      item.reviewOriginalText || item.reviewTranslatedText || item.review_text
+      item.reviewOriginalText || item.reviewTranslatedText || item.review_text ||
+      item.reviewTextLiked || item.reviewTextDisliked || item.likedText || item.dislikedText
     )
     .map(item => {
       const isTrustpilotFormat = item.author || item.consumer;
@@ -461,15 +462,32 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
         item.review_text || item.traveler_name || item.published_date || item.hotel_id
       );
       const isTripcomDedicated = forcedPlatform === "tripcom";
+      const isBookingDedicated = forcedPlatform === "booking";
       const platform = forcedPlatform || (isTrustpilotFormat ? "trustpilot" : normalizePlatform(item.provider || "unknown"));
-      
+
       let rating: number;
       let text: string;
       let reviewerName: string;
       let postedAt: string;
       let reviewId: string;
 
-      if (isTripcomDedicated) {
+      if (isBookingDedicated) {
+        // voyager/booking-reviews-scraper — rating is 0-10 scale
+        const rawRating = Number(item.rating ?? item.reviewScore ?? item.reviewRating ?? 6);
+        rating = rawRating > 5 ? Math.round(rawRating / 2) : Math.min(5, Math.max(1, Math.round(rawRating)));
+        const liked = item.reviewTextLiked || item.likedText || "";
+        const disliked = item.reviewTextDisliked || item.dislikedText || "";
+        const title = item.reviewTitle || item.title || "";
+        const parts: string[] = [];
+        if (title) parts.push(title);
+        if (liked) parts.push(`👍 ${liked}`);
+        if (disliked) parts.push(`👎 ${disliked}`);
+        if (!parts.length && (item.reviewText || item.text)) parts.push(item.reviewText || item.text);
+        text = parts.join("\n\n");
+        reviewerName = item.userName || item.reviewerName || item.authorName || item.guestName || "Anonymous";
+        postedAt = toSafeIsoDate(item.reviewDate || item.date || item.publishedDate);
+        reviewId = item.reviewId || item.id || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      } else if (isTripcomDedicated) {
         // Trip.com scraper format (shahidirfan/trip-com-hotel-reviews-scraper) — rating is 0-10
         const rawRating = Number(item.reviewRating ?? 6);
         rating = rawRating > 5 ? Math.round(rawRating / 2) : Math.min(5, Math.max(1, Math.round(rawRating)));
