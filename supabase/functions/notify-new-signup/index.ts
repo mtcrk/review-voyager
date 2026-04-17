@@ -67,6 +67,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         from: "VoyageRespond <notify@voyagerespond.com>",
         to: [ADMIN_EMAIL],
+        bcc: [ADMIN_EMAIL],
         subject: `🎉 Yeni Kayıt: ${full_name || user_email}`,
         html: emailHtml,
       }),
