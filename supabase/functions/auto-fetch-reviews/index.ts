@@ -353,6 +353,14 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Optional ?platforms=booking,hotelscom,trustpilot,expedia,tripadvisor
+    const url = new URL(req.url);
+    const platformsParam = url.searchParams.get("platforms");
+    const allowedPlatforms = platformsParam
+      ? new Set(platformsParam.split(",").map(s => s.trim().toLowerCase()).filter(Boolean))
+      : undefined;
+    console.log("Allowed platforms:", allowedPlatforms ? [...allowedPlatforms].join(",") : "ALL");
+
     // Get all businesses with any platform configured
     const { data: businesses, error: bizError } = await supabase
       .from("businesses")
