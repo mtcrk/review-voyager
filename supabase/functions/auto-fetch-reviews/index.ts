@@ -40,14 +40,15 @@ interface FetchJob {
   actorInput: any;
 }
 
-function buildFetchJobs(biz: any): FetchJob[] {
+function buildFetchJobs(biz: any, allowedPlatforms?: Set<string>): FetchJob[] {
   const jobs: FetchJob[] = [];
 
   // Daily fetch limit per platform — economical mode
   const MAX_PER_QUERY = 50;
+  const allow = (p: string) => !allowedPlatforms || allowedPlatforms.has(p);
 
   // Booking.com — always use direct URL if booking_hotel_id exists
-  if (biz.booking_hotel_id) {
+  if (allow("booking") && biz.booking_hotel_id) {
     jobs.push({
       business: biz,
       platform: "booking",
@@ -60,7 +61,7 @@ function buildFetchJobs(biz: any): FetchJob[] {
         scrapeReviewResponses: true,
       },
     });
-  } else if (biz.place_id) {
+  } else if (allow("booking") && biz.place_id) {
     jobs.push({
       business: biz,
       platform: "booking",
@@ -76,7 +77,7 @@ function buildFetchJobs(biz: any): FetchJob[] {
   }
 
   // TripAdvisor
-  if (biz.tripadvisor_id) {
+  if (allow("tripadvisor") && biz.tripadvisor_id) {
     const taUrl = biz.tripadvisor_id.startsWith("http")
       ? biz.tripadvisor_id
       : `https://www.tripadvisor.com/Hotel_Review-${biz.tripadvisor_id}`;
@@ -92,7 +93,7 @@ function buildFetchJobs(biz: any): FetchJob[] {
         scrapeReviewResponses: true,
       },
     });
-  } else if (biz.place_id) {
+  } else if (allow("tripadvisor") && biz.place_id) {
     jobs.push({
       business: biz,
       platform: "tripadvisor",
@@ -108,7 +109,7 @@ function buildFetchJobs(biz: any): FetchJob[] {
   }
 
   // Hotels.com / Expedia
-  if (biz.place_id) {
+  if (allow("hotelscom") && biz.place_id) {
     jobs.push({
       business: biz,
       platform: "hotelscom",
@@ -124,7 +125,7 @@ function buildFetchJobs(biz: any): FetchJob[] {
   }
 
   // Expedia direct
-  if (biz.expedia_hotel_id) {
+  if (allow("expedia") && biz.expedia_hotel_id) {
     jobs.push({
       business: biz,
       platform: "expedia",
@@ -140,7 +141,7 @@ function buildFetchJobs(biz: any): FetchJob[] {
   }
 
   // Trustpilot
-  if (biz.trustpilot_url) {
+  if (allow("trustpilot") && biz.trustpilot_url) {
     const domain = biz.trustpilot_url.replace(/^https?:\/\/(www\.)?trustpilot\.[a-z.]+\/review\//i, "").replace(/\/.*$/, "");
     jobs.push({
       business: biz,
@@ -352,6 +353,14 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Optional ?platforms=booking,hotelscom,trustpilot,expedia,tripadvisor
+    const url = new URL(req.url);
+    const platformsParam = url.searchParams.get("platforms");
+    const allowedPlatforms = platformsParam
+      ? new Set(platformsParam.split(",").map(s => s.trim().toLowerCase()).filter(Boolean))
+      : undefined;
+    console.log("Allowed platforms:", allowedPlatforms ? [...allowedPlatforms].join(",") : "ALL");
+
     // Get all businesses with any platform configured
     const { data: businesses, error: bizError } = await supabase
       .from("businesses")
@@ -376,7 +385,7 @@ Deno.serve(async (req) => {
     }>> = new Map();
 
     for (const biz of businesses) {
-      const jobs = buildFetchJobs(biz);
+      const jobs = buildFetchJobs(biz, allowedPlatforms);
       const allNewReviews: any[] = [];
       const platformResults: { platform: string; fetched: number; inserted: number; error?: string }[] = [];
 
