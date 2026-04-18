@@ -385,7 +385,7 @@ Deno.serve(async (req) => {
     }>> = new Map();
 
     for (const biz of businesses) {
-      const jobs = buildFetchJobs(biz);
+      const jobs = buildFetchJobs(biz, allowedPlatforms);
       const allNewReviews: any[] = [];
       const platformResults: { platform: string; fetched: number; inserted: number; error?: string }[] = [];
 
