@@ -48,7 +48,7 @@ function buildFetchJobs(biz: any, allowedPlatforms?: Set<string>): FetchJob[] {
   const allow = (p: string) => !allowedPlatforms || allowedPlatforms.has(p);
 
   // Booking.com — always use direct URL if booking_hotel_id exists
-  if (biz.booking_hotel_id) {
+  if (allow("booking") && biz.booking_hotel_id) {
     jobs.push({
       business: biz,
       platform: "booking",
@@ -61,7 +61,7 @@ function buildFetchJobs(biz: any, allowedPlatforms?: Set<string>): FetchJob[] {
         scrapeReviewResponses: true,
       },
     });
-  } else if (biz.place_id) {
+  } else if (allow("booking") && biz.place_id) {
     jobs.push({
       business: biz,
       platform: "booking",
@@ -77,7 +77,7 @@ function buildFetchJobs(biz: any, allowedPlatforms?: Set<string>): FetchJob[] {
   }
 
   // TripAdvisor
-  if (biz.tripadvisor_id) {
+  if (allow("tripadvisor") && biz.tripadvisor_id) {
     const taUrl = biz.tripadvisor_id.startsWith("http")
       ? biz.tripadvisor_id
       : `https://www.tripadvisor.com/Hotel_Review-${biz.tripadvisor_id}`;
@@ -93,7 +93,7 @@ function buildFetchJobs(biz: any, allowedPlatforms?: Set<string>): FetchJob[] {
         scrapeReviewResponses: true,
       },
     });
-  } else if (biz.place_id) {
+  } else if (allow("tripadvisor") && biz.place_id) {
     jobs.push({
       business: biz,
       platform: "tripadvisor",
@@ -109,7 +109,7 @@ function buildFetchJobs(biz: any, allowedPlatforms?: Set<string>): FetchJob[] {
   }
 
   // Hotels.com / Expedia
-  if (biz.place_id) {
+  if (allow("hotelscom") && biz.place_id) {
     jobs.push({
       business: biz,
       platform: "hotelscom",
@@ -125,7 +125,7 @@ function buildFetchJobs(biz: any, allowedPlatforms?: Set<string>): FetchJob[] {
   }
 
   // Expedia direct
-  if (biz.expedia_hotel_id) {
+  if (allow("expedia") && biz.expedia_hotel_id) {
     jobs.push({
       business: biz,
       platform: "expedia",
@@ -141,7 +141,7 @@ function buildFetchJobs(biz: any, allowedPlatforms?: Set<string>): FetchJob[] {
   }
 
   // Trustpilot
-  if (biz.trustpilot_url) {
+  if (allow("trustpilot") && biz.trustpilot_url) {
     const domain = biz.trustpilot_url.replace(/^https?:\/\/(www\.)?trustpilot\.[a-z.]+\/review\//i, "").replace(/\/.*$/, "");
     jobs.push({
       business: biz,
