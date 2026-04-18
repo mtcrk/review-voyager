@@ -38,6 +38,8 @@ import { useReviewFetch } from "@/contexts/ReviewFetchContext";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { ReviewTranslator } from "@/components/reviews/ReviewTranslator";
+import { ReviewCategoryChips } from "@/components/reviews/ReviewCategoryChips";
+import { matchesCategory, REVIEW_CATEGORIES } from "@/lib/reviewCategories";
 
 type SortField = "posted_at" | "rating" | "reviewer_name";
 type SortOrder = "asc" | "desc";
@@ -87,6 +89,7 @@ export default function Reviews() {
   const [platformFilter, setPlatformFilter] = useState<PlatformFilter>(urlPlatform || "all");
   const [ratingFilter, setRatingFilter] = useState<RatingFilter>("all");
   const [sortOption, setSortOption] = useState<SortOption>("newest");
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   // Sync platformFilter with URL changes (sidebar navigation)
   useEffect(() => {
     const newPlatform = searchParams.get("platform") as PlatformFilter | null;
