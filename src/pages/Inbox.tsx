@@ -106,6 +106,7 @@ export default function Inbox() {
   });
 
   const filtered = useMemo(() => {
+    const cat = categoryFilter ? REVIEW_CATEGORIES.find((c) => c.key === categoryFilter) : null;
     return reviews.filter((r: any) => {
       if (!businessIdSet.has(r.business_id)) return false;
       if (!selectedPlatforms.includes(r.platform || "google")) return false;
@@ -116,9 +117,10 @@ export default function Inbox() {
         const hay = `${r.reviewer_name || ""} ${r.text || ""} ${businessNameMap[r.business_id] || ""}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
+      if (cat && !matchesCategory(`${r.text || ""} ${r.summary || ""}`, cat)) return false;
       return true;
     });
-  }, [reviews, businessIdSet, selectedPlatforms, statusTab, search, businessNameMap]);
+  }, [reviews, businessIdSet, selectedPlatforms, statusTab, search, businessNameMap, categoryFilter]);
 
   const stats = useMemo(() => {
     const unanswered = reviews.filter((r: any) => !r.approved_reply && r.status !== "replied").length;
@@ -129,7 +131,7 @@ export default function Inbox() {
   // Reset to page 1 whenever filters change
   useEffect(() => {
     setPage(1);
-  }, [selectedBusinessIds, selectedPlatforms, statusTab, search]);
+  }, [selectedBusinessIds, selectedPlatforms, statusTab, search, categoryFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
