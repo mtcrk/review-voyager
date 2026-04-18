@@ -79,13 +79,15 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // Optional: extra BCC recipients (comma-separated emails) — copies every report to these too
-    let extraRecipients: string[] = [];
+    // Admin always BCC'd on every report
+    const ADMIN_BCC = "metecorukbasari@gmail.com";
+    let extraRecipients: string[] = [ADMIN_BCC];
     try {
       if (req.method === "POST") {
         const body = await req.json().catch(() => ({}));
         if (body?.bcc) {
-          extraRecipients = String(body.bcc).split(",").map((e: string) => e.trim()).filter(Boolean);
+          const extra = String(body.bcc).split(",").map((e: string) => e.trim()).filter(Boolean);
+          extraRecipients = Array.from(new Set([ADMIN_BCC, ...extra]));
         }
       }
     } catch (_) {}
