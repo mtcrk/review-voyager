@@ -38,6 +38,8 @@ import { useReviewFetch } from "@/contexts/ReviewFetchContext";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { ReviewTranslator } from "@/components/reviews/ReviewTranslator";
+import { ReviewCategoryChips } from "@/components/reviews/ReviewCategoryChips";
+import { matchesCategory, REVIEW_CATEGORIES } from "@/lib/reviewCategories";
 
 type SortField = "posted_at" | "rating" | "reviewer_name";
 type SortOrder = "asc" | "desc";
@@ -87,6 +89,7 @@ export default function Reviews() {
   const [platformFilter, setPlatformFilter] = useState<PlatformFilter>(urlPlatform || "all");
   const [ratingFilter, setRatingFilter] = useState<RatingFilter>("all");
   const [sortOption, setSortOption] = useState<SortOption>("newest");
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   // Sync platformFilter with URL changes (sidebar navigation)
   useEffect(() => {
     const newPlatform = searchParams.get("platform") as PlatformFilter | null;
@@ -438,6 +441,16 @@ export default function Reviews() {
       result = result.filter((r) => r.rating === targetRating);
     }
 
+    // Category filter (keyword-based)
+    if (categoryFilter) {
+      const cat = REVIEW_CATEGORIES.find((c) => c.key === categoryFilter);
+      if (cat) {
+        result = result.filter((r) =>
+          matchesCategory(`${r.text || ""} ${r.summary || ""}`, cat)
+        );
+      }
+    }
+
     // Sorting
     result.sort((a, b) => {
       let comparison = 0;
@@ -456,7 +469,7 @@ export default function Reviews() {
     });
 
     return result;
-  }, [reviews, searchQuery, statusFilter, sentimentFilter, platformFilter, ratingFilter, sortField, sortOrder]);
+  }, [reviews, searchQuery, statusFilter, sentimentFilter, platformFilter, ratingFilter, categoryFilter, sortField, sortOrder]);
 
   // Pagination
   const totalPages = Math.max(1, Math.ceil(filteredReviews.length / pageSize));
@@ -836,6 +849,15 @@ export default function Reviews() {
           )}
         </div>
       </div>
+
+      {/* Category chips (keyword-based) */}
+      {reviews.length > 0 && (
+        <ReviewCategoryChips
+          reviews={reviews}
+          selectedCategory={categoryFilter}
+          onSelectCategory={(c) => { setCategoryFilter(c); setCurrentPage(1); }}
+        />
+      )}
 
       {/* Filters and Search */}
       <div className="flex flex-col lg:flex-row gap-4">

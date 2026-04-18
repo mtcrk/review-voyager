@@ -31,6 +31,8 @@ import {
 
 import { formatDistanceToNow } from "date-fns";
 import { tr } from "date-fns/locale";
+import { ReviewCategoryChips } from "@/components/reviews/ReviewCategoryChips";
+import { matchesCategory, REVIEW_CATEGORIES } from "@/lib/reviewCategories";
 
 const PLATFORM_META: Record<string, { label: string; classes: string }> = {
   google: { label: "Google", classes: "bg-blue-50 text-blue-700 border-blue-200" },
@@ -56,6 +58,7 @@ export default function Inbox() {
   const [statusTab, setStatusTab] = useState<StatusTab>("all");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const PAGE_SIZE = 50;
 
   // Default: tüm işletmeler seçili
@@ -103,6 +106,7 @@ export default function Inbox() {
   });
 
   const filtered = useMemo(() => {
+    const cat = categoryFilter ? REVIEW_CATEGORIES.find((c) => c.key === categoryFilter) : null;
     return reviews.filter((r: any) => {
       if (!businessIdSet.has(r.business_id)) return false;
       if (!selectedPlatforms.includes(r.platform || "google")) return false;
@@ -113,9 +117,10 @@ export default function Inbox() {
         const hay = `${r.reviewer_name || ""} ${r.text || ""} ${businessNameMap[r.business_id] || ""}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
+      if (cat && !matchesCategory(`${r.text || ""} ${r.summary || ""}`, cat)) return false;
       return true;
     });
-  }, [reviews, businessIdSet, selectedPlatforms, statusTab, search, businessNameMap]);
+  }, [reviews, businessIdSet, selectedPlatforms, statusTab, search, businessNameMap, categoryFilter]);
 
   const stats = useMemo(() => {
     const unanswered = reviews.filter((r: any) => !r.approved_reply && r.status !== "replied").length;
@@ -126,7 +131,7 @@ export default function Inbox() {
   // Reset to page 1 whenever filters change
   useEffect(() => {
     setPage(1);
-  }, [selectedBusinessIds, selectedPlatforms, statusTab, search]);
+  }, [selectedBusinessIds, selectedPlatforms, statusTab, search, categoryFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
@@ -275,6 +280,16 @@ export default function Inbox() {
                 <TabsTrigger value="negative">Olumsuz ({stats.negative})</TabsTrigger>
               </TabsList>
             </Tabs>
+
+            {/* Category chips (keyword-based) */}
+            {reviews.length > 0 && (
+              <ReviewCategoryChips
+                reviews={reviews}
+                selectedCategory={categoryFilter}
+                onSelectCategory={setCategoryFilter}
+                className="mt-2"
+              />
+            )}
           </CardContent>
         </Card>
 
