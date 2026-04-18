@@ -280,6 +280,16 @@ export default function Inbox() {
                 <TabsTrigger value="negative">Olumsuz ({stats.negative})</TabsTrigger>
               </TabsList>
             </Tabs>
+
+            {/* Category chips (keyword-based) */}
+            {reviews.length > 0 && (
+              <ReviewCategoryChips
+                reviews={reviews}
+                selectedCategory={categoryFilter}
+                onSelectCategory={setCategoryFilter}
+                className="mt-2"
+              />
+            )}
           </CardContent>
         </Card>
 
