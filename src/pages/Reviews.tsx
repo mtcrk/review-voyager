@@ -441,6 +441,16 @@ export default function Reviews() {
       result = result.filter((r) => r.rating === targetRating);
     }
 
+    // Category filter (keyword-based)
+    if (categoryFilter) {
+      const cat = REVIEW_CATEGORIES.find((c) => c.key === categoryFilter);
+      if (cat) {
+        result = result.filter((r) =>
+          matchesCategory(`${r.text || ""} ${r.summary || ""}`, cat)
+        );
+      }
+    }
+
     // Sorting
     result.sort((a, b) => {
       let comparison = 0;
