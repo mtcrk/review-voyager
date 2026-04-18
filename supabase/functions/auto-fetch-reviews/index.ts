@@ -95,40 +95,35 @@ Deno.serve(async (req) => {
       });
     }
 
-    const results: any[] = [];
-
+    // Fire-and-forget: trigger each platform fetch without waiting.
+    // The platform functions handle their own Apify run polling internally.
+    const triggered: any[] = [];
     for (const biz of businesses) {
       const plans = planFor(biz, allowed);
       for (const plan of plans) {
-        try {
-          console.log(`[${biz.name}] start ${plan.platform} via ${plan.functionName}`);
-          const payload: any = { business_id: biz.id };
-          if (plan.functionName === "apify-fetch-reviews") payload.platform = plan.platform;
+        const payload: any = { business_id: biz.id };
+        if (plan.functionName === "apify-fetch-reviews") payload.platform = plan.platform;
 
-          let res = await invokePlatformFetch(supabaseUrl, serviceKey, plan.functionName, payload);
-          let data = res.data;
+        // Fire without await — let it run in background
+        invokePlatformFetch(supabaseUrl, serviceKey, plan.functionName, payload)
+          .then((res) => {
+            const d = res.data;
+            if (d?.success) {
+              console.log(`[${biz.name}] ${plan.platform}: inserted=${d.inserted ?? 0}`);
+            } else if (d?.status === "running") {
+              console.log(`[${biz.name}] ${plan.platform}: started run_id=${d.run_id}`);
+            } else {
+              console.error(`[${biz.name}] ${plan.platform} failed: ${d?.message || d?.error || res.status}`);
+            }
+          })
+          .catch((err) => console.error(`[${biz.name}] ${plan.platform} ex:`, err.message));
 
-          if (data?.status === "running" && data?.run_id) {
-            data = await pollUntilDone(supabaseUrl, serviceKey, plan.functionName, payload, data.run_id);
-          }
-
-          if (data?.success) {
-            console.log(`[${biz.name}] ${plan.platform}: fetched=${data.fetched ?? "?"} inserted=${data.inserted ?? 0}`);
-            results.push({ business: biz.name, platform: plan.platform, fetched: data.fetched ?? 0, inserted: data.inserted ?? 0 });
-          } else {
-            const msg = data?.message || data?.error || `status ${res.status}`;
-            console.error(`[${biz.name}] ${plan.platform} failed: ${msg}`);
-            results.push({ business: biz.name, platform: plan.platform, error: msg });
-          }
-        } catch (err: any) {
-          console.error(`[${biz.name}] ${plan.platform} exception:`, err.message);
-          results.push({ business: biz.name, platform: plan.platform, error: err.message });
-        }
+        triggered.push({ business: biz.name, platform: plan.platform });
       }
     }
 
-    console.log("Auto-fetch done:", JSON.stringify(results));
-    return new Response(JSON.stringify({ success: true, results }), {
+    console.log(`Auto-fetch triggered ${triggered.length} jobs`);
+    return new Response(JSON.stringify({ success: true, triggered: triggered.length, jobs: triggered }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {
