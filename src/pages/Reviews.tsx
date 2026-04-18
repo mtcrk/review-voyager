@@ -850,6 +850,15 @@ export default function Reviews() {
         </div>
       </div>
 
+      {/* Category chips (keyword-based) */}
+      {reviews.length > 0 && (
+        <ReviewCategoryChips
+          reviews={reviews}
+          selectedCategory={categoryFilter}
+          onSelectCategory={(c) => { setCategoryFilter(c); setCurrentPage(1); }}
+        />
+      )}
+
       {/* Filters and Search */}
       <div className="flex flex-col lg:flex-row gap-4">
         <div className="relative flex-1">
