@@ -156,7 +156,7 @@ function buildFetchJobs(biz: any): FetchJob[] {
   return jobs;
 }
 
-async function runActorAndWait(actorId: string, input: any, token: string, maxWaitMs = 120000): Promise<any[]> {
+async function runActorAndWait(actorId: string, input: any, token: string, maxWaitMs = 600000): Promise<any[]> {
   const startResp = await fetch(
     `${APIFY_BASE}/acts/${actorId}/runs?token=${token}`,
     {
