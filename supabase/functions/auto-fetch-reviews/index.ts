@@ -40,11 +40,12 @@ interface FetchJob {
   actorInput: any;
 }
 
-function buildFetchJobs(biz: any): FetchJob[] {
+function buildFetchJobs(biz: any, allowedPlatforms?: Set<string>): FetchJob[] {
   const jobs: FetchJob[] = [];
 
   // Daily fetch limit per platform — economical mode
   const MAX_PER_QUERY = 50;
+  const allow = (p: string) => !allowedPlatforms || allowedPlatforms.has(p);
 
   // Booking.com — always use direct URL if booking_hotel_id exists
   if (biz.booking_hotel_id) {
