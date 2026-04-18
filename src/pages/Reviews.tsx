@@ -469,7 +469,7 @@ export default function Reviews() {
     });
 
     return result;
-  }, [reviews, searchQuery, statusFilter, sentimentFilter, platformFilter, ratingFilter, sortField, sortOrder]);
+  }, [reviews, searchQuery, statusFilter, sentimentFilter, platformFilter, ratingFilter, categoryFilter, sortField, sortOrder]);
 
   // Pagination
   const totalPages = Math.max(1, Math.ceil(filteredReviews.length / pageSize));
