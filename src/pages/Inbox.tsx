@@ -31,6 +31,8 @@ import {
 
 import { formatDistanceToNow } from "date-fns";
 import { tr } from "date-fns/locale";
+import { ReviewCategoryChips } from "@/components/reviews/ReviewCategoryChips";
+import { matchesCategory, REVIEW_CATEGORIES } from "@/lib/reviewCategories";
 
 const PLATFORM_META: Record<string, { label: string; classes: string }> = {
   google: { label: "Google", classes: "bg-blue-50 text-blue-700 border-blue-200" },
@@ -56,6 +58,7 @@ export default function Inbox() {
   const [statusTab, setStatusTab] = useState<StatusTab>("all");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const PAGE_SIZE = 50;
 
   // Default: tüm işletmeler seçili
