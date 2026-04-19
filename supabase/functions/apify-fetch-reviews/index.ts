@@ -223,7 +223,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    const { business_id, platform = "all", run_id } = await req.json();
+    const { business_id, platform = "all", run_id, force = false } = await req.json();
 
     if (!business_id) {
       return new Response(
@@ -233,6 +233,49 @@ Deno.serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // 🧠 Akıllı skip: cron (service-role) çağrılarında, son 48 saat içinde
+    // bu işletme-platform için zaten bir scrape yapıldıysa VE o scrape'te
+    // hiç yeni yorum eklenmediyse → tekrar scrape etme (Apify maliyetini düşürür).
+    if (!run_id && isServiceRole && !force) {
+      const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+      const { data: lastLogs } = await supabase
+        .from("integration_logs")
+        .select("created_at, meta, status")
+        .eq("business_id", business_id)
+        .eq("provider", "apify")
+        .eq("action", `${platform}_reviews_fetch`)
+        .eq("status", "success")
+        .gte("created_at", cutoff)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      const lastRun = lastLogs?.[0];
+      if (lastRun && lastRun.meta && Number((lastRun.meta as any).inserted ?? 0) === 0) {
+        console.log(
+          `⏭️ Skipping ${platform} for business ${business_id} — last successful run at ${lastRun.created_at} added 0 reviews (within 48h cooldown).`
+        );
+        await supabase.from("integration_logs").insert({
+          business_id,
+          provider: "apify",
+          action: `${platform}_reviews_fetch`,
+          status: "skipped",
+          meta: {
+            reason: "smart_skip_no_new_reviews_within_48h",
+            last_run_at: lastRun.created_at,
+          },
+        });
+        return new Response(
+          JSON.stringify({
+            success: true,
+            skipped: true,
+            reason: "smart_skip_no_new_reviews_within_48h",
+            last_run_at: lastRun.created_at,
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
 
     // If run_id is provided, we're checking an existing run
     if (run_id) {
@@ -296,6 +339,10 @@ Deno.serve(async (req) => {
       const result = await insertReviews(supabase, cappedItems, business_id, forcedPlatform);
 
       await logSuccess(supabase, business_id, platform, items.length, result.inserted, result.updated, result.skipped);
+      // Fire-and-forget admin notification
+      notifyAdmin(business_id, platform, items.length, result.inserted, result.updated, result.skipped, run_id).catch(
+        (e) => console.error("notifyAdmin failed:", e)
+      );
 
       return new Response(
         JSON.stringify({ success: true, ...result, fetched: items.length }),
@@ -715,5 +762,75 @@ async function logSuccess(
     status: "success",
     meta: { fetched, inserted, updated, skipped },
   });
+}
+
+async function notifyAdmin(
+  businessId: string,
+  platform: string,
+  fetched: number,
+  inserted: number,
+  updated: number,
+  skipped: number,
+  runId?: string,
+) {
+  const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+  if (!RESEND_API_KEY) {
+    console.warn("RESEND_API_KEY not set, skipping admin notification");
+    return;
+  }
+
+  // Lookup business name for context
+  let businessName = businessId;
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const sb = createClient(supabaseUrl, supabaseServiceKey);
+    const { data } = await sb.from("businesses").select("name, city").eq("id", businessId).maybeSingle();
+    if (data?.name) businessName = `${data.name}${data.city ? ` (${data.city})` : ""}`;
+  } catch (_) { /* noop */ }
+
+  const subject = `[Apify] ${platform} • ${businessName} • +${inserted} new`;
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:560px;color:#111">
+      <h2 style="margin:0 0 12px">Apify Scrape Tamamlandı</h2>
+      <p style="margin:0 0 16px;color:#555">Bir Apify run'ı başarıyla tamamlandı.</p>
+      <table style="border-collapse:collapse;width:100%;font-size:14px">
+        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>İşletme</b></td><td style="padding:6px 8px">${businessName}</td></tr>
+        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>Platform</b></td><td style="padding:6px 8px">${platform}</td></tr>
+        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>Çekilen</b></td><td style="padding:6px 8px">${fetched}</td></tr>
+        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>Yeni eklenen</b></td><td style="padding:6px 8px"><b style="color:#16a34a">${inserted}</b></td></tr>
+        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>Güncellenen</b></td><td style="padding:6px 8px">${updated}</td></tr>
+        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>Atlanan (duplike)</b></td><td style="padding:6px 8px">${skipped}</td></tr>
+        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>Run ID</b></td><td style="padding:6px 8px;font-family:monospace;font-size:12px">${runId || "-"}</td></tr>
+        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>Business ID</b></td><td style="padding:6px 8px;font-family:monospace;font-size:12px">${businessId}</td></tr>
+        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>Zaman</b></td><td style="padding:6px 8px">${new Date().toISOString()}</td></tr>
+      </table>
+      <p style="margin-top:16px;color:#888;font-size:12px">VoyageRespond • Apify Monitor</p>
+    </div>
+  `;
+
+  try {
+    const resp = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "VoyageRespond Monitor <notify@voyagerespond.com>",
+        to: ["metecorukbasari@gmail.com"],
+        subject,
+        html,
+      }),
+    });
+    if (!resp.ok) {
+      const t = await resp.text();
+      console.error("Resend admin notify failed:", resp.status, t);
+    } else {
+      console.log("✉️ Admin notified for Apify run:", platform, businessName);
+    }
+  } catch (e) {
+    console.error("Resend admin notify error:", e);
+  }
 }
 
