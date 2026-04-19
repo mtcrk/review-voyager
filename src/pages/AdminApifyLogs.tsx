@@ -83,6 +83,20 @@ export default function AdminApifyLogs() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [providerFilter, setProviderFilter] = useState<string>("all");
 
+  // Pagination state per tab
+  const [apifyPage, setApifyPage] = useState(1);
+  const [usersPage, setUsersPage] = useState(1);
+  const [repliesPage, setRepliesPage] = useState(1);
+  const [emailsPage, setEmailsPage] = useState(1);
+  const [integrationsPage, setIntegrationsPage] = useState(1);
+
+  // Reset page when filters change
+  useEffect(() => { setApifyPage(1); }, [search, platformFilter, statusFilter, days]);
+  useEffect(() => { setUsersPage(1); }, [search, days]);
+  useEffect(() => { setRepliesPage(1); }, [search, days]);
+  useEffect(() => { setEmailsPage(1); }, [search, days]);
+  useEffect(() => { setIntegrationsPage(1); }, [search, providerFilter, days]);
+
   const isAdmin = user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
   const fetchData = async () => {
