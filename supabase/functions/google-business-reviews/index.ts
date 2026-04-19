@@ -213,23 +213,28 @@ Deno.serve(async (req) => {
           const sentiment =
             (rating as number) >= 4 ? "positive" : (rating as number) >= 3 ? "neutral" : "negative";
 
-          // Insert new review
+          // Upsert new review (prevents race-condition duplicates via unique index)
           const replyComment = review.reviewReply?.comment || null;
-          const { error: insertError } = await supabaseAdmin.from("reviews").insert({
-            business_id: biz.id,
-            platform: "google",
-            google_review_id: googleReviewId,
-            google_review_name: reviewName,
-            reviewer_name: reviewerName,
-            rating: rating as number,
-            text,
-            posted_at: postedAt,
-            status: hasReply ? "replied" : "pending_reply",
-            replied_at: hasReply ? review.reviewReply?.updateTime : null,
-            approved_reply: hasReply ? replyComment : null,
-            sentiment,
-            photos: photos.length > 0 ? photos : [],
-          });
+          const { error: insertError } = await supabaseAdmin
+            .from("reviews")
+            .upsert(
+              {
+                business_id: biz.id,
+                platform: "google",
+                google_review_id: googleReviewId,
+                google_review_name: reviewName,
+                reviewer_name: reviewerName,
+                rating: rating as number,
+                text,
+                posted_at: postedAt,
+                status: hasReply ? "replied" : "pending_reply",
+                replied_at: hasReply ? review.reviewReply?.updateTime : null,
+                approved_reply: hasReply ? replyComment : null,
+                sentiment,
+                photos: photos.length > 0 ? photos : [],
+              },
+              { onConflict: "business_id,platform,google_review_id", ignoreDuplicates: true }
+            );
 
           if (!insertError) insertedCount++;
           else console.error("Insert error:", insertError);
