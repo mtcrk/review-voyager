@@ -13,11 +13,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Loader2, RefreshCw, Mail, MailX, Search } from "lucide-react";
+import { Loader2, RefreshCw, Mail, MailX, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 
 const ADMIN_EMAIL = "metecorukbasari@gmail.com";
+const PAGE_SIZE = 25;
 
 interface OverviewResp {
   window_days: number;
@@ -34,6 +35,42 @@ interface OverviewResp {
   integrations: { total: number; by_provider: Record<string, { total: number; success: number; failed: number; skipped: number }>; list: any[] };
 }
 
+function paginate<T>(items: T[], page: number) {
+  const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
+  const safePage = Math.min(Math.max(1, page), totalPages);
+  const start = (safePage - 1) * PAGE_SIZE;
+  return {
+    pageItems: items.slice(start, start + PAGE_SIZE),
+    totalPages,
+    safePage,
+    total: items.length,
+  };
+}
+
+function Pager({
+  page, totalPages, total, onPage,
+}: { page: number; totalPages: number; total: number; onPage: (p: number) => void }) {
+  if (total === 0) return null;
+  const start = (page - 1) * PAGE_SIZE + 1;
+  const end = Math.min(page * PAGE_SIZE, total);
+  return (
+    <div className="flex items-center justify-between gap-3 pt-3 mt-3 border-t text-xs text-muted-foreground flex-wrap">
+      <div>{start.toLocaleString("tr-TR")}–{end.toLocaleString("tr-TR")} / {total.toLocaleString("tr-TR")}</div>
+      <div className="flex items-center gap-1">
+        <Button variant="outline" size="sm" className="h-7 px-2" onClick={() => onPage(1)} disabled={page <= 1}>«</Button>
+        <Button variant="outline" size="sm" className="h-7 px-2" onClick={() => onPage(page - 1)} disabled={page <= 1}>
+          <ChevronLeft className="h-3.5 w-3.5" />
+        </Button>
+        <span className="px-2">Sayfa {page} / {totalPages}</span>
+        <Button variant="outline" size="sm" className="h-7 px-2" onClick={() => onPage(page + 1)} disabled={page >= totalPages}>
+          <ChevronRight className="h-3.5 w-3.5" />
+        </Button>
+        <Button variant="outline" size="sm" className="h-7 px-2" onClick={() => onPage(totalPages)} disabled={page >= totalPages}>»</Button>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminApifyLogs() {
   const { user, loading: authLoading } = useAuth();
   const [data, setData] = useState<OverviewResp | null>(null);
@@ -43,6 +80,20 @@ export default function AdminApifyLogs() {
   const [platformFilter, setPlatformFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [providerFilter, setProviderFilter] = useState<string>("all");
+
+  // Pagination state per tab
+  const [apifyPage, setApifyPage] = useState(1);
+  const [usersPage, setUsersPage] = useState(1);
+  const [repliesPage, setRepliesPage] = useState(1);
+  const [emailsPage, setEmailsPage] = useState(1);
+  const [integrationsPage, setIntegrationsPage] = useState(1);
+
+  // Reset pages when filters/search change
+  useEffect(() => { setApifyPage(1); }, [search, platformFilter, statusFilter, days]);
+  useEffect(() => { setUsersPage(1); }, [search, days]);
+  useEffect(() => { setRepliesPage(1); }, [search, days]);
+  useEffect(() => { setEmailsPage(1); }, [search, days]);
+  useEffect(() => { setIntegrationsPage(1); }, [search, providerFilter, days]);
 
   const isAdmin = user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
@@ -115,6 +166,13 @@ export default function AdminApifyLogs() {
     );
   }, [data, search]);
 
+  // Paged slices
+  const apifyPaged = useMemo(() => paginate(filteredApifyLogs, apifyPage), [filteredApifyLogs, apifyPage]);
+  const usersPaged = useMemo(() => paginate(filteredUsers, usersPage), [filteredUsers, usersPage]);
+  const repliesPaged = useMemo(() => paginate(filteredReplies, repliesPage), [filteredReplies, repliesPage]);
+  const emailsPaged = useMemo(() => paginate(filteredEmails, emailsPage), [filteredEmails, emailsPage]);
+  const integrationsPaged = useMemo(() => paginate(filteredIntegrations, integrationsPage), [filteredIntegrations, integrationsPage]);
+
   if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -135,7 +193,7 @@ export default function AdminApifyLogs() {
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold">Admin Aktivite Paneli</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Yalnızca {ADMIN_EMAIL} erişebilir. Sistemdeki her aktiviteyi gör: kim ne yaptı, hangi entegrasyon çalıştı, hangi mail atıldı.
+              Yalnızca {ADMIN_EMAIL} erişebilir. Sistemdeki her aktiviteyi gör.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -263,7 +321,7 @@ export default function AdminApifyLogs() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredApifyLogs.map((l: any) => (
+                      {apifyPaged.pageItems.map((l: any) => (
                         <TableRow key={l.id}>
                           <TableCell className="whitespace-nowrap text-xs">
                             {format(new Date(l.created_at), "dd MMM HH:mm", { locale: tr })}
@@ -299,6 +357,7 @@ export default function AdminApifyLogs() {
                       )}
                     </TableBody>
                   </Table>
+                  <Pager page={apifyPaged.safePage} totalPages={apifyPaged.totalPages} total={apifyPaged.total} onPage={setApifyPage} />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -320,7 +379,7 @@ export default function AdminApifyLogs() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredUsers.map((u: any) => (
+                      {usersPaged.pageItems.map((u: any) => (
                         <TableRow key={u.id}>
                           <TableCell className="font-medium text-sm">{u.email}</TableCell>
                           <TableCell className="text-sm">{u.full_name}</TableCell>
@@ -336,8 +395,12 @@ export default function AdminApifyLogs() {
                           </TableCell>
                         </TableRow>
                       ))}
+                      {filteredUsers.length === 0 && (
+                        <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Kayıt yok.</TableCell></TableRow>
+                      )}
                     </TableBody>
                   </Table>
+                  <Pager page={usersPaged.safePage} totalPages={usersPaged.totalPages} total={usersPaged.total} onPage={setUsersPage} />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -360,7 +423,7 @@ export default function AdminApifyLogs() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredReplies.map((r: any) => (
+                      {repliesPaged.pageItems.map((r: any) => (
                         <TableRow key={r.id}>
                           <TableCell className="whitespace-nowrap text-xs">
                             {format(new Date(r.created_at), "dd MMM HH:mm", { locale: tr })}
@@ -382,6 +445,7 @@ export default function AdminApifyLogs() {
                       )}
                     </TableBody>
                   </Table>
+                  <Pager page={repliesPaged.safePage} totalPages={repliesPaged.totalPages} total={repliesPaged.total} onPage={setRepliesPage} />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -403,7 +467,7 @@ export default function AdminApifyLogs() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredEmails.map((e: any) => (
+                      {emailsPaged.pageItems.map((e: any) => (
                         <TableRow key={e.id}>
                           <TableCell className="whitespace-nowrap text-xs">
                             {format(new Date(e.created_at), "dd MMM HH:mm", { locale: tr })}
@@ -420,6 +484,7 @@ export default function AdminApifyLogs() {
                       )}
                     </TableBody>
                   </Table>
+                  <Pager page={emailsPaged.safePage} totalPages={emailsPaged.totalPages} total={emailsPaged.total} onPage={setEmailsPage} />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -469,7 +534,7 @@ export default function AdminApifyLogs() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredIntegrations.map((l: any) => (
+                      {integrationsPaged.pageItems.map((l: any) => (
                         <TableRow key={l.id}>
                           <TableCell className="whitespace-nowrap text-xs">
                             {format(new Date(l.created_at), "dd MMM HH:mm", { locale: tr })}
@@ -489,6 +554,7 @@ export default function AdminApifyLogs() {
                       )}
                     </TableBody>
                   </Table>
+                  <Pager page={integrationsPaged.safePage} totalPages={integrationsPaged.totalPages} total={integrationsPaged.total} onPage={setIntegrationsPage} />
                 </CardContent>
               </Card>
             </TabsContent>
