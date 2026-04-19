@@ -13,11 +13,50 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Loader2, RefreshCw, Mail, MailX, Search } from "lucide-react";
+import { Loader2, RefreshCw, Mail, MailX, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 
 const ADMIN_EMAIL = "metecorukbasari@gmail.com";
+const PAGE_SIZE = 25;
+
+function usePaged<T>(items: T[], page: number) {
+  return useMemo(() => {
+    const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
+    const safePage = Math.min(page, totalPages);
+    const start = (safePage - 1) * PAGE_SIZE;
+    return {
+      pageItems: items.slice(start, start + PAGE_SIZE),
+      totalPages,
+      safePage,
+      total: items.length,
+    };
+  }, [items, page]);
+}
+
+function Pager({
+  page, totalPages, total, onPage,
+}: { page: number; totalPages: number; total: number; onPage: (p: number) => void }) {
+  if (total === 0) return null;
+  const start = (page - 1) * PAGE_SIZE + 1;
+  const end = Math.min(page * PAGE_SIZE, total);
+  return (
+    <div className="flex items-center justify-between gap-3 pt-3 border-t mt-3 text-xs text-muted-foreground flex-wrap">
+      <div>{start}–{end} / {total.toLocaleString("tr-TR")}</div>
+      <div className="flex items-center gap-1">
+        <Button variant="outline" size="sm" onClick={() => onPage(1)} disabled={page <= 1}>«</Button>
+        <Button variant="outline" size="sm" onClick={() => onPage(page - 1)} disabled={page <= 1}>
+          <ChevronLeft className="h-3.5 w-3.5" />
+        </Button>
+        <span className="px-2">Sayfa {page} / {totalPages}</span>
+        <Button variant="outline" size="sm" onClick={() => onPage(page + 1)} disabled={page >= totalPages}>
+          <ChevronRight className="h-3.5 w-3.5" />
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => onPage(totalPages)} disabled={page >= totalPages}>»</Button>
+      </div>
+    </div>
+  );
+}
 
 interface OverviewResp {
   window_days: number;
