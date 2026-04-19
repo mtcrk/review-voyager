@@ -764,3 +764,73 @@ async function logSuccess(
   });
 }
 
+async function notifyAdmin(
+  businessId: string,
+  platform: string,
+  fetched: number,
+  inserted: number,
+  updated: number,
+  skipped: number,
+  runId?: string,
+) {
+  const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+  if (!RESEND_API_KEY) {
+    console.warn("RESEND_API_KEY not set, skipping admin notification");
+    return;
+  }
+
+  // Lookup business name for context
+  let businessName = businessId;
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const sb = createClient(supabaseUrl, supabaseServiceKey);
+    const { data } = await sb.from("businesses").select("name, city").eq("id", businessId).maybeSingle();
+    if (data?.name) businessName = `${data.name}${data.city ? ` (${data.city})` : ""}`;
+  } catch (_) { /* noop */ }
+
+  const subject = `[Apify] ${platform} • ${businessName} • +${inserted} new`;
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:560px;color:#111">
+      <h2 style="margin:0 0 12px">Apify Scrape Tamamlandı</h2>
+      <p style="margin:0 0 16px;color:#555">Bir Apify run'ı başarıyla tamamlandı.</p>
+      <table style="border-collapse:collapse;width:100%;font-size:14px">
+        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>İşletme</b></td><td style="padding:6px 8px">${businessName}</td></tr>
+        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>Platform</b></td><td style="padding:6px 8px">${platform}</td></tr>
+        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>Çekilen</b></td><td style="padding:6px 8px">${fetched}</td></tr>
+        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>Yeni eklenen</b></td><td style="padding:6px 8px"><b style="color:#16a34a">${inserted}</b></td></tr>
+        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>Güncellenen</b></td><td style="padding:6px 8px">${updated}</td></tr>
+        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>Atlanan (duplike)</b></td><td style="padding:6px 8px">${skipped}</td></tr>
+        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>Run ID</b></td><td style="padding:6px 8px;font-family:monospace;font-size:12px">${runId || "-"}</td></tr>
+        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>Business ID</b></td><td style="padding:6px 8px;font-family:monospace;font-size:12px">${businessId}</td></tr>
+        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>Zaman</b></td><td style="padding:6px 8px">${new Date().toISOString()}</td></tr>
+      </table>
+      <p style="margin-top:16px;color:#888;font-size:12px">VoyageRespond • Apify Monitor</p>
+    </div>
+  `;
+
+  try {
+    const resp = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "VoyageRespond Monitor <notify@voyagerespond.com>",
+        to: ["metecorukbasari@gmail.com"],
+        subject,
+        html,
+      }),
+    });
+    if (!resp.ok) {
+      const t = await resp.text();
+      console.error("Resend admin notify failed:", resp.status, t);
+    } else {
+      console.log("✉️ Admin notified for Apify run:", platform, businessName);
+    }
+  } catch (e) {
+    console.error("Resend admin notify error:", e);
+  }
+}
+
