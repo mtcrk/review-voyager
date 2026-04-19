@@ -251,7 +251,9 @@ Deno.serve(async (req) => {
         .limit(1);
 
       const lastRun = lastLogs?.[0];
-      if (lastRun && lastRun.meta && Number((lastRun.meta as any).inserted ?? 0) === 0) {
+      const lastInserted = Number((lastRun?.meta as any)?.inserted ?? 0);
+      const lastUpdated = Number((lastRun?.meta as any)?.updated ?? 0);
+      if (lastRun && lastRun.meta && lastInserted === 0 && lastUpdated === 0) {
         console.log(
           `⏭️ Skipping ${platform} for business ${business_id} — last successful run at ${lastRun.created_at} added 0 reviews (within 48h cooldown).`
         );

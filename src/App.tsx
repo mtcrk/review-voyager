@@ -57,6 +57,7 @@ import OtelYorumCevaplari from "./pages/seo/OtelYorumCevaplari";
 import GooglePerformance from "./pages/GooglePerformance";
 import Inbox from "./pages/Inbox";
 import GoogleAccounts from "./pages/GoogleAccounts";
+import AdminApifyLogs from "./pages/AdminApifyLogs";
 
 const queryClient = new QueryClient();
 
@@ -301,6 +302,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route path="/admin/apify-logs" element={<AdminApifyLogs />} />
             <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
