@@ -223,7 +223,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    const { business_id, platform = "all", run_id } = await req.json();
+    const { business_id, platform = "all", run_id, force = false } = await req.json();
 
     if (!business_id) {
       return new Response(
@@ -233,6 +233,49 @@ Deno.serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // 🧠 Akıllı skip: cron (service-role) çağrılarında, son 48 saat içinde
+    // bu işletme-platform için zaten bir scrape yapıldıysa VE o scrape'te
+    // hiç yeni yorum eklenmediyse → tekrar scrape etme (Apify maliyetini düşürür).
+    if (!run_id && isServiceRole && !force) {
+      const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+      const { data: lastLogs } = await supabase
+        .from("integration_logs")
+        .select("created_at, meta, status")
+        .eq("business_id", business_id)
+        .eq("provider", "apify")
+        .eq("action", `${platform}_reviews_fetch`)
+        .eq("status", "success")
+        .gte("created_at", cutoff)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      const lastRun = lastLogs?.[0];
+      if (lastRun && lastRun.meta && Number((lastRun.meta as any).inserted ?? 0) === 0) {
+        console.log(
+          `⏭️ Skipping ${platform} for business ${business_id} — last successful run at ${lastRun.created_at} added 0 reviews (within 48h cooldown).`
+        );
+        await supabase.from("integration_logs").insert({
+          business_id,
+          provider: "apify",
+          action: `${platform}_reviews_fetch`,
+          status: "skipped",
+          meta: {
+            reason: "smart_skip_no_new_reviews_within_48h",
+            last_run_at: lastRun.created_at,
+          },
+        });
+        return new Response(
+          JSON.stringify({
+            success: true,
+            skipped: true,
+            reason: "smart_skip_no_new_reviews_within_48h",
+            last_run_at: lastRun.created_at,
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
 
     // If run_id is provided, we're checking an existing run
     if (run_id) {
