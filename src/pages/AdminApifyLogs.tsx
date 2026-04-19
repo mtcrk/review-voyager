@@ -301,6 +301,12 @@ export default function AdminApifyLogs() {
                   </div>
                 </CardHeader>
                 <CardContent className="overflow-auto">
+                  {(() => {
+                    const totalPages = Math.max(1, Math.ceil(filteredApifyLogs.length / PAGE_SIZE));
+                    const safePage = Math.min(apifyPage, totalPages);
+                    const pageItems = filteredApifyLogs.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+                    return (
+                  <>
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -316,7 +322,7 @@ export default function AdminApifyLogs() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredApifyLogs.map((l: any) => (
+                      {pageItems.map((l: any) => (
                         <TableRow key={l.id}>
                           <TableCell className="whitespace-nowrap text-xs">
                             {format(new Date(l.created_at), "dd MMM HH:mm", { locale: tr })}
