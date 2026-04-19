@@ -339,6 +339,10 @@ Deno.serve(async (req) => {
       const result = await insertReviews(supabase, cappedItems, business_id, forcedPlatform);
 
       await logSuccess(supabase, business_id, platform, items.length, result.inserted, result.updated, result.skipped);
+      // Fire-and-forget admin notification
+      notifyAdmin(business_id, platform, items.length, result.inserted, result.updated, result.skipped, run_id).catch(
+        (e) => console.error("notifyAdmin failed:", e)
+      );
 
       return new Response(
         JSON.stringify({ success: true, ...result, fetched: items.length }),
