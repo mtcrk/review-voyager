@@ -17,10 +17,21 @@ interface ReviewLite {
   platform?: string;
 }
 
+interface EditedReviewLite {
+  id?: string;
+  reviewer_name?: string;
+  rating: number;
+  previous_rating?: number | null;
+  text?: string | null;
+  previous_text?: string | null;
+  platform?: string;
+}
+
 interface PlatformResult {
   platform: string;
   fetched: number;
   inserted: number;
+  edited?: number;
   error?: string;
 }
 
@@ -153,6 +164,38 @@ function summarizeIssuesPraises(reviews: ReviewLite[]) {
   return { topIssues, topPraises, negativeCount: negatives.length, positiveCount: positives.length };
 }
 
+function buildEditedReviewsBlock(edited: EditedReviewLite[]): string {
+  if (!edited || edited.length === 0) return "";
+  const cards = edited.slice(0, 10).map((r) => {
+    const ratingChanged = r.previous_rating != null && r.previous_rating !== r.rating;
+    const oldText = r.previous_text || "—";
+    const newText = r.text || "—";
+    const trunc = (t: string) => (t.length > 250 ? t.substring(0, 250) + "..." : t);
+    const ratingBadge = ratingChanged
+      ? `<span style="font-size:12px;color:#9ca3af;text-decoration:line-through;">${r.previous_rating}★</span> <span style="color:#7A5AF8;">→</span> <span style="font-size:13px;color:${getRatingColor(r.rating)};font-weight:700;">${r.rating}★</span>`
+      : `<span style="font-size:13px;color:${getRatingColor(r.rating)};font-weight:700;">${r.rating}★</span>`;
+    return `
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:14px 16px;margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <strong style="font-size:13px;color:#111827;">${r.reviewer_name || "Anonim"}</strong>
+          <div>${ratingBadge}</div>
+        </div>
+        <div style="font-size:12px;color:#9ca3af;margin-bottom:4px;">Önceki:</div>
+        <div style="font-size:13px;color:#6b7280;text-decoration:line-through;line-height:1.5;margin-bottom:8px;">"${trunc(oldText)}"</div>
+        <div style="font-size:12px;color:#b45309;margin-bottom:4px;font-weight:600;">Güncel:</div>
+        <div style="font-size:13px;color:#374151;line-height:1.5;">"${trunc(newText)}"</div>
+      </div>`;
+  }).join("");
+  const more = edited.length > 10 ? `<div style="font-size:12px;color:#9ca3af;text-align:center;margin-top:6px;">+${edited.length - 10} düzenleme daha</div>` : "";
+  return `
+    <div style="margin-bottom:20px;">
+      <h3 style="margin:0 0 10px 0;font-size:14px;color:#b45309;">✏️ Düzenlenen Yorumlar (${edited.length})</h3>
+      <div style="font-size:12px;color:#6b7280;margin-bottom:10px;">Müşteri yorumunu güncellemiş — yanıtınızı gözden geçirmek isteyebilirsiniz.</div>
+      ${cards}
+      ${more}
+    </div>`;
+}
+
 function buildLocationSection(opts: {
   businessName: string;
   totalNew: number;
@@ -160,11 +203,12 @@ function buildLocationSection(opts: {
   platformResults: PlatformResult[];
   summary: ReturnType<typeof summarizeIssuesPraises>;
   sampleReviews: ReviewLite[];
+  editedReviews: EditedReviewLite[];
   aiSummary: Awaited<ReturnType<typeof generateAISummary>>;
   yesterdayCount: number;
   unansweredCount: number;
 }): string {
-  const { businessName, totalNew, avgRating, platformResults, summary, sampleReviews, aiSummary, yesterdayCount, unansweredCount } = opts;
+  const { businessName, totalNew, avgRating, platformResults, summary, sampleReviews, editedReviews, aiSummary, yesterdayCount, unansweredCount } = opts;
 
   // Urgency banner: 3+ negative reviews
   const urgencyBanner = summary.negativeCount >= 3
@@ -311,6 +355,8 @@ function buildLocationSection(opts: {
 
       ${recommendationsBlock}
 
+      ${buildEditedReviewsBlock(editedReviews)}
+
       ${sampleCards ? `<h3 style="margin:0 0 10px 0;font-size:14px;color:#111827;">Örnek Yorumlar</h3>${sampleCards}` : ""}
     </div>`;
 }
@@ -324,10 +370,12 @@ function buildConsolidatedEmailHtml(locations: Array<{
   aiSummary: Awaited<ReturnType<typeof generateAISummary>>;
   platformResults: PlatformResult[];
   sampleReviews: ReviewLite[];
+  editedReviews: EditedReviewLite[];
   yesterdayCount: number;
   unansweredCount: number;
 }>): string {
   const totalNewAll = locations.reduce((s, l) => s + l.totalNew, 0);
+  const totalEditedAll = locations.reduce((s, l) => s + (l.editedReviews?.length || 0), 0);
   const totalNegAll = locations.reduce((s, l) => s + l.summary.negativeCount, 0);
   const totalUnansweredAll = locations.reduce((s, l) => s + l.unansweredCount, 0);
   const isMulti = locations.length > 1;
@@ -345,6 +393,10 @@ function buildConsolidatedEmailHtml(locations: Array<{
           <div style="font-size:24px;font-weight:700;color:#111827;">${totalNewAll}</div>
           <div style="font-size:11px;color:#6b7280;">Toplam Yeni</div>
         </div>
+        ${totalEditedAll > 0 ? `<div style="flex:1;min-width:100px;text-align:center;">
+          <div style="font-size:24px;font-weight:700;color:#b45309;">${totalEditedAll}</div>
+          <div style="font-size:11px;color:#6b7280;">Düzenlenen</div>
+        </div>` : ""}
         <div style="flex:1;min-width:100px;text-align:center;">
           <div style="font-size:24px;font-weight:700;color:#16a34a;">${locations.reduce((s, l) => s + l.summary.positiveCount, 0)}</div>
           <div style="font-size:11px;color:#6b7280;">Olumlu</div>
@@ -373,6 +425,7 @@ function buildConsolidatedEmailHtml(locations: Array<{
     platformResults: loc.platformResults,
     summary: loc.summary,
     sampleReviews: loc.sampleReviews,
+    editedReviews: loc.editedReviews || [],
     aiSummary: loc.aiSummary,
     yesterdayCount: loc.yesterdayCount,
     unansweredCount: loc.unansweredCount,
@@ -438,6 +491,7 @@ Deno.serve(async (req) => {
       business_name?: string;
       city?: string | null;
       new_reviews: ReviewLite[];
+      edited_reviews?: EditedReviewLite[];
       platform_results: PlatformResult[];
     }> = [];
 
@@ -448,6 +502,7 @@ Deno.serve(async (req) => {
       locations = [{
         business_id: body.business_id,
         new_reviews: body.new_reviews || [],
+        edited_reviews: body.edited_reviews || [],
         platform_results: body.platform_results || [],
       }];
     } else {
@@ -457,12 +512,14 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Skip if nothing new and no errors across all locations
+    // Skip if nothing new, no edits, and no errors across all locations
     const hasAnyContent = locations.some((loc) =>
-      loc.new_reviews.length > 0 || loc.platform_results.some((p) => p.error)
+      loc.new_reviews.length > 0 ||
+      (loc.edited_reviews && loc.edited_reviews.length > 0) ||
+      loc.platform_results.some((p) => p.error)
     );
     if (!hasAnyContent) {
-      return new Response(JSON.stringify({ skipped: true, reason: "no new reviews" }), {
+      return new Response(JSON.stringify({ skipped: true, reason: "no new or edited reviews" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -485,6 +542,7 @@ Deno.serve(async (req) => {
       const biz = bizMap.get(loc.business_id);
       const name = loc.business_name || biz?.name || "İşletme";
       const reviews = loc.new_reviews || [];
+      const editedReviews = loc.edited_reviews || [];
       const totalNew = reviews.length;
       const avgRating = totalNew > 0
         ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / totalNew
@@ -523,6 +581,7 @@ Deno.serve(async (req) => {
         aiSummary,
         platformResults: loc.platform_results || [],
         sampleReviews: reviews,
+        editedReviews,
         yesterdayCount: yesterdayCount || 0,
         unansweredCount,
       };
@@ -539,13 +598,17 @@ Deno.serve(async (req) => {
     const html = buildConsolidatedEmailHtml(enrichedLocations);
 
     const totalAcrossAll = enrichedLocations.reduce((s, l) => s + l.totalNew, 0);
+    const totalEditedAcross = enrichedLocations.reduce((s, l) => s + (l.editedReviews?.length || 0), 0);
     const totalNegative = enrichedLocations.reduce((s, l) => s + l.summary.negativeCount, 0);
     const urgencyPrefix = totalNegative >= 3 ? "🚨 ACİL — " : "📊 ";
     const locLabel = enrichedLocations.length > 1
       ? `${enrichedLocations.length} lokasyon`
       : enrichedLocations[0].name;
-    const subject = totalAcrossAll > 0
-      ? `${urgencyPrefix}${locLabel} — ${totalAcrossAll} yeni yorum`
+    const parts: string[] = [];
+    if (totalAcrossAll > 0) parts.push(`${totalAcrossAll} yeni`);
+    if (totalEditedAcross > 0) parts.push(`${totalEditedAcross} düzenlenen`);
+    const subject = parts.length > 0
+      ? `${urgencyPrefix}${locLabel} — ${parts.join(" + ")} yorum`
       : `⚠️ ${locLabel} — Yorum çekme uyarısı`;
 
     const recipients = new Set<string>([ADMIN_EMAIL]);
