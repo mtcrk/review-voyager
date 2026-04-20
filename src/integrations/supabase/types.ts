@@ -599,16 +599,20 @@ export type Database = {
           approved_reply: string | null
           business_id: string
           created_at: string
+          edited_at: string | null
           google_reply_error_message: string | null
           google_reply_status: string | null
           google_review_id: string | null
           google_review_name: string | null
           id: string
+          is_edited: boolean
           issues: Json | null
           photos: Json | null
           platform: string
           posted_at: string
           praises: Json | null
+          previous_rating: number | null
+          previous_text: string | null
           rating: number
           replied_at: string | null
           reply_source: string | null
@@ -623,16 +627,20 @@ export type Database = {
           approved_reply?: string | null
           business_id: string
           created_at?: string
+          edited_at?: string | null
           google_reply_error_message?: string | null
           google_reply_status?: string | null
           google_review_id?: string | null
           google_review_name?: string | null
           id?: string
+          is_edited?: boolean
           issues?: Json | null
           photos?: Json | null
           platform?: string
           posted_at: string
           praises?: Json | null
+          previous_rating?: number | null
+          previous_text?: string | null
           rating: number
           replied_at?: string | null
           reply_source?: string | null
@@ -647,16 +655,20 @@ export type Database = {
           approved_reply?: string | null
           business_id?: string
           created_at?: string
+          edited_at?: string | null
           google_reply_error_message?: string | null
           google_reply_status?: string | null
           google_review_id?: string | null
           google_review_name?: string | null
           id?: string
+          is_edited?: boolean
           issues?: Json | null
           photos?: Json | null
           platform?: string
           posted_at?: string
           praises?: Json | null
+          previous_rating?: number | null
+          previous_text?: string | null
           rating?: number
           replied_at?: string | null
           reply_source?: string | null
