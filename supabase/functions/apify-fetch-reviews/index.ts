@@ -430,7 +430,7 @@ Deno.serve(async (req) => {
       const businessUrl = `https://www.trustpilot.com/review/${domain}`;
       actorInput = {
         businessUrl,
-        maxResults: 200,
+        maxResults: 50,
       };
       console.log(`Using dedicated Trustpilot scraper for: ${businessUrl}`);
     } else if (platform === "booking" && business.booking_hotel_id) {
