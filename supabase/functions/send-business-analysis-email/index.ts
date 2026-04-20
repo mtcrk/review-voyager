@@ -143,7 +143,7 @@ Profesyonel ve net ol. Sadece HTML döndür, markdown veya code block kullanma.`
 
         <div style="background: #f8f9fa; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
           <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-            <tr><td style="padding: 6px 0; color: #666;">Toplam Yorum</td><td style="padding: 6px 0; font-weight: 600; text-align: right;">${totalReviews}</td></tr>
+            <tr><td style="padding: 6px 0; color: #666;">Toplam Yorum</td><td style="padding: 6px 0; font-weight: 600; text-align: right;">${totalReviews}${sampleSize < totalReviews ? ` <span style="color:#999;font-weight:400;">(son ${sampleSize} analiz edildi)</span>` : ""}</td></tr>
             <tr><td style="padding: 6px 0; color: #666;">Ortalama Puan</td><td style="padding: 6px 0; font-weight: 600; text-align: right;">⭐ ${avgRating.toFixed(1)}/5</td></tr>
             <tr><td style="padding: 6px 0; color: #666;">Yanıt Oranı</td><td style="padding: 6px 0; font-weight: 600; text-align: right;">%${replyRate.toFixed(0)}</td></tr>
             <tr><td style="padding: 6px 0; color: #666;">Pozitif / Negatif</td><td style="padding: 6px 0; font-weight: 600; text-align: right;">${sentimentCounts.positive} / ${sentimentCounts.negative}</td></tr>
