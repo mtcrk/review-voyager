@@ -119,7 +119,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    const { business_id, run_id } = await req.json();
+    const { business_id, run_id, force = false } = await req.json();
 
     if (!business_id) {
       return new Response(
@@ -129,6 +129,50 @@ Deno.serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // 🧠 Smart skip: Cron (service-role) çağrılarında, son 48 saat içinde
+    // bu işletme için TripAdvisor scrape edilmişse → tekrar scrape etme.
+    // TripAdvisor en pahalı aktörlerden biri (her run ~$0.30+), bu yüzden
+    // yeni yorum 0 olmasa bile cooldown uygula.
+    if (!run_id && isServiceRole && !force) {
+      const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+      const { data: lastLogs } = await supabase
+        .from("integration_logs")
+        .select("created_at, meta, status")
+        .eq("business_id", business_id)
+        .eq("provider", "apify")
+        .eq("action", "tripadvisor_reviews_fetch")
+        .eq("status", "success")
+        .gte("created_at", cutoff)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      const lastRun = lastLogs?.[0];
+      if (lastRun) {
+        console.log(
+          `⏭️ Skipping TripAdvisor for business ${business_id} — last run at ${lastRun.created_at} (within 48h cooldown).`
+        );
+        await supabase.from("integration_logs").insert({
+          business_id,
+          provider: "apify",
+          action: "tripadvisor_reviews_fetch",
+          status: "skipped",
+          meta: {
+            reason: "smart_skip_within_48h",
+            last_run_at: lastRun.created_at,
+          },
+        });
+        return new Response(
+          JSON.stringify({
+            success: true,
+            skipped: true,
+            reason: "smart_skip_within_48h",
+            last_run_at: lastRun.created_at,
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
 
     // If run_id provided, check existing run
     if (run_id) {

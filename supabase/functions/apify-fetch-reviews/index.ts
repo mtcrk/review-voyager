@@ -234,9 +234,11 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // 🧠 Akıllı skip: cron (service-role) çağrılarında, son 48 saat içinde
-    // bu işletme-platform için zaten bir scrape yapıldıysa VE o scrape'te
-    // hiç yeni yorum eklenmediyse → tekrar scrape etme (Apify maliyetini düşürür).
+    // 🧠 GÜÇLENDİRİLMİŞ smart skip: cron (service-role) çağrılarında,
+    // son 48 saat içinde bu işletme-platform için BAŞARILI BİR SCRAPE
+    // yapıldıysa → tekrar scrape ETME. (Eskiden sadece 0-yeni-yorum durumda
+    // skip ediyordu; bu Apify maliyetini patlatıyordu.)
+    // Manuel UI tetiklemeleri (force=true veya user-token) etkilenmez.
     if (!run_id && isServiceRole && !force) {
       const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
       const { data: lastLogs } = await supabase
@@ -251,11 +253,9 @@ Deno.serve(async (req) => {
         .limit(1);
 
       const lastRun = lastLogs?.[0];
-      const lastInserted = Number((lastRun?.meta as any)?.inserted ?? 0);
-      const lastUpdated = Number((lastRun?.meta as any)?.updated ?? 0);
-      if (lastRun && lastRun.meta && lastInserted === 0 && lastUpdated === 0) {
+      if (lastRun) {
         console.log(
-          `⏭️ Skipping ${platform} for business ${business_id} — last successful run at ${lastRun.created_at} added 0 reviews (within 48h cooldown).`
+          `⏭️ Skipping ${platform} for business ${business_id} — last successful run at ${lastRun.created_at} (within 48h cooldown).`
         );
         await supabase.from("integration_logs").insert({
           business_id,
@@ -263,7 +263,7 @@ Deno.serve(async (req) => {
           action: `${platform}_reviews_fetch`,
           status: "skipped",
           meta: {
-            reason: "smart_skip_no_new_reviews_within_48h",
+            reason: "smart_skip_within_48h",
             last_run_at: lastRun.created_at,
           },
         });
@@ -271,7 +271,7 @@ Deno.serve(async (req) => {
           JSON.stringify({
             success: true,
             skipped: true,
-            reason: "smart_skip_no_new_reviews_within_48h",
+            reason: "smart_skip_within_48h",
             last_run_at: lastRun.created_at,
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
