@@ -164,6 +164,38 @@ function summarizeIssuesPraises(reviews: ReviewLite[]) {
   return { topIssues, topPraises, negativeCount: negatives.length, positiveCount: positives.length };
 }
 
+function buildEditedReviewsBlock(edited: EditedReviewLite[]): string {
+  if (!edited || edited.length === 0) return "";
+  const cards = edited.slice(0, 10).map((r) => {
+    const ratingChanged = r.previous_rating != null && r.previous_rating !== r.rating;
+    const oldText = r.previous_text || "—";
+    const newText = r.text || "—";
+    const trunc = (t: string) => (t.length > 250 ? t.substring(0, 250) + "..." : t);
+    const ratingBadge = ratingChanged
+      ? `<span style="font-size:12px;color:#9ca3af;text-decoration:line-through;">${r.previous_rating}★</span> <span style="color:#7A5AF8;">→</span> <span style="font-size:13px;color:${getRatingColor(r.rating)};font-weight:700;">${r.rating}★</span>`
+      : `<span style="font-size:13px;color:${getRatingColor(r.rating)};font-weight:700;">${r.rating}★</span>`;
+    return `
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:14px 16px;margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <strong style="font-size:13px;color:#111827;">${r.reviewer_name || "Anonim"}</strong>
+          <div>${ratingBadge}</div>
+        </div>
+        <div style="font-size:12px;color:#9ca3af;margin-bottom:4px;">Önceki:</div>
+        <div style="font-size:13px;color:#6b7280;text-decoration:line-through;line-height:1.5;margin-bottom:8px;">"${trunc(oldText)}"</div>
+        <div style="font-size:12px;color:#b45309;margin-bottom:4px;font-weight:600;">Güncel:</div>
+        <div style="font-size:13px;color:#374151;line-height:1.5;">"${trunc(newText)}"</div>
+      </div>`;
+  }).join("");
+  const more = edited.length > 10 ? `<div style="font-size:12px;color:#9ca3af;text-align:center;margin-top:6px;">+${edited.length - 10} düzenleme daha</div>` : "";
+  return `
+    <div style="margin-bottom:20px;">
+      <h3 style="margin:0 0 10px 0;font-size:14px;color:#b45309;">✏️ Düzenlenen Yorumlar (${edited.length})</h3>
+      <div style="font-size:12px;color:#6b7280;margin-bottom:10px;">Müşteri yorumunu güncellemiş — yanıtınızı gözden geçirmek isteyebilirsiniz.</div>
+      ${cards}
+      ${more}
+    </div>`;
+}
+
 function buildLocationSection(opts: {
   businessName: string;
   totalNew: number;
@@ -171,11 +203,12 @@ function buildLocationSection(opts: {
   platformResults: PlatformResult[];
   summary: ReturnType<typeof summarizeIssuesPraises>;
   sampleReviews: ReviewLite[];
+  editedReviews: EditedReviewLite[];
   aiSummary: Awaited<ReturnType<typeof generateAISummary>>;
   yesterdayCount: number;
   unansweredCount: number;
 }): string {
-  const { businessName, totalNew, avgRating, platformResults, summary, sampleReviews, aiSummary, yesterdayCount, unansweredCount } = opts;
+  const { businessName, totalNew, avgRating, platformResults, summary, sampleReviews, editedReviews, aiSummary, yesterdayCount, unansweredCount } = opts;
 
   // Urgency banner: 3+ negative reviews
   const urgencyBanner = summary.negativeCount >= 3
