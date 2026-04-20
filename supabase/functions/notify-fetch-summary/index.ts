@@ -355,6 +355,8 @@ function buildLocationSection(opts: {
 
       ${recommendationsBlock}
 
+      ${buildEditedReviewsBlock(editedReviews)}
+
       ${sampleCards ? `<h3 style="margin:0 0 10px 0;font-size:14px;color:#111827;">Örnek Yorumlar</h3>${sampleCards}` : ""}
     </div>`;
 }
