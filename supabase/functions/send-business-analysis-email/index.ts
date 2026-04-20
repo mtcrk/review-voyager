@@ -44,13 +44,19 @@ Deno.serve(async (req) => {
       .maybeSingle();
     const ownerName = profile?.full_name || "İşletme Sahibi";
 
-    // Fetch reviews
+    // Get total review count
+    const { count: totalReviewCount } = await admin
+      .from("reviews")
+      .select("*", { count: "exact", head: true })
+      .eq("business_id", business_id);
+
+    // Fetch reviews for analysis (cap at 500 for AI context)
     const { data: reviews } = await admin
       .from("reviews")
       .select("rating, text, sentiment, posted_at, status, platform")
       .eq("business_id", business_id)
       .order("posted_at", { ascending: false })
-      .limit(200);
+      .limit(500);
 
     if (!reviews || reviews.length === 0) {
       return new Response(
