@@ -16,6 +16,7 @@ import {
 import { Loader2, RefreshCw, Mail, MailX, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
+import { AdminCronJobs } from "@/components/admin/AdminCronJobs";
 
 const ADMIN_EMAIL = "metecorukbasari@gmail.com";
 const PAGE_SIZE = 25;
@@ -230,13 +231,19 @@ export default function AdminApifyLogs() {
 
         {data && (
           <Tabs defaultValue="apify" className="space-y-4">
-            <TabsList className="grid grid-cols-5 w-full max-w-2xl">
+            <TabsList className="grid grid-cols-6 w-full max-w-3xl">
               <TabsTrigger value="apify">Apify ({data.apify.totals.total_runs})</TabsTrigger>
               <TabsTrigger value="users">Kullanıcılar ({data.users.total})</TabsTrigger>
               <TabsTrigger value="replies">Yanıtlar ({data.reply_logs.total})</TabsTrigger>
               <TabsTrigger value="emails">Mailler ({data.email_logs.total})</TabsTrigger>
               <TabsTrigger value="integrations">Tüm Logs ({data.integrations.total})</TabsTrigger>
+              <TabsTrigger value="cron">Cron Joblar</TabsTrigger>
             </TabsList>
+
+            <TabsContent value="cron">
+              <AdminCronJobs />
+            </TabsContent>
+
 
             {/* ============ APIFY ============ */}
             <TabsContent value="apify" className="space-y-4">
