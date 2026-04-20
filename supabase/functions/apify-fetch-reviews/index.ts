@@ -450,7 +450,7 @@ Deno.serve(async (req) => {
       // Use the general hotel-review-aggregator
       const providers = PLATFORM_TO_APIFY_PROVIDER[platform] || [];
       actorInput = {
-        maxReviewsPerQuery: 200,
+        maxReviewsPerQuery: 50,
         scrapeReviewPictures: false,
         scrapeReviewResponses: true,
       };
