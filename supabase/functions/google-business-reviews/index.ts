@@ -152,9 +152,33 @@ Deno.serve(async (req) => {
         let insertedCount = 0;
         let updatedCount = 0;
 
+        // BULK STRATEGY: 1 query to fetch all existing IDs, then batched insert + targeted updates
+        // This avoids N×2 sequential queries which blow the Edge Function CPU limit on large hotels.
+        const allGoogleIds = reviews.map((r: any) => r.reviewId).filter(Boolean);
+
+        // Fetch existing reviews in chunks (PostgREST .in() limit safety)
+        const existingMap = new Map<string, { id: string; status: string | null; approved_reply: string | null }>();
+        const ID_CHUNK = 500;
+        for (let i = 0; i < allGoogleIds.length; i += ID_CHUNK) {
+          const chunk = allGoogleIds.slice(i, i + ID_CHUNK);
+          const { data: existingRows } = await supabaseAdmin
+            .from("reviews")
+            .select("id, status, approved_reply, google_review_id")
+            .eq("business_id", biz.id)
+            .eq("platform", "google")
+            .in("google_review_id", chunk);
+          for (const row of existingRows || []) {
+            if (row.google_review_id) existingMap.set(row.google_review_id, row as any);
+          }
+        }
+
+        const toInsert: any[] = [];
+        const toUpdate: { id: string; updates: Record<string, any> }[] = [];
+
         for (const review of reviews) {
           const googleReviewId = review.reviewId;
-          const reviewName = review.name; // Full resource name for API calls
+          if (!googleReviewId) continue;
+          const reviewName = review.name;
           const reviewerName = review.reviewer?.displayName || "Anonymous";
           const rating = review.starRating
             ? { ONE: 1, TWO: 2, THREE: 3, FOUR: 4, FIVE: 5 }[review.starRating as string] || 3
@@ -162,10 +186,10 @@ Deno.serve(async (req) => {
           const text = review.comment || null;
           const postedAt = review.createTime || new Date().toISOString();
           const hasReply = !!review.reviewReply;
+          const replyComment = review.reviewReply?.comment || null;
 
-          // Extract review photos
           const photos: { url: string; thumbnail?: string }[] = [];
-          if (review.reviewPhotos && Array.isArray(review.reviewPhotos)) {
+          if (Array.isArray(review.reviewPhotos)) {
             for (const photo of review.reviewPhotos) {
               const photoUrl = photo.photoUri || photo.googleUrl || photo.url;
               if (photoUrl) {
@@ -177,67 +201,65 @@ Deno.serve(async (req) => {
             }
           }
 
-          // Check if review already exists
-          const { data: existing } = await supabaseAdmin
-            .from("reviews")
-            .select("id, status")
-            .eq("business_id", biz.id)
-            .eq("google_review_id", googleReviewId)
-            .eq("platform", "google")
-            .maybeSingle();
-
+          const existing = existingMap.get(googleReviewId);
           if (existing) {
-            // Update if reply status changed or reply text missing
             if (hasReply) {
-              const replyText = review.reviewReply?.comment || null;
               const updates: Record<string, any> = {};
               if (existing.status !== "replied") {
                 updates.status = "replied";
                 updates.replied_at = review.reviewReply?.updateTime || new Date().toISOString();
               }
-              if (replyText) {
-                updates.approved_reply = replyText;
+              if (replyComment && existing.approved_reply !== replyComment) {
+                updates.approved_reply = replyComment;
               }
               if (Object.keys(updates).length > 0) {
-                await supabaseAdmin
-                  .from("reviews")
-                  .update(updates)
-                  .eq("id", existing.id);
-                updatedCount++;
+                toUpdate.push({ id: existing.id, updates });
               }
             }
             continue;
           }
 
-          // Determine sentiment from rating
           const sentiment =
             (rating as number) >= 4 ? "positive" : (rating as number) >= 3 ? "neutral" : "negative";
 
-          // Upsert new review (prevents race-condition duplicates via unique index)
-          const replyComment = review.reviewReply?.comment || null;
-          const { error: insertError } = await supabaseAdmin
-            .from("reviews")
-            .upsert(
-              {
-                business_id: biz.id,
-                platform: "google",
-                google_review_id: googleReviewId,
-                google_review_name: reviewName,
-                reviewer_name: reviewerName,
-                rating: rating as number,
-                text,
-                posted_at: postedAt,
-                status: hasReply ? "replied" : "pending_reply",
-                replied_at: hasReply ? review.reviewReply?.updateTime : null,
-                approved_reply: hasReply ? replyComment : null,
-                sentiment,
-                photos: photos.length > 0 ? photos : [],
-              },
-              { onConflict: "business_id,platform,google_review_id", ignoreDuplicates: true }
-            );
+          toInsert.push({
+            business_id: biz.id,
+            platform: "google",
+            google_review_id: googleReviewId,
+            google_review_name: reviewName,
+            reviewer_name: reviewerName,
+            rating: rating as number,
+            text,
+            posted_at: postedAt,
+            status: hasReply ? "replied" : "pending_reply",
+            replied_at: hasReply ? review.reviewReply?.updateTime : null,
+            approved_reply: hasReply ? replyComment : null,
+            sentiment,
+            photos: photos.length > 0 ? photos : [],
+          });
+        }
 
-          if (!insertError) insertedCount++;
-          else console.error("Insert error:", insertError);
+        // Bulk insert in batches (avoid request size limits)
+        const INSERT_CHUNK = 200;
+        for (let i = 0; i < toInsert.length; i += INSERT_CHUNK) {
+          const chunk = toInsert.slice(i, i + INSERT_CHUNK);
+          const { error: insertError, count } = await supabaseAdmin
+            .from("reviews")
+            .insert(chunk, { count: "exact" });
+          if (insertError) {
+            console.error("Bulk insert error:", insertError.message);
+          } else {
+            insertedCount += count ?? chunk.length;
+          }
+        }
+
+        // Targeted updates (only rows that actually changed)
+        for (const u of toUpdate) {
+          const { error: updErr } = await supabaseAdmin
+            .from("reviews")
+            .update(u.updates)
+            .eq("id", u.id);
+          if (!updErr) updatedCount++;
         }
 
         // Send notification for new reviews
