@@ -380,8 +380,8 @@ Deno.serve(async (req) => {
       const hotelId = business.hotelscom_url.replace(/\D/g, ""); // Extract numeric ID
       actorInput = {
         startUrls: [`https://www.hotels.com/ho${hotelId}/`],
-        maxItems: 200,
-        maxReviewsPerHotel: 200,
+        maxItems: 50,
+        maxReviewsPerHotel: 50,
         sortBy: "newest_first",
       };
       console.log(`Using dedicated Hotels.com scraper for hotel ID: ${hotelId}`);
