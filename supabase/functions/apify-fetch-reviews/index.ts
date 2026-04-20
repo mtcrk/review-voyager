@@ -440,10 +440,10 @@ Deno.serve(async (req) => {
       // voyager~booking-reviews-scraper supports several limit fields; set them all to be safe
       actorInput = {
         startUrls: [{ url: bookingUrl }],
-        maxReviewsPerHotel: 1000,
-        maxReviews: 1000,
-        maxItems: 1000,
-        sortBy: "bayesian_review_score",
+        maxReviewsPerHotel: 50,
+        maxReviews: 50,
+        maxItems: 50,
+        sortBy: "newest_first",
       };
       console.log(`Using dedicated Booking scraper for: ${bookingUrl}`);
     } else {
