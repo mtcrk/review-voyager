@@ -491,6 +491,7 @@ Deno.serve(async (req) => {
       business_name?: string;
       city?: string | null;
       new_reviews: ReviewLite[];
+      edited_reviews?: EditedReviewLite[];
       platform_results: PlatformResult[];
     }> = [];
 
@@ -501,6 +502,7 @@ Deno.serve(async (req) => {
       locations = [{
         business_id: body.business_id,
         new_reviews: body.new_reviews || [],
+        edited_reviews: body.edited_reviews || [],
         platform_results: body.platform_results || [],
       }];
     } else {
@@ -510,12 +512,14 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Skip if nothing new and no errors across all locations
+    // Skip if nothing new, no edits, and no errors across all locations
     const hasAnyContent = locations.some((loc) =>
-      loc.new_reviews.length > 0 || loc.platform_results.some((p) => p.error)
+      loc.new_reviews.length > 0 ||
+      (loc.edited_reviews && loc.edited_reviews.length > 0) ||
+      loc.platform_results.some((p) => p.error)
     );
     if (!hasAnyContent) {
-      return new Response(JSON.stringify({ skipped: true, reason: "no new reviews" }), {
+      return new Response(JSON.stringify({ skipped: true, reason: "no new or edited reviews" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -538,6 +542,7 @@ Deno.serve(async (req) => {
       const biz = bizMap.get(loc.business_id);
       const name = loc.business_name || biz?.name || "İşletme";
       const reviews = loc.new_reviews || [];
+      const editedReviews = loc.edited_reviews || [];
       const totalNew = reviews.length;
       const avgRating = totalNew > 0
         ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / totalNew
@@ -576,6 +581,7 @@ Deno.serve(async (req) => {
         aiSummary,
         platformResults: loc.platform_results || [],
         sampleReviews: reviews,
+        editedReviews,
         yesterdayCount: yesterdayCount || 0,
         unansweredCount,
       };
