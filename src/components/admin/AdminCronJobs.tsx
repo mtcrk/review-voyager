@@ -180,7 +180,7 @@ export function AdminCronJobs() {
                       {result ? (
                         <div className="flex items-center gap-1.5 text-xs">
                           {result.ok ? (
-                            <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
+                            <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
                           ) : (
                             <XCircle className="h-3.5 w-3.5 text-destructive" />
                           )}
