@@ -162,6 +162,10 @@ Deno.serve(async (req) => {
             last_run_at: lastRun.created_at,
           },
         });
+        notifyAdmin(business_id, 0, 0, 0, undefined, "skipped", {
+          reason: "smart_skip_within_48h",
+          triggered_by: "service-role (cron/n8n)",
+        }).catch((e) => console.error("notifyAdmin skip failed:", e));
         return new Response(
           JSON.stringify({
             success: true,
@@ -201,6 +205,9 @@ Deno.serve(async (req) => {
       const items = await fetchDatasetItems(runData.defaultDatasetId, APIFY_API_TOKEN);
       const result = await insertReviews(supabase, items, business_id);
       await logSuccess(supabase, business_id, items.length, result.inserted, result.skipped);
+      notifyAdmin(business_id, items.length, result.inserted, result.skipped, run_id, "success", {
+        reason: "run_completed",
+      }).catch((e) => console.error("notifyAdmin success failed:", e));
 
       return new Response(
         JSON.stringify({ success: true, ...result, fetched: items.length }),
@@ -280,6 +287,11 @@ Deno.serve(async (req) => {
 
     console.log(`TripAdvisor actor run started: ${newRunId}`);
 
+    notifyAdmin(business_id, 0, 0, 0, newRunId, "success", {
+      reason: "actor_started",
+      triggered_by: isServiceRole ? "service-role (cron/n8n)" : "user",
+    }).catch((e) => console.error("notifyAdmin start failed:", e));
+
     return new Response(
       JSON.stringify({
         status: "running",
@@ -292,6 +304,11 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error("Error in tripadvisor-fetch-reviews:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    try {
+      const body = await req.clone().json().catch(() => ({}));
+      const bid = body?.business_id || "unknown";
+      notifyAdmin(bid, 0, 0, 0, undefined, "error", { error: errorMessage }).catch(() => {});
+    } catch (_) { /* noop */ }
     return new Response(
       JSON.stringify({ error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -403,4 +420,79 @@ async function logSuccess(supabase: any, businessId: string, fetched: number, in
     status: "success",
     meta: { fetched, inserted, skipped },
   });
+}
+
+type TaNotifyStatus = "success" | "skipped" | "error";
+
+async function notifyAdmin(
+  businessId: string,
+  fetched: number,
+  inserted: number,
+  skipped: number,
+  runId?: string,
+  status: TaNotifyStatus = "success",
+  extra?: { reason?: string; error?: string; triggered_by?: string },
+) {
+  const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+  if (!RESEND_API_KEY) return;
+
+  let businessName = businessId;
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const sb = createClient(supabaseUrl, supabaseServiceKey);
+    const { data } = await sb.from("businesses").select("name, city").eq("id", businessId).maybeSingle();
+    if (data?.name) businessName = `${data.name}${data.city ? ` (${data.city})` : ""}`;
+  } catch (_) { /* noop */ }
+
+  const meta: Record<TaNotifyStatus, { label: string; color: string; tag: string }> = {
+    success: { label: "✅ BAŞARILI", color: "#16a34a", tag: "OK" },
+    skipped: { label: "⏭️ ATLANDI",  color: "#6b7280", tag: "SKIP" },
+    error:   { label: "❌ HATA",     color: "#dc2626", tag: "ERR" },
+  };
+  const m = meta[status];
+  const subject = `[Apify ${m.tag}] tripadvisor • ${businessName}${status === "success" ? ` • +${inserted} new` : ""}`;
+
+  const rows: Array<[string, string]> = [
+    ["Durum", `<span style="background:${m.color};color:#fff;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600">${m.label}</span>`],
+    ["İşletme", businessName],
+    ["Platform", "tripadvisor"],
+  ];
+  if (extra?.triggered_by) rows.push(["Tetikleyen", extra.triggered_by]);
+  if (extra?.reason) rows.push(["Sebep", extra.reason]);
+  if (status === "success") {
+    rows.push(["Çekilen", String(fetched)]);
+    rows.push(["Yeni eklenen", `<b style="color:#16a34a">${inserted}</b>`]);
+    rows.push(["Atlanan (duplike)", String(skipped)]);
+  }
+  if (extra?.error) rows.push(["Hata", `<code style="color:#dc2626">${extra.error.slice(0, 400)}</code>`]);
+  rows.push(["Run ID", `<span style="font-family:monospace;font-size:12px">${runId || "-"}</span>`]);
+  rows.push(["Business ID", `<span style="font-family:monospace;font-size:12px">${businessId}</span>`]);
+  rows.push(["Zaman", new Date().toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" })]);
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:560px;color:#111">
+      <h2 style="margin:0 0 12px">TripAdvisor Run — ${m.label}</h2>
+      <table style="border-collapse:collapse;width:100%;font-size:14px">
+        ${rows.map(([k, v]) => `<tr><td style="padding:6px 8px;background:#f6f6f7;width:35%"><b>${k}</b></td><td style="padding:6px 8px">${v}</td></tr>`).join("")}
+      </table>
+      <p style="margin-top:16px;color:#888;font-size:12px">VoyageRespond • Apify Monitor</p>
+    </div>
+  `;
+
+  try {
+    const resp = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: "VoyageRespond Monitor <notify@voyagerespond.com>",
+        to: ["metecorukbasari@gmail.com"],
+        subject,
+        html,
+      }),
+    });
+    if (!resp.ok) console.error("Resend TA notify failed:", resp.status, await resp.text());
+  } catch (e) {
+    console.error("Resend TA notify error:", e);
+  }
 }
