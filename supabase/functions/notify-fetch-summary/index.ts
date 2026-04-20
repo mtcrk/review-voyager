@@ -598,13 +598,17 @@ Deno.serve(async (req) => {
     const html = buildConsolidatedEmailHtml(enrichedLocations);
 
     const totalAcrossAll = enrichedLocations.reduce((s, l) => s + l.totalNew, 0);
+    const totalEditedAcross = enrichedLocations.reduce((s, l) => s + (l.editedReviews?.length || 0), 0);
     const totalNegative = enrichedLocations.reduce((s, l) => s + l.summary.negativeCount, 0);
     const urgencyPrefix = totalNegative >= 3 ? "🚨 ACİL — " : "📊 ";
     const locLabel = enrichedLocations.length > 1
       ? `${enrichedLocations.length} lokasyon`
       : enrichedLocations[0].name;
-    const subject = totalAcrossAll > 0
-      ? `${urgencyPrefix}${locLabel} — ${totalAcrossAll} yeni yorum`
+    const parts: string[] = [];
+    if (totalAcrossAll > 0) parts.push(`${totalAcrossAll} yeni`);
+    if (totalEditedAcross > 0) parts.push(`${totalEditedAcross} düzenlenen`);
+    const subject = parts.length > 0
+      ? `${urgencyPrefix}${locLabel} — ${parts.join(" + ")} yorum`
       : `⚠️ ${locLabel} — Yorum çekme uyarısı`;
 
     const recipients = new Set<string>([ADMIN_EMAIL]);
