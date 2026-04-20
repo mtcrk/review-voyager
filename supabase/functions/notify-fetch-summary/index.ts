@@ -17,10 +17,21 @@ interface ReviewLite {
   platform?: string;
 }
 
+interface EditedReviewLite {
+  id?: string;
+  reviewer_name?: string;
+  rating: number;
+  previous_rating?: number | null;
+  text?: string | null;
+  previous_text?: string | null;
+  platform?: string;
+}
+
 interface PlatformResult {
   platform: string;
   fetched: number;
   inserted: number;
+  edited?: number;
   error?: string;
 }
 
