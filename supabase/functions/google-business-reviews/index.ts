@@ -304,35 +304,40 @@ Deno.serve(async (req) => {
         }
 
         // Send consolidated summary email (1 per fetch instead of 1 per review)
-        if (insertedCount > 0) {
+        // Trigger if there are NEW reviews OR EDITED reviews
+        if (insertedCount > 0 || editedReviews.length > 0) {
           try {
-            const { data: newReviews } = await supabaseAdmin
-              .from("reviews")
-              .select("id, reviewer_name, rating, text, sentiment, posted_at, platform")
-              .eq("business_id", biz.id)
-              .eq("platform", "google")
-              .order("created_at", { ascending: false })
-              .limit(insertedCount);
-
-            if (newReviews && newReviews.length > 0) {
-              fetch(`${supabaseUrl}/functions/v1/notify-fetch-summary`, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${serviceRoleKey}`,
-                },
-                body: JSON.stringify({
-                  business_id: biz.id,
-                  new_reviews: newReviews,
-                  platform_results: [{
-                    platform: "google",
-                    fetched: reviews.length,
-                    inserted: insertedCount,
-                  }],
-                }),
-              }).catch((e) => console.error("notify-fetch-summary failed:", e));
-              console.log(`Summary email triggered for ${newReviews.length} new Google reviews`);
+            let newReviews: any[] = [];
+            if (insertedCount > 0) {
+              const { data } = await supabaseAdmin
+                .from("reviews")
+                .select("id, reviewer_name, rating, text, sentiment, posted_at, platform")
+                .eq("business_id", biz.id)
+                .eq("platform", "google")
+                .order("created_at", { ascending: false })
+                .limit(insertedCount);
+              newReviews = data || [];
             }
+
+            fetch(`${supabaseUrl}/functions/v1/notify-fetch-summary`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${serviceRoleKey}`,
+              },
+              body: JSON.stringify({
+                business_id: biz.id,
+                new_reviews: newReviews,
+                edited_reviews: editedReviews,
+                platform_results: [{
+                  platform: "google",
+                  fetched: reviews.length,
+                  inserted: insertedCount,
+                  edited: editedReviews.length,
+                }],
+              }),
+            }).catch((e) => console.error("notify-fetch-summary failed:", e));
+            console.log(`Summary email triggered: ${newReviews.length} new + ${editedReviews.length} edited`);
           } catch (notifyErr) {
             console.error("Failed to trigger summary email:", notifyErr);
           }
@@ -349,6 +354,7 @@ Deno.serve(async (req) => {
             total_fetched: reviews.length,
             inserted: insertedCount,
             updated: updatedCount,
+            edited: editedReviews.length,
           },
         });
 
@@ -357,6 +363,7 @@ Deno.serve(async (req) => {
           fetched: reviews.length,
           inserted: insertedCount,
           updated: updatedCount,
+          edited: editedReviews.length,
         });
       } catch (err: any) {
         console.error(`Error processing ${biz.name}:`, err);
