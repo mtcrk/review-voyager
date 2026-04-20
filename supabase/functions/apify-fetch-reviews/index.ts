@@ -766,6 +766,8 @@ async function logSuccess(
   });
 }
 
+type NotifyStatus = "success" | "skipped" | "error";
+
 async function notifyAdmin(
   businessId: string,
   platform: string,
@@ -774,6 +776,8 @@ async function notifyAdmin(
   updated: number,
   skipped: number,
   runId?: string,
+  status: NotifyStatus = "success",
+  extra?: { reason?: string; error?: string; triggered_by?: string },
 ) {
   const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
   if (!RESEND_API_KEY) {
@@ -781,7 +785,6 @@ async function notifyAdmin(
     return;
   }
 
-  // Lookup business name for context
   let businessName = businessId;
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -791,21 +794,37 @@ async function notifyAdmin(
     if (data?.name) businessName = `${data.name}${data.city ? ` (${data.city})` : ""}`;
   } catch (_) { /* noop */ }
 
-  const subject = `[Apify] ${platform} • ${businessName} • +${inserted} new`;
+  const statusMeta: Record<NotifyStatus, { label: string; color: string; tag: string }> = {
+    success: { label: "✅ BAŞARILI", color: "#16a34a", tag: "OK" },
+    skipped: { label: "⏭️ ATLANDI", color: "#6b7280", tag: "SKIP" },
+    error:   { label: "❌ HATA",     color: "#dc2626", tag: "ERR" },
+  };
+  const meta = statusMeta[status];
+  const subject = `[Apify ${meta.tag}] ${platform} • ${businessName}${status === "success" ? ` • +${inserted} new` : ""}`;
+
+  const rows: Array<[string, string]> = [
+    ["Durum", `<span style="background:${meta.color};color:#fff;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600">${meta.label}</span>`],
+    ["İşletme", businessName],
+    ["Platform", platform],
+  ];
+  if (extra?.triggered_by) rows.push(["Tetikleyen", extra.triggered_by]);
+  if (extra?.reason) rows.push(["Sebep", extra.reason]);
+  if (status === "success") {
+    rows.push(["Çekilen", String(fetched)]);
+    rows.push(["Yeni eklenen", `<b style="color:#16a34a">${inserted}</b>`]);
+    rows.push(["Güncellenen", String(updated)]);
+    rows.push(["Atlanan (duplike)", String(skipped)]);
+  }
+  if (extra?.error) rows.push(["Hata", `<code style="color:#dc2626">${extra.error.slice(0, 400)}</code>`]);
+  rows.push(["Run ID", `<span style="font-family:monospace;font-size:12px">${runId || "-"}</span>`]);
+  rows.push(["Business ID", `<span style="font-family:monospace;font-size:12px">${businessId}</span>`]);
+  rows.push(["Zaman", new Date().toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" })]);
+
   const html = `
     <div style="font-family:Arial,sans-serif;max-width:560px;color:#111">
-      <h2 style="margin:0 0 12px">Apify Scrape Tamamlandı</h2>
-      <p style="margin:0 0 16px;color:#555">Bir Apify run'ı başarıyla tamamlandı.</p>
+      <h2 style="margin:0 0 12px">Apify Run — ${meta.label}</h2>
       <table style="border-collapse:collapse;width:100%;font-size:14px">
-        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>İşletme</b></td><td style="padding:6px 8px">${businessName}</td></tr>
-        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>Platform</b></td><td style="padding:6px 8px">${platform}</td></tr>
-        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>Çekilen</b></td><td style="padding:6px 8px">${fetched}</td></tr>
-        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>Yeni eklenen</b></td><td style="padding:6px 8px"><b style="color:#16a34a">${inserted}</b></td></tr>
-        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>Güncellenen</b></td><td style="padding:6px 8px">${updated}</td></tr>
-        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>Atlanan (duplike)</b></td><td style="padding:6px 8px">${skipped}</td></tr>
-        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>Run ID</b></td><td style="padding:6px 8px;font-family:monospace;font-size:12px">${runId || "-"}</td></tr>
-        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>Business ID</b></td><td style="padding:6px 8px;font-family:monospace;font-size:12px">${businessId}</td></tr>
-        <tr><td style="padding:6px 8px;background:#f6f6f7"><b>Zaman</b></td><td style="padding:6px 8px">${new Date().toISOString()}</td></tr>
+        ${rows.map(([k, v]) => `<tr><td style="padding:6px 8px;background:#f6f6f7;width:35%"><b>${k}</b></td><td style="padding:6px 8px">${v}</td></tr>`).join("")}
       </table>
       <p style="margin-top:16px;color:#888;font-size:12px">VoyageRespond • Apify Monitor</p>
     </div>
@@ -814,10 +833,7 @@ async function notifyAdmin(
   try {
     const resp = await fetch("https://api.resend.com/emails", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         from: "VoyageRespond Monitor <notify@voyagerespond.com>",
         to: ["metecorukbasari@gmail.com"],
@@ -829,7 +845,7 @@ async function notifyAdmin(
       const t = await resp.text();
       console.error("Resend admin notify failed:", resp.status, t);
     } else {
-      console.log("✉️ Admin notified for Apify run:", platform, businessName);
+      console.log(`✉️ Admin notified [${status}]:`, platform, businessName);
     }
   } catch (e) {
     console.error("Resend admin notify error:", e);
