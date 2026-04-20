@@ -170,7 +170,7 @@ Profesyonel ve net ol. Sadece HTML döndür, markdown veya code block kullanma.`
     if (ownerEmail) recipients.add(ownerEmail);
     recipients.add(ADMIN_EMAIL);
 
-    const subject = `📊 ${business.name} — Analiz Raporu (${totalReviews} yorum)`;
+    const subject = `📊 ${business.name} — Analiz Raporu (${totalReviews} yorum${sampleSize < totalReviews ? `, son ${sampleSize} analiz` : ""})`;
 
     const sendRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
