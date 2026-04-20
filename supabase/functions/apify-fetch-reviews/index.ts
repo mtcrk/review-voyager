@@ -380,8 +380,8 @@ Deno.serve(async (req) => {
       const hotelId = business.hotelscom_url.replace(/\D/g, ""); // Extract numeric ID
       actorInput = {
         startUrls: [`https://www.hotels.com/ho${hotelId}/`],
-        maxItems: 200,
-        maxReviewsPerHotel: 200,
+        maxItems: 50,
+        maxReviewsPerHotel: 50,
         sortBy: "newest_first",
       };
       console.log(`Using dedicated Hotels.com scraper for hotel ID: ${hotelId}`);
@@ -397,8 +397,8 @@ Deno.serve(async (req) => {
       }
       actorInput = {
         startUrl: expediaUrl,
-        results_wanted: 200,
-        max_pages: 20,
+        results_wanted: 50,
+        max_pages: 5,
         proxyConfiguration: { useApifyProxy: true, apifyProxyGroups: ["RESIDENTIAL"] },
       };
       console.log(`Using shahidirfan/expedia-reviews-scraper for: ${expediaUrl}`);
@@ -413,7 +413,7 @@ Deno.serve(async (req) => {
       actorId = TRIPCOM_ACTOR_ID;
       actorInput = {
         hotelId: parseInt(business.tripcom_hotel_id, 10),
-        results_wanted: 200,
+        results_wanted: 50,
       };
       console.log(`Using Trip.com scraper for hotel ID: ${business.tripcom_hotel_id}`);
     } else if (platform === "trustpilot") {
@@ -430,7 +430,7 @@ Deno.serve(async (req) => {
       const businessUrl = `https://www.trustpilot.com/review/${domain}`;
       actorInput = {
         businessUrl,
-        maxResults: 200,
+        maxResults: 50,
       };
       console.log(`Using dedicated Trustpilot scraper for: ${businessUrl}`);
     } else if (platform === "booking" && business.booking_hotel_id) {
@@ -440,17 +440,17 @@ Deno.serve(async (req) => {
       // voyager~booking-reviews-scraper supports several limit fields; set them all to be safe
       actorInput = {
         startUrls: [{ url: bookingUrl }],
-        maxReviewsPerHotel: 1000,
-        maxReviews: 1000,
-        maxItems: 1000,
-        sortBy: "bayesian_review_score",
+        maxReviewsPerHotel: 50,
+        maxReviews: 50,
+        maxItems: 50,
+        sortBy: "newest_first",
       };
       console.log(`Using dedicated Booking scraper for: ${bookingUrl}`);
     } else {
       // Use the general hotel-review-aggregator
       const providers = PLATFORM_TO_APIFY_PROVIDER[platform] || [];
       actorInput = {
-        maxReviewsPerQuery: 200,
+        maxReviewsPerQuery: 50,
         scrapeReviewPictures: false,
         scrapeReviewResponses: true,
       };
