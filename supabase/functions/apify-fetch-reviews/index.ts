@@ -267,6 +267,10 @@ Deno.serve(async (req) => {
             last_run_at: lastRun.created_at,
           },
         });
+        notifyAdmin(business_id, platform, 0, 0, 0, 0, undefined, "skipped", {
+          reason: "smart_skip_within_48h",
+          triggered_by: "service-role (cron/n8n)",
+        }).catch((e) => console.error("notifyAdmin skip failed:", e));
         return new Response(
           JSON.stringify({
             success: true,
@@ -492,6 +496,12 @@ Deno.serve(async (req) => {
 
     console.log(`Actor run started: ${newRunId}, dataset: ${datasetId}`);
 
+    // Notify admin that a new Apify run was triggered (cost event!)
+    notifyAdmin(business_id, platform, 0, 0, 0, 0, newRunId, "success", {
+      reason: "actor_started",
+      triggered_by: isServiceRole ? "service-role (cron/n8n)" : "user",
+    }).catch((e) => console.error("notifyAdmin start failed:", e));
+
     // Return immediately; frontend will poll with run_id
     return new Response(
       JSON.stringify({
@@ -505,6 +515,14 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error("Error in apify-fetch-reviews:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    try {
+      const body = await req.clone().json().catch(() => ({}));
+      const bid = body?.business_id || "unknown";
+      const plat = body?.platform || "unknown";
+      notifyAdmin(bid, plat, 0, 0, 0, 0, undefined, "error", {
+        error: errorMessage,
+      }).catch(() => {});
+    } catch (_) { /* noop */ }
     return new Response(
       JSON.stringify({ error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
