@@ -397,8 +397,8 @@ Deno.serve(async (req) => {
       }
       actorInput = {
         startUrl: expediaUrl,
-        results_wanted: 200,
-        max_pages: 20,
+        results_wanted: 50,
+        max_pages: 5,
         proxyConfiguration: { useApifyProxy: true, apifyProxyGroups: ["RESIDENTIAL"] },
       };
       console.log(`Using shahidirfan/expedia-reviews-scraper for: ${expediaUrl}`);
