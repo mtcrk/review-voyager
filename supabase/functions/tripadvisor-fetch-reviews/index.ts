@@ -162,6 +162,10 @@ Deno.serve(async (req) => {
             last_run_at: lastRun.created_at,
           },
         });
+        notifyAdmin(business_id, 0, 0, 0, undefined, "skipped", {
+          reason: "smart_skip_within_48h",
+          triggered_by: "service-role (cron/n8n)",
+        }).catch((e) => console.error("notifyAdmin skip failed:", e));
         return new Response(
           JSON.stringify({
             success: true,
@@ -201,6 +205,9 @@ Deno.serve(async (req) => {
       const items = await fetchDatasetItems(runData.defaultDatasetId, APIFY_API_TOKEN);
       const result = await insertReviews(supabase, items, business_id);
       await logSuccess(supabase, business_id, items.length, result.inserted, result.skipped);
+      notifyAdmin(business_id, items.length, result.inserted, result.skipped, run_id, "success", {
+        reason: "run_completed",
+      }).catch((e) => console.error("notifyAdmin success failed:", e));
 
       return new Response(
         JSON.stringify({ success: true, ...result, fetched: items.length }),
@@ -280,6 +287,11 @@ Deno.serve(async (req) => {
 
     console.log(`TripAdvisor actor run started: ${newRunId}`);
 
+    notifyAdmin(business_id, 0, 0, 0, newRunId, "success", {
+      reason: "actor_started",
+      triggered_by: isServiceRole ? "service-role (cron/n8n)" : "user",
+    }).catch((e) => console.error("notifyAdmin start failed:", e));
+
     return new Response(
       JSON.stringify({
         status: "running",
@@ -292,6 +304,11 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error("Error in tripadvisor-fetch-reviews:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    try {
+      const body = await req.clone().json().catch(() => ({}));
+      const bid = body?.business_id || "unknown";
+      notifyAdmin(bid, 0, 0, 0, undefined, "error", { error: errorMessage }).catch(() => {});
+    } catch (_) { /* noop */ }
     return new Response(
       JSON.stringify({ error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
