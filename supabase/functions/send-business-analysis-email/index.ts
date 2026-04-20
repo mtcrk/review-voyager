@@ -65,15 +65,16 @@ Deno.serve(async (req) => {
       );
     }
 
-    const totalReviews = reviews.length;
-    const avgRating = reviews.reduce((s, r) => s + r.rating, 0) / totalReviews;
+    const sampleSize = reviews.length;
+    const totalReviews = totalReviewCount ?? sampleSize;
+    const avgRating = reviews.reduce((s, r) => s + r.rating, 0) / sampleSize;
     const sentimentCounts = {
       positive: reviews.filter((r) => r.sentiment === "positive").length,
       neutral: reviews.filter((r) => r.sentiment === "neutral").length,
       negative: reviews.filter((r) => r.sentiment === "negative").length,
     };
     const repliedCount = reviews.filter((r) => r.status === "replied").length;
-    const replyRate = (repliedCount / totalReviews) * 100;
+    const replyRate = (repliedCount / sampleSize) * 100;
 
     const reviewSummary = reviews.slice(0, 100).map((r) => ({
       rating: r.rating,
