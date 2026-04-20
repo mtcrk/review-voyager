@@ -204,8 +204,10 @@ Deno.serve(async (req) => {
 
           const existing = existingMap.get(googleReviewId);
           if (existing) {
+            const updates: Record<string, any> = {};
+
+            // Reply status updates
             if (hasReply) {
-              const updates: Record<string, any> = {};
               if (existing.status !== "replied") {
                 updates.status = "replied";
                 updates.replied_at = review.reviewReply?.updateTime || new Date().toISOString();
@@ -213,9 +215,35 @@ Deno.serve(async (req) => {
               if (replyComment && existing.approved_reply !== replyComment) {
                 updates.approved_reply = replyComment;
               }
-              if (Object.keys(updates).length > 0) {
-                toUpdate.push({ id: existing.id, updates });
+            }
+
+            // EDIT DETECTION: text or rating changed → kullanıcı yorumunu düzenlemiş
+            const textChanged = (existing.text || "") !== (text || "");
+            const ratingChanged = existing.rating !== (rating as number);
+            if (textChanged || ratingChanged) {
+              updates.is_edited = true;
+              updates.edited_at = new Date().toISOString();
+              updates.previous_text = existing.text;
+              updates.previous_rating = existing.rating;
+              if (textChanged) updates.text = text;
+              if (ratingChanged) {
+                updates.rating = rating as number;
+                updates.sentiment =
+                  (rating as number) >= 4 ? "positive" : (rating as number) >= 3 ? "neutral" : "negative";
               }
+              editedReviews.push({
+                id: existing.id,
+                reviewer_name: existing.reviewer_name,
+                rating: rating as number,
+                previous_rating: existing.rating,
+                text,
+                previous_text: existing.text,
+                platform: "google",
+              });
+            }
+
+            if (Object.keys(updates).length > 0) {
+              toUpdate.push({ id: existing.id, updates });
             }
             continue;
           }
