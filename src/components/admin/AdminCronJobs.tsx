@@ -171,9 +171,7 @@ export function AdminCronJobs() {
                     </TableCell>
                     <TableCell>
                       {job.active ? (
-                        <Badge variant="default" className="bg-green-100 text-green-700 hover:bg-green-100">
-                          Aktif
-                        </Badge>
+                        <Badge variant="secondary">Aktif</Badge>
                       ) : (
                         <Badge variant="outline">Pasif</Badge>
                       )}
