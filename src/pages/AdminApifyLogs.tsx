@@ -16,6 +16,7 @@ import {
 import { Loader2, RefreshCw, Mail, MailX, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
+import { AdminCronJobs } from "@/components/admin/AdminCronJobs";
 
 const ADMIN_EMAIL = "metecorukbasari@gmail.com";
 const PAGE_SIZE = 25;
