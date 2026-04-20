@@ -157,13 +157,13 @@ Deno.serve(async (req) => {
         const allGoogleIds = reviews.map((r: any) => r.reviewId).filter(Boolean);
 
         // Fetch existing reviews in chunks (PostgREST .in() limit safety)
-        const existingMap = new Map<string, { id: string; status: string | null; approved_reply: string | null }>();
+        const existingMap = new Map<string, { id: string; status: string | null; approved_reply: string | null; text: string | null; rating: number; reviewer_name: string }>();
         const ID_CHUNK = 500;
         for (let i = 0; i < allGoogleIds.length; i += ID_CHUNK) {
           const chunk = allGoogleIds.slice(i, i + ID_CHUNK);
           const { data: existingRows } = await supabaseAdmin
             .from("reviews")
-            .select("id, status, approved_reply, google_review_id")
+            .select("id, status, approved_reply, google_review_id, text, rating, reviewer_name")
             .eq("business_id", biz.id)
             .eq("platform", "google")
             .in("google_review_id", chunk);
@@ -174,6 +174,7 @@ Deno.serve(async (req) => {
 
         const toInsert: any[] = [];
         const toUpdate: { id: string; updates: Record<string, any> }[] = [];
+        const editedReviews: any[] = []; // Düzenlenen yorumları mail için topla
 
         for (const review of reviews) {
           const googleReviewId = review.reviewId;
