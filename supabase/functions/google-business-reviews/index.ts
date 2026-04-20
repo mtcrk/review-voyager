@@ -239,15 +239,27 @@ Deno.serve(async (req) => {
           });
         }
 
-        // Bulk insert in batches (avoid request size limits)
+        // Deduplicate by google_review_id (Google pagination can return overlaps)
+        const seenIds = new Set<string>();
+        const dedupedInsert = toInsert.filter((r) => {
+          if (seenIds.has(r.google_review_id)) return false;
+          seenIds.add(r.google_review_id);
+          return true;
+        });
+
+        // Bulk upsert in batches (avoid request size limits + handle race conditions)
         const INSERT_CHUNK = 200;
-        for (let i = 0; i < toInsert.length; i += INSERT_CHUNK) {
-          const chunk = toInsert.slice(i, i + INSERT_CHUNK);
+        for (let i = 0; i < dedupedInsert.length; i += INSERT_CHUNK) {
+          const chunk = dedupedInsert.slice(i, i + INSERT_CHUNK);
           const { error: insertError, count } = await supabaseAdmin
             .from("reviews")
-            .insert(chunk, { count: "exact" });
+            .upsert(chunk, {
+              onConflict: "business_id,platform,google_review_id",
+              ignoreDuplicates: true,
+              count: "exact",
+            });
           if (insertError) {
-            console.error("Bulk insert error:", insertError.message);
+            console.error("Bulk upsert error:", insertError.message);
           } else {
             insertedCount += count ?? chunk.length;
           }
