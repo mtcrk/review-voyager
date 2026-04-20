@@ -85,11 +85,12 @@ Deno.serve(async (req) => {
 
     const prompt = `Sen bir işletme analiz uzmanısın. "${business.name}" işletmesi için Türkçe kapsamlı analiz raporu hazırla.
 
-İSTATİSTİKLER:
+İSTATİSTİKLER (toplam ${totalReviews} yorum üzerinden, son ${sampleSize} yorum analiz ediliyor):
 - Toplam Yorum: ${totalReviews}
-- Ortalama Puan: ${avgRating.toFixed(1)}/5
+- Analiz Edilen Örneklem: ${sampleSize}
+- Ortalama Puan (örneklem): ${avgRating.toFixed(1)}/5
 - Pozitif: ${sentimentCounts.positive}, Nötr: ${sentimentCounts.neutral}, Negatif: ${sentimentCounts.negative}
-- Yanıt Oranı: %${replyRate.toFixed(0)}
+- Yanıt Oranı (örneklem): %${replyRate.toFixed(0)}
 
 YORUMLAR:
 ${JSON.stringify(reviewSummary)}
