@@ -370,10 +370,12 @@ function buildConsolidatedEmailHtml(locations: Array<{
   aiSummary: Awaited<ReturnType<typeof generateAISummary>>;
   platformResults: PlatformResult[];
   sampleReviews: ReviewLite[];
+  editedReviews: EditedReviewLite[];
   yesterdayCount: number;
   unansweredCount: number;
 }>): string {
   const totalNewAll = locations.reduce((s, l) => s + l.totalNew, 0);
+  const totalEditedAll = locations.reduce((s, l) => s + (l.editedReviews?.length || 0), 0);
   const totalNegAll = locations.reduce((s, l) => s + l.summary.negativeCount, 0);
   const totalUnansweredAll = locations.reduce((s, l) => s + l.unansweredCount, 0);
   const isMulti = locations.length > 1;
@@ -391,6 +393,10 @@ function buildConsolidatedEmailHtml(locations: Array<{
           <div style="font-size:24px;font-weight:700;color:#111827;">${totalNewAll}</div>
           <div style="font-size:11px;color:#6b7280;">Toplam Yeni</div>
         </div>
+        ${totalEditedAll > 0 ? `<div style="flex:1;min-width:100px;text-align:center;">
+          <div style="font-size:24px;font-weight:700;color:#b45309;">${totalEditedAll}</div>
+          <div style="font-size:11px;color:#6b7280;">Düzenlenen</div>
+        </div>` : ""}
         <div style="flex:1;min-width:100px;text-align:center;">
           <div style="font-size:24px;font-weight:700;color:#16a34a;">${locations.reduce((s, l) => s + l.summary.positiveCount, 0)}</div>
           <div style="font-size:11px;color:#6b7280;">Olumlu</div>
@@ -419,6 +425,7 @@ function buildConsolidatedEmailHtml(locations: Array<{
     platformResults: loc.platformResults,
     summary: loc.summary,
     sampleReviews: loc.sampleReviews,
+    editedReviews: loc.editedReviews || [],
     aiSummary: loc.aiSummary,
     yesterdayCount: loc.yesterdayCount,
     unansweredCount: loc.unansweredCount,
