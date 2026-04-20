@@ -44,13 +44,19 @@ Deno.serve(async (req) => {
       .maybeSingle();
     const ownerName = profile?.full_name || "İşletme Sahibi";
 
-    // Fetch reviews
+    // Get total review count
+    const { count: totalReviewCount } = await admin
+      .from("reviews")
+      .select("*", { count: "exact", head: true })
+      .eq("business_id", business_id);
+
+    // Fetch reviews for analysis (cap at 500 for AI context)
     const { data: reviews } = await admin
       .from("reviews")
       .select("rating, text, sentiment, posted_at, status, platform")
       .eq("business_id", business_id)
       .order("posted_at", { ascending: false })
-      .limit(200);
+      .limit(500);
 
     if (!reviews || reviews.length === 0) {
       return new Response(
@@ -59,15 +65,16 @@ Deno.serve(async (req) => {
       );
     }
 
-    const totalReviews = reviews.length;
-    const avgRating = reviews.reduce((s, r) => s + r.rating, 0) / totalReviews;
+    const sampleSize = reviews.length;
+    const totalReviews = totalReviewCount ?? sampleSize;
+    const avgRating = reviews.reduce((s, r) => s + r.rating, 0) / sampleSize;
     const sentimentCounts = {
       positive: reviews.filter((r) => r.sentiment === "positive").length,
       neutral: reviews.filter((r) => r.sentiment === "neutral").length,
       negative: reviews.filter((r) => r.sentiment === "negative").length,
     };
     const repliedCount = reviews.filter((r) => r.status === "replied").length;
-    const replyRate = (repliedCount / totalReviews) * 100;
+    const replyRate = (repliedCount / sampleSize) * 100;
 
     const reviewSummary = reviews.slice(0, 100).map((r) => ({
       rating: r.rating,
@@ -78,11 +85,12 @@ Deno.serve(async (req) => {
 
     const prompt = `Sen bir işletme analiz uzmanısın. "${business.name}" işletmesi için Türkçe kapsamlı analiz raporu hazırla.
 
-İSTATİSTİKLER:
+İSTATİSTİKLER (toplam ${totalReviews} yorum üzerinden, son ${sampleSize} yorum analiz ediliyor):
 - Toplam Yorum: ${totalReviews}
-- Ortalama Puan: ${avgRating.toFixed(1)}/5
+- Analiz Edilen Örneklem: ${sampleSize}
+- Ortalama Puan (örneklem): ${avgRating.toFixed(1)}/5
 - Pozitif: ${sentimentCounts.positive}, Nötr: ${sentimentCounts.neutral}, Negatif: ${sentimentCounts.negative}
-- Yanıt Oranı: %${replyRate.toFixed(0)}
+- Yanıt Oranı (örneklem): %${replyRate.toFixed(0)}
 
 YORUMLAR:
 ${JSON.stringify(reviewSummary)}
@@ -135,7 +143,7 @@ Profesyonel ve net ol. Sadece HTML döndür, markdown veya code block kullanma.`
 
         <div style="background: #f8f9fa; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
           <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-            <tr><td style="padding: 6px 0; color: #666;">Toplam Yorum</td><td style="padding: 6px 0; font-weight: 600; text-align: right;">${totalReviews}</td></tr>
+            <tr><td style="padding: 6px 0; color: #666;">Toplam Yorum</td><td style="padding: 6px 0; font-weight: 600; text-align: right;">${totalReviews}${sampleSize < totalReviews ? ` <span style="color:#999;font-weight:400;">(son ${sampleSize} analiz edildi)</span>` : ""}</td></tr>
             <tr><td style="padding: 6px 0; color: #666;">Ortalama Puan</td><td style="padding: 6px 0; font-weight: 600; text-align: right;">⭐ ${avgRating.toFixed(1)}/5</td></tr>
             <tr><td style="padding: 6px 0; color: #666;">Yanıt Oranı</td><td style="padding: 6px 0; font-weight: 600; text-align: right;">%${replyRate.toFixed(0)}</td></tr>
             <tr><td style="padding: 6px 0; color: #666;">Pozitif / Negatif</td><td style="padding: 6px 0; font-weight: 600; text-align: right;">${sentimentCounts.positive} / ${sentimentCounts.negative}</td></tr>
@@ -162,7 +170,7 @@ Profesyonel ve net ol. Sadece HTML döndür, markdown veya code block kullanma.`
     if (ownerEmail) recipients.add(ownerEmail);
     recipients.add(ADMIN_EMAIL);
 
-    const subject = `📊 ${business.name} — Analiz Raporu (${totalReviews} yorum)`;
+    const subject = `📊 ${business.name} — Analiz Raporu (${totalReviews} yorum${sampleSize < totalReviews ? `, son ${sampleSize} analiz` : ""})`;
 
     const sendRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
