@@ -134,6 +134,26 @@ export default function GoogleBusinessCallback() {
         console.warn("Auto-fetch business info failed:", infoError);
       }
 
+      // Trigger analysis email for newly connected businesses (fire-and-forget, delayed so reviews ingest first)
+      setTimeout(() => {
+        selectedBizList.forEach(async (biz) => {
+          try {
+            const { data: matchingBiz } = await supabase
+              .from("businesses")
+              .select("id")
+              .eq("google_location_id", biz.location_id)
+              .maybeSingle();
+            if (matchingBiz?.id) {
+              await supabase.functions.invoke("send-business-analysis-email", {
+                body: { business_id: matchingBiz.id, trigger_source: "new_connection" },
+              });
+            }
+          } catch (e) {
+            console.warn("Analysis email trigger failed for", biz.name, e);
+          }
+        });
+      }, 30000); // 30s delay so initial review fetch can complete
+
       await refetchBusinesses();
 
       toast({
