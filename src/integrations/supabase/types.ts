@@ -1142,6 +1142,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_get_cron_jobs: {
+        Args: never
+        Returns: {
+          active: boolean
+          command: string
+          jobid: number
+          jobname: string
+          schedule: string
+        }[]
+      }
       get_user_role: {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
