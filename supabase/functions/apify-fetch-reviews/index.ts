@@ -350,6 +350,44 @@ Deno.serve(async (req) => {
         (e) => console.error("notifyAdmin failed:", e)
       );
 
+      // Fire-and-forget consolidated summary email (only if new reviews inserted)
+      if (result.inserted > 0) {
+        (async () => {
+          try {
+            const platformName = forcedPlatform || (platform === "all" ? "booking" : platform);
+            const { data: newReviews } = await supabase
+              .from("reviews")
+              .select("id, reviewer_name, rating, text, sentiment, posted_at, platform")
+              .eq("business_id", business_id)
+              .eq("platform", platformName)
+              .order("created_at", { ascending: false })
+              .limit(result.inserted);
+
+            if (newReviews && newReviews.length > 0) {
+              await fetch(`${supabaseUrl}/functions/v1/notify-fetch-summary`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${supabaseServiceKey}`,
+                },
+                body: JSON.stringify({
+                  business_id,
+                  new_reviews: newReviews,
+                  platform_results: [{
+                    platform: platformName,
+                    fetched: items.length,
+                    inserted: result.inserted,
+                  }],
+                }),
+              });
+              console.log(`Summary email triggered for ${newReviews.length} new ${platformName} reviews`);
+            }
+          } catch (e) {
+            console.error("notify-fetch-summary trigger failed:", e);
+          }
+        })();
+      }
+
       return new Response(
         JSON.stringify({ success: true, ...result, fetched: items.length }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
