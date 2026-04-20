@@ -209,6 +209,43 @@ Deno.serve(async (req) => {
         reason: "run_completed",
       }).catch((e) => console.error("notifyAdmin success failed:", e));
 
+      // Fire-and-forget consolidated summary email (only if new reviews inserted)
+      if (result.inserted > 0) {
+        (async () => {
+          try {
+            const { data: newReviews } = await supabase
+              .from("reviews")
+              .select("id, reviewer_name, rating, text, sentiment, posted_at, platform")
+              .eq("business_id", business_id)
+              .eq("platform", "tripadvisor")
+              .order("created_at", { ascending: false })
+              .limit(result.inserted);
+
+            if (newReviews && newReviews.length > 0) {
+              await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/notify-fetch-summary`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+                },
+                body: JSON.stringify({
+                  business_id,
+                  new_reviews: newReviews,
+                  platform_results: [{
+                    platform: "tripadvisor",
+                    fetched: items.length,
+                    inserted: result.inserted,
+                  }],
+                }),
+              });
+              console.log(`Summary email triggered for ${newReviews.length} new TripAdvisor reviews`);
+            }
+          } catch (e) {
+            console.error("notify-fetch-summary trigger failed:", e);
+          }
+        })();
+      }
+
       return new Response(
         JSON.stringify({ success: true, ...result, fetched: items.length }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }

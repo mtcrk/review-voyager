@@ -274,21 +274,19 @@ Deno.serve(async (req) => {
           if (!updErr) updatedCount++;
         }
 
-        // Send notification for new reviews
+        // Send consolidated summary email (1 per fetch instead of 1 per review)
         if (insertedCount > 0) {
           try {
-            // Collect newly inserted reviews (pending_reply, no approved_reply)
             const { data: newReviews } = await supabaseAdmin
               .from("reviews")
-              .select("id, reviewer_name, rating, text, suggested_reply, posted_at")
+              .select("id, reviewer_name, rating, text, sentiment, posted_at, platform")
               .eq("business_id", biz.id)
-              .eq("status", "pending_reply")
-              .is("approved_reply", null)
+              .eq("platform", "google")
               .order("created_at", { ascending: false })
               .limit(insertedCount);
 
             if (newReviews && newReviews.length > 0) {
-              await fetch(`${supabaseUrl}/functions/v1/notify-new-review`, {
+              fetch(`${supabaseUrl}/functions/v1/notify-fetch-summary`, {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
@@ -296,14 +294,18 @@ Deno.serve(async (req) => {
                 },
                 body: JSON.stringify({
                   business_id: biz.id,
-                  reviews: newReviews,
+                  new_reviews: newReviews,
+                  platform_results: [{
+                    platform: "google",
+                    fetched: reviews.length,
+                    inserted: insertedCount,
+                  }],
                 }),
-              });
-              console.log(`Notification sent for ${newReviews.length} new reviews`);
+              }).catch((e) => console.error("notify-fetch-summary failed:", e));
+              console.log(`Summary email triggered for ${newReviews.length} new Google reviews`);
             }
           } catch (notifyErr) {
-            console.error("Failed to send review notification:", notifyErr);
-            // Don't fail the whole process if notification fails
+            console.error("Failed to trigger summary email:", notifyErr);
           }
         }
 
