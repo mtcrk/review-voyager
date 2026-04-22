@@ -648,7 +648,7 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
       if (isBookingDedicated) {
         // voyager/booking-reviews-scraper — rating is 0-10 scale
         const rawRating = Number(item.rating ?? item.reviewScore ?? item.reviewRating ?? 6);
-        rating = rawRating > 5 ? Math.round(rawRating / 2) : Math.min(5, Math.max(1, Math.round(rawRating)));
+        rating = Math.min(10, Math.max(1, Math.round(rawRating)));
         const liked = item.reviewTextLiked || item.likedText || "";
         const disliked = item.reviewTextDisliked || item.dislikedText || "";
         const title = item.reviewTitle || item.title || "";
@@ -664,7 +664,7 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
       } else if (isTripcomDedicated) {
         // Trip.com scraper format (shahidirfan/trip-com-hotel-reviews-scraper) — rating is 0-10
         const rawRating = Number(item.reviewRating ?? 6);
-        rating = rawRating > 5 ? Math.round(rawRating / 2) : Math.min(5, Math.max(1, Math.round(rawRating)));
+        rating = Math.min(10, Math.max(1, Math.round(rawRating)));
         const original = item.reviewOriginalText || "";
         const translated = item.reviewTranslatedText || "";
         text = translated && translated !== original ? `${original}\n\n[Translated]\n${translated}` : (original || translated || "");
@@ -674,7 +674,7 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
       } else if (isExpediaDedicated) {
         // Dedicated Expedia scraper format (shahidirfan/expedia-reviews-scraper) — rating 0-10
         const rawRating = Number(item.rating ?? item.overallSatisfaction ?? 6);
-        rating = rawRating > 5 ? Math.round(rawRating / 2) : Math.min(5, Math.max(1, Math.round(rawRating)));
+        rating = Math.min(10, Math.max(1, Math.round(rawRating)));
         text = item.review_text || item.text || item.reviewText || "";
         if (item.title && text) text = `${item.title}\n\n${text}`;
         else if (item.title) text = item.title;
