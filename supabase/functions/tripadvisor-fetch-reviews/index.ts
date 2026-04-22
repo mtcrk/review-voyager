@@ -135,7 +135,7 @@ Deno.serve(async (req) => {
     // TripAdvisor en pahalı aktörlerden biri (her run ~$0.30+), bu yüzden
     // yeni yorum 0 olmasa bile cooldown uygula.
     if (!run_id && isServiceRole && !force) {
-      const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+      const cutoff = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString();
       const { data: lastLogs } = await supabase
         .from("integration_logs")
         .select("created_at, meta, status")
@@ -150,7 +150,7 @@ Deno.serve(async (req) => {
       const lastRun = lastLogs?.[0];
       if (lastRun) {
         console.log(
-          `⏭️ Skipping TripAdvisor for business ${business_id} — last run at ${lastRun.created_at} (within 48h cooldown).`
+          `⏭️ Skipping TripAdvisor for business ${business_id} — last run at ${lastRun.created_at} (within 72h cooldown).`
         );
         await supabase.from("integration_logs").insert({
           business_id,
@@ -158,19 +158,19 @@ Deno.serve(async (req) => {
           action: "tripadvisor_reviews_fetch",
           status: "skipped",
           meta: {
-            reason: "smart_skip_within_48h",
+            reason: "smart_skip_within_72h",
             last_run_at: lastRun.created_at,
           },
         });
         notifyAdmin(business_id, 0, 0, 0, undefined, "skipped", {
-          reason: "smart_skip_within_48h",
+          reason: "smart_skip_within_72h",
           triggered_by: "service-role (cron/n8n)",
         }).catch((e) => console.error("notifyAdmin skip failed:", e));
         return new Response(
           JSON.stringify({
             success: true,
             skipped: true,
-            reason: "smart_skip_within_48h",
+            reason: "smart_skip_within_72h",
             last_run_at: lastRun.created_at,
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -296,7 +296,7 @@ Deno.serve(async (req) => {
 
     const actorInput = {
       startUrls: [{ url: tripAdvisorUrl }],
-      maxItemsPerQuery: 50,
+      maxItemsPerQuery: 20,
       scrapeReviewerInfo: true,
     };
 
