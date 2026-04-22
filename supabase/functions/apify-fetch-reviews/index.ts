@@ -55,16 +55,32 @@ interface ApifyReview {
   reviewResponses?: string[];
 }
 
+// Returns the rating in its NATIVE scale (1-5 for Google/TripAdvisor/Trustpilot, 1-10 for Booking/Expedia/Hotels/Trip.com)
 function normalizeRating(rating: number | string | null | undefined, provider: string): number {
-  if (rating == null) return 3;
-  const num = typeof rating === "string" ? parseFloat(rating) : rating;
-  if (isNaN(num)) return 3;
-  // Booking.com, Expedia, and Hotels.com use 1-10 scale
   const p = provider.toLowerCase();
-  if ((p === "booking" || p === "booking.com" || p === "expedia" || p === "hotels" || p === "hotelscom" || p === "hotels.com") && num > 5) {
-    return Math.round(num / 2);
+  const isTenScale = p === "booking" || p === "booking.com" || p === "expedia" ||
+    p === "hotels" || p === "hotelscom" || p === "hotels.com" ||
+    p === "tripcom" || p === "trip.com";
+  const max = isTenScale ? 10 : 5;
+  const fallback = isTenScale ? 6 : 3;
+  if (rating == null) return fallback;
+  const num = typeof rating === "string" ? parseFloat(rating) : rating;
+  if (isNaN(num)) return fallback;
+  return Math.min(max, Math.max(1, Math.round(num)));
+}
+
+// Sentiment based on the platform's native scale
+function ratingToSentiment(rating: number, platform: string): string {
+  const p = platform.toLowerCase();
+  const isTenScale = p === "booking" || p === "expedia" || p === "hotelscom" || p === "tripcom";
+  if (isTenScale) {
+    if (rating >= 8) return "positive";
+    if (rating >= 6) return "neutral";
+    return "negative";
   }
-  return Math.min(5, Math.max(1, Math.round(num)));
+  if (rating >= 4) return "positive";
+  if (rating >= 3) return "neutral";
+  return "negative";
 }
 
 function normalizePlatform(provider: string): string {
