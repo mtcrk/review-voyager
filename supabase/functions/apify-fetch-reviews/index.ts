@@ -755,6 +755,7 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
     reply_source: "platform";
     status: "replied";
   }> = [];
+  const ratingUpdates: Array<{ id: string; rating: number; sentiment: string }> = [];
 
   for (const review of transformed) {
     const existing = existingReviews.get(review.google_review_id);
@@ -762,6 +763,15 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
     if (!existing) {
       newReviews.push(review);
       continue;
+    }
+
+    // BACKFILL: rating ölçeği değiştiyse (eskiden /2 kaydedilmişti, şimdi ham), güncelle
+    if (existing.rating !== review.rating) {
+      ratingUpdates.push({
+        id: existing.id,
+        rating: review.rating,
+        sentiment: review.sentiment,
+      });
     }
 
     const canApplyPlatformReply = Boolean(review.approved_reply) && (!existing.approved_reply || existing.reply_source === "platform");
