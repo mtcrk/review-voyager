@@ -1196,9 +1196,17 @@ export default function Reviews() {
                         </Badge>
                       )}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {format(new Date(review.posted_at), 'd MMM yyyy', { locale: tr })}
-                    </TableCell>
+                     <TableCell className="text-muted-foreground">
+                       <div className="flex flex-col gap-0.5">
+                         <span>{format(new Date(review.posted_at), 'd MMM yyyy', { locale: tr })}</span>
+                         {review.is_edited && review.edited_at && (
+                           <span className="text-[11px] text-amber-600 dark:text-amber-500 flex items-center gap-1">
+                             <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500" />
+                             Düzenlendi: {format(new Date(review.edited_at), 'd MMM yyyy', { locale: tr })}
+                           </span>
+                         )}
+                       </div>
+                     </TableCell>
                     <TableCell>
                       <Badge variant={statusInfo.variant}>
                         {statusInfo.label}
@@ -1396,6 +1404,29 @@ export default function Reviews() {
                   {selectedReview.text || 'Yorum metni yok'}
                 </p>
                 {selectedReview.text && <ReviewTranslator text={selectedReview.text} />}
+                {selectedReview.is_edited && selectedReview.edited_at && (
+                  <div className="mt-3 rounded-md border border-amber-500/30 bg-amber-500/5 p-3">
+                    <div className="flex items-center gap-2 text-xs font-medium text-amber-700 dark:text-amber-500 mb-1">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500" />
+                      Yorumcu bu yorumu düzenledi
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      İlk yayın: {format(new Date(selectedReview.posted_at), 'd MMM yyyy', { locale: tr })}
+                      {' · '}
+                      Son düzenleme: {format(new Date(selectedReview.edited_at), 'd MMM yyyy', { locale: tr })}
+                    </p>
+                    {selectedReview.previous_text && (
+                      <p className="text-xs text-muted-foreground mt-2 italic line-through">
+                        Önceki: "{selectedReview.previous_text}"
+                      </p>
+                    )}
+                    {selectedReview.previous_rating != null && selectedReview.previous_rating !== selectedReview.rating && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Önceki puan: {selectedReview.previous_rating} → {selectedReview.rating}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Rating */}
