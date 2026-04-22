@@ -712,7 +712,7 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
         text: text || null,
         posted_at: postedAt,
         status: ownerReply ? "replied" : "pending_reply",
-        sentiment: rating >= 4 ? "positive" : rating >= 3 ? "neutral" : "negative",
+        sentiment: ratingToSentiment(rating, platform),
         approved_reply: ownerReply,
         replied_at: ownerReplyAt,
         reply_source: ownerReply ? "platform" : null,
