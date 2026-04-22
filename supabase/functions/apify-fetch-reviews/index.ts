@@ -648,7 +648,7 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
       if (isBookingDedicated) {
         // voyager/booking-reviews-scraper — rating is 0-10 scale
         const rawRating = Number(item.rating ?? item.reviewScore ?? item.reviewRating ?? 6);
-        rating = rawRating > 5 ? Math.round(rawRating / 2) : Math.min(5, Math.max(1, Math.round(rawRating)));
+        rating = Math.min(10, Math.max(1, Math.round(rawRating)));
         const liked = item.reviewTextLiked || item.likedText || "";
         const disliked = item.reviewTextDisliked || item.dislikedText || "";
         const title = item.reviewTitle || item.title || "";
@@ -664,7 +664,7 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
       } else if (isTripcomDedicated) {
         // Trip.com scraper format (shahidirfan/trip-com-hotel-reviews-scraper) — rating is 0-10
         const rawRating = Number(item.reviewRating ?? 6);
-        rating = rawRating > 5 ? Math.round(rawRating / 2) : Math.min(5, Math.max(1, Math.round(rawRating)));
+        rating = Math.min(10, Math.max(1, Math.round(rawRating)));
         const original = item.reviewOriginalText || "";
         const translated = item.reviewTranslatedText || "";
         text = translated && translated !== original ? `${original}\n\n[Translated]\n${translated}` : (original || translated || "");
@@ -674,7 +674,7 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
       } else if (isExpediaDedicated) {
         // Dedicated Expedia scraper format (shahidirfan/expedia-reviews-scraper) — rating 0-10
         const rawRating = Number(item.rating ?? item.overallSatisfaction ?? 6);
-        rating = rawRating > 5 ? Math.round(rawRating / 2) : Math.min(5, Math.max(1, Math.round(rawRating)));
+        rating = Math.min(10, Math.max(1, Math.round(rawRating)));
         text = item.review_text || item.text || item.reviewText || "";
         if (item.title && text) text = `${item.title}\n\n${text}`;
         else if (item.title) text = item.title;
@@ -712,7 +712,7 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
         text: text || null,
         posted_at: postedAt,
         status: ownerReply ? "replied" : "pending_reply",
-        sentiment: rating >= 4 ? "positive" : rating >= 3 ? "neutral" : "negative",
+        sentiment: ratingToSentiment(rating, platform),
         approved_reply: ownerReply,
         replied_at: ownerReplyAt,
         reply_source: ownerReply ? "platform" : null,
@@ -726,6 +726,8 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
     reply_source: string | null;
     replied_at: string | null;
     status: string | null;
+    rating: number | null;
+    sentiment: string | null;
   }>();
   const allIds = transformed.map(r => r.google_review_id);
   const CHECK_BATCH = 200;
@@ -733,7 +735,7 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
     const batch = allIds.slice(i, i + CHECK_BATCH);
     const { data: existing } = await supabase
       .from("reviews")
-      .select("id, google_review_id, approved_reply, reply_source, replied_at, status")
+      .select("id, google_review_id, approved_reply, reply_source, replied_at, status, rating, sentiment")
       .eq("business_id", businessId)
       .in("google_review_id", batch);
     if (existing) {
@@ -753,6 +755,7 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
     reply_source: "platform";
     status: "replied";
   }> = [];
+  const ratingUpdates: Array<{ id: string; rating: number; sentiment: string }> = [];
 
   for (const review of transformed) {
     const existing = existingReviews.get(review.google_review_id);
@@ -760,6 +763,15 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
     if (!existing) {
       newReviews.push(review);
       continue;
+    }
+
+    // BACKFILL: rating ölçeği değiştiyse (eskiden /2 kaydedilmişti, şimdi ham), güncelle
+    if (existing.rating !== review.rating) {
+      ratingUpdates.push({
+        id: existing.id,
+        rating: review.rating,
+        sentiment: review.sentiment,
+      });
     }
 
     const canApplyPlatformReply = Boolean(review.approved_reply) && (!existing.approved_reply || existing.reply_source === "platform");
@@ -810,6 +822,19 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
 
     if (error) {
       console.error(`Reply update error for ${u.id}:`, error.message);
+    } else {
+      updated += 1;
+    }
+  }
+
+  // Backfill rating/sentiment when scale changes (e.g. 4 -> 8 for Booking)
+  for (const r of ratingUpdates) {
+    const { error } = await supabase
+      .from("reviews")
+      .update({ rating: r.rating, sentiment: r.sentiment })
+      .eq("id", r.id);
+    if (error) {
+      console.error(`Rating update error for ${r.id}:`, error.message);
     } else {
       updated += 1;
     }

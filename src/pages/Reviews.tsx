@@ -49,6 +49,11 @@ type PlatformFilter = "all" | "google" | "booking" | "tripadvisor" | "expedia" |
 type RatingFilter = "all" | "1" | "2" | "3" | "4" | "5";
 type SortOption = "newest" | "oldest" | "rating_high" | "rating_low" | "name_az";
 
+// Booking, Expedia, Hotels.com, Trip.com use a 1-10 native scale; others use 1-5
+const TEN_SCALE_PLATFORMS = new Set(["booking", "expedia", "hotelscom", "tripcom"]);
+const getRatingScale = (platform?: string | null): 5 | 10 =>
+  platform && TEN_SCALE_PLATFORMS.has(platform.toLowerCase()) ? 10 : 5;
+
 type ToneOption = "friendly" | "formal" | "playful" | "empathetic" | "grateful" | "witty" | "apologetic" | "enthusiastic";
 
 const toneOptions: { value: ToneOption; label: string; emoji: string }[] = [
@@ -1162,11 +1167,21 @@ export default function Reviews() {
                     </TableCell>
                     <TableCell className="font-medium">{review.reviewer_name}</TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1">
-                        {Array.from({ length: review.rating }).map((_, i) => (
-                          <Star key={i} className="h-4 w-4 fill-primary text-primary" />
-                        ))}
-                      </div>
+                      {getRatingScale(review.platform) === 10 ? (
+                        <div className="flex items-center gap-1">
+                          <Star className="h-4 w-4 fill-primary text-primary" />
+                          <span className="text-sm font-semibold text-foreground">
+                            {review.rating}
+                            <span className="text-muted-foreground font-normal"> / 10</span>
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: review.rating }).map((_, i) => (
+                            <Star key={i} className="h-4 w-4 fill-primary text-primary" />
+                          ))}
+                        </div>
+                      )}
                     </TableCell>
                     {locationFilter !== "active" && (
                       <TableCell>
@@ -1437,11 +1452,21 @@ export default function Reviews() {
               {/* Rating */}
               <div>
                 <h3 className="text-sm font-semibold text-foreground mb-2">Puan</h3>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: selectedReview.rating }).map((_, i) => (
-                    <Star key={i} className="h-5 w-5 fill-primary text-primary" />
-                  ))}
-                </div>
+                {getRatingScale(selectedReview.platform) === 10 ? (
+                  <div className="flex items-center gap-2">
+                    <Star className="h-5 w-5 fill-primary text-primary" />
+                    <span className="text-lg font-semibold text-foreground">
+                      {selectedReview.rating}
+                      <span className="text-muted-foreground font-normal text-base"> / 10</span>
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: selectedReview.rating }).map((_, i) => (
+                      <Star key={i} className="h-5 w-5 fill-primary text-primary" />
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Existing Reply (from platform / approved) */}
