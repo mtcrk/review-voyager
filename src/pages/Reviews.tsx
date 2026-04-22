@@ -49,6 +49,11 @@ type PlatformFilter = "all" | "google" | "booking" | "tripadvisor" | "expedia" |
 type RatingFilter = "all" | "1" | "2" | "3" | "4" | "5";
 type SortOption = "newest" | "oldest" | "rating_high" | "rating_low" | "name_az";
 
+// Booking, Expedia, Hotels.com, Trip.com use a 1-10 native scale; others use 1-5
+const TEN_SCALE_PLATFORMS = new Set(["booking", "expedia", "hotelscom", "tripcom"]);
+const getRatingScale = (platform?: string | null): 5 | 10 =>
+  platform && TEN_SCALE_PLATFORMS.has(platform.toLowerCase()) ? 10 : 5;
+
 type ToneOption = "friendly" | "formal" | "playful" | "empathetic" | "grateful" | "witty" | "apologetic" | "enthusiastic";
 
 const toneOptions: { value: ToneOption; label: string; emoji: string }[] = [
