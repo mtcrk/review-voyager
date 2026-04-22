@@ -1167,11 +1167,21 @@ export default function Reviews() {
                     </TableCell>
                     <TableCell className="font-medium">{review.reviewer_name}</TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1">
-                        {Array.from({ length: review.rating }).map((_, i) => (
-                          <Star key={i} className="h-4 w-4 fill-primary text-primary" />
-                        ))}
-                      </div>
+                      {getRatingScale(review.platform) === 10 ? (
+                        <div className="flex items-center gap-1">
+                          <Star className="h-4 w-4 fill-primary text-primary" />
+                          <span className="text-sm font-semibold text-foreground">
+                            {review.rating}
+                            <span className="text-muted-foreground font-normal"> / 10</span>
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: review.rating }).map((_, i) => (
+                            <Star key={i} className="h-4 w-4 fill-primary text-primary" />
+                          ))}
+                        </div>
+                      )}
                     </TableCell>
                     {locationFilter !== "active" && (
                       <TableCell>
