@@ -296,7 +296,7 @@ Deno.serve(async (req) => {
 
     const actorInput = {
       startUrls: [{ url: tripAdvisorUrl }],
-      maxItemsPerQuery: 1000,
+      maxItemsPerQuery: 50,
       scrapeReviewerInfo: true,
     };
 
