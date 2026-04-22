@@ -827,6 +827,19 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
     }
   }
 
+  // Backfill rating/sentiment when scale changes (e.g. 4 -> 8 for Booking)
+  for (const r of ratingUpdates) {
+    const { error } = await supabase
+      .from("reviews")
+      .update({ rating: r.rating, sentiment: r.sentiment })
+      .eq("id", r.id);
+    if (error) {
+      console.error(`Rating update error for ${r.id}:`, error.message);
+    } else {
+      updated += 1;
+    }
+  }
+
   const skipped = transformed.length - newReviews.length - replyUpdates.length;
   console.log(`Done: ${inserted} inserted, ${updated} updated, ${skipped} skipped out of ${transformed.length} total`);
   return { inserted, updated, skipped, total: transformed.length };
