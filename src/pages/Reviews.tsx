@@ -1196,9 +1196,17 @@ export default function Reviews() {
                         </Badge>
                       )}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {format(new Date(review.posted_at), 'd MMM yyyy', { locale: tr })}
-                    </TableCell>
+                     <TableCell className="text-muted-foreground">
+                       <div className="flex flex-col gap-0.5">
+                         <span>{format(new Date(review.posted_at), 'd MMM yyyy', { locale: tr })}</span>
+                         {review.is_edited && review.edited_at && (
+                           <span className="text-[11px] text-amber-600 dark:text-amber-500 flex items-center gap-1">
+                             <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500" />
+                             Düzenlendi: {format(new Date(review.edited_at), 'd MMM yyyy', { locale: tr })}
+                           </span>
+                         )}
+                       </div>
+                     </TableCell>
                     <TableCell>
                       <Badge variant={statusInfo.variant}>
                         {statusInfo.label}
