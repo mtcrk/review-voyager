@@ -256,7 +256,7 @@ Deno.serve(async (req) => {
     // skip ediyordu; bu Apify maliyetini patlatıyordu.)
     // Manuel UI tetiklemeleri (force=true veya user-token) etkilenmez.
     if (!run_id && isServiceRole && !force) {
-      const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+      const cutoff = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString();
       const { data: lastLogs } = await supabase
         .from("integration_logs")
         .select("created_at, meta, status")
@@ -271,7 +271,7 @@ Deno.serve(async (req) => {
       const lastRun = lastLogs?.[0];
       if (lastRun) {
         console.log(
-          `⏭️ Skipping ${platform} for business ${business_id} — last successful run at ${lastRun.created_at} (within 48h cooldown).`
+          `⏭️ Skipping ${platform} for business ${business_id} — last successful run at ${lastRun.created_at} (within 72h cooldown).`
         );
         await supabase.from("integration_logs").insert({
           business_id,
@@ -279,19 +279,19 @@ Deno.serve(async (req) => {
           action: `${platform}_reviews_fetch`,
           status: "skipped",
           meta: {
-            reason: "smart_skip_within_48h",
+            reason: "smart_skip_within_72h",
             last_run_at: lastRun.created_at,
           },
         });
         notifyAdmin(business_id, platform, 0, 0, 0, 0, undefined, "skipped", {
-          reason: "smart_skip_within_48h",
+          reason: "smart_skip_within_72h",
           triggered_by: "service-role (cron/n8n)",
         }).catch((e) => console.error("notifyAdmin skip failed:", e));
         return new Response(
           JSON.stringify({
             success: true,
             skipped: true,
-            reason: "smart_skip_within_48h",
+            reason: "smart_skip_within_72h",
             last_run_at: lastRun.created_at,
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -434,8 +434,8 @@ Deno.serve(async (req) => {
       const hotelId = business.hotelscom_url.replace(/\D/g, ""); // Extract numeric ID
       actorInput = {
         startUrls: [`https://www.hotels.com/ho${hotelId}/`],
-        maxItems: 50,
-        maxReviewsPerHotel: 50,
+        maxItems: 20,
+        maxReviewsPerHotel: 20,
         sortBy: "newest_first",
       };
       console.log(`Using dedicated Hotels.com scraper for hotel ID: ${hotelId}`);
@@ -451,7 +451,7 @@ Deno.serve(async (req) => {
       }
       actorInput = {
         startUrl: expediaUrl,
-        results_wanted: 50,
+        results_wanted: 20,
         max_pages: 100,
         proxyConfiguration: { useApifyProxy: true, apifyProxyGroups: ["RESIDENTIAL"] },
       };
@@ -467,7 +467,7 @@ Deno.serve(async (req) => {
       actorId = TRIPCOM_ACTOR_ID;
       actorInput = {
         hotelId: parseInt(business.tripcom_hotel_id, 10),
-        results_wanted: 50,
+        results_wanted: 20,
       };
       console.log(`Using Trip.com scraper for hotel ID: ${business.tripcom_hotel_id}`);
     } else if (platform === "trustpilot") {
@@ -484,7 +484,7 @@ Deno.serve(async (req) => {
       const businessUrl = `https://www.trustpilot.com/review/${domain}`;
       actorInput = {
         businessUrl,
-        maxResults: 50,
+        maxResults: 20,
       };
       console.log(`Using dedicated Trustpilot scraper for: ${businessUrl}`);
     } else if (platform === "booking" && business.booking_hotel_id) {
@@ -494,16 +494,16 @@ Deno.serve(async (req) => {
       // voyager~booking-reviews-scraper supports several limit fields; set them all to be safe
       actorInput = {
         startUrls: [{ url: bookingUrl }],
-        maxReviewsPerHotel: 50,
-        maxReviews: 50,
-        maxItems: 50,
+        maxReviewsPerHotel: 20,
+        maxReviews: 20,
+        maxItems: 20,
       };
       console.log(`Using dedicated Booking scraper for: ${bookingUrl}`);
     } else {
       // Use the general hotel-review-aggregator
       const providers = PLATFORM_TO_APIFY_PROVIDER[platform] || [];
       actorInput = {
-        maxReviewsPerQuery: 50,
+        maxReviewsPerQuery: 20,
         scrapeReviewPictures: false,
         scrapeReviewResponses: true,
       };
