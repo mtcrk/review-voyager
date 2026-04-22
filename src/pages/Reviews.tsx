@@ -1452,11 +1452,21 @@ export default function Reviews() {
               {/* Rating */}
               <div>
                 <h3 className="text-sm font-semibold text-foreground mb-2">Puan</h3>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: selectedReview.rating }).map((_, i) => (
-                    <Star key={i} className="h-5 w-5 fill-primary text-primary" />
-                  ))}
-                </div>
+                {getRatingScale(selectedReview.platform) === 10 ? (
+                  <div className="flex items-center gap-2">
+                    <Star className="h-5 w-5 fill-primary text-primary" />
+                    <span className="text-lg font-semibold text-foreground">
+                      {selectedReview.rating}
+                      <span className="text-muted-foreground font-normal text-base"> / 10</span>
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: selectedReview.rating }).map((_, i) => (
+                      <Star key={i} className="h-5 w-5 fill-primary text-primary" />
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Existing Reply (from platform / approved) */}
