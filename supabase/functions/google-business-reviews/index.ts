@@ -226,7 +226,8 @@ Deno.serve(async (req) => {
             const ratingChanged = existing.rating !== (rating as number);
             if (textChanged || ratingChanged) {
               updates.is_edited = true;
-              updates.edited_at = new Date().toISOString();
+              // Google'ın updateTime'ı varsa onu kullan (gerçek düzenleme zamanı), yoksa şimdiki zaman
+              updates.edited_at = updateTime || new Date().toISOString();
               updates.previous_text = existing.text;
               updates.previous_rating = existing.rating;
               if (textChanged) updates.text = text;
