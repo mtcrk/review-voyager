@@ -78,10 +78,12 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceKey);
 
     const url = new URL(req.url);
+    const body = await req.json().catch(() => ({}));
     const platformsParam = url.searchParams.get("platforms");
     const allowed = platformsParam
       ? new Set(platformsParam.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean))
       : undefined;
+    const force = Boolean(body?.force || body?.manual);
     console.log("Allowed platforms:", allowed ? [...allowed].join(",") : "ALL");
 
     const { data: businesses, error } = await supabase
@@ -95,35 +97,51 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fire-and-forget: trigger each platform fetch without waiting.
-    // The platform functions handle their own Apify run polling internally.
+    const jobs: Array<Promise<any>> = [];
     const triggered: any[] = [];
     for (const biz of businesses) {
       const plans = planFor(biz, allowed);
       for (const plan of plans) {
-        const payload: any = { business_id: biz.id };
+        const payload: any = { business_id: biz.id, force };
         if (plan.functionName === "apify-fetch-reviews") payload.platform = plan.platform;
 
-        // Fire without await — let it run in background
-        invokePlatformFetch(supabaseUrl, serviceKey, plan.functionName, payload)
-          .then((res) => {
-            const d = res.data;
-            if (d?.success) {
-              console.log(`[${biz.name}] ${plan.platform}: inserted=${d.inserted ?? 0}`);
-            } else if (d?.status === "running") {
-              console.log(`[${biz.name}] ${plan.platform}: started run_id=${d.run_id}`);
-            } else {
-              console.error(`[${biz.name}] ${plan.platform} failed: ${d?.message || d?.error || res.status}`);
-            }
-          })
-          .catch((err) => console.error(`[${biz.name}] ${plan.platform} ex:`, err.message));
+        jobs.push((async () => {
+          const res = await invokePlatformFetch(supabaseUrl, serviceKey, plan.functionName, payload);
+          const d = res.data;
 
+          if (d?.success) {
+            console.log(`[${biz.name}] ${plan.platform}: inserted=${d.inserted ?? 0}`);
+            return { business: biz.name, platform: plan.platform, success: true, inserted: d.inserted ?? 0 };
+          }
+
+          if (d?.status === "running" && d?.run_id) {
+            console.log(`[${biz.name}] ${plan.platform}: started run_id=${d.run_id}`);
+            const done = await pollUntilDone(supabaseUrl, serviceKey, plan.functionName, payload, d.run_id);
+            if (done?.success) {
+              console.log(`[${biz.name}] ${plan.platform}: completed inserted=${done.inserted ?? 0}`);
+              return { business: biz.name, platform: plan.platform, success: true, inserted: done.inserted ?? 0 };
+            }
+
+            console.error(`[${biz.name}] ${plan.platform} poll failed: ${done?.message || done?.error || "unknown"}`);
+            return { business: biz.name, platform: plan.platform, success: false, error: done?.message || done?.error || "poll_failed" };
+          }
+
+          console.error(`[${biz.name}] ${plan.platform} failed: ${d?.message || d?.error || res.status}`);
+          return { business: biz.name, platform: plan.platform, success: false, error: d?.message || d?.error || String(res.status) };
+        })().catch((err) => {
+          console.error(`[${biz.name}] ${plan.platform} ex:`, err.message);
+          return { business: biz.name, platform: plan.platform, success: false, error: err.message };
+        }));
         triggered.push({ business: biz.name, platform: plan.platform });
       }
     }
 
-    console.log(`Auto-fetch triggered ${triggered.length} jobs`);
-    return new Response(JSON.stringify({ success: true, triggered: triggered.length, jobs: triggered }), {
+    const results = await Promise.all(jobs);
+    const completed = results.filter((r) => r?.success);
+    const failed = results.filter((r) => !r?.success);
+
+    console.log(`Auto-fetch completed ${completed.length}/${triggered.length} jobs`);
+    return new Response(JSON.stringify({ success: failed.length === 0, triggered: triggered.length, completed: completed.length, failed: failed.length, jobs: results }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {
