@@ -456,7 +456,12 @@ export default function Reviews() {
       let comparison = 0;
       switch (sortField) {
         case "posted_at":
-          comparison = new Date(a.posted_at).getTime() - new Date(b.posted_at).getTime();
+          {
+            // Düzenlenmiş yorumları Google'ın updateTime'ına (edited_at) göre sırala
+            const aDate = a.edited_at ? new Date(a.edited_at).getTime() : new Date(a.posted_at).getTime();
+            const bDate = b.edited_at ? new Date(b.edited_at).getTime() : new Date(b.posted_at).getTime();
+            comparison = aDate - bDate;
+          }
           break;
         case "rating":
           comparison = a.rating - b.rating;
