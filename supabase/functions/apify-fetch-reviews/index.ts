@@ -726,6 +726,8 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
     reply_source: string | null;
     replied_at: string | null;
     status: string | null;
+    rating: number | null;
+    sentiment: string | null;
   }>();
   const allIds = transformed.map(r => r.google_review_id);
   const CHECK_BATCH = 200;
@@ -733,7 +735,7 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
     const batch = allIds.slice(i, i + CHECK_BATCH);
     const { data: existing } = await supabase
       .from("reviews")
-      .select("id, google_review_id, approved_reply, reply_source, replied_at, status")
+      .select("id, google_review_id, approved_reply, reply_source, replied_at, status, rating, sentiment")
       .eq("business_id", businessId)
       .in("google_review_id", batch);
     if (existing) {
