@@ -186,6 +186,10 @@ Deno.serve(async (req) => {
             : 3;
           const text = review.comment || null;
           const postedAt = review.createTime || new Date().toISOString();
+          const updateTime = review.updateTime || null;
+          // Google, yorumcu yorumunu düzenlediyse updateTime'ı createTime'dan farklı verir
+          const wasEditedOnGoogle =
+            !!updateTime && !!review.createTime && updateTime !== review.createTime;
           const hasReply = !!review.reviewReply;
           const replyComment = review.reviewReply?.comment || null;
 
@@ -242,6 +246,12 @@ Deno.serve(async (req) => {
               });
             }
 
+            // BACKFILL: Google'ın updateTime'ı düzenleme yapıldığını söylüyorsa ama biz bayrak koymadıysak işaretle
+            if (wasEditedOnGoogle && !existing.is_edited) {
+              updates.is_edited = true;
+              updates.edited_at = updateTime;
+            }
+
             if (Object.keys(updates).length > 0) {
               toUpdate.push({ id: existing.id, updates });
             }
@@ -265,6 +275,9 @@ Deno.serve(async (req) => {
             approved_reply: hasReply ? replyComment : null,
             sentiment,
             photos: photos.length > 0 ? photos : [],
+            // Eğer Google'da daha önce düzenlenmişse ilk kayıtta da işaretleyelim
+            is_edited: wasEditedOnGoogle,
+            edited_at: wasEditedOnGoogle ? updateTime : null,
           });
         }
 
