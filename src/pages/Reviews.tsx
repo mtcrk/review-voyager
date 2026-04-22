@@ -46,7 +46,7 @@ type SortOrder = "asc" | "desc";
 type StatusFilter = "all" | "pending" | "approved" | "replied" | "not_replied";
 type SentimentFilter = "all" | "positive" | "negative" | "neutral";
 type PlatformFilter = "all" | "google" | "booking" | "tripadvisor" | "expedia" | "hotelscom" | "tripcom";
-type RatingFilter = "all" | "1" | "2" | "3" | "4" | "5";
+type RatingFilter = "all" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10";
 type SortOption = "newest" | "oldest" | "rating_high" | "rating_low" | "name_az";
 
 // Booking, Expedia, Hotels.com, Trip.com use a 1-10 native scale; others use 1-5
@@ -927,6 +927,11 @@ export default function Reviews() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tüm Puanlar</SelectItem>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="9">9</SelectItem>
+              <SelectItem value="8">8</SelectItem>
+              <SelectItem value="7">7</SelectItem>
+              <SelectItem value="6">6</SelectItem>
               <SelectItem value="5">⭐⭐⭐⭐⭐ (5)</SelectItem>
               <SelectItem value="4">⭐⭐⭐⭐ (4)</SelectItem>
               <SelectItem value="3">⭐⭐⭐ (3)</SelectItem>
