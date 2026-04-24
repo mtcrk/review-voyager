@@ -58,6 +58,7 @@ import GooglePerformance from "./pages/GooglePerformance";
 import Inbox from "./pages/Inbox";
 import GoogleAccounts from "./pages/GoogleAccounts";
 import AdminApifyLogs from "./pages/AdminApifyLogs";
+import YouTubeInbox from "./pages/YouTubeInbox";
 
 const queryClient = new QueryClient();
 
@@ -303,6 +304,16 @@ const App = () => (
               }
             />
             <Route path="/admin/apify-logs" element={<AdminApifyLogs />} />
+            <Route
+              path="/youtube"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <YouTubeInbox />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
             <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
