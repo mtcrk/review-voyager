@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, RefreshCw, ExternalLink, ThumbsUp, MessageCircle, Youtube } from "lucide-react";
+import { Loader2, RefreshCw, ExternalLink, ThumbsUp, MessageCircle, Youtube, MapPin } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { tr } from "date-fns/locale";
 
@@ -34,7 +35,7 @@ interface YouTubeComment {
 }
 
 export default function YouTubeInbox() {
-  const { activeBusiness } = useBusiness();
+  const { activeBusiness, businesses, setActiveBusiness } = useBusiness();
   const [videos, setVideos] = useState<YouTubeVideo[]>([]);
   const [comments, setComments] = useState<YouTubeComment[]>([]);
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
@@ -101,10 +102,35 @@ export default function YouTubeInbox() {
     <div className="container mx-auto px-4 sm:px-6 py-6 space-y-6 max-w-7xl">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Youtube className="h-7 w-7 text-red-600" />
-            YouTube Yorumları
-          </h1>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              <Youtube className="h-7 w-7 text-red-600" />
+              YouTube Yorumları
+            </h1>
+            {businesses.length > 1 && (
+              <Select
+                value={activeBusiness.id}
+                onValueChange={(id) => {
+                  const b = businesses.find((x) => x.id === id);
+                  if (b) {
+                    setActiveBusiness(b);
+                    setSelectedVideoId(null);
+                    setComments([]);
+                  }
+                }}
+              >
+                <SelectTrigger className="w-[220px] h-9 text-sm">
+                  <MapPin className="h-4 w-4 mr-1.5 text-muted-foreground" />
+                  <SelectValue placeholder="Lokasyon" />
+                </SelectTrigger>
+                <SelectContent>
+                  {businesses.map((b) => (
+                    <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
           <p className="text-sm text-muted-foreground mt-1">
             "{activeBusiness.name}" adı geçen videoları ve yorumlarını çek.
           </p>
