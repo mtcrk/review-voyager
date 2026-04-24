@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, RefreshCw, ExternalLink, ThumbsUp, MessageCircle, Youtube, MapPin } from "lucide-react";
+import { Loader2, RefreshCw, ExternalLink, ThumbsUp, MessageCircle, Youtube, MapPin, Languages } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { tr } from "date-fns/locale";
 
@@ -41,6 +41,9 @@ export default function YouTubeInbox() {
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
+  const [translations, setTranslations] = useState<Record<string, string>>({});
+  const [translatingId, setTranslatingId] = useState<string | null>(null);
+  const [translatingAll, setTranslatingAll] = useState(false);
 
   const loadData = useCallback(async () => {
     if (!activeBusiness) return;
@@ -67,7 +70,71 @@ export default function YouTubeInbox() {
   }, []);
 
   useEffect(() => { loadData(); }, [loadData]);
-  useEffect(() => { if (selectedVideoId) loadComments(selectedVideoId); }, [selectedVideoId, loadComments]);
+  useEffect(() => {
+    if (selectedVideoId) {
+      loadComments(selectedVideoId);
+      setTranslations({});
+    }
+  }, [selectedVideoId, loadComments]);
+
+  const translateOne = async (c: YouTubeComment) => {
+    if (translations[c.id]) {
+      // toggle off
+      setTranslations((prev) => {
+        const { [c.id]: _, ...rest } = prev;
+        return rest;
+      });
+      return;
+    }
+    setTranslatingId(c.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("translate-text", {
+        body: { text: c.comment_text, target: "tr" },
+      });
+      if (error) throw error;
+      if (data?.translated) {
+        setTranslations((prev) => ({ ...prev, [c.id]: data.translated }));
+      } else {
+        throw new Error("Çeviri alınamadı");
+      }
+    } catch (e) {
+      toast({
+        title: "Çeviri hatası",
+        description: e instanceof Error ? e.message : "Bilinmeyen hata",
+        variant: "destructive",
+      });
+    } finally {
+      setTranslatingId(null);
+    }
+  };
+
+  const translateAll = async () => {
+    const pending = comments.filter((c) => !translations[c.id]);
+    if (pending.length === 0) return;
+    setTranslatingAll(true);
+    try {
+      const results = await Promise.all(
+        pending.map(async (c) => {
+          try {
+            const { data, error } = await supabase.functions.invoke("translate-text", {
+              body: { text: c.comment_text, target: "tr" },
+            });
+            if (error || !data?.translated) return null;
+            return [c.id, data.translated as string] as const;
+          } catch {
+            return null;
+          }
+        })
+      );
+      setTranslations((prev) => {
+        const next = { ...prev };
+        for (const r of results) if (r) next[r[0]] = r[1];
+        return next;
+      });
+    } finally {
+      setTranslatingAll(false);
+    }
+  };
 
   const handleFetch = async () => {
     if (!activeBusiness) return;
@@ -181,16 +248,34 @@ export default function YouTubeInbox() {
                 <CardHeader>
                   <CardTitle className="text-base flex items-center justify-between">
                     <span>Yorumlar ({comments.length})</span>
-                    {videos.find((v) => v.id === selectedVideoId)?.permalink && (
-                      <a
-                        href={videos.find((v) => v.id === selectedVideoId)?.permalink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-primary flex items-center gap-1 hover:underline"
-                      >
-                        Videoya git <ExternalLink className="h-3 w-3" />
-                      </a>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {comments.length > 0 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={translateAll}
+                          disabled={translatingAll}
+                          className="h-8"
+                        >
+                          {translatingAll ? (
+                            <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                          ) : (
+                            <Languages className="h-3.5 w-3.5 mr-1.5" />
+                          )}
+                          Tümünü Türkçeye Çevir
+                        </Button>
+                      )}
+                      {videos.find((v) => v.id === selectedVideoId)?.permalink && (
+                        <a
+                          href={videos.find((v) => v.id === selectedVideoId)?.permalink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-primary flex items-center gap-1 hover:underline"
+                        >
+                          Videoya git <ExternalLink className="h-3 w-3" />
+                        </a>
+                      )}
+                    </div>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 max-h-[70vh] overflow-y-auto">
@@ -213,8 +298,28 @@ export default function YouTubeInbox() {
                           </span>
                         </div>
                         <p className="text-sm mt-1 whitespace-pre-wrap break-words">{c.comment_text}</p>
+                        {translations[c.id] && (
+                          <div className="mt-2 p-2 rounded-md bg-muted/50 border-l-2 border-primary">
+                            <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1 flex items-center gap-1">
+                              <Languages className="h-3 w-3" /> Türkçe çeviri
+                            </p>
+                            <p className="text-sm whitespace-pre-wrap break-words">{translations[c.id]}</p>
+                          </div>
+                        )}
                         <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1"><ThumbsUp className="h-3 w-3" /> {c.like_count}</span>
+                          <button
+                            onClick={() => translateOne(c)}
+                            disabled={translatingId === c.id}
+                            className="flex items-center gap-1 hover:text-primary transition-colors disabled:opacity-50"
+                          >
+                            {translatingId === c.id ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <Languages className="h-3 w-3" />
+                            )}
+                            {translations[c.id] ? "Orijinali göster" : "Türkçeye çevir"}
+                          </button>
                         </div>
                       </div>
                     </div>
