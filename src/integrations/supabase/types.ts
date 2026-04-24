@@ -1151,6 +1151,7 @@ export type Database = {
       }
       youtube_comments: {
         Row: {
+          analyzed_at: string | null
           author_avatar_url: string | null
           author_channel_id: string | null
           author_display_name: string | null
@@ -1162,6 +1163,11 @@ export type Database = {
           like_count: number | null
           raw: Json | null
           reply_count: number | null
+          sentiment: string | null
+          sentiment_score: number | null
+          sentiment_summary: string | null
+          sentiment_topics: Json | null
+          sentiment_translated_text: string | null
           status: string
           updated_at: string
           video_id: string
@@ -1169,6 +1175,7 @@ export type Database = {
           youtube_video_id: string
         }
         Insert: {
+          analyzed_at?: string | null
           author_avatar_url?: string | null
           author_channel_id?: string | null
           author_display_name?: string | null
@@ -1180,6 +1187,11 @@ export type Database = {
           like_count?: number | null
           raw?: Json | null
           reply_count?: number | null
+          sentiment?: string | null
+          sentiment_score?: number | null
+          sentiment_summary?: string | null
+          sentiment_topics?: Json | null
+          sentiment_translated_text?: string | null
           status?: string
           updated_at?: string
           video_id: string
@@ -1187,6 +1199,7 @@ export type Database = {
           youtube_video_id: string
         }
         Update: {
+          analyzed_at?: string | null
           author_avatar_url?: string | null
           author_channel_id?: string | null
           author_display_name?: string | null
@@ -1198,6 +1211,11 @@ export type Database = {
           like_count?: number | null
           raw?: Json | null
           reply_count?: number | null
+          sentiment?: string | null
+          sentiment_score?: number | null
+          sentiment_summary?: string | null
+          sentiment_topics?: Json | null
+          sentiment_translated_text?: string | null
           status?: string
           updated_at?: string
           video_id?: string
