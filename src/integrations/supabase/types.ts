@@ -1149,6 +1149,128 @@ export type Database = {
           },
         ]
       }
+      youtube_comments: {
+        Row: {
+          author_avatar_url: string | null
+          author_channel_id: string | null
+          author_display_name: string | null
+          business_id: string
+          comment_text: string
+          commented_at: string | null
+          created_at: string
+          id: string
+          like_count: number | null
+          raw: Json | null
+          reply_count: number | null
+          status: string
+          updated_at: string
+          video_id: string
+          youtube_comment_id: string
+          youtube_video_id: string
+        }
+        Insert: {
+          author_avatar_url?: string | null
+          author_channel_id?: string | null
+          author_display_name?: string | null
+          business_id: string
+          comment_text: string
+          commented_at?: string | null
+          created_at?: string
+          id?: string
+          like_count?: number | null
+          raw?: Json | null
+          reply_count?: number | null
+          status?: string
+          updated_at?: string
+          video_id: string
+          youtube_comment_id: string
+          youtube_video_id: string
+        }
+        Update: {
+          author_avatar_url?: string | null
+          author_channel_id?: string | null
+          author_display_name?: string | null
+          business_id?: string
+          comment_text?: string
+          commented_at?: string | null
+          created_at?: string
+          id?: string
+          like_count?: number | null
+          raw?: Json | null
+          reply_count?: number | null
+          status?: string
+          updated_at?: string
+          video_id?: string
+          youtube_comment_id?: string
+          youtube_video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "youtube_comments_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "youtube_videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      youtube_videos: {
+        Row: {
+          business_id: string
+          channel_id: string | null
+          channel_title: string | null
+          comment_count: number | null
+          created_at: string
+          description: string | null
+          id: string
+          like_count: number | null
+          permalink: string | null
+          published_at: string | null
+          raw: Json | null
+          thumbnail_url: string | null
+          title: string | null
+          updated_at: string
+          view_count: number | null
+          youtube_video_id: string
+        }
+        Insert: {
+          business_id: string
+          channel_id?: string | null
+          channel_title?: string | null
+          comment_count?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          like_count?: number | null
+          permalink?: string | null
+          published_at?: string | null
+          raw?: Json | null
+          thumbnail_url?: string | null
+          title?: string | null
+          updated_at?: string
+          view_count?: number | null
+          youtube_video_id: string
+        }
+        Update: {
+          business_id?: string
+          channel_id?: string | null
+          channel_title?: string | null
+          comment_count?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          like_count?: number | null
+          permalink?: string | null
+          published_at?: string | null
+          raw?: Json | null
+          thumbnail_url?: string | null
+          title?: string | null
+          updated_at?: string
+          view_count?: number | null
+          youtube_video_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
