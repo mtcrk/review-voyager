@@ -17,6 +17,7 @@ import {
   ExternalLink,
   TrendingUp,
   Languages,
+  RefreshCw,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { tr } from "date-fns/locale";
@@ -51,6 +52,7 @@ export default function SocialAnalytics() {
   const [comments, setComments] = useState<AnalyzedComment[]>([]);
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
+  const [fetching, setFetching] = useState(false);
   const [filter, setFilter] = useState<SentimentFilter>("all");
 
   const load = useCallback(async () => {
@@ -127,6 +129,31 @@ export default function SocialAnalytics() {
     }
   };
 
+  const handleFetchYouTube = async () => {
+    if (!activeBusiness) return;
+    setFetching(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("youtube-fetch-reviews", {
+        body: { business_id: activeBusiness.id, max_videos: 15 },
+      });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || "Bilinmeyen hata");
+      toast({
+        title: "YouTube verileri çekildi 🎉",
+        description: `${data.videos} video, ${data.comments} yorum eklendi/güncellendi.`,
+      });
+      await load();
+    } catch (e) {
+      toast({
+        title: "Çekme hatası",
+        description: e instanceof Error ? e.message : "Bilinmeyen hata",
+        variant: "destructive",
+      });
+    } finally {
+      setFetching(false);
+    }
+  };
+
   if (!activeBusiness) {
     return <div className="p-8 text-muted-foreground">Önce bir işletme seçin.</div>;
   }
@@ -169,14 +196,24 @@ export default function SocialAnalytics() {
             YouTube yorumlarının duygu analizi, çevirisi ve ana konuları tek ekranda.
           </p>
         </div>
-        <Button onClick={handleAnalyze} disabled={analyzing}>
-          {analyzing ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <Sparkles className="h-4 w-4 mr-2" />
-          )}
-          {analyzing ? "Analiz ediliyor..." : "Analiz Et"}
-        </Button>
+        <div className="flex gap-2 flex-wrap">
+          <Button variant="outline" onClick={handleFetchYouTube} disabled={fetching}>
+            {fetching ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Youtube className="h-4 w-4 mr-2 text-red-600" />
+            )}
+            {fetching ? "Çekiliyor..." : "YouTube Yorumlarını Çek"}
+          </Button>
+          <Button onClick={handleAnalyze} disabled={analyzing}>
+            {analyzing ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4 mr-2" />
+            )}
+            {analyzing ? "Analiz ediliyor..." : "Analiz Et"}
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
