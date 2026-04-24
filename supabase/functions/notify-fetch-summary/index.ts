@@ -528,7 +528,7 @@ Deno.serve(async (req) => {
     const bizIds = locations.map((l) => l.business_id);
     const { data: bizRows } = await supabase
       .from("businesses")
-      .select("id, name, user_id, city")
+      .select("id, name, user_id, city, review_notification_type")
       .in("id", bizIds);
     const bizMap = new Map((bizRows || []).map((b) => [b.id, b]));
 
@@ -594,27 +594,34 @@ Deno.serve(async (req) => {
       ownerEmail = user?.email;
     }
 
-    // Build email
-    const html = buildConsolidatedEmailHtml(enrichedLocations);
+    const ownerEligibleLocations = enrichedLocations.filter((loc) => {
+      const biz = bizMap.get(loc.business_id);
+      return biz?.review_notification_type !== "none";
+    });
 
-    const totalAcrossAll = enrichedLocations.reduce((s, l) => s + l.totalNew, 0);
-    const totalEditedAcross = enrichedLocations.reduce((s, l) => s + (l.editedReviews?.length || 0), 0);
-    const totalNegative = enrichedLocations.reduce((s, l) => s + l.summary.negativeCount, 0);
-    const urgencyPrefix = totalNegative >= 3 ? "🚨 ACİL — " : "📊 ";
-    const locLabel = enrichedLocations.length > 1
-      ? `${enrichedLocations.length} lokasyon`
-      : enrichedLocations[0].name;
-    const parts: string[] = [];
-    if (totalAcrossAll > 0) parts.push(`${totalAcrossAll} yeni`);
-    if (totalEditedAcross > 0) parts.push(`${totalEditedAcross} düzenlenen`);
-    const subject = parts.length > 0
-      ? `${urgencyPrefix}${locLabel} — ${parts.join(" + ")} yorum`
-      : `⚠️ ${locLabel} — Yorum çekme uyarısı`;
+    const buildSummaryPayload = (items: typeof enrichedLocations) => {
+      const html = buildConsolidatedEmailHtml(items);
+      const totalAcrossAll = items.reduce((s, l) => s + l.totalNew, 0);
+      const totalEditedAcross = items.reduce((s, l) => s + (l.editedReviews?.length || 0), 0);
+      const totalNegative = items.reduce((s, l) => s + l.summary.negativeCount, 0);
+      const urgencyPrefix = totalNegative >= 3 ? "🚨 ACİL — " : "📊 ";
+      const locLabel = items.length > 1 ? `${items.length} lokasyon` : items[0].name;
+      const parts: string[] = [];
+      if (totalAcrossAll > 0) parts.push(`${totalAcrossAll} yeni`);
+      if (totalEditedAcross > 0) parts.push(`${totalEditedAcross} düzenlenen`);
 
+      return {
+        html,
+        subject: parts.length > 0
+          ? `${urgencyPrefix}${locLabel} — ${parts.join(" + ")} yorum`
+          : `⚠️ ${locLabel} — Yorum çekme uyarısı`,
+      };
+    };
+
+    const adminPayload = buildSummaryPayload(enrichedLocations);
     const recipients = new Set<string>([ADMIN_EMAIL]);
-    if (ownerEmail) recipients.add(ownerEmail);
 
-    const res = await fetch("https://api.resend.com/emails", {
+    const adminRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -622,14 +629,38 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         from: "VoyageRespond <notify@voyagerespond.com>",
-        to: Array.from(recipients),
-        subject,
-        html,
+        to: [ADMIN_EMAIL],
+        subject: adminPayload.subject,
+        html: adminPayload.html,
       }),
     });
 
-    const result = await res.json();
-    console.log(`Consolidated summary sent to ${Array.from(recipients).join(", ")} (${enrichedLocations.length} locations):`, result);
+    const adminResult = await adminRes.json();
+
+    if (ownerEmail && ownerEligibleLocations.length > 0) {
+      const ownerPayload = buildSummaryPayload(ownerEligibleLocations);
+      const ownerRes = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${RESEND_API_KEY}`,
+        },
+        body: JSON.stringify({
+          from: "VoyageRespond <notify@voyagerespond.com>",
+          to: [ownerEmail],
+          subject: ownerPayload.subject,
+          html: ownerPayload.html,
+        }),
+      });
+
+      const ownerResult = await ownerRes.json();
+      recipients.add(ownerEmail);
+      console.log(`Owner summary sent to ${ownerEmail} (${ownerEligibleLocations.length} locations):`, ownerResult);
+    } else if (ownerEmail) {
+      console.log(`Owner summary skipped for ${ownerEmail} due to notification settings.`);
+    }
+
+    console.log(`Admin consolidated summary sent to ${ADMIN_EMAIL} (${enrichedLocations.length} locations):`, adminResult);
 
     return new Response(JSON.stringify({ success: true, recipients: Array.from(recipients), locations: enrichedLocations.length }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
