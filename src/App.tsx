@@ -59,6 +59,7 @@ import Inbox from "./pages/Inbox";
 import GoogleAccounts from "./pages/GoogleAccounts";
 import AdminApifyLogs from "./pages/AdminApifyLogs";
 import YouTubeInbox from "./pages/YouTubeInbox";
+import SocialAnalytics from "./pages/SocialAnalytics";
 
 const queryClient = new QueryClient();
 
@@ -310,6 +311,16 @@ const App = () => (
                 <ProtectedRoute>
                   <AppLayout>
                     <YouTubeInbox />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/social-analytics"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <SocialAnalytics />
                   </AppLayout>
                 </ProtectedRoute>
               }

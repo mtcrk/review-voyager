@@ -36,6 +36,7 @@ import {
   Trophy,
   TrendingUp,
   LayoutGrid,
+  Sparkles,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -82,6 +83,7 @@ const commonItems = [
   { title: "Rep Score", url: "/rep-score", icon: Trophy },
   { title: "Google Hesapları", url: "/google-accounts", icon: Star },
   { title: "İstatistikler", url: "/statistics", icon: BarChart3 },
+  { title: "Sosyal Medya Analizi", url: "/social-analytics", icon: Sparkles },
   { title: "Google Performance", url: "/performance", icon: TrendingUp },
   { title: "Rapor Oluştur", url: "/report", icon: FileText },
   { title: "Ayarlar", url: "/settings", icon: Settings },
