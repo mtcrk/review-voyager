@@ -33,5 +33,7 @@ Disallow: /report
 Disallow: /onboarding
 Disallow: /auth/callback
 Disallow: /reset-password
+Disallow: /login
+Disallow: /register
 
 Sitemap: https://voyagerespond.com/sitemap.xml
