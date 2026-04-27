@@ -516,6 +516,45 @@ export type Database = {
           },
         ]
       }
+      platform_ratings: {
+        Row: {
+          business_id: string
+          created_at: string
+          fetched_at: string
+          id: string
+          platform: string
+          rating: number | null
+          rating_scale: number
+          raw: Json | null
+          review_count: number | null
+          source_url: string | null
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          fetched_at?: string
+          id?: string
+          platform: string
+          rating?: number | null
+          rating_scale?: number
+          raw?: Json | null
+          review_count?: number | null
+          source_url?: string | null
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          fetched_at?: string
+          id?: string
+          platform?: string
+          rating?: number | null
+          rating_scale?: number
+          raw?: Json | null
+          review_count?: number | null
+          source_url?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
