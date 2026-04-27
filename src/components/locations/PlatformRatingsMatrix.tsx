@@ -1,6 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Star, LayoutGrid } from "lucide-react";
 import { LocationMetrics } from "@/hooks/useMultiLocationData";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Props {
   locations: LocationMetrics[];
@@ -19,10 +21,41 @@ const PLATFORMS: { key: string; label: string; dot: string }[] = [
   { key: "trustpilot", label: "Trustpilot", dot: "bg-teal-500" },
 ];
 
+interface OverridePR {
+  business_id: string;
+  platform: string;
+  rating: number | null;
+  rating_scale: number;
+  review_count: number | null;
+}
+
 export function PlatformRatingsMatrix({ locations, onSelectLocation }: Props) {
+  const businessIds = locations.map((l) => l.id);
+
+  const { data: overrides = [] } = useQuery({
+    queryKey: ["platform-ratings-overrides", businessIds.join(",")],
+    queryFn: async () => {
+      if (businessIds.length === 0) return [] as OverridePR[];
+      const { data, error } = await supabase
+        .from("platform_ratings")
+        .select("business_id, platform, rating, rating_scale, review_count")
+        .in("business_id", businessIds);
+      if (error) throw error;
+      return (data || []) as OverridePR[];
+    },
+    enabled: businessIds.length > 0,
+  });
+
+  const overrideMap = new Map<string, OverridePR>();
+  overrides.forEach((o) => overrideMap.set(`${o.business_id}:${o.platform}`, o));
+
   // Only show platforms that at least one location has data for
   const activePlatforms = PLATFORMS.filter((p) =>
-    locations.some((l) => l.platformBreakdown[p.key]?.count > 0)
+    locations.some(
+      (l) =>
+        l.platformBreakdown[p.key]?.count > 0 ||
+        overrideMap.has(`${l.id}:${p.key}`)
+    )
   );
 
   const sorted = [...locations].sort((a, b) => b.averageRating - a.averageRating);
@@ -83,8 +116,15 @@ export function PlatformRatingsMatrix({ locations, onSelectLocation }: Props) {
                     </div>
                   </td>
                   {activePlatforms.map((p) => {
+                    const override = overrideMap.get(`${loc.id}:${p.key}`);
                     const data = loc.platformBreakdown[p.key];
-                    if (!data || data.count === 0) {
+
+                    // Prefer official platform rating if available
+                    const displayRating = override?.rating ?? data?.avgRating ?? null;
+                    const displayCount = override?.review_count ?? data?.count ?? 0;
+                    const scale = override?.rating_scale ?? 5;
+
+                    if (displayRating == null && displayCount === 0) {
                       return (
                         <td key={p.key} className="text-center px-4 py-4">
                           <span className="text-xs text-muted-foreground/50">—</span>
@@ -97,11 +137,12 @@ export function PlatformRatingsMatrix({ locations, onSelectLocation }: Props) {
                           <div className="flex items-center gap-1">
                             <Star className="h-3 w-3 text-amber-400 fill-amber-400" />
                             <span className="font-semibold text-foreground">
-                              {data.avgRating}
+                              {displayRating != null ? displayRating : "—"}
                             </span>
+                            <span className="text-[10px] text-muted-foreground">/{scale}</span>
                           </div>
                           <span className="text-[10px] text-muted-foreground">
-                            {data.count} yorum
+                            {displayCount} yorum
                           </span>
                         </div>
                       </td>
