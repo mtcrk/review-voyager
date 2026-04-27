@@ -2,21 +2,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Clock, Tag, Share2 } from "lucide-react";
 import { getBlogPost, blogPosts } from "@/lib/blogPosts";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
-import { useEffect } from "react";
 import AEOSection from "@/components/seo/AEOSection";
+import SEO from "@/components/seo/SEO";
 
 const BlogPost = () => {
   const navigate = useNavigate();
   const { slug } = useParams<{ slug: string }>();
   const post = slug ? getBlogPost(slug) : undefined;
-
-  useEffect(() => {
-    if (post) {
-      document.title = `${post.ogTitle} - VoyageRespond`;
-      const meta = document.querySelector('meta[name="description"]');
-      if (meta) meta.setAttribute("content", post.ogDescription);
-    }
-  }, [post]);
 
   if (!post) {
     return (

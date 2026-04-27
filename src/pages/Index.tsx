@@ -7,6 +7,7 @@ import demoGif from "@/assets/voyagerespond-demo.gif";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import SEO from "@/components/seo/SEO";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -16,6 +17,19 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
+      <SEO
+        title="AI Yorum Yönetim Yazılımı | Google, Booking, TripAdvisor | VoyageRespond"
+        description="Google, Booking.com, TripAdvisor, Hotels.com, HolidayCheck ve daha fazlasındaki yorumlarınızı tek panelden yönetin. AI ile otomatik yanıt üretin."
+        canonical="/"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: "VoyageRespond",
+          applicationCategory: "BusinessApplication",
+          description: "AI destekli online itibar ve yorum yönetim platformu",
+          url: "https://voyagerespond.com",
+        }}
+      />
       {/* Navbar — Clean, minimal */}
       <nav className="sticky top-0 z-50 border-b border-border/60 backdrop-blur-xl bg-background/80">
         <div className="container mx-auto px-4 sm:px-6">
