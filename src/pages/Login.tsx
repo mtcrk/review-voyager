@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
+import SEO from '@/components/seo/SEO';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -73,6 +74,12 @@ export default function Login() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">
+      <SEO
+        title="Giriş Yap | VoyageRespond"
+        description="VoyageRespond hesabınıza giriş yapın."
+        canonical="/login"
+        noindex
+      />
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">{t('auth.login.title')}</CardTitle>

@@ -132,6 +132,11 @@ export default function DemoPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="AI Yorum Yanıt Demo | Ücretsiz Dene | VoyageRespond"
+        description="VoyageRespond AI yorum yanıt aracını kayıt olmadan deneyin. Olumlu ve olumsuz yorumlar için saniyeler içinde profesyonel yanıtlar üretin."
+        canonical="/demo"
+      />
       {/* Navbar */}
       <nav className="sticky top-0 z-50 border-b border-border/60 backdrop-blur-xl bg-background/80">
         <div className="container mx-auto px-4 sm:px-6">
