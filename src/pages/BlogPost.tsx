@@ -101,6 +101,21 @@ const BlogPost = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title={`${post.ogTitle} | VoyageRespond Blog`}
+        description={post.ogDescription}
+        canonical={`/blog/${post.slug}`}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "BlogPosting",
+          headline: post.title,
+          description: post.description,
+          author: { "@type": "Organization", name: post.author },
+          datePublished: post.publishedAt,
+          keywords: post.keywords?.join(", "),
+          mainEntityOfPage: `https://voyagerespond.com/blog/${post.slug}`,
+        }}
+      />
       {/* Header */}
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
         <div className="container mx-auto px-4 sm:px-6">

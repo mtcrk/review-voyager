@@ -2,6 +2,7 @@
  import { Button } from "@/components/ui/button";
  import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import SEO from "@/components/seo/SEO";
  
  const Contact = () => {
    const navigate = useNavigate();
@@ -9,6 +10,11 @@ import { useTranslation } from "react-i18next";
  
    return (
      <div className="min-h-screen bg-background">
+       <SEO
+         title="İletişim | VoyageRespond"
+         description="VoyageRespond ile iletişime geçin. Demo talep edin, sorularınızı iletin veya destek alın."
+         canonical="/contact"
+       />
        {/* Header */}
        <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
          <div className="container mx-auto px-4 sm:px-6 py-4">

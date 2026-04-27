@@ -8,6 +8,7 @@ import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import SEO from "@/components/seo/SEO";
 
 // GA4 event helper
 const gtagEvent = (eventName: string, category: string, label: string) => {

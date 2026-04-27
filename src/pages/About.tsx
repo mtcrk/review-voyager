@@ -5,6 +5,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { useAuth } from "@/contexts/AuthContext";
 import { Building2, Target, Users, Sparkles, ArrowRight } from "lucide-react";
+import SEO from "@/components/seo/SEO";
 
 export default function About() {
   const navigate = useNavigate();
@@ -13,6 +14,11 @@ export default function About() {
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
+      <SEO
+        title="Hakkımızda | VoyageRespond"
+        description="VoyageRespond, otel ve restoranlar için AI destekli yorum yönetimi sunan B2B SaaS platformudur. Misyonumuzu ve ekibimizi tanıyın."
+        canonical="/about"
+      />
       {/* Navbar */}
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white" style={{ borderBottomColor: '#E2E8F0' }}>
         <div className="container mx-auto px-4 sm:px-6">
