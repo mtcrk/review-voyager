@@ -121,7 +121,9 @@ export function PlatformRatingsMatrix({ locations, onSelectLocation }: Props) {
 
                     // Prefer official platform rating if available
                     const displayRating = override?.rating ?? data?.avgRating ?? null;
-                    const displayCount = override?.review_count ?? data?.count ?? 0;
+                    const officialCount = override?.review_count ?? null;
+                    const fetchedCount = data?.count ?? 0;
+                    const displayCount = officialCount ?? fetchedCount;
                     const scale = override?.rating_scale ?? 5;
 
                     if (displayRating == null && displayCount === 0) {
@@ -131,6 +133,16 @@ export function PlatformRatingsMatrix({ locations, onSelectLocation }: Props) {
                         </td>
                       );
                     }
+
+                    // Coverage: how many of the official total we have in our DB
+                    const hasGap =
+                      officialCount != null && fetchedCount < officialCount;
+                    const coveragePct =
+                      officialCount && officialCount > 0
+                        ? Math.round((fetchedCount / officialCount) * 100)
+                        : null;
+                    const lowCoverage = coveragePct != null && coveragePct < 50;
+
                     return (
                       <td key={p.key} className="text-center px-4 py-4">
                         <div className="flex flex-col items-center gap-0.5">
@@ -141,9 +153,27 @@ export function PlatformRatingsMatrix({ locations, onSelectLocation }: Props) {
                             </span>
                             <span className="text-[10px] text-muted-foreground">/{scale}</span>
                           </div>
-                          <span className="text-[10px] text-muted-foreground">
-                            {displayCount} yorum
-                          </span>
+                          {hasGap ? (
+                            <span
+                              className="text-[10px] text-muted-foreground"
+                              title={`Booking'de toplam ${officialCount} yorum, biz ${fetchedCount} tanesini çektik (%${coveragePct})`}
+                            >
+                              {officialCount} yorum
+                              <span
+                                className={
+                                  lowCoverage
+                                    ? "ml-1 text-amber-600 font-medium"
+                                    : "ml-1 text-muted-foreground/70"
+                                }
+                              >
+                                · {fetchedCount} çekildi
+                              </span>
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-muted-foreground">
+                              {displayCount} yorum
+                            </span>
+                          )}
                         </div>
                       </td>
                     );
