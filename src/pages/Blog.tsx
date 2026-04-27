@@ -2,21 +2,18 @@ import { useNavigate } from "react-router-dom";
 import { ArrowRight, Clock, Tag } from "lucide-react";
 import { blogPosts } from "@/lib/blogPosts";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
-import { useEffect } from "react";
+import SEO from "@/components/seo/SEO";
 
 const Blog = () => {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    document.title = "Blog | Google Yorum Yönetimi ve AI Görünürlük Rehberleri - VoyageRespond";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) {
-      meta.setAttribute("content", "Google yorum yönetimi, AI görünürlük, müşteri analizi ve dijital itibar yönetimi hakkında rehberler ve ipuçları. VoyageRespond Blog.");
-    }
-  }, []);
-
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Blog | Google Yorum Yönetimi ve AI Görünürlük Rehberleri | VoyageRespond"
+        description="Google yorum yönetimi, AI görünürlük, müşteri analizi ve dijital itibar yönetimi hakkında rehberler ve ipuçları. VoyageRespond Blog."
+        canonical="/blog"
+      />
       {/* Header */}
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
         <div className="container mx-auto px-4 sm:px-6">

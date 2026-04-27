@@ -8,6 +8,7 @@ import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import SEO from "@/components/seo/SEO";
 
 // GA4 event helper
 const gtagEvent = (eventName: string, category: string, label: string) => {
@@ -131,6 +132,11 @@ export default function DemoPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="AI Yorum Yanıt Demo | Ücretsiz Dene | VoyageRespond"
+        description="VoyageRespond AI yorum yanıt aracını kayıt olmadan deneyin. Olumlu ve olumsuz yorumlar için saniyeler içinde profesyonel yanıtlar üretin."
+        canonical="/demo"
+      />
       {/* Navbar */}
       <nav className="sticky top-0 z-50 border-b border-border/60 backdrop-blur-xl bg-background/80">
         <div className="container mx-auto px-4 sm:px-6">

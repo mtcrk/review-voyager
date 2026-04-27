@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { isPersonalEmail } from '@/lib/emailValidation';
 import { Building2, AlertTriangle } from 'lucide-react';
+import SEO from '@/components/seo/SEO';
 
 
 export default function Register() {
@@ -134,6 +135,12 @@ export default function Register() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">
+      <SEO
+        title="Ücretsiz Hesap Oluştur | VoyageRespond"
+        description="VoyageRespond'a ücretsiz kayıt olun ve AI destekli yorum yönetimini hemen kullanmaya başlayın."
+        canonical="/register"
+        noindex
+      />
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">{t('auth.register.title')}</CardTitle>
