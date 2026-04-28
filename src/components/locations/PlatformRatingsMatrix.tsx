@@ -11,14 +11,14 @@ interface Props {
 
 // Note: clicking a row navigates to the location's platform detail page (handled by parent).
 
-const PLATFORMS: { key: string; label: string; dot: string }[] = [
-  { key: "google", label: "Google", dot: "bg-blue-500" },
-  { key: "booking", label: "Booking", dot: "bg-indigo-500" },
-  { key: "tripadvisor", label: "TripAdvisor", dot: "bg-emerald-500" },
-  { key: "hotelscom", label: "Hotels.com", dot: "bg-rose-500" },
-  { key: "expedia", label: "Expedia", dot: "bg-amber-500" },
-  { key: "tripcom", label: "Trip.com", dot: "bg-orange-500" },
-  { key: "trustpilot", label: "Trustpilot", dot: "bg-teal-500" },
+const PLATFORMS: { key: string; label: string; dot: string; scale: number }[] = [
+  { key: "google", label: "Google", dot: "bg-blue-500", scale: 5 },
+  { key: "booking", label: "Booking", dot: "bg-indigo-500", scale: 10 },
+  { key: "tripadvisor", label: "TripAdvisor", dot: "bg-emerald-500", scale: 5 },
+  { key: "hotelscom", label: "Hotels.com", dot: "bg-rose-500", scale: 10 },
+  { key: "expedia", label: "Expedia", dot: "bg-amber-500", scale: 10 },
+  { key: "tripcom", label: "Trip.com", dot: "bg-orange-500", scale: 10 },
+  { key: "trustpilot", label: "Trustpilot", dot: "bg-teal-500", scale: 5 },
 ];
 
 interface OverridePR {
@@ -119,12 +119,22 @@ export function PlatformRatingsMatrix({ locations, onSelectLocation }: Props) {
                     const override = overrideMap.get(`${loc.id}:${p.key}`);
                     const data = loc.platformBreakdown[p.key];
 
-                    // Prefer official platform rating if available
-                    const displayRating = override?.rating ?? data?.avgRating ?? null;
+                    // Each platform has a fixed native scale. We always display in that scale.
+                    const scale = p.scale;
+
+                    // Prefer official platform rating if available; fallback to fetched reviews avg.
+                    // Reviews are always stored on a 1-5 scale; convert to platform scale when needed.
+                    let displayRating: number | null = null;
+                    if (override?.rating != null) {
+                      displayRating = override.rating;
+                    } else if (data?.avgRating != null) {
+                      displayRating = scale === 10
+                        ? Math.round(data.avgRating * 2 * 10) / 10
+                        : data.avgRating;
+                    }
                     const officialCount = override?.review_count ?? null;
                     const fetchedCount = data?.count ?? 0;
                     const displayCount = officialCount ?? fetchedCount;
-                    const scale = override?.rating_scale ?? 5;
 
                     if (displayRating == null && displayCount === 0) {
                       return (
