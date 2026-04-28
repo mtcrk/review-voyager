@@ -29,6 +29,26 @@ interface OverridePR {
   review_count: number | null;
 }
 
+const normalizeRatingForScale = (rating: number | null | undefined, scale: number) => {
+  if (rating == null) return null;
+
+  let normalized = Number(rating);
+
+  if (scale === 10) {
+    if (normalized > 10 && normalized <= 20) {
+      normalized = normalized / 2;
+    } else if (normalized > 0 && normalized <= 5) {
+      normalized = normalized * 2;
+    }
+  }
+
+  if (scale === 5 && normalized > 5 && normalized <= 10) {
+    normalized = normalized / 2;
+  }
+
+  return Math.round(Math.min(normalized, scale) * 10) / 10;
+};
+
 export function PlatformRatingsMatrix({ locations, onSelectLocation }: Props) {
   const businessIds = locations.map((l) => l.id);
 
@@ -122,15 +142,13 @@ export function PlatformRatingsMatrix({ locations, onSelectLocation }: Props) {
                     // Each platform has a fixed native scale. We always display in that scale.
                     const scale = p.scale;
 
-                    // Prefer official platform rating if available; fallback to fetched reviews avg.
-                    // Reviews are always stored on a 1-5 scale; convert to platform scale when needed.
+                    // Prefer official platform rating if available; fallback to fetched review average.
+                    // Some scraped/imported OTA averages are already 10-point, so normalize safely.
                     let displayRating: number | null = null;
                     if (override?.rating != null) {
-                      displayRating = override.rating;
+                      displayRating = normalizeRatingForScale(override.rating, scale);
                     } else if (data?.avgRating != null) {
-                      displayRating = scale === 10
-                        ? Math.round(data.avgRating * 2 * 10) / 10
-                        : data.avgRating;
+                      displayRating = normalizeRatingForScale(data.avgRating, scale);
                     }
                     const officialCount = override?.review_count ?? null;
                     const fetchedCount = data?.count ?? 0;
