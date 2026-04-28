@@ -18,25 +18,48 @@ export default function PlatformRatings() {
     navigate(`/locations/platform-ratings/${id}`);
   };
 
-  const handleRefreshBooking = async () => {
+  const handleRefreshAll = async () => {
     if (locations.length === 0) return;
     setRefreshing(true);
+    const business_ids = locations.map((l) => l.id);
     try {
-      const { data, error } = await supabase.functions.invoke(
-        "fetch-booking-overall-rating",
-        { body: { business_ids: locations.map((l) => l.id) } }
-      );
-      if (error) throw error;
-      const okCount = Object.keys(data?.results || {}).length;
-      const errCount = Object.keys(data?.errors || {}).length;
+      const tid = toast.loading("Tüm platform puanları çekiliyor...");
+
+      const [bookingRes, otherRes] = await Promise.all([
+        supabase.functions.invoke("fetch-booking-overall-rating", {
+          body: { business_ids },
+        }),
+        supabase.functions.invoke("fetch-platform-overall-rating", {
+          body: {
+            business_ids,
+            platforms: ["tripadvisor", "hotelscom", "expedia", "tripcom"],
+          },
+        }),
+      ]);
+
+      toast.dismiss(tid);
+
+      let success = 0;
+      let missing = 0;
+
+      if (!bookingRes.error) {
+        success += Object.keys(bookingRes.data?.results || {}).length;
+        missing += Object.keys(bookingRes.data?.errors || {}).length;
+      }
+
+      if (!otherRes.error && otherRes.data?.results) {
+        for (const bizId of Object.keys(otherRes.data.results)) {
+          success += Object.keys(otherRes.data.results[bizId] || {}).length;
+          missing += Object.keys(otherRes.data.errors?.[bizId] || {}).length;
+        }
+      }
+
       toast.success(
-        `Booking puanları güncellendi: ${okCount} başarılı${
-          errCount ? `, ${errCount} eksik` : ""
-        }`
+        `Puanlar güncellendi: ${success} başarılı${missing ? `, ${missing} eksik/atlandı` : ""}`
       );
       queryClient.invalidateQueries({ queryKey: ["platform-ratings-overrides"] });
     } catch (e: any) {
-      toast.error(e?.message || "Booking puanları güncellenemedi");
+      toast.error(e?.message || "Puanlar güncellenemedi");
     } finally {
       setRefreshing(false);
     }
@@ -71,11 +94,11 @@ export default function PlatformRatings() {
         <Button
           variant="outline"
           size="sm"
-          onClick={handleRefreshBooking}
+          onClick={handleRefreshAll}
           disabled={refreshing || locations.length === 0}
         >
           <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
-          Booking puanlarını güncelle
+          Tüm platform puanlarını güncelle
         </Button>
       </div>
 
