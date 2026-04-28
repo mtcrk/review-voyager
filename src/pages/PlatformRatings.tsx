@@ -87,8 +87,8 @@ export default function PlatformRatings() {
             Platform Puanları
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Google 5 üzerinden, Booking ve diğer OTA'lar 10 üzerinden gösterilir — her platformun
-            kendi resmi skalası kullanılır.
+            Google 5 üzerinden; Booking, Hotels.com, Expedia ve Trip.com 10 üzerinden;
+            TripAdvisor 5 üzerinden gösterilir — her platformun kendi resmi skalası kullanılır.
           </p>
         </div>
         <Button

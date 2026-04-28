@@ -57,7 +57,7 @@ The rating is on a 10-point scale (e.g. "8.6"). The review count looks like "1,2
 Return JSON. Use null when unknown. Do not invent numbers.`,
   },
   tripcom: {
-    scale: 5,
+    scale: 10,
     buildUrl: (biz) => {
       const id = biz.tripcom_hotel_id;
       if (!id) return null;
@@ -65,8 +65,8 @@ Return JSON. Use null when unknown. Do not invent numbers.`,
       return `https://www.trip.com/hotels/detail/?hotelId=${id}`;
     },
     prompt: `Extract the official overall guest rating and total review count from this Trip.com hotel page.
-The rating is on a 5-point scale (e.g. "4.5"). The review count looks like "1,234 reviews".
-Return JSON. Use null when unknown. Do not invent numbers.`,
+IMPORTANT: Trip.com displays ratings on a 5-point scale on the page (e.g. "4.5") but we want the 10-point equivalent. If you see a value <= 5, multiply it by 2 to convert to the 10-point scale (e.g. 4.5 -> 9.0). If a 10-point value is shown directly, use it as-is. The review count looks like "1,234 reviews".
+Return JSON with rating on a 10-point scale. Use null when unknown. Do not invent numbers.`,
   },
 };
 
@@ -177,8 +177,18 @@ Deno.serve(async (req) => {
 
         try {
           const r = await scrape(url, cfg.prompt);
-          const rating = typeof r?.rating === "number" ? r.rating : null;
+          let rating = typeof r?.rating === "number" ? r.rating : null;
           const reviewCount = typeof r?.review_count === "number" ? r.review_count : null;
+
+          // Sanity normalization: if platform scale is 10 but extracted value is <= 5,
+          // Firecrawl likely picked up a 5-point representation — convert to 10.
+          if (rating != null && cfg.scale === 10 && rating > 0 && rating <= 5) {
+            rating = Math.round(rating * 2 * 10) / 10;
+          }
+          // Conversely, if platform scale is 5 but value > 5, it's likely a 10-point figure.
+          if (rating != null && cfg.scale === 5 && rating > 5 && rating <= 10) {
+            rating = Math.round((rating / 2) * 10) / 10;
+          }
 
           if (rating == null && reviewCount == null) {
             errors[biz.id][platform] = "no_data_extracted";
