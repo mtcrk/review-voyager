@@ -341,9 +341,6 @@ const Index = () => {
                     3 Ay Ücretsiz Başla
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
                   </Button>
-                  <p className="text-xs text-muted-foreground mt-3">
-                    Kredi kartı gerekmez
-                  </p>
                 </div>
               </div>
             </div>
