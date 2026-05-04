@@ -345,20 +345,6 @@ const Index = () => {
                     Kredi kartı gerekmez
                   </p>
                 </div>
-
-                {/* Counter */}
-                <div className="pt-4 border-t border-border">
-                  <div className="flex items-center justify-center gap-3 text-sm text-muted-foreground">
-                    <div className="flex -space-x-1.5">
-                      {[...Array(4)].map((_, i) => (
-                        <div key={i} className="w-6 h-6 rounded-full bg-gradient-to-br from-primary/30 to-primary/60 border-2 border-card" />
-                      ))}
-                    </div>
-                    <span>
-                      <strong className="text-foreground">23</strong> işletme katıldı · 77 kontenjan kaldı
-                    </span>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
