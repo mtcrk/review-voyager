@@ -320,8 +320,6 @@ const Index = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left max-w-md mx-auto pt-2">
                   {[
                     "3 ay tüm özellikler ücretsiz",
-                    "Sınırsız lokasyon",
-                    "Ömür boyu %50 indirim garantisi",
                     "Öncelikli destek",
                   ].map((perk, i) => (
                     <div key={i} className="flex items-center gap-2.5">
