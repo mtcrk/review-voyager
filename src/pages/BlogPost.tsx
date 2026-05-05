@@ -146,8 +146,8 @@ const BlogPost = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title={`${post.ogTitle} | VoyageRespond Blog`}
-        description={post.ogDescription}
+        title={post.metaTitle ?? `${post.ogTitle} | VoyageRespond Blog`}
+        description={post.metaDescription ?? post.ogDescription}
         canonical={`/blog/${post.slug}`}
         jsonLd={{
           "@context": "https://schema.org",
