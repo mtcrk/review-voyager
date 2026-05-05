@@ -10,6 +10,8 @@ export interface BlogPost {
   keywords: string[];
   ogTitle: string;
   ogDescription: string;
+  metaTitle?: string;
+  metaDescription?: string;
 }
 
 export const blogPosts: BlogPost[] = [
