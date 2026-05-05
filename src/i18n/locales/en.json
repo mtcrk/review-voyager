@@ -126,23 +126,62 @@
       }
     },
     "useCases": {
-      "instagram": { "title": "Only Instagram Sales", "description": "Perfect for creators and e-commerce brands who sell through DMs" },
-      "google": { "title": "Google Reviews + AI Visibility", "description": "Boost your local search ranking with AI-powered review insights and visibility tracking" },
-      "multi": { "title": "Full Visibility Stack", "description": "Combine social engagement with AI visibility for maximum discoverability" }
+      "instagram": {
+        "title": "Only Instagram Sales",
+        "description": "Perfect for creators and e-commerce brands who sell through DMs"
+      },
+      "google": {
+        "title": "Google Reviews + AI Visibility",
+        "description": "Boost your local search ranking with AI-powered review insights and visibility tracking"
+      },
+      "multi": {
+        "title": "Full Visibility Stack",
+        "description": "Combine social engagement with AI visibility for maximum discoverability"
+      }
     },
     "howItWorks": {
-      "step1": { "title": "Connect & Analyze", "description": "Link your Google Business Profile. Our AI instantly calculates your Visibility Score." },
-      "step2": { "title": "Get Smart Recommendations", "description": "AI tells you which reviews to answer, when to respond, and how to optimize for search." },
-      "step3": { "title": "Track Your Growth", "description": "Monitor visibility metrics, sentiment trends, and review performance in real-time." }
+      "step1": {
+        "title": "Connect & Analyze",
+        "description": "Link your Google Business Profile. Our AI instantly calculates your Visibility Score."
+      },
+      "step2": {
+        "title": "Get Smart Recommendations",
+        "description": "AI tells you which reviews to answer, when to respond, and how to optimize for search."
+      },
+      "step3": {
+        "title": "Track Your Growth",
+        "description": "Monitor visibility metrics, sentiment trends, and review performance in real-time."
+      }
     },
     "pricingPlans": {
-      "starter": { "name": "Starter", "description": "Platform access with 1 automation", "feature1": "Core platform access", "feature2": "1 automation (Instagram or Google)", "feature3": "500 messages/month", "feature4": "Basic analytics" },
-      "pro": { "name": "Pro", "description": "Up to 2 automations + analytics", "feature1": "Core platform access", "feature2": "Up to 2 automations", "feature3": "Unlimited messages", "feature4": "Advanced analytics", "feature5": "Priority support" },
-      "agency": { "name": "Agency", "description": "All automations + team access", "feature1": "Core platform access", "feature2": "All automations included", "feature3": "Team access (5 members)", "feature4": "Full analytics suite", "feature5": "Custom integrations" }
+      "starter": {
+        "name": "Starter",
+        "description": "Platform access with 1 automation",
+        "feature1": "Core platform access",
+        "feature2": "1 automation (Instagram or Google)",
+        "feature3": "500 messages/month",
+        "feature4": "Basic analytics"
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "Up to 2 automations + analytics",
+        "feature1": "Core platform access",
+        "feature2": "Up to 2 automations",
+        "feature3": "Unlimited messages",
+        "feature4": "Advanced analytics",
+        "feature5": "Priority support"
+      },
+      "agency": {
+        "name": "Agency",
+        "description": "All automations + team access",
+        "feature1": "Core platform access",
+        "feature2": "All automations included",
+        "feature3": "Team access (5 members)",
+        "feature4": "Full analytics suite",
+        "feature5": "Custom integrations"
+      }
     },
     "comingSoon": "Coming Soon",
-    "monthly": "Monthly",
-    "yearly": "Yearly",
     "yearlyDiscount": "2 months free",
     "perMonth": "/month",
     "choosePlan": "Choose Plan",
@@ -221,114 +260,114 @@
       "customerSatisfaction": "Customer Satisfaction",
       "reviews": "reviews",
       "highlights": "Highlights"
-     },
-     "visibilityDemo": {
-       "excellent": "Excellent",
-       "good": "Good",
-       "medium": "Medium",
-       "needsImprovement": "Needs Improvement",
-       "thisMonth": "this month",
-       "averageRating": "Average Rating",
-       "responseRate": "Response Rate",
-       "positiveReviews": "Positive Reviews",
-       "totalReviews": "Total Reviews",
-       "liveData": "Live Data"
-     },
-     "testimonials": {
-       "title": "What Our Customers Say",
-       "subtitle": "Trusted by 850+ businesses",
-       "testimonial1": {
-         "quote": "I now respond to Google reviews in 30 seconds instead of 5 minutes. The AI suggestions are really professional and the tone settings work perfectly.",
-         "name": "Ahmet Y.",
-         "role": "Business Owner"
-       },
-       "testimonial2": {
-         "quote": "Responding to TikTok comments instantly increased our sales by 40%. With Story Kit, our customers create content, we just share it.",
-         "name": "Zeynep K.",
-         "role": "Marketing Director"
-       },
-       "testimonial3": {
-         "quote": "We manage all reviews of our 3 hotels from a single panel. Thanks to the AI Visibility score, we've climbed to the top of Google.",
-         "name": "Mehmet D.",
-         "role": "General Manager"
-       },
-       "testimonial4": {
-         "quote": "I didn't know how to respond to negative reviews. The AI's empathetic tone suggestion won back the customer.",
-         "name": "Elif Ö.",
-         "role": "Founder"
-       }
-     },
-     "trustBadges": {
-       "gdpr": "GDPR Compliant",
-       "gdprDesc": "European data protection standards",
-       "ssl": "256-bit SSL",
-       "sslDesc": "Encrypted data transfer",
-       "euData": "EU Data Center",
-       "euDataDesc": "Data hosted in Europe",
-       "soc2": "SOC 2 Type II",
-       "soc2Desc": "Security audit certified",
-       "apiIntegrations": "Official API Integrations",
-       "countriesUsed": "Used in 180+ Countries"
-     },
-     "storyKitDemo": {
-       "howItWorks": "How It Works?",
-       "step1": "Set hashtag and colors for your business",
-       "step2": "Download QR code and place on your table/counter",
-       "step3": "Customers scan, create stories and share",
-       "step4": "Track your sharing statistics",
-       "phonePrompt": "Click \"Generate Story\" to create a sample Instagram Story",
-       "downloadStoryBtn": "Download Story",
-       "tableStand": "Table Stand / QR Code",
-       "tableStandDesc": "QR code design for your table or counter",
-       "scanToCreate": "Scan to create a story",
-       "sizeOptions": "Square",
-       "customizableSizes": "✓ Customizable sizes and colors",
-       "highResDownload": "✓ High resolution PNG download",
-       "printReady": "✓ Ready for instant printing",
-       "shareLink": "Share Link",
-       "shareLinkDesc": "Link to share via WhatsApp, SMS, or social media",
-       "whatsappTemplate": "Thank you for visiting us! 🙏 Would you like to share your experience on Instagram?",
-       "readyTemplates": "✓ Ready message templates",
-       "oneClickCopy": "✓ One-click copy",
-       "suitableFor": "✓ Suitable for WhatsApp, SMS, Email",
-       "websiteButton": "Website Button",
-       "websiteButtonDesc": "Single line of code to add to your website",
-       "createStory": "Create Story",
-       "copied": "Copied!",
-       "copyEmbedCode": "Copy Embed Code",
-       "floatingPopup": "Floating Popup",
-       "floatingPopupDesc": "Fixed popup button in the bottom right corner",
-       "sitePreview": "Site preview",
-       "widgetTypes": "✓ 3 different widget types",
-       "colorCustom": "✓ Color customization",
-       "singleLineJs": "✓ Single line JavaScript",
-        "activateNow": "Activate Story Kit for your business now",
-        "startFree": "Start Free"
+    },
+    "visibilityDemo": {
+      "excellent": "Excellent",
+      "good": "Good",
+      "medium": "Medium",
+      "needsImprovement": "Needs Improvement",
+      "thisMonth": "this month",
+      "averageRating": "Average Rating",
+      "responseRate": "Response Rate",
+      "positiveReviews": "Positive Reviews",
+      "totalReviews": "Total Reviews",
+      "liveData": "Live Data"
+    },
+    "testimonials": {
+      "title": "What Our Customers Say",
+      "subtitle": "Trusted by 850+ businesses",
+      "testimonial1": {
+        "quote": "I now respond to Google reviews in 30 seconds instead of 5 minutes. The AI suggestions are really professional and the tone settings work perfectly.",
+        "name": "Ahmet Y.",
+        "role": "Business Owner"
       },
-      "dashboardDemo": {
-        "badge": "Dashboard Preview",
-        "title": "Powerful Dashboard Tools",
-        "subtitle": "AI-powered insights, priority management, and competitive analysis - all in one place."
+      "testimonial2": {
+        "quote": "Responding to TikTok comments instantly increased our sales by 40%. With Story Kit, our customers create content, we just share it.",
+        "name": "Zeynep K.",
+        "role": "Marketing Director"
       },
-      "priorityDemo": {
-        "title": "Priority Actions",
-        "subtitle": "Reviews that need to be answered today",
-        "critical": "Critical",
-        "urgent": "Urgent",
-        "normal": "Normal",
-        "reply": "Reply",
-        "cta": "Manage All Reviews"
+      "testimonial3": {
+        "quote": "We manage all reviews of our 3 hotels from a single panel. Thanks to the AI Visibility score, we've climbed to the top of Google.",
+        "name": "Mehmet D.",
+        "role": "General Manager"
       },
-      "competitorDemo": {
-        "title": "Competitor Comparison",
-        "subtitle": "Compare your AI visibility with competitors",
-        "placeholder": "Competitor business name...",
-        "metric": "Metric",
-        "you": "You",
-        "insights": "AI Insights:",
-        "hint": "Enter competitor name to compare AI visibility",
-        "cta": "Compare with Real Data"
+      "testimonial4": {
+        "quote": "I didn't know how to respond to negative reviews. The AI's empathetic tone suggestion won back the customer.",
+        "name": "Elif Ö.",
+        "role": "Founder"
       }
+    },
+    "trustBadges": {
+      "gdpr": "GDPR Compliant",
+      "gdprDesc": "European data protection standards",
+      "ssl": "256-bit SSL",
+      "sslDesc": "Encrypted data transfer",
+      "euData": "EU Data Center",
+      "euDataDesc": "Data hosted in Europe",
+      "soc2": "SOC 2 Type II",
+      "soc2Desc": "Security audit certified",
+      "apiIntegrations": "Official API Integrations",
+      "countriesUsed": "Used in 180+ Countries"
+    },
+    "storyKitDemo": {
+      "howItWorks": "How It Works?",
+      "step1": "Set hashtag and colors for your business",
+      "step2": "Download QR code and place on your table/counter",
+      "step3": "Customers scan, create stories and share",
+      "step4": "Track your sharing statistics",
+      "phonePrompt": "Click \"Generate Story\" to create a sample Instagram Story",
+      "downloadStoryBtn": "Download Story",
+      "tableStand": "Table Stand / QR Code",
+      "tableStandDesc": "QR code design for your table or counter",
+      "scanToCreate": "Scan to create a story",
+      "sizeOptions": "Square",
+      "customizableSizes": "✓ Customizable sizes and colors",
+      "highResDownload": "✓ High resolution PNG download",
+      "printReady": "✓ Ready for instant printing",
+      "shareLink": "Share Link",
+      "shareLinkDesc": "Link to share via WhatsApp, SMS, or social media",
+      "whatsappTemplate": "Thank you for visiting us! 🙏 Would you like to share your experience on Instagram?",
+      "readyTemplates": "✓ Ready message templates",
+      "oneClickCopy": "✓ One-click copy",
+      "suitableFor": "✓ Suitable for WhatsApp, SMS, Email",
+      "websiteButton": "Website Button",
+      "websiteButtonDesc": "Single line of code to add to your website",
+      "createStory": "Create Story",
+      "copied": "Copied!",
+      "copyEmbedCode": "Copy Embed Code",
+      "floatingPopup": "Floating Popup",
+      "floatingPopupDesc": "Fixed popup button in the bottom right corner",
+      "sitePreview": "Site preview",
+      "widgetTypes": "✓ 3 different widget types",
+      "colorCustom": "✓ Color customization",
+      "singleLineJs": "✓ Single line JavaScript",
+      "activateNow": "Activate Story Kit for your business now",
+      "startFree": "Start Free"
+    },
+    "dashboardDemo": {
+      "badge": "Dashboard Preview",
+      "title": "Powerful Dashboard Tools",
+      "subtitle": "AI-powered insights, priority management, and competitive analysis - all in one place."
+    },
+    "priorityDemo": {
+      "title": "Priority Actions",
+      "subtitle": "Reviews that need to be answered today",
+      "critical": "Critical",
+      "urgent": "Urgent",
+      "normal": "Normal",
+      "reply": "Reply",
+      "cta": "Manage All Reviews"
+    },
+    "competitorDemo": {
+      "title": "Competitor Comparison",
+      "subtitle": "Compare your AI visibility with competitors",
+      "placeholder": "Competitor business name...",
+      "metric": "Metric",
+      "you": "You",
+      "insights": "AI Insights:",
+      "hint": "Enter competitor name to compare AI visibility",
+      "cta": "Compare with Real Data"
+    }
   },
   "hero": {
     "title": "Transform Your Google Reviews Into Growth",
@@ -338,9 +377,18 @@
   "features": {
     "title": "Everything you need to manage reviews",
     "subtitle": "Powerful features designed to help you respond to every review efficiently",
-    "smartManagement": { "title": "Smart Review Management", "description": "Manage all your Google Business reviews in one clean, organized dashboard" },
-    "aiPowered": { "title": "AI-Powered Responses", "description": "Generate professional responses instantly with customizable tone and language" },
-    "deepAnalytics": { "title": "Deep Analytics", "description": "Track sentiment trends, response rates, and key insights from your reviews" }
+    "smartManagement": {
+      "title": "Smart Review Management",
+      "description": "Manage all your Google Business reviews in one clean, organized dashboard"
+    },
+    "aiPowered": {
+      "title": "AI-Powered Responses",
+      "description": "Generate professional responses instantly with customizable tone and language"
+    },
+    "deepAnalytics": {
+      "title": "Deep Analytics",
+      "description": "Track sentiment trends, response rates, and key insights from your reviews"
+    }
   },
   "pricing": {
     "title": "Simple, transparent pricing",
@@ -350,12 +398,53 @@
     "yearlyDiscount": "(Save 20%)",
     "perMonth": "/month",
     "popular": "Most Popular",
-    "starter": { "name": "Starter", "description": "Perfect for single-location businesses", "features": { "locations": "1 location", "reviews": "200 reviews/month", "dashboard": "Dashboard access", "aiGeneration": "AI response generation", "manual": "Manual approve and copy" } },
-    "pro": { "name": "Pro", "description": "For growing businesses", "features": { "locations": "3 locations", "reviews": "Unlimited reviews", "autoReply": "Auto Reply", "googleApi": "Google API reply sending", "support": "Priority support" } },
-    "agency": { "name": "Agency", "description": "Scale with your agency", "features": { "locations": "Unlimited locations", "team": "Team access", "analytics": "Advanced analytics", "whitelabel": "White label option", "customSupport": "Custom support" } }
+    "starter": {
+      "name": "Starter",
+      "description": "Perfect for single-location businesses",
+      "features": {
+        "locations": "1 location",
+        "reviews": "200 reviews/month",
+        "dashboard": "Dashboard access",
+        "aiGeneration": "AI response generation",
+        "manual": "Manual approve and copy"
+      }
+    },
+    "pro": {
+      "name": "Pro",
+      "description": "For growing businesses",
+      "features": {
+        "locations": "3 locations",
+        "reviews": "Unlimited reviews",
+        "autoReply": "Auto Reply",
+        "googleApi": "Google API reply sending",
+        "support": "Priority support"
+      }
+    },
+    "agency": {
+      "name": "Agency",
+      "description": "Scale with your agency",
+      "features": {
+        "locations": "Unlimited locations",
+        "team": "Team access",
+        "analytics": "Advanced analytics",
+        "whitelabel": "White label option",
+        "customSupport": "Custom support"
+      }
+    }
   },
-  "cta": { "title": "Ready to elevate your customer relationships?", "subtitle": "Join businesses that save time and build better customer relationships with AI-powered review responses.", "button": "Get Started Now" },
-  "footer": { "copyright": "© 2025 VoyageRespond", "privacy": "Privacy Policy", "terms": "Terms of Service", "contact": "Contact" },
+  "cta": {
+    "title": "Ready to elevate your customer relationships?",
+    "subtitle": "Join businesses that save time and build better customer relationships with AI-powered review responses.",
+    "button": "Get Started Now"
+  },
+  "footer": {
+    "quickLinks": "Quick Links",
+    "description": "AI-powered review management & visibility optimization platform.",
+    "address": "Address",
+    "copyright": "© 2025 VoyageRespond",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service"
+  },
   "contact": {
     "backToHome": "Home",
     "title": "Contact Us",
@@ -368,48 +457,47 @@
     "locationValue": "Turkey"
   },
   "auth": {
-    "login": { "title": "Login", "subtitle": "Welcome back! Please sign in to continue.", "email": "Email", "password": "Password", "forgotPassword": "Forgot password?", "submit": "Login", "noAccount": "Don't have an account?", "register": "Register", "error": "Invalid email or password", "emailNotVerified": "Your email address has not been verified yet. Please click the verification link sent to your inbox." },
-    "register": { "title": "Create Account", "subtitle": "Get started with VoyageRespond today.", "fullName": "Full Name", "email": "Email", "password": "Password", "submit": "Create Account", "hasAccount": "Already have an account?", "login": "Login", "success": "Account created successfully! Please check your email to verify your account.", "error": "An error occurred during registration", "googleSignIn": "Sign up with Google", "orEmail": "or with email" },
-    "forgotPassword": { "title": "Reset Password", "subtitle": "Enter your email address and we'll send you a reset link.", "email": "Email", "submit": "Send Reset Link", "backToLogin": "Back to Login", "success": "Password reset link sent! Please check your email.", "error": "An error occurred. Please try again." },
-    "authCallback": { "title": "Email Verification", "verifying": "Verifying your account...", "error": "An error occurred during verification.", "success": "Account verified successfully! Redirecting...", "noSession": "Session not found. Redirecting to login..." }
-  },
-  "dashboard": { "welcome": "Welcome", "metrics": { "avgRating": "Average Rating", "totalReviews": "Total Reviews", "thisWeek": "Reviews This Week", "pending": "Pending Replies" }, "weeklyActivity": "Weekly Review Activity", "recentReviews": "Recent Reviews", "noReviews": "No reviews yet", "noReviewsDay": "No reviews on this day" },
-  "reviews": { "title": "Reviews", "filters": { "all": "All", "pending": "Pending", "replied": "Replied" }, "sentiment": { "positive": "Positive", "neutral": "Neutral", "negative": "Negative" }, "copyReply": "Copy Reply", "copiedSuccess": "Reply copied to clipboard!" },
-  "settings": { "title": "Settings", "profile": "Profile", "business": "Business Settings", "account": "Account" },
-  "privacy": {
-    "title": "Privacy Policy",
-    "lastUpdated": "Last updated: December 2025",
-    "backToHome": "Back to Home",
-    "sections": {
-      "introduction": { "title": "Introduction", "content": "Welcome to VoyageRespond. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our service. We are committed to protecting your privacy and ensuring the security of your personal data." },
-      "informationWeCollect": { "title": "Information We Collect", "content": "We collect information you provide directly to us, including: your name and email address when you create an account; your business information such as business name and Google Place ID; Google Business Profile data when you connect your account (including reviews, ratings, and reviewer information); usage data such as how you interact with our service; and technical data including IP address, browser type, and device information." },
-      "howWeUseInformation": { "title": "How We Use Your Information", "content": "We use the information we collect to: provide, maintain, and improve our services; generate AI-powered responses to your business reviews; analyze review sentiment and provide insights; communicate with you about your account and our services; send you technical notices, updates, and support messages; detect, prevent, and address technical issues and security threats; and comply with legal obligations." },
-      "googleBusinessData": { "title": "Google Business Profile Data Use", "content": "When you connect your Google Business Profile to VoyageRespond, we access your business reviews and related information through the Google Business Profile API. We use this data solely to: display your reviews within our dashboard; generate AI-powered response suggestions; analyze review sentiment and trends; and send replies to reviews on your behalf when you authorize it. We do not use your Google Business Profile data for advertising purposes or share it with third parties for their marketing purposes." },
-      "dataSharing": { "title": "Data Sharing", "content": "We do not sell your personal information. We may share your information with: service providers who assist us in operating our platform (such as hosting providers and AI services); professional advisors such as lawyers and accountants when necessary; law enforcement or government authorities when required by law; and in connection with a merger, acquisition, or sale of assets. All third-party service providers are bound by confidentiality obligations." },
-      "dataRetention": { "title": "Data Retention & Deletion", "content": "We retain your personal information for as long as your account is active or as needed to provide you services. You may request deletion of your account and associated data at any time by contacting us at support@voyagerespond.com. Upon deletion request, we will remove your personal data within 30 days, except where retention is required by law or for legitimate business purposes such as fraud prevention." },
-      "security": { "title": "Security Practices", "content": "We implement appropriate technical and organizational measures to protect your personal information, including: encryption of data in transit and at rest; secure authentication mechanisms; regular security assessments and updates; access controls limiting who can access your data; and monitoring for suspicious activity. However, no method of transmission over the Internet is 100% secure, and we cannot guarantee absolute security." },
-      "userRights": { "title": "Your Rights", "content": "Depending on your location, you may have the following rights regarding your personal information: the right to access and receive a copy of your data; the right to correct inaccurate information; the right to delete your data; the right to restrict or object to processing; the right to data portability; and the right to withdraw consent. To exercise these rights, please contact us at support@voyagerespond.com." },
-      "internationalTransfers": { "title": "International Transfers", "content": "Your information may be transferred to and processed in countries other than your country of residence. These countries may have data protection laws that are different from your country. We ensure appropriate safeguards are in place to protect your information when it is transferred internationally, including standard contractual clauses approved by relevant authorities." },
-      "changes": { "title": "Changes to This Policy", "content": "We may update this Privacy Policy from time to time. We will notify you of any material changes by posting the new Privacy Policy on this page and updating the 'Last updated' date. Your continued use of the service after any modifications constitutes your acceptance of the updated Privacy Policy." },
-      "contact": { "title": "Contact Information", "content": "If you have any questions about this Privacy Policy or our data practices, please contact us at: support@voyagerespond.com. We will respond to your inquiry within a reasonable timeframe." }
-    }
-  },
-  "terms": {
-    "title": "Terms of Service",
-    "lastUpdated": "Last updated: December 2025",
-    "backToHome": "Back to Home",
-    "sections": {
-      "introduction": { "title": "Introduction", "content": "Welcome to VoyageRespond. These Terms of Service govern your access to and use of our website, products, and services. By accessing or using VoyageRespond, you agree to be bound by these Terms. If you do not agree to these Terms, please do not use our services." },
-      "definitions": { "title": "Definitions", "content": "In these Terms: 'Service' refers to the VoyageRespond platform and all related services; 'User', 'You', and 'Your' refer to the individual or entity using the Service; 'We', 'Us', and 'Our' refer to VoyageRespond; 'Content' means any text, data, information, or other materials uploaded, submitted, or transmitted through the Service; 'Google Business Profile' refers to Google's business listing service that may be connected to our Service." },
-      "serviceDescription": { "title": "Service Description", "content": "VoyageRespond is an AI-powered review management platform that helps businesses manage and respond to their Google Business Profile reviews. Our services include: aggregating and displaying your business reviews; generating AI-powered response suggestions; providing sentiment analysis and insights; enabling you to respond to reviews directly through our platform; and offering analytics and reporting features." },
-      "accountRules": { "title": "Account Rules", "content": "To use our Service, you must create an account. You agree to: provide accurate and complete information during registration; maintain the security of your account credentials; promptly update your account information if it changes; notify us immediately of any unauthorized access to your account; and accept responsibility for all activities that occur under your account. We reserve the right to suspend or terminate accounts that violate these Terms." },
-      "acceptableUse": { "title": "Acceptable Use", "content": "You agree to use the Service only for lawful purposes and in accordance with these Terms. You agree not to: use the Service in any way that violates applicable laws or regulations; impersonate any person or entity or misrepresent your affiliation; transmit any malicious code, viruses, or harmful content; attempt to gain unauthorized access to our systems; use the Service to send spam or unsolicited communications; interfere with or disrupt the Service or servers; use the Service to generate false, misleading, or defamatory content; or resell or redistribute the Service without our permission." },
-      "googleApi": { "title": "Google Account & API Access", "content": "Our Service integrates with Google Business Profile through Google's APIs. By connecting your Google account to VoyageRespond, you: authorize us to access your Google Business Profile data as permitted by Google; agree to comply with Google's Terms of Service and API usage policies; acknowledge that we are not affiliated with Google and that Google is not responsible for our Service; and understand that Google may change or discontinue API access at any time. You can revoke our access to your Google account at any time through your Google account settings." },
-      "payments": { "title": "Payments & Subscriptions", "content": "Some features of our Service require a paid subscription. By subscribing, you agree that: subscription fees are billed in advance on a monthly or annual basis; all fees are non-refundable except as required by law; we may change our prices upon reasonable notice; you are responsible for all taxes associated with your subscription; failure to pay may result in suspension of your account; and you can cancel your subscription at any time, with cancellation taking effect at the end of the current billing period." },
-      "termination": { "title": "Termination", "content": "We may suspend or terminate your access to the Service at any time, with or without cause, and with or without notice. Reasons for termination may include: violation of these Terms; non-payment of fees; extended periods of inactivity; or at your request. Upon termination, your right to use the Service will immediately cease. Provisions of these Terms that by their nature should survive termination will remain in effect." },
-      "limitationOfLiability": { "title": "Limitation of Liability", "content": "To the maximum extent permitted by applicable law: the Service is provided 'as is' and 'as available' without warranties of any kind; we disclaim all warranties, express or implied, including merchantability, fitness for a particular purpose, and non-infringement; we are not liable for any indirect, incidental, special, consequential, or punitive damages; our total liability shall not exceed the amount you paid us in the twelve months preceding the claim; and we are not responsible for any third-party services or content accessed through our Service." },
-      "governingLaw": { "title": "Governing Law", "content": "These Terms shall be governed by and construed in accordance with the laws of the Republic of Turkey, without regard to its conflict of law provisions. Any disputes arising from or relating to these Terms or the Service shall be subject to the exclusive jurisdiction of the courts located in Istanbul, Turkey. You agree to submit to the personal jurisdiction of such courts." },
-      "contact": { "title": "Contact Information", "content": "If you have any questions about these Terms of Service, please contact us at: support@voyagerespond.com. We will respond to your inquiry within a reasonable timeframe." }
+    "login": {
+      "title": "Login",
+      "subtitle": "Welcome back! Please sign in to continue.",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot password?",
+      "submit": "Login",
+      "noAccount": "Don't have an account?",
+      "register": "Register",
+      "error": "Invalid email or password",
+      "emailNotVerified": "Your email address has not been verified yet. Please click the verification link sent to your inbox."
+    },
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Get started with VoyageRespond today.",
+      "fullName": "Full Name",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Create Account",
+      "hasAccount": "Already have an account?",
+      "login": "Login",
+      "success": "Account created successfully! Please check your email to verify your account.",
+      "error": "An error occurred during registration",
+      "googleSignIn": "Sign up with Google",
+      "orEmail": "or with email"
+    },
+    "forgotPassword": {
+      "title": "Reset Password",
+      "subtitle": "Enter your email address and we'll send you a reset link.",
+      "email": "Email",
+      "submit": "Send Reset Link",
+      "backToLogin": "Back to Login",
+      "success": "Password reset link sent! Please check your email.",
+      "error": "An error occurred. Please try again."
+    },
+    "authCallback": {
+      "title": "Email Verification",
+      "verifying": "Verifying your account...",
+      "error": "An error occurred during verification.",
+      "success": "Account verified successfully! Redirecting...",
+      "noSession": "Session not found. Redirecting to login..."
     }
   },
   "dashboard": {
@@ -449,15 +537,150 @@
       }
     }
   },
+  "reviews": {
+    "title": "Reviews",
+    "filters": {
+      "all": "All",
+      "pending": "Pending",
+      "replied": "Replied"
+    },
+    "sentiment": {
+      "positive": "Positive",
+      "neutral": "Neutral",
+      "negative": "Negative"
+    },
+    "copyReply": "Copy Reply",
+    "copiedSuccess": "Reply copied to clipboard!"
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "business": "Business Settings",
+    "account": "Account"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: December 2025",
+    "backToHome": "Back to Home",
+    "sections": {
+      "introduction": {
+        "title": "Introduction",
+        "content": "Welcome to VoyageRespond. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our service. We are committed to protecting your privacy and ensuring the security of your personal data."
+      },
+      "informationWeCollect": {
+        "title": "Information We Collect",
+        "content": "We collect information you provide directly to us, including: your name and email address when you create an account; your business information such as business name and Google Place ID; Google Business Profile data when you connect your account (including reviews, ratings, and reviewer information); usage data such as how you interact with our service; and technical data including IP address, browser type, and device information."
+      },
+      "howWeUseInformation": {
+        "title": "How We Use Your Information",
+        "content": "We use the information we collect to: provide, maintain, and improve our services; generate AI-powered responses to your business reviews; analyze review sentiment and provide insights; communicate with you about your account and our services; send you technical notices, updates, and support messages; detect, prevent, and address technical issues and security threats; and comply with legal obligations."
+      },
+      "googleBusinessData": {
+        "title": "Google Business Profile Data Use",
+        "content": "When you connect your Google Business Profile to VoyageRespond, we access your business reviews and related information through the Google Business Profile API. We use this data solely to: display your reviews within our dashboard; generate AI-powered response suggestions; analyze review sentiment and trends; and send replies to reviews on your behalf when you authorize it. We do not use your Google Business Profile data for advertising purposes or share it with third parties for their marketing purposes."
+      },
+      "dataSharing": {
+        "title": "Data Sharing",
+        "content": "We do not sell your personal information. We may share your information with: service providers who assist us in operating our platform (such as hosting providers and AI services); professional advisors such as lawyers and accountants when necessary; law enforcement or government authorities when required by law; and in connection with a merger, acquisition, or sale of assets. All third-party service providers are bound by confidentiality obligations."
+      },
+      "dataRetention": {
+        "title": "Data Retention & Deletion",
+        "content": "We retain your personal information for as long as your account is active or as needed to provide you services. You may request deletion of your account and associated data at any time by contacting us at support@voyagerespond.com. Upon deletion request, we will remove your personal data within 30 days, except where retention is required by law or for legitimate business purposes such as fraud prevention."
+      },
+      "security": {
+        "title": "Security Practices",
+        "content": "We implement appropriate technical and organizational measures to protect your personal information, including: encryption of data in transit and at rest; secure authentication mechanisms; regular security assessments and updates; access controls limiting who can access your data; and monitoring for suspicious activity. However, no method of transmission over the Internet is 100% secure, and we cannot guarantee absolute security."
+      },
+      "userRights": {
+        "title": "Your Rights",
+        "content": "Depending on your location, you may have the following rights regarding your personal information: the right to access and receive a copy of your data; the right to correct inaccurate information; the right to delete your data; the right to restrict or object to processing; the right to data portability; and the right to withdraw consent. To exercise these rights, please contact us at support@voyagerespond.com."
+      },
+      "internationalTransfers": {
+        "title": "International Transfers",
+        "content": "Your information may be transferred to and processed in countries other than your country of residence. These countries may have data protection laws that are different from your country. We ensure appropriate safeguards are in place to protect your information when it is transferred internationally, including standard contractual clauses approved by relevant authorities."
+      },
+      "changes": {
+        "title": "Changes to This Policy",
+        "content": "We may update this Privacy Policy from time to time. We will notify you of any material changes by posting the new Privacy Policy on this page and updating the 'Last updated' date. Your continued use of the service after any modifications constitutes your acceptance of the updated Privacy Policy."
+      },
+      "contact": {
+        "title": "Contact Information",
+        "content": "If you have any questions about this Privacy Policy or our data practices, please contact us at: support@voyagerespond.com. We will respond to your inquiry within a reasonable timeframe."
+      }
+    }
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "lastUpdated": "Last updated: December 2025",
+    "backToHome": "Back to Home",
+    "sections": {
+      "introduction": {
+        "title": "Introduction",
+        "content": "Welcome to VoyageRespond. These Terms of Service govern your access to and use of our website, products, and services. By accessing or using VoyageRespond, you agree to be bound by these Terms. If you do not agree to these Terms, please do not use our services."
+      },
+      "definitions": {
+        "title": "Definitions",
+        "content": "In these Terms: 'Service' refers to the VoyageRespond platform and all related services; 'User', 'You', and 'Your' refer to the individual or entity using the Service; 'We', 'Us', and 'Our' refer to VoyageRespond; 'Content' means any text, data, information, or other materials uploaded, submitted, or transmitted through the Service; 'Google Business Profile' refers to Google's business listing service that may be connected to our Service."
+      },
+      "serviceDescription": {
+        "title": "Service Description",
+        "content": "VoyageRespond is an AI-powered review management platform that helps businesses manage and respond to their Google Business Profile reviews. Our services include: aggregating and displaying your business reviews; generating AI-powered response suggestions; providing sentiment analysis and insights; enabling you to respond to reviews directly through our platform; and offering analytics and reporting features."
+      },
+      "accountRules": {
+        "title": "Account Rules",
+        "content": "To use our Service, you must create an account. You agree to: provide accurate and complete information during registration; maintain the security of your account credentials; promptly update your account information if it changes; notify us immediately of any unauthorized access to your account; and accept responsibility for all activities that occur under your account. We reserve the right to suspend or terminate accounts that violate these Terms."
+      },
+      "acceptableUse": {
+        "title": "Acceptable Use",
+        "content": "You agree to use the Service only for lawful purposes and in accordance with these Terms. You agree not to: use the Service in any way that violates applicable laws or regulations; impersonate any person or entity or misrepresent your affiliation; transmit any malicious code, viruses, or harmful content; attempt to gain unauthorized access to our systems; use the Service to send spam or unsolicited communications; interfere with or disrupt the Service or servers; use the Service to generate false, misleading, or defamatory content; or resell or redistribute the Service without our permission."
+      },
+      "googleApi": {
+        "title": "Google Account & API Access",
+        "content": "Our Service integrates with Google Business Profile through Google's APIs. By connecting your Google account to VoyageRespond, you: authorize us to access your Google Business Profile data as permitted by Google; agree to comply with Google's Terms of Service and API usage policies; acknowledge that we are not affiliated with Google and that Google is not responsible for our Service; and understand that Google may change or discontinue API access at any time. You can revoke our access to your Google account at any time through your Google account settings."
+      },
+      "payments": {
+        "title": "Payments & Subscriptions",
+        "content": "Some features of our Service require a paid subscription. By subscribing, you agree that: subscription fees are billed in advance on a monthly or annual basis; all fees are non-refundable except as required by law; we may change our prices upon reasonable notice; you are responsible for all taxes associated with your subscription; failure to pay may result in suspension of your account; and you can cancel your subscription at any time, with cancellation taking effect at the end of the current billing period."
+      },
+      "termination": {
+        "title": "Termination",
+        "content": "We may suspend or terminate your access to the Service at any time, with or without cause, and with or without notice. Reasons for termination may include: violation of these Terms; non-payment of fees; extended periods of inactivity; or at your request. Upon termination, your right to use the Service will immediately cease. Provisions of these Terms that by their nature should survive termination will remain in effect."
+      },
+      "limitationOfLiability": {
+        "title": "Limitation of Liability",
+        "content": "To the maximum extent permitted by applicable law: the Service is provided 'as is' and 'as available' without warranties of any kind; we disclaim all warranties, express or implied, including merchantability, fitness for a particular purpose, and non-infringement; we are not liable for any indirect, incidental, special, consequential, or punitive damages; our total liability shall not exceed the amount you paid us in the twelve months preceding the claim; and we are not responsible for any third-party services or content accessed through our Service."
+      },
+      "governingLaw": {
+        "title": "Governing Law",
+        "content": "These Terms shall be governed by and construed in accordance with the laws of the Republic of Turkey, without regard to its conflict of law provisions. Any disputes arising from or relating to these Terms or the Service shall be subject to the exclusive jurisdiction of the courts located in Istanbul, Turkey. You agree to submit to the personal jurisdiction of such courts."
+      },
+      "contact": {
+        "title": "Contact Information",
+        "content": "If you have any questions about these Terms of Service, please contact us at: support@voyagerespond.com. We will respond to your inquiry within a reasonable timeframe."
+      }
+    }
+  },
   "demo": {
     "badge": "Interactive Demos",
     "title": "Explore the Platform",
     "subtitle": "Try all features for free. Start working with your real data when you're ready.",
     "sections": {
-      "visibility": { "title": "How Does Your Business Look on AI?", "subtitle": "Discover your AI Visibility Score instantly" },
-      "aiReply": { "title": "Try AI Reply Suggestions", "subtitle": "See how AI generates professional replies for every review" },
-      "dashboardTools": { "title": "Dashboard Tools", "subtitle": "Priority actions, chat, and competitor analysis" },
-      "storyKit": { "title": "Free Marketing with Story Kit", "subtitle": "Turn your customers into your brand storytellers" }
+      "visibility": {
+        "title": "How Does Your Business Look on AI?",
+        "subtitle": "Discover your AI Visibility Score instantly"
+      },
+      "aiReply": {
+        "title": "Try AI Reply Suggestions",
+        "subtitle": "See how AI generates professional replies for every review"
+      },
+      "dashboardTools": {
+        "title": "Dashboard Tools",
+        "subtitle": "Priority actions, chat, and competitor analysis"
+      },
+      "storyKit": {
+        "title": "Free Marketing with Story Kit",
+        "subtitle": "Turn your customers into your brand storytellers"
+      }
     }
   },
   "about": {
@@ -495,14 +718,6 @@
       "title": "Start Growing Your Business",
       "subtitle": "Get your AI Visibility Score for free and boost your digital visibility."
     }
-  },
-  "footer": {
-    "quickLinks": "Quick Links",
-    "description": "AI-powered review management & visibility optimization platform.",
-    "address": "Address",
-    "copyright": "© 2025 VoyageRespond",
-    "privacy": "Privacy Policy",
-    "terms": "Terms of Service"
   },
   "onboarding": {
     "step1Title": "What is your main goal?",
@@ -620,5 +835,67 @@
     "login": "Login",
     "getStarted": "Get Started",
     "dashboard": "Dashboard"
+  },
+  "indexPage": {
+    "nav": {
+      "features": "Features",
+      "pricing": "Pricing",
+      "blog": "Blog",
+      "contact": "Contact",
+      "login": "Sign In",
+      "dashboard": "Dashboard",
+      "startFree": "Start Free"
+    },
+    "hero": {
+      "badge": "AI-Powered Review Management",
+      "titleStart": "Turn your reviews into",
+      "titleAccent": "revenue.",
+      "subtitle": "Manage Google, Booking and TripAdvisor reviews from one panel. Generate professional replies in seconds with AI.",
+      "ctaPrimary": "Try Free — 3 Months Free",
+      "ctaSecondary": "Request Demo",
+      "trust": "2-minute setup",
+      "screenshotAlt": "VoyageRespond dashboard — AI-powered review management"
+    },
+    "socialProof": {
+      "businesses": "businesses using",
+      "reviews": "reviews managed",
+      "avgResponse": "Avg. response time"
+    },
+    "featuresSection": {
+      "title": "Every step of reputation management, one platform.",
+      "subtitle": "Reduce manual workload, boost customer satisfaction.",
+      "aiReplyTitle": "AI Reply Suggestions",
+      "aiReplyDesc": "Personalized, on-brand professional replies for every review. Approve with one click and save time.",
+      "visibilityTitle": "AI Visibility Score",
+      "visibilityDesc": "Measure and improve how your business appears in ChatGPT, Gemini and Google AI.",
+      "centralTitle": "Centralized Review Inbox",
+      "centralDesc": "Google, Booking, TripAdvisor — reviews from every platform in one dashboard.",
+      "sentimentTitle": "Sentiment Analysis & Reports",
+      "sentimentDesc": "Understand how your customers feel. Track progress with weekly PDF reports.",
+      "multiLocTitle": "Multi-Location Management",
+      "multiLocDesc": "Manage 50+ branches from one panel. Compare locations and surface the best.",
+      "competitorTitle": "Competitor Analysis",
+      "competitorDesc": "Track your competitors' ratings, response times and customer perception."
+    },
+    "pricingSection": {
+      "badge": "Early Access",
+      "title": "Exclusive for the first 100 businesses",
+      "subtitle": "All features and unlimited locations free for 3 months. Then continue at affordable per-location pricing.",
+      "perk1": "3 months all features free",
+      "perk2": "Priority support",
+      "cta": "Start 3 Months Free"
+    },
+    "footerSection": {
+      "tagline": "AI-powered review management and visibility optimization.",
+      "links": "Links",
+      "about": "About",
+      "blog": "Blog",
+      "contact": "Contact",
+      "hub": "Hub",
+      "legal": "Legal",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "rights": "All rights reserved."
+    }
   }
 }
