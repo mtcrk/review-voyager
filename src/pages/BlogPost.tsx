@@ -1,5 +1,6 @@
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Clock, Tag, Share2 } from "lucide-react";
+import { ArrowLeft, Clock, Tag, Share2, List } from "lucide-react";
 import { getBlogPost, blogPosts } from "@/lib/blogPosts";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import AEOSection from "@/components/seo/AEOSection";
@@ -9,6 +10,43 @@ const BlogPost = () => {
   const navigate = useNavigate();
   const { slug } = useParams<{ slug: string }>();
   const post = slug ? getBlogPost(slug) : undefined;
+
+  // Build TOC from H2 headings in markdown (must run on every render before any early return)
+  const toc = useMemo(() => {
+    if (!post) return [] as { id: string; text: string }[];
+    const slugify = (s: string) =>
+      s
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, "")
+        .trim()
+        .replace(/\s+/g, "-");
+    return post.content
+      .split("\n")
+      .filter((l) => l.startsWith("## "))
+      .map((l) => {
+        const text = l.slice(3).trim();
+        return { id: slugify(text), text };
+      });
+  }, [post]);
+
+  const [activeId, setActiveId] = useState<string>("");
+
+  useEffect(() => {
+    if (!toc.length) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) setActiveId(entry.target.id);
+        });
+      },
+      { rootMargin: "-80px 0px -70% 0px", threshold: 0.1 },
+    );
+    toc.forEach((h) => {
+      const el = document.getElementById(h.id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, [toc, slug]);
 
   if (!post) {
     return (
@@ -62,7 +100,13 @@ const BlogPost = () => {
       if (line.startsWith("### ")) {
         html.push(`<h3 class="text-xl font-bold text-foreground mt-8 mb-3">${formatInline(line.slice(4))}</h3>`);
       } else if (line.startsWith("## ")) {
-        html.push(`<h2 class="text-2xl font-bold text-foreground mt-10 mb-4">${formatInline(line.slice(3))}</h2>`);
+        const text = line.slice(3).trim();
+        const id = text
+          .toLowerCase()
+          .replace(/[^\w\s-]/g, "")
+          .trim()
+          .replace(/\s+/g, "-");
+        html.push(`<h2 id="${id}" class="scroll-mt-24 text-2xl font-bold text-foreground mt-10 mb-4">${formatInline(text)}</h2>`);
       } else if (line.startsWith("> ")) {
         html.push(`<blockquote class="border-l-4 border-primary/30 pl-4 py-2 my-4 bg-muted/50 rounded-r-lg text-muted-foreground italic">${formatInline(line.slice(2))}</blockquote>`);
       } else if (line.startsWith("- ")) {
@@ -146,15 +190,17 @@ const BlogPost = () => {
         </div>
       </nav>
 
-      {/* Article */}
-      <article className="container mx-auto px-4 sm:px-6 py-12 max-w-3xl">
+      {/* Article + TOC */}
+      <div className="container mx-auto px-4 sm:px-6 py-12">
+        <div className="mx-auto max-w-3xl xl:max-w-6xl xl:grid xl:grid-cols-[1fr_240px] xl:gap-12">
+          <article className="min-w-0">
         {/* Back */}
         <button
           onClick={() => navigate("/blog")}
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
-          Tüm yazılar
+          Back to Blog
         </button>
 
         {/* Meta */}
@@ -191,6 +237,25 @@ const BlogPost = () => {
           dangerouslySetInnerHTML={{ __html: renderMarkdown(post.content) }}
         />
 
+        {/* CTA Banner */}
+        <div className="mt-12 p-6 sm:p-8 rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-background flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-center sm:text-left">
+            <h3 className="text-lg sm:text-xl font-bold text-foreground">
+              Manage all your reviews in one place
+            </h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              Reply to Google, Booking & TripAdvisor with AI — in seconds.
+            </p>
+          </div>
+          <button
+            onClick={() => navigate("/onboarding")}
+            className="px-6 py-3 rounded-md text-white font-medium transition-all hover:shadow-lg whitespace-nowrap min-h-[48px]"
+            style={{ backgroundColor: "#7A5AF8" }}
+          >
+            Start Free Trial →
+          </button>
+        </div>
+
         {/* AEO Section + FAQ */}
         <AEOSection
           pageUrl={`https://voyagerespond.com/blog/${post.slug}`}
@@ -224,7 +289,36 @@ const BlogPost = () => {
             </a>
           </div>
         </div>
-      </article>
+          </article>
+
+          {/* TOC Sidebar (desktop xl+) */}
+          {toc.length > 0 && (
+            <aside className="hidden xl:block">
+              <div className="sticky top-24">
+                <div className="flex items-center gap-2 text-sm font-semibold text-foreground mb-3">
+                  <List className="w-4 h-4" />
+                  On this page
+                </div>
+                <nav className="space-y-1 border-l border-border">
+                  {toc.map((h) => (
+                    <a
+                      key={h.id}
+                      href={`#${h.id}`}
+                      className={`block pl-4 py-1.5 text-sm leading-snug border-l-2 -ml-px transition-colors ${
+                        activeId === h.id
+                          ? "border-primary text-primary font-medium"
+                          : "border-transparent text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {h.text}
+                    </a>
+                  ))}
+                </nav>
+              </div>
+            </aside>
+          )}
+        </div>
+      </div>
 
       {/* Related Posts */}
       {otherPosts.length > 0 && (
