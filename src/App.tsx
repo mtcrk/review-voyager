@@ -84,6 +84,9 @@ const AppRoutes = () => (
     <Route path="/about" element={<About />} />
     <Route path="/blog" element={<Blog />} />
     <Route path="/blog/:slug" element={<BlogPost />} />
+    {/* Redirect /en/blog/* to /blog/* to avoid duplicate content (canonical lives at /blog/...) */}
+    <Route path="/en/blog" element={<Navigate to="/blog" replace />} />
+    <Route path="/en/blog/:slug" element={<BlogRedirect />} />
     <Route path="/google-yorum-cevap-ornekleri" element={<GoogleYorumCevapOrnekleri />} />
     <Route path="/restoran-yorum-cevaplari" element={<RestoranYorumCevaplari />} />
     <Route path="/otel-yorum-cevaplari" element={<OtelYorumCevaplari />} />
