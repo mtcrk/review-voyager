@@ -31,7 +31,7 @@ import NotFound from "./pages/NotFound";
 import GoogleBusinessCallback from "./pages/GoogleBusinessCallback";
 import Onboarding from "./pages/Onboarding";
 import Hub from "./pages/Hub";
-import { Navigate } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import InstagramSales from "./pages/automations/InstagramSales";
 import GoogleReviews from "./pages/automations/GoogleReviews";
 import WhatsAppAutomation from "./pages/automations/WhatsAppAutomation";
@@ -63,6 +63,12 @@ import AdminApifyLogs from "./pages/AdminApifyLogs";
 import YouTubeInbox from "./pages/YouTubeInbox";
 import SocialAnalytics from "./pages/SocialAnalytics";
 
+// Redirect /en/blog/:slug -> /blog/:slug (preserve slug, avoid duplicate content)
+const BlogRedirect = () => {
+  const { slug } = useParams<{ slug: string }>();
+  return <Navigate to={`/blog/${slug ?? ""}`} replace />;
+};
+
 const queryClient = new QueryClient();
 
 const AppRoutes = () => (
@@ -84,6 +90,9 @@ const AppRoutes = () => (
     <Route path="/about" element={<About />} />
     <Route path="/blog" element={<Blog />} />
     <Route path="/blog/:slug" element={<BlogPost />} />
+    {/* Redirect /en/blog/* to /blog/* to avoid duplicate content (canonical lives at /blog/...) */}
+    <Route path="/en/blog" element={<Navigate to="/blog" replace />} />
+    <Route path="/en/blog/:slug" element={<BlogRedirect />} />
     <Route path="/google-yorum-cevap-ornekleri" element={<GoogleYorumCevapOrnekleri />} />
     <Route path="/restoran-yorum-cevaplari" element={<RestoranYorumCevaplari />} />
     <Route path="/otel-yorum-cevaplari" element={<OtelYorumCevaplari />} />
