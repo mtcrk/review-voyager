@@ -1394,23 +1394,6 @@ With coverage across **80+ platforms** including Google, Booking.com, TripAdviso
   },
 ];
 
-// Stale entries below intentionally removed; the array above contains the full set.
-const _unusedRemainingPlaceholders: BlogPost[] = [
-  {
-    slug: "__removed_4__",
-    title: "",
-    description: "",
-    ogTitle: "",
-    ogDescription: "",
-    author: "",
-    publishedAt: "1970-01-01",
-    category: "",
-    readTime: "",
-    keywords: [],
-    content: "",
-  },
-];
-
 blogPosts.push(...englishPosts);
 
 export const getBlogPost = (slug: string): BlogPost | undefined => {
