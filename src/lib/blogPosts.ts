@@ -10,6 +10,8 @@ export interface BlogPost {
   keywords: string[];
   ogTitle: string;
   ogDescription: string;
+  metaTitle?: string;
+  metaDescription?: string;
 }
 
 export const blogPosts: BlogPost[] = [
@@ -824,6 +826,8 @@ ChatGPT, Google yorumlarına hızlı cevap yazmak için harika bir başlangıç 
 const englishPosts: BlogPost[] = [
   {
     slug: "how-to-respond-professionally-to-a-bad-review",
+    metaTitle: "How to Respond Professionally to a Bad Review (With Templates) | VoyageRespond",
+    metaDescription: "Learn the 5-step framework for responding to negative reviews professionally. Includes copy-paste templates for every situation. Used by hotels, restaurants, and clinics.",
     title: "How to Respond Professionally to a Bad Review",
     description: "A practical framework for replying to negative reviews with empathy, professionalism, and a clear path to resolution.",
     ogTitle: "How to Respond Professionally to a Bad Review | VoyageRespond",
@@ -883,6 +887,8 @@ Manually responding to every review across Google, Booking.com, TripAdvisor, and
   },
   {
     slug: "what-should-a-company-do-after-getting-a-bad-review",
+    metaTitle: "What Should a Company Do After Getting a Bad Review? | VoyageRespond",
+    metaDescription: "Got a bad review? Here's exactly what to do in the next 24 hours — from investigating the complaint to responding publicly and preventing it from happening again.",
     title: "What Should a Company Do After Getting a Bad Review?",
     description: "The exact playbook to follow in the first 24 hours after a negative review lands — from triage to public reply to internal follow-up.",
     ogTitle: "What to Do After Getting a Bad Review | VoyageRespond",
@@ -926,6 +932,8 @@ You can't manage what you don't measure. Set up alerts so you're notified the mo
   },
   {
     slug: "how-do-companies-recover-from-bad-reviews",
+    metaTitle: "How Do Companies Recover From Bad Reviews? | VoyageRespond",
+    metaDescription: "Discover the proven recovery timeline and strategies businesses use to bounce back from negative reviews — with a real case study of a restaurant that went from 3.2 to 4.4 stars.",
     title: "How Do Companies Recover From Bad Reviews?",
     description: "Real recovery strategies used by hotels, restaurants and SaaS brands to rebuild trust after a wave of negative feedback.",
     ogTitle: "How Companies Recover From Bad Reviews | VoyageRespond",
@@ -970,6 +978,8 @@ Manually managing reputation across dozens of platforms is exhausting. [VoyageRe
   },
   {
     slug: "how-long-does-it-take-to-fix-a-bad-reputation",
+    metaTitle: "How Long Does It Take to Fix a Company's Bad Reputation? | VoyageRespond",
+    metaDescription: "The honest answer: it depends. See realistic timelines for reputation recovery based on how many reviews you have, which platforms are affected, and how fast you act.",
     title: "How Long Does It Take to Fix a Bad Reputation?",
     description: "Realistic timelines for reputation recovery, the math behind your average rating, and what actually moves the needle.",
     ogTitle: "How Long to Fix a Bad Online Reputation | VoyageRespond",
@@ -1019,6 +1029,8 @@ Google is hardest to recover on because it has the most visibility. TripAdvisor 
   },
   {
     slug: "how-to-get-better-customer-reviews",
+    metaTitle: "How to Get Better Customer Reviews for Your Business (7 Proven Ways) | VoyageRespond",
+    metaDescription: "More reviews. Better reviews. Here are 7 proven strategies to systematically collect positive customer reviews — without violating any platform policies.",
     title: "How to Get Better Customer Reviews for Your Business",
     description: "Beyond just asking — the messaging, timing and channels that consistently produce higher-quality, more detailed customer reviews.",
     ogTitle: "How to Get Better Customer Reviews | VoyageRespond",
@@ -1071,6 +1083,8 @@ Going from 50 to 200 reviews doesn't just raise your rating — it fundamentally
   },
   {
     slug: "how-do-review-scores-impact-businesses",
+    metaTitle: "How Do Review Scores Actually Impact Businesses? | VoyageRespond",
+    metaDescription: "Review scores affect your revenue, Google ranking, and customer trust more than you think. See the data behind the impact — and what a one-star improvement is actually worth.",
     title: "How Do Review Scores Actually Impact Businesses?",
     description: "The data behind star ratings — how a single tenth of a star can change revenue, search rankings and conversion rate.",
     ogTitle: "How Review Scores Impact Business Revenue | VoyageRespond",
@@ -1119,6 +1133,8 @@ The businesses winning on reputation aren't necessarily delivering better servic
   },
   {
     slug: "how-fast-should-companies-respond-to-bad-reviews",
+    metaTitle: "How Fast Should Companies Respond to Bad Reviews? | VoyageRespond",
+    metaDescription: "53% of customers expect a response within 7 days — but most businesses take over 2 days or never respond at all. Here's why speed matters and how to fix your response time.",
     title: "How Fast Do Companies Respond to Bad Reviews?",
     description: "The benchmark response times that customers and Google's algorithm actually reward — and how to hit them at scale.",
     ogTitle: "How Fast to Respond to Bad Reviews | VoyageRespond",
@@ -1165,6 +1181,8 @@ The honest reason businesses don't respond quickly is bandwidth. A hotel with re
   },
   {
     slug: "how-to-get-more-google-reviews",
+    metaTitle: "How to Get More Google Reviews for Your Business (Step-by-Step) | VoyageRespond",
+    metaDescription: "A practical, policy-compliant system for collecting more Google reviews. Includes QR code tips, SMS templates, and the compounding effect of consistent review collection.",
     title: "How to Get More Google Reviews for Your Business",
     description: "Compliant, scalable tactics for collecting more Google reviews — including QR codes, post-stay emails and SMS automations.",
     ogTitle: "How to Get More Google Reviews | VoyageRespond",
@@ -1223,6 +1241,8 @@ Going from 20 to 100 Google reviews doesn't just raise your rating — it improv
   },
   {
     slug: "what-is-review-management-software",
+    metaTitle: "What Is Review Management Software? (And Do You Need It?) | VoyageRespond",
+    metaDescription: "Review management software centralizes all your reviews in one place. Find out what it does, who needs it, and whether the ROI makes sense for your business.",
     title: "What Is Review Management Software? (And Do You Need It?)",
     description: "A clear breakdown of what review management software does, the must-have features, and how to choose the right tool for your business.",
     ogTitle: "What Is Review Management Software? | VoyageRespond",
@@ -1275,6 +1295,8 @@ The average hospitality business spends **3–5 hours per week** managing review
   },
   {
     slug: "how-to-improve-your-google-rating",
+    metaTitle: "How to Improve Your Google Rating: A Step-by-Step Guide | VoyageRespond",
+    metaDescription: "Your Google rating is the first thing customers see. Here's a practical guide to improving it — with realistic timelines and the exact steps to take starting today.",
     title: "How to Improve Your Google Rating",
     description: "Step-by-step strategies — from operational fixes to review velocity tactics — that move your Google star rating up and keep it there.",
     ogTitle: "How to Improve Your Google Rating | VoyageRespond",
@@ -1336,6 +1358,8 @@ When you respond to reviews, naturally include your business type and location: 
   },
   {
     slug: "how-to-respond-to-negative-reviews",
+    metaTitle: "How to Respond to Negative Reviews: The Complete Guide (With Templates) | VoyageRespond",
+    metaDescription: "The ultimate guide to responding to negative reviews — with copy-paste templates for every type of complaint. Used by hotels, restaurants, clinics, and service businesses worldwide.",
     title: "How to Respond to Negative Reviews: The Complete Guide",
     description: "The complete guide to writing negative review replies that protect your brand, satisfy the customer and reassure future buyers.",
     ogTitle: "How to Respond to Negative Reviews | VoyageRespond",
