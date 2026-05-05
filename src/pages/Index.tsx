@@ -12,7 +12,7 @@ import SEO from "@/components/seo/SEO";
 const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  useTranslation();
+  const { t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -52,25 +52,25 @@ const Index = () => {
                 onClick={() => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })}
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
-                Özellikler
+                {t('indexPage.nav.features')}
               </button>
               <button
                 onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })}
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
-                Fiyatlandırma
+                {t('indexPage.nav.pricing')}
               </button>
               <button
                 onClick={() => navigate("/blog")}
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
-                Blog
+                {t('indexPage.nav.blog')}
               </button>
               <button
                 onClick={() => navigate("/contact")}
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
-                İletişim
+                {t('indexPage.nav.contact')}
               </button>
             </div>
 
@@ -81,13 +81,13 @@ const Index = () => {
                 onClick={() => navigate(user ? "/dashboard" : "/login")}
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2"
               >
-                {user ? "Dashboard" : "Giriş Yap"}
+                {user ? t('indexPage.nav.dashboard') : t('indexPage.nav.login')}
               </button>
               <Button
                 onClick={() => navigate("/onboarding")}
                 className="gradient-primary text-white text-sm px-5 py-2 h-9 hover:shadow-lg transition-all duration-200"
               >
-                Ücretsiz Başla
+                {t('indexPage.nav.startFree')}
               </Button>
             </div>
 
@@ -107,11 +107,11 @@ const Index = () => {
           {mobileMenuOpen && (
             <div className="md:hidden border-t border-border py-4 space-y-1">
               {[
-                { label: "Özellikler", action: () => { document.getElementById("features")?.scrollIntoView({ behavior: "smooth" }); setMobileMenuOpen(false); } },
-                { label: "Fiyatlandırma", action: () => { document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" }); setMobileMenuOpen(false); } },
-                { label: "Blog", action: () => { navigate("/blog"); setMobileMenuOpen(false); } },
-                { label: "İletişim", action: () => { navigate("/contact"); setMobileMenuOpen(false); } },
-                { label: user ? "Dashboard" : "Giriş Yap", action: () => { navigate(user ? "/dashboard" : "/login"); setMobileMenuOpen(false); } },
+                { label: t('indexPage.nav.features'), action: () => { document.getElementById("features")?.scrollIntoView({ behavior: "smooth" }); setMobileMenuOpen(false); } },
+                { label: t('indexPage.nav.pricing'), action: () => { document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" }); setMobileMenuOpen(false); } },
+                { label: t('indexPage.nav.blog'), action: () => { navigate("/blog"); setMobileMenuOpen(false); } },
+                { label: t('indexPage.nav.contact'), action: () => { navigate("/contact"); setMobileMenuOpen(false); } },
+                { label: user ? t('indexPage.nav.dashboard') : t('indexPage.nav.login'), action: () => { navigate(user ? "/dashboard" : "/login"); setMobileMenuOpen(false); } },
               ].map((item) => (
                 <button
                   key={item.label}
@@ -126,7 +126,7 @@ const Index = () => {
                   onClick={() => { navigate("/onboarding"); setMobileMenuOpen(false); }}
                   className="w-full gradient-primary text-white"
                 >
-                  Ücretsiz Başla
+                  {t('indexPage.nav.startFree')}
                 </Button>
               </div>
             </div>
@@ -144,21 +144,20 @@ const Index = () => {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/15 text-primary text-xs font-medium">
               <Sparkles className="w-3.5 h-3.5" />
-              AI-Powered Review Management
+              {t('indexPage.hero.badge')}
             </div>
 
             {/* Headline */}
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-[1.1] tracking-tight">
-              Yorumlarınızı{" "}
+              {t('indexPage.hero.titleStart')}{" "}
               <span className="bg-gradient-to-r from-primary to-purple-700 bg-clip-text text-transparent">
-                gelire dönüştürün.
+                {t('indexPage.hero.titleAccent')}
               </span>
             </h1>
 
             {/* Subtitle */}
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-              Google, Booking ve TripAdvisor yorumlarını tek panelden yönetin.
-              AI ile saniyeler içinde profesyonel yanıtlar oluşturun.
+              {t('indexPage.hero.subtitle')}
             </p>
 
             {/* CTA Row */}
@@ -168,7 +167,7 @@ const Index = () => {
                 onClick={() => navigate("/onboarding")}
                 className="gradient-primary text-white shadow-lg text-base px-8 py-6 w-full sm:w-auto hover:shadow-xl hover:scale-[1.02] transition-all duration-200 group"
               >
-                Ücretsiz Dene — 3 Ay Bedava
+                {t('indexPage.hero.ctaPrimary')}
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
               </Button>
               <Button
@@ -177,13 +176,13 @@ const Index = () => {
                 onClick={() => navigate("/demo")}
                 className="text-base px-8 py-6 w-full sm:w-auto border-border hover:bg-muted/50 transition-all duration-200"
               >
-                Demo İste
+                {t('indexPage.hero.ctaSecondary')}
               </Button>
             </div>
 
             {/* Trust line */}
             <p className="text-xs text-muted-foreground pt-1">
-              Kredi kartı gerekmez · 2 dakikada kurulum · Sınırsız lokasyon
+              {t('indexPage.hero.trust')}
             </p>
           </div>
 
@@ -205,7 +204,7 @@ const Index = () => {
               </div>
               <img
                 src={demoGif}
-                alt="VoyageRespond dashboard — AI ile yorum yönetimi"
+                alt={t('indexPage.hero.screenshotAlt')}
                 className="w-full h-auto"
                 loading="eager"
               />
@@ -220,15 +219,15 @@ const Index = () => {
           <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-primary" />
-              <span><strong className="text-foreground">100+</strong> işletme kullanıyor</span>
+              <span><strong className="text-foreground">100+</strong> {t('indexPage.socialProof.businesses')}</span>
             </div>
             <div className="flex items-center gap-2">
               <Star className="w-4 h-4 text-primary" />
-              <span><strong className="text-foreground">50K+</strong> yorum yönetildi</span>
+              <span><strong className="text-foreground">50K+</strong> {t('indexPage.socialProof.reviews')}</span>
             </div>
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-primary" />
-              <span>Ortalama yanıt süresi <strong className="text-foreground">&lt; 2 dk</strong></span>
+              <span>{t('indexPage.socialProof.avgResponse')} <strong className="text-foreground">&lt; 2 dk</strong></span>
             </div>
           </div>
         </div>
@@ -238,10 +237,10 @@ const Index = () => {
       <section id="features" className="container mx-auto px-4 sm:px-6 py-20 md:py-28">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            İtibar yönetiminin her adımı, tek platform.
+            {t('indexPage.featuresSection.title')}
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Manuel iş yükünü azaltın, müşteri memnuniyetini artırın.
+            {t('indexPage.featuresSection.subtitle')}
           </p>
         </div>
 
@@ -249,33 +248,33 @@ const Index = () => {
           {[
             {
               icon: MessageSquare,
-              title: "AI Yanıt Önerileri",
-              desc: "Her yoruma özel, markanızın tonunda profesyonel yanıtlar. Tek tıkla onaylayın, zaman kazanın.",
+              title: t('indexPage.featuresSection.aiReplyTitle'),
+              desc: t('indexPage.featuresSection.aiReplyDesc'),
             },
             {
               icon: Eye,
-              title: "AI Visibility Score",
-              desc: "İşletmenizin ChatGPT, Gemini ve Google AI'da nasıl göründüğünü ölçün ve iyileştirin.",
+              title: t('indexPage.featuresSection.visibilityTitle'),
+              desc: t('indexPage.featuresSection.visibilityDesc'),
             },
             {
               icon: Star,
-              title: "Merkezi Yorum Paneli",
-              desc: "Google, Booking, TripAdvisor — tüm platformlardan gelen yorumlar tek dashboard'da.",
+              title: t('indexPage.featuresSection.centralTitle'),
+              desc: t('indexPage.featuresSection.centralDesc'),
             },
             {
               icon: TrendingUp,
-              title: "Duygu Analizi & Raporlar",
-              desc: "Müşterilerinizin ne hissettiğini anlayın. Haftalık PDF raporlarla gelişimi takip edin.",
+              title: t('indexPage.featuresSection.sentimentTitle'),
+              desc: t('indexPage.featuresSection.sentimentDesc'),
             },
             {
               icon: Target,
-              title: "Çoklu Lokasyon Yönetimi",
-              desc: "50+ şubeyi tek panelden yönetin. Lokasyonları karşılaştırın, en iyileri öne çıkarın.",
+              title: t('indexPage.featuresSection.multiLocTitle'),
+              desc: t('indexPage.featuresSection.multiLocDesc'),
             },
             {
               icon: Shield,
-              title: "Rakip Analizi",
-              desc: "Rakiplerinizin puanlarını, yanıt sürelerini ve müşteri algısını takip edin.",
+              title: t('indexPage.featuresSection.competitorTitle'),
+              desc: t('indexPage.featuresSection.competitorDesc'),
             },
           ].map((feature, i) => (
             <div
@@ -304,23 +303,22 @@ const Index = () => {
               <div className="text-center space-y-6">
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/15 text-primary text-xs font-medium">
                   <Sparkles className="w-3.5 h-3.5" />
-                  Erken Erişim
+                  {t('indexPage.pricingSection.badge')}
                 </div>
 
                 <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-                  İlk 100 işletmeye özel
+                  {t('indexPage.pricingSection.title')}
                 </h2>
 
                 <p className="text-muted-foreground max-w-lg mx-auto leading-relaxed">
-                  3 ay boyunca tüm özellikler ve sınırsız lokasyon ücretsiz.
-                  Sonrasında lokasyon başına uygun fiyatlarla devam edin.
+                  {t('indexPage.pricingSection.subtitle')}
                 </p>
 
                 {/* Perks */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left max-w-md mx-auto pt-2">
                   {[
-                    "3 ay tüm özellikler ücretsiz",
-                    "Öncelikli destek",
+                    t('indexPage.pricingSection.perk1'),
+                    t('indexPage.pricingSection.perk2'),
                   ].map((perk, i) => (
                     <div key={i} className="flex items-center gap-2.5">
                       <Check className="w-4 h-4 text-primary flex-shrink-0" />
@@ -336,7 +334,7 @@ const Index = () => {
                     onClick={() => navigate("/register")}
                     className="gradient-primary text-white shadow-lg text-base px-10 py-6 hover:shadow-xl hover:scale-[1.02] transition-all duration-200 group w-full sm:w-auto"
                   >
-                    3 Ay Ücretsiz Başla
+                    {t('indexPage.pricingSection.cta')}
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
                   </Button>
                 </div>
@@ -357,7 +355,7 @@ const Index = () => {
                 <span className="font-semibold text-foreground text-sm">VoyageRespond</span>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                AI destekli yorum yönetimi ve görünürlük optimizasyonu.
+                {t('indexPage.footerSection.tagline')}
               </p>
               <a
                 href="https://www.instagram.com/voyagerespond"
@@ -372,28 +370,28 @@ const Index = () => {
 
             {/* Links */}
             <div>
-              <h4 className="font-medium text-foreground text-sm mb-3">Bağlantılar</h4>
+              <h4 className="font-medium text-foreground text-sm mb-3">{t('indexPage.footerSection.links')}</h4>
               <div className="space-y-2">
-                <button onClick={() => navigate("/about")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Hakkımızda</button>
-                <button onClick={() => navigate("/blog")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Blog</button>
-                <button onClick={() => navigate("/contact")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">İletişim</button>
-                <button onClick={() => navigate("/hub")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Hub</button>
+                <button onClick={() => navigate("/about")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.about')}</button>
+                <button onClick={() => navigate("/blog")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.blog')}</button>
+                <button onClick={() => navigate("/contact")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.contact')}</button>
+                <button onClick={() => navigate("/hub")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.hub')}</button>
               </div>
             </div>
 
             {/* Legal */}
             <div>
-              <h4 className="font-medium text-foreground text-sm mb-3">Yasal</h4>
+              <h4 className="font-medium text-foreground text-sm mb-3">{t('indexPage.footerSection.legal')}</h4>
               <div className="space-y-2">
-                <button onClick={() => navigate("/privacy-policy")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Gizlilik Politikası</button>
-                <button onClick={() => navigate("/terms-of-service")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Kullanım Şartları</button>
+                <button onClick={() => navigate("/privacy-policy")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.privacy')}</button>
+                <button onClick={() => navigate("/terms-of-service")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.terms')}</button>
                 <p className="text-sm text-muted-foreground pt-1">support@voyagerespond.com</p>
               </div>
             </div>
           </div>
 
           <div className="border-t border-border pt-6 text-center text-xs text-muted-foreground">
-            © {new Date().getFullYear()} VoyageRespond. Tüm hakları saklıdır.
+            © {new Date().getFullYear()} VoyageRespond. {t('indexPage.footerSection.rights')}
           </div>
         </div>
       </footer>
