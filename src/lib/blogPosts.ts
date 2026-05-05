@@ -821,6 +821,172 @@ ChatGPT, Google yorumlarına hızlı cevap yazmak için harika bir başlangıç 
   },
 ];
 
+const PLACEHOLDER_CONTENT = `
+## Introduction
+
+Content for this article is coming soon. We're putting the finishing touches on a comprehensive, research-backed guide.
+
+## What you'll learn
+
+- Practical, step-by-step strategies you can apply today
+- Real examples from businesses that get reviews right
+- How to scale review management without burning out your team
+
+## In the meantime
+
+If you want to manage all your reviews from one place — Google, Booking, TripAdvisor and more — VoyageRespond replies on your behalf with AI-generated, on-brand responses in seconds.
+
+**[Start your free trial →](https://voyagerespond.com/onboarding)**
+`;
+
+const englishPosts: BlogPost[] = [
+  {
+    slug: "how-to-respond-professionally-to-a-bad-review",
+    title: "How to Respond Professionally to a Bad Review",
+    description: "A practical framework for replying to negative reviews with empathy, professionalism, and a clear path to resolution.",
+    ogTitle: "How to Respond Professionally to a Bad Review | VoyageRespond",
+    ogDescription: "Learn the exact framework top brands use to turn negative reviews into loyal customers.",
+    author: "VoyageRespond",
+    publishedAt: "2026-04-20",
+    category: "Review Management",
+    readTime: "7 min",
+    keywords: ["respond to bad review", "negative review reply", "professional review response"],
+    content: PLACEHOLDER_CONTENT,
+  },
+  {
+    slug: "what-should-a-company-do-after-getting-a-bad-review",
+    title: "What Should a Company Do After Getting a Bad Review?",
+    description: "The exact playbook to follow in the first 24 hours after a negative review lands — from triage to public reply to internal follow-up.",
+    ogTitle: "What to Do After Getting a Bad Review | VoyageRespond",
+    ogDescription: "A 24-hour playbook for handling negative reviews the right way.",
+    author: "VoyageRespond",
+    publishedAt: "2026-04-21",
+    category: "Review Management",
+    readTime: "6 min",
+    keywords: ["bad review playbook", "respond to negative review", "review crisis"],
+    content: PLACEHOLDER_CONTENT,
+  },
+  {
+    slug: "how-do-companies-recover-from-bad-reviews",
+    title: "How Do Companies Recover From Bad Reviews?",
+    description: "Real recovery strategies used by hotels, restaurants and SaaS brands to rebuild trust after a wave of negative feedback.",
+    ogTitle: "How Companies Recover From Bad Reviews | VoyageRespond",
+    ogDescription: "Proven strategies to repair your reputation and win back customers.",
+    author: "VoyageRespond",
+    publishedAt: "2026-04-22",
+    category: "Reputation",
+    readTime: "8 min",
+    keywords: ["recover from bad reviews", "reputation recovery", "review damage control"],
+    content: PLACEHOLDER_CONTENT,
+  },
+  {
+    slug: "how-long-does-it-take-to-fix-a-bad-reputation",
+    title: "How Long Does It Take to Fix a Bad Reputation?",
+    description: "Realistic timelines for reputation recovery, the math behind your average rating, and what actually moves the needle.",
+    ogTitle: "How Long to Fix a Bad Online Reputation | VoyageRespond",
+    ogDescription: "Realistic timelines and tactics for repairing your online reputation.",
+    author: "VoyageRespond",
+    publishedAt: "2026-04-23",
+    category: "Reputation",
+    readTime: "6 min",
+    keywords: ["fix bad reputation", "reputation recovery timeline", "improve rating"],
+    content: PLACEHOLDER_CONTENT,
+  },
+  {
+    slug: "how-to-get-better-customer-reviews",
+    title: "How to Get Better Customer Reviews",
+    description: "Beyond just asking — the messaging, timing and channels that consistently produce higher-quality, more detailed customer reviews.",
+    ogTitle: "How to Get Better Customer Reviews | VoyageRespond",
+    ogDescription: "Strategies for collecting more detailed, higher-quality customer reviews.",
+    author: "VoyageRespond",
+    publishedAt: "2026-04-24",
+    category: "Review Generation",
+    readTime: "7 min",
+    keywords: ["get better reviews", "customer review quality", "review requests"],
+    content: PLACEHOLDER_CONTENT,
+  },
+  {
+    slug: "how-do-review-scores-impact-businesses",
+    title: "How Do Review Scores Impact Businesses?",
+    description: "The data behind star ratings — how a single tenth of a star can change revenue, search rankings and conversion rate.",
+    ogTitle: "How Review Scores Impact Business Revenue | VoyageRespond",
+    ogDescription: "Data-backed look at how star ratings affect revenue, SEO and conversion.",
+    author: "VoyageRespond",
+    publishedAt: "2026-04-25",
+    category: "Insights",
+    readTime: "8 min",
+    keywords: ["review scores", "star rating impact", "rating revenue"],
+    content: PLACEHOLDER_CONTENT,
+  },
+  {
+    slug: "how-fast-should-companies-respond-to-bad-reviews",
+    title: "How Fast Should Companies Respond to Bad Reviews?",
+    description: "The benchmark response times that customers and Google's algorithm actually reward — and how to hit them at scale.",
+    ogTitle: "How Fast to Respond to Bad Reviews | VoyageRespond",
+    ogDescription: "Industry benchmarks for review response time and how to hit them.",
+    author: "VoyageRespond",
+    publishedAt: "2026-04-26",
+    category: "Review Management",
+    readTime: "5 min",
+    keywords: ["review response time", "respond to bad review fast", "review SLA"],
+    content: PLACEHOLDER_CONTENT,
+  },
+  {
+    slug: "how-to-get-more-google-reviews",
+    title: "How to Get More Google Reviews",
+    description: "Compliant, scalable tactics for collecting more Google reviews — including QR codes, post-stay emails and SMS automations.",
+    ogTitle: "How to Get More Google Reviews | VoyageRespond",
+    ogDescription: "Compliant, scalable ways to grow your Google review count.",
+    author: "VoyageRespond",
+    publishedAt: "2026-04-27",
+    category: "Review Generation",
+    readTime: "7 min",
+    keywords: ["get more google reviews", "google review requests", "qr code reviews"],
+    content: PLACEHOLDER_CONTENT,
+  },
+  {
+    slug: "what-is-review-management-software",
+    title: "What Is Review Management Software?",
+    description: "A clear breakdown of what review management software does, the must-have features, and how to choose the right tool for your business.",
+    ogTitle: "What Is Review Management Software? | VoyageRespond",
+    ogDescription: "What review management software does and how to choose the right one.",
+    author: "VoyageRespond",
+    publishedAt: "2026-04-28",
+    category: "Tools",
+    readTime: "6 min",
+    keywords: ["review management software", "reputation tools", "review platform"],
+    content: PLACEHOLDER_CONTENT,
+  },
+  {
+    slug: "how-to-improve-your-google-rating",
+    title: "How to Improve Your Google Rating",
+    description: "Step-by-step strategies — from operational fixes to review velocity tactics — that move your Google star rating up and keep it there.",
+    ogTitle: "How to Improve Your Google Rating | VoyageRespond",
+    ogDescription: "Practical strategies for raising your Google star rating.",
+    author: "VoyageRespond",
+    publishedAt: "2026-04-29",
+    category: "Reputation",
+    readTime: "8 min",
+    keywords: ["improve google rating", "raise star rating", "google reviews"],
+    content: PLACEHOLDER_CONTENT,
+  },
+  {
+    slug: "how-to-respond-to-negative-reviews",
+    title: "How to Respond to Negative Reviews",
+    description: "The complete guide to writing negative review replies that protect your brand, satisfy the customer and reassure future buyers.",
+    ogTitle: "How to Respond to Negative Reviews | VoyageRespond",
+    ogDescription: "Complete guide to writing negative review replies that win back customers.",
+    author: "VoyageRespond",
+    publishedAt: "2026-04-30",
+    category: "Review Management",
+    readTime: "8 min",
+    keywords: ["respond to negative reviews", "negative review reply", "review responses"],
+    content: PLACEHOLDER_CONTENT,
+  },
+];
+
+blogPosts.push(...englishPosts);
+
 export const getBlogPost = (slug: string): BlogPost | undefined => {
   return blogPosts.find((post) => post.slug === slug);
 };
