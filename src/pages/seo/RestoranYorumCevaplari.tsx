@@ -58,8 +58,8 @@ const RestoranYorumCevaplari = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Restoran Yorum Cevapları | Google, Yelp için 30 Şablon"
-        description="Restoran müşteri yorumlarına profesyonel cevap örnekleri. Google ve Yelp için olumlu/olumsuz hazır yanıt şablonları."
+        title="Restoran Yorum Cevap Örnekleri | Google ve Yelp için 30 Şablon"
+        description="Restoranınıza gelen Google, Yelp ve TripAdvisor yorumlarına profesyonel cevap örnekleri. Yemek kalitesi, servis hızı, hijyen ve atmosfer şikayetleri için 30 şablon."
         canonical="https://voyagerespond.com/restoran-yorum-cevaplari"
         jsonLd={{
           "@context": "https://schema.org",
@@ -95,10 +95,10 @@ const RestoranYorumCevaplari = () => {
             Restoranlara Özel
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Restoran Yorum Cevapları
+            Restoran Yorum Cevapları: Google ve Yelp için Hazır Yanıtlar
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Restoranınıza gelen Google yorumlarına profesyonel yanıtlar. 30 hazır şablon — kopyalayın ve kişiselleştirin.
+            Restoranınıza gelen Google, Yelp ve TripAdvisor yorumlarına profesyonel cevap örnekleri. Yemek kalitesi, servis hızı, hijyen ve atmosfer şikayetleri için hazır yanıt şablonları.
           </p>
         </div>
 
