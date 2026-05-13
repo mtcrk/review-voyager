@@ -27,6 +27,8 @@ export const blogPosts: BlogPost[] = [
     readTime: "8 dk",
     keywords: ["google yorumlarına yanıt", "google yorum cevaplama", "olumsuz yoruma cevap", "google yorum yönetimi"],
     content: `
+Google yorumlarına nasıl yanıt verilir? Google Business Profile üzerinden adım adım yanıtlama rehberi, en iyi pratikler ve örneklerle profesyonel cevap yazma teknikleri. AI destekli alternatifleri de inceleyeceğiz.
+
 ## Neden Google Yorumlarına Yanıt Vermelisiniz?
 
 Google yorumları, potansiyel müşterilerinizin işletmeniz hakkındaki ilk izlenimini oluşturur. Araştırmalar gösteriyor ki:
