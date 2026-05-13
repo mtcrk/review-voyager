@@ -307,6 +307,8 @@ Yanıt yazmadan önce:
     readTime: "12 dk",
     keywords: ["kötü yorumlara cevap", "olumsuz yorum yanıt", "negatif yorum cevaplama", "google kötü yorum"],
     content: `
+Kötü yorumlara nasıl cevap verilir? Olumsuz müşteri yorumlarına empati, profesyonellik ve çözüm odaklı yaklaşımla yanıt vermenin yolları. Örneklerle adım adım rehber.
+
 ## Kötü Yorumlar Neden Bir Fırsattır?
 
 Olumsuz bir yorum aldığınızda panik yapmayın. Araştırmalar gösteriyor ki:
