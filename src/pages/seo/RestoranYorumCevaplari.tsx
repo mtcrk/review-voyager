@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Copy, Check, UtensilsCrossed } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import AEOSection from "@/components/seo/AEOSection";
+import SEO from "@/components/seo/SEO";
 
 const templates = [
   { category: "🍽️ Yemek Kalitesi — Olumlu", items: [
@@ -48,14 +49,6 @@ const RestoranYorumCevaplari = () => {
   const navigate = useNavigate();
   const [copiedIndex, setCopiedIndex] = useState<string | null>(null);
 
-  useEffect(() => {
-    document.title = "Restoran Yorum Cevapları | 30 Hazır Yanıt Şablonu - VoyageRespond";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) {
-      meta.setAttribute("content", "Restoranlar için Google yorum yanıt şablonları. Yemek, servis, atmosfer ve şikayet yorumlarına 30 profesyonel hazır cevap.");
-    }
-  }, []);
-
   const handleCopy = (text: string, key: string) => {
     navigator.clipboard.writeText(text);
     setCopiedIndex(key);
@@ -64,6 +57,22 @@ const RestoranYorumCevaplari = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Restoran Yorum Cevapları | Google, Yelp için 30 Şablon"
+        description="Restoran müşteri yorumlarına profesyonel cevap örnekleri. Google ve Yelp için olumlu/olumsuz hazır yanıt şablonları."
+        canonical="https://voyagerespond.com/restoran-yorum-cevaplari"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: templates.flatMap((s) =>
+            s.items.map((it) => ({
+              "@type": "Question",
+              name: it.title,
+              acceptedAnswer: { "@type": "Answer", text: it.text },
+            }))
+          ),
+        }}
+      />
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
         <div className="container mx-auto px-6">
           <div className="flex h-16 items-center justify-between">
