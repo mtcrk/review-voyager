@@ -376,6 +376,19 @@ const Index = () => {
 
       {/* ─── FOOTER ─── */}
       <footer className="border-t border-border bg-card/50">
+        <div className="container mx-auto px-4 sm:px-6 pt-10">
+          <div className="max-w-4xl mx-auto p-6 rounded-xl bg-muted/40 border border-border">
+            <h2 className="text-base font-semibold text-foreground mb-4">Popüler Rehberler</h2>
+            <ul className="grid sm:grid-cols-2 gap-2">
+              <li><button onClick={() => navigate("/google-yorum-cevap-ornekleri")} className="text-sm text-primary hover:underline text-left">Google Yorum Cevap Örnekleri (25 Şablon) →</button></li>
+              <li><button onClick={() => navigate("/otel-yorum-cevaplari")} className="text-sm text-primary hover:underline text-left">Otel Yorum Cevapları →</button></li>
+              <li><button onClick={() => navigate("/restoran-yorum-cevaplari")} className="text-sm text-primary hover:underline text-left">Restoran Yorum Cevapları →</button></li>
+              <li><button onClick={() => navigate("/blog/google-yorumlarina-nasil-yanit-verilir")} className="text-sm text-primary hover:underline text-left">Google Yorumlarına Nasıl Yanıt Verilir? →</button></li>
+              <li><button onClick={() => navigate("/blog/ai-gorunurluk-skoru-nedir")} className="text-sm text-primary hover:underline text-left">AI Görünürlük Skoru Nedir? →</button></li>
+              <li><button onClick={() => navigate("/blog/kotu-yorumlara-nasil-cevap-verilir")} className="text-sm text-primary hover:underline text-left">Kötü Yorumlara Nasıl Cevap Verilir? →</button></li>
+            </ul>
+          </div>
+        </div>
         <div className="container mx-auto px-4 sm:px-6 py-10">
           <div className="grid sm:grid-cols-3 gap-8 mb-8">
             {/* Brand */}
