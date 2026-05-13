@@ -18,8 +18,8 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       <SEO
-        title="Google Yorum Yönetimi | AI ile Akıllı Yanıt ve Müşteri Analizi"
-        description="Google, Booking ve TripAdvisor yorumlarınızı yapay zeka ile yönetin. AI destekli yanıt önerileri, duygu analizi ve AI görünürlük skoru. Otel ve restoranlar için."
+        title="Google Yorum Yönetimi | AI ile Otomatik Yanıt - VoyageRespond"
+        description="Google, Booking ve TripAdvisor yorumlarını yapay zeka ile yönetin. Otomatik yanıt önerileri, duygu analizi, AI görünürlük skoru. 3 ay ücretsiz deneyin."
         canonical="https://voyagerespond.com/"
         jsonLd={{
           "@context": "https://schema.org",
