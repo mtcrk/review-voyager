@@ -18,16 +18,46 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       <SEO
-        title="AI Yorum Yönetim Yazılımı | Google, Booking, TripAdvisor | VoyageRespond"
-        description="Google, Booking.com, TripAdvisor, Hotels.com, HolidayCheck ve daha fazlasındaki yorumlarınızı tek panelden yönetin. AI ile otomatik yanıt üretin."
-        canonical="/"
+        title="Google Yorum Yönetimi | AI ile Akıllı Yanıt ve Müşteri Analizi"
+        description="Google, Booking ve TripAdvisor yorumlarınızı yapay zeka ile yönetin. AI destekli yanıt önerileri, duygu analizi ve AI görünürlük skoru. Otel ve restoranlar için."
+        canonical="https://voyagerespond.com/"
         jsonLd={{
           "@context": "https://schema.org",
-          "@type": "SoftwareApplication",
-          name: "VoyageRespond",
-          applicationCategory: "BusinessApplication",
-          description: "AI destekli online itibar ve yorum yönetim platformu",
-          url: "https://voyagerespond.com",
+          "@type": "FAQPage",
+          mainEntity: [
+            {
+              "@type": "Question",
+              name: "Google yorumlarını yapay zeka ile nasıl yönetebilirim?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "VoyageRespond, Google Business Profile'ınızı bağladıktan sonra tüm yorumlarınızı otomatik olarak çeker. Yapay zeka her yorum için duygu analizi yapar, akıllı yanıt önerileri sunar ve tek tıkla yanıt göndermenizi sağlar.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "AI Visibility Score nedir?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "AI Visibility Score, işletmenizin ChatGPT, Google Gemini ve diğer yapay zeka asistanlarında ne kadar görünür olduğunu ölçen bir metriktir. Yorumlarınız, puanlarınız ve online varlığınız analiz edilerek 0-100 arasında bir skor hesaplanır.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "Hangi platformlardan yorum çekiliyor?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "VoyageRespond; Google, Booking.com, TripAdvisor ve Hotels.com platformlarından yorumları otomatik olarak çeker ve tek bir panelde yönetmenizi sağlar.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "VoyageRespond ücretsiz mi?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Evet, VoyageRespond erken erişim döneminde 3 ay boyunca tüm özellikler ve sınırsız lokasyon ile tamamen ücretsizdir.",
+              },
+            },
+          ],
         }}
       />
       {/* Navbar — Clean, minimal */}
