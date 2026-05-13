@@ -179,15 +179,15 @@ const Index = () => {
 
             {/* Headline */}
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-[1.1] tracking-tight">
-              {t('indexPage.hero.titleStart')}{" "}
+              Google Yorumlarınızı{" "}
               <span className="bg-gradient-to-r from-primary to-purple-700 bg-clip-text text-transparent">
-                {t('indexPage.hero.titleAccent')}
+                Yapay Zeka ile Otomatik Yönetin
               </span>
             </h1>
 
             {/* Subtitle */}
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-              {t('indexPage.hero.subtitle')}
+              VoyageRespond, Google, Booking, TripAdvisor ve 80+ platformdaki müşteri yorumlarınızı tek bir panelde toplar. Yapay zeka her yoruma kişiselleştirilmiş yanıt üretir, duygu analizi yapar ve işletmenizin AI görünürlük skorunu takip eder.
             </p>
 
             {/* CTA Row */}
@@ -197,7 +197,7 @@ const Index = () => {
                 onClick={() => navigate("/onboarding")}
                 className="gradient-primary text-white shadow-lg text-base px-8 py-6 w-full sm:w-auto hover:shadow-xl hover:scale-[1.02] transition-all duration-200 group"
               >
-                {t('indexPage.hero.ctaPrimary')}
+                3 Ay Ücretsiz Deneyin
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
               </Button>
               <Button
