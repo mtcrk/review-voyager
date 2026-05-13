@@ -149,13 +149,20 @@ const BlogPost = () => {
         title={post.metaTitle ?? `${post.ogTitle} | VoyageRespond Blog`}
         description={post.metaDescription ?? post.ogDescription}
         canonical={`/blog/${post.slug}`}
+        ogType="article"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "BlogPosting",
           headline: post.title,
           description: post.description,
           author: { "@type": "Organization", name: post.author },
+          publisher: {
+            "@type": "Organization",
+            name: "VoyageRespond",
+            logo: { "@type": "ImageObject", url: "https://voyagerespond.com/email-logo.png" },
+          },
           datePublished: post.publishedAt,
+          dateModified: post.publishedAt,
           keywords: post.keywords?.join(", "),
           mainEntityOfPage: `https://voyagerespond.com/blog/${post.slug}`,
         }}
