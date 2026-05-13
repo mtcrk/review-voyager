@@ -27,6 +27,8 @@ export const blogPosts: BlogPost[] = [
     readTime: "8 dk",
     keywords: ["google yorumlarına yanıt", "google yorum cevaplama", "olumsuz yoruma cevap", "google yorum yönetimi"],
     content: `
+Google yorumlarına nasıl yanıt verilir? Google Business Profile üzerinden adım adım yanıtlama rehberi, en iyi pratikler ve örneklerle profesyonel cevap yazma teknikleri. AI destekli alternatifleri de inceleyeceğiz.
+
 ## Neden Google Yorumlarına Yanıt Vermelisiniz?
 
 Google yorumları, potansiyel müşterilerinizin işletmeniz hakkındaki ilk izlenimini oluşturur. Araştırmalar gösteriyor ki:
@@ -113,6 +115,8 @@ Google yorumlarına yanıt vermek, dijital itibar yönetiminin en önemli parça
     readTime: "6 dk",
     keywords: ["ai visibility score", "yapay zeka görünürlük", "chatgpt işletme", "ai seo"],
     content: `
+AI Görünürlük Skoru nedir? İşletmenizin ChatGPT, Google Gemini, Claude ve diğer yapay zeka asistanlarında ne kadar görünür olduğunu ölçen yeni nesil bir metrik. Bu rehberde nasıl hesaplandığını ve nasıl iyileştirebileceğinizi öğreneceksiniz.
+
 ## AI Visibility Score Nedir?
 
 AI Visibility Score, işletmenizin **ChatGPT, Google Gemini, Microsoft Copilot** ve diğer yapay zeka asistanlarında ne kadar doğru ve olumlu şekilde temsil edildiğini ölçen bir metriktir.
@@ -303,6 +307,8 @@ Yanıt yazmadan önce:
     readTime: "12 dk",
     keywords: ["kötü yorumlara cevap", "olumsuz yorum yanıt", "negatif yorum cevaplama", "google kötü yorum"],
     content: `
+Kötü yorumlara nasıl cevap verilir? Olumsuz müşteri yorumlarına empati, profesyonellik ve çözüm odaklı yaklaşımla yanıt vermenin yolları. Örneklerle adım adım rehber.
+
 ## Kötü Yorumlar Neden Bir Fırsattır?
 
 Olumsuz bir yorum aldığınızda panik yapmayın. Araştırmalar gösteriyor ki:

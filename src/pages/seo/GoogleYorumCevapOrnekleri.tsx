@@ -52,8 +52,8 @@ const GoogleYorumCevapOrnekleri = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Google Yorum Cevap Örnekleri | 25 Hazır Yanıt Şablonu"
-        description="Google yorumlarına kopyala-yapıştır hazır yanıt şablonları. Olumlu, olumsuz ve nötr yorumlar için 25 profesyonel cevap örneği."
+        title="Google Yorum Cevap Örnekleri | 25 Hazır Yanıt Şablonu - VoyageRespond"
+        description="Google yorumlarına nasıl cevap verilir? Olumlu, olumsuz ve nötr yorumlar için 25 profesyonel cevap örneği. Restoran, otel ve hizmet sektörü için kopyala-yapıştır şablonlar."
         canonical="https://voyagerespond.com/google-yorum-cevap-ornekleri"
         jsonLd={{
           "@context": "https://schema.org",
@@ -91,10 +91,10 @@ const GoogleYorumCevapOrnekleri = () => {
             25 Hazır Şablon
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Google Yorum Cevap Örnekleri
+            Google Yorum Cevap Örnekleri: 25 Hazır Yanıt Şablonu (2026)
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Her duruma uygun profesyonel yanıt şablonları. Kopyalayın, kişiselleştirin ve hemen kullanın.
+            Google yorumlarına nasıl cevap verilir bilmiyor musunuz? Olumlu, olumsuz ve nötr müşteri yorumları için 25 profesyonel cevap örneği. Restoran, otel ve hizmet sektörü için kopyala-yapıştır hazır şablonlar.
           </p>
         </div>
 

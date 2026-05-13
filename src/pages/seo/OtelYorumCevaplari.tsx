@@ -6,7 +6,7 @@ import AEOSection from "@/components/seo/AEOSection";
 import SEO from "@/components/seo/SEO";
 
 const templates = [
-  { category: "🏨 Konaklama Deneyimi — Olumlu", items: [
+  { category: "🏨 Booking.com Yorumları için Cevap Örnekleri", items: [
     { title: "Genel memnuniyet", text: "Sayın [İsim], otelimizde keyifli bir konaklama geçirmenize çok sevindik! Misafir memnuniyeti her zaman önceliğimizdir. Bir sonraki seyahatinizde sizi tekrar ağırlamaktan büyük mutluluk duyarız. İyi yolculuklar! 🏨" },
     { title: "Oda övgüsü", text: "Merhaba [İsim], odamızın konforundan memnun kalmanıza çok mutlu olduk! Her detayı misafirlerimizin rahatlığı için özenle seçiyoruz. Bir sonraki konaklamanızda süit odalarımızı da denemenizi tavsiye ederiz. ✨" },
     { title: "Manzara övgüsü", text: "[İsim], manzaramızı beğenmenize sevindik! [Deniz/dağ/şehir] manzaralı odalarımız en çok tercih edilen seçeneklerimiz. Erken rezervasyonla daha uygun fiyatlarla bu deneyimi yakalayabilirsiniz. 🌅" },
@@ -19,7 +19,7 @@ const templates = [
     { title: "Housekeeping övgüsü", text: "Merhaba [İsim], oda temizliğimizi beğenmenize çok mutlu olduk! Housekeeping ekibimiz her odayı titizlikle hazırlıyor. Güzel sözlerinizi ekiple paylaştık — motive oldular! 🌟" },
     { title: "Özel hizmet", text: "[İsim], [özel istek/organizasyon] için güzel sözleriniz bizi çok mutlu etti! Her misafirimize özel bir deneyim sunmak en büyük hedefimiz. Gelecekteki organizasyonlarınız için de yanınızdayız!" },
   ]},
-  { category: "📍 Konum ve Tesis — Olumlu", items: [
+  { category: "📍 TripAdvisor Yorumlarına Profesyonel Yanıt", items: [
     { title: "Konum övgüsü", text: "Sayın [İsim], merkezi konumumuzu beğenmenize sevindik! [Bölge] bölgesinin en güzel noktalarına yürüme mesafesindeyiz. Shuttle hizmetimiz de mevcuttur. Tekrar bekleriz! 📍" },
     { title: "Restoran övgüsü", text: "Merhaba [İsim], otel restoranımızdaki deneyiminizi beğenmenize çok mutlu olduk! Şefimiz yerel lezzetleri modern dokunuşlarla sunuyor. Akşam yemeği için özel menümüzü denemenizi tavsiye ederiz. 🍽️" },
     { title: "Genel tesis", text: "[İsim], tesislerimizi beğenmenize sevindik! Fitness merkezi, spa ve açık yüzme havuzumuz misafirlerimizin hizmetinde. Bir sonraki konaklamanızda hepsini denemenizi öneririz!" },
@@ -29,7 +29,7 @@ const templates = [
     { title: "Beklenti farklılığı", text: "Merhaba [İsim], beklentilerinizi tam olarak karşılayamadığımız için üzgünüz. Geri bildiriminizi detaylı olarak inceledik. Lütfen bize doğrudan ulaşın ki durumu anlamak ve bir sonraki konaklamanızı mükemmelleştirmek isteriz." },
     { title: "Fiyat endişesi", text: "[İsim], değerlendirmeniz için teşekkürler. Kaliteli hizmet ve konfor sunma kararlılığımız fiyatlarımıza yansıyor. Erken rezervasyon ve sezon dışı kampanyalarımız daha uygun seçenekler sunuyor. Web sitemizi takip edin!" },
   ]},
-  { category: "❌ Oda ve Tesis Şikayetleri", items: [
+  { category: "❌ Olumsuz Otel Yorumlarına Nasıl Cevap Verilir?", items: [
     { title: "Oda temizliği", text: "Sayın [İsim], oda temizliğiyle ilgili yaşadığınız deneyim standartlarımızın çok altındadır. Housekeeping ekibimizle acil bir değerlendirme toplantısı yaptık. Size özel bir konaklama teklifi sunmak isteriz — lütfen bize ulaşın." },
     { title: "Klima/ısıtma sorunu", text: "Merhaba [İsim], odanızdaki klima sorunundan dolayı çok üzgünüz. Teknik ekibimiz tüm odaların klima sistemlerini kontrol etti. Bu tür sorunlar anında çözülmeli — resepsiyonumuza haber vermenizi rica ederiz." },
     { title: "Gürültü şikayeti", text: "[İsim], gürültü sorunu yaşamanız için samimiyetle özür dileriz. Sessiz oda talebinizi not ediyoruz — bir sonraki konaklamanızda üst katlardaki sakin odalarımızı tahsis edeceğiz." },
@@ -63,8 +63,8 @@ const OtelYorumCevaplari = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Otel Yorum Cevapları | Booking, TripAdvisor için 30 Şablon"
-        description="Otel müşteri yorumlarına profesyonel cevap örnekleri. Booking.com, TripAdvisor ve Google için hazır yanıt şablonları."
+        title="Otel Yorum Cevap Örnekleri | Booking, TripAdvisor için 30 Şablon"
+        description="Otelinize gelen Google, Booking ve TripAdvisor yorumlarına profesyonel cevap örnekleri. Misafir memnuniyeti, şikayet yönetimi ve oda sorunları için 30 hazır şablon."
         canonical="https://voyagerespond.com/otel-yorum-cevaplari"
         jsonLd={{
           "@context": "https://schema.org",
@@ -100,10 +100,10 @@ const OtelYorumCevaplari = () => {
             Otellere Özel
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Otel Yorum Cevapları
+            Otel Yorum Cevapları: Booking ve TripAdvisor için Hazır Şablonlar
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Otelinize gelen Google, Booking ve TripAdvisor yorumlarına profesyonel yanıtlar. 30 hazır şablon.
+            Otelinize gelen Google, Booking.com ve TripAdvisor yorumlarına profesyonel cevap örnekleri. Misafir memnuniyeti, şikayet yönetimi ve oda sorunları için hazır yanıt şablonları.
           </p>
         </div>
 
