@@ -115,6 +115,8 @@ Google yorumlarına yanıt vermek, dijital itibar yönetiminin en önemli parça
     readTime: "6 dk",
     keywords: ["ai visibility score", "yapay zeka görünürlük", "chatgpt işletme", "ai seo"],
     content: `
+AI Görünürlük Skoru nedir? İşletmenizin ChatGPT, Google Gemini, Claude ve diğer yapay zeka asistanlarında ne kadar görünür olduğunu ölçen yeni nesil bir metrik. Bu rehberde nasıl hesaplandığını ve nasıl iyileştirebileceğinizi öğreneceksiniz.
+
 ## AI Visibility Score Nedir?
 
 AI Visibility Score, işletmenizin **ChatGPT, Google Gemini, Microsoft Copilot** ve diğer yapay zeka asistanlarında ne kadar doğru ve olumlu şekilde temsil edildiğini ölçen bir metriktir.
