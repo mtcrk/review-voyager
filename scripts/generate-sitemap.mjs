@@ -1,4 +1,5 @@
-import { readFileSync, writeFileSync, resolve } from "fs";
+import { readFileSync, writeFileSync } from "fs";
+import { resolve } from "path";
 
 const BASE_URL = "https://voyagerespond.com";
 
@@ -30,7 +31,7 @@ function extractBlogPosts(): SitemapEntry[] {
   const content = readFileSync(filePath, "utf-8");
 
   const posts: SitemapEntry[] = [];
-  // Split by object boundaries that start with slug:
+  // Extract slug and publishedAt from each blog post object
   const postRegex = /\{\s*slug:\s*"([^"]+)"[\s\S]*?publishedAt:\s*"([^"]+)"[\s\S]*?\},?/g;
 
   let match;
