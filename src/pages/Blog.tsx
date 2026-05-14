@@ -10,7 +10,7 @@ const Blog = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Blog | Google Yorum Yönetimi ve AI Görünürlük Rehberleri | VoyageRespond"
+        title="Blog | Yorum Yönetimi ve AI Rehberleri - VoyageRespond"
         description="Google yorum yönetimi, AI görünürlük, müşteri analizi ve dijital itibar yönetimi hakkında rehberler ve ipuçları. VoyageRespond Blog."
         canonical="/blog"
       />
