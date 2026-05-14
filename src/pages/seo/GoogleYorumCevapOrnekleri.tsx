@@ -55,17 +55,6 @@ const GoogleYorumCevapOrnekleri = () => {
         title="Google Yorum Cevap Örnekleri | 25 Hazır Yanıt Şablonu - VoyageRespond"
         description="Google yorumlarına nasıl cevap verilir? Olumlu, olumsuz ve nötr yorumlar için 25 profesyonel cevap örneği. Restoran, otel ve hizmet sektörü için kopyala-yapıştır şablonlar."
         canonical="https://voyagerespond.com/google-yorum-cevap-ornekleri"
-        jsonLd={{
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          mainEntity: templates.flatMap((s) =>
-            s.items.map((it) => ({
-              "@type": "Question",
-              name: it.title,
-              acceptedAnswer: { "@type": "Answer", text: it.text },
-            }))
-          ),
-        }}
       />
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
         <div className="container mx-auto px-6">
