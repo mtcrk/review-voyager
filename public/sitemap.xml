@@ -2,39 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://voyagerespond.com/</loc>
-    <lastmod>2026-05-05</lastmod>
+    <lastmod>2026-05-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>https://voyagerespond.com/pricing</loc>
-    <lastmod>2026-03-10</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://voyagerespond.com/about</loc>
     <lastmod>2026-03-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://voyagerespond.com/contact</loc>
-    <lastmod>2026-03-10</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://voyagerespond.com/demo</loc>
-    <lastmod>2026-03-16</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://voyagerespond.com/hub</loc>
-    <lastmod>2026-03-16</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://voyagerespond.com/automations/google-reviews</loc>
@@ -44,85 +20,67 @@
   </url>
   <url>
     <loc>https://voyagerespond.com/blog</loc>
-    <lastmod>2026-05-05</lastmod>
+    <lastmod>2026-05-14</lastmod>
     <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://voyagerespond.com/blog/ai-gorunurluk-skoru-nedir</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://voyagerespond.com/blog/booking-yorum-yonetimi</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://voyagerespond.com/blog/chatgpt-ile-google-yorumlarina-nasil-cevap-yazilir</loc>
+    <lastmod>2026-03-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://voyagerespond.com/blog/google-isletme-profili-optimizasyonu</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://voyagerespond.com/blog/google-yorum-cevap-araclari-2026</loc>
+    <lastmod>2026-03-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://voyagerespond.com/blog/google-yorum-cevap-ornekleri</loc>
+    <lastmod>2026-03-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://voyagerespond.com/blog/google-yorum-rehberi</loc>
+    <lastmod>2026-05-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://voyagerespond.com/blog/google-yorum-silme-rehberi</loc>
+    <lastmod>2026-05-12</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://voyagerespond.com/blog/google-yorumlarina-nasil-yanit-verilir</loc>
     <lastmod>2026-03-10</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://voyagerespond.com/blog/ai-gorunurluk-skoru-nedir</loc>
-    <lastmod>2026-03-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://voyagerespond.com/blog/otel-restoran-yorum-yonetimi-rehberi</loc>
-    <lastmod>2026-03-16</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://voyagerespond.com/blog/kotu-yorumlara-nasil-cevap-verilir</loc>
-    <lastmod>2026-03-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://voyagerespond.com/blog/google-yorum-cevap-ornekleri</loc>
-    <lastmod>2026-03-18</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://voyagerespond.com/blog/yorumlara-neden-cevap-vermek-onemlidir</loc>
-    <lastmod>2026-03-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://voyagerespond.com/blog/google-yorum-cevap-araclari-2026</loc>
-    <lastmod>2026-03-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://voyagerespond.com/blog/chatgpt-ile-google-yorumlarina-nasil-cevap-yazilir</loc>
-    <lastmod>2026-03-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://voyagerespond.com/blog/how-to-respond-professionally-to-a-bad-review</loc>
-    <lastmod>2026-04-20</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://voyagerespond.com/blog/what-should-a-company-do-after-getting-a-bad-review</loc>
-    <lastmod>2026-04-21</lastmod>
-    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://voyagerespond.com/blog/how-do-companies-recover-from-bad-reviews</loc>
     <lastmod>2026-04-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://voyagerespond.com/blog/how-long-does-it-take-to-fix-a-bad-reputation</loc>
-    <lastmod>2026-04-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://voyagerespond.com/blog/how-to-get-better-customer-reviews</loc>
-    <lastmod>2026-04-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -139,14 +97,20 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://voyagerespond.com/blog/how-to-get-more-google-reviews</loc>
-    <lastmod>2026-04-27</lastmod>
+    <loc>https://voyagerespond.com/blog/how-long-does-it-take-to-fix-a-bad-reputation</loc>
+    <lastmod>2026-04-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://voyagerespond.com/blog/what-is-review-management-software</loc>
-    <lastmod>2026-04-28</lastmod>
+    <loc>https://voyagerespond.com/blog/how-to-get-better-customer-reviews</loc>
+    <lastmod>2026-04-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://voyagerespond.com/blog/how-to-get-more-google-reviews</loc>
+    <lastmod>2026-04-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -157,50 +121,38 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://voyagerespond.com/blog/how-to-respond-professionally-to-a-bad-review</loc>
+    <lastmod>2026-04-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://voyagerespond.com/blog/how-to-respond-to-negative-reviews</loc>
     <lastmod>2026-04-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://voyagerespond.com/blog/google-yorum-rehberi</loc>
-    <lastmod>2026-05-12</lastmod>
+    <loc>https://voyagerespond.com/blog/instagram-yorum-yonetimi</loc>
+    <lastmod>2026-05-14</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://voyagerespond.com/blog/google-yorum-silme-rehberi</loc>
-    <lastmod>2026-05-12</lastmod>
+    <loc>https://voyagerespond.com/blog/kotu-yorumlara-nasil-cevap-verilir</loc>
+    <lastmod>2026-03-17</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://voyagerespond.com/blog/google-isletme-profili-optimizasyonu</loc>
-    <lastmod>2026-05-13</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://voyagerespond.com/blog/online-itibar-yonetimi-rehberi</loc>
     <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://voyagerespond.com/blog/booking-yorum-yonetimi</loc>
-    <lastmod>2026-05-13</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://voyagerespond.com/blog/tripadvisor-yorum-yonetimi</loc>
-    <lastmod>2026-05-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://voyagerespond.com/blog/instagram-yorum-yonetimi</loc>
-    <lastmod>2026-05-14</lastmod>
+    <loc>https://voyagerespond.com/blog/otel-restoran-yorum-yonetimi-rehberi</loc>
+    <lastmod>2026-03-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -211,10 +163,46 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://voyagerespond.com/blog/tripadvisor-yorum-yonetimi</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://voyagerespond.com/blog/what-is-review-management-software</loc>
+    <lastmod>2026-04-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://voyagerespond.com/blog/what-should-a-company-do-after-getting-a-bad-review</loc>
+    <lastmod>2026-04-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://voyagerespond.com/blog/yorumlara-neden-cevap-vermek-onemlidir</loc>
+    <lastmod>2026-03-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://voyagerespond.com/blog/youtube-yorum-yonetimi</loc>
     <lastmod>2026-05-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://voyagerespond.com/contact</loc>
+    <lastmod>2026-03-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://voyagerespond.com/demo</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://voyagerespond.com/google-yorum-cevap-ornekleri</loc>
@@ -223,10 +211,10 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://voyagerespond.com/restoran-yorum-cevaplari</loc>
-    <lastmod>2026-03-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://voyagerespond.com/hub</loc>
+    <lastmod>2026-03-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://voyagerespond.com/otel-yorum-cevaplari</loc>
@@ -235,22 +223,22 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://voyagerespond.com/login</loc>
-    <lastmod>2026-03-01</lastmod>
+    <loc>https://voyagerespond.com/pricing</loc>
+    <lastmod>2026-03-10</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://voyagerespond.com/register</loc>
-    <lastmod>2026-03-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://voyagerespond.com/privacy-policy</loc>
     <lastmod>2026-01-01</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://voyagerespond.com/restoran-yorum-cevaplari</loc>
+    <lastmod>2026-03-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://voyagerespond.com/terms-of-service</loc>
