@@ -20,6 +20,7 @@ const staticRoutes = [
   { path: "/login", changefreq: "yearly", priority: "0.2", lastmod: "2026-01-01" },
   { path: "/register", changefreq: "yearly", priority: "0.2", lastmod: "2026-01-01" },
   { path: "/forgot-password", changefreq: "yearly", priority: "0.2", lastmod: "2026-01-01" },
+  { path: "/onboarding", changefreq: "monthly", priority: "0.6", lastmod: "2026-05-14" },
 ];
 
 function extractBlogPosts() {
