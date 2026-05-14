@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import SEO from '@/components/seo/SEO';
 
 export default function PrivacyPolicy() {
   const { t } = useTranslation();
@@ -23,6 +24,11 @@ export default function PrivacyPolicy() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Gizlilik Politikası | VoyageRespond"
+        description="VoyageRespond gizlilik politikası: kişisel verilerinizi nasıl topladığımız, kullandığımız, sakladığımız ve koruduğumuz hakkında detaylı bilgi."
+        canonical="https://voyagerespond.com/privacy-policy"
+      />
       <div className="container mx-auto px-6 py-12 max-w-4xl">
         <Button
           variant="ghost"
