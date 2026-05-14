@@ -52,8 +52,8 @@ const GoogleYorumCevapOrnekleri = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Google Yorum Cevap Örnekleri | 25 Hazır Yanıt Şablonu - VoyageRespond"
-        description="Google yorumlarına nasıl cevap verilir? Olumlu, olumsuz ve nötr yorumlar için 25 profesyonel cevap örneği. Restoran, otel ve hizmet sektörü için kopyala-yapıştır şablonlar."
+        title="Google Yorum Cevap Örnekleri | 25 Hazır Şablon"
+        description="Olumlu, olumsuz ve nötr Google yorumları için 25 profesyonel, kopyala-yapıştır cevap şablonu. Restoran, otel ve hizmet sektörü için."
         canonical="https://voyagerespond.com/google-yorum-cevap-ornekleri"
       />
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
@@ -104,6 +104,7 @@ const GoogleYorumCevapOrnekleri = () => {
                         onClick={() => handleCopy(item.text, key)}
                         className="shrink-0 p-2 rounded-lg border border-border hover:bg-muted transition-colors"
                         title="Kopyala"
+                        aria-label={copiedIndex === key ? "Kopyalandı" : `\"${item.title}\" şablonunu kopyala`}
                       >
                         {copiedIndex === key ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4 text-muted-foreground" />}
                       </button>

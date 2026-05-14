@@ -82,9 +82,7 @@ export default function Login() {
       />
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle asChild>
-            <h1 className="text-2xl font-bold">{t('auth.login.title')}</h1>
-          </CardTitle>
+          <h1 className="text-2xl font-semibold leading-none tracking-tight">{t('auth.login.title')}</h1>
           <CardDescription>
             {t('auth.login.subtitle')}
           </CardDescription>

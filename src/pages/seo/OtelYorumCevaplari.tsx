@@ -64,7 +64,7 @@ const OtelYorumCevaplari = () => {
     <div className="min-h-screen bg-background">
       <SEO
         title="Otel Yorum Cevap Örnekleri | 30 Hazır Şablon"
-        description="Otelinize gelen Google, Booking ve TripAdvisor yorumlarına profesyonel cevap örnekleri. Misafir memnuniyeti, şikayet yönetimi ve oda sorunları için 30 hazır şablon."
+        description="Google, Booking ve TripAdvisor otel yorumları için 30 profesyonel cevap şablonu: memnuniyet, şikayet ve oda sorunları."
         canonical="https://voyagerespond.com/otel-yorum-cevaplari"
       />
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">

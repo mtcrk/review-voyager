@@ -164,7 +164,12 @@ export default function DemoPage() {
               </Button>
             </div>
 
-            <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <button
+              className="md:hidden p-2"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? "Menüyü kapat" : "Menüyü aç"}
+              aria-expanded={mobileMenuOpen}
+            >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
@@ -269,6 +274,7 @@ export default function DemoPage() {
                         onMouseEnter={() => setHoverRating(star)}
                         onMouseLeave={() => setHoverRating(0)}
                         className="transition-transform hover:scale-110"
+                        aria-label={`${star} yıldız`}
                       >
                         <Star
                           className={`w-9 h-9 transition-colors ${
@@ -364,6 +370,7 @@ export default function DemoPage() {
                         onClick={handleReset}
                         className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground"
                         title="Sıfırla"
+                        aria-label="Sıfırla"
                       >
                         <RotateCcw className="w-4 h-4" />
                       </button>
