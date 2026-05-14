@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { ArrowRight, Check, Star, MessageSquare, Eye, TrendingUp, Sparkles, Zap, Target, Shield, Users, Menu, X } from "lucide-react";
 import { useState } from "react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
-import demoGif from "@/assets/voyagerespond-demo.gif";
+import demoMp4 from "@/assets/voyagerespond-demo.mp4";
+import demoWebm from "@/assets/voyagerespond-demo.webm";
+import demoPoster from "@/assets/voyagerespond-demo-poster.jpg";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -232,16 +234,22 @@ const Index = () => {
                   </div>
                 </div>
               </div>
-              <img
-                src={demoGif}
-                alt={t('indexPage.hero.screenshotAlt')}
-                className="w-full h-auto"
-                loading="eager"
-                fetchPriority="high"
-                decoding="async"
+              <video
+                src={demoMp4}
+                poster={demoPoster}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                aria-label={t('indexPage.hero.screenshotAlt')}
+                className="w-full h-auto block"
                 width={1280}
                 height={800}
-              />
+              >
+                <source src={demoWebm} type="video/webm" />
+                <source src={demoMp4} type="video/mp4" />
+              </video>
             </div>
           </div>
         </div>
