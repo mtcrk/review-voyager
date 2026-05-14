@@ -1426,6 +1426,908 @@ With coverage across **80+ platforms** including Google, Booking.com, TripAdviso
 
 blogPosts.push(...englishPosts);
 
+const reputationPosts: BlogPost[] = [
+  {
+    slug: "google-yorum-rehberi",
+    title: "Google Yorum: İşletmeler İçin 2026 Tam Rehberi",
+    description: "Google yorum nedir, nasıl yönetilir, nasıl artırılır? İşletme sahipleri için yorum yönetimi, yanıtlama ve SEO etkisi rehberi.",
+    ogTitle: "Google Yorum Rehberi 2026 | İşletmeler İçin Tam Kılavuz",
+    ogDescription: "Google yorumlarını anlama, yanıtlama ve artırma rehberi. SEO etkisi, en iyi pratikler ve AI destekli çözümler.",
+    metaTitle: "Google Yorum Rehberi 2026 | VoyageRespond",
+    metaDescription: "Google yorum nedir, nasıl yönetilir? İşletmeniz için yorum yanıtlama, artırma ve SEO etkisi konularında kapsamlı rehber.",
+    author: "VoyageRespond",
+    publishedAt: "2026-05-12",
+    category: "Yorum Yönetimi",
+    readTime: "10 dk",
+    keywords: ["google yorum", "google yorumlarım", "google işletmem yorum", "google yorum yönetimi"],
+    content: `
+Google yorum, bir işletmenin Google Haritalar ve Arama sonuçlarında görünen müşteri değerlendirmeleridir. Bu rehberde Google yorumlarının nasıl çalıştığını, neden kritik olduğunu ve nasıl yönetilmesi gerektiğini adım adım anlatıyoruz.
+
+## Google Yorum Nedir?
+
+Google yorum, müşterilerin Google Business Profile (eski adıyla Google My Business) üzerinde işletmeniz hakkında bıraktığı 1-5 yıldız puan ve metin değerlendirmesidir. Bu yorumlar:
+
+- **Google Haritalar** üzerinde görünür
+- **Google Arama** sonuçlarında "knowledge panel"de yer alır
+- **Yerel SEO sıralamasını** doğrudan etkiler
+- **AI asistanlarına** (ChatGPT, Gemini) bilgi sağlar
+
+## Neden Bu Kadar Önemli?
+
+- Türkiye'de **ayda 5.400 kişi** Google'da "google yorum" araması yapıyor
+- Tüketicilerin **%93'ü** bir işletmeyi ziyaret etmeden önce Google yorumlarını okuyor
+- **4.0+ puan ortalamasına** sahip işletmeler %32 daha fazla tıklama alıyor
+- Yanıtlanan yorumlar **arama sıralamasını** ortalama %12 yukarı taşıyor
+
+## Google Yorum Yönetiminin 5 Adımı
+
+### 1. Yorumları Sürekli İzleyin
+Yeni yorumları **gerçek zamanlı** takip edin. Manuel kontrol değil, otomatik bildirim sistemi şart.
+
+### 2. 24 Saat İçinde Yanıt Verin
+Google'ın algoritması **yanıt hızını** sıralama sinyali olarak kullanır. İdeal hedef: 2 saat içinde.
+
+### 3. Kişiselleştirilmiş Yanıtlar Yazın
+Şablon yanıtlardan kaçının. Müşterinin adını, yorumdaki spesifik detayları ve işletmenize özgü ifadeleri kullanın.
+
+### 4. Olumsuz Yorumları Fırsata Çevirin
+1 yıldız bir yorumun profesyonelce yanıtlanması, 100 olumlu yorumdan daha fazla güven inşa eder.
+
+### 5. Yeni Yorumları Aktif Olarak Teşvik Edin
+QR kodlar, e-posta hatırlatıcıları ve hizmet sonrası kısa link paylaşımı ile yorum sayınızı artırın.
+
+## Sahte ve Spam Yorumlar
+
+Sahte yorumları Google'a şikayet edebilirsiniz:
+1. Google Business Profile'a giriş yapın
+2. İlgili yoruma tıklayın → "Bayrak" simgesine basın
+3. "Spam, off-topic, çıkar çatışması" gibi nedenler arasından seçin
+
+Google'ın inceleme süresi ortalama **7-14 gün**.
+
+## AI ile Google Yorum Yönetimi
+
+[VoyageRespond](https://voyagerespond.com), Google yorumlarınızı 6 saatte bir otomatik çekip yapay zeka ile yanıt önerisi üretir. 8 farklı tonda, çok dilli ve marka uyumlu yanıtlar — tek tıkla onaylanabilir.
+
+## İlgili Rehberler
+
+- [Google Yorumlarına Nasıl Yanıt Verilir?](/blog/google-yorumlarina-nasil-yanit-verilir)
+- [Google Yorum Silme Rehberi](/blog/google-yorum-silme-rehberi)
+- [Google İşletme Profili Optimizasyonu](/blog/google-isletme-profili-optimizasyonu)
+- [Online İtibar Yönetimi Rehberi](/blog/online-itibar-yonetimi-rehberi)
+
+**[3 ay ücretsiz deneyin →](https://voyagerespond.com/onboarding)**
+    `,
+  },
+  {
+    slug: "google-yorum-silme-rehberi",
+    title: "Google Yorum Silme: Sahte ve Haksız Yorumları Kaldırma Rehberi",
+    description: "Google yorum nasıl silinir? Sahte, hakaret içeren veya politika ihlali yapan yorumları kaldırma adımları, şikayet süreci ve alternatif çözümler.",
+    ogTitle: "Google Yorum Silme Rehberi 2026 | Adım Adım",
+    ogDescription: "Sahte ve haksız Google yorumlarını silme rehberi. Şikayet süreçleri, kabul edilen nedenler ve alternatif itibar yönetimi.",
+    metaTitle: "Google Yorum Silme Rehberi | VoyageRespond",
+    metaDescription: "Google'da sahte veya haksız yorumlar nasıl silinir? Şikayet süreci, başarı oranları ve alternatif çözümler.",
+    author: "VoyageRespond",
+    publishedAt: "2026-05-12",
+    category: "Yorum Yönetimi",
+    readTime: "8 dk",
+    keywords: ["google yorum silme", "google yorum kaldırma", "sahte google yorumu", "google yorum şikayet"],
+    content: `
+Google yorum silme, sahte veya politika ihlali yapan yorumları işletme profilinizden kaldırma işlemidir. Türkiye'de ayda 1.600 işletme sahibi bu konuyu araştırıyor. Bu rehberde hangi yorumların silinebildiğini ve süreci adım adım anlatıyoruz.
+
+## Hangi Yorumlar Silinebilir?
+
+Google'ın **resmi politikasına göre** şu yorumlar silinebilir:
+
+- ❌ **Spam ve sahte içerik** — Bot veya rakip tarafından yazılmış
+- ❌ **Hakaret ve nefret söylemi** — Küfür, ayrımcılık
+- ❌ **Çıkar çatışması** — Eski çalışan, rakip işletme
+- ❌ **Konu dışı içerik** — İşletmenizle ilgisiz şikayet
+- ❌ **Kişisel bilgi paylaşımı** — Telefon, adres, kimlik
+- ❌ **Yasa dışı içerik** — Yasal olmayan ürün/hizmet talebi
+
+## Hangi Yorumlar Silinemez?
+
+- ✅ **Olumsuz ama gerçek deneyimler** — Müşteri haklı veya haksız olabilir
+- ✅ **Düşük puanlı yorumlar** — Sadece 1 yıldız olduğu için silinmez
+- ✅ **Sübjektif şikayetler** — "Yemek tatsızdı" gibi
+
+**Google bu yorumları korur.** Tek çözüm profesyonel yanıt vermek.
+
+## Adım Adım Şikayet Süreci
+
+### 1. Yorumu Tespit Edin
+Google Business Profile → "Yorumlar" sekmesi
+
+### 2. Bayrak Simgesine Tıklayın
+Yorumun sağ üst köşesindeki üç nokta menüsünden "Uygunsuz olarak işaretle"
+
+### 3. Neden Seçin
+- Off-topic
+- Spam
+- Çıkar çatışması
+- Hakaret
+- Yasa dışı içerik
+
+### 4. Bekleyin
+Google'ın inceleme süresi ortalama **3-14 gün**. Bazen 30 güne kadar uzayabilir.
+
+## Başarı Oranı Ne Kadar?
+
+Sektör verilerine göre Google'a yapılan silme taleplerinin yalnızca **%23'ü kabul ediliyor**. Bu yüzden:
+
+- Şikayet öncesi yorumun politika ihlali yaptığından emin olun
+- Ekran görüntüsü ve kanıt toplayın
+- Kabul edilmeyen yorumlara mutlaka **profesyonel yanıt** verin
+
+## Yorum Silinmezse Ne Yapılır?
+
+### A. Profesyonel Yanıt Verin
+Olumsuz yorumun altına yazılan iyi bir yanıt, yorumdan daha fazla okunur. [Kötü yorumlara nasıl cevap verilir?](/blog/kotu-yorumlara-nasil-cevap-verilir)
+
+### B. Olumlu Yorum Hacmini Artırın
+10 olumlu yorum, 1 olumsuz yorumu görsel olarak gömer. Memnun müşterilerden yorum talep edin.
+
+### C. Hukuki Yol
+Hakaret veya iftira içeren yorumlar için **avukat aracılığıyla mahkeme kararı** alarak Google'a iletebilirsiniz. Bu süreç 2-6 ay sürer.
+
+## VoyageRespond ile Otomatik İtibar Koruma
+
+[VoyageRespond](https://voyagerespond.com), olumsuz yorumları **anında bildirir**, profesyonel yanıt önerileri sunar ve yeni olumlu yorum talep süreçlerini otomatikleştirir.
+
+## İlgili Rehberler
+
+- [Google Yorum Rehberi](/blog/google-yorum-rehberi)
+- [Kötü Yorumlara Nasıl Cevap Verilir?](/blog/kotu-yorumlara-nasil-cevap-verilir)
+- [Online İtibar Yönetimi Rehberi](/blog/online-itibar-yonetimi-rehberi)
+
+**[Ücretsiz deneyin →](https://voyagerespond.com/onboarding)**
+    `,
+  },
+  {
+    slug: "google-isletme-profili-optimizasyonu",
+    title: "Google İşletme Profili Optimizasyonu: 2026 Tam Rehberi",
+    description: "Google İşletme Profilinizi optimize ederek yerel aramalarda üst sıralara çıkın. Adım adım rehber, kontrol listesi ve sıralama faktörleri.",
+    ogTitle: "Google İşletme Profili Optimizasyonu 2026",
+    ogDescription: "Google İşletme Profili'nizi optimize etmenin 12 adımı. Yerel SEO, kategori seçimi, yorum stratejisi.",
+    metaTitle: "Google İşletme Profili Optimizasyonu Rehberi | VoyageRespond",
+    metaDescription: "Google İşletme Profili nasıl optimize edilir? Yerel SEO, fotoğraf, yorum ve kategori seçimi rehberi.",
+    author: "VoyageRespond",
+    publishedAt: "2026-05-13",
+    category: "Yerel SEO",
+    readTime: "11 dk",
+    keywords: ["google işletme profili", "google işletmem", "google business profile", "yerel seo"],
+    content: `
+Google İşletme Profili optimizasyonu, yerel aramalarda üst sıralara çıkmanın en etkili yoludur. Türkiye'de ayda 1.900 işletme sahibi "google işletme profili" araması yapıyor. Bu rehberde profilinizi adım adım optimize ediyoruz.
+
+## Google İşletme Profili Nedir?
+
+Google'ın işletmeniz hakkında topladığı tüm bilgilerin merkezi paneldir. İçerir:
+
+- İşletme adı, adres, telefon (NAP)
+- Kategori ve hizmetler
+- Çalışma saatleri
+- Fotoğraflar ve videolar
+- Müşteri yorumları
+- Mesajlaşma ve rezervasyon
+
+## Optimizasyon Kontrol Listesi
+
+### ✅ 1. NAP Tutarlılığı
+İşletme adı, adres, telefon **tüm platformlarda aynı** olmalı. Tek bir karakter farkı bile sıralamayı düşürür.
+
+### ✅ 2. Doğru Birincil Kategori Seçimi
+Birincil kategori en önemli faktördür. "Restoran" yerine "İtalyan Restoranı" gibi spesifik olun. Rakiplerinizin kategorilerini inceleyin.
+
+### ✅ 3. Tüm Alt Kategorileri Doldurun
+Maksimum 9 ek kategori ekleyebilirsiniz. Her biri ek anahtar kelime trafiği getirir.
+
+### ✅ 4. Detaylı İşletme Açıklaması
+750 karakteri sonuna kadar kullanın. Anahtar kelimeleri doğal şekilde yerleştirin.
+
+### ✅ 5. Profesyonel Fotoğraflar
+- Logo: 250x250 px
+- Kapak: 1080x608 px  
+- En az **20 yüksek kalitede fotoğraf**
+- Her hafta 1-2 yeni fotoğraf
+
+### ✅ 6. Çalışma Saatleri ve Tatiller
+Resmi tatillerde özel saatler ekleyin. Yanlış bilgi olumsuz yoruma yol açar.
+
+### ✅ 7. Hizmet ve Ürün Listesi
+Tüm hizmetlerinizi fiyatlandırma ile birlikte ekleyin. Bu, "long-tail" aramalarda ortaya çıkmanızı sağlar.
+
+### ✅ 8. Soru-Cevap Bölümü
+Sıkça sorulan soruları **kendiniz sorup cevaplayın**. Kontrolü elinizde tutun.
+
+### ✅ 9. Yorum Yönetimi
+Yerel SEO sıralamasının **%17'si** yorumlardan oluşur. Hedefler:
+- Aylık minimum 5 yeni yorum
+- 4.3+ ortalama puan
+- %95+ yanıt oranı
+- 24 saat içinde yanıt
+
+### ✅ 10. Google Posts
+Haftalık güncellemeler, kampanyalar, etkinlikler paylaşın. "Aktif işletme" sinyali.
+
+### ✅ 11. UTM ile Trafik Takibi
+Web sitesi linkinde UTM parametresi: \`?utm_source=google&utm_medium=gbp\`
+
+### ✅ 12. Düzenli Performans Kontrolü
+Google Insights üzerinden:
+- Profil görüntüleme
+- Arama yapan kelimeler
+- Müşteri eylemleri
+
+## Sıralama Faktörleri
+
+Google'ın yerel sıralama algoritması üç ana faktörden oluşur:
+
+1. **Alaka düzeyi** (Relevance) — Aranan terim ile profil eşleşmesi
+2. **Mesafe** (Distance) — Aramayı yapan kişiye yakınlık
+3. **Belirginlik** (Prominence) — Yorum sayısı, web varlığı, link sayısı
+
+## VoyageRespond ile Yorum Optimizasyonu
+
+Sıralamanın **%17'si yorumlar**. [VoyageRespond](https://voyagerespond.com) ile:
+
+- Otomatik yorum çekme (6 saatte bir)
+- AI yanıt önerileri (8 ton, çok dilli)
+- Yorum talep otomasyonu (QR + e-posta)
+- AI Visibility Score takibi
+
+## İlgili Rehberler
+
+- [Google Yorum Rehberi](/blog/google-yorum-rehberi)
+- [Google Yorumlarına Nasıl Yanıt Verilir?](/blog/google-yorumlarina-nasil-yanit-verilir)
+- [Online İtibar Yönetimi Rehberi](/blog/online-itibar-yonetimi-rehberi)
+
+**[Profilinizi optimize etmeye başlayın →](https://voyagerespond.com/onboarding)**
+    `,
+  },
+  {
+    slug: "online-itibar-yonetimi-rehberi",
+    title: "Online İtibar Yönetimi: 2026 İşletme Rehberi",
+    description: "Online itibar yönetimi nedir, nasıl yapılır? Google, sosyal medya ve OTA platformlarında dijital itibarınızı koruma ve büyütme rehberi.",
+    ogTitle: "Online İtibar Yönetimi Rehberi 2026 | VoyageRespond",
+    ogDescription: "Dijital itibar yönetiminin 6 sütunu, kriz yönetimi ve AI destekli çözümler.",
+    metaTitle: "Online İtibar Yönetimi 2026 | İşletme Rehberi",
+    metaDescription: "Online itibar yönetimi nedir, nasıl yapılır? Google, OTA, sosyal medya itibar koruma stratejileri.",
+    author: "VoyageRespond",
+    publishedAt: "2026-05-13",
+    category: "İtibar Yönetimi",
+    readTime: "10 dk",
+    keywords: ["online itibar yönetimi", "dijital itibar yönetimi", "itibar yönetimi", "kurumsal itibar"],
+    content: `
+Online itibar yönetimi (Online Reputation Management — ORM), bir işletmenin internetteki algısını ölçme, koruma ve geliştirme sürecidir. Türkiye'de ayda 590 işletme sahibi bu konuyu araştırıyor. Bu rehberde A'dan Z'ye anlatıyoruz.
+
+## Online İtibar Nedir?
+
+İşletmenizin dijital ortamdaki görünümünün toplamı:
+
+- Google yorumları ve puanı
+- Booking.com, TripAdvisor gibi OTA puanları
+- Sosyal medya yorumları (Instagram, TikTok, YouTube)
+- Forum ve Reddit gibi topluluklar
+- Şikayetvar.com gibi şikayet platformları
+- Haber ve blog yazıları
+
+## Neden Kritik?
+
+- Tüketicilerin **%87'si** satın alma kararından önce online itibar araştırıyor
+- 1 yıldız puan artışı, gelirde **%5-9 artış** sağlıyor
+- Olumsuz bir haber, organik trafiği **%22'ye kadar** düşürüyor
+- AI asistanları (ChatGPT, Gemini) artık **itibar verisini öneri** olarak kullanıyor
+
+## Online İtibar Yönetiminin 6 Sütunu
+
+### 1. İzleme (Monitoring)
+Tüm platformlarda işletme adınızı **gerçek zamanlı** takip edin. Google Alerts yetersiz; profesyonel ORM araçları gerekli.
+
+### 2. Yorum Yönetimi
+- 24 saat içinde yanıt
+- Kişiselleştirilmiş cevaplar
+- Olumsuz yorumlara profesyonel yaklaşım
+
+### 3. İçerik Üretimi
+Olumlu içerik (blog, sosyal medya, müşteri başarı hikayeleri) ile olumsuz içeriği arama sonuçlarında **aşağı itin**.
+
+### 4. SEO ve SERP Yönetimi
+İşletme adınız aratıldığında ilk 10 sonucun **kontrol ettiğiniz** sayfalar olmasını hedefleyin.
+
+### 5. Kriz Yönetimi
+Olumsuz haber/yorum patlamalarında:
+- Hızlı resmi açıklama
+- Şeffaf iletişim
+- Aksiyon planı paylaşımı
+
+### 6. Aktif İtibar İnşası
+- Müşterilerden yorum talebi
+- Influencer/blogger işbirlikleri
+- Topluluk sponsorluğu
+
+## Kriz Yönetimi: 4 Aşama
+
+### Aşama 1: Tespit (0-1 saat)
+Sorunu fark eder etmez ekibi toplayın. Yayılma hızını ölçün.
+
+### Aşama 2: Değerlendirme (1-4 saat)
+- Etki alanı nedir?
+- Hukuki boyut var mı?
+- Resmi açıklama gerekli mi?
+
+### Aşama 3: Müdahale (4-24 saat)
+- Net, samimi resmi açıklama
+- İlgili müşteriyle birebir iletişim
+- Sosyal medya iletişim planı
+
+### Aşama 4: Onarım (1 hafta+)
+- Olumlu içerik kampanyası
+- Müşteri memnuniyet anketleri
+- İç süreç iyileştirmeleri
+
+## Hangi Sektörler İçin En Kritik?
+
+| Sektör | Etki Düzeyi | Öncelikli Platformlar |
+|--------|------------|----------------------|
+| Otel | 🔴 Çok yüksek | Booking, TripAdvisor, Google |
+| Restoran | 🔴 Çok yüksek | Google, TripAdvisor, Instagram |
+| Sağlık | 🔴 Çok yüksek | Google, sektör platformları |
+| E-ticaret | 🟠 Yüksek | Trustpilot, Şikayetvar, Google |
+| B2B SaaS | 🟡 Orta | G2, Capterra, LinkedIn |
+
+## AI ile İtibar Yönetimi
+
+[VoyageRespond](https://voyagerespond.com) Google, Booking, TripAdvisor, Hotels.com, Instagram, TikTok ve YouTube yorumlarını **tek panelden yönetmenizi** sağlar:
+
+- 80+ platformdan otomatik yorum çekme
+- AI duygu analizi ve önceliklendirme
+- 8 farklı tonda yanıt önerisi
+- AI Visibility Score takibi
+- Haftalık otomatik raporlar
+
+## İlgili Rehberler
+
+- [Google Yorum Rehberi](/blog/google-yorum-rehberi)
+- [Booking.com Yorum Yönetimi](/blog/booking-yorum-yonetimi)
+- [TripAdvisor Yorum Yönetimi](/blog/tripadvisor-yorum-yonetimi)
+- [Instagram Yorum Yönetimi](/blog/instagram-yorum-yonetimi)
+
+**[3 ay ücretsiz deneyin →](https://voyagerespond.com/onboarding)**
+    `,
+  },
+  {
+    slug: "booking-yorum-yonetimi",
+    title: "Booking.com Yorum Yönetimi: Oteller İçin 2026 Rehberi",
+    description: "Booking.com yorumlarını yönetme rehberi. Misafir yorumlarına yanıt verme, puan artırma stratejileri ve otomatik yönetim çözümleri.",
+    ogTitle: "Booking.com Yorum Yönetimi Rehberi 2026",
+    ogDescription: "Booking.com'da puanınızı artırmanın 8 yolu. Misafir yorumlarına profesyonel yanıt rehberi.",
+    metaTitle: "Booking.com Yorum Yönetimi | Otel Rehberi 2026",
+    metaDescription: "Booking.com misafir yorumlarını yönetme rehberi. Puan artırma, yanıtlama ve otomatik yönetim.",
+    author: "VoyageRespond",
+    publishedAt: "2026-05-13",
+    category: "OTA Yönetimi",
+    readTime: "9 dk",
+    keywords: ["booking yorumları", "booking.com yorum", "booking misafir yorumu", "otel yorum yönetimi"],
+    content: `
+Booking.com yorum yönetimi, oteller için **en kritik gelir kaynağıdır**. Booking.com'un Türkiye'de aylık 450.000 araması var ve misafirler rezervasyondan önce ortalama **6-9 yorum** okuyor. Bu rehberde Booking puanınızı nasıl artıracağınızı anlatıyoruz.
+
+## Booking.com Puan Sistemi Nasıl Çalışır?
+
+Booking.com, **10 üzerinden** puan kullanır ve şu kategorileri ölçer:
+
+- **Personel** (Staff)
+- **Konfor** (Comfort)
+- **Ücretsiz Wi-Fi**
+- **Tesisler** (Facilities)
+- **Temizlik** (Cleanliness)
+- **Konum** (Location)
+- **Fiyat-performans** (Value for money)
+
+Genel puan bu 7 kategorinin **ağırlıklı ortalamasıdır**. Hedef puan: **8.5+** ("Çok iyi" rozeti için).
+
+## Booking Puanını Etkileyen Kritik Faktörler
+
+### 1. Yanıt Oranı
+Booking.com, yanıt verilmiş yorumları **arama sonuçlarında öne çıkarır**. Hedef: %95+ yanıt oranı.
+
+### 2. Yanıt Süresi
+İdeal: 48 saat içinde. 7 günü geçen yanıtlar etki azaltır.
+
+### 3. Yorum Hacmi
+Son 24 ayda **30+ yorum** olmadan "Genius" partner statüsüne giremezsiniz.
+
+### 4. Ortalama Puan Trendi
+Booking, son 12 ayın trendine bakar. Düşüş varsa sıralama düşer.
+
+## Misafir Yorumlarına Yanıt Verme
+
+### Olumlu Yorum Yanıtı (Şablon)
+> "Sayın [İsim], güzel yorumunuz için çok teşekkür ederiz. Özellikle [bahsettikleri detay] hakkındaki sözleriniz tüm ekibimizi mutlu etti. Bir sonraki [şehir] ziyaretinizde tekrar ağırlamak için sabırsızlanıyoruz. 🙏"
+
+### Olumsuz Yorum Yanıtı (Şablon)
+> "Sayın [İsim], yaşadığınız deneyim için içten özrümüzü kabul edin. [Spesifik sorun] konusu kesinlikle standartlarımızın altında. İlgili ekibimizle değerlendirme toplantısı yaptık ve [aksiyon]. Sizi tekrar misafir etme şansı verirseniz farkı göstermek isteriz. Lütfen [email] adresinden bizimle iletişime geçin."
+
+## Booking Puan Artırma Stratejileri
+
+### Strateji 1: Check-in Deneyimini Mükemmelleştirin
+İlk 15 dakika genel deneyim algısının **%60'ını** belirler. Karşılama, hızlı işlem, oda gösterimi.
+
+### Strateji 2: Sürpriz Eklemeler
+Welcome drink, küçük bir ikram, doğum günü mesajı — küçük detaylar 9-10 puanı garantiler.
+
+### Strateji 3: Check-out'ta Geri Bildirim
+Check-out anında "Nasıldı?" sorusu, sorunları **Booking'e yansımadan** çözmenizi sağlar.
+
+### Strateji 4: Özür ve Telafi Politikası
+Sorun yaşayan misafire **anında telafi** sunun (indirim, ücretsiz hizmet). %70'i puan vermekten vazgeçer.
+
+### Strateji 5: Çok Dilli Yanıtlar
+Yabancı misafire kendi dilinde yanıt = +1.5 puan etkisi (sektör verisi).
+
+## Sahte ve Haksız Yorumları Şikayet Etme
+
+Booking Extranet → "Misafir Yorumları" → "Şikayet Et"
+
+Kabul edilen nedenler:
+- Hiç konaklamamış misafir (rezervasyon iptal edilmiş)
+- Hakaret / küfür
+- Konaklamayla ilgisiz şikayet
+- Yasa dışı talep
+
+İnceleme süresi: **5-10 iş günü**
+
+## VoyageRespond ile Booking Otomasyon
+
+[VoyageRespond](https://voyagerespond.com), Booking.com yorumlarını otomatik çeker, AI ile yanıt önerisi üretir ve **çok dilli** yanıt yazar:
+
+- 80+ dilde otomatik yanıt
+- Yanıt onay sistemi (siz onaylar Booking'e gider)
+- Misafir kategorisi bazlı yanıt önerileri
+- Düşük puan uyarısı (anında bildirim)
+
+## İlgili Rehberler
+
+- [Otel & Restoran Yorum Yönetimi Rehberi](/blog/otel-restoran-yorum-yonetimi-rehberi)
+- [TripAdvisor Yorum Yönetimi](/blog/tripadvisor-yorum-yonetimi)
+- [Otel Yorum Cevap Şablonları](/otel-yorum-cevaplari)
+
+**[Otelinizi 3 ay ücretsiz yönetin →](https://voyagerespond.com/onboarding)**
+    `,
+  },
+  {
+    slug: "tripadvisor-yorum-yonetimi",
+    title: "TripAdvisor Yorum Yönetimi: Otel ve Restoran Rehberi",
+    description: "TripAdvisor yorumlarını yönetme rehberi. Sıralama algoritması, yanıt stratejileri ve Travelers' Choice rozeti kazanma yolları.",
+    ogTitle: "TripAdvisor Yorum Yönetimi Rehberi 2026",
+    ogDescription: "TripAdvisor sıralama algoritması, yanıt stratejileri ve Travelers' Choice rozeti rehberi.",
+    metaTitle: "TripAdvisor Yorum Yönetimi | Otel & Restoran Rehberi",
+    metaDescription: "TripAdvisor yorum yönetimi, sıralama algoritması ve Travelers' Choice rozeti kazanma rehberi.",
+    author: "VoyageRespond",
+    publishedAt: "2026-05-14",
+    category: "OTA Yönetimi",
+    readTime: "9 dk",
+    keywords: ["tripadvisor yorum", "tripadvisor yorum yönetimi", "tripadvisor sıralama", "travelers choice"],
+    content: `
+TripAdvisor, dünya genelinde en büyük seyahat platformudur ve Türkiye'de aylık 74.000 arama alır. TripAdvisor yorum yönetimi, özellikle **uluslararası misafir** çeken oteller ve restoranlar için kritiktir.
+
+## TripAdvisor "Popularity Ranking" Algoritması
+
+TripAdvisor sıralaması üç ana sinyalden oluşur:
+
+### 1. Yorum Kalitesi (Quality)
+- Yıldız sayısı
+- Yorum metni uzunluğu ve detayı
+- Fotoğraf eklenip eklenmediği
+
+### 2. Yorum Tazeliği (Recency)
+Son yorumlar daha ağır basar. **3+ ay** yorum gelmemesi sıralamayı düşürür.
+
+### 3. Yorum Hacmi (Quantity)
+Bulunduğunuz şehir/kategorideki rakiplere göre **göreceli** hacim.
+
+## Travelers' Choice Rozeti
+
+TripAdvisor'un en prestijli rozetidir. Kazanmak için:
+- Son 12 ayda **tutarlı yüksek puan** (4.0+)
+- En az **30 yorum**
+- Yüksek **yanıt oranı**
+- Şehir/kategori sıralamasında üst %10
+
+Rozet sahipleri ortalama **+18% rezervasyon artışı** yaşıyor.
+
+## Yorum Yanıtlama Stratejisi
+
+### Yanıt Oranı Hedefi
+- Olumsuz yorumlar: **%100** yanıt
+- 4 yıldız: %80+
+- 5 yıldız: %50+
+
+### Çok Dilli Yanıt Önemli
+TripAdvisor kullanıcılarının **%67'si İngilizce dışında dilde** yorum yazıyor. Yanıtınızı yorumla aynı dilde verin.
+
+### Yanıt Şablonu (İngilizce - Olumlu)
+> "Dear [Name], thank you so much for your wonderful review! We're thrilled that you enjoyed [specific detail]. Our team will be delighted to hear your kind words. We can't wait to welcome you back on your next visit to [city]."
+
+### Yanıt Şablonu (İngilizce - Olumsuz)
+> "Dear [Name], we sincerely apologize for the experience you had. [Specific issue] is absolutely not the standard we strive for. We have addressed this matter with our team and implemented [action]. We would be grateful for the opportunity to welcome you back. Please contact us at [email]."
+
+## Sahte Yorum Şikayeti
+
+TripAdvisor Management Center → "Reviews" → "Report a Review"
+
+Kabul edilen nedenler:
+- Konaklamamış kişi
+- Çıkar çatışması (rakip, eski çalışan)
+- Hakaret
+- Konu dışı içerik
+- Şantaj girişimi
+
+TripAdvisor'un **"Fraud Detection"** sistemi yorum başına 50+ sinyal kontrol eder. Bu nedenle başarı oranı Google'dan yüksektir (~%40).
+
+## Sıralama Artırma Taktikleri
+
+### 1. Düzenli Yorum Akışı Sağlayın
+Her ay minimum 5-10 yeni yorum hedefleyin. Boşluk = sıralama düşüşü.
+
+### 2. Misafir Profil Çeşitliliği
+TripAdvisor; aile, çift, iş, solo gibi profilleri ayrı ayrı puanlar. **Tüm segmentlerden** yorum gelmeli.
+
+### 3. Fotoğraflı Yorumları Teşvik Edin
+Fotoğraflı yorumlar **3 kat daha fazla** sıralama ağırlığı taşır.
+
+### 4. "Helpful" Oyları
+Olumlu yorumlarınıza "helpful" oyu gelmesi sıralamayı yukarı çeker.
+
+## VoyageRespond ile TripAdvisor Otomasyon
+
+[VoyageRespond](https://voyagerespond.com), TripAdvisor yorumlarını **scraper teknolojisiyle** çeker (API kısıtlamaları olmadan):
+
+- Hibrit fetcher (web scraping + manuel doğrulama)
+- AI çok dilli yanıt önerileri
+- Travelers' Choice ilerleme takibi
+- Rakip otel/restoran karşılaştırması
+
+## İlgili Rehberler
+
+- [Booking.com Yorum Yönetimi](/blog/booking-yorum-yonetimi)
+- [Otel & Restoran Yorum Yönetimi](/blog/otel-restoran-yorum-yonetimi-rehberi)
+- [Otel Yorum Cevap Şablonları](/otel-yorum-cevaplari)
+
+**[3 ay ücretsiz deneyin →](https://voyagerespond.com/onboarding)**
+    `,
+  },
+  {
+    slug: "instagram-yorum-yonetimi",
+    title: "Instagram Yorum Yönetimi: İşletmeler İçin 2026 Rehberi",
+    description: "Instagram yorumlarını yönetme rehberi. Spam filtreleme, AI yanıt stratejileri ve dönüşümü artıran yorum yaklaşımları.",
+    ogTitle: "Instagram Yorum Yönetimi Rehberi 2026",
+    ogDescription: "Instagram yorumları nasıl yönetilir? Spam filtreleme, AI yanıt ve dönüşüm stratejileri.",
+    metaTitle: "Instagram Yorum Yönetimi | İşletme Rehberi 2026",
+    metaDescription: "Instagram yorum yönetimi, spam filtreleme ve dönüşüm odaklı yanıt stratejileri.",
+    author: "VoyageRespond",
+    publishedAt: "2026-05-14",
+    category: "Sosyal Medya",
+    readTime: "8 dk",
+    keywords: ["instagram yorum", "instagram yorum yönetimi", "instagram müşteri yorumu", "sosyal medya yorum"],
+    content: `
+Instagram yorum yönetimi, marka algısının şekillendiği en görünür alandır. Türkiye'de aylık 1.000 arama alan "instagram yorum" konusu, özellikle e-ticaret, restoran ve hizmet sektörü için kritik.
+
+## Instagram Yorumlarının Önemi
+
+- Tüketicilerin **%76'sı** Instagram yorumlarını "sosyal kanıt" olarak değerlendiriyor
+- Olumsuz bir yorum, ortalama **6 potansiyel müşteriyi** caydırıyor
+- Yanıtlanmış yorumlar **2.3 kat daha fazla** etkileşim alıyor
+- Algoritma, **yüksek yorum etkileşimi** olan postları daha fazla yayıyor
+
+## Yorum Türleri ve Yaklaşımlar
+
+### 1. Soru Yorumları
+"Fiyat ne kadar?", "Stokta var mı?", "Hangi şubede?"
+
+**Yaklaşım:** **30 dakika içinde** yanıt — algoritma için kritik. DM'ye yönlendirin.
+
+### 2. Övgü Yorumları
+"Süpermiş!", "Almak istiyorum!"
+
+**Yaklaşım:** Emoji + kişisel teşekkür + ek değer (link, indirim).
+
+### 3. Şikayet Yorumları
+"Siparişim gelmedi", "Kalitesi kötüydü"
+
+**Yaklaşım:** Asla silmeyin — DM'ye taşıyın, herkes önünde profesyonel kalın.
+
+### 4. Spam ve Bot Yorumları
+Linkler, emoji bombası, alakasız reklamlar.
+
+**Yaklaşım:** Filtre ile engelleyin (Settings → Privacy → Hidden Words).
+
+## Yorum Yönetimi Aracı: Yerleşik Filtreler
+
+Instagram'ın sağladığı:
+- **Hidden Words** — Belirli kelimeleri içeren yorumları otomatik gizle
+- **Manual Filter** — Kelime listesi (rakip ürün adları, küfür, vb.)
+- **Comment Controls** — Sadece takipçilerden yorum
+- **Restricted Accounts** — Belirli hesapların yorumlarını sadece o kişi görür
+
+## Etkili Yanıt Stratejisi
+
+### Yanıt Süresi
+- İlk 1 saat içinde gelen yorumlara yanıt = postun **5x daha fazla** dağıtım alması
+- Geç yanıtlar etkileşim spike'ını kaçırır
+
+### Emoji Kullanımı
+Yanıtlarda **2-3 emoji** ortalama optimal. Daha fazlası bot algısı yaratır.
+
+### Etkileşim Soruları
+Yanıtınıza bir soru ekleyerek **konuşmayı uzatın** — algoritma sever.
+
+### CTA Yerleştirme
+Olumlu yorumlara: "Daha fazlası için → bio link" CTA'sı.
+
+## Instagram DM ve Yorum Entegrasyonu
+
+Yorum + DM birlikte çalışmalı:
+- Public yorumda kısa selamla
+- "Detayları DM'den göndereyim" diyerek konuşmayı taşı
+- DM'de fiyat, link, kişisel bilgi paylaş
+
+Bu yaklaşım conversion'ı **%34 artırıyor**.
+
+## Olumsuz Yorum Krizleri
+
+### Adım 1: 15 Dakika Bekleyin
+Duygusal yanıt vermeyin.
+
+### Adım 2: Kontrol Edin
+- Müşteri haklı mı?
+- Daha önce yaşanmış mı?
+- Ne aksiyon mümkün?
+
+### Adım 3: Public Yanıt
+Kısa, profesyonel, çözüm odaklı. **DM'ye taşıyın**.
+
+### Adım 4: DM Çözümü
+Detay alın, telafi sunun, gerekirse yorum güncellemesi rica edin.
+
+## VoyageRespond ile Sosyal Medya Yorum Yönetimi
+
+[VoyageRespond](https://voyagerespond.com), Instagram, TikTok ve YouTube yorumlarını **tek panelden** yönetmenizi sağlar:
+
+- Çok platformlu yorum gelen kutusu
+- AI ton seçimli yanıt önerisi (8 ton)
+- Marka rehberi öğrenen AI
+- Toplu spam filtreleme
+
+## İlgili Rehberler
+
+- [TikTok Yorum Yönetimi](/blog/tiktok-yorum-yonetimi)
+- [YouTube Yorum Yönetimi](/blog/youtube-yorum-yonetimi)
+- [Online İtibar Yönetimi Rehberi](/blog/online-itibar-yonetimi-rehberi)
+
+**[3 ay ücretsiz deneyin →](https://voyagerespond.com/onboarding)**
+    `,
+  },
+  {
+    slug: "tiktok-yorum-yonetimi",
+    title: "TikTok Yorum Yönetimi: Markalar İçin 2026 Rehberi",
+    description: "TikTok yorumlarını yönetme rehberi. AI yanıt stratejileri, spam koruma ve viral içerik yönetimi.",
+    ogTitle: "TikTok Yorum Yönetimi Rehberi 2026",
+    ogDescription: "TikTok yorumları nasıl yönetilir? Spam koruma, AI yanıt ve viral kriz yönetimi.",
+    metaTitle: "TikTok Yorum Yönetimi | Marka Rehberi 2026",
+    metaDescription: "TikTok yorum yönetimi, AI yanıt stratejileri ve viral içerik kriz yönetimi rehberi.",
+    author: "VoyageRespond",
+    publishedAt: "2026-05-14",
+    category: "Sosyal Medya",
+    readTime: "8 dk",
+    keywords: ["tiktok yorum", "tiktok yorum yönetimi", "tiktok marka", "tiktok kriz yönetimi"],
+    content: `
+TikTok, **viral hızı** ve **genç kitle erişimi** ile markalar için artık zorunlu bir kanal. Ancak yorum sayıları diğer platformlardan **5-10 kat fazla** olabiliyor. Bu rehberde TikTok yorumlarını verimli yönetmenin yollarını anlatıyoruz.
+
+## TikTok Yorum Dinamikleri
+
+- Bir viral video saatte **binlerce** yorum alabilir
+- Yorumların **%30-40'ı spam, bot veya alakasız**
+- TikTok algoritması, **erken yorum etkileşimi** olan videoları daha fazla dağıtır
+- "Pinned comments" özelliği ile **3 yorum** sabitlenebilir — bu marka kontrolü için kritik
+
+## Spam ve Toxic Yorum Koruması
+
+TikTok'un yerleşik araçları:
+- **Filter Keywords** — Belirli kelimeler otomatik gizlenir
+- **Filter All Comments** — Tüm yorumlar onay bekler
+- **Block Words** — Kelime kara listesi (özelleştirilebilir)
+- **Restrict User** — Belirli hesapları sessize alma
+
+Profesyonel hesaplar için **mutlaka aktive edin**.
+
+## Yanıt Stratejileri
+
+### 1. Pinned Comment ile Yönlendirme
+Postun en üstüne sabitlenen yorum **5 kat daha fazla** okunur. Burada:
+- CTA (link, kampanya)
+- SSS yanıtı
+- Kullanıcı uyarısı
+
+### 2. Video ile Yanıt
+TikTok'un **"Reply with Video"** özelliği — bir yorumu bir sonraki videonuzun konusu yapın. Etkileşim **3x artar**.
+
+### 3. Emoji ve TikTok Diline Hakim Olun
+Resmi ton TikTok'ta **soğuk** algılanır. Genç kitle dilini öğrenin: "slay", "real", "fr", emoji bombası kabul.
+
+### 4. Erken Yanıt = Viral Boost
+İlk 30 dakikadaki yorum etkileşimi videoyu FYP'ye taşır. **Yorumlara hızlı yanıt verin**.
+
+## Kriz Yönetimi: Viral Olumsuz Yorum
+
+TikTok'ta tek bir olumsuz yorum **milyonlara ulaşabilir**. Adımlar:
+
+### Aşama 1: Hemen Tespit (0-30 dk)
+Otomatik bildirim sistemi şart. Manuel kontrol yetersiz.
+
+### Aşama 2: Profesyonel Yanıt
+Kısa, samimi, çözüm odaklı. Asla savunmacı olmayın — TikTok kullanıcısı bunu hemen tespit eder.
+
+### Aşama 3: Public Aksiyon
+Sorunla ilgili **resmi video yayınlayın**. Şeffaflık viral kriz çözümünün anahtarı.
+
+### Aşama 4: Takip Videosu
+1-2 hafta sonra "Bunu yaptık, sonuç bu" videosu — güveni geri kazanın.
+
+## TikTok Yorumlarında AI Yanıt
+
+TikTok yorum hacmi manuel yönetimi imkansız kılar. AI destekli yaklaşım:
+
+- **Yorum kategorisi** otomatik tanıma (soru, övgü, şikayet, spam)
+- **3 alternatif yanıt önerisi** sunma
+- **Marka tonuna** uygun yanıt üretimi
+- **Kullanıcı onayı** ile yayınlama (TikTok politikası gereği)
+
+## Restoran ve Otel İçin TikTok
+
+TikTok'ta **konum etiketleri** çok güçlü. Misafirlerinizin sizi etiketlediği videoları takip edin:
+- Olumlu içeriği **paylaşın** (UGC stratejisi)
+- Olumsuz içeriğe **profesyonel yanıt** verin
+- Misafiri **tag'leyerek teşekkür** edin (sadakati artırır)
+
+## VoyageRespond ile TikTok Otomasyon
+
+[VoyageRespond](https://voyagerespond.com), TikTok yorumlarını **resmi API üzerinden** çeker (sandbox + production):
+
+- Yorum kategorisi tanıma (intent detection)
+- 3 güvenli kısa yanıt önerisi
+- Kullanıcı onaylı yayın (TikTok politika uyumlu)
+- Çoklu video yönetimi
+
+## İlgili Rehberler
+
+- [Instagram Yorum Yönetimi](/blog/instagram-yorum-yonetimi)
+- [YouTube Yorum Yönetimi](/blog/youtube-yorum-yonetimi)
+- [Online İtibar Yönetimi Rehberi](/blog/online-itibar-yonetimi-rehberi)
+
+**[3 ay ücretsiz deneyin →](https://voyagerespond.com/onboarding)**
+    `,
+  },
+  {
+    slug: "youtube-yorum-yonetimi",
+    title: "YouTube Yorum Yönetimi: Kanal Sahipleri İçin 2026 Rehberi",
+    description: "YouTube yorumlarını yönetme rehberi. AI yanıt stratejileri, spam filtreleme, topluluk inşası ve algoritma etkisi.",
+    ogTitle: "YouTube Yorum Yönetimi Rehberi 2026",
+    ogDescription: "YouTube yorumları nasıl yönetilir? AI yanıt, spam filtreleme ve topluluk inşası rehberi.",
+    metaTitle: "YouTube Yorum Yönetimi | Kanal Rehberi 2026",
+    metaDescription: "YouTube yorum yönetimi, AI yanıt stratejileri ve topluluk inşası rehberi.",
+    author: "VoyageRespond",
+    publishedAt: "2026-05-14",
+    category: "Sosyal Medya",
+    readTime: "8 dk",
+    keywords: ["youtube yorum", "youtube yorum yönetimi", "youtube topluluk", "youtube spam"],
+    content: `
+YouTube yorum yönetimi, kanal büyümesinin **gizli motorudur**. Türkiye'de aylık 720 arama alan "youtube yorum" konusu, içerik üreticileri ve markalar için kritik. YouTube algoritması yorum etkileşimini sıralama sinyali olarak kullanır.
+
+## YouTube Yorum Algoritması
+
+YouTube **3 sinyal** üzerinden yorumları değerlendirir:
+
+### 1. Yorum Hacmi (Volume)
+Çok yorum alan video = ilgi çekici video.
+
+### 2. Yorum Hızı (Velocity)
+İlk 24 saat içinde gelen yorumlar **6x daha ağır** basar.
+
+### 3. Yanıt Etkileşimi (Engagement)
+Kanal sahibinin yanıtladığı yorumlar **algoritma için pozitif sinyal**.
+
+## Spam ve Toxic Yorum Koruma
+
+YouTube Studio araçları:
+- **Held for Review** — Belirli kriterlere uyan yorumlar onay bekler
+- **Block Words** — Kelime kara listesi
+- **Hidden Users** — Spam hesap engellenebilir
+- **Auto Moderation** — Linkler, fazla emoji, küfür otomatik filtrelenir
+
+Mutlaka aktif edin: **Settings → Community → Defaults**.
+
+## Etkili Yorum Yanıt Stratejisi
+
+### "Heart" Özelliği
+Yorumlara kalp koymak (sadece kanal sahibinin yetkisi) — kullanıcıya **bildirim gider**, sadakat artar.
+
+### Pinned Comment
+Her video için bir yorumu sabitleyin:
+- CTA (abone ol, link)
+- SSS yanıtı
+- Yeni içerik duyurusu
+
+### Topluluk İnşası
+Düzenli yorum yapan takipçileri **isimle tanıyın**. "Süper yorum [İsim]!" gibi yanıtlar topluluk hissi yaratır.
+
+### Soru-Cevap Stratejisi
+Yorum altında **bir soru sorun** — konuşmayı devam ettirin. YouTube algoritması seviyor.
+
+## Yorum Türleri ve Yaklaşımlar
+
+### 1. Övgü Yorumları
+→ Kalp + kişisel teşekkür
+
+### 2. Soru Yorumları
+→ Detaylı yanıt + bir sonraki video önerisi
+
+### 3. Yapıcı Eleştiri
+→ Kabul + öğrenme + gelecek video sözü
+
+### 4. Toxic Yorumlar
+→ Yanıtlama, gizle (bildirim gitmez), gerekirse engelleme
+
+### 5. Spam Yorumlar
+→ Otomatik filtre + raporlama
+
+## Long-form Video Yorum Yönetimi
+
+10+ dakikalık videolarda yorum sayısı patlar. Ölçeklendirmek için:
+
+- AI ile **yorum sınıflandırma** (soru, övgü, şikayet)
+- **Toplu yanıt önerileri**
+- Pinned comment ile SSS
+- Düzenli **community post** (yorum trafiğini buraya yönlendirin)
+
+## YouTube Shorts Yorumları
+
+Shorts farklı dinamiktedir:
+- Yorumlar **çok hızlı akar**
+- **Kısa, samimi yanıtlar** öne çıkar
+- Emoji ve TikTok diline benzer ton
+- Pinned comment **çok önemli** (Shorts'ta yorum kutusu küçüktür)
+
+## Markalar İçin YouTube Yorum Stratejisi
+
+- Müşterilerin sorularına **birinci elden yanıt**
+- Olumsuz yorumlara **şeffaf yaklaşım**
+- "Subscribe + comment" kampanyaları
+- Yorum yarışmaları (sıralamayı destekler)
+
+## VoyageRespond ile YouTube Otomasyon
+
+[VoyageRespond](https://voyagerespond.com), YouTube yorumlarını **resmi API üzerinden** çekip AI ile yönetir:
+
+- Yorum sınıflandırma (intent detection)
+- AI yanıt önerisi (8 ton seçeneği)
+- Spam otomatik filtreleme
+- Çoklu video yönetimi
+- Yorum analitikleri (en çok bahsedilen konular)
+
+## İlgili Rehberler
+
+- [Instagram Yorum Yönetimi](/blog/instagram-yorum-yonetimi)
+- [TikTok Yorum Yönetimi](/blog/tiktok-yorum-yonetimi)
+- [Online İtibar Yönetimi Rehberi](/blog/online-itibar-yonetimi-rehberi)
+
+**[3 ay ücretsiz deneyin →](https://voyagerespond.com/onboarding)**
+    `,
+  },
+];
+
+blogPosts.push(...reputationPosts);
+
 export const getBlogPost = (slug: string): BlogPost | undefined => {
   return blogPosts.find((post) => post.slug === slug);
 };
