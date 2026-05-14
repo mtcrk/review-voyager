@@ -32,6 +32,10 @@ Disallow: /rep-score
 Disallow: /report
 Disallow: /onboarding
 Disallow: /auth/callback
+Disallow: /auth/google-business/callback
+Disallow: /auth/reset
+Disallow: /auth/tiktok/callback
+Disallow: /en/
 Disallow: /reset-password
 Disallow: /login
 Disallow: /register
