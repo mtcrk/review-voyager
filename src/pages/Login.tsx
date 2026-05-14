@@ -76,7 +76,7 @@ export default function Login() {
     <div className="flex items-center justify-center min-h-screen bg-background">
       <SEO
         title="Giriş Yap | VoyageRespond"
-        description="VoyageRespond hesabınıza giriş yapın."
+        description="VoyageRespond hesabınıza giriş yaparak Google, Booking ve TripAdvisor yorumlarınızı tek panelden yönetin, AI yanıtlar oluşturun ve raporlarınızı görüntüleyin."
         canonical="/login"
         noindex
       />

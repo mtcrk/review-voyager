@@ -17,6 +17,9 @@ const staticRoutes = [
   { path: "/otel-yorum-cevaplari", changefreq: "monthly", priority: "0.8", lastmod: "2026-03-19" },
   { path: "/privacy-policy", changefreq: "yearly", priority: "0.3", lastmod: "2026-01-01" },
   { path: "/terms-of-service", changefreq: "yearly", priority: "0.3", lastmod: "2026-01-01" },
+  { path: "/login", changefreq: "yearly", priority: "0.2", lastmod: "2026-01-01" },
+  { path: "/register", changefreq: "yearly", priority: "0.2", lastmod: "2026-01-01" },
+  { path: "/forgot-password", changefreq: "yearly", priority: "0.2", lastmod: "2026-01-01" },
 ];
 
 function extractBlogPosts() {
