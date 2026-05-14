@@ -3,14 +3,7 @@ import { resolve } from "path";
 
 const BASE_URL = "https://voyagerespond.com";
 
-interface SitemapEntry {
-  path: string;
-  lastmod?: string;
-  changefreq?: string;
-  priority?: string;
-}
-
-const staticRoutes: SitemapEntry[] = [
+const staticRoutes = [
   { path: "/", changefreq: "weekly", priority: "1.0", lastmod: "2026-05-14" },
   { path: "/pricing", changefreq: "monthly", priority: "0.8", lastmod: "2026-03-10" },
   { path: "/about", changefreq: "monthly", priority: "0.6", lastmod: "2026-03-10" },
@@ -26,11 +19,11 @@ const staticRoutes: SitemapEntry[] = [
   { path: "/terms-of-service", changefreq: "yearly", priority: "0.3", lastmod: "2026-01-01" },
 ];
 
-function extractBlogPosts(): SitemapEntry[] {
+function extractBlogPosts() {
   const filePath = resolve("src/lib/blogPosts.ts");
   const content = readFileSync(filePath, "utf-8");
 
-  const posts: SitemapEntry[] = [];
+  const posts = [];
   // Extract slug and publishedAt from each blog post object
   const postRegex = /\{\s*slug:\s*"([^"]+)"[\s\S]*?publishedAt:\s*"([^"]+)"[\s\S]*?\},?/g;
 
@@ -49,7 +42,7 @@ function extractBlogPosts(): SitemapEntry[] {
   return posts;
 }
 
-function generateSitemap(entries: SitemapEntry[]) {
+function generateSitemap(entries) {
   const urls = entries.map((e) =>
     [
       `  <url>`,
