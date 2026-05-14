@@ -94,7 +94,7 @@ export default function Register() {
       <div className="flex items-center justify-center min-h-screen bg-background">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold">{t('auth.register.success')}</CardTitle>
+            <h1 className="text-2xl font-semibold leading-none tracking-tight">{t('auth.register.success')}</h1>
             <CardDescription>
               {t('auth.register.subtitle')}
             </CardDescription>
@@ -143,7 +143,7 @@ export default function Register() {
       />
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">{t('auth.register.title')}</CardTitle>
+          <h1 className="text-2xl font-semibold leading-none tracking-tight">{t('auth.register.title')}</h1>
           <CardDescription>
             {t('auth.register.subtitle')}
           </CardDescription>

@@ -59,7 +59,7 @@ const RestoranYorumCevaplari = () => {
     <div className="min-h-screen bg-background">
       <SEO
         title="Restoran Yorum Cevap Örnekleri | 30 Hazır Şablon"
-        description="Restoranınıza gelen Google, Yelp ve TripAdvisor yorumlarına profesyonel cevap örnekleri. Yemek kalitesi, servis hızı, hijyen ve atmosfer şikayetleri için 30 şablon."
+        description="Google, Yelp ve TripAdvisor restoran yorumları için 30 profesyonel cevap şablonu: yemek, servis, hijyen ve atmosfer."
         canonical="https://voyagerespond.com/restoran-yorum-cevaplari"
       />
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">

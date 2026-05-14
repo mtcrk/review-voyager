@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import { useLocation } from "react-router-dom";
 
 interface SEOProps {
   title: string;
@@ -13,11 +14,19 @@ interface SEOProps {
 const SITE_URL = "https://voyagerespond.com";
 
 const SEO = ({ title, description, canonical, ogImage, ogType, noindex, jsonLd }: SEOProps) => {
-  const url = canonical
+  const location = useLocation();
+  const isEn = location.pathname.startsWith("/en/") || location.pathname === "/en";
+
+  let url = canonical
     ? canonical.startsWith("http")
       ? canonical
       : `${SITE_URL}${canonical}`
     : undefined;
+
+  // For English routes, self-reference the /en/ canonical instead of the Turkish root
+  if (isEn) {
+    url = `${SITE_URL}${location.pathname}`;
+  }
   const image = ogImage || `${SITE_URL}/og-image.png`;
   const ldArray = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
 

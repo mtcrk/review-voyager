@@ -73,6 +73,9 @@ export default function About() {
 
       {/* Mission & Values */}
       <section className="container mx-auto px-4 sm:px-6 py-12 sm:py-16">
+        <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mb-10">
+          Misyonumuz ve Değerlerimiz
+        </h2>
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
           <div className="text-center p-6 sm:p-8 rounded-2xl border border-border bg-card hover:shadow-lg transition-shadow">
             <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
