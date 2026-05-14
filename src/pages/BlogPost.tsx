@@ -378,28 +378,6 @@ const BlogPost = () => {
           </div>
         </div>
       </footer>
-
-      {/* JSON-LD for Blog Post */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "BlogPosting",
-            headline: post.title,
-            description: post.description,
-            author: { "@type": "Organization", name: "VoyageRespond" },
-            datePublished: post.publishedAt,
-            publisher: {
-              "@type": "Organization",
-              name: "VoyageRespond",
-              logo: { "@type": "ImageObject", url: "https://voyagerespond.com/email-logo.png" },
-            },
-            mainEntityOfPage: `https://voyagerespond.com/blog/${post.slug}`,
-            keywords: post.keywords.join(", "),
-          }),
-        }}
-      />
     </div>
   );
 };

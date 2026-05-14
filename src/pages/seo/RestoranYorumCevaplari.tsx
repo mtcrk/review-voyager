@@ -61,17 +61,6 @@ const RestoranYorumCevaplari = () => {
         title="Restoran Yorum Cevap Örnekleri | Google ve Yelp için 30 Şablon"
         description="Restoranınıza gelen Google, Yelp ve TripAdvisor yorumlarına profesyonel cevap örnekleri. Yemek kalitesi, servis hızı, hijyen ve atmosfer şikayetleri için 30 şablon."
         canonical="https://voyagerespond.com/restoran-yorum-cevaplari"
-        jsonLd={{
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          mainEntity: templates.flatMap((s) =>
-            s.items.map((it) => ({
-              "@type": "Question",
-              name: it.title,
-              acceptedAnswer: { "@type": "Answer", text: it.text },
-            }))
-          ),
-        }}
       />
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
         <div className="container mx-auto px-6">

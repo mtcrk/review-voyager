@@ -1,0 +1,25 @@
+# VoyageRespond
+
+> AI destekli yorum yönetim platformu. Otel, restoran ve işletmeler için Google, Booking, TripAdvisor ve TikTok yorumlarını yapay zeka ile yönetin.
+
+VoyageRespond; çok platformlu yorum toplama, AI destekli yanıt önerileri, duygu analizi, AI görünürlük skoru ve çok lokasyonlu işletme yönetimi sunan bir SaaS ürünüdür. Türkçe ve İngilizce destekli, 8 farklı tonlamada otomatik yanıt üretir.
+
+## Pages
+
+- [Ana Sayfa](/): Ürün özeti, özellikler ve 3 ay ücretsiz deneme.
+- [Fiyatlandırma](/pricing): Plan seçenekleri ve fiyat bilgileri.
+- [Hakkımızda](/about): Şirket, misyon ve ekip bilgileri.
+- [İletişim](/contact): Demo talebi ve iletişim formu.
+- [Demo](/demo): Etkileşimli AI yanıt demosu.
+- [Blog](/blog): Yorum yönetimi, AI görünürlük ve dijital itibar rehberleri.
+
+## Rehberler
+
+- [Google Yorum Cevap Örnekleri](/google-yorum-cevap-ornekleri): Google yorumları için 25 hazır yanıt şablonu.
+- [Otel Yorum Cevapları](/otel-yorum-cevaplari): Booking, TripAdvisor ve Google için 30 otel yanıt şablonu.
+- [Restoran Yorum Cevapları](/restoran-yorum-cevaplari): Restoranlara özel 30 yanıt şablonu.
+
+## Optional
+
+- [Gizlilik Politikası](/privacy-policy)
+- [Kullanım Koşulları](/terms-of-service)

@@ -66,17 +66,6 @@ const OtelYorumCevaplari = () => {
         title="Otel Yorum Cevap Örnekleri | Booking, TripAdvisor için 30 Şablon"
         description="Otelinize gelen Google, Booking ve TripAdvisor yorumlarına profesyonel cevap örnekleri. Misafir memnuniyeti, şikayet yönetimi ve oda sorunları için 30 hazır şablon."
         canonical="https://voyagerespond.com/otel-yorum-cevaplari"
-        jsonLd={{
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          mainEntity: templates.flatMap((s) =>
-            s.items.map((it) => ({
-              "@type": "Question",
-              name: it.title,
-              acceptedAnswer: { "@type": "Answer", text: it.text },
-            }))
-          ),
-        }}
       />
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
         <div className="container mx-auto px-6">
