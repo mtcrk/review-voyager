@@ -237,6 +237,10 @@ const Index = () => {
                 alt={t('indexPage.hero.screenshotAlt')}
                 className="w-full h-auto"
                 loading="eager"
+                fetchPriority="high"
+                decoding="async"
+                width={1280}
+                height={800}
               />
             </div>
           </div>
