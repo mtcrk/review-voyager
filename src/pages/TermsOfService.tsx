@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import SEO from '@/components/seo/SEO';
 
 export default function TermsOfService() {
   const { t } = useTranslation();
@@ -23,6 +24,11 @@ export default function TermsOfService() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Kullanım Koşulları | VoyageRespond"
+        description="VoyageRespond kullanım koşulları: hizmet kapsamı, hesap kuralları, ödeme, sorumluluk ve fesih şartları hakkında bilmeniz gerekenler."
+        canonical="https://voyagerespond.com/terms-of-service"
+      />
       <div className="container mx-auto px-6 py-12 max-w-4xl">
         <Button
           variant="ghost"
