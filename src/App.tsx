@@ -74,62 +74,64 @@ const BlogRedirect = () => {
 const queryClient = new QueryClient();
 
 const AppRoutes = () => (
-  <Routes>
-    <Route path="/" element={<Index />} />
-    <Route path="/login" element={<Login />} />
-    <Route path="/register" element={<Register />} />
-    <Route path="/forgot-password" element={<ForgotPassword />} />
-    <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-    <Route path="/terms-of-service" element={<TermsOfService />} />
-    <Route path="/auth/callback" element={<AuthCallback />} />
-    <Route path="/auth/google-business/callback" element={<GoogleBusinessCallback />} />
-    <Route path="/auth/reset" element={<ResetPassword />} />
-    <Route path="/onboarding" element={<Onboarding />} />
-    <Route path="/hub" element={<Hub />} />
-    <Route path="/pricing" element={<Navigate to="/#pricing" replace />} />
-    <Route path="/contact" element={<Contact />} />
-    <Route path="/demo" element={<DemoPage />} />
-    <Route path="/about" element={<About />} />
-    <Route path="/blog" element={<Blog />} />
-    <Route path="/blog/:slug" element={<BlogPost />} />
-    {/* Redirect /en/blog/* to /blog/* to avoid duplicate content (canonical lives at /blog/...) */}
-    <Route path="/en/blog" element={<Navigate to="/blog" replace />} />
-    <Route path="/en/blog/:slug" element={<BlogRedirect />} />
-    <Route path="/google-yorum-cevap-ornekleri" element={<GoogleYorumCevapOrnekleri />} />
-    <Route path="/restoran-yorum-cevaplari" element={<RestoranYorumCevaplari />} />
-    <Route path="/otel-yorum-cevaplari" element={<OtelYorumCevaplari />} />
-    <Route path="/automations/instagram-sales" element={<InstagramSales />} />
-    <Route path="/automations/google-reviews" element={<GoogleReviews />} />
-    <Route path="/automations/whatsapp" element={<WhatsAppAutomation />} />
-    <Route path="/automations/other" element={<OtherAutomations />} />
-    <Route path="/channels/tiktok" element={<ProtectedRoute><TikTokChannel /></ProtectedRoute>} />
-    <Route path="/auth/tiktok/callback" element={<TikTokCallback />} />
-    <Route path="/tiktok-inbox" element={<ProtectedRoute><AppLayout><TikTokInbox /></AppLayout></ProtectedRoute>} />
-    <Route path="/tiktok-review-kit" element={<ProtectedRoute><TikTokReviewKit /></ProtectedRoute>} />
-    <Route path="/share/:businessSlug" element={<StoryKit />} />
-    <Route path="/story-kit" element={<ProtectedRoute><StoryKitSettings /></ProtectedRoute>} />
-    <Route path="/tiktok-dm" element={<ProtectedRoute><TikTokDMInbox /></ProtectedRoute>} />
-    <Route path="/locations" element={<ProtectedRoute><AppLayout><Locations /></AppLayout></ProtectedRoute>} />
-    <Route path="/locations/platform-ratings" element={<ProtectedRoute><AppLayout><PlatformRatings /></AppLayout></ProtectedRoute>} />
-    <Route path="/locations/platform-ratings/:id" element={<ProtectedRoute><AppLayout><PlatformRatingDetail /></AppLayout></ProtectedRoute>} />
-    <Route path="/dashboard" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
-    <Route path="/inbox" element={<ProtectedRoute><AppLayout><Inbox /></AppLayout></ProtectedRoute>} />
-    <Route path="/reviews" element={<ProtectedRoute><AppLayout><Reviews /></AppLayout></ProtectedRoute>} />
-    <Route path="/reviews/:id" element={<ProtectedRoute><AppLayout><ReviewDetailPage /></AppLayout></ProtectedRoute>} />
-    <Route path="/auto-reply" element={<ProtectedRoute><AppLayout><AutoReply /></AppLayout></ProtectedRoute>} />
-    <Route path="/statistics" element={<ProtectedRoute><AppLayout><Statistics /></AppLayout></ProtectedRoute>} />
-    <Route path="/report" element={<ProtectedRoute><AppLayout><Report /></AppLayout></ProtectedRoute>} />
-    <Route path="/chat" element={<ProtectedRoute><AppLayout><ChatWithReviewsPage /></AppLayout></ProtectedRoute>} />
-    <Route path="/settings" element={<ProtectedRoute><AppLayout><Settings /></AppLayout></ProtectedRoute>} />
-    <Route path="/email" element={<ProtectedRoute><AppLayout><EmailCenter /></AppLayout></ProtectedRoute>} />
-    <Route path="/performance" element={<ProtectedRoute><AppLayout><GooglePerformance /></AppLayout></ProtectedRoute>} />
-    <Route path="/rep-score" element={<ProtectedRoute><AppLayout><RepScore /></AppLayout></ProtectedRoute>} />
-    <Route path="/google-accounts" element={<ProtectedRoute><AppLayout><GoogleAccounts /></AppLayout></ProtectedRoute>} />
-    <Route path="/admin/apify-logs" element={<AdminApifyLogs />} />
-    <Route path="/youtube" element={<ProtectedRoute><AppLayout><YouTubeInbox /></AppLayout></ProtectedRoute>} />
-    <Route path="/social-analytics" element={<ProtectedRoute><AppLayout><SocialAnalytics /></AppLayout></ProtectedRoute>} />
-    <Route path="*" element={<NotFound />} />
-  </Routes>
+  <Suspense fallback={<div className="min-h-screen bg-background" />}>
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+      <Route path="/terms-of-service" element={<TermsOfService />} />
+      <Route path="/auth/callback" element={<AuthCallback />} />
+      <Route path="/auth/google-business/callback" element={<GoogleBusinessCallback />} />
+      <Route path="/auth/reset" element={<ResetPassword />} />
+      <Route path="/onboarding" element={<Onboarding />} />
+      <Route path="/hub" element={<Hub />} />
+      <Route path="/pricing" element={<Navigate to="/#pricing" replace />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/demo" element={<DemoPage />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/blog" element={<Blog />} />
+      <Route path="/blog/:slug" element={<BlogPost />} />
+      {/* Redirect /en/blog/* to /blog/* to avoid duplicate content (canonical lives at /blog/...) */}
+      <Route path="/en/blog" element={<Navigate to="/blog" replace />} />
+      <Route path="/en/blog/:slug" element={<BlogRedirect />} />
+      <Route path="/google-yorum-cevap-ornekleri" element={<GoogleYorumCevapOrnekleri />} />
+      <Route path="/restoran-yorum-cevaplari" element={<RestoranYorumCevaplari />} />
+      <Route path="/otel-yorum-cevaplari" element={<OtelYorumCevaplari />} />
+      <Route path="/automations/instagram-sales" element={<InstagramSales />} />
+      <Route path="/automations/google-reviews" element={<GoogleReviews />} />
+      <Route path="/automations/whatsapp" element={<WhatsAppAutomation />} />
+      <Route path="/automations/other" element={<OtherAutomations />} />
+      <Route path="/channels/tiktok" element={<ProtectedRoute><TikTokChannel /></ProtectedRoute>} />
+      <Route path="/auth/tiktok/callback" element={<TikTokCallback />} />
+      <Route path="/tiktok-inbox" element={<ProtectedRoute><AppLayout><TikTokInbox /></AppLayout></ProtectedRoute>} />
+      <Route path="/tiktok-review-kit" element={<ProtectedRoute><TikTokReviewKit /></ProtectedRoute>} />
+      <Route path="/share/:businessSlug" element={<StoryKit />} />
+      <Route path="/story-kit" element={<ProtectedRoute><StoryKitSettings /></ProtectedRoute>} />
+      <Route path="/tiktok-dm" element={<ProtectedRoute><TikTokDMInbox /></ProtectedRoute>} />
+      <Route path="/locations" element={<ProtectedRoute><AppLayout><Locations /></AppLayout></ProtectedRoute>} />
+      <Route path="/locations/platform-ratings" element={<ProtectedRoute><AppLayout><PlatformRatings /></AppLayout></ProtectedRoute>} />
+      <Route path="/locations/platform-ratings/:id" element={<ProtectedRoute><AppLayout><PlatformRatingDetail /></AppLayout></ProtectedRoute>} />
+      <Route path="/dashboard" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
+      <Route path="/inbox" element={<ProtectedRoute><AppLayout><Inbox /></AppLayout></ProtectedRoute>} />
+      <Route path="/reviews" element={<ProtectedRoute><AppLayout><Reviews /></AppLayout></ProtectedRoute>} />
+      <Route path="/reviews/:id" element={<ProtectedRoute><AppLayout><ReviewDetailPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/auto-reply" element={<ProtectedRoute><AppLayout><AutoReply /></AppLayout></ProtectedRoute>} />
+      <Route path="/statistics" element={<ProtectedRoute><AppLayout><Statistics /></AppLayout></ProtectedRoute>} />
+      <Route path="/report" element={<ProtectedRoute><AppLayout><Report /></AppLayout></ProtectedRoute>} />
+      <Route path="/chat" element={<ProtectedRoute><AppLayout><ChatWithReviewsPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute><AppLayout><Settings /></AppLayout></ProtectedRoute>} />
+      <Route path="/email" element={<ProtectedRoute><AppLayout><EmailCenter /></AppLayout></ProtectedRoute>} />
+      <Route path="/performance" element={<ProtectedRoute><AppLayout><GooglePerformance /></AppLayout></ProtectedRoute>} />
+      <Route path="/rep-score" element={<ProtectedRoute><AppLayout><RepScore /></AppLayout></ProtectedRoute>} />
+      <Route path="/google-accounts" element={<ProtectedRoute><AppLayout><GoogleAccounts /></AppLayout></ProtectedRoute>} />
+      <Route path="/admin/apify-logs" element={<AdminApifyLogs />} />
+      <Route path="/youtube" element={<ProtectedRoute><AppLayout><YouTubeInbox /></AppLayout></ProtectedRoute>} />
+      <Route path="/social-analytics" element={<ProtectedRoute><AppLayout><SocialAnalytics /></AppLayout></ProtectedRoute>} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  </Suspense>
 );
 
 const App = () => (
