@@ -556,6 +556,171 @@ export const platformLandingPages: PlatformLandingContent[] = [
     ],
     relatedSlugs: ["google-yorumlari-icin-yapay-zeka", "instagram-yorumlari-icin-yapay-zeka", "tripadvisor-yorumlari-icin-yapay-zeka"],
   },
+  {
+    slug: "facebook-yorumlari-icin-yapay-zeka",
+    platformName: "Facebook Yorumları",
+    emoji: "📘",
+    badgeText: "Facebook · AI",
+    metaTitle: "Facebook Yorumları için Yapay Zeka: Otomatik Cevap & Yönetim",
+    metaDescription: "Facebook sayfa yorumlarına, paylaşım yorumlarına ve değerlendirmelere yapay zeka ile saniyeler içinde marka uyumlu cevap yazın. Tek panelden moderasyon.",
+    h1: "Facebook yorumlarına yapay zeka ile cevap: Sayfa, gönderi ve değerlendirme yönetimi",
+    intro:
+      "Facebook sayfanız hâlâ aktif misafir akışı çekiyor — ama yorum kutusu çoğu zaman boş bakıyor. Yapay zeka destekli yorum yönetimi, Facebook sayfa değerlendirmelerinizi, gönderi altındaki yorumları ve mesajları tek panelden toplar, marka sesinizde yanıt önerir.",
+    sections: [
+      {
+        id: "neden-onemli",
+        heading: "Facebook yorumları hâlâ neden önemli?",
+        paragraphs: [
+          "Türkiye'de Facebook hâlâ 40 yaş üstü kitle, yerel topluluklar ve otel/restoran tavsiye gruplarında en yoğun kullanılan platform. Sayfa değerlendirmeleri Google'a indeksleniyor ve marka aramalarında çıkıyor.",
+          "Cevapsız bir Facebook yorumu, potansiyel misafire \"bu işletme ilgilenmiyor\" sinyali verir. Hızlı ve kişisel cevap dönüşümü doğrudan etkiler.",
+        ],
+      },
+      {
+        id: "ai-nasil-calisir",
+        heading: "Facebook yorumlarında yapay zeka nasıl çalışır?",
+        paragraphs: [
+          "VoyageRespond, Facebook Graph API üzerinden sayfanıza güvenli OAuth ile bağlanır. Tüm sayfa yorumları, gönderi altındaki yorumlar ve değerlendirmeler tek panelde toplanır. Yapay zeka her yorumu duygu, niyet ve dile göre etiketler, ardından 8 farklı tonda yanıt önerir.",
+        ],
+        bullets: [
+          "Pozitif yorumlar için otomatik teşekkür modu",
+          "Negatif yorumlar için ekip içi atama ve onay akışı",
+          "Spam/küfür filtresi ile gizleme önerisi",
+          "Çok dilli destek: turist yorumlarına anadilinde cevap",
+        ],
+      },
+      {
+        id: "spam-moderasyon",
+        heading: "Spam ve negatif yorum moderasyonu",
+        paragraphs: [
+          "Facebook'ta spam ve rakip saldırı yorumları sık görülür. Yapay zeka, spam kalıplarını öğrenip otomatik gizleme/işaretleme önerisi sunar. Gerçek negatif geri bildirimlerse Slack veya e-posta üzerinden anında ekibe bildirilir.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Facebook sayfama bağlanmak güvenli mi?",
+        answer:
+          "Evet. Bağlantı Meta'nın resmi OAuth 2.0 akışı üzerinden kurulur, şifreniz alınmaz. İstediğiniz zaman tek tıkla bağlantıyı kesebilirsiniz.",
+      },
+      {
+        question: "Hem sayfa yorumlarını hem değerlendirmeleri yönetiyor mu?",
+        answer:
+          "Evet. Sayfa gönderilerinin altındaki yorumlar, sayfa değerlendirmeleri (tavsiye ediyor/etmiyor) ve mesajlar tek panelde birleşir.",
+      },
+      {
+        question: "Instagram ile birlikte mi çalışıyor?",
+        answer:
+          "Evet. Facebook bağlantısıyla aynı Business Suite hesabı altındaki Instagram yorumları da otomatik içe aktarılır.",
+      },
+    ],
+    relatedSlugs: ["instagram-yorumlari-icin-yapay-zeka", "google-yorumlari-icin-yapay-zeka", "yorumlara-yapay-zeka-ile-cevap-yazma"],
+  },
+  {
+    slug: "youtube-yorumlari-icin-yapay-zeka",
+    platformName: "YouTube Yorumları",
+    emoji: "▶️",
+    badgeText: "YouTube · AI",
+    metaTitle: "YouTube Yorumları için Yapay Zeka: Otomatik Cevaplama Aracı",
+    metaDescription: "YouTube video yorumlarınıza yapay zeka ile saniyeler içinde marka uyumlu cevap yazın. Spam filtresi, duygu analizi ve toplu yanıt tek panelde.",
+    h1: "YouTube yorumlarına yapay zeka ile cevap: Kanal büyütmenin sessiz silahı",
+    intro:
+      "YouTube yorumları, kanal algoritması için en güçlü etkileşim sinyalidir. Ama 1.000 abone sonrası yorumlara yetişmek imkansızlaşır. Yapay zeka, her yoruma saniyeler içinde marka tonunda anlamlı cevap yazar — etkileşim, izlenme süresi ve abone dönüşümü artar.",
+    sections: [
+      {
+        id: "neden-onemli",
+        heading: "YouTube yorum cevapları algoritmayı nasıl etkiler?",
+        paragraphs: [
+          "YouTube algoritması yorum sayısı kadar yorum cevap oranını da \"engagement\" sinyali olarak okur. Cevaplanan yorumlar yeni yorumları tetikler, video önerilenlere düşer.",
+          "Yorumlara verilen cevaplar abonelere bildirim gönderir — bu hem geri tıklama hem watch time getirir.",
+        ],
+      },
+      {
+        id: "ai-nasil-calisir",
+        heading: "YouTube yorum AI yönetimi nasıl çalışır?",
+        paragraphs: [
+          "YouTube Data API üzerinden kanalınıza OAuth ile bağlanılır. Tüm video yorumları tek panele akar, AI her yorumu okur — soru mu, övgü mü, spam mı ayırt eder. Sorulara içerikten beslenmiş yanıtlar, övgülere kişisel teşekkürler önerir.",
+        ],
+        bullets: [
+          "Spam ve link yorumlarını otomatik tespit",
+          "Soru içeren yorumlara öncelik etiketi",
+          "Sabitlenmiş cevaplarla topluluk yönetimi",
+          "Çoklu kanal desteği (kişisel + marka kanalı)",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Tüm videolarımdaki yorumları görür müyüm?",
+        answer:
+          "Evet. Kanalınızdaki tüm public videoların yorumları tek panelde birleşir. Geçmiş yorumlar da içe aktarılır.",
+      },
+      {
+        question: "Otomatik cevap göndermek YouTube politikalarına aykırı mı?",
+        answer:
+          "Hayır. AI, yanıt önerir; gönderim öncesi onay verebilir veya otomatik mod seçebilirsiniz. Tüm gönderim YouTube API'nin resmi yanıt endpoint'i üzerinden yapılır.",
+      },
+      {
+        question: "Türkçe ve İngilizce yorumlar destekleniyor mu?",
+        answer:
+          "Evet. AI yorumun dilini otomatik algılar ve aynı dilde yanıt üretir. Toplam 12+ dil desteği vardır.",
+      },
+    ],
+    relatedSlugs: ["instagram-yorumlari-icin-yapay-zeka", "tiktok-yorumlari-icin-yapay-zeka", "yorumlara-yapay-zeka-ile-cevap-yazma"],
+  },
+  {
+    slug: "hotels-com-yorumlari-icin-yapay-zeka",
+    platformName: "Hotels.com Yorumları",
+    emoji: "🏩",
+    badgeText: "Hotels.com · AI",
+    metaTitle: "Hotels.com Yorumları için Yapay Zeka: Otel Yorum Yönetimi",
+    metaDescription: "Hotels.com'daki misafir yorumlarınıza yapay zeka ile profesyonel cevaplar yazın. Booking, TripAdvisor ve Google ile tek panelden yönetin.",
+    h1: "Hotels.com yorumlarına yapay zeka ile cevap: Misafir deneyimini kanıtla",
+    intro:
+      "Hotels.com ve Expedia ekosistemi Avrupa ve Amerika misafirinin en sık baktığı OTA'lardan biri. Yorum cevap oranı, otelinizin sıralamasını ve dönüşüm oranını doğrudan etkiler. Yapay zeka, tüm Hotels.com yorumlarınızı tek panele çekip saniyeler içinde marka tonunda yanıt önerir.",
+    sections: [
+      {
+        id: "neden-onemli",
+        heading: "Hotels.com yorumları otel için neden kritik?",
+        paragraphs: [
+          "Hotels.com algoritması, cevaplanmış yorum oranı yüksek otelleri arama sonuçlarında üst sıralara çıkarır. Misafirler de cevap veren oteli \"daha güvenilir\" olarak değerlendirir.",
+          "Ekosistemde Expedia, Vrbo ve Orbitz ile entegre çalıştığı için Hotels.com'daki tek bir yorum birden fazla platformda görünür.",
+        ],
+      },
+      {
+        id: "ai-nasil-calisir",
+        heading: "Hotels.com yorum yönetimi nasıl çalışır?",
+        paragraphs: [
+          "VoyageRespond, Hotels.com sayfanızı hibrit bir yöntemle takip eder: otel ID'nizi girersiniz, sistem yeni yorumları otomatik çeker. AI her yorumu dile, duyguya ve niyete göre etiketler, marka sesinizde profesyonel yanıt önerir.",
+          "Hotels.com'un kendi paneli yanıtları yayınlamak için kullanılır — VoyageRespond yanıtı sizin için hazırlar, tek tıkla kopyalayıp yapıştırırsınız.",
+        ],
+      },
+      {
+        id: "coklu-ota",
+        heading: "Booking, TripAdvisor ve Google ile birlikte",
+        paragraphs: [
+          "Hotels.com'u tek başına yönetmek değil, Booking, TripAdvisor, Google ve Tatil Sepeti gibi tüm OTA yorumlarınızı tek gelen kutusunda görmek operasyonu rahatlatır. Aynı misafir farklı platformlarda yorum yazmışsa AI bunu eşleştirir.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Hotels.com'a doğrudan bağlanıyor mu?",
+        answer:
+          "Hotels.com henüz açık halka açık yanıt API'si vermiyor. VoyageRespond yorumları yarı-otomatik çeker, AI yanıtı hazırlar, siz Hotels.com paneline kopyalayıp yayınlarsınız.",
+      },
+      {
+        question: "Expedia yorumları da geliyor mu?",
+        answer:
+          "Evet. Expedia ve Hotels.com aynı yorum havuzunu paylaşır, dolayısıyla Expedia yorumlarınız da panele düşer.",
+      },
+      {
+        question: "Yanıtlar İngilizce mi yazılıyor?",
+        answer:
+          "AI yorumun dilini otomatik algılar ve aynı dilde yanıt önerir. Türkçe, İngilizce, Almanca, Rusça dahil 12+ dil desteklenir.",
+      },
+    ],
+    relatedSlugs: ["booking-yorumlari-icin-yapay-zeka", "tripadvisor-yorumlari-icin-yapay-zeka", "google-yorumlari-icin-yapay-zeka"],
+  },
 ];
 
 export function getPlatformLandingPage(slug: string): PlatformLandingContent | undefined {
