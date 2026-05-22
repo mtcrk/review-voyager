@@ -721,6 +721,334 @@ export const platformLandingPages: PlatformLandingContent[] = [
     ],
     relatedSlugs: ["booking-yorumlari-icin-yapay-zeka", "tripadvisor-yorumlari-icin-yapay-zeka", "google-yorumlari-icin-yapay-zeka"],
   },
+  {
+    slug: "trendyol-yorumlari-icin-yapay-zeka",
+    platformName: "Trendyol Yorumları",
+    emoji: "🛒",
+    badgeText: "Trendyol · AI",
+    metaTitle: "Trendyol Yorumları için Yapay Zeka: Satıcı Cevap & Yönetim",
+    metaDescription: "Trendyol mağaza ve ürün yorumlarına yapay zeka ile marka uyumlu cevap yazın. Otomatik satıcı yanıtları, negatif yorum uyarısı ve duygu analizi.",
+    h1: "Trendyol yorumlarına yapay zeka ile cevap: Satıcı puanınızı yükseltin",
+    intro:
+      "Trendyol'da satıcı puanı ve yorum cevap oranı, ürün sıralamasını doğrudan etkiler. Müşteri bir ürünü incelerken satıcının yorumlara verdiği yanıtları okur — cevap vermeyen satıcıya güven azalır. Yapay zeka destekli yorum yönetimi, Trendyol mağaza yorumlarınızı tek panelden toplar, duygu analizi yapar ve saniyeler içinde profesyonel yanıt önerir.",
+    sections: [
+      {
+        id: "neden-onemli",
+        heading: "Trendyol yorumları satıcı için neden kritik?",
+        paragraphs: [
+          "Trendyol algoritması, yorum cevap oranı yüksek mağazaları listelemede üst sıralara çıkarır. Ayrıca potansiyel alıcı, negatif yoruma verilen profesyonel yanıtı görünce satın alma riskini azaltır.",
+          "Satıcı puanı %95'in üzerinde olan mağazalar, 'Trendyol Garantili Mağaza' rozetine daha yakın olur ve dönüşüm oranı %20-30 artar.",
+        ],
+      },
+      {
+        id: "trendyol-eksikleri",
+        heading: "Trendyol Satıcı Paneli'nin yetmediği noktalar",
+        paragraphs: [
+          "Trendyol Satıcı Paneli temel cevap özelliği sunar, ama hiçbir akıllı katman içermez. Her yoruma tek tek girip manuel yazmak gerekir.",
+        ],
+        bullets: [
+          "Otomatik yanıt şablonu yok; her cevabı sıfırdan yazarsınız.",
+          "Negatif yorum önceliklendirme yok: 5 yıldızlı övgü ile 1 yıldızlı şikayet aynı listede.",
+          "Duygu analizi yok: Yorumun tonunu manuel okumak zorundasınız.",
+          "Çoklu mağaza yönetimi karmaşası: Birden fazla markanız varsa her paneli ayrı açmanız gerekir.",
+          "Rakip ve spam yorum ayrımı yok; manuel rapor etme süreci uzun.",
+        ],
+      },
+      {
+        id: "ai-nasil-calisir",
+        heading: "Yapay zeka ile Trendyol yorum yönetimi nasıl çalışır?",
+        paragraphs: [
+          "VoyageRespond, Trendyol mağaza sayfanızı hibrit yöntemle takip eder. Yeni yorum geldiğinde AI yorumu analiz eder: duygu (pozitif/nötr/negatif), niyet (övgü, şikayet, iade talebi, ürün sorusu) ve dile göre etiketler.",
+          "Marka sesinizde 3 farklı yanıt önerisi üretir. Tek tıkla onaylayıp kopyalayabilir, veya düzenleyip Trendyol paneline yapıştırabilirsiniz.",
+        ],
+      },
+      {
+        id: "negatif-uyari",
+        heading: "Negatif yorum anında uyarı ve kurtarma",
+        paragraphs: [
+          "1-2 yıldızlık yorum geldiği an e-posta veya Slack bildirimi alırsınız. AI yorumun ana şikayetini çıkarır ('ürün hasarlı geldi', 'kargo gecikti') ve empati + çözüm içeren yanıt taslağı hazırlar.",
+          "Hızlı ve profesyonel yanıt, potansiyel alıcılara 'bu satıcı sorunları çözüyor' mesajı verir. Ayrıca iade-talebi öncesi çözüm sunarak maliyetli iadelerin önüne geçebilirsiniz.",
+        ],
+      },
+      {
+        id: "coklu-magaza",
+        heading: "Çoklu mağaza ve ürün kategorisi yönetimi",
+        paragraphs: [
+          "Birden fazla Trendyol mağazası veya markası yönetiyorsanız tüm yorumlar tek dashboard'da birleşir. Mağaza bazlı puan, cevap oranı ve duygu trendi raporlanır.",
+          "Elektronik mağazanızdaki 'kargo' şikayetleri ile kozmetik mağazanızdaki 'ambalaj' şikayetleri ayrı kategorize edilir, böylece operasyonel hataları kaynağında görürsünüz.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Trendyol'a doğrudan API ile bağlanıyor musunuz?",
+        answer:
+          "Trendyol henüz satıcılar için açık yanıt API'si sunmuyor. VoyageRespond yorumları yarı-otomatik çeker, AI yanıtı hazırlar, siz Trendyol Satıcı Paneli'ne kopyalayıp yayınlarsınız. Bu yöntem tamamen güvenli ve Trendyol kurallarına uygundur.",
+      },
+      {
+        question: "Negatif yorumlara nasıl cevap vermeliyim?",
+        answer:
+          "AI, şikayetin türüne göre empati + somut çözüm içeren yanıtlar üretir. Örneğin 'ürün hasarlı' şikayetine 'özür dileriz, hemen yeni ürün gönderiyoruz' tonunda; 'kargo gecikti' şikayetine ise 'kargo partnerimizle görüştük, gecikme telafisi sağlayacağız' şeklinde profesyonel yanıtlar önerir.",
+      },
+      {
+        question: "Birden fazla Trendyol mağazamı bağlayabilir miyim?",
+        answer:
+          "Evet. Tek VoyageRespond hesabıyla sınırsız Trendyol mağazası takip edebilirsiniz. Her mağaza ayrı puan, ayrı cevap oranı ve karşılaştırmalı raporlarla görünür.",
+      },
+      {
+        question: "Yorum cevaplaması satıcı puanımı etkiler mi?",
+        answer:
+          "Evet, dolaylı olarak etkiler. Cevap veren mağazalar alıcı gözünde daha güvenilir algılanır, bu da dönüşüm oranını artırır. Ayrıca cevaplanmış yorum oranı, Trendyol'un listeleme algoritmasındaki 'mağaza kalite skoru'na olumlu yansır.",
+      },
+    ],
+    relatedSlugs: ["yemeksepeti-yorumlari-icin-yapay-zeka", "google-yorumlari-icin-yapay-zeka", "yorumlara-yapay-zeka-ile-cevap-yazma"],
+  },
+  {
+    slug: "yemeksepeti-yorumlari-icin-yapay-zeka",
+    platformName: "Yemeksepeti Yorumları",
+    emoji: "🍔",
+    badgeText: "Yemeksepeti · AI",
+    metaTitle: "Yemeksepeti Yorumları için Yapay Zeka: Restoran Cevap & Yönetim",
+    metaDescription: "Yemeksepeti sipariş ve restoran yorumlarına yapay zeka ile anında profesyonel cevap yazın. Negatif yorum uyarısı ve marka sesinde yanıtlar.",
+    h1: "Yemeksepeti yorumlarına yapay zeka ile cevap: Restoran itibarınızı koruyun",
+    intro:
+      "Yemeksepeti, Türkiye'nin en büyük online yemek sipariş platformu. Restoranınızın puanı ve yorumları, sipariş hacminizi doğrudan belirler. Ancak her gün onlarca yoruma manuel cevap yazmak mutfak operasyonunun yanında imkansızlaşır. Yapay zeka, Yemeksepeti yorumlarınızı otomatik toplar, duygu analizi yapar ve saniyeler içinde marka sesinde yanıt önerir.",
+    sections: [
+      {
+        id: "neden-onemli",
+        heading: "Yemeksepeti yorumları restoran için neden hayati?",
+        paragraphs: [
+          "Yemeksepeti'nde 4.5 üzeri puanlı restoranlar, arama sonuçlarında üst sıralarda görünür ve sipariş hacmi ortalama %35 daha yüksektir. Yeni müşteri restoran seçerken ilk 10 yoruma ve satıcının verdiği yanıtlara bakar.",
+          "Özellikle soğuk yemek, eksik sipariş veya kurye gecikmesi gibi konularda verilen profesyonel yanıt, potansiyel müşterinin 'bu restoran sorunu çözüyor' algısı yaratır.",
+        ],
+      },
+      {
+        id: "yemeksepeti-eksikleri",
+        heading: "Yemeksepeti İşletme Paneli'nin yetmediği noktalar",
+        paragraphs: [
+          "Yemeksepeti restoran paneli yorumları görüntülemeye ve basit cevap yazmaya izin verir, ancak akıllı yönetim araçları sunmaz.",
+        ],
+        bullets: [
+          "Yanıt şablonu ve marka sesi eğitimi yok; her cevabı manuel yazarsınız.",
+          "Negatif yorum önceliklendirme yok: 'yemek soğuktu' şikayetiyle 'çok güzeldi' övgüsü aynı listede.",
+          "Yorum duygu analizi yok; şikayetin şiddetini manuel anlamak gerekir.",
+          "Birden fazla şube varsa her biri için ayrı panel açmak şart.",
+          "Haftalık/aylık yorum trend raporu yok; operasyonel hataları kaynağında göremezsiniz.",
+        ],
+      },
+      {
+        id: "ai-nasil-calisir",
+        heading: "Yapay zeka ile Yemeksepeti yorum yönetimi nasıl çalışır?",
+        paragraphs: [
+          "VoyageRespond, Yemeksepeti restoran sayfanızı takip eder. Yeni yorum geldiğinde AI otomatik analiz eder: yemek kalitesi, kurye hızı, paketleme, servis gibi konuları etiketler ve duyguyu (pozitif/nötr/negatif) belirler.",
+          "Restoranınızın marka tonuna uygun 3 farklı yanıt önerisi üretir. Örneğin fast-food markasıysanız kısa ve samimi; fine-dining ise daha resmi ve detaylı yanıtlar önerilir.",
+        ],
+      },
+      {
+        id: "kriz-yonetimi",
+        heading: "Soğuk yemek ve kurye gecikmesi gibi kriz anlarında yanıt",
+        paragraphs: [
+          "'Yemek soğuktu', '1 saatte geldi', 'eksik ürün vardı' gibi yorumlar restoran puanınızı düşüren en yaygın şikayetlerdir. AI bu tür yorumları otomatik algılar, özür ve somut telafi içeren yanıt taslağı hazırlar.",
+          "Tek tıkla onayladığınız yanıt, potansiyel müşterilere 'bu restoran hatalarını telafi ediyor' mesajı verir ve tekrar sipariş olasılığını artırır.",
+        ],
+      },
+      {
+        id: "coklu-subeler",
+        heading: "Çoklu şube ve zincir restoran yönetimi",
+        paragraphs: [
+          "3 şubeniz mi var, 30 mu? Hepsinin Yemeksepeti yorumları tek dashboard'da birleşir. Şube bazlı puan, cevap oranı ve en sık şikayet konuları raporlanır.",
+          "'Kadıköy şubesinde paketleme şikayetleri %50 arttı' gibi içgörülerle operasyonel hataları anında müdahale edebilirsiniz. Manuel Excel'e gerek kalmaz.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Yemeksepeti'ne API ile doğrudan cevap gönderebilir misiniz?",
+        answer:
+          "Yemeksepeti henüz restoranlar için açık yanıt API'si sunmuyor. VoyageRespond yorumları yarı-otomatik takip eder, AI yanıtı hazırlar, siz Yemeksepeti İşletme Paneli'ne kopyalayıp yayınlarsınız. Bu yöntem tamamen güvenlidir.",
+      },
+      {
+        question: "Soğuk yemek ve kurye şikayetlerine nasıl cevap vermeliyim?",
+        answer:
+          "AI, şikayet türüne göre empati + telafi içeren yanıtlar üretir. Örneğin 'soğuk yemek' şikayetine 'özür dileriz, bir sonraki siparişinizde %20 indirim kodu gönderiyoruz' şeklinde; 'gecikme' şikayetine ise 'kurye yoğunluğundan dolayı gecikme yaşandı, telafi olarak ücretsiz içecek hediye ediyoruz' tonunda profesyonel yanıtlar önerir.",
+      },
+      {
+        question: "Birden fazla şubemi yönetebilir miyim?",
+        answer:
+          "Evet. Tüm Yemeksepeti şubeleriniz tek panelde birleşir. Her şube için ayrı puan, cevap oranı ve trend raporu görürsünüz.",
+      },
+      {
+        question: "Yorum cevaplaması sipariş hacmimi etkiler mi?",
+        answer:
+          "Kesinlikle. Cevap veren restoranlar müşteri gözünde daha güvenilir ve profesyonel algılanır. Özellikle negatif yorumlara verilen yapıcı yanıtlar, potansiyel müşterinin sipariş verme kararını olumlu etkiler.",
+      },
+    ],
+    relatedSlugs: ["trendyol-yorumlari-icin-yapay-zeka", "google-yorumlari-icin-yapay-zeka", "facebook-yorumlari-icin-yapay-zeka"],
+  },
+  {
+    slug: "airbnb-yorumlari-icin-yapay-zeka",
+    platformName: "Airbnb Yorumları",
+    emoji: "🏠",
+    badgeText: "Airbnb · AI",
+    metaTitle: "Airbnb Yorumları için Yapay Zeka: Ev Sahibi Cevap & Yönetim",
+    metaDescription: "Airbnb misafir yorumlarına yapay zeka ile profesyonel ev sahibi yanıtları yazın. Superhost puanınızı koruyun, negatif yorumları kurtarın.",
+    h1: "Airbnb yorumlarına yapay zeka ile cevap: Superhost statünüzü koruyun",
+    intro:
+      "Airbnb'de ev sahibi yanıt oranı ve yorum kalitesi, Superhost statüsü ve arama sıralaması için kritik. Her misafir yorumuna kişisel, samimi ama profesyonel yanıt yazmak zaman alır. Yapay zeka, Airbnb yorumlarınızı tek panelden toplar, misafir deneyimini analiz eder ve ev sahibi tonunuzda anında yanıt önerir.",
+    sections: [
+      {
+        id: "neden-onemli",
+        heading: "Airbnb yorumları ev sahibi için neden kritik?",
+        paragraphs: [
+          "Airbnb algoritması, yanıtlanmış yorum oranı yüksek ve ortalama puanı 4.8+ olan ev sahiplerini arama sonuçlarında öne çıkarır. Superhost statüsü için %90 yanıt oranı şartı vardır.",
+          "Potansiyel misafir, rezervasyon yapmadan önce son 10 yoruma ve ev sahibinin verdiği yanıtlara mutlaka bakar. Profesyonel yanıtlar = daha yüksek doluluk oranı.",
+        ],
+      },
+      {
+        id: "airbnb-eksikleri",
+        heading: "Airbnb'nin yerel araçlarının yetmediği noktalar",
+        paragraphs: [
+          "Airbnb ev sahibi paneli temel cevap özelliği sunar, ama yoğun ev sahipleri için yetersiz kalır.",
+        ],
+        bullets: [
+          "Yanıt şablonu ve AI desteği yok; her yoruma manuel, kişiselleştirilmiş yanıt yazmak gerekir.",
+          "Çoklu mülk yönetiminde yorumlar ayrı ayrı listelenir; tek bir dashboard yok.",
+          "Negatif yorum erken uyarısı yok; kritik şikayeti geç fark edebilirsiniz.",
+          "Duygu analizi ve yorum kategorizasyonu yok; 'temizlik' şikayetiyle 'konum' övgüsü karışır.",
+          "Yabancı dildeki yorumları çevirip yanıtlamak manuel ve zaman alıcıdır.",
+        ],
+      },
+      {
+        id: "ai-nasil-calisir",
+        heading: "Yapay zeka ile Airbnb yorum yönetimi nasıl çalışır?",
+        paragraphs: [
+          "VoyageRespond, Airbnb profil sayfanızı takip eder. Yeni misafir yorumu geldiğinde AI otomatik analiz eder: konaklama deneyimini konulara (temizlik, konum, iletişim, değer, ev sahibi) ayırır, duyguyu ve dili belirler.",
+          "Ev sahibi tonunuzda (samimi ama profesyonel) 3 farklı yanıt önerisi üretir. Misafirin adı, konaklama tarihi ve övdüğü/eleştirdiği detaylar yanıta otomatik girer.",
+        ],
+      },
+      {
+        id: "superhost",
+        heading: "Superhost statüsünü korumak ve yükseltmek",
+        paragraphs: [
+          "Superhost olmak %90 yanıt oranı, 4.8+ ortalama puan ve %5'ten az iptal gerektirir. VoyageRespond ile tüm yorumlara zamanında ve kaliteli yanıt vererek bu kriterleri zorlanmadan karşılarsınız.",
+          "Özellikle 3-4 yıldızlı 'orta' yorumlar, Superhost sınırında olan ev sahipleri için kritiktir. AI bu yorumlara empati ve somut iyileştirme taahhüdü içeren yanıtlar üreterek puanınızı korur.",
+        ],
+      },
+      {
+        id: "cok-dilli",
+        heading: "Çok dilli misafir yorumlarına yerel dilde yanıt",
+        paragraphs: [
+          "Airbnb'deki misafirleriniz İngilizce, Almanca, Fransızca, İspanyolca, Rusça veya Arapça yorum yazabilir. AI yorumun dilini otomatik tespit eder ve aynı dilde, ev sahibi tonunuzda yanıt önerir.",
+          "Kültürel nüansları da dikkate alır: Alman misafire daha formal, Amerikan misafire daha samimi ton otomatik uygulanır.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Airbnb'e API ile doğrudan cevap gönderebilir misiniz?",
+        answer:
+          "Airbnb henüz ev sahipleri için açık yanıt API'si sunmuyor. VoyageRespond yorumları takip eder, AI yanıtı hazırlar, siz Airbnb paneline kopyalayıp yayınlarsınız. Bu yöntem tamamen güvenli ve Airbnb kurallarına uygundur.",
+      },
+      {
+        question: "Superhost statümü korumak için tüm yorumlara cevap vermem mi gerek?",
+        answer:
+          "Airbnb Superhost kriterlerinde %90 yanıt oranı şartı vardır. VoyageRespond ile tüm yorumlara hızlı ve kaliteli yanıt vererek bu kriteri kolayca karşılarsınız.",
+      },
+      {
+        question: "Yabancı dildeki yorumlara nasıl cevap veriyorsunuz?",
+        answer:
+          "AI yorumun dilini otomatik tespit eder ve aynı dilde yanıt önerir. İngilizce, Almanca, Fransızca, İspanyolca, Rusça, Arapça dahil 15+ dil desteklenir.",
+      },
+      {
+        question: "Birden fazla mülkümü yönetebilir miyim?",
+        answer:
+          "Evet. Tüm Airbnb mülklerinizin yorumları tek panelde birleşir. Her mülk için ayrı puan, yanıt oranı ve misafir deneyimi raporu görürsünüz.",
+      },
+    ],
+    relatedSlugs: ["booking-yorumlari-icin-yapay-zeka", "tripadvisor-yorumlari-icin-yapay-zeka", "google-yorumlari-icin-yapay-zeka"],
+  },
+  {
+    slug: "zomato-yorumlari-icin-yapay-zeka",
+    platformName: "Zomato Yorumları",
+    emoji: "🍽️",
+    badgeText: "Zomato · AI",
+    metaTitle: "Zomato Yorumları için Yapay Zeka: Restoran Cevap & Yönetim",
+    metaDescription: "Zomato restoran yorumlarına yapay zeka ile marka uyumlu cevap yazın. Otomatik yanıtlar, duygu analizi ve global restoran itibar yönetimi.",
+    h1: "Zomato yorumlarına yapay zeka ile cevap: Global restoran itibarınızı yönetin",
+    intro:
+      "Zomato, Hindistan, Birleşik Arap Emirlikleri, Avustralya ve daha birçok pazarda lider restoran keşif ve yorum platformu. Restoranınızın Zomato puanı ve yorumları, uluslararası misafirlerin rezervasyon kararını doğrudan etkiler. Yapay zeka destekli yorum yönetimi, Zomato yorumlarınızı tek panelden toplar, duygu analizi yapar ve marka sesinde anında yanıt önerir.",
+    sections: [
+      {
+        id: "neden-onemli",
+        heading: "Zomato yorumları restoran için neden kritik?",
+        paragraphs: [
+          "Zomato'da 4.0+ puanlı restoranlar arama sonuçlarında öne çıkar ve rezervasyon dönüşümü %40 daha yüksektir. Özellikle turistik bölgelerdeki restoranlar için Zomato, uluslararası misafirin ilk baktığı platformlardan biridir.",
+          "Yönetici cevap oranı, Zomato'nun restoran sıralamasına olumlu yansır. Cevap vermeyen restoran potansiyel müşteriye 'ilgisiz' mesajı verir.",
+        ],
+      },
+      {
+        id: "zomato-eksikleri",
+        heading: "Zomato'nun yerel araçlarının yetmediği noktalar",
+        paragraphs: [
+          "Zomato restoran paneli yorumları görüntülemeye ve temel cevap yazmaya izin verir, ancak akıllı yönetim araçları sunmaz.",
+        ],
+        bullets: [
+          "Otomatik yanıt şablonu ve AI desteği yok; her cevabı manuel yazarsınız.",
+          "Yorum önceliklendirme yok: 5 yıldızlı övgü ile 1 yıldızlı şikayet aynı listede.",
+          "Çoklu şube veya zincir restoran yönetimi tek panelde birleşmez.",
+          "Duygu analizi ve yorum kategorizasyonu yok; 'servis' şikayetiyle 'lezzet' övgüsü karışır.",
+          "Çok dilli yorum desteği zayıf; uluslararası misafir yorumlarını manuel çevirmek gerekir.",
+        ],
+      },
+      {
+        id: "ai-nasil-calisir",
+        heading: "Yapay zeka ile Zomato yorum yönetimi nasıl çalışır?",
+        paragraphs: [
+          "VoyageRespond, Zomato restoran sayfanızı takip eder. Yeni yorum geldiğinde AI otomatik analiz eder: lezzet, servis, ambiyans, fiyat/performans, konum gibi konulara ayırır ve duyguyu (pozitif/nötr/negatif) belirler.",
+          "Restoranınızın marka tonuna uygun 3 farklı yanıt önerisi üretir. Örneğin lüks restoran için formal ve detaylı; cafe için samimi ve kısa yanıtlar önerilir.",
+        ],
+      },
+      {
+        id: "cok-dilli",
+        heading: "Uluslararası misafir yorumlarına çok dilli yanıt",
+        paragraphs: [
+          "Zomato'daki yorumlar İngilizce, Hintçe, Arapça ve daha birçok dilde olabilir. AI yorumun dilini otomatik tespit eder ve aynı dilde, marka sesinizde yanıt önerir.",
+          "Kültürel nüanslar da dikkate alınır: Hintli misafire teşekkür içeren, Arap misafire saygılı ve resmi ton otomatik uygulanır.",
+        ],
+      },
+      {
+        id: "kriz-yonetimi",
+        heading: "Negatif yorum kriz yönetimi ve itibar kurtarma",
+        paragraphs: [
+          "'Yemek çok tuzluydu', 'servis yavaştı', 'fiyat pahalıydı' gibi yorumlar restoran puanınızı düşürür. AI bu tür yorumları otomatik algılar, özür ve somut iyileştirme taahhüdü içeren yanıt taslağı hazırlar.",
+          "Profesyonel ve zamanında verilen yanıt, potansiyel uluslararası misafire 'bu restoran geri bildirimi ciddiye alıyor' mesajı verir ve rezervasyon olasılığını artırır.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Zomato'ya API ile doğrudan cevap gönderebilir misiniz?",
+        answer:
+          "Zomato henüz restoranlar için açık yanıt API'si sunmuyor. VoyageRespond yorumları takip eder, AI yanıtı hazırlar, siz Zomato paneline kopyalayıp yayınlarsınız. Bu yöntem tamamen güvenli ve Zomato kurallarına uygundur.",
+      },
+      {
+        question: "Zomato yanıtları hangi dillerde yazıyorsunuz?",
+        answer:
+          "AI yorumun dilini otomatik tespit eder ve aynı dilde yanıt önerir. İngilizce, Hintçe, Arapça, Türkçe dahil 15+ dil desteklenir.",
+      },
+      {
+        question: "Birden fazla restoranımı yönetebilir miyim?",
+        answer:
+          "Evet. Tüm Zomato restoranlarınızın yorumları tek panelde birleşir. Her restoran için ayrı puan, yanıt oranı ve trend raporu görürsünüz.",
+      },
+      {
+        question: "Zomato puanımı yapay zeka yanıtları yükseltir mi?",
+        answer:
+          "Dolaylı olarak evet. Cevap veren restoranlar misafir gözünde daha güvenilir ve profesyonel algılanır. Özellikle negatif yorumlara verilen yapıcı yanıtlar, potansiyel misafirin restoran seçimini olumlu etkiler.",
+      },
+    ],
+    relatedSlugs: ["tripadvisor-yorumlari-icin-yapay-zeka", "google-yorumlari-icin-yapay-zeka", "booking-yorumlari-icin-yapay-zeka"],
+  },
 ];
 
 export function getPlatformLandingPage(slug: string): PlatformLandingContent | undefined {
