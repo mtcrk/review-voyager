@@ -317,45 +317,10 @@ Deno.serve(async (req) => {
           if (!updErr) updatedCount++;
         }
 
-        // Send consolidated summary email (1 per fetch instead of 1 per review)
-        // Trigger if there are NEW reviews OR EDITED reviews
-        if (insertedCount > 0 || editedReviews.length > 0) {
-          try {
-            let newReviews: any[] = [];
-            if (insertedCount > 0) {
-              const { data } = await supabaseAdmin
-                .from("reviews")
-                .select("id, reviewer_name, rating, text, sentiment, posted_at, platform")
-                .eq("business_id", biz.id)
-                .eq("platform", "google")
-                .order("created_at", { ascending: false })
-                .limit(insertedCount);
-              newReviews = data || [];
-            }
-
-            fetch(`${supabaseUrl}/functions/v1/notify-fetch-summary`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${serviceRoleKey}`,
-              },
-              body: JSON.stringify({
-                business_id: biz.id,
-                new_reviews: newReviews,
-                edited_reviews: editedReviews,
-                platform_results: [{
-                  platform: "google",
-                  fetched: reviews.length,
-                  inserted: insertedCount,
-                  edited: editedReviews.length,
-                }],
-              }),
-            }).catch((e) => console.error("notify-fetch-summary failed:", e));
-            console.log(`Summary email triggered: ${newReviews.length} new + ${editedReviews.length} edited`);
-          } catch (notifyErr) {
-            console.error("Failed to trigger summary email:", notifyErr);
-          }
-        }
+        // Inline summary email DISABLED — owner only receives the
+        // 09:00 TR consolidated summary via daily-consolidated-summary.
+        // Admin still receives individual reviews via notify-new-review
+        // when business is in 'instant' mode.
 
         // Log success
         await supabaseAdmin.from("integration_logs").insert({
