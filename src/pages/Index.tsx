@@ -18,7 +18,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       <SEO
-        title="Google Yorum Yönetimi | AI ile Otomatik Yanıt - VoyageRespond"
+        title="VoyageRespond — AI Google Yorum Yönetimi"
         description="Google, Booking ve TripAdvisor yorumlarını yapay zeka ile yönetin. Otomatik yanıt önerileri, duygu analizi, AI görünürlük skoru. 3 ay ücretsiz deneyin."
         canonical="https://voyagerespond.com/"
         jsonLd={{
@@ -230,7 +230,7 @@ const Index = () => {
                 </div>
                 <div className="flex-1 mx-4">
                   <div className="h-6 rounded-md bg-muted/60 max-w-xs mx-auto flex items-center justify-center">
-                    <span className="text-[10px] text-muted-foreground/60 font-mono">voyagerespond.com/dashboard</span>
+                    <span className="text-[10px] text-muted-foreground font-mono">voyagerespond.com/dashboard</span>
                   </div>
                 </div>
               </div>
