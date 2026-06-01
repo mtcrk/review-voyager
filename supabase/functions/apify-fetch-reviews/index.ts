@@ -367,7 +367,8 @@ Deno.serve(async (req) => {
       );
 
       // Fire-and-forget consolidated summary email (only if new reviews inserted)
-      if (result.inserted > 0) {
+      // Skip on service-role (cron) calls — daily-consolidated-summary handles those.
+      if (result.inserted > 0 && !isServiceRole) {
         (async () => {
           try {
             const platformName = forcedPlatform || (platform === "all" ? "booking" : platform);

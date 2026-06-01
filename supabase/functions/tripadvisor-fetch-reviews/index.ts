@@ -210,7 +210,8 @@ Deno.serve(async (req) => {
       }).catch((e) => console.error("notifyAdmin success failed:", e));
 
       // Fire-and-forget consolidated summary email (only if new reviews inserted)
-      if (result.inserted > 0) {
+      // Skip on service-role (cron) calls — daily-consolidated-summary handles those.
+      if (result.inserted > 0 && !isServiceRole) {
         (async () => {
           try {
             const { data: newReviews } = await supabase

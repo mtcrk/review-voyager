@@ -1,0 +1,2 @@
+UPDATE public.businesses SET review_notification_type = 'daily' WHERE id IN ('2e05652e-da86-4a7a-a003-e5890fb011bc','e3bcffb4-2850-48cb-82cf-0d5952459793');
+UPDATE public.businesses SET review_notification_type = 'none' WHERE id = '73b0b4ac-b64d-4107-9d20-59f9f36998dc';
