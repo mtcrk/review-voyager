@@ -94,6 +94,27 @@ Deno.serve(async (req) => {
     }
 
     // ============================================================
+    // HARD GUARD #2b: Daily throttle.
+    // If any review-notification email was already sent to this
+    // business in the last 24h → SKIP (max 1 instant mail per day).
+    // ============================================================
+    const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { count: dailySentCount } = await supabase
+      .from("email_logs")
+      .select("id", { count: "exact", head: true })
+      .eq("business_id", business_id)
+      .like("resend_id", "review:%")
+      .gte("created_at", dayAgo);
+
+    if ((dailySentCount ?? 0) > 0) {
+      console.log(`Skipping — daily throttle (already sent ${dailySentCount} mail(s) in last 24h for "${business.name}")`);
+      return new Response(
+        JSON.stringify({ message: "Daily throttle: max 1 mail per business per 24h" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // ============================================================
     // HARD GUARD #3: Per-review idempotency.
     // Skip any review that has ALREADY been notified (email_logs).
     // resend_id format: "review:<review_id>"
