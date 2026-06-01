@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { useAuth } from "@/contexts/AuthContext";
+import SEO from "@/components/seo/SEO";
 
 const Pricing = () => {
   const navigate = useNavigate();
@@ -138,6 +139,11 @@ const Pricing = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Fiyatlandırma | VoyageRespond"
+        description="VoyageRespond fiyatlandırması: platform + otomasyonlar. Starter, Pro ve Enterprise planları. Tek otomasyonla başlayın, ihtiyacınız büyüdükçe ekleyin."
+        canonical="/pricing"
+      />
       {/* Header */}
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
         <div className="container mx-auto px-4 sm:px-6">

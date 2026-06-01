@@ -104,7 +104,12 @@ const RestoranYorumCevaplari = () => {
                         <h3 className="font-semibold text-foreground mb-2">{item.title}</h3>
                         <p className="text-muted-foreground text-sm leading-relaxed">{item.text}</p>
                       </div>
-                      <button onClick={() => handleCopy(item.text, key)} className="shrink-0 p-2 rounded-lg border border-border hover:bg-muted transition-colors" title="Kopyala">
+                      <button
+                        onClick={() => handleCopy(item.text, key)}
+                        className="shrink-0 p-2 rounded-lg border border-border hover:bg-muted transition-colors"
+                        title="Kopyala"
+                        aria-label={copiedIndex === key ? "Şablon kopyalandı" : "Şablonu kopyala"}
+                      >
                         {copiedIndex === key ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4 text-muted-foreground" />}
                       </button>
                     </div>
