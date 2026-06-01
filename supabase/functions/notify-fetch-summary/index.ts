@@ -637,28 +637,9 @@ Deno.serve(async (req) => {
 
     const adminResult = await adminRes.json();
 
-    if (ownerEmail && ownerEligibleLocations.length > 0) {
-      const ownerPayload = buildSummaryPayload(ownerEligibleLocations);
-      const ownerRes = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${RESEND_API_KEY}`,
-        },
-        body: JSON.stringify({
-          from: "VoyageRespond <notify@voyagerespond.com>",
-          to: [ownerEmail],
-          subject: ownerPayload.subject,
-          html: ownerPayload.html,
-        }),
-      });
-
-      const ownerResult = await ownerRes.json();
-      recipients.add(ownerEmail);
-      console.log(`Owner summary sent to ${ownerEmail} (${ownerEligibleLocations.length} locations):`, ownerResult);
-    } else if (ownerEmail) {
-      console.log(`Owner summary skipped for ${ownerEmail} due to notification settings.`);
-    }
+    // Owner emails disabled — only admin (metecorukbasari@gmail.com) receives summaries.
+    void ownerEmail;
+    void ownerEligibleLocations;
 
     console.log(`Admin consolidated summary sent to ${ADMIN_EMAIL} (${enrichedLocations.length} locations):`, adminResult);
 
