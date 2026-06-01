@@ -270,7 +270,7 @@ const Pricing = () => {
                     )}
                     <span
                       className={`text-sm ${
-                        feature.included ? "text-foreground" : "text-muted-foreground/60"
+                        feature.included ? "text-foreground" : "text-muted-foreground"
                       }`}
                     >
                       {feature.text}

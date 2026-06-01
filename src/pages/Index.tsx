@@ -230,7 +230,7 @@ const Index = () => {
                 </div>
                 <div className="flex-1 mx-4">
                   <div className="h-6 rounded-md bg-muted/60 max-w-xs mx-auto flex items-center justify-center">
-                    <span className="text-[10px] text-muted-foreground/60 font-mono">voyagerespond.com/dashboard</span>
+                    <span className="text-[10px] text-muted-foreground font-mono">voyagerespond.com/dashboard</span>
                   </div>
                 </div>
               </div>
