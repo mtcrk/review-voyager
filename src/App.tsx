@@ -60,6 +60,7 @@ const RestoranYorumCevaplari = lazy(() => import("./pages/seo/RestoranYorumCevap
 const OtelYorumCevaplari = lazy(() => import("./pages/seo/OtelYorumCevaplari"));
 const PlatformLanding = lazy(() => import("./pages/seo/PlatformLanding"));
 const SehirOtelYorumYonetimi = lazy(() => import("./pages/seo/SehirOtelYorumYonetimi"));
+const YorumYonetimAraclari = lazy(() => import("./pages/seo/YorumYonetimAraclari"));
 const GooglePerformance = lazy(() => import("./pages/GooglePerformance"));
 const Inbox = lazy(() => import("./pages/Inbox"));
 const GoogleAccounts = lazy(() => import("./pages/GoogleAccounts"));
@@ -102,6 +103,7 @@ const AppRoutes = () => (
       <Route path="/restoran-yorum-cevaplari" element={<RestoranYorumCevaplari />} />
       <Route path="/otel-yorum-cevaplari" element={<OtelYorumCevaplari />} />
       <Route path="/otel-yorum-yonetimi/:sehir" element={<SehirOtelYorumYonetimi />} />
+      <Route path="/yorum-yonetim-araclari" element={<YorumYonetimAraclari />} />
       <Route path="/platform/:slug" element={<PlatformLanding />} />
       <Route path="/automations/instagram-sales" element={<InstagramSales />} />
       <Route path="/automations/google-reviews" element={<GoogleReviews />} />
