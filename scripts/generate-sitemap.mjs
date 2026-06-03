@@ -15,6 +15,7 @@ const staticRoutes = [
   { path: "/google-yorum-cevap-ornekleri", changefreq: "monthly", priority: "0.8", lastmod: "2026-03-19" },
   { path: "/restoran-yorum-cevaplari", changefreq: "monthly", priority: "0.8", lastmod: "2026-03-19" },
   { path: "/otel-yorum-cevaplari", changefreq: "monthly", priority: "0.8", lastmod: "2026-03-19" },
+  { path: "/yorum-yonetim-araclari", changefreq: "monthly", priority: "0.9", lastmod: "2026-06-03" },
   { path: "/platform/yorumlara-yapay-zeka-ile-cevap-yazma", changefreq: "weekly", priority: "0.9", lastmod: "2026-05-22" },
   { path: "/platform/google-yorumlari-icin-yapay-zeka", changefreq: "weekly", priority: "0.9", lastmod: "2026-05-22" },
   { path: "/platform/instagram-yorumlari-icin-yapay-zeka", changefreq: "weekly", priority: "0.9", lastmod: "2026-05-22" },
