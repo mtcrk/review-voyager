@@ -36,6 +36,23 @@ const staticRoutes = [
   { path: "/onboarding", changefreq: "monthly", priority: "0.6", lastmod: "2026-05-14" },
 ];
 
+function extractCityHotelPages() {
+  const filePath = resolve("src/lib/cityHotelData.ts");
+  const content = readFileSync(filePath, "utf-8");
+  const slugs = [];
+  const slugRegex = /slug:\s*"([^"]+)"/g;
+  let match;
+  while ((match = slugRegex.exec(content)) !== null) {
+    slugs.push({
+      path: `/otel-yorum-yonetimi/${match[1]}`,
+      changefreq: "monthly",
+      priority: "0.85",
+      lastmod: "2026-06-03",
+    });
+  }
+  return slugs;
+}
+
 function extractBlogPosts() {
   const filePath = resolve("src/lib/blogPosts.ts");
   const content = readFileSync(filePath, "utf-8");
@@ -83,7 +100,8 @@ function generateSitemap(entries) {
 }
 
 const blogPosts = extractBlogPosts();
-const allEntries = [...staticRoutes, ...blogPosts];
+const cityHotelPages = extractCityHotelPages();
+const allEntries = [...staticRoutes, ...blogPosts, ...cityHotelPages];
 
 // Sort by path for consistent output
 allEntries.sort((a, b) => a.path.localeCompare(b.path));
@@ -92,4 +110,6 @@ const sitemapXml = generateSitemap(allEntries);
 const outputPath = resolve("public/sitemap.xml");
 writeFileSync(outputPath, sitemapXml);
 
-console.log(`sitemap.xml written (${allEntries.length} entries, ${blogPosts.length} blog posts)`);
+console.log(
+  `sitemap.xml written (${allEntries.length} entries, ${blogPosts.length} blog posts, ${cityHotelPages.length} city pages)`
+);
