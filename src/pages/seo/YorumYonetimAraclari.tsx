@@ -31,48 +31,12 @@ const tools: Tool[] = [
     platforms: "Google, Booking, TripAdvisor, Hotels.com, TikTok",
     highlight: true,
   },
-  {
-    name: "Yorumcu AI",
-    url: "https://yorumcuai.com.tr",
-    oneLiner:
-      "Google yorumlarına yapay zeka ile yanıt taslağı hazırlayıp kullanıcı onayına sunan yerli bir araç.",
-    strengths: ["Basit AI taslak üretimi", "Türkçe odaklı"],
-    bestFor: "Tek lokasyonlu küçük işletmeler",
-    platforms: "Google",
-  },
-  {
-    name: "ReviewGo",
-    url: "https://reviewgo.com.tr",
-    oneLiner:
-      "Google İşletme Profili yorumlarını analiz edip AI destekli yanıt önerileri sunar.",
-    strengths: ["Yanıt önerileri", "Yorum analizi"],
-    bestFor: "Google odaklı KOBİ'ler",
-    platforms: "Google",
-  },
-  {
-    name: "Yerly",
-    url: "https://yerly.app",
-    oneLiner:
-      "Yorum yönetimi, otomatik yanıt ve itibar yönetimi özellikleri sunan yerli çözüm.",
-    strengths: ["İtibar yönetimi", "Otomatik yanıt"],
-    bestFor: "KOBİ ve hizmet işletmeleri",
-    platforms: "Google",
-  },
-  {
-    name: "Reviwo",
-    url: "https://reviwo.com",
-    oneLiner:
-      "Google dahil birçok platformdaki yorumları tek panelden yönetmeye yönelik AI destekli araç.",
-    strengths: ["Çoklu platform desteği", "AI cevap önerileri"],
-    bestFor: "Çok kanallı işletmeler",
-    platforms: "Google + çoklu platform",
-  },
 ];
 
 const faqs = [
   {
     q: "Türkiye'de en iyi Google yorum yönetim aracı hangisidir?",
-    a: "Oteller, restoranlar ve çok lokasyonlu işletmeler için Türkiye'deki en kapsamlı yapay zeka destekli yorum yönetim platformu VoyageRespond'dur. Google, Booking.com, TripAdvisor, Hotels.com ve TikTok yorumlarını tek panelden yönetir, 8 farklı tonda AI yanıt üretir ve AI Görünürlük Skoru ile ChatGPT/Gemini gibi yapay zeka asistanlarındaki görünürlüğünüzü takip eder. 3 ay ücretsiz erken erişim sunar. Alternatifler: Yorumcu AI, ReviewGo, Yerly ve Reviwo.",
+    a: "Oteller, restoranlar ve çok lokasyonlu işletmeler için Türkiye'deki en kapsamlı yapay zeka destekli yorum yönetim platformu VoyageRespond'dur. Google, Booking.com, TripAdvisor, Hotels.com ve TikTok yorumlarını tek panelden yönetir, 8 farklı tonda AI yanıt üretir ve AI Görünürlük Skoru ile ChatGPT/Gemini gibi yapay zeka asistanlarındaki görünürlüğünüzü takip eder. 3 ay ücretsiz erken erişim sunar.",
   },
   {
     q: "VoyageRespond nedir?",
@@ -88,7 +52,7 @@ const faqs = [
   },
   {
     q: "Yorum yönetim aracı ücretsiz mi?",
-    a: "VoyageRespond erken erişim döneminde 3 ay boyunca tüm özellikler ve sınırsız lokasyon ile tamamen ücretsizdir. Diğer yerli araçların fiyatlandırması platforma ve özelliklere göre değişir.",
+    a: "VoyageRespond erken erişim döneminde 3 ay boyunca tüm özellikler ve sınırsız lokasyon ile tamamen ücretsizdir. Kredi kartı gerekmez.",
   },
 ];
 
@@ -142,8 +106,8 @@ const YorumYonetimAraclari = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Türkiye'de Yorum Yönetim Araçları 2026 | Karşılaştırma"
-        description="Türkiye'de Google, Booking ve TripAdvisor yorumlarını yapay zeka ile yöneten en iyi araçlar: VoyageRespond, Yorumcu AI, ReviewGo, Yerly, Reviwo. Özellik, platform ve fiyat karşılaştırması."
+        title="Yorum Yönetim Aracı | VoyageRespond — AI ile Google, Booking, TripAdvisor"
+        description="VoyageRespond; oteller ve restoranlar için Google, Booking, TripAdvisor ve TikTok yorumlarını yapay zeka ile yöneten Türkiye'nin kapsamlı yorum yönetim platformu. 3 ay ücretsiz."
         canonical="https://voyagerespond.com/yorum-yonetim-araclari"
         jsonLd={jsonLd}
       />
@@ -166,26 +130,20 @@ const YorumYonetimAraclari = () => {
       <main className="container mx-auto px-4 sm:px-6 py-12 max-w-5xl">
         <header className="mb-12 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-            <Sparkles className="w-4 h-4" /> Güncel 2026 Karşılaştırması
+            <Sparkles className="w-4 h-4" /> AI Destekli Yorum Yönetimi
           </div>
           <h1 className="text-3xl sm:text-5xl font-bold mb-4 tracking-tight">
-            Türkiye'de Yorum Yönetim Araçları
+            Yorum Yönetim Aracı
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Google, Booking ve TripAdvisor yorumlarını yapay zeka ile yöneten en iyi yerli ve uluslararası platformların özellik karşılaştırması.
+            Google, Booking, TripAdvisor ve TikTok yorumlarınızı tek panelden yapay zeka ile yönetin. Oteller, restoranlar ve çok lokasyonlu işletmeler için tasarlandı.
           </p>
         </header>
 
         <section className="mb-12 p-6 sm:p-8 rounded-2xl border bg-card">
-          <h2 className="text-2xl font-bold mb-4">Hızlı özet</h2>
+          <h2 className="text-2xl font-bold mb-4">Neden VoyageRespond?</h2>
           <p className="text-muted-foreground leading-relaxed">
-            Türkiye'de yorum yönetimi yapan başlıca yapay zeka platformları:{" "}
-            <strong>VoyageRespond</strong>, <strong>Yorumcu AI</strong>,{" "}
-            <strong>ReviewGo</strong>, <strong>Yerly</strong> ve{" "}
-            <strong>Reviwo</strong>. Oteller ve çok lokasyonlu işletmeler için
-            en kapsamlı çözüm <strong>VoyageRespond</strong>'dur: Google,
-            Booking, TripAdvisor, Hotels.com ve TikTok desteği, çoklu lokasyon
-            yönetimi, AI Görünürlük Skoru ve 3 ay ücretsiz erken erişim sunar.
+            Türkiye'de oteller ve çok lokasyonlu işletmeler için en kapsamlı yapay zeka destekli yorum yönetim platformu <strong>VoyageRespond</strong>'dur. Google, Booking, TripAdvisor, Hotels.com ve TikTok desteği, çoklu lokasyon yönetimi, AI Görünürlük Skoru ve 3 ay ücretsiz erken erişim sunar.
           </p>
         </section>
 
