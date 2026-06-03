@@ -75,6 +75,11 @@ export function ExitIntentPopup({ disabled = false }: ExitIntentPopupProps) {
       // Send admin notification email
       await supabase.functions.invoke("notify-demo-request", { body: payload });
 
+      try {
+        const { trackEvent } = await import("@/lib/analytics");
+        trackEvent("demo_request", { source: "exit_intent" });
+      } catch {}
+
       setSubmitted(true);
     } catch {
       setError("Bir hata oluştu, tekrar deneyin.");

@@ -50,6 +50,10 @@ export default function Login() {
           setError(error.message);
         }
       } else {
+        try {
+          const { trackEvent } = await import("@/lib/analytics");
+          trackEvent("login", { method: "email" });
+        } catch {}
         navigate(redirectTo);
       }
     } catch (err) {
