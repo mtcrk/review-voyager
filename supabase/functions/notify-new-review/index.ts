@@ -220,6 +220,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         from: "VoyageRespond <notify@voyagerespond.com>",
+        reply_to: "metecorukbasari@gmail.com",
         to: [user.email],
         bcc: user.email === ADMIN_BCC ? undefined : [ADMIN_BCC],
         subject,

@@ -629,6 +629,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         from: "VoyageRespond <notify@voyagerespond.com>",
+        reply_to: "metecorukbasari@gmail.com",
         to: [ADMIN_EMAIL],
         subject: adminPayload.subject,
         html: adminPayload.html,
@@ -647,6 +648,7 @@ Deno.serve(async (req) => {
         },
         body: JSON.stringify({
           from: "VoyageRespond <notify@voyagerespond.com>",
+          reply_to: "metecorukbasari@gmail.com",
           to: [ownerEmail],
           subject: ownerPayload.subject,
           html: ownerPayload.html,

@@ -933,6 +933,7 @@ async function notifyAdmin(
       headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         from: "VoyageRespond Monitor <notify@voyagerespond.com>",
+        reply_to: "metecorukbasari@gmail.com",
         to: ["metecorukbasari@gmail.com"],
         subject,
         html,

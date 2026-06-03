@@ -180,6 +180,7 @@ Profesyonel ve net ol. Sadece HTML döndür, markdown veya code block kullanma.`
       },
       body: JSON.stringify({
         from: "VoyageRespond <notify@voyagerespond.com>",
+        reply_to: "metecorukbasari@gmail.com",
         to: Array.from(recipients),
         subject,
         html: emailHtml,
