@@ -2328,6 +2328,294 @@ Shorts farklı dinamiktedir:
 
 blogPosts.push(...reputationPosts);
 
+// SEO-targeted long-tail posts (validated keywords via Semrush TR DB)
+const seoTargetedPosts: BlogPost[] = [
+  {
+    slug: "otel-yorum-yonetimi-rehberi",
+    title: "Otel Yorum Yönetimi: A'dan Z'ye 2026 Rehberi",
+    description:
+      "Otel yorum yönetimi nedir, neden kritik, Google Booking TripAdvisor yorumları nasıl yönetilir? Otel sahipleri için 2026 kapsamlı rehber.",
+    ogTitle: "Otel Yorum Yönetimi 2026 Rehberi | VoyageRespond",
+    ogDescription: "Otel yorumlarını profesyonelce yönetin: platform, AI, ton ve sıralama ipuçları.",
+    author: "VoyageRespond",
+    publishedAt: "2026-06-03",
+    category: "Otel Yönetimi",
+    readTime: "12 dk",
+    keywords: ["otel yorum", "otel yorumları", "otel yorum yönetimi", "google otel", "otel siteleri"],
+    content: `
+Otel yorum yönetimi, bir otelin Google, Booking.com, TripAdvisor ve diğer platformlardaki misafir yorumlarını sistematik olarak takip etme, yanıtlama, analiz etme ve sıralamayı iyileştirme sürecidir. 2026 yılında bir otelin rezervasyon hacminin **%73'ü** doğrudan yorum puanlarına bağlıdır.
+
+## Otel Yorum Yönetimi Neden Kritik?
+
+- **Google Otel sıralaması** yorum puanı ve yanıt oranına göre belirlenir
+- **Booking.com'da puan 0.1 artışı** rezervasyonu ortalama **%9** artırır
+- **TripAdvisor Top 10** listesine girmek için 4.5+ puan ve aktif yanıt zorunlu
+- Yorumlara yanıt veren oteller **%35 daha fazla güven** kazanır
+
+## En Çok Kullanılan Otel Yorum Siteleri
+
+1. **Google Otel** — Doğrudan rezervasyona bağlı, en yüksek hacim
+2. **Booking.com** — Türkiye'de #1 rezervasyon platformu
+3. **TripAdvisor** — Yabancı turistler için referans
+4. **Hotels.com / Expedia** — Uluslararası seyahat
+5. **Airbnb** — Butik otel ve villa
+6. **Trivago** — Otel karşılaştırma trafiği
+
+## Otel Yorumlarına Nasıl Cevap Verilir?
+
+### Olumlu Yorumlara
+- 24 saat içinde yanıtlayın
+- Misafirin adını kullanın
+- Spesifik bir detaydan bahsedin
+- Tekrar davet edin
+
+### Olumsuz Yorumlara
+- Önce **sakin olun**, savunmaya geçmeyin
+- **Spesifik sorunu** kabul edin
+- Somut bir **çözüm** sunun
+- İletişime davet edin (offline'a taşıyın)
+
+## Otel Karşılaştırma Sitelerinde Üst Sıraya Çıkma
+
+1. **Yorum hacmini artırın** — Check-out sonrası otomatik istek
+2. **Yanıt oranını %95+** tutun
+3. **Çok dilli yanıt** sunun (Booking sıralama sinyali)
+4. **Düzenli fotoğraf ekleyin** (Google sinyali)
+5. **AI ile hız kazanın** — günde 50+ yorum için manuel imkansız
+
+## VoyageRespond ile Otel Yorum Yönetimi
+
+[VoyageRespond](https://voyagerespond.com), Türkiye'nin lider otel yorum yönetim platformudur. Google, Booking.com, TripAdvisor, Hotels.com, Airbnb yorumlarını **tek panelden** toplar, AI ile **çok dilli profesyonel yanıt** üretir ve sıralama trendlerini takip eder.
+
+### Şehre Özel Yönetim
+
+- [İstanbul Otel Yorum Yönetimi](/otel-yorum-yonetimi/istanbul)
+- [Antalya Otel Yorum Yönetimi](/otel-yorum-yonetimi/antalya)
+- [Bodrum Otel Yorum Yönetimi](/otel-yorum-yonetimi/bodrum)
+- [Kapadokya Otel Yorum Yönetimi](/otel-yorum-yonetimi/kapadokya)
+
+**[3 ay ücretsiz deneyin →](https://voyagerespond.com/onboarding)**
+    `,
+  },
+  {
+    slug: "tripadvisor-yorum-yonetimi-rehberi",
+    title: "TripAdvisor Nedir, Yorumları Nasıl Yönetilir? 2026 Rehberi",
+    description:
+      "TripAdvisor nedir, otel ve restoran için neden önemli, yorumları nasıl yönetilir? Türkiye'deki işletmeler için kapsamlı rehber.",
+    ogTitle: "TripAdvisor Yorum Yönetimi 2026 | VoyageRespond",
+    ogDescription: "TripAdvisor yorumlarını profesyonelce yönetin: sıralama, yanıt, şikayet ve AI ipuçları.",
+    author: "VoyageRespond",
+    publishedAt: "2026-06-03",
+    category: "Platform Rehberleri",
+    readTime: "10 dk",
+    keywords: ["tripadvisor yorum", "tripadvisor nedir", "tripadvisor yorum yönetimi", "tripadvisor sıralama"],
+    content: `
+TripAdvisor, dünya çapında **490+ milyon yoruma** sahip en büyük seyahat platformudur. Otel, restoran ve gezi yerleri için kullanıcılar deneyimlerini puanlayıp paylaşır. Türkiye'de özellikle yabancı turistler için **bir numaralı referans kaynağıdır**.
+
+## TripAdvisor Nedir?
+
+2000 yılında kurulan TripAdvisor, kullanıcı tarafından oluşturulan içeriklere dayalı bir seyahat platformudur:
+- **Otel rezervasyonu** + karşılaştırma
+- **Restoran** keşfi ve rezervasyonu
+- **Gezi & deneyim** önerileri
+- **Forum** tartışmaları
+
+## TripAdvisor Sıralaması Nasıl Hesaplanır?
+
+TripAdvisor "Popularity Index" üç ana faktöre dayanır:
+
+1. **Kalite** — Ortalama puan (5 üzerinden)
+2. **Yenilik** — Son 12 aydaki yorum hacmi ve trendler
+3. **Hacim** — Toplam yorum sayısı
+
+**Önemli:** Yanıt oranı doğrudan sıralama faktörü değildir ama **kullanıcı güven sinyali** olarak rezervasyonu etkiler.
+
+## TripAdvisor Yorumlarına Nasıl Cevap Verilir?
+
+### 1. Yönetici Hesabını Doğrulayın
+TripAdvisor for Business üzerinden işletmenizi sahiplenin. Doğrulama 3-7 gün sürer.
+
+### 2. Yanıtlama Pratikleri
+- **24-48 saat** içinde yanıt
+- **İngilizce ağırlıklı** (yabancı turist profili)
+- **Spesifik detay** + tekrar davet
+- Olumsuz yorumda **çözüm + iletişim**
+
+### 3. Olumsuz Yorum Şikayeti
+TripAdvisor yorum silme politikası **çok katıdır**. Sadece şu durumlarda silinir:
+- Yanlış işletme yorumu
+- Şantaj veya hakaret içeriği
+- Sahte yorum (kanıtlanabilir)
+
+Şikayet için "Report a review" linkini kullanın.
+
+## TripAdvisor + AI ile Yorum Yönetimi
+
+TripAdvisor'da haftada 20+ yorum alan bir otel için manuel yanıt imkansız hale gelir. VoyageRespond gibi AI platformları:
+
+- TripAdvisor yorumlarını **otomatik çekip** panele taşır
+- Sentiment analizi yapar (pozitif/nötr/negatif)
+- **8 farklı tonda** yanıt önerir
+- Çoklu dil desteği (TR/EN/DE/RU)
+- Kopyala-yapıştır kolaylığı
+
+## İlgili Rehberler
+
+- [Otel Yorum Yönetimi Rehberi](/blog/otel-yorum-yonetimi-rehberi)
+- [Google Yorumlarına Nasıl Yanıt Verilir](/blog/google-yorumlarina-nasil-yanit-verilir)
+- [Booking.com Yorum Yönetimi](/platform/booking-yorumlari-icin-yapay-zeka)
+
+**[3 ay ücretsiz deneyin →](https://voyagerespond.com/onboarding)**
+    `,
+  },
+  {
+    slug: "otel-karsilastirma-sitelerinde-ust-siralara-cikma",
+    title: "Otel Karşılaştırma Sitelerinde Üst Sıralara Çıkma Rehberi",
+    description:
+      "Trivago, Google Otel, Kayak gibi otel karşılaştırma sitelerinde üst sıralara çıkmanın 10 yolu. Sıralama algoritmaları ve pratik ipuçları.",
+    ogTitle: "Otel Karşılaştırma Sitelerinde Üst Sıralara Çıkma | VoyageRespond",
+    ogDescription: "Trivago, Google Otel, Kayak'ta üst sıralara çıkmak için yorum, fotoğraf ve fiyatlandırma stratejisi.",
+    author: "VoyageRespond",
+    publishedAt: "2026-06-03",
+    category: "Otel Pazarlama",
+    readTime: "9 dk",
+    keywords: ["otel karşılaştırma", "otel siteleri", "trivago sıralama", "google otel sıralama"],
+    content: `
+Otel karşılaştırma siteleri (metasearch) — Trivago, Google Otel, Kayak, Trip.com — direkt rezervasyon almaz, ama **rezervasyonların yönlendirilmesinde kritik rol** oynar. Üst sıralarda olmak, doğrudan trafik demek.
+
+## En Çok Kullanılan Otel Karşılaştırma Siteleri
+
+1. **Google Otel** — Google aramalarına entegre, en yüksek hacim
+2. **Trivago** — Avrupa'da #1, Türkiye'de güçlü
+3. **Kayak** — ABD/İngiltere ağırlıklı
+4. **Trip.com** — Asya pazarı
+5. **HotelsCombined** — Karşılaştırma odaklı
+
+## Sıralama Algoritmasını Anlamak
+
+Her metasearch sitesinin algoritması farklı, ama ortak faktörler:
+
+### 1. Puan ve Yorum Sayısı (%35 ağırlık)
+- Genel puan
+- Son 6 aydaki yorum sayısı
+- Yanıt oranı (Google için kritik)
+
+### 2. Fiyat Rekabeti (%25 ağırlık)
+- En düşük fiyatlı OTA bağlantısı
+- Fiyat tutarlılığı (rate parity)
+
+### 3. İçerik Kalitesi (%20 ağırlık)
+- Profesyonel fotoğraflar (10+ adet)
+- Detaylı açıklama
+- Amenity listesi
+
+### 4. Davranış Sinyalleri (%20 ağırlık)
+- Tıklama oranı (CTR)
+- Bounce rate
+- Conversion rate
+
+## 10 Pratik Strateji
+
+1. **Yanıt oranınızı %90+** tutun (Google sinyali)
+2. **Aylık 20+ yeni yorum** hedefleyin
+3. **Yüksek çözünürlüklü 15+ fotoğraf** ekleyin
+4. **Tüm OTA'larda aynı fiyatı** koruyun
+5. **Mevsimsel kampanyalar** ile fiyat avantajı yaratın
+6. **Google Business Profile** bilgilerini güncel tutun
+7. **Çok dilli açıklama** ekleyin (en az TR + EN)
+8. **Amenity listesini** eksiksiz doldurun
+9. **AI ile yorum yanıtlarını hızlandırın**
+10. **Booking & TripAdvisor için ayrı strateji** uygulayın
+
+## VoyageRespond ile Sıralama Yükseltme
+
+VoyageRespond, tüm yorum platformlarınızı tek panelden yönetir:
+- Yanıt oranınızı **%95+** tutmanıza yardımcı olur
+- AI ile günlük 100+ yoruma saniyeler içinde yanıt
+- Sıralama trendlerini analiz eder
+- Şehre özel rakip karşılaştırması
+
+## İlgili Rehberler
+
+- [Otel Yorum Yönetimi Rehberi](/blog/otel-yorum-yonetimi-rehberi)
+- [TripAdvisor Yorum Yönetimi](/blog/tripadvisor-yorum-yonetimi-rehberi)
+- [Booking.com Yorum Yönetimi](/platform/booking-yorumlari-icin-yapay-zeka)
+
+**[3 ay ücretsiz deneyin →](https://voyagerespond.com/onboarding)**
+    `,
+  },
+  {
+    slug: "airbnb-sikayet-ve-yorum-yonetimi",
+    title: "Airbnb Şikayet ve Yorum Yönetimi: Ev Sahipleri için Rehber",
+    description:
+      "Airbnb şikayetleri nasıl çözülür, olumsuz yoruma nasıl cevap verilir, Superhost olmak için 5 adım. Türkiye'deki Airbnb ev sahipleri için 2026 rehberi.",
+    ogTitle: "Airbnb Şikayet ve Yorum Yönetimi | VoyageRespond",
+    ogDescription: "Airbnb şikayetlerini profesyonelce çözün, Superhost statüsüne ulaşın.",
+    author: "VoyageRespond",
+    publishedAt: "2026-06-03",
+    category: "Platform Rehberleri",
+    readTime: "8 dk",
+    keywords: ["airbnb şikayet", "airbnb yorum", "airbnb türkiye", "superhost"],
+    content: `
+Airbnb, Türkiye'de **350.000+ aktif listing** ile en büyük kısa dönem kiralama platformudur. Ev sahipleri için **yorum puanı ve yanıt hızı** her şeydir — Superhost statüsünden Search sıralamasına kadar her şey buna bağlı.
+
+## Airbnb Şikayet Türleri ve Çözümleri
+
+### 1. Temizlik Şikayetleri
+- **En sık şikayet türü** (toplamın %35'i)
+- **Çözüm:** Profesyonel temizlik servisi + check-in öncesi kontrol fotoğrafı
+- **Yanıt tonu:** Samimi özür + somut iyileştirme adımı
+
+### 2. Konum Yanıltıcılığı
+- "Reklamdan farklı" şikayeti
+- **Çözüm:** Listing açıklamasında ulaşım süreleri net belirtin
+- **Önleyici:** Çevre fotoğrafları ekleyin
+
+### 3. Eşya/Donanım Eksikliği
+- WiFi, klima, sıcak su gibi temel eksikler
+- **Çözüm:** Anında telafi (indirim/iade) + 24 saat içinde onarım
+
+### 4. Komşu/Gürültü Sorunları
+- **Çözüm:** House rules'da sessizlik saatleri belirtin, gerekirse komşulara haber verin
+
+## Airbnb Yorumlarına Nasıl Cevap Verilir?
+
+- **48 saat içinde** yanıtlayın (Superhost kriteri)
+- **Karşılıklı yorum** sistemi — siz yorum yazana kadar misafirin yorumu görünmez
+- **Olumsuz yoruma yanıt yazın** — yeni misafirler bunu okuyacak
+- **Profesyonel ton** kullanın, savunmaya geçmeyin
+
+## Superhost Olmak İçin 5 Kriter
+
+1. **Yıllık 10+ konaklama** veya 100 gece
+2. **%90+ yanıt oranı** (24 saat içinde)
+3. **%1'den az iptal oranı**
+4. **4.8+ ortalama puan**
+5. Son yılda en az **bir tane 5 yıldız** yorum
+
+Superhost rozeti **rezervasyonu %22 artırır** (Airbnb verisi).
+
+## Birden Fazla Listing Yönetenler için AI
+
+5+ daire/villa yöneten ev sahipleri için manuel yanıt imkansız. VoyageRespond:
+- Tüm Airbnb listing'lerinizi **tek panele** toplar
+- AI ile **çok dilli yanıt** üretir (TR/EN/RU/DE)
+- Sentiment analizi ve uyarılar
+- Superhost kriterlerini takip eder
+
+## İlgili Rehberler
+
+- [Otel Yorum Yönetimi Rehberi](/blog/otel-yorum-yonetimi-rehberi)
+- [Booking.com Yorum Yönetimi](/platform/booking-yorumlari-icin-yapay-zeka)
+- [Airbnb Yorumları için Yapay Zeka](/platform/airbnb-yorumlari-icin-yapay-zeka)
+
+**[3 ay ücretsiz deneyin →](https://voyagerespond.com/onboarding)**
+    `,
+  },
+];
+
+blogPosts.push(...seoTargetedPosts);
+
 export const getBlogPost = (slug: string): BlogPost | undefined => {
   return blogPosts.find((post) => post.slug === slug);
 };
