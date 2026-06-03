@@ -151,7 +151,8 @@ const SehirOtelYorumYonetimi = () => {
 
         {/* AEO / FAQ */}
         <AEOSection
-          title={`${city.name} Otel Yorum Yönetimi — Sıkça Sorulan Sorular`}
+          pageUrl={`https://voyagerespond.com/otel-yorum-yonetimi/${city.slug}`}
+          showAISection={false}
           faqs={[
             {
               question: `${city.name}'da otelimin Google yorumlarına nasıl yanıt verebilirim?`,
