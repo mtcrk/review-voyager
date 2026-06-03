@@ -75,6 +75,12 @@ export default function Register() {
         return;
       }
 
+      // Track signup conversion (key event in GA4)
+      try {
+        const { trackEvent } = await import("@/lib/analytics");
+        trackEvent("sign_up", { method: "email" });
+      } catch {}
+
       // If email confirmation is disabled, user gets a session immediately.
       if (data?.session) {
         navigate(redirectTo);
