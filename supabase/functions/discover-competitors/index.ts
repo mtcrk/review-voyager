@@ -97,11 +97,41 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    if (biz.lat == null || biz.lng == null) {
-      return new Response(JSON.stringify({ error: "Business is missing lat/lng" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    let bizLat: number | null = biz.lat != null ? Number(biz.lat) : null;
+    let bizLng: number | null = biz.lng != null ? Number(biz.lng) : null;
+
+    // Fallback: geocode via Places Text Search using name (+ city if available)
+    if (bizLat == null || bizLng == null) {
+      try {
+        const query = [biz.name, biz.city].filter(Boolean).join(" ");
+        const tsRes = await fetch("https://places.googleapis.com/v1/places:searchText", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Goog-Api-Key": placesKey,
+            "X-Goog-FieldMask": "places.id,places.location,places.displayName",
+          },
+          body: JSON.stringify({ textQuery: query, pageSize: 1 }),
+        });
+        if (tsRes.ok) {
+          const tsJson = await tsRes.json();
+          const p = (tsJson.places || [])[0];
+          if (p?.location) {
+            bizLat = p.location.latitude;
+            bizLng = p.location.longitude;
+            await admin.from("businesses").update({ lat: bizLat, lng: bizLng }).eq("id", business_id);
+          }
+        }
+      } catch (_) { /* ignore */ }
+    }
+
+    if (bizLat == null || bizLng == null) {
+      return new Response(
+        JSON.stringify({
+          error: "Bu işletmenin konumu bulunamadı. Lütfen önce Google Business Profile bağlayın veya işletmenin Google Maps'te kayıtlı olduğundan emin olun.",
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     // Compute own avg rating + count
@@ -122,7 +152,7 @@ Deno.serve(async (req) => {
       rankPreference: "DISTANCE",
       locationRestriction: {
         circle: {
-          center: { latitude: Number(biz.lat), longitude: Number(biz.lng) },
+          center: { latitude: bizLat, longitude: bizLng },
           radius: Math.min(Number(radius_m), 50000),
         },
       },
