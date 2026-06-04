@@ -29,6 +29,20 @@ const LODGING_TYPES = new Set([
   "guest_house",
 ]);
 
+// Broader accept-set used as a post-filter on candidate primaryType.
+// Search uses the narrow set, but Google sometimes classifies real hotels as
+// "lodging" or "extended_stay_hotel" — accept those, reject everything else.
+const LODGING_ACCEPT_SET = new Set([
+  "hotel",
+  "resort_hotel",
+  "motel",
+  "lodging",
+  "bed_and_breakfast",
+  "inn",
+  "guest_house",
+  "extended_stay_hotel",
+]);
+
 // Narrower set used for the actual Places search — paid, reviewable hotels only.
 const LODGING_SEARCH_TYPES = ["hotel", "resort_hotel", "motel"];
 const LODGING_SEARCH_SET = new Set(LODGING_SEARCH_TYPES);
@@ -306,6 +320,7 @@ Deno.serve(async (req) => {
     const results = (placesJson.places || []) as any[];
     const candidates = [] as any[];
     let filteredOutLowReviews = 0;
+    let filteredOutWrongType = 0;
 
     for (const r of results) {
       const pid = r.id;
@@ -319,6 +334,25 @@ Deno.serve(async (req) => {
 
       const candRating = typeof r.rating === "number" ? r.rating : null;
       const candReviewCount = typeof r.userRatingCount === "number" ? r.userRatingCount : 0;
+      const candTypesEarly: string[] = Array.isArray(r.types) ? r.types : [];
+      const primaryType: string | null = typeof r.primaryType === "string" ? r.primaryType : null;
+
+      // Hard type filter: candidate's MAIN identity must match what we're searching for.
+      // This blocks vet clinics, event venues, etc. that have a stray "hotel" in types.
+      let typeOk: boolean;
+      if (isLodging) {
+        typeOk = primaryType
+          ? LODGING_ACCEPT_SET.has(primaryType)
+          : candTypesEarly.some((t) => LODGING_ACCEPT_SET.has(t));
+      } else {
+        typeOk = primaryType
+          ? primaryType === resolvedType
+          : candTypesEarly.includes(resolvedType);
+      }
+      if (!typeOk) {
+        filteredOutWrongType++;
+        continue;
+      }
 
       // Hard filter: a competitor without a meaningful review base is useless for review intelligence
       if (candReviewCount == null || candReviewCount < Number(min_reviews)) {
@@ -398,6 +432,7 @@ Deno.serve(async (req) => {
         ok: true,
         search_type: isLodging ? `${resolvedType} (lodging family)` : resolvedType,
         candidates_found: results.length,
+        filtered_out_wrong_type: filteredOutWrongType,
         filtered_out_low_reviews: filteredOutLowReviews,
         suggested_count: top.length,
         inserted,
