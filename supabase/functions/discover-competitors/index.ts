@@ -2,8 +2,15 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
 const CATEGORY_TO_PLACES_TYPE: Record<string, string> = {
-  hotel: "lodging",
+  hotel: "hotel",
   lodging: "lodging",
+  motel: "motel",
+  resort: "resort_hotel",
+  resort_hotel: "resort_hotel",
+  bed_and_breakfast: "bed_and_breakfast",
+  bnb: "bed_and_breakfast",
+  inn: "inn",
+  guest_house: "guest_house",
   restaurant: "restaurant",
   cafe: "cafe",
   bar: "bar",
@@ -11,6 +18,31 @@ const CATEGORY_TO_PLACES_TYPE: Record<string, string> = {
   salon: "beauty_salon",
   spa: "spa",
 };
+
+const LODGING_TYPES = new Set([
+  "hotel",
+  "motel",
+  "resort_hotel",
+  "bed_and_breakfast",
+  "lodging",
+  "inn",
+  "guest_house",
+]);
+
+const KNOWN_BUSINESS_TYPES = new Set([
+  ...LODGING_TYPES,
+  "restaurant",
+  "cafe",
+  "bar",
+  "doctor",
+  "beauty_salon",
+  "spa",
+  "tourist_attraction",
+  "museum",
+  "gym",
+  "store",
+  "shopping_mall",
+]);
 
 function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number) {
   const R = 6371000;
@@ -65,7 +97,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const { business_id, radius_m = 5000, rating_tolerance = 1.0 } = await req.json();
+    const { business_id, radius_m = 5000, rating_tolerance = 1.0, category } = await req.json();
     if (!business_id) {
       return new Response(JSON.stringify({ error: "business_id required" }), {
         status: 400,
@@ -144,7 +176,41 @@ Deno.serve(async (req) => {
       ? ownReviews!.reduce((s: number, r: any) => s + (r.rating || 0), 0) / ownReviewCount
       : null;
 
-    const mappedType = (biz as any).category ? CATEGORY_TO_PLACES_TYPE[(biz as any).category.toLowerCase()] : undefined;
+    // Resolve search type: (a) request override, (b) Place Details on biz.place_id, (c) error
+    let resolvedType: string | null = null;
+    if (typeof category === "string" && category.trim()) {
+      resolvedType = CATEGORY_TO_PLACES_TYPE[category.trim().toLowerCase()] ?? null;
+    }
+    if (!resolvedType && biz.place_id) {
+      try {
+        const detailsRes = await fetch(`https://places.googleapis.com/v1/places/${biz.place_id}`, {
+          method: "GET",
+          headers: {
+            "X-Goog-Api-Key": placesKey,
+            "X-Goog-FieldMask": "id,types,primaryType",
+          },
+        });
+        if (detailsRes.ok) {
+          const dJson = await detailsRes.json();
+          const primary = typeof dJson.primaryType === "string" ? dJson.primaryType : null;
+          if (primary) {
+            resolvedType = primary;
+          } else if (Array.isArray(dJson.types)) {
+            resolvedType = dJson.types.find((t: string) => KNOWN_BUSINESS_TYPES.has(t)) ?? null;
+          }
+        } else {
+          console.warn("Place Details failed", detailsRes.status, await detailsRes.text());
+        }
+      } catch (e) {
+        console.warn("Place Details error", e);
+      }
+    }
+    if (!resolvedType) {
+      return new Response(
+        JSON.stringify({ error: "Could not determine business category. Provide a category." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     // Places API (New) — Nearby Search
     const body: Record<string, unknown> = {
@@ -156,8 +222,8 @@ Deno.serve(async (req) => {
           radius: Math.min(Number(radius_m), 50000),
         },
       },
+      includedTypes: [resolvedType],
     };
-    if (mappedType) body.includedTypes = [mappedType];
 
     const placesRes = await fetch("https://places.googleapis.com/v1/places:searchNearby", {
       method: "POST",
@@ -198,8 +264,8 @@ Deno.serve(async (req) => {
       }
 
       const categoryMatch =
-        (mappedType != null) &&
-        ((Array.isArray(r.types) && r.types.includes(mappedType)) || r.primaryType === mappedType);
+        r.primaryType === resolvedType ||
+        (Array.isArray(r.types) && r.types.includes(resolvedType));
 
       const match_score = scoreCandidate({
         distance,
@@ -215,7 +281,7 @@ Deno.serve(async (req) => {
         business_id,
         name: r.displayName?.text || "Unknown",
         place_id: pid,
-        category: (biz as any).category || null,
+        category: resolvedType,
         city: biz.city || null,
         lat: candLat,
         lng: candLng,
@@ -262,6 +328,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         ok: true,
+        search_type: resolvedType,
         candidates_found: results.length,
         suggested_count: top.length,
         inserted,
