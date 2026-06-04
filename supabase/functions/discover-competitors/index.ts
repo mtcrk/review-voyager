@@ -120,7 +120,7 @@ Deno.serve(async (req) => {
     // Load business
     const { data: biz, error: bizErr } = await admin
       .from("businesses")
-      .select("id, name, place_id, city, lat, lng")
+      .select("id, name, place_id, city, lat, lng, booking_hotel_id, expedia_hotel_id, hotelscom_url, tripadvisor_id, tripcom_hotel_id")
       .eq("id", business_id)
       .maybeSingle();
     if (bizErr || !biz) {
@@ -176,7 +176,8 @@ Deno.serve(async (req) => {
       ? ownReviews!.reduce((s: number, r: any) => s + (r.rating || 0), 0) / ownReviewCount
       : null;
 
-    // Resolve search type: (a) request override, (b) Place Details on biz.place_id, (c) error
+    // Resolve search type: (a) request override, (b) Place Details on biz.place_id,
+    // (c) hotel-platform IDs imply lodging, (d) Text Search lookup, (e) error
     let resolvedType: string | null = null;
     if (typeof category === "string" && category.trim()) {
       resolvedType = CATEGORY_TO_PLACES_TYPE[category.trim().toLowerCase()] ?? null;
@@ -205,12 +206,59 @@ Deno.serve(async (req) => {
         console.warn("Place Details error", e);
       }
     }
+    // Hotel-platform IDs strongly imply lodging
+    if (!resolvedType) {
+      const b = biz as any;
+      if (b.booking_hotel_id || b.expedia_hotel_id || b.hotelscom_url || b.tripadvisor_id || b.tripcom_hotel_id) {
+        resolvedType = "hotel";
+      }
+    }
+    // Text Search fallback using business name + lat/lng
+    if (!resolvedType && biz.name) {
+      try {
+        const tsRes = await fetch("https://places.googleapis.com/v1/places:searchText", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Goog-Api-Key": placesKey,
+            "X-Goog-FieldMask": "places.id,places.primaryType,places.types",
+          },
+          body: JSON.stringify({
+            textQuery: biz.name,
+            locationBias: { circle: { center: { latitude: bizLat, longitude: bizLng }, radius: 500 } },
+            maxResultCount: 1,
+          }),
+        });
+        if (tsRes.ok) {
+          const tsJson = await tsRes.json();
+          const p = (tsJson.places || [])[0];
+          if (p) {
+            if (typeof p.primaryType === "string") {
+              resolvedType = p.primaryType;
+            } else if (Array.isArray(p.types)) {
+              resolvedType = p.types.find((t: string) => KNOWN_BUSINESS_TYPES.has(t)) ?? null;
+            }
+            if (p.id && !biz.place_id) {
+              await admin.from("businesses").update({ place_id: p.id }).eq("id", business_id);
+              (biz as any).place_id = p.id;
+            }
+          }
+        } else {
+          console.warn("Text Search type-resolve failed", tsRes.status, await tsRes.text());
+        }
+      } catch (e) {
+        console.warn("Text Search type-resolve error", e);
+      }
+    }
     if (!resolvedType) {
       return new Response(
         JSON.stringify({ error: "Could not determine business category. Provide a category." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+
+    const isLodging = LODGING_TYPES.has(resolvedType);
+    const searchTypes = isLodging ? Array.from(LODGING_TYPES) : [resolvedType];
 
     // Places API (New) — Nearby Search
     const body: Record<string, unknown> = {
@@ -222,7 +270,7 @@ Deno.serve(async (req) => {
           radius: Math.min(Number(radius_m), 50000),
         },
       },
-      includedTypes: [resolvedType],
+      includedTypes: searchTypes,
     };
 
     const placesRes = await fetch("https://places.googleapis.com/v1/places:searchNearby", {
@@ -263,9 +311,10 @@ Deno.serve(async (req) => {
         // soft filter; allow but heavy penalty handled in score
       }
 
-      const categoryMatch =
-        r.primaryType === resolvedType ||
-        (Array.isArray(r.types) && r.types.includes(resolvedType));
+      const candTypes: string[] = Array.isArray(r.types) ? r.types : [];
+      const categoryMatch = isLodging
+        ? (LODGING_TYPES.has(r.primaryType) || candTypes.some((t) => LODGING_TYPES.has(t)))
+        : (r.primaryType === resolvedType || candTypes.includes(resolvedType));
 
       const match_score = scoreCandidate({
         distance,
@@ -328,7 +377,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         ok: true,
-        search_type: resolvedType,
+        search_type: isLodging ? `${resolvedType} (lodging family)` : resolvedType,
         candidates_found: results.length,
         suggested_count: top.length,
         inserted,
