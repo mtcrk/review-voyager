@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -96,10 +96,51 @@ export default function Intelligence() {
   const [generatingBrief, setGeneratingBrief] = useState(false);
 
   const [addOpen, setAddOpen] = useState(false);
-  const [addName, setAddName] = useState("");
-  const [addPlaceId, setAddPlaceId] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searching, setSearching] = useState(false);
+  const [suggestions, setSuggestions] = useState<
+    { place_id: string; main_text: string; secondary_text: string; full_text: string }[]
+  >([]);
+  const [addingPlaceId, setAddingPlaceId] = useState<string | null>(null);
+  const searchSeq = useRef(0);
 
   const competitorsKey = ["ci_competitors", businessId] as const;
+
+  useEffect(() => {
+    if (!addOpen) {
+      setSearchQuery("");
+      setSuggestions([]);
+      return;
+    }
+  }, [addOpen]);
+
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (q.length < 2) {
+      setSuggestions([]);
+      setSearching(false);
+      return;
+    }
+    const seq = ++searchSeq.current;
+    setSearching(true);
+    const t = setTimeout(async () => {
+      const { data, error } = await supabase.functions.invoke("places-autocomplete", {
+        body: {
+          query: q,
+          lat: activeBusiness?.lat ? Number(activeBusiness.lat) : undefined,
+          lng: activeBusiness?.lng ? Number(activeBusiness.lng) : undefined,
+        },
+      });
+      if (seq !== searchSeq.current) return;
+      setSearching(false);
+      if (error) {
+        setSuggestions([]);
+        return;
+      }
+      setSuggestions((data as any)?.suggestions ?? []);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [searchQuery, activeBusiness?.lat, activeBusiness?.lng]);
 
   const competitorsQuery = useQuery({
     queryKey: competitorsKey,
@@ -221,23 +262,37 @@ export default function Intelligence() {
     }
   }
 
-  async function addManual() {
-    if (!businessId || !addName.trim()) return;
-    const { error } = await supabase.from("ci_competitors").insert({
+  async function selectSuggestion(s: { place_id: string; main_text: string; full_text: string }) {
+    if (!businessId) return;
+    setAddingPlaceId(s.place_id);
+    const { data, error } = await supabase.functions.invoke("places-autocomplete", {
+      body: { place_id: s.place_id, details: true },
+    });
+    const place = (data as any)?.place;
+    const name = place?.name || s.main_text || s.full_text;
+    const { error: insErr } = await supabase.from("ci_competitors").insert({
       business_id: businessId,
-      name: addName.trim(),
-      place_id: addPlaceId.trim() || null,
+      name,
+      place_id: s.place_id,
+      lat: place?.lat ?? null,
+      lng: place?.lng ?? null,
+      rating: place?.rating ?? null,
+      review_count: place?.review_count ?? null,
       source: "manual",
       status: "confirmed",
     });
-    if (error) {
-      toast({ title: "Eklenemedi", description: error.message, variant: "destructive" });
+    setAddingPlaceId(null);
+    if (error || insErr) {
+      toast({
+        title: "Eklenemedi",
+        description: insErr?.message ?? error?.message ?? "Bilinmeyen hata",
+        variant: "destructive",
+      });
       return;
     }
-    setAddName("");
-    setAddPlaceId("");
     setAddOpen(false);
     queryClient.invalidateQueries({ queryKey: competitorsKey });
+    toast({ title: "Eklendi", description: `${name} rakip olarak eklendi.` });
   }
 
   async function generateBrief() {
@@ -338,25 +393,55 @@ export default function Intelligence() {
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>Manuel Rakip Ekle</DialogTitle>
+                        <DialogTitle>Rakip Ekle</DialogTitle>
                       </DialogHeader>
                       <div className="space-y-3">
-                        <Input
-                          placeholder="Rakip adı"
-                          value={addName}
-                          onChange={(e) => setAddName(e.target.value)}
-                        />
-                        <Input
-                          placeholder="Google place_id (opsiyonel)"
-                          value={addPlaceId}
-                          onChange={(e) => setAddPlaceId(e.target.value)}
-                        />
+                        <div className="relative">
+                          <Input
+                            placeholder="Rakip otel ara..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            autoFocus
+                          />
+                          {searching && (
+                            <Loader2 className="h-4 w-4 animate-spin absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                          )}
+                        </div>
+                        <div className="max-h-80 overflow-y-auto border rounded-md divide-y">
+                          {searchQuery.trim().length < 2 ? (
+                            <div className="p-4 text-sm text-muted-foreground text-center">
+                              Aramak için en az 2 karakter yazın.
+                            </div>
+                          ) : suggestions.length === 0 && !searching ? (
+                            <div className="p-4 text-sm text-muted-foreground text-center">
+                              Sonuç bulunamadı
+                            </div>
+                          ) : (
+                            suggestions.map((s) => (
+                              <button
+                                key={s.place_id}
+                                type="button"
+                                onClick={() => selectSuggestion(s)}
+                                disabled={addingPlaceId !== null}
+                                className="w-full text-left px-3 py-2.5 hover:bg-accent transition-colors flex items-start gap-2 disabled:opacity-50"
+                              >
+                                <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-sm font-medium truncate">{s.main_text}</div>
+                                  {s.secondary_text && (
+                                    <div className="text-xs text-muted-foreground truncate">
+                                      {s.secondary_text}
+                                    </div>
+                                  )}
+                                </div>
+                                {addingPlaceId === s.place_id && (
+                                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                                )}
+                              </button>
+                            ))
+                          )}
+                        </div>
                       </div>
-                      <DialogFooter>
-                        <Button onClick={addManual} disabled={!addName.trim()}>
-                          Ekle
-                        </Button>
-                      </DialogFooter>
                     </DialogContent>
                   </Dialog>
                   <Button onClick={discover} disabled={discovering} className="w-full sm:w-auto">
