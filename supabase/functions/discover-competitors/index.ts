@@ -187,7 +187,7 @@ Deno.serve(async (req) => {
       const candLat = r.location?.latitude;
       const candLng = r.location?.longitude;
       if (candLat == null || candLng == null) continue;
-      const distance = haversineMeters(Number(biz.lat), Number(biz.lng), candLat, candLng);
+      const distance = haversineMeters(bizLat, bizLng, candLat, candLng);
       if (distance > radius_m) continue;
 
       const candRating = typeof r.rating === "number" ? r.rating : null;
