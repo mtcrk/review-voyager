@@ -4,14 +4,64 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Plus, Star, CheckCircle2, AlertCircle } from "lucide-react";
+import { Loader2, Plus, Star, CheckCircle2, AlertCircle, Unlink } from "lucide-react";
 import { invokeAuthedFunction } from "@/lib/invokeAuthedFunction";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function GoogleAccounts() {
-  const { businesses, loading } = useBusiness();
+  const businessCtx = useBusiness() as any;
+  const { businesses, loading } = businessCtx;
+  const refetch = businessCtx.refetch || businessCtx.refresh;
   const [connecting, setConnecting] = useState(false);
+  const [disconnectId, setDisconnectId] = useState<string | null>(null);
+  const [disconnecting, setDisconnecting] = useState(false);
 
   const connectedBusinesses = businesses.filter((b) => b.google_connected);
+  const target = connectedBusinesses.find((b) => b.id === disconnectId);
+
+  const handleDisconnect = async () => {
+    if (!target) return;
+    setDisconnecting(true);
+    try {
+      const { error: bizErr } = await supabase
+        .from("businesses")
+        .update({
+          google_connected: false,
+          google_location_id: null,
+          google_account_id: null,
+          place_id: null,
+        })
+        .eq("id", target.id);
+      if (bizErr) throw bizErr;
+
+      await supabase.from("business_credentials" as any).delete().eq("business_id", target.id);
+
+      toast({
+        title: "Bağlantı kesildi",
+        description: "Mevcut Google yorumlarınız panelde görünmeye devam edecek (salt-okunur).",
+      });
+      setDisconnectId(null);
+      if (typeof refetch === "function") await refetch();
+    } catch (e: any) {
+      toast({
+        title: "Hata",
+        description: e.message || "Bağlantı kesilemedi.",
+        variant: "destructive",
+      });
+    } finally {
+      setDisconnecting(false);
+    }
+  };
 
   const handleConnect = async () => {
     setConnecting(true);
@@ -108,9 +158,18 @@ export default function GoogleAccounts() {
                       </p>
                     )}
                   </div>
-                  <Badge variant="outline" className="shrink-0">
-                    Bağlı
-                  </Badge>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Badge variant="outline">Bağlı</Badge>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => setDisconnectId(b.id)}
+                    >
+                      <Unlink className="h-4 w-4 mr-1" />
+                      Bağlantıyı Kes
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -128,6 +187,50 @@ export default function GoogleAccounts() {
           </ul>
         </CardContent>
       </Card>
+
+      <AlertDialog open={!!disconnectId} onOpenChange={(o) => !o && setDisconnectId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Google bağlantısını kesmek istiyor musun?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <p>
+                  <strong>{target?.name}</strong> için Google Business bağlantısı kesilecek.
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                  <li>Yeni Google yorumları otomatik çekilmeyecek.</li>
+                  <li>Panelden Google'a doğrudan yanıt gönderemeyeceksin.</li>
+                  <li>
+                    <strong className="text-foreground">Mevcut yorumların silinmez</strong> —
+                    geçmiş tüm Google yorumların panelde salt-okunur kalmaya devam eder.
+                  </li>
+                  <li>İstediğin zaman tekrar "Yeni Google Hesabı Bağla" ile bağlayabilirsin.</li>
+                </ul>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={disconnecting}>Vazgeç</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={disconnecting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={(e) => {
+                e.preventDefault();
+                handleDisconnect();
+              }}
+            >
+              {disconnecting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Kesiliyor...
+                </>
+              ) : (
+                "Evet, Bağlantıyı Kes"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
