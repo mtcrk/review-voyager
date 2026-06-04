@@ -29,6 +29,10 @@ const LODGING_TYPES = new Set([
   "guest_house",
 ]);
 
+// Narrower set used for the actual Places search — paid, reviewable hotels only.
+const LODGING_SEARCH_TYPES = ["hotel", "resort_hotel", "motel"];
+const LODGING_SEARCH_SET = new Set(LODGING_SEARCH_TYPES);
+
 const KNOWN_BUSINESS_TYPES = new Set([
   ...LODGING_TYPES,
   "restaurant",
@@ -66,38 +70,46 @@ function scoreCandidate(opts: {
 }) {
   const { distance, radius, ownRating, candRating, ownReviewCount, candReviewCount, categoryMatch } = opts;
 
-  // Proximity (40 pts)
-  const proximity = Math.max(0, 1 - distance / radius) * 40;
+  // Proximity (30 pts)
+  const proximity = Math.max(0, 1 - distance / radius) * 30;
 
-  // Rating similarity (25 pts)
-  let ratingScore = 12.5;
+  // Rating similarity (20 pts)
+  let ratingScore = 10;
   if (ownRating != null && candRating != null) {
     const diff = Math.abs(ownRating - candRating);
-    ratingScore = Math.max(0, 1 - diff / 2) * 25;
+    ratingScore = Math.max(0, 1 - diff / 2) * 20;
   }
 
-  // Review volume similarity, same order of magnitude (20 pts)
-  let volumeScore = 10;
+  // Review volume similarity, same order of magnitude (35 pts)
+  let volumeScore = 8;
   if (ownReviewCount > 0 && candReviewCount > 0) {
     const ratio = candReviewCount / ownReviewCount;
-    if (ratio < 0.3 || ratio > 3) volumeScore = 4;
+    if (ratio < 0.3 || ratio > 3) volumeScore = 8;
     else {
       const logDiff = Math.abs(Math.log10(ratio));
-      volumeScore = Math.max(0, 1 - logDiff) * 20;
+      volumeScore = Math.max(0, 1 - logDiff) * 35;
     }
+  } else if (candReviewCount > 0) {
+    // own has no reviews — reward established candidates anyway
+    volumeScore = Math.min(20, Math.log10(candReviewCount + 1) * 10);
   }
 
   // Category match (15 pts)
   const categoryScore = categoryMatch ? 15 : 5;
 
-  return Math.round(proximity + ratingScore + volumeScore + categoryScore);
+  // Establishment bonus
+  let establishedBonus = 0;
+  if (candReviewCount >= 500) establishedBonus = 10;
+  else if (candReviewCount >= 100) establishedBonus = 5;
+
+  return Math.round(proximity + ratingScore + volumeScore + categoryScore + establishedBonus);
 }
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const { business_id, radius_m = 5000, rating_tolerance = 1.0, category } = await req.json();
+    const { business_id, radius_m = 5000, rating_tolerance = 1.0, category, min_reviews = 30 } = await req.json();
     if (!business_id) {
       return new Response(JSON.stringify({ error: "business_id required" }), {
         status: 400,
@@ -258,7 +270,7 @@ Deno.serve(async (req) => {
     }
 
     const isLodging = LODGING_TYPES.has(resolvedType);
-    const searchTypes = isLodging ? Array.from(LODGING_TYPES) : [resolvedType];
+    const searchTypes = isLodging ? LODGING_SEARCH_TYPES : [resolvedType];
 
     // Places API (New) — Nearby Search
     const body: Record<string, unknown> = {
@@ -293,6 +305,7 @@ Deno.serve(async (req) => {
     const placesJson = await placesRes.json();
     const results = (placesJson.places || []) as any[];
     const candidates = [] as any[];
+    let filteredOutLowReviews = 0;
 
     for (const r of results) {
       const pid = r.id;
@@ -307,13 +320,19 @@ Deno.serve(async (req) => {
       const candRating = typeof r.rating === "number" ? r.rating : null;
       const candReviewCount = typeof r.userRatingCount === "number" ? r.userRatingCount : 0;
 
+      // Hard filter: a competitor without a meaningful review base is useless for review intelligence
+      if (candReviewCount == null || candReviewCount < Number(min_reviews)) {
+        filteredOutLowReviews++;
+        continue;
+      }
+
       if (ownRating != null && candRating != null && Math.abs(ownRating - candRating) > rating_tolerance + 1) {
         // soft filter; allow but heavy penalty handled in score
       }
 
       const candTypes: string[] = Array.isArray(r.types) ? r.types : [];
       const categoryMatch = isLodging
-        ? (LODGING_TYPES.has(r.primaryType) || candTypes.some((t) => LODGING_TYPES.has(t)))
+        ? (LODGING_SEARCH_SET.has(r.primaryType) || candTypes.some((t) => LODGING_SEARCH_SET.has(t)))
         : (r.primaryType === resolvedType || candTypes.includes(resolvedType));
 
       const match_score = scoreCandidate({
@@ -379,6 +398,7 @@ Deno.serve(async (req) => {
         ok: true,
         search_type: isLodging ? `${resolvedType} (lodging family)` : resolvedType,
         candidates_found: results.length,
+        filtered_out_low_reviews: filteredOutLowReviews,
         suggested_count: top.length,
         inserted,
         competitors: top.map((c) => ({
