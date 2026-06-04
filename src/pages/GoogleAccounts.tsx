@@ -187,6 +187,50 @@ export default function GoogleAccounts() {
           </ul>
         </CardContent>
       </Card>
+
+      <AlertDialog open={!!disconnectId} onOpenChange={(o) => !o && setDisconnectId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Google bağlantısını kesmek istiyor musun?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <p>
+                  <strong>{target?.name}</strong> için Google Business bağlantısı kesilecek.
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                  <li>Yeni Google yorumları otomatik çekilmeyecek.</li>
+                  <li>Panelden Google'a doğrudan yanıt gönderemeyeceksin.</li>
+                  <li>
+                    <strong className="text-foreground">Mevcut yorumların silinmez</strong> —
+                    geçmiş tüm Google yorumların panelde salt-okunur kalmaya devam eder.
+                  </li>
+                  <li>İstediğin zaman tekrar "Yeni Google Hesabı Bağla" ile bağlayabilirsin.</li>
+                </ul>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={disconnecting}>Vazgeç</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={disconnecting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={(e) => {
+                e.preventDefault();
+                handleDisconnect();
+              }}
+            >
+              {disconnecting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Kesiliyor...
+                </>
+              ) : (
+                "Evet, Bağlantıyı Kes"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
