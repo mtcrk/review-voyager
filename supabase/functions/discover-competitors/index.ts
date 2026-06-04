@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
     // Load business
     const { data: biz, error: bizErr } = await admin
       .from("businesses")
-      .select("id, name, place_id, category, city, lat, lng")
+      .select("id, name, place_id, city, lat, lng")
       .eq("id", business_id)
       .maybeSingle();
     if (bizErr || !biz) {
@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
       ? ownReviews!.reduce((s: number, r: any) => s + (r.rating || 0), 0) / ownReviewCount
       : null;
 
-    const mappedType = biz.category ? CATEGORY_TO_PLACES_TYPE[biz.category.toLowerCase()] : undefined;
+    const mappedType = (biz as any).category ? CATEGORY_TO_PLACES_TYPE[(biz as any).category.toLowerCase()] : undefined;
 
     // Places API (New) — Nearby Search
     const body: Record<string, unknown> = {
@@ -185,7 +185,7 @@ Deno.serve(async (req) => {
         business_id,
         name: r.displayName?.text || "Unknown",
         place_id: pid,
-        category: biz.category || null,
+        category: (biz as any).category || null,
         city: biz.city || null,
         lat: candLat,
         lng: candLng,
