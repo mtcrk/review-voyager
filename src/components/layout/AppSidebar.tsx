@@ -37,6 +37,7 @@ import {
   TrendingUp,
   LayoutGrid,
   Sparkles,
+  Swords,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -459,6 +460,21 @@ export function AppSidebar() {
                   >
                     <Zap className="h-5 w-5" />
                     <span>Otomatik Yanıt</span>
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={location.pathname === "/intelligence"}
+                  tooltip="Rakip Analizi"
+                >
+                  <NavLink
+                    to="/intelligence"
+                    className="flex items-center gap-3 transition-smooth"
+                  >
+                    <Swords className="h-5 w-5" />
+                    <span>Rakip Analizi</span>
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
