@@ -68,6 +68,7 @@ const AdminApifyLogs = lazy(() => import("./pages/AdminApifyLogs"));
 const YouTubeInbox = lazy(() => import("./pages/YouTubeInbox"));
 const SocialAnalytics = lazy(() => import("./pages/SocialAnalytics"));
 const Intelligence = lazy(() => import("./pages/Intelligence"));
+const IntelligenceComparison = lazy(() => import("./pages/IntelligenceComparison"));
 
 // Redirect /en/blog/:slug -> /blog/:slug (preserve slug, avoid duplicate content)
 const BlogRedirect = () => {
@@ -137,6 +138,7 @@ const AppRoutes = () => (
       <Route path="/youtube" element={<ProtectedRoute><AppLayout><YouTubeInbox /></AppLayout></ProtectedRoute>} />
       <Route path="/social-analytics" element={<ProtectedRoute><AppLayout><SocialAnalytics /></AppLayout></ProtectedRoute>} />
       <Route path="/intelligence" element={<ProtectedRoute><AppLayout><Intelligence /></AppLayout></ProtectedRoute>} />
+      <Route path="/intelligence/karsilastirma" element={<ProtectedRoute><AppLayout><IntelligenceComparison /></AppLayout></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   </Suspense>

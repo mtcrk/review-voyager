@@ -35,6 +35,7 @@ import {
   MapPin,
   CheckCircle2,
 } from "lucide-react";
+import { IntelligenceTabs } from "@/components/intelligence/IntelligenceTabs";
 
 type Competitor = {
   id: string;
@@ -341,6 +342,7 @@ export default function Intelligence() {
         <title>Rakip Analizi · VoyageRespond</title>
       </Helmet>
       <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-6">
+        <IntelligenceTabs />
         <div>
           <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">Rakip Analizi</h1>
           <p className="text-sm text-muted-foreground mt-1">
