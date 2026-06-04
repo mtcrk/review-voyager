@@ -114,52 +114,62 @@ Deno.serve(async (req) => {
       ? ownReviews!.reduce((s: number, r: any) => s + (r.rating || 0), 0) / ownReviewCount
       : null;
 
-    const placesType =
-      (biz.category && CATEGORY_TO_PLACES_TYPE[biz.category.toLowerCase()]) || "establishment";
+    const mappedType = biz.category ? CATEGORY_TO_PLACES_TYPE[biz.category.toLowerCase()] : undefined;
 
-    // Google Places Nearby Search
-    const placesUrl = new URL("https://maps.googleapis.com/maps/api/place/nearbysearch/json");
-    placesUrl.searchParams.set("location", `${biz.lat},${biz.lng}`);
-    placesUrl.searchParams.set("radius", String(radius_m));
-    placesUrl.searchParams.set("type", placesType);
-    placesUrl.searchParams.set("key", placesKey);
+    // Places API (New) — Nearby Search
+    const body: Record<string, unknown> = {
+      maxResultCount: 20,
+      rankPreference: "DISTANCE",
+      locationRestriction: {
+        circle: {
+          center: { latitude: Number(biz.lat), longitude: Number(biz.lng) },
+          radius: Math.min(Number(radius_m), 50000),
+        },
+      },
+    };
+    if (mappedType) body.includedTypes = [mappedType];
 
-    const placesRes = await fetch(placesUrl.toString());
+    const placesRes = await fetch("https://places.googleapis.com/v1/places:searchNearby", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": placesKey,
+        "X-Goog-FieldMask":
+          "places.id,places.displayName,places.location,places.rating,places.userRatingCount,places.types,places.primaryType",
+      },
+      body: JSON.stringify(body),
+    });
     if (!placesRes.ok) {
       const text = await placesRes.text();
-      return new Response(JSON.stringify({ error: "Places API error", details: text }), {
-        status: 502,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    const placesJson = await placesRes.json();
-    if (placesJson.status && placesJson.status !== "OK" && placesJson.status !== "ZERO_RESULTS") {
       return new Response(
-        JSON.stringify({ error: `Places API: ${placesJson.status}`, details: placesJson.error_message }),
+        JSON.stringify({ error: "Places API (New) error", details: text, status: placesRes.status }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
-
-    const results = (placesJson.results || []) as any[];
+    const placesJson = await placesRes.json();
+    const results = (placesJson.places || []) as any[];
     const candidates = [] as any[];
 
     for (const r of results) {
-      if (!r.place_id) continue;
-      if (biz.place_id && r.place_id === biz.place_id) continue;
-      const candLat = r.geometry?.location?.lat;
-      const candLng = r.geometry?.location?.lng;
+      const pid = r.id;
+      if (!pid) continue;
+      if (biz.place_id && pid === biz.place_id) continue;
+      const candLat = r.location?.latitude;
+      const candLng = r.location?.longitude;
       if (candLat == null || candLng == null) continue;
       const distance = haversineMeters(Number(biz.lat), Number(biz.lng), candLat, candLng);
       if (distance > radius_m) continue;
 
       const candRating = typeof r.rating === "number" ? r.rating : null;
-      const candReviewCount = typeof r.user_ratings_total === "number" ? r.user_ratings_total : 0;
+      const candReviewCount = typeof r.userRatingCount === "number" ? r.userRatingCount : 0;
 
       if (ownRating != null && candRating != null && Math.abs(ownRating - candRating) > rating_tolerance + 1) {
         // soft filter; allow but heavy penalty handled in score
       }
 
-      const categoryMatch = Array.isArray(r.types) && r.types.includes(placesType);
+      const categoryMatch =
+        (mappedType != null) &&
+        ((Array.isArray(r.types) && r.types.includes(mappedType)) || r.primaryType === mappedType);
 
       const match_score = scoreCandidate({
         distance,
@@ -173,8 +183,8 @@ Deno.serve(async (req) => {
 
       candidates.push({
         business_id,
-        name: r.name,
-        place_id: r.place_id,
+        name: r.displayName?.text || "Unknown",
+        place_id: pid,
         category: biz.category || null,
         city: biz.city || null,
         lat: candLat,
@@ -188,7 +198,7 @@ Deno.serve(async (req) => {
         is_active: true,
         discovered_at: new Date().toISOString(),
         source_urls: {
-          google_maps: `https://www.google.com/maps/place/?q=place_id:${r.place_id}`,
+          google_maps: `https://www.google.com/maps/place/?q=place_id:${pid}`,
         },
       });
     }
