@@ -4,14 +4,64 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Plus, Star, CheckCircle2, AlertCircle } from "lucide-react";
+import { Loader2, Plus, Star, CheckCircle2, AlertCircle, Unlink } from "lucide-react";
 import { invokeAuthedFunction } from "@/lib/invokeAuthedFunction";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function GoogleAccounts() {
-  const { businesses, loading } = useBusiness();
+  const businessCtx = useBusiness() as any;
+  const { businesses, loading } = businessCtx;
+  const refetch = businessCtx.refetch || businessCtx.refresh;
   const [connecting, setConnecting] = useState(false);
+  const [disconnectId, setDisconnectId] = useState<string | null>(null);
+  const [disconnecting, setDisconnecting] = useState(false);
 
   const connectedBusinesses = businesses.filter((b) => b.google_connected);
+  const target = connectedBusinesses.find((b) => b.id === disconnectId);
+
+  const handleDisconnect = async () => {
+    if (!target) return;
+    setDisconnecting(true);
+    try {
+      const { error: bizErr } = await supabase
+        .from("businesses")
+        .update({
+          google_connected: false,
+          google_location_id: null,
+          google_account_id: null,
+          place_id: null,
+        })
+        .eq("id", target.id);
+      if (bizErr) throw bizErr;
+
+      await supabase.from("business_credentials" as any).delete().eq("business_id", target.id);
+
+      toast({
+        title: "Bağlantı kesildi",
+        description: "Mevcut Google yorumlarınız panelde görünmeye devam edecek (salt-okunur).",
+      });
+      setDisconnectId(null);
+      if (typeof refetch === "function") await refetch();
+    } catch (e: any) {
+      toast({
+        title: "Hata",
+        description: e.message || "Bağlantı kesilemedi.",
+        variant: "destructive",
+      });
+    } finally {
+      setDisconnecting(false);
+    }
+  };
 
   const handleConnect = async () => {
     setConnecting(true);
