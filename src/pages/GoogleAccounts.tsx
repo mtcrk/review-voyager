@@ -158,9 +158,18 @@ export default function GoogleAccounts() {
                       </p>
                     )}
                   </div>
-                  <Badge variant="outline" className="shrink-0">
-                    Bağlı
-                  </Badge>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Badge variant="outline">Bağlı</Badge>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => setDisconnectId(b.id)}
+                    >
+                      <Unlink className="h-4 w-4 mr-1" />
+                      Bağlantıyı Kes
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
