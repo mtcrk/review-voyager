@@ -535,6 +535,120 @@ function WeeklyReportCard() {
   );
 }
 
+function DeleteAccountCard() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+  const [deleting, setDeleting] = useState(false);
+
+  const canDelete =
+    !!user?.email && confirmText.trim().toLowerCase() === user.email.toLowerCase();
+
+  const handleDelete = async () => {
+    if (!canDelete) return;
+    setDeleting(true);
+    try {
+      await invokeAuthedFunction("delete-account", {
+        body: { confirmation: confirmText.trim() },
+      });
+      await supabase.auth.signOut();
+      toast({
+        title: "Hesabın silindi",
+        description: "Tüm verilerin kalıcı olarak kaldırıldı.",
+      });
+      navigate("/login");
+    } catch (e: any) {
+      toast({
+        title: "Hata",
+        description: e.message || "Hesap silinemedi.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  return (
+    <Card className="shadow-card border-destructive/40">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-destructive">
+          <AlertTriangle className="h-5 w-5" />
+          Hesabımı Sil
+        </CardTitle>
+        <CardDescription>
+          Hesabını ve tüm verilerini kalıcı olarak siler. Bu işlem geri alınamaz.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="text-sm text-muted-foreground space-y-2 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
+          <p className="font-medium text-foreground">Silindiğinde aşağıdakiler de kalıcı olarak silinir:</p>
+          <ul className="list-disc list-inside space-y-1">
+            <li>Tüm işletmelerin ve lokasyonların</li>
+            <li>Tüm yorumların (Google, Booking, TripAdvisor, Trustpilot, Hotels.com vb.)</li>
+            <li>AI yanıtların, yanıt geçmişin ve tonların</li>
+            <li>Bağlı Google / TikTok / YouTube hesapları ve token'ların</li>
+            <li>E-posta listen, kampanyaların ve gönderim geçmişin</li>
+            <li>Sohbet geçmişin, raporların ve rakip analizlerin</li>
+            <li>Profil bilgilerin ve giriş hesabın</li>
+          </ul>
+          <p className="text-xs pt-2">
+            Sadece bağlantıyı kesmek istiyorsan, "Google Hesapları" sayfasından
+            "Bağlantıyı Kes"i kullan — yorumların kalır.
+          </p>
+        </div>
+        <Button variant="destructive" onClick={() => setOpen(true)}>
+          Hesabımı Kalıcı Olarak Sil
+        </Button>
+      </CardContent>
+
+      <AlertDialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setConfirmText(""); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-destructive">Son onay</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3 text-sm">
+                <p>
+                  Bu işlem <strong className="text-foreground">geri alınamaz</strong>. Hesabın,
+                  tüm işletmelerin, yorumların, raporların ve bağlı entegrasyonların kalıcı
+                  olarak silinir.
+                </p>
+                <p>
+                  Onaylamak için e-posta adresini yaz:{" "}
+                  <code className="px-1.5 py-0.5 rounded bg-muted text-foreground font-mono text-xs">
+                    {user?.email}
+                  </code>
+                </p>
+                <Input
+                  value={confirmText}
+                  onChange={(e) => setConfirmText(e.target.value)}
+                  placeholder={user?.email || ""}
+                  autoComplete="off"
+                  disabled={deleting}
+                />
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Vazgeç</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={!canDelete || deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={(e) => { e.preventDefault(); handleDelete(); }}
+            >
+              {deleting ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Siliniyor...</>
+              ) : (
+                "Evet, hesabımı sil"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </Card>
+  );
+}
+
 function BrowserPushCard() {
   const { pushPermission, requestPushPermission } = useNewReviews();
 
