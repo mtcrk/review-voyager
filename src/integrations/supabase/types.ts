@@ -196,6 +196,279 @@ export type Database = {
           },
         ]
       }
+      ci_competitor_reviews: {
+        Row: {
+          author_country: string | null
+          author_name: string | null
+          body: string | null
+          competitor_id: string
+          external_id: string
+          id: string
+          language: string | null
+          platform: string
+          posted_at: string | null
+          rating: number | null
+          raw_payload: Json | null
+          scraped_at: string
+          title: string | null
+          topics_extracted_at: string | null
+          trip_type: string | null
+        }
+        Insert: {
+          author_country?: string | null
+          author_name?: string | null
+          body?: string | null
+          competitor_id: string
+          external_id: string
+          id?: string
+          language?: string | null
+          platform: string
+          posted_at?: string | null
+          rating?: number | null
+          raw_payload?: Json | null
+          scraped_at?: string
+          title?: string | null
+          topics_extracted_at?: string | null
+          trip_type?: string | null
+        }
+        Update: {
+          author_country?: string | null
+          author_name?: string | null
+          body?: string | null
+          competitor_id?: string
+          external_id?: string
+          id?: string
+          language?: string | null
+          platform?: string
+          posted_at?: string | null
+          rating?: number | null
+          raw_payload?: Json | null
+          scraped_at?: string
+          title?: string | null
+          topics_extracted_at?: string | null
+          trip_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ci_competitor_reviews_competitor_id_fkey"
+            columns: ["competitor_id"]
+            isOneToOne: false
+            referencedRelation: "ci_competitors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ci_competitors: {
+        Row: {
+          added_by: string | null
+          business_id: string
+          category: string | null
+          city: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          lat: number | null
+          lng: number | null
+          name: string
+          place_id: string | null
+          proximity_m: number | null
+          source_urls: Json
+          updated_at: string
+        }
+        Insert: {
+          added_by?: string | null
+          business_id: string
+          category?: string | null
+          city?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          lat?: number | null
+          lng?: number | null
+          name: string
+          place_id?: string | null
+          proximity_m?: number | null
+          source_urls?: Json
+          updated_at?: string
+        }
+        Update: {
+          added_by?: string | null
+          business_id?: string
+          category?: string | null
+          city?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          lat?: number | null
+          lng?: number | null
+          name?: string
+          place_id?: string | null
+          proximity_m?: number | null
+          source_urls?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ci_competitors_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ci_monday_briefs: {
+        Row: {
+          bucket_week: string
+          business_id: string
+          competitors_count: number | null
+          emailed_at: string | null
+          generated_at: string
+          id: string
+          opened_at: string | null
+          reviews_analysed: number | null
+          sections: Json
+          signal_strength: number | null
+        }
+        Insert: {
+          bucket_week: string
+          business_id: string
+          competitors_count?: number | null
+          emailed_at?: string | null
+          generated_at?: string
+          id?: string
+          opened_at?: string | null
+          reviews_analysed?: number | null
+          sections: Json
+          signal_strength?: number | null
+        }
+        Update: {
+          bucket_week?: string
+          business_id?: string
+          competitors_count?: number | null
+          emailed_at?: string | null
+          generated_at?: string
+          id?: string
+          opened_at?: string | null
+          reviews_analysed?: number | null
+          sections?: Json
+          signal_strength?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ci_monday_briefs_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ci_review_topics: {
+        Row: {
+          business_id: string
+          competitor_id: string | null
+          confidence: number
+          excerpt: string | null
+          extracted_at: string
+          id: number
+          language: string | null
+          review_id: string
+          review_posted_at: string | null
+          review_source: string
+          sentiment: number
+          topic_id: string
+        }
+        Insert: {
+          business_id: string
+          competitor_id?: string | null
+          confidence?: number
+          excerpt?: string | null
+          extracted_at?: string
+          id?: number
+          language?: string | null
+          review_id: string
+          review_posted_at?: string | null
+          review_source: string
+          sentiment: number
+          topic_id: string
+        }
+        Update: {
+          business_id?: string
+          competitor_id?: string | null
+          confidence?: number
+          excerpt?: string | null
+          extracted_at?: string
+          id?: number
+          language?: string | null
+          review_id?: string
+          review_posted_at?: string | null
+          review_source?: string
+          sentiment?: number
+          topic_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ci_review_topics_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ci_review_topics_competitor_id_fkey"
+            columns: ["competitor_id"]
+            isOneToOne: false
+            referencedRelation: "ci_competitors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ci_review_topics_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "ci_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ci_topics: {
+        Row: {
+          applies_to_verticals: string[]
+          category: string
+          created_at: string
+          display_name: Json
+          id: string
+          is_decision_driver: boolean
+          parent_id: string | null
+        }
+        Insert: {
+          applies_to_verticals?: string[]
+          category: string
+          created_at?: string
+          display_name: Json
+          id: string
+          is_decision_driver?: boolean
+          parent_id?: string | null
+        }
+        Update: {
+          applies_to_verticals?: string[]
+          category?: string
+          created_at?: string
+          display_name?: Json
+          id?: string
+          is_decision_driver?: boolean
+          parent_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ci_topics_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "ci_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_contacts: {
         Row: {
           business_id: string
