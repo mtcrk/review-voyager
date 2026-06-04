@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,23 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, Plus, RefreshCw, Sparkles, Star, X, Check, MapPin } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Loader2,
+  Plus,
+  RefreshCw,
+  Sparkles,
+  Star,
+  X,
+  Check,
+  MapPin,
+  CheckCircle2,
+} from "lucide-react";
 
 type Competitor = {
   id: string;
@@ -57,22 +74,83 @@ function scoreColor(score: number | null) {
   return "bg-muted text-muted-foreground";
 }
 
-export default function Intelligence() {
-  const { activeBusiness } = useBusiness();
-  const businessId = activeBusiness?.id;
+function relativeTime(iso?: string | null) {
+  if (!iso) return null;
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return "az önce";
+  if (m < 60) return `${m} dk önce`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h} sa önce`;
+  const d = Math.floor(h / 24);
+  return `${d} gün önce`;
+}
 
-  const [competitors, setCompetitors] = useState<Competitor[]>([]);
-  const [loadingComp, setLoadingComp] = useState(true);
+export default function Intelligence() {
+  const { activeBusiness, loading: businessLoading } = useBusiness();
+  const businessId = activeBusiness?.id;
+  const queryClient = useQueryClient();
+
   const [discovering, setDiscovering] = useState(false);
   const [radius, setRadius] = useState(5000);
-
-  const [brief, setBrief] = useState<Brief | null>(null);
-  const [loadingBrief, setLoadingBrief] = useState(true);
   const [generatingBrief, setGeneratingBrief] = useState(false);
 
   const [addOpen, setAddOpen] = useState(false);
   const [addName, setAddName] = useState("");
   const [addPlaceId, setAddPlaceId] = useState("");
+
+  const competitorsKey = ["ci_competitors", businessId] as const;
+
+  const competitorsQuery = useQuery({
+    queryKey: competitorsKey,
+    enabled: !!businessId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ci_competitors")
+        .select("*")
+        .eq("business_id", businessId!)
+        .neq("status", "rejected")
+        .order("match_score", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as Competitor[];
+    },
+  });
+
+  const briefQuery = useQuery({
+    queryKey: ["ci_monday_brief", businessId],
+    enabled: !!businessId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ci_monday_briefs")
+        .select("*")
+        .eq("business_id", businessId!)
+        .order("bucket_week", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return (data as Brief) ?? null;
+    },
+  });
+
+  const lastRunQuery = useQuery({
+    queryKey: ["ci_last_run", businessId],
+    enabled: !!businessId,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("ci_discovery_runs")
+        .select("ran_at")
+        .eq("business_id", businessId!)
+        .order("ran_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return (data?.ran_at as string | undefined) ?? null;
+    },
+  });
+
+  const competitors = competitorsQuery.data ?? [];
+  const loadingComp = competitorsQuery.isLoading;
+  const brief = briefQuery.data ?? null;
+  const loadingBrief = briefQuery.isLoading;
 
   const suggested = useMemo(
     () =>
@@ -86,50 +164,9 @@ export default function Intelligence() {
     [competitors],
   );
 
-  async function fetchCompetitors() {
-    if (!businessId) return;
-    setLoadingComp(true);
-    const { data, error } = await supabase
-      .from("ci_competitors")
-      .select("*")
-      .eq("business_id", businessId)
-      .neq("status", "rejected")
-      .order("match_score", { ascending: false });
-    if (error) {
-      toast({ title: "Hata", description: error.message, variant: "destructive" });
-    } else {
-      setCompetitors((data ?? []) as Competitor[]);
-    }
-    setLoadingComp(false);
-  }
-
-  async function fetchBrief() {
-    if (!businessId) return;
-    setLoadingBrief(true);
-    const { data, error } = await supabase
-      .from("ci_monday_briefs")
-      .select("*")
-      .eq("business_id", businessId)
-      .order("bucket_week", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (error) {
-      console.error(error);
-    }
-    setBrief((data as Brief) ?? null);
-    setLoadingBrief(false);
-  }
-
-  useEffect(() => {
-    if (businessId) {
-      fetchCompetitors();
-      fetchBrief();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [businessId]);
-
   async function discover() {
     if (!businessId) return;
+    const before = competitors.filter((c) => c.status === "suggested").length;
     setDiscovering(true);
     const { data, error } = await supabase.functions.invoke("discover-competitors", {
       body: { business_id: businessId, radius_m: radius },
@@ -139,24 +176,49 @@ export default function Intelligence() {
       toast({ title: "Keşif başarısız", description: error.message, variant: "destructive" });
       return;
     }
-    toast({
-      title: "Tamamlandı",
-      description: `${data?.suggested_count ?? 0} rakip önerisi bulundu.`,
+    queryClient.invalidateQueries({ queryKey: ["ci_last_run", businessId] });
+    const fresh = await queryClient.fetchQuery({
+      queryKey: competitorsKey,
+      queryFn: async () => {
+        const { data: d } = await supabase
+          .from("ci_competitors")
+          .select("*")
+          .eq("business_id", businessId)
+          .neq("status", "rejected")
+          .order("match_score", { ascending: false });
+        return (d ?? []) as Competitor[];
+      },
     });
-    fetchCompetitors();
+    const found = data?.candidates_found ?? 0;
+    const suggestedCount = data?.suggested_count ?? 0;
+    const afterSuggested = fresh.filter((c) => c.status === "suggested").length;
+    const newCount = Math.max(0, afterSuggested - before);
+    if (suggestedCount === 0 || newCount === 0) {
+      toast({
+        title: "Yeni öneri bulunamadı",
+        description: "Daha geniş bir yarıçap deneyin (örn. 10 km).",
+      });
+    } else {
+      toast({
+        title: "Tarama tamamlandı",
+        description: `${found} işletme tarandı, ${newCount} yeni öneri eklendi.`,
+      });
+    }
   }
 
   async function setStatus(id: string, status: "confirmed" | "rejected") {
-    const { error } = await supabase.from("ci_competitors").update({ status }).eq("id", id);
-    if (error) {
-      toast({ title: "Hata", description: error.message, variant: "destructive" });
-      return;
-    }
-    setCompetitors((prev) =>
+    const prev = queryClient.getQueryData<Competitor[]>(competitorsKey) ?? [];
+    queryClient.setQueryData<Competitor[]>(
+      competitorsKey,
       status === "rejected"
         ? prev.filter((c) => c.id !== id)
         : prev.map((c) => (c.id === id ? { ...c, status } : c)),
     );
+    const { error } = await supabase.from("ci_competitors").update({ status }).eq("id", id);
+    if (error) {
+      queryClient.setQueryData(competitorsKey, prev);
+      toast({ title: "Hata", description: error.message, variant: "destructive" });
+    }
   }
 
   async function addManual() {
@@ -175,7 +237,7 @@ export default function Intelligence() {
     setAddName("");
     setAddPlaceId("");
     setAddOpen(false);
-    fetchCompetitors();
+    queryClient.invalidateQueries({ queryKey: competitorsKey });
   }
 
   async function generateBrief() {
@@ -190,7 +252,22 @@ export default function Intelligence() {
       return;
     }
     toast({ title: "Brief hazır", description: "En son brief yüklendi." });
-    fetchBrief();
+    queryClient.invalidateQueries({ queryKey: ["ci_monday_brief", businessId] });
+  }
+
+  // Business context still loading — show skeleton instead of "select a business"
+  if (businessLoading) {
+    return (
+      <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-6">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-4 w-96 max-w-full" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {[0, 1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-28 w-full" />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (!businessId) {
@@ -201,8 +278,10 @@ export default function Intelligence() {
     );
   }
 
+  const lastRun = relativeTime(lastRunQuery.data);
+
   return (
-    <>
+    <TooltipProvider delayDuration={200}>
       <Helmet>
         <title>Rakip Analizi · VoyageRespond</title>
       </Helmet>
@@ -212,6 +291,19 @@ export default function Intelligence() {
           <p className="text-sm text-muted-foreground mt-1">
             Bölgenizdeki rakipleri otomatik keşfedin ve haftalık stratejik brief alın.
           </p>
+          {!loadingComp && (
+            <div className="text-xs text-muted-foreground mt-2 flex flex-wrap gap-x-2 gap-y-1">
+              <span>{confirmed.length} rakip takip ediliyor</span>
+              <span>·</span>
+              <span>{suggested.length} öneri bekliyor</span>
+              {lastRun && (
+                <>
+                  <span>·</span>
+                  <span>son keşif: {lastRun}</span>
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         <Tabs defaultValue="competitors">
@@ -237,10 +329,10 @@ export default function Intelligence() {
                     </Button>
                   ))}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Dialog open={addOpen} onOpenChange={setAddOpen}>
                     <DialogTrigger asChild>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" className="w-full sm:w-auto">
                         <Plus className="h-4 w-4" /> Rakip Ekle
                       </Button>
                     </DialogTrigger>
@@ -267,10 +359,10 @@ export default function Intelligence() {
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
-                  <Button onClick={discover} disabled={discovering}>
+                  <Button onClick={discover} disabled={discovering} className="w-full sm:w-auto">
                     {discovering ? (
                       <>
-                        <Loader2 className="h-4 w-4 animate-spin" /> Bölgenizdeki rakipler taranıyor...
+                        <Loader2 className="h-4 w-4 animate-spin" /> Bölgeniz taranıyor...
                       </>
                     ) : (
                       <>
@@ -290,17 +382,21 @@ export default function Intelligence() {
               </div>
             ) : (
               <>
-                {/* Confirmed */}
+                {/* Confirmed FIRST */}
                 {confirmed.length > 0 && (
                   <section>
-                    <h2 className="text-sm font-medium text-muted-foreground mb-2">
-                      Rakiplerim ({confirmed.length})
-                    </h2>
+                    <div className="flex items-center gap-2 mb-2">
+                      <h2 className="text-sm font-medium">Rakiplerim</h2>
+                      <Badge variant="secondary" className="h-5">
+                        {confirmed.length}
+                      </Badge>
+                    </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {confirmed.map((c) => (
                         <CompetitorCard
                           key={c.id}
                           c={c}
+                          confirmed
                           actions={
                             <Button
                               size="sm"
@@ -318,9 +414,12 @@ export default function Intelligence() {
 
                 {/* Suggested */}
                 <section>
-                  <h2 className="text-sm font-medium text-muted-foreground mb-2">
-                    Önerilen Rakipler ({suggested.length})
-                  </h2>
+                  <div className="flex items-center gap-2 mb-2">
+                    <h2 className="text-sm font-medium">Önerilen Rakipler</h2>
+                    <Badge variant="secondary" className="h-5">
+                      {suggested.length}
+                    </Badge>
+                  </div>
                   {suggested.length === 0 && confirmed.length === 0 ? (
                     <Card>
                       <CardContent className="p-8 text-center space-y-3">
@@ -338,6 +437,16 @@ export default function Intelligence() {
                           )}
                           Rakipleri Keşfet
                         </Button>
+                      </CardContent>
+                    </Card>
+                  ) : suggested.length === 0 ? (
+                    <Card>
+                      <CardContent className="p-6 text-center space-y-2">
+                        <CheckCircle2 className="h-7 w-7 mx-auto text-green-600" />
+                        <h3 className="font-medium">Tüm öneriler incelendi</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Harika iş! Haftalık Brief sekmesinden stratejik özetinize göz atın.
+                        </p>
                       </CardContent>
                     </Card>
                   ) : (
@@ -401,18 +510,34 @@ export default function Intelligence() {
           </TabsContent>
         </Tabs>
       </div>
-    </>
+    </TooltipProvider>
   );
 }
 
-function CompetitorCard({ c, actions }: { c: Competitor; actions: React.ReactNode }) {
+function CompetitorCard({
+  c,
+  actions,
+  confirmed,
+}: {
+  c: Competitor;
+  actions: React.ReactNode;
+  confirmed?: boolean;
+}) {
   const distanceKm = c.proximity_m != null ? (c.proximity_m / 1000).toFixed(1) : null;
   return (
-    <Card>
+    <Card className={confirmed ? "border-l-2 border-l-primary" : ""}>
       <CardContent className="p-4 space-y-3">
         <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h3 className="font-medium truncate">{c.name}</h3>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 min-w-0">
+              {confirmed && <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <h3 className="font-medium truncate">{c.name}</h3>
+                </TooltipTrigger>
+                <TooltipContent>{c.name}</TooltipContent>
+              </Tooltip>
+            </div>
             <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1 flex-wrap">
               {c.rating != null && (
                 <span className="inline-flex items-center gap-1">
@@ -476,14 +601,12 @@ function BriefView({
       <Card>
         <CardContent className="p-6 divide-y">
           <BriefRow label="En güçlü avantajınız" value={s.strongest_advantage} />
-          {/* TODO: paywall — blur biggest_gap for free tier */}
           <BriefRow label="En büyük açığınız" value={s.biggest_gap} />
           <BriefRow label="En aktif rakip" value={s.most_active_competitor} />
           <div className="py-4">
             <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
               Yükselen konular
             </p>
-            {/* TODO: paywall — blur topics_on_the_rise for free tier */}
             {rising.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {rising.map((t, i) => (
@@ -507,7 +630,6 @@ function BriefView({
           {actions.length > 0 ? (
             <ol className="space-y-3">
               {actions.map((a, i) => (
-                /* TODO: paywall — blur actions 2 & 3 for free tier */
                 <li key={i} className="flex gap-3">
                   <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-medium flex items-center justify-center">
                     {i + 1}
