@@ -1,0 +1,224 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+
+function pick<T = any>(obj: any, keys: string[]): T | null {
+  for (const k of keys) {
+    const v = k.split(".").reduce((o: any, p: string) => (o == null ? o : o[p]), obj);
+    if (v !== undefined && v !== null && v !== "") return v as T;
+  }
+  return null;
+}
+
+function toIsoDate(v: any): string | null {
+  if (!v) return null;
+  try {
+    const d = new Date(v);
+    if (isNaN(d.getTime())) return null;
+    return d.toISOString();
+  } catch {
+    return null;
+  }
+}
+
+function normalizeItem(item: any) {
+  const place_id =
+    pick<string>(item, [
+      "placeId",
+      "place_id",
+      "sourcePlaceId",
+      "source.placeId",
+      "google.placeId",
+      "googlePlaceId",
+    ]) || null;
+
+  const external_id =
+    pick<string>(item, [
+      "reviewId",
+      "id",
+      "review_id",
+      "externalId",
+      "external_id",
+      "reviewIdStr",
+    ]) || null;
+
+  const rating = pick<number>(item, ["rating", "stars", "score", "ratingValue"]);
+  const body = pick<string>(item, ["text", "reviewText", "comment", "body", "review", "content"]);
+  const title = pick<string>(item, ["title", "reviewTitle", "headline"]);
+  const author_name = pick<string>(item, [
+    "authorName",
+    "author_name",
+    "reviewerName",
+    "name",
+    "user.name",
+    "userName",
+  ]);
+  const language = pick<string>(item, ["language", "lang", "originalLanguage", "detectedLanguage"]);
+  const platform =
+    pick<string>(item, ["platform", "source", "provider", "site"]) || "google";
+  const posted_at = toIsoDate(
+    pick(item, ["publishedAtDate", "publishedAt", "date", "createdAt", "reviewDate", "time"]),
+  );
+
+  return {
+    place_id,
+    external_id,
+    rating: rating != null ? Number(rating) : null,
+    body,
+    title,
+    author_name,
+    language,
+    platform: String(platform).toLowerCase(),
+    posted_at,
+  };
+}
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const apifyToken = Deno.env.get("APIFY_API_TOKEN");
+    if (!apifyToken) {
+      return new Response(
+        JSON.stringify({ error: "APIFY_API_TOKEN secret not configured" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const admin = createClient(supabaseUrl, serviceKey);
+
+    let payload: any = {};
+    try { payload = await req.json(); } catch {}
+
+    // Apify webhook shape: { eventType, resource:{ defaultDatasetId, actId, actorRunId, ... } }
+    // Also allow direct invocation with { datasetId } for testing.
+    const datasetId =
+      payload?.resource?.defaultDatasetId ||
+      payload?.defaultDatasetId ||
+      payload?.datasetId;
+    const actorRunId = payload?.resource?.actorRunId || payload?.actorRunId || null;
+
+    if (!datasetId) {
+      return new Response(
+        JSON.stringify({ error: "datasetId (resource.defaultDatasetId) is required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // Fetch dataset items (paginated; default 1000 is fine for most runs, loop just in case)
+    const allItems: any[] = [];
+    let offset = 0;
+    const limit = 1000;
+    while (true) {
+      const url = `https://api.apify.com/v2/datasets/${datasetId}/items?token=${apifyToken}&clean=true&limit=${limit}&offset=${offset}`;
+      const res = await fetch(url);
+      if (!res.ok) {
+        const text = await res.text();
+        return new Response(JSON.stringify({ error: "Apify dataset fetch failed", details: text }), {
+          status: 502,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const items = (await res.json()) as any[];
+      allItems.push(...items);
+      if (items.length < limit) break;
+      offset += limit;
+      if (offset > 20000) break; // safety
+    }
+
+    // Group items by place_id and resolve competitor_ids
+    const placeIds = Array.from(
+      new Set(allItems.map((i) => normalizeItem(i).place_id).filter(Boolean) as string[]),
+    );
+
+    let competitorsByPlace: Record<string, string> = {};
+    if (placeIds.length > 0) {
+      const { data: comps } = await admin
+        .from("ci_competitors")
+        .select("id, place_id")
+        .in("place_id", placeIds);
+      for (const c of comps || []) {
+        if (c.place_id) competitorsByPlace[c.place_id] = c.id;
+      }
+    }
+
+    const rows: any[] = [];
+    let skippedNoCompetitor = 0;
+    let skippedNoId = 0;
+    for (const raw of allItems) {
+      const n = normalizeItem(raw);
+      if (!n.place_id || !competitorsByPlace[n.place_id]) {
+        skippedNoCompetitor++;
+        continue;
+      }
+      if (!n.external_id) {
+        skippedNoId++;
+        continue;
+      }
+      rows.push({
+        competitor_id: competitorsByPlace[n.place_id],
+        external_id: String(n.external_id),
+        platform: n.platform || "google",
+        rating: n.rating,
+        language: n.language,
+        title: n.title,
+        body: n.body,
+        author_name: n.author_name,
+        posted_at: n.posted_at,
+        raw_payload: raw,
+      });
+    }
+
+    let inserted = 0;
+    // Chunk upserts to avoid huge payloads
+    const chunkSize = 500;
+    for (let i = 0; i < rows.length; i += chunkSize) {
+      const chunk = rows.slice(i, i + chunkSize);
+      const { error, count } = await admin
+        .from("ci_competitor_reviews")
+        .upsert(chunk, { onConflict: "platform,external_id", count: "exact", ignoreDuplicates: false });
+      if (error) {
+        console.error("Upsert ci_competitor_reviews failed:", error);
+        return new Response(
+          JSON.stringify({
+            error: "Insert failed",
+            details: error.message,
+            inserted_so_far: inserted,
+          }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      inserted += count ?? chunk.length;
+    }
+
+    // Mark last_scraped_at on touched competitors
+    const touched = Array.from(new Set(rows.map((r) => r.competitor_id)));
+    if (touched.length > 0) {
+      await admin
+        .from("ci_competitors")
+        .update({ last_scraped_at: new Date().toISOString() })
+        .in("id", touched);
+    }
+
+    return new Response(
+      JSON.stringify({
+        ok: true,
+        actorRunId,
+        datasetId,
+        total_items: allItems.length,
+        inserted,
+        skipped_no_competitor: skippedNoCompetitor,
+        skipped_no_id: skippedNoId,
+        competitors_updated: touched.length,
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  } catch (e) {
+    console.error("ingest-apify-reviews error:", e);
+    return new Response(
+      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+});
