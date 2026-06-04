@@ -1520,6 +1520,27 @@ export type Database = {
           },
         ]
       }
+      user_first_action_notified: {
+        Row: {
+          action: string | null
+          email: string | null
+          notified_at: string
+          user_id: string
+        }
+        Insert: {
+          action?: string | null
+          email?: string | null
+          notified_at?: string
+          user_id: string
+        }
+        Update: {
+          action?: string | null
+          email?: string | null
+          notified_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       youtube_comments: {
         Row: {
           analyzed_at: string | null

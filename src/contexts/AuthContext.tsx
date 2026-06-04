@@ -61,6 +61,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const notifyFirstAction = async (u: User) => {
+    try {
+      const key = `vr_first_action_notified_${u.id}`;
+      if (localStorage.getItem(key)) return;
+      localStorage.setItem(key, '1');
+      await supabase.functions.invoke('notify-first-action', {
+        body: {
+          user_id: u.id,
+          email: u.email,
+          full_name: (u.user_metadata as any)?.full_name ?? null,
+          action: 'session_active',
+        },
+      });
+    } catch (e) {
+      console.error('notify-first-action failed', e);
+    }
+  };
+
   const refreshProfile = async () => {
     if (user?.id) {
       await fetchProfile(user.id);
@@ -78,6 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (session?.user) {
           setTimeout(() => {
             fetchProfile(session.user.id);
+            notifyFirstAction(session.user);
           }, 0);
         } else {
           setProfile(null);
@@ -96,6 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         fetchProfile(session.user.id).then(() => {
           setLoading(false);
         });
+        notifyFirstAction(session.user);
       } else {
         setLoading(false);
       }
