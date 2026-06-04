@@ -265,14 +265,21 @@ export type Database = {
           category: string | null
           city: string | null
           created_at: string
+          discovered_at: string | null
           id: string
           is_active: boolean
+          last_scraped_at: string | null
           lat: number | null
           lng: number | null
+          match_score: number | null
           name: string
           place_id: string | null
           proximity_m: number | null
+          rating: number | null
+          review_count: number | null
+          source: string
           source_urls: Json
+          status: string
           updated_at: string
         }
         Insert: {
@@ -281,14 +288,21 @@ export type Database = {
           category?: string | null
           city?: string | null
           created_at?: string
+          discovered_at?: string | null
           id?: string
           is_active?: boolean
+          last_scraped_at?: string | null
           lat?: number | null
           lng?: number | null
+          match_score?: number | null
           name: string
           place_id?: string | null
           proximity_m?: number | null
+          rating?: number | null
+          review_count?: number | null
+          source?: string
           source_urls?: Json
+          status?: string
           updated_at?: string
         }
         Update: {
@@ -297,19 +311,64 @@ export type Database = {
           category?: string | null
           city?: string | null
           created_at?: string
+          discovered_at?: string | null
           id?: string
           is_active?: boolean
+          last_scraped_at?: string | null
           lat?: number | null
           lng?: number | null
+          match_score?: number | null
           name?: string
           place_id?: string | null
           proximity_m?: number | null
+          rating?: number | null
+          review_count?: number | null
+          source?: string
           source_urls?: Json
+          status?: string
           updated_at?: string
         }
         Relationships: [
           {
             foreignKeyName: "ci_competitors_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ci_discovery_runs: {
+        Row: {
+          business_id: string
+          candidates_found: number | null
+          id: string
+          radius_m: number
+          ran_at: string
+          rating_tolerance: number | null
+          suggested_count: number | null
+        }
+        Insert: {
+          business_id: string
+          candidates_found?: number | null
+          id?: string
+          radius_m: number
+          ran_at?: string
+          rating_tolerance?: number | null
+          suggested_count?: number | null
+        }
+        Update: {
+          business_id?: string
+          candidates_found?: number | null
+          id?: string
+          radius_m?: number
+          ran_at?: string
+          rating_tolerance?: number | null
+          suggested_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ci_discovery_runs_business_id_fkey"
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
