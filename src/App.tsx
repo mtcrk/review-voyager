@@ -61,6 +61,9 @@ const OtelYorumCevaplari = lazy(() => import("./pages/seo/OtelYorumCevaplari"));
 const PlatformLanding = lazy(() => import("./pages/seo/PlatformLanding"));
 const SehirOtelYorumYonetimi = lazy(() => import("./pages/seo/SehirOtelYorumYonetimi"));
 const YorumYonetimAraclari = lazy(() => import("./pages/seo/YorumYonetimAraclari"));
+const OnlineItibarYonetimi = lazy(() => import("./pages/seo/OnlineItibarYonetimi"));
+const MusteriMemnuniyeti = lazy(() => import("./pages/seo/MusteriMemnuniyeti"));
+const RestoranMusteriMemnuniyeti = lazy(() => import("./pages/seo/RestoranMusteriMemnuniyeti"));
 const GooglePerformance = lazy(() => import("./pages/GooglePerformance"));
 const Inbox = lazy(() => import("./pages/Inbox"));
 const GoogleAccounts = lazy(() => import("./pages/GoogleAccounts"));
@@ -106,6 +109,9 @@ const AppRoutes = () => (
       <Route path="/otel-yorum-cevaplari" element={<OtelYorumCevaplari />} />
       <Route path="/otel-yorum-yonetimi/:sehir" element={<SehirOtelYorumYonetimi />} />
       <Route path="/yorum-yonetim-araclari" element={<YorumYonetimAraclari />} />
+      <Route path="/online-itibar-yonetimi" element={<OnlineItibarYonetimi />} />
+      <Route path="/musteri-memnuniyeti" element={<MusteriMemnuniyeti />} />
+      <Route path="/restoran-musteri-memnuniyeti" element={<RestoranMusteriMemnuniyeti />} />
       <Route path="/platform/:slug" element={<PlatformLanding />} />
       <Route path="/automations/instagram-sales" element={<InstagramSales />} />
       <Route path="/automations/google-reviews" element={<GoogleReviews />} />
