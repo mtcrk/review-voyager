@@ -2618,6 +2618,9 @@ Superhost rozeti **rezervasyonu %22 artırır** (Airbnb verisi).
 
 blogPosts.push(...seoTargetedPosts);
 
+import { restoranClusterPosts } from "./blogClusterRestoran";
+blogPosts.push(...restoranClusterPosts);
+
 export const getBlogPost = (slug: string): BlogPost | undefined => {
   return blogPosts.find((post) => post.slug === slug);
 };
