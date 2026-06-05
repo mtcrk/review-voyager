@@ -79,6 +79,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://voyagerespond.com/blog/google-yorum-nedir-nasil-yapilir</loc>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://voyagerespond.com/blog/google-yorum-rehberi</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>monthly</changefreq>
@@ -87,6 +93,12 @@
   <url>
     <loc>https://voyagerespond.com/blog/google-yorum-silme-rehberi</loc>
     <lastmod>2026-05-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://voyagerespond.com/blog/google-yorumlarim-nasil-yonetilir</loc>
+    <lastmod>2026-06-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -159,6 +171,18 @@
   <url>
     <loc>https://voyagerespond.com/blog/kotu-yorumlara-nasil-cevap-verilir</loc>
     <lastmod>2026-03-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://voyagerespond.com/blog/musteri-memnuniyet-anketi-ornekleri</loc>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://voyagerespond.com/blog/musteri-memnuniyet-mesaji-ornekleri</loc>
+    <lastmod>2026-06-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -283,10 +307,22 @@
     <priority>0.2</priority>
   </url>
   <url>
+    <loc>https://voyagerespond.com/musteri-memnuniyeti</loc>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://voyagerespond.com/onboarding</loc>
     <lastmod>2026-05-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://voyagerespond.com/online-itibar-yonetimi</loc>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://voyagerespond.com/otel-yorum-cevaplari</loc>
@@ -479,6 +515,12 @@
     <lastmod>2026-01-01</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.2</priority>
+  </url>
+  <url>
+    <loc>https://voyagerespond.com/restoran-musteri-memnuniyeti</loc>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://voyagerespond.com/restoran-yorum-cevaplari</loc>
