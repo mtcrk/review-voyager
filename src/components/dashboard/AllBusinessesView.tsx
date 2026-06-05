@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, MessageSquare, AlertCircle, Building2, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { normalizeRatingTo5 } from "@/lib/ratingScale";
 
 export function AllBusinessesView() {
   const { businesses, setActiveBusiness } = useBusiness();
@@ -23,7 +24,7 @@ export function AllBusinessesView() {
       while (true) {
         const { data, error } = await supabase
           .from("reviews")
-          .select("id,business_id,rating,status,approved_reply,posted_at")
+          .select("id,business_id,rating,status,approved_reply,posted_at,platform")
           .in("business_id", businessIds)
           .order("posted_at", { ascending: false })
           .range(from, from + pageSize - 1);
@@ -47,12 +48,13 @@ export function AllBusinessesView() {
     reviews.forEach((r: any) => {
       const m = map.get(r.business_id);
       if (!m) return;
+      const r5 = normalizeRatingTo5(r.rating, r.platform);
       m.count += 1;
-      m.sum += r.rating;
+      m.sum += r5;
       const isPending = !r.approved_reply && r.status !== "replied";
       if (isPending) m.pending += 1;
       totalCount += 1;
-      totalSum += r.rating;
+      totalSum += r5;
       if (isPending) totalPending += 1;
     });
     const avg = totalCount > 0 ? totalSum / totalCount : 0;
