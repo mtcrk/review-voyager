@@ -441,6 +441,41 @@ const Index = () => {
           <div className="border-t border-border pt-6 text-center text-xs text-muted-foreground">
             © {new Date().getFullYear()} VoyageRespond. {t('indexPage.footerSection.rights')}
           </div>
+
+          {/* Verified on / 3rd party listings */}
+          <div className="mt-6 pt-6 border-t border-border">
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-xs text-muted-foreground">
+              <span className="uppercase tracking-wide text-[10px] font-medium">Verified on</span>
+              <a
+                href="https://www.capterra.com/p/10042872/VoyageRespond/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors"
+                aria-label="Verified on Capterra"
+              >
+                <span className="inline-flex items-center justify-center h-5 w-5 rounded bg-[#FF9D28] text-white text-[10px] font-bold">C</span>
+                <span>Capterra</span>
+              </a>
+              <a
+                href="https://www.getapp.com/customer-service-support-software/a/voyagerespond/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors"
+                aria-label="Listed on GetApp"
+              >
+                <span className="inline-flex items-center justify-center h-5 w-5 rounded bg-[#FF6F4D] text-white text-[10px] font-bold">G</span>
+                <span>GetApp</span>
+              </a>
+              <span className="inline-flex items-center gap-1.5 opacity-50" aria-label="G2 coming soon">
+                <span className="inline-flex items-center justify-center h-5 w-5 rounded bg-muted text-muted-foreground text-[10px] font-bold">G2</span>
+                <span>G2 (soon)</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 opacity-50" aria-label="Product Hunt coming soon">
+                <span className="inline-flex items-center justify-center h-5 w-5 rounded bg-muted text-muted-foreground text-[10px] font-bold">PH</span>
+                <span>Product Hunt (soon)</span>
+              </span>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
