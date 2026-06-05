@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Shield, TrendingUp, Eye, MessageSquare, BarChart3, Sparkles } from "lucide-react";
+import { ArrowRight, Shield, TrendingUp, Eye, MessageSquare, BarChart3, Sparkles, BookOpen, Scale } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import AEOSection from "@/components/seo/AEOSection";
 import SEO from "@/components/seo/SEO";
@@ -26,8 +26,8 @@ const OnlineItibarYonetimi = () => {
             </button>
             <div className="flex items-center gap-4">
               <button onClick={() => navigate("/blog")} className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-foreground">Blog</button>
-              <button onClick={() => navigate("/onboarding")} className="px-4 py-2 rounded-md text-sm font-medium text-white" style={{ backgroundColor: "#7A5AF8" }}>
-                Ücretsiz Dene
+              <button onClick={() => navigate("/yorum-yonetim-araclari")} className="px-4 py-2 rounded-md text-sm font-medium text-white" style={{ backgroundColor: "#7A5AF8" }}>
+                Yorum Yönetim Rehberi
               </button>
             </div>
           </div>
@@ -53,6 +53,47 @@ const OnlineItibarYonetimi = () => {
           <p className="text-muted-foreground leading-relaxed">
             Online itibar yönetimi (Online Reputation Management — ORM), işletmenizin internetteki tüm görünümünü — Google yorumları, Booking puanları, TripAdvisor değerlendirmeleri, sosyal medya yorumları ve haber kaynakları — sistematik olarak <strong>izleme, yanıtlama ve geliştirme</strong> sürecidir. Tüketicilerin <strong>%93'ü</strong> bir işletmeye gitmeden önce online yorumları okuyor (BrightLocal 2025). Yani dijital itibarınız, satış kararını tetikleyen ilk filtredir.
           </p>
+
+          <div className="my-10 rounded-2xl border-2 border-primary/20 bg-primary/5 p-6 sm:p-8">
+            <div className="flex items-center gap-3 mb-4">
+              <Scale className="w-6 h-6 text-primary" />
+              <h2 className="text-2xl font-bold m-0">Online İtibar Yönetimi vs Yorum Yönetimi: Hangisi Size Lazım?</h2>
+            </div>
+            <p className="text-muted-foreground leading-relaxed mb-5">
+              "Online itibar yönetimi" çatı bir terim ve aslında <strong>iki çok farklı hizmet</strong> alanını kapsar. İhtiyacınızı doğru tanımlamak, doğru sağlayıcıya ulaşmanın ilk adımıdır.
+            </p>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="rounded-xl border border-border bg-card p-5">
+                <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Alan 1</div>
+                <h3 className="font-semibold text-foreground mb-2">İçerik Silme & SERP Suppression</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Olumsuz haber, ekşi sözlük başlığı veya yargı kararı içeren içeriklerin Google sonuçlarından kaldırılması/aşağı itilmesi. <strong>Hukuki bir süreç</strong>: unutulma hakkı talepleri, mahkeme kararları, DMCA bildirimleri.
+                </p>
+                <p className="text-sm text-muted-foreground mb-3">
+                  <strong className="text-foreground">Kim yapar:</strong> Hukuk firmaları (Mıhcı Hukuk vb.) ve dijital PR ajansları (Webtures, HF Media vb.).
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  <strong className="text-foreground">Ne zaman gerekir:</strong> Kriz, dava, viral skandal — yılda 1-2 kez denk gelinen <em>nadir</em> durumlar.
+                </p>
+              </div>
+              <div className="rounded-xl border-2 border-primary/40 bg-card p-5">
+                <div className="text-xs uppercase tracking-wider text-primary mb-2">Alan 2 — VoyageRespond'un alanı</div>
+                <h3 className="font-semibold text-foreground mb-2">Yorum Yönetimi</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Google, Booking, TripAdvisor ve sosyal medyadaki müşteri yorumlarını toplama, AI ile yanıtlama, duygu analizi yapma ve operasyonel iyileştirmeye dönüştürme.
+                </p>
+                <p className="text-sm text-muted-foreground mb-3">
+                  <strong className="text-foreground">Kim yapar:</strong> Yorum yönetim platformları — <a href="/yorum-yonetim-araclari" className="text-primary hover:underline">VoyageRespond, Jetyorum, Esinix</a> gibi yazılım firmaları.
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  <strong className="text-foreground">Ne zaman gerekir:</strong> <em>Her hafta</em>. Otel, restoran, çoklu lokasyon işletmeleri için sürekli ve operasyonel bir süreç.
+                </p>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground mt-5 leading-relaxed">
+              <strong className="text-foreground">Pratik kural:</strong> Çoğu işletmenin (özellikle otel ve restoranların) ihtiyacı <strong>yorum yönetimidir</strong>. İçerik silme, ancak gerçek bir kriz veya hukuki sorun varsa devreye alınmalıdır. Yorum yönetimini doğru yaparsanız, ilerideki krizlerin <em>çoğunu</em> baştan engellersiniz.
+            </p>
+          </div>
 
           <h2 className="text-2xl font-bold mt-12 mb-4">Neden Önemli? 4 Somut Veri</h2>
           <ul className="space-y-2 text-muted-foreground">
@@ -115,7 +156,10 @@ const OnlineItibarYonetimi = () => {
 
           <h2 className="text-2xl font-bold mt-12 mb-4">Online İtibar Yönetimi Araçları</h2>
           <p className="text-muted-foreground leading-relaxed">
-            Piyasada yaygın araçlar: Yotpo, BirdEye, Podium, Reputation, ReviewTrackers. Türkçe destek, yerel platform entegrasyonu (Yemeksepeti, Şikayetvar, Booking TR puanları) ve AI tabanlı Türkçe yanıt üretimi açısından <strong>VoyageRespond</strong> Türkiye pazarı için optimize edilmiş tek platformdur. Karşılaştırma için → <a href="/yorum-yonetim-araclari" className="text-primary hover:underline">Yorum Yönetim Araçları</a>.
+            Yorum yönetimi tarafında piyasada birçok platform var: Yotpo, Birdeye, Podium, TrustYou, ReviewPro, Jetyorum, Esinix, MARA Solutions ve VoyageRespond. Her birinin güçlü olduğu sektör ve coğrafya farklı. Detaylı karşılaştırma için → <a href="/yorum-yonetim-araclari" className="text-primary hover:underline">En İyi Yorum Yönetim Araçları 2026: 12 Platform Karşılaştırması</a>.
+          </p>
+          <p className="text-muted-foreground leading-relaxed mt-3">
+            Google özelinde nasıl yönetileceğini adım adım öğrenmek isterseniz → <a href="/blog/google-yorumlarim-nasil-yonetilir" className="text-primary hover:underline">Google Yorumlarım Nasıl Yönetilir?</a> rehberi iyi bir başlangıç. Restoran sahibiyseniz → <a href="/restoran-yorum-cevaplari" className="text-primary hover:underline">Restoran Yorum Cevapları</a>, otelciyseniz → <a href="/platform/google-yorumlari-icin-yapay-zeka" className="text-primary hover:underline">Google yorumları için yapay zeka</a> sayfası daha uygulamaya yönelik.
           </p>
 
           <h2 className="text-2xl font-bold mt-12 mb-4">Kriz Anında İtibar Yönetimi</h2>
@@ -138,16 +182,25 @@ const OnlineItibarYonetimi = () => {
           </ul>
         </article>
 
-        <div className="my-16 text-center p-8 sm:p-10 rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/5 via-background to-background">
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-3">
-            Tüm platformlardaki itibarınızı tek panelden yönetin
-          </h2>
-          <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-            VoyageRespond, Google, Booking, TripAdvisor ve sosyal medya yorumlarınızı AI ile yöneten Türkiye'nin ilk yerli itibar yönetim platformudur.
+        <div className="my-16 p-8 sm:p-10 rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/5 via-background to-background">
+          <div className="flex items-center gap-3 mb-3">
+            <BookOpen className="w-6 h-6 text-primary" />
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground m-0">Devamı: Pratik Yorum Yönetimi Rehberi</h2>
+          </div>
+          <p className="text-muted-foreground mb-6 max-w-2xl">
+            Bu sayfa "online itibar yönetimi"nin <strong>ne olduğunu</strong> anlatıyor. <strong>Nasıl yapılacağını</strong> ve hangi araçların ne işe yaradığını uygulamalı olarak görmek isterseniz, kapsamlı yorum yönetimi içeriklerimize geçin:
           </p>
-          <button onClick={() => navigate("/onboarding")} className="px-8 py-3 rounded-md text-white font-medium hover:shadow-lg min-h-[48px]" style={{ backgroundColor: "#7A5AF8" }}>
-            3 Ay Ücretsiz Deneyin <ArrowRight className="w-4 h-4 inline ml-1" />
-          </button>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button onClick={() => navigate("/yorum-yonetim-araclari")} className="px-5 py-3 rounded-md text-white font-medium hover:shadow-lg min-h-[48px] text-sm" style={{ backgroundColor: "#7A5AF8" }}>
+              12 Platform Karşılaştırması <ArrowRight className="w-4 h-4 inline ml-1" />
+            </button>
+            <button onClick={() => navigate("/blog/google-yorumlarim-nasil-yonetilir")} className="px-5 py-3 rounded-md font-medium border border-border hover:bg-muted min-h-[48px] text-sm">
+              Google Yorumlarım Nasıl Yönetilir?
+            </button>
+            <button onClick={() => navigate("/restoran-yorum-cevaplari")} className="px-5 py-3 rounded-md font-medium border border-border hover:bg-muted min-h-[48px] text-sm">
+              Restoran Yorum Cevapları
+            </button>
+          </div>
         </div>
 
         <AEOSection
