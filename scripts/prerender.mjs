@@ -102,6 +102,12 @@ async function renderOne(routePath) {
 
     const target = `${ORIGIN}${routePath === "/__prerender_404__" ? "/__prerender_404__" : routePath}`;
     await page.goto(target, { waitUntil: "networkidle0", timeout: ROUTE_TIMEOUT_MS });
+    // Wait for the SPA to signal it has mounted (set in src/main.tsx).
+    await page
+      .waitForFunction(() => document.documentElement.dataset.prerenderReady === "1", {
+        timeout: 10_000,
+      })
+      .catch(() => {});
     await new Promise((r) => setTimeout(r, READY_EXTRA_MS));
 
     // Inline Helmet head mutations are already in document.head at this point.
