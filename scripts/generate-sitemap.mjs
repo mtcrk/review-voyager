@@ -55,25 +55,29 @@ function extractCityHotelPages() {
 }
 
 function extractBlogPosts() {
-  const filePath = resolve("src/lib/blogPosts.ts");
-  const content = readFileSync(filePath, "utf-8");
-
+  const files = [
+    "src/lib/blogPosts.ts",
+    "src/lib/blogClusterRestoran.ts",
+  ];
   const posts = [];
-  // Extract slug and publishedAt from each blog post object
+  const seen = new Set();
   const postRegex = /\{\s*slug:\s*"([^"]+)"[\s\S]*?publishedAt:\s*"([^"]+)"[\s\S]*?\},?/g;
-
-  let match;
-  while ((match = postRegex.exec(content)) !== null) {
-    const slug = match[1];
-    const publishedAt = match[2];
-    posts.push({
-      path: `/blog/${slug}`,
-      lastmod: publishedAt,
-      changefreq: "monthly",
-      priority: "0.8",
-    });
+  for (const f of files) {
+    let content;
+    try { content = readFileSync(resolve(f), "utf-8"); } catch { continue; }
+    let match;
+    while ((match = postRegex.exec(content)) !== null) {
+      const slug = match[1];
+      if (seen.has(slug)) continue;
+      seen.add(slug);
+      posts.push({
+        path: `/blog/${slug}`,
+        lastmod: match[2],
+        changefreq: "monthly",
+        priority: "0.8",
+      });
+    }
   }
-
   return posts;
 }
 
