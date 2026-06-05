@@ -16,7 +16,7 @@ const ORIGIN = `http://localhost:${PORT}`;
 const DIST = resolve("dist");
 const CONCURRENCY = 4;
 const ROUTE_TIMEOUT_MS = 25_000;
-const READY_EXTRA_MS = 350;
+const READY_EXTRA_MS = 900;
 
 if (!existsSync(DIST)) {
   console.error("[prerender] dist/ not found — skipping");
