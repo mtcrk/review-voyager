@@ -162,7 +162,7 @@ const BlogPost = () => {
             logo: { "@type": "ImageObject", url: "https://voyagerespond.com/email-logo.png" },
           },
           datePublished: post.publishedAt,
-          dateModified: post.publishedAt,
+          dateModified: post.updatedAt ?? post.publishedAt,
           keywords: post.keywords?.join(", "),
           mainEntityOfPage: `https://voyagerespond.com/blog/${post.slug}`,
         }}
@@ -266,7 +266,7 @@ const BlogPost = () => {
         {/* AEO Section + FAQ */}
         <AEOSection
           pageUrl={`https://voyagerespond.com/blog/${post.slug}`}
-          faqs={[
+          faqs={post.faqs ?? [
             { question: "Google yorumlarına nasıl cevap verilir?", answer: "Google Business profilinizden yorumları görüntüleyip tek tek yanıt verebilirsiniz. Daha hızlı ve tutarlı yanıtlar için VoyageRespond gibi AI destekli yorum yönetim platformlarını kullanabilirsiniz." },
             { question: "AI yorum cevabı yazabilir mi?", answer: "Evet, VoyageRespond gibi AI destekli yorum yönetim platformları her yorumu analiz ederek kişiselleştirilmiş, marka uyumlu yanıtlar üretir. Manuel cevap yazmaya kıyasla %90 zaman tasarrufu sağlar." },
             { question: "Kötü yorumlara nasıl yanıt verilir?", answer: "Sakin kalın, özür dileyin, sorunu kabul edin ve somut bir çözüm sunun. VoyageRespond olumsuz yorumları anında tespit eder ve empatik yanıt önerileri sunar." },
