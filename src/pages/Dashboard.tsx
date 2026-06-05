@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { averageRating5 } from "@/lib/ratingScale";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Star, ChevronLeft, ChevronRight, CheckCircle2, AlertCircle, ExternalLink } from "lucide-react";
