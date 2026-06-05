@@ -2620,6 +2620,8 @@ blogPosts.push(...seoTargetedPosts);
 
 import { restoranClusterPosts } from "./blogClusterRestoran";
 blogPosts.push(...restoranClusterPosts);
+import { memnuniyetClusterPosts } from "./blogClusterMemnuniyet";
+blogPosts.push(...memnuniyetClusterPosts);
 
 export const getBlogPost = (slug: string): BlogPost | undefined => {
   return blogPosts.find((post) => post.slug === slug);
