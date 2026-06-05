@@ -12,6 +12,8 @@ export interface BlogPost {
   ogDescription: string;
   metaTitle?: string;
   metaDescription?: string;
+  updatedAt?: string;
+  faqs?: { question: string; answer: string }[];
 }
 
 export const blogPosts: BlogPost[] = [
