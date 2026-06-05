@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { normalizeRatingTo5 } from "@/lib/ratingScale";
 
 export interface LocationMetrics {
   id: string;
@@ -64,7 +65,7 @@ export function useMultiLocationData() {
         const totalReviews = bizReviews.length;
         const averageRating =
           totalReviews > 0
-            ? bizReviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews
+            ? bizReviews.reduce((sum, r) => sum + normalizeRatingTo5(r.rating, r.platform), 0) / totalReviews
             : 0;
 
         const pendingReplies = bizReviews.filter(
@@ -89,7 +90,7 @@ export function useMultiLocationData() {
         last30.forEach((r) => {
           const day = r.posted_at.slice(0, 10);
           const entry = dailyMap.get(day) || { sum: 0, count: 0 };
-          entry.sum += r.rating;
+          entry.sum += normalizeRatingTo5(r.rating, r.platform);
           entry.count += 1;
           dailyMap.set(day, entry);
         });
@@ -106,7 +107,7 @@ export function useMultiLocationData() {
         bizReviews.forEach((r) => {
           const p = (r.platform || "google").toLowerCase();
           const entry = platformAgg.get(p) || { sum: 0, count: 0 };
-          entry.sum += r.rating;
+          entry.sum += normalizeRatingTo5(r.rating, r.platform);
           entry.count += 1;
           platformAgg.set(p, entry);
         });

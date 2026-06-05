@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { averageRating5 } from "@/lib/ratingScale";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Star, ChevronLeft, ChevronRight, CheckCircle2, AlertCircle, ExternalLink } from "lucide-react";
@@ -74,7 +75,7 @@ export default function Dashboard() {
     if (isDemoMode) return DEMO_METRICS;
     if (!reviews.length) return { avgRating: 0, totalReviews: 0, reviewsThisWeek: 0, pendingReplies: 0 };
 
-    const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+    const avgRating = averageRating5(reviews as any);
     const weekStart = startOfDay(currentWeekStart);
     const weekEnd = endOfDay(addDays(currentWeekStart, 6));
     const reviewsThisWeek = reviews.filter(r => {
@@ -96,9 +97,7 @@ export default function Dashboard() {
         const reviewDate = new Date(r.posted_at);
         return reviewDate >= dayStart && reviewDate <= dayEnd;
       });
-      const avgRating = dayReviews.length > 0
-        ? dayReviews.reduce((sum, r) => sum + r.rating, 0) / dayReviews.length
-        : 0;
+      const avgRating = averageRating5(dayReviews as any);
       return {
         date,
         day: format(date, 'EEE'),
