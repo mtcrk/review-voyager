@@ -16,7 +16,7 @@ const ORIGIN = `http://localhost:${PORT}`;
 const DIST = resolve("dist");
 const CONCURRENCY = 4;
 const ROUTE_TIMEOUT_MS = 25_000;
-const READY_EXTRA_MS = 350;
+const READY_EXTRA_MS = 400;
 
 if (!existsSync(DIST)) {
   console.error("[prerender] dist/ not found — skipping");
@@ -102,6 +102,26 @@ async function renderOne(routePath) {
 
     const target = `${ORIGIN}${routePath === "/__prerender_404__" ? "/__prerender_404__" : routePath}`;
     await page.goto(target, { waitUntil: "networkidle0", timeout: ROUTE_TIMEOUT_MS });
+    // Wait for the SPA to signal it has mounted (set in src/main.tsx).
+    await page
+      .waitForFunction(() => document.documentElement.dataset.prerenderReady === "1", {
+        timeout: 10_000,
+      })
+      .catch(() => {});
+    // react-helmet-async batches DOM mutations via requestAnimationFrame.
+    // Headless tabs that are idle / backgrounded throttle rAF, so we explicitly
+    // pump several frames before snapshotting so <title>/<meta>/JSON-LD commit.
+    await page.evaluate(
+      () =>
+        new Promise((resolve) => {
+          let frames = 0;
+          const pump = () => {
+            if (++frames >= 8) resolve(undefined);
+            else requestAnimationFrame(pump);
+          };
+          requestAnimationFrame(pump);
+        }),
+    );
     await new Promise((r) => setTimeout(r, READY_EXTRA_MS));
 
     // Inline Helmet head mutations are already in document.head at this point.
