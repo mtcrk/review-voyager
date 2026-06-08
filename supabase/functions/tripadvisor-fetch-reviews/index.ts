@@ -293,6 +293,24 @@ Deno.serve(async (req) => {
 
     tripAdvisorUrl = tripAdvisorUrl.split('?')[0].split('#')[0];
 
+    // Normalize non-review TripAdvisor URLs (photo pages, etc.) into Hotel_Review form
+    // so the actor actually finds reviews. Example input:
+    //   .../LocationPhotoDirectLink-g298656-d295103-i444585340-Buyukhanli_Park_Hotel-Ankara.html
+    // becomes:
+    //   .../Hotel_Review-g298656-d295103-Reviews-Buyukhanli_Park_Hotel-Ankara.html
+    if (!/\/Hotel_Review-/i.test(tripAdvisorUrl)) {
+      const gMatch = tripAdvisorUrl.match(/-g(\d+)/i);
+      const dMatch = tripAdvisorUrl.match(/-d(\d+)/i);
+      if (gMatch && dMatch) {
+        // Try to keep the human-readable slug tail (after the last numeric -X<id> segment)
+        const tailMatch = tripAdvisorUrl.match(/-(?:i|o|a|r|m)\d+-(.+?)\.html$/i)
+          || tripAdvisorUrl.match(/-d\d+-(.+?)\.html$/i);
+        const slug = tailMatch?.[1] ? `-${tailMatch[1]}` : "";
+        tripAdvisorUrl = `https://www.tripadvisor.com/Hotel_Review-g${gMatch[1]}-d${dMatch[1]}-Reviews${slug}.html`;
+        console.log(`Normalized TripAdvisor URL → ${tripAdvisorUrl}`);
+      }
+    }
+
     console.log(`Starting TripAdvisor actor (maxcopell/tripadvisor-reviews) for business ${business_id}, URL: ${tripAdvisorUrl}`);
 
     const actorInput = {
