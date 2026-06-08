@@ -59,6 +59,16 @@ type Competitor = {
   status: string;
   source: string;
   created_at: string;
+  star_rating?: number | null;
+  segment?: string | null;
+  price_tier?: number | null;
+  match_score_breakdown?: {
+    proximity?: number;
+    star?: number;
+    segment?: number;
+    price?: number;
+    volume?: number;
+  } | null;
 };
 
 type Brief = {
@@ -77,6 +87,22 @@ const RADIUS_OPTIONS = [
   { label: "5 km", value: 5000 },
   { label: "10 km", value: 10000 },
 ];
+
+const SEGMENT_LABEL: Record<string, string> = {
+  luxury: "Lüks",
+  boutique: "Butik",
+  resort: "Resort",
+  business: "Business",
+  budget: "Ekonomik",
+  bnb: "B&B",
+  hostel: "Hostel",
+  apart: "Apart",
+};
+
+function priceLabel(t?: number | null) {
+  if (!t) return null;
+  return "₺".repeat(Math.max(1, Math.min(4, t)));
+}
 
 function scoreColor(score: number | null) {
   if (score == null) return "bg-muted text-muted-foreground";
