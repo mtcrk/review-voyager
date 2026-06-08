@@ -37,6 +37,7 @@ import {
   Download,
 } from "lucide-react";
 import { IntelligenceTabs } from "@/components/intelligence/IntelligenceTabs";
+import { CompetitorReviewsDrawer } from "@/components/intelligence/CompetitorReviewsDrawer";
 import {
   Select,
   SelectContent,
@@ -920,6 +921,7 @@ function CompetitorCard({
   pending?: boolean;
 }) {
   const distanceKm = c.proximity_m != null ? (c.proximity_m / 1000).toFixed(1) : null;
+  const [reviewsOpen, setReviewsOpen] = useState(false);
   return (
     <Card className={confirmed ? "border-l-2 border-l-primary" : ""}>
       <CardContent className="p-4 space-y-3">
@@ -991,7 +993,17 @@ function CompetitorCard({
         </div>
         {confirmed && (
           <div className="text-xs text-muted-foreground flex flex-wrap gap-x-2">
-            <span>{reviewCount ?? 0} yorum toplandı</span>
+            {reviewCount && reviewCount > 0 ? (
+              <button
+                type="button"
+                onClick={() => setReviewsOpen(true)}
+                className="text-primary hover:underline font-medium"
+              >
+                {reviewCount} yorum toplandı — görüntüle
+              </button>
+            ) : (
+              <span>0 yorum toplandı</span>
+            )}
             {(c as any).last_scraped_at && (
               <>
                 <span>·</span>
@@ -1008,6 +1020,15 @@ function CompetitorCard({
         )}
         <div className="flex justify-end">{actions}</div>
       </CardContent>
+      {confirmed && (
+        <CompetitorReviewsDrawer
+          open={reviewsOpen}
+          onOpenChange={setReviewsOpen}
+          competitorId={c.id}
+          competitorName={c.name}
+          totalCount={reviewCount ?? 0}
+        />
+      )}
     </Card>
   );
 }

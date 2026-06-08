@@ -186,11 +186,19 @@ Deno.serve(async (req) => {
         insertedReviewIds[item.source].add(item.review_id);
       }
       if (rows.length > 0) {
+        // Dedupe within batch (Gemini sometimes returns same topic twice per review)
+        const seen = new Set<string>();
+        const deduped = rows.filter((r) => {
+          const k = `${r.review_id}|${r.review_source}|${r.topic_id}`;
+          if (seen.has(k)) return false;
+          seen.add(k);
+          return true;
+        });
         const { error: insErr } = await admin
           .from("ci_review_topics")
-          .upsert(rows, { onConflict: "review_id,review_source,topic_id", ignoreDuplicates: true });
+          .upsert(deduped, { onConflict: "review_id,review_source,topic_id", ignoreDuplicates: true });
         if (insErr) console.warn("topic insert err", insErr);
-        else totalMentions += rows.length;
+        else totalMentions += deduped.length;
       }
     }
 
