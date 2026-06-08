@@ -229,11 +229,12 @@ Deno.serve(async (req) => {
     }
 
     const admin = createClient(supabaseUrl, serviceKey);
+    const lovableKey = Deno.env.get("LOVABLE_API_KEY") ?? "";
 
     // Load business
     const { data: biz, error: bizErr } = await admin
       .from("businesses")
-      .select("id, name, place_id, city, lat, lng, booking_hotel_id, expedia_hotel_id, hotelscom_url, tripadvisor_id, tripcom_hotel_id")
+      .select("id, name, place_id, city, lat, lng, booking_hotel_id, expedia_hotel_id, hotelscom_url, tripadvisor_id, tripcom_hotel_id, star_rating, segment, price_tier")
       .eq("id", business_id)
       .maybeSingle();
     if (bizErr || !biz) {
@@ -288,6 +289,9 @@ Deno.serve(async (req) => {
     const ownRating = ownReviewCount > 0
       ? ownReviews!.reduce((s: number, r: any) => s + (r.rating || 0), 0) / ownReviewCount
       : null;
+    const ownStar: number | null = (biz as any).star_rating != null ? Number((biz as any).star_rating) : null;
+    const ownSegment: string | null = (biz as any).segment ?? null;
+    const ownPriceTier: number | null = (biz as any).price_tier ?? null;
 
     // Resolve search type: (a) request override, (b) Place Details on biz.place_id,
     // (c) hotel-platform IDs imply lodging, (d) Text Search lookup, (e) error
@@ -392,7 +396,7 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": placesKey,
         "X-Goog-FieldMask":
-          "places.id,places.displayName,places.location,places.rating,places.userRatingCount,places.types,places.primaryType",
+          "places.id,places.displayName,places.location,places.rating,places.userRatingCount,places.types,places.primaryType,places.priceLevel,places.editorialSummary",
       },
       body: JSON.stringify(body),
     });
@@ -456,7 +460,11 @@ Deno.serve(async (req) => {
         ? (LODGING_SEARCH_SET.has(r.primaryType) || candTypes.some((t) => LODGING_SEARCH_SET.has(t)))
         : (r.primaryType === resolvedType || candTypes.includes(resolvedType));
 
-      const match_score = scoreCandidate({
+      const candPriceTier = googlePriceLevelToTier(r.priceLevel);
+      const candSummary: string | null = r.editorialSummary?.text ?? null;
+      const candStar = parseStarFromText(r.displayName?.text) ?? parseStarFromText(candSummary);
+
+      const scored = scoreCandidate({
         distance,
         radius: radius_m,
         ownRating,
@@ -464,6 +472,12 @@ Deno.serve(async (req) => {
         ownReviewCount,
         candReviewCount,
         categoryMatch,
+        ownStar,
+        candStar,
+        ownSegment,
+        candSegment: null, // filled after AI inference below
+        ownPriceTier,
+        candPriceTier,
       });
 
       candidates.push({
@@ -476,7 +490,10 @@ Deno.serve(async (req) => {
         lng: candLng,
         rating: candRating,
         review_count: candReviewCount,
-        match_score,
+        match_score: scored.total,
+        match_score_breakdown: scored.breakdown,
+        star_rating: candStar,
+        price_tier: candPriceTier,
         proximity_m: Math.round(distance),
         source: "discovered",
         status: "suggested",
@@ -485,11 +502,45 @@ Deno.serve(async (req) => {
         source_urls: {
           google_maps: `https://www.google.com/maps/place/?q=place_id:${pid}`,
         },
+        _types: candTypes,
+        _summary: candSummary,
       });
     }
 
     candidates.sort((a, b) => b.match_score - a.match_score);
     const top = candidates.slice(0, 15);
+
+    // Infer segments for top candidates via Gemini (parallel, capped)
+    if (lovableKey && top.length > 0) {
+      await Promise.all(top.map(async (c) => {
+        const seg = await inferSegment(lovableKey, c.name, c._types ?? [], c._summary ?? null, c.price_tier);
+        c.segment = seg;
+        if (seg && ownSegment) {
+          // recompute score now that segment is known
+          const scored = scoreCandidate({
+            distance: c.proximity_m, radius: radius_m,
+            ownRating, candRating: c.rating, ownReviewCount, candReviewCount: c.review_count,
+            categoryMatch: true,
+            ownStar, candStar: c.star_rating,
+            ownSegment, candSegment: seg,
+            ownPriceTier, candPriceTier: c.price_tier,
+          });
+          c.match_score = scored.total;
+          c.match_score_breakdown = scored.breakdown;
+        }
+      }));
+      // remove temp fields before upsert
+      for (const c of top) {
+        delete c._types;
+        delete c._summary;
+      }
+      top.sort((a, b) => b.match_score - a.match_score);
+    } else {
+      for (const c of top) {
+        delete c._types;
+        delete c._summary;
+      }
+    }
 
     let inserted = 0;
     if (top.length > 0) {
