@@ -1250,6 +1250,22 @@ function OwnProfileCard({
                   </SelectContent>
                 </Select>
               </div>
+              <div>
+                <label className="text-xs font-medium mb-1.5 block">
+                  Ortalama oda fiyatı (€/gece) <span className="text-muted-foreground font-normal">— opsiyonel</span>
+                </label>
+                <Input
+                  type="number"
+                  inputMode="decimal"
+                  min={0}
+                  placeholder="örn. 120"
+                  value={priceEur}
+                  onChange={(e) => setPriceEur(e.target.value)}
+                />
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  Fiyat pozisyonu kartı için kullanılır.
+                </p>
+              </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setOpen(false)}>Vazgeç</Button>
