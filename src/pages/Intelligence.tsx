@@ -1154,12 +1154,16 @@ function OwnProfileCard({
   const [star, setStar] = useState<string>(business?.star_rating != null ? String(business.star_rating) : "");
   const [segment, setSegment] = useState<string>(business?.segment ?? "");
   const [price, setPrice] = useState<string>(business?.price_tier != null ? String(business.price_tier) : "");
+  const [priceEur, setPriceEur] = useState<string>(
+    (business as any)?.price_estimate_eur != null ? String((business as any).price_estimate_eur) : "",
+  );
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     setStar(business?.star_rating != null ? String(business.star_rating) : "");
     setSegment(business?.segment ?? "");
     setPrice(business?.price_tier != null ? String(business.price_tier) : "");
+    setPriceEur((business as any)?.price_estimate_eur != null ? String((business as any).price_estimate_eur) : "");
   }, [business?.id, business?.star_rating, business?.segment, business?.price_tier]);
 
   if (!business) return null;
@@ -1173,7 +1177,8 @@ function OwnProfileCard({
         star_rating: star ? Number(star) : null,
         segment: segment || null,
         price_tier: price ? Number(price) : null,
-      })
+        price_estimate_eur: priceEur ? Number(priceEur) : null,
+      } as any)
       .eq("id", business.id);
     setSaving(false);
     if (error) {
@@ -1244,6 +1249,22 @@ function OwnProfileCard({
                     <SelectItem value="4">₺₺₺₺ — Lüks</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div>
+                <label className="text-xs font-medium mb-1.5 block">
+                  Ortalama oda fiyatı (€/gece) <span className="text-muted-foreground font-normal">— opsiyonel</span>
+                </label>
+                <Input
+                  type="number"
+                  inputMode="decimal"
+                  min={0}
+                  placeholder="örn. 120"
+                  value={priceEur}
+                  onChange={(e) => setPriceEur(e.target.value)}
+                />
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  Fiyat pozisyonu kartı için kullanılır.
+                </p>
               </div>
             </div>
             <DialogFooter>

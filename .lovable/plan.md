@@ -1,105 +1,86 @@
-# Rakip Analizi — Derinleştirme Planı
+## Hedef
 
-4 alanı sırayla, küçük PR'lar halinde inşa edeceğiz. Her faz tek başına çalışır ve test edilebilir.
+Şu an rakip analizi "puan + yorum sayısı + sentiment" gösteriyor — bu yetmez. Otelci 3 kararı verebilmeli:
 
----
+1. **Fiyat & pozisyon**: Aynı yıldız/segmentteki rakiplere göre fiyatımı yukarı mı çekmeliyim, aşağı mı?
+2. **Operasyon**: Bu hafta hangi servisi düzeltirsem en çok puan kazanırım?
+3. **Yanıt yönetimi**: Rakiplerim yorumlara ne kadar hızlı/sıkı yanıtlıyor, ben neredeyim?
 
-## Faz 1 — Karşılaştırma Dashboard'u (en yüksek görünür etki)
+Çıktı: Comparison sayfası üstünde **3 canlı aksiyon kartı** + her Pazartesi otomatik gönderilen **haftalık brief e-postası**.
 
-Rakip Analizi sayfasına **3. tab: "Karşılaştırma"** eklenecek. Senin oteline vs onaylı rakiplere yan yana metrikler.
+## Yeni veri (1 migration)
 
-**Görseller:**
-- KPI kartları (4 adet): Ortalama Puan, Toplam Yorum, Yanıt Oranı, Son 30g Yorum Hacmi — sen vs rakip ortalaması delta'sı ile
-- Bar grafiği: Her rakip + sen, ortalama puan karşılaştırması (Recharts)
-- Çizgi grafiği: Son 90 günde yorum hacmi trendi (sen vs en yakın 3 rakip)
-- Platform dağılımı tablosu: Booking / TripAdvisor / Expedia / Hotels.com / Google başına ortalama puan (sen + her rakip)
-- Sıralama (rank) rozeti: "Bölgenizde X. sıradasın"
+`ci_competitor_reviews` zaten ham yorumları + `raw_payload` tutuyor. Owner reply'leri çoğunlukla `raw_payload.ownerResponse` içinde geliyor. Yeni alanlar:
 
-**Veri kaynağı:**
-- Senin: `reviews` (business_id'ye göre)
-- Rakip: `ci_competitor_reviews` (competitor_id → ci_competitors)
+- `ci_competitor_reviews.owner_reply_text TEXT` — varsa rakibin yorumun altına yazdığı cevap
+- `ci_competitor_reviews.owner_reply_at TIMESTAMPTZ` — cevap tarihi (yanıt süresi hesabı için)
+- `ci_competitors.price_estimate_eur NUMERIC` — kullanıcının manuel girebileceği rakip oda fiyatı (opsiyonel, fiyat ekseni için)
+- `businesses.price_estimate_eur NUMERIC` — kendi ortalama oda fiyatı
 
-**Lokasyon dropdown'u** zaten mevcut; bu tab da onu kullanır.
+Owner reply alanlarını mevcut Apify ingest fonksiyonu (`ingest-apify-reviews`) `raw_payload.ownerResponse.text/date` yoksa `ownerResponseText`/`reply` gibi sık bilinen alanlardan dener.
 
----
+## Action Pack — 3 kart (Comparison sayfasında)
 
-## Faz 2 — Konu & Sentiment Analizi
+### Kart 1 — Fiyat & Pozisyon Önerisi
 
-Mevcut `ci_review_topics` ve `ci_topics` tablolarını canlandır + zenginleştir.
+- Aynı **segment + yıldız** filtreli rakipleri al → ortalama puanını ve (varsa) fiyat tier/EUR'unu hesapla.
+- **Value Index = rating × 20 − price_tier × 10** (yüksek = aşırı değerli)
+- Öneri kuralları:
+  - Sizin rating > rakip ortalama + 0.2 **ve** price ≤ rakip ortalama → "Fiyatı %5-10 artırma fırsatı var"
+  - Sizin rating < rakip ortalama − 0.2 → "Fiyatı sabit tut, önce 2. kartı çöz"
+  - Rating ≈ ortalama, price > rakip → "Promosyon/paket önerisi"
+- Görsel: küçük bar — siz vs segment ortalaması (rating + fiyat tier), altta tek cümle öneri.
 
-**Yeni edge function: `analyze-competitor-topics`**
-- Trigger: Apify ingest sonrası otomatik (webhook) + manuel "Yeniden analiz et" butonu
-- Gemini 2.5 Flash ile rakip yorumlarından konu çıkarımı (temizlik, personel, kahvaltı, gürültü, fiyat, konum, vb.)
-- Her konu için: pozitif/negatif sayısı, son 30g delta, hangi rakipte daha çok
+### Kart 2 — Bu Haftaki Operasyonel Öncelik
 
-**UI: Tab "Karşılaştırma" altında "Konu Analizi" bölümü**
-- Heat map / matris: Konular × Rakipler, hücre rengi sentiment'a göre
-- "Sende fırsat" kartı: Rakipte negatif yükseliyor, sende henüz şikayet yok
-- "Sende risk" kartı: Sende negatif var, rakiplerde yok
-- Konuya tıklayınca o konudaki son yorum örnekleri
+`ci_review_topics` zaten doluyor. Her topic için ROI skoru:
 
----
-
-## Faz 3 — Otomatik Alertler (Email)
-
-**Yeni edge function: `competitor-alerts-cron`** (haftalık pg_cron, Pazartesi 09:00)
-
-**Tetikleyiciler:**
-- Rakip ortalama puanı ±0.2 değişti
-- Rakip yorum hacmi son 7g'de %50+ arttı
-- Yeni rakip otomatik keşfedildi (suggested)
-- Rakipte yükselen şikayet konusu (Faz 2'ye bağlı)
-- Sen bir konuda rakiplerin tamamını geçtin (kazanım)
-
-**Email:** Resend / `notify@voyagerespond.com` üzerinden VoyageRespond brand template (mevcut Approach A). Markdown bullet'lı haftalık özet + dashboard linki.
-
-**Ayarlar UI:** Intelligence sayfasında küçük "Bildirim Tercihleri" pop-over — alert tipleri açık/kapalı, e-posta adresi.
-
-**Yeni tablo: `ci_alert_preferences`** (business_id, alert_types jsonb, email, enabled, last_sent_at)
-
----
-
-## Faz 4 — Akıllı Eşleştirme (match_score iyileştirme)
-
-`discover-competitors` edge function'ını ve `ci_competitors` tablosunu güçlendir.
-
-**Yeni alanlar (`ci_competitors`):**
-- `star_rating` (otel yıldız sayısı, 1-5)
-- `segment` (boutique / resort / business / budget / luxury)
-- `price_tier` (1-4, Google Places price_level)
-- `room_count` (varsa)
-
-**Yeni match_score formülü (0-100):**
 ```
-40% Yakınlık (proximity, mevcut)
-20% Yıldız uyumu (aynı yıldız = 100, ±1 = 60, diğer = 20)
-15% Segment uyumu (aynı segment = 100)
-15% Fiyat tier uyumu
-10% Yorum hacmi benzerliği (log scale)
+priority = (own_negative_count * 2) + (comp_negative_count * 1) − (own_positive_count * 0.5)
+boost = comp_avg_sentiment > 0.1 ise 1.5×  (rakip iyi, siz kötü → en kritik)
 ```
 
-**Segment çıkarımı:** Gemini 2.5 Flash, otel adı + Google açıklaması üzerinden tek sefer (rakip eklenirken).
+Top 3 topic'i "şu hafta şuna odaklan" listesi olarak göster. Her satır: konu adı + "X şikayetiniz, rakipte Y şikayet" + tahmini puan etkisi.
 
-**UI:**
-- Rakip kartında yeni rozetler: yıldız, segment, fiyat
-- Filtre çubuğu: "Sadece aynı segment" / "Sadece aynı yıldız"
-- Match score breakdown tooltip (neden bu skor?)
+### Kart 3 — Yanıt Benchmark
 
----
+- **Sizin reply rate** (mevcut `reviews.approved_reply` / `status='replied'`)
+- **Rakip reply rate** (`owner_reply_text IS NOT NULL` / toplam)
+- **Sizin medyan yanıt süresi** (replied_at − posted_at)
+- **Rakip medyan yanıt süresi**
+- Renk kodlu rozet: yeşil (rakipten iyi), amber (yakın), kırmızı (kötü).
+- Altta CTA: "Cevapsız 12 yorumunuza git" → `/reviews?status=unanswered`
 
-## Sıra & Tahmini Süre
+## Haftalık Otomatik E-posta (Pazartesi 09:00 TR)
 
-1. **Faz 1** (Karşılaştırma Dashboard) — TAMAMLANDI
-2. **Faz 4** (Akıllı Eşleştirme) — TAMAMLANDI
-3. **Faz 2** (Konu Analizi) — TAMAMLANDI
-4. **Faz 3** (Alertler) — Faz 2 sinyallerine dayanır, en sona
+Yeni edge function: `weekly-competitive-brief`
+- pg_cron: `0 6 * * 1` UTC (09:00 TR)
+- Tüm `businesses` üzerinde döner; en az 1 `confirmed` rakibi olanları işler
+- İçeriği DB'den çeker (yukarıdaki 3 kartla aynı mantık) → React Email template (Lovable Emails)
+- Resend connector yerine **Lovable Emails** kullanılır (mevcut altyapı `notify.voyagerespond.com`)
+- Template: `weekly-competitive-brief.tsx`
+  - Üst: "Bu hafta sizin için 3 aksiyon" (1 satırlık öneriler)
+  - Geçen haftayla karşılaştırma: rating Δ, yorum hacmi Δ, en çok artan/azalan konu
+  - Alt: "Panele git" CTA → `/intelligence/comparison`
 
-## Teknik notlar
+## Teknik
 
-- Tüm yeni edge function'lar: `verify_jwt = false` + Authorization header forwarding (mevcut pattern)
-- RLS: tüm yeni tablolar `business_id` üzerinden, mevcut `has_role` pattern
-- AI: Gemini 2.5 Flash via Lovable AI Gateway (`LOVABLE_API_KEY` zaten var)
-- Apify ek maliyet yok (mevcut veriyi işliyoruz)
-- pg_cron job Faz 3'te eklenir
+```text
+1. Migration: 4 yeni kolon
+2. ingest-apify-reviews → owner_reply_text/at extraction
+3. src/lib/intelligence/actionPack.ts → tüm hesap fonksiyonları (test edilebilir, paylaşılan)
+4. src/components/intelligence/ActionPack.tsx → 3 kart bileşeni
+5. IntelligenceComparison.tsx → ActionPack en üste eklenir
+6. Settings > Locations → "Ortalama oda fiyatı (EUR)" alanı (price_estimate_eur)
+7. supabase/functions/weekly-competitive-brief/index.ts
+8. supabase/functions/_shared/transactional-email-templates/weekly-competitive-brief.tsx
+9. pg_cron job (insert tool ile)
+```
 
-Hangi fazdan başlayalım — sırayla 1'den mi, yoksa farklı bir öncelik mi?
+## Kapsam dışı (bu turda)
+
+- PDF export (zaten Reporting modülünde var)
+- Fiyat **otomatik** scraping (Booking fiyatları manuel girilecek; otomasyon ayrı bir faz)
+- 5'ten fazla rakip karşılaştırma (UI 5 ile sınırlanır; daha fazlası için "Tümünü görüntüle" linki)
+
+Onaylarsan migration ile başlıyorum.
