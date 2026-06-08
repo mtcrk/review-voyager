@@ -81,42 +81,129 @@ function scoreCandidate(opts: {
   ownReviewCount: number;
   candReviewCount: number;
   categoryMatch: boolean;
+  ownStar?: number | null;
+  candStar?: number | null;
+  ownSegment?: string | null;
+  candSegment?: string | null;
+  ownPriceTier?: number | null;
+  candPriceTier?: number | null;
 }) {
-  const { distance, radius, ownRating, candRating, ownReviewCount, candReviewCount, categoryMatch } = opts;
+  const {
+    distance, radius, ownReviewCount, candReviewCount, categoryMatch,
+    ownStar, candStar, ownSegment, candSegment, ownPriceTier, candPriceTier,
+  } = opts;
 
-  // Proximity (30 pts)
-  const proximity = Math.max(0, 1 - distance / radius) * 30;
+  // 40% Yakınlık
+  const proximity = Math.max(0, 1 - distance / radius) * 40;
 
-  // Rating similarity (20 pts)
-  let ratingScore = 10;
-  if (ownRating != null && candRating != null) {
-    const diff = Math.abs(ownRating - candRating);
-    ratingScore = Math.max(0, 1 - diff / 2) * 20;
+  // 20% Yıldız uyumu
+  let starScore = 12; // neutral when unknown
+  if (ownStar != null && candStar != null) {
+    const diff = Math.abs(ownStar - candStar);
+    if (diff < 0.5) starScore = 20;
+    else if (diff <= 1) starScore = 12;
+    else starScore = 4;
   }
 
-  // Review volume similarity, same order of magnitude (35 pts)
-  let volumeScore = 8;
+  // 15% Segment uyumu
+  let segmentScore = 9;
+  if (ownSegment && candSegment) {
+    segmentScore = ownSegment === candSegment ? 15 : 5;
+  }
+
+  // 15% Fiyat tier uyumu
+  let priceScore = 9;
+  if (ownPriceTier != null && candPriceTier != null) {
+    const diff = Math.abs(ownPriceTier - candPriceTier);
+    if (diff === 0) priceScore = 15;
+    else if (diff === 1) priceScore = 9;
+    else priceScore = 3;
+  }
+
+  // 10% Yorum hacmi benzerliği (log scale) - category match required
+  let volumeScore = categoryMatch ? 4 : 2;
   if (ownReviewCount > 0 && candReviewCount > 0) {
-    const ratio = candReviewCount / ownReviewCount;
-    if (ratio < 0.3 || ratio > 3) volumeScore = 8;
-    else {
-      const logDiff = Math.abs(Math.log10(ratio));
-      volumeScore = Math.max(0, 1 - logDiff) * 35;
-    }
+    const logDiff = Math.abs(Math.log10(candReviewCount / ownReviewCount));
+    volumeScore = Math.max(0, 1 - logDiff / 1.5) * 10;
   } else if (candReviewCount > 0) {
-    // own has no reviews — reward established candidates anyway
-    volumeScore = Math.min(20, Math.log10(candReviewCount + 1) * 10);
+    volumeScore = Math.min(6, Math.log10(candReviewCount + 1) * 2);
   }
 
-  // Category match (15 pts)
-  const categoryScore = categoryMatch ? 15 : 5;
+  const total = Math.round(proximity + starScore + segmentScore + priceScore + volumeScore);
+  return {
+    total,
+    breakdown: {
+      proximity: Math.round(proximity),
+      star: Math.round(starScore),
+      segment: Math.round(segmentScore),
+      price: Math.round(priceScore),
+      volume: Math.round(volumeScore),
+    },
+  };
+}
 
-  // Establishment bonus
-  let establishedBonus = 0;
-  if (candReviewCount >= 500) establishedBonus = 10;
-  else if (candReviewCount >= 100) establishedBonus = 5;
+// Parse star rating from name/description (Turkish hotel naming conventions)
+function parseStarFromText(text: string | null | undefined): number | null {
+  if (!text) return null;
+  const t = text.toLowerCase();
+  // "5 star", "5-star", "5 yıldız", "5*"
+  const m = t.match(/(\d)\s*[-]?\s*(?:star|y[ıi]ld[ıi]z|\*)/);
+  if (m) {
+    const n = parseInt(m[1], 10);
+    if (n >= 1 && n <= 5) return n;
+  }
+  return null;
+}
 
-  return Math.round(proximity + ratingScore + volumeScore + categoryScore + establishedBonus);
+async function inferSegment(
+  apiKey: string,
+  name: string,
+  types: string[],
+  summary: string | null,
+  priceLevel: number | null,
+): Promise<string | null> {
+  try {
+    const prompt = `Aşağıdaki konaklama işletmesini tek bir segment etiketiyle sınıflandır.
+Sadece şu seçeneklerden BIRINI cevap ver (başka kelime yok):
+luxury, boutique, resort, business, budget, bnb, hostel, apart
+
+İsim: ${name}
+Tipler: ${types.join(", ") || "n/a"}
+Açıklama: ${summary ?? "n/a"}
+Google fiyat seviyesi (1-4): ${priceLevel ?? "n/a"}`;
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 10,
+      }),
+    });
+    if (!res.ok) return null;
+    const j = await res.json();
+    const raw = j.choices?.[0]?.message?.content?.trim().toLowerCase() ?? "";
+    const valid = ["luxury", "boutique", "resort", "business", "budget", "bnb", "hostel", "apart"];
+    return valid.find((v) => raw.includes(v)) ?? null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function googlePriceLevelToTier(pl: string | number | null | undefined): number | null {
+  if (pl == null) return null;
+  if (typeof pl === "number") return pl >= 1 && pl <= 4 ? pl : null;
+  const map: Record<string, number> = {
+    PRICE_LEVEL_FREE: 1,
+    PRICE_LEVEL_INEXPENSIVE: 1,
+    PRICE_LEVEL_MODERATE: 2,
+    PRICE_LEVEL_EXPENSIVE: 3,
+    PRICE_LEVEL_VERY_EXPENSIVE: 4,
+  };
+  return map[pl] ?? null;
 }
 
 Deno.serve(async (req) => {
