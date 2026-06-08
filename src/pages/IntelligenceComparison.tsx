@@ -45,6 +45,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { IntelligenceTabs } from "@/components/intelligence/IntelligenceTabs";
+import { TopicAnalysis } from "@/components/intelligence/TopicAnalysis";
 
 type Competitor = {
   id: string;
@@ -767,19 +768,8 @@ export default function IntelligenceComparison() {
               />
             </div>
 
-            {/* Teaser */}
-            <Card className="border-dashed">
-              <CardContent className="p-5 flex items-start gap-3">
-                <Sparkles className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-                <div>
-                  <div className="text-sm font-medium">Yakında: Konu Analizi</div>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Temizlik, personel, kahvaltı, gürültü gibi konularda rakip karşılaştırması ve
-                    "sende fırsat / sende risk" sinyalleri. Faz 2'de geliyor.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Topic Analysis */}
+            {activeBusiness?.id && <TopicAnalysis businessId={activeBusiness.id} />}
           </>
         )}
       </div>
