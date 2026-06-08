@@ -1110,3 +1110,131 @@ function BriefRow({ label, value }: { label: string; value?: string | null }) {
     </div>
   );
 }
+
+const SEGMENT_OPTIONS = [
+  { value: "luxury", label: "Lüks" },
+  { value: "boutique", label: "Butik" },
+  { value: "resort", label: "Resort" },
+  { value: "business", label: "Business" },
+  { value: "budget", label: "Ekonomik" },
+  { value: "bnb", label: "B&B" },
+  { value: "hostel", label: "Hostel" },
+  { value: "apart", label: "Apart" },
+];
+
+function OwnProfileCard({
+  business,
+  onSaved,
+}: {
+  business: any;
+  onSaved: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [star, setStar] = useState<string>(business?.star_rating != null ? String(business.star_rating) : "");
+  const [segment, setSegment] = useState<string>(business?.segment ?? "");
+  const [price, setPrice] = useState<string>(business?.price_tier != null ? String(business.price_tier) : "");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setStar(business?.star_rating != null ? String(business.star_rating) : "");
+    setSegment(business?.segment ?? "");
+    setPrice(business?.price_tier != null ? String(business.price_tier) : "");
+  }, [business?.id, business?.star_rating, business?.segment, business?.price_tier]);
+
+  if (!business) return null;
+  const hasAll = business.star_rating != null && business.segment && business.price_tier != null;
+
+  async function save() {
+    setSaving(true);
+    const { error } = await supabase
+      .from("businesses")
+      .update({
+        star_rating: star ? Number(star) : null,
+        segment: segment || null,
+        price_tier: price ? Number(price) : null,
+      })
+      .eq("id", business.id);
+    setSaving(false);
+    if (error) {
+      toast({ title: "Kaydedilemedi", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Otel profili güncellendi", description: "Akıllı eşleştirme aktif." });
+    setOpen(false);
+    onSaved();
+  }
+
+  return (
+    <Card className={hasAll ? "" : "border-primary/40 bg-primary/5"}>
+      <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+        <div className="text-sm">
+          <div className="font-medium">Otelinizin profili</div>
+          <div className="text-xs text-muted-foreground mt-0.5">
+            {hasAll ? (
+              <>
+                {Number(business.star_rating)}★ · {SEGMENT_LABEL[business.segment] ?? business.segment} · {priceLabel(business.price_tier)} — akıllı eşleştirme aktif
+              </>
+            ) : (
+              "Yıldız, segment ve fiyat seviyenizi girin; rakip eşleştirme çok daha hassas olsun."
+            )}
+          </div>
+        </div>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button size="sm" variant={hasAll ? "outline" : "default"}>
+              {hasAll ? "Düzenle" : "Profili tamamla"}
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Otelinizin profili</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-medium mb-1.5 block">Yıldız</label>
+                <Select value={star} onValueChange={setStar}>
+                  <SelectTrigger><SelectValue placeholder="Seçin" /></SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <SelectItem key={n} value={String(n)}>{n} yıldız</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs font-medium mb-1.5 block">Segment</label>
+                <Select value={segment} onValueChange={setSegment}>
+                  <SelectTrigger><SelectValue placeholder="Seçin" /></SelectTrigger>
+                  <SelectContent>
+                    {SEGMENT_OPTIONS.map((s) => (
+                      <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs font-medium mb-1.5 block">Fiyat seviyesi</label>
+                <Select value={price} onValueChange={setPrice}>
+                  <SelectTrigger><SelectValue placeholder="Seçin" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">₺ — Ekonomik</SelectItem>
+                    <SelectItem value="2">₺₺ — Orta</SelectItem>
+                    <SelectItem value="3">₺₺₺ — Üst</SelectItem>
+                    <SelectItem value="4">₺₺₺₺ — Lüks</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setOpen(false)}>Vazgeç</Button>
+              <Button onClick={save} disabled={saving}>
+                {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+                Kaydet
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </CardContent>
+    </Card>
+  );
+}
