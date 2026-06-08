@@ -110,9 +110,6 @@ export function PlatformRatingsMatrix({ locations, onSelectLocation }: Props) {
                     </div>
                   </th>
                 ))}
-                <th className="text-center px-4 py-3 font-medium text-foreground min-w-[100px] bg-primary/5">
-                  Ortalama
-                </th>
               </tr>
             </thead>
             <tbody>
@@ -206,17 +203,6 @@ export function PlatformRatingsMatrix({ locations, onSelectLocation }: Props) {
                       </td>
                     );
                   })}
-                  <td className="text-center px-4 py-4 bg-primary/5">
-                    <div className="flex flex-col items-center gap-0.5">
-                      <div className="flex items-center gap-1">
-                        <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
-                        <span className="font-bold text-foreground">{loc.averageRating}</span>
-                      </div>
-                      <span className="text-[10px] text-muted-foreground">
-                        {loc.totalReviews} toplam
-                      </span>
-                    </div>
-                  </td>
                 </tr>
               ))}
             </tbody>
