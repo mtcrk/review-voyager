@@ -63,7 +63,11 @@ export type Database = {
           name: string
           parent_business_id: string | null
           place_id: string | null
+          price_tier: number | null
           review_notification_type: string
+          room_count: number | null
+          segment: string | null
+          star_rating: number | null
           tone: string | null
           tripadvisor_id: string | null
           tripcom_hotel_id: string | null
@@ -87,7 +91,11 @@ export type Database = {
           name: string
           parent_business_id?: string | null
           place_id?: string | null
+          price_tier?: number | null
           review_notification_type?: string
+          room_count?: number | null
+          segment?: string | null
+          star_rating?: number | null
           tone?: string | null
           tripadvisor_id?: string | null
           tripcom_hotel_id?: string | null
@@ -111,7 +119,11 @@ export type Database = {
           name?: string
           parent_business_id?: string | null
           place_id?: string | null
+          price_tier?: number | null
           review_notification_type?: string
+          room_count?: number | null
+          segment?: string | null
+          star_rating?: number | null
           tone?: string | null
           tripadvisor_id?: string | null
           tripcom_hotel_id?: string | null
@@ -275,13 +287,18 @@ export type Database = {
           lat: number | null
           lng: number | null
           match_score: number | null
+          match_score_breakdown: Json | null
           name: string
           place_id: string | null
+          price_tier: number | null
           proximity_m: number | null
           rating: number | null
           review_count: number | null
+          room_count: number | null
+          segment: string | null
           source: string
           source_urls: Json
+          star_rating: number | null
           status: string
           updated_at: string
         }
@@ -298,13 +315,18 @@ export type Database = {
           lat?: number | null
           lng?: number | null
           match_score?: number | null
+          match_score_breakdown?: Json | null
           name: string
           place_id?: string | null
+          price_tier?: number | null
           proximity_m?: number | null
           rating?: number | null
           review_count?: number | null
+          room_count?: number | null
+          segment?: string | null
           source?: string
           source_urls?: Json
+          star_rating?: number | null
           status?: string
           updated_at?: string
         }
@@ -321,13 +343,18 @@ export type Database = {
           lat?: number | null
           lng?: number | null
           match_score?: number | null
+          match_score_breakdown?: Json | null
           name?: string
           place_id?: string | null
+          price_tier?: number | null
           proximity_m?: number | null
           rating?: number | null
           review_count?: number | null
+          room_count?: number | null
+          segment?: string | null
           source?: string
           source_urls?: Json
+          star_rating?: number | null
           status?: string
           updated_at?: string
         }
