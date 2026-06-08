@@ -1023,6 +1023,7 @@ export type Database = {
           suggested_reply: string | null
           summary: string | null
           text: string | null
+          topics_extracted_at: string | null
         }
         Insert: {
           approved_reply?: string | null
@@ -1051,6 +1052,7 @@ export type Database = {
           suggested_reply?: string | null
           summary?: string | null
           text?: string | null
+          topics_extracted_at?: string | null
         }
         Update: {
           approved_reply?: string | null
@@ -1079,6 +1081,7 @@ export type Database = {
           suggested_reply?: string | null
           summary?: string | null
           text?: string | null
+          topics_extracted_at?: string | null
         }
         Relationships: [
           {
