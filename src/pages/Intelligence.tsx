@@ -37,6 +37,15 @@ import {
   Download,
 } from "lucide-react";
 import { IntelligenceTabs } from "@/components/intelligence/IntelligenceTabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Clock } from "lucide-react";
 
 type Competitor = {
   id: string;
@@ -89,7 +98,7 @@ function relativeTime(iso?: string | null) {
 }
 
 export default function Intelligence() {
-  const { activeBusiness, loading: businessLoading } = useBusiness();
+  const { activeBusiness, businesses, setActiveBusiness, loading: businessLoading } = useBusiness();
   const businessId = activeBusiness?.id;
   const queryClient = useQueryClient();
 
@@ -108,6 +117,50 @@ export default function Intelligence() {
   >([]);
   const [addingPlaceId, setAddingPlaceId] = useState<string | null>(null);
   const searchSeq = useRef(0);
+
+  // Pending fetch tracking: competitor_id -> started timestamp
+  const PENDING_KEY = businessId ? `ci_pending_fetches_${businessId}` : "ci_pending_fetches";
+  const [pendingFetches, setPendingFetches] = useState<Record<string, number>>(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      const raw = localStorage.getItem(PENDING_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(PENDING_KEY);
+      setPendingFetches(raw ? JSON.parse(raw) : {});
+    } catch {
+      setPendingFetches({});
+    }
+  }, [PENDING_KEY]);
+
+  function markPending(ids: string[]) {
+    setPendingFetches((prev) => {
+      const next = { ...prev };
+      const now = Date.now();
+      for (const id of ids) next[id] = now;
+      try {
+        localStorage.setItem(PENDING_KEY, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }
+
+  function clearPending(id: string) {
+    setPendingFetches((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      try {
+        localStorage.setItem(PENDING_KEY, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }
 
   const competitorsKey = ["ci_competitors", businessId] as const;
   const reviewStatsKey = ["ci_competitor_review_stats", businessId] as const;
@@ -197,6 +250,7 @@ export default function Intelligence() {
   const reviewStatsQuery = useQuery({
     queryKey: reviewStatsKey,
     enabled: !!businessId,
+    refetchInterval: Object.keys(pendingFetches).length > 0 ? 15000 : false,
     queryFn: async () => {
       const { data: comps } = await supabase
         .from("ci_competitors")
@@ -217,6 +271,18 @@ export default function Intelligence() {
     },
   });
   const reviewCounts = reviewStatsQuery.data ?? {};
+
+  // Auto-clear pending when reviews arrive or after 15 min timeout
+  useEffect(() => {
+    const now = Date.now();
+    const TIMEOUT_MS = 15 * 60 * 1000;
+    for (const [id, startedAt] of Object.entries(pendingFetches)) {
+      if ((reviewCounts[id] ?? 0) > 0 || now - startedAt > TIMEOUT_MS) {
+        clearPending(id);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reviewCounts]);
 
   const competitors = competitorsQuery.data ?? [];
   const loadingComp = competitorsQuery.isLoading;
@@ -357,9 +423,10 @@ export default function Intelligence() {
     } else if (skipped?.reason === "within_7d_cooldown") {
       toast({ title: `${c.name}`, description: "Son 7 günde tarandı (tekrar için bekleyin)." });
     } else if ((data as any)?.started?.length) {
+      markPending([c.id]);
       toast({
         title: `${c.name} için yorum toplama başlatıldı`,
-        description: "Birkaç dakikada işlenir; bittikçe sayaç güncellenir.",
+        description: "Apify yorumları çekiyor. 2-5 dk sürer, bu sayfada otomatik güncellenir.",
       });
     } else {
       toast({ title: `${c.name}`, description: "İşlem başlatılamadı." });
@@ -382,9 +449,11 @@ export default function Intelligence() {
     }
     const startedN = (data as any)?.started?.length ?? 0;
     const skippedN = (data as any)?.skipped?.length ?? 0;
+    const startedIds = ((data as any)?.started ?? []).map((s: any) => s.competitor_id);
+    if (startedIds.length) markPending(startedIds);
     toast({
       title: "Yorum çekme başlatıldı",
-      description: `${startedN} rakip için başlatıldı, ${skippedN} atlandı (7 gün cooldown).`,
+      description: `${startedN} rakip için başlatıldı, ${skippedN} atlandı. Sonuçlar 2-5 dk içinde otomatik gelir.`,
     });
     queryClient.invalidateQueries({ queryKey: competitorsKey });
     queryClient.invalidateQueries({ queryKey: reviewStatsKey });
@@ -427,6 +496,29 @@ export default function Intelligence() {
           <p className="text-sm text-muted-foreground mt-1">
             Bölgenizdeki rakipleri otomatik keşfedin ve haftalık stratejik brief alın.
           </p>
+          {businesses.length > 1 && (
+            <div className="mt-3 flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-muted-foreground" />
+              <Select
+                value={activeBusiness?.id}
+                onValueChange={(id) => {
+                  const b = businesses.find((x) => x.id === id);
+                  if (b) setActiveBusiness(b);
+                }}
+              >
+                <SelectTrigger className="w-full sm:w-[280px] h-9">
+                  <SelectValue placeholder="Lokasyon seçin" />
+                </SelectTrigger>
+                <SelectContent>
+                  {businesses.map((b) => (
+                    <SelectItem key={b.id} value={b.id}>
+                      {b.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           {!loadingComp && (
             <div className="text-xs text-muted-foreground mt-2 flex flex-wrap gap-x-2 gap-y-1">
               <span>{confirmed.length} rakip takip ediliyor</span>
@@ -450,6 +542,18 @@ export default function Intelligence() {
 
           {/* ===== TAB 1: COMPETITORS ===== */}
           <TabsContent value="competitors" className="space-y-6 mt-4">
+            {Object.keys(pendingFetches).length > 0 && (
+              <Alert className="border-primary/40 bg-primary/5">
+                <Clock className="h-4 w-4 text-primary" />
+                <AlertDescription className="text-sm">
+                  <span className="font-medium text-foreground">
+                    {Object.keys(pendingFetches).length} rakip için yorumlar Apify'dan çekiliyor.
+                  </span>{" "}
+                  Genellikle 2-5 dakika sürer. Sayfa açık kaldığı sürece otomatik güncellenir — beklemek
+                  zorunda değilsiniz, başka bir sekmeye geçebilirsiniz.
+                </AlertDescription>
+              </Alert>
+            )}
             <Card>
               <CardContent className="p-4 sm:p-6 flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
                 <div className="flex flex-wrap items-center gap-2">
@@ -597,6 +701,7 @@ export default function Intelligence() {
                           confirmed
                           reviewCount={reviewCounts[c.id] ?? 0}
                           fetching={fetchingId === c.id}
+                          pending={!!pendingFetches[c.id]}
                           actions={
                             <div className="flex gap-2">
                               <Button
@@ -735,12 +840,14 @@ function CompetitorCard({
   confirmed,
   reviewCount,
   fetching,
+  pending,
 }: {
   c: Competitor;
   actions: React.ReactNode;
   confirmed?: boolean;
   reviewCount?: number;
   fetching?: boolean;
+  pending?: boolean;
 }) {
   const distanceKm = c.proximity_m != null ? (c.proximity_m / 1000).toFixed(1) : null;
   return (
@@ -789,6 +896,11 @@ function CompetitorCard({
               </>
             )}
             {fetching && <span className="text-primary">başlatılıyor…</span>}
+            {!fetching && pending && (
+              <span className="text-primary inline-flex items-center gap-1">
+                <Loader2 className="h-3 w-3 animate-spin" /> yorumlar çekiliyor (~2-5 dk)
+              </span>
+            )}
           </div>
         )}
         <div className="flex justify-end">{actions}</div>
