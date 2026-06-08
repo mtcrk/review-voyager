@@ -454,7 +454,6 @@ Deno.serve(async (req) => {
         startUrl: expediaUrl,
         results_wanted: 20,
         max_pages: 100,
-        proxyConfiguration: { useApifyProxy: true, apifyProxyGroups: ["RESIDENTIAL"] },
       };
       console.log(`Using shahidirfan/expedia-reviews-scraper for: ${expediaUrl}`);
     } else if (platform === "tripcom") {
