@@ -496,6 +496,29 @@ export default function Intelligence() {
           <p className="text-sm text-muted-foreground mt-1">
             Bölgenizdeki rakipleri otomatik keşfedin ve haftalık stratejik brief alın.
           </p>
+          {businesses.length > 1 && (
+            <div className="mt-3 flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-muted-foreground" />
+              <Select
+                value={activeBusiness?.id}
+                onValueChange={(id) => {
+                  const b = businesses.find((x) => x.id === id);
+                  if (b) setActiveBusiness(b);
+                }}
+              >
+                <SelectTrigger className="w-full sm:w-[280px] h-9">
+                  <SelectValue placeholder="Lokasyon seçin" />
+                </SelectTrigger>
+                <SelectContent>
+                  {businesses.map((b) => (
+                    <SelectItem key={b.id} value={b.id}>
+                      {b.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           {!loadingComp && (
             <div className="text-xs text-muted-foreground mt-2 flex flex-wrap gap-x-2 gap-y-1">
               <span>{confirmed.length} rakip takip ediliyor</span>
@@ -519,6 +542,18 @@ export default function Intelligence() {
 
           {/* ===== TAB 1: COMPETITORS ===== */}
           <TabsContent value="competitors" className="space-y-6 mt-4">
+            {Object.keys(pendingFetches).length > 0 && (
+              <Alert className="border-primary/40 bg-primary/5">
+                <Clock className="h-4 w-4 text-primary" />
+                <AlertDescription className="text-sm">
+                  <span className="font-medium text-foreground">
+                    {Object.keys(pendingFetches).length} rakip için yorumlar Apify'dan çekiliyor.
+                  </span>{" "}
+                  Genellikle 2-5 dakika sürer. Sayfa açık kaldığı sürece otomatik güncellenir — beklemek
+                  zorunda değilsiniz, başka bir sekmeye geçebilirsiniz.
+                </AlertDescription>
+              </Alert>
+            )}
             <Card>
               <CardContent className="p-4 sm:p-6 flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
                 <div className="flex flex-wrap items-center gap-2">
@@ -666,6 +701,7 @@ export default function Intelligence() {
                           confirmed
                           reviewCount={reviewCounts[c.id] ?? 0}
                           fetching={fetchingId === c.id}
+                          pending={!!pendingFetches[c.id]}
                           actions={
                             <div className="flex gap-2">
                               <Button
