@@ -733,10 +733,14 @@ function CompetitorCard({
   c,
   actions,
   confirmed,
+  reviewCount,
+  fetching,
 }: {
   c: Competitor;
   actions: React.ReactNode;
   confirmed?: boolean;
+  reviewCount?: number;
+  fetching?: boolean;
 }) {
   const distanceKm = c.proximity_m != null ? (c.proximity_m / 1000).toFixed(1) : null;
   return (
@@ -775,6 +779,18 @@ function CompetitorCard({
             </Badge>
           )}
         </div>
+        {confirmed && (
+          <div className="text-xs text-muted-foreground flex flex-wrap gap-x-2">
+            <span>{reviewCount ?? 0} yorum toplandı</span>
+            {(c as any).last_scraped_at && (
+              <>
+                <span>·</span>
+                <span>son tarama: {relativeTime((c as any).last_scraped_at)}</span>
+              </>
+            )}
+            {fetching && <span className="text-primary">başlatılıyor…</span>}
+          </div>
+        )}
         <div className="flex justify-end">{actions}</div>
       </CardContent>
     </Card>
