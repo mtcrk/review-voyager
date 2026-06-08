@@ -581,6 +581,13 @@ export default function Intelligence() {
 
           {/* ===== TAB 1: COMPETITORS ===== */}
           <TabsContent value="competitors" className="space-y-6 mt-4">
+            <OwnProfileCard
+              business={activeBusiness}
+              onSaved={() => {
+                queryClient.invalidateQueries({ queryKey: ["business"] });
+                queryClient.invalidateQueries({ queryKey: competitorsKey });
+              }}
+            />
             {Object.keys(pendingFetches).length > 0 && (
               <Alert className="border-primary/40 bg-primary/5">
                 <Clock className="h-4 w-4 text-primary" />
