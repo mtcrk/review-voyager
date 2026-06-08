@@ -128,6 +128,11 @@ Deno.serve(async (req) => {
         maxReviewsPerQuery: 40,
         scrapeReviewPictures: false,
         scrapeReviewResponses: false,
+        proxyConfiguration: {
+          useApifyProxy: true,
+          apifyProxyGroups: ["RESIDENTIAL"],
+          apifyProxyCountry: "TR",
+        },
       };
 
       try {
