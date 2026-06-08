@@ -99,6 +99,33 @@ function normalizeItem(item: any) {
     pick(item, ["publishedAtDate", "publishedAt", "date", "createdAt", "reviewDate", "time"]),
   );
 
+  // Owner / business reply (Google, Booking, TripAdvisor variants)
+  const owner_reply_text = pick<string>(item, [
+    "responseFromOwnerText",
+    "ownerResponse.text",
+    "ownerResponse.body",
+    "ownerResponseText",
+    "ownerReply",
+    "ownerReply.text",
+    "reply.text",
+    "reply",
+    "managementResponse.text",
+    "managementResponse",
+    "hotelResponse.text",
+    "hotelResponse",
+  ]);
+  const owner_reply_at = toIsoDate(
+    pick(item, [
+      "responseFromOwnerDate",
+      "ownerResponse.date",
+      "ownerResponse.publishedAt",
+      "ownerResponseDate",
+      "reply.date",
+      "managementResponse.date",
+      "hotelResponse.date",
+    ]),
+  );
+
   // Keep rating in NATIVE scale and clamp to that scale's max.
   let rating: number | null = null;
   if (ratingRaw != null && ratingRaw !== "") {
@@ -121,6 +148,8 @@ function normalizeItem(item: any) {
     language,
     platform,
     posted_at,
+    owner_reply_text: typeof owner_reply_text === "string" ? owner_reply_text.slice(0, 4000) : null,
+    owner_reply_at,
   };
 }
 
@@ -219,6 +248,8 @@ Deno.serve(async (req) => {
         body: n.body,
         author_name: n.author_name,
         posted_at: n.posted_at,
+        owner_reply_text: n.owner_reply_text,
+        owner_reply_at: n.owner_reply_at,
         raw_payload: raw,
       });
     }
