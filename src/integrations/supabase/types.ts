@@ -63,6 +63,7 @@ export type Database = {
           name: string
           parent_business_id: string | null
           place_id: string | null
+          price_estimate_eur: number | null
           price_tier: number | null
           review_notification_type: string
           room_count: number | null
@@ -91,6 +92,7 @@ export type Database = {
           name: string
           parent_business_id?: string | null
           place_id?: string | null
+          price_estimate_eur?: number | null
           price_tier?: number | null
           review_notification_type?: string
           room_count?: number | null
@@ -119,6 +121,7 @@ export type Database = {
           name?: string
           parent_business_id?: string | null
           place_id?: string | null
+          price_estimate_eur?: number | null
           price_tier?: number | null
           review_notification_type?: string
           room_count?: number | null
@@ -217,6 +220,8 @@ export type Database = {
           external_id: string
           id: string
           language: string | null
+          owner_reply_at: string | null
+          owner_reply_text: string | null
           platform: string
           posted_at: string | null
           rating: number | null
@@ -235,6 +240,8 @@ export type Database = {
           external_id: string
           id?: string
           language?: string | null
+          owner_reply_at?: string | null
+          owner_reply_text?: string | null
           platform: string
           posted_at?: string | null
           rating?: number | null
@@ -253,6 +260,8 @@ export type Database = {
           external_id?: string
           id?: string
           language?: string | null
+          owner_reply_at?: string | null
+          owner_reply_text?: string | null
           platform?: string
           posted_at?: string | null
           rating?: number | null
@@ -290,6 +299,7 @@ export type Database = {
           match_score_breakdown: Json | null
           name: string
           place_id: string | null
+          price_estimate_eur: number | null
           price_tier: number | null
           proximity_m: number | null
           rating: number | null
@@ -318,6 +328,7 @@ export type Database = {
           match_score_breakdown?: Json | null
           name: string
           place_id?: string | null
+          price_estimate_eur?: number | null
           price_tier?: number | null
           proximity_m?: number | null
           rating?: number | null
@@ -346,6 +357,7 @@ export type Database = {
           match_score_breakdown?: Json | null
           name?: string
           place_id?: string | null
+          price_estimate_eur?: number | null
           price_tier?: number | null
           proximity_m?: number | null
           rating?: number | null
