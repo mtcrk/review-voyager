@@ -37,6 +37,15 @@ import {
   Download,
 } from "lucide-react";
 import { IntelligenceTabs } from "@/components/intelligence/IntelligenceTabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Clock } from "lucide-react";
 
 type Competitor = {
   id: string;
@@ -89,7 +98,7 @@ function relativeTime(iso?: string | null) {
 }
 
 export default function Intelligence() {
-  const { activeBusiness, loading: businessLoading } = useBusiness();
+  const { activeBusiness, businesses, setActiveBusiness, loading: businessLoading } = useBusiness();
   const businessId = activeBusiness?.id;
   const queryClient = useQueryClient();
 
@@ -108,6 +117,50 @@ export default function Intelligence() {
   >([]);
   const [addingPlaceId, setAddingPlaceId] = useState<string | null>(null);
   const searchSeq = useRef(0);
+
+  // Pending fetch tracking: competitor_id -> started timestamp
+  const PENDING_KEY = businessId ? `ci_pending_fetches_${businessId}` : "ci_pending_fetches";
+  const [pendingFetches, setPendingFetches] = useState<Record<string, number>>(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      const raw = localStorage.getItem(PENDING_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(PENDING_KEY);
+      setPendingFetches(raw ? JSON.parse(raw) : {});
+    } catch {
+      setPendingFetches({});
+    }
+  }, [PENDING_KEY]);
+
+  function markPending(ids: string[]) {
+    setPendingFetches((prev) => {
+      const next = { ...prev };
+      const now = Date.now();
+      for (const id of ids) next[id] = now;
+      try {
+        localStorage.setItem(PENDING_KEY, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }
+
+  function clearPending(id: string) {
+    setPendingFetches((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      try {
+        localStorage.setItem(PENDING_KEY, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }
 
   const competitorsKey = ["ci_competitors", businessId] as const;
   const reviewStatsKey = ["ci_competitor_review_stats", businessId] as const;
@@ -197,6 +250,7 @@ export default function Intelligence() {
   const reviewStatsQuery = useQuery({
     queryKey: reviewStatsKey,
     enabled: !!businessId,
+    refetchInterval: Object.keys(pendingFetches).length > 0 ? 15000 : false,
     queryFn: async () => {
       const { data: comps } = await supabase
         .from("ci_competitors")
@@ -217,6 +271,18 @@ export default function Intelligence() {
     },
   });
   const reviewCounts = reviewStatsQuery.data ?? {};
+
+  // Auto-clear pending when reviews arrive or after 15 min timeout
+  useEffect(() => {
+    const now = Date.now();
+    const TIMEOUT_MS = 15 * 60 * 1000;
+    for (const [id, startedAt] of Object.entries(pendingFetches)) {
+      if ((reviewCounts[id] ?? 0) > 0 || now - startedAt > TIMEOUT_MS) {
+        clearPending(id);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reviewCounts]);
 
   const competitors = competitorsQuery.data ?? [];
   const loadingComp = competitorsQuery.isLoading;
@@ -357,9 +423,10 @@ export default function Intelligence() {
     } else if (skipped?.reason === "within_7d_cooldown") {
       toast({ title: `${c.name}`, description: "Son 7 günde tarandı (tekrar için bekleyin)." });
     } else if ((data as any)?.started?.length) {
+      markPending([c.id]);
       toast({
         title: `${c.name} için yorum toplama başlatıldı`,
-        description: "Birkaç dakikada işlenir; bittikçe sayaç güncellenir.",
+        description: "Apify yorumları çekiyor. 2-5 dk sürer, bu sayfada otomatik güncellenir.",
       });
     } else {
       toast({ title: `${c.name}`, description: "İşlem başlatılamadı." });
@@ -382,9 +449,11 @@ export default function Intelligence() {
     }
     const startedN = (data as any)?.started?.length ?? 0;
     const skippedN = (data as any)?.skipped?.length ?? 0;
+    const startedIds = ((data as any)?.started ?? []).map((s: any) => s.competitor_id);
+    if (startedIds.length) markPending(startedIds);
     toast({
       title: "Yorum çekme başlatıldı",
-      description: `${startedN} rakip için başlatıldı, ${skippedN} atlandı (7 gün cooldown).`,
+      description: `${startedN} rakip için başlatıldı, ${skippedN} atlandı. Sonuçlar 2-5 dk içinde otomatik gelir.`,
     });
     queryClient.invalidateQueries({ queryKey: competitorsKey });
     queryClient.invalidateQueries({ queryKey: reviewStatsKey });
