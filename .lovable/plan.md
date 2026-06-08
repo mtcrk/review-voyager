@@ -89,8 +89,8 @@ Mevcut `ci_review_topics` ve `ci_topics` tablolarını canlandır + zenginleşti
 
 ## Sıra & Tahmini Süre
 
-1. **Faz 1** (Karşılaştırma Dashboard) — en hızlı görünür değer, sadece frontend + read-only sorgular
-2. **Faz 4** (Akıllı Eşleştirme) — keşif kalitesini artırır, Faz 2'yi besler
+1. **Faz 1** (Karşılaştırma Dashboard) — TAMAMLANDI
+2. **Faz 4** (Akıllı Eşleştirme) — TAMAMLANDI
 3. **Faz 2** (Konu Analizi) — AI maliyeti var, Apify'dan veri olgunlaşınca anlamlı
 4. **Faz 3** (Alertler) — Faz 2 sinyallerine dayanır, en sona
 
