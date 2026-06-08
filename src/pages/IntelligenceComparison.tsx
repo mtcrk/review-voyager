@@ -46,6 +46,7 @@ import {
 } from "lucide-react";
 import { IntelligenceTabs } from "@/components/intelligence/IntelligenceTabs";
 import { TopicAnalysis } from "@/components/intelligence/TopicAnalysis";
+import { ActionPack } from "@/components/intelligence/ActionPack";
 
 type Competitor = {
   id: string;
@@ -429,6 +430,9 @@ export default function IntelligenceComparison() {
           </Card>
         ) : (
           <>
+            {/* Action Pack — actionable cards */}
+            <ActionPack businessId={businessId} />
+
             {/* KPI cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               <KpiCard
