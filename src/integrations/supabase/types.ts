@@ -210,6 +210,7 @@ export type Database = {
           rating: number | null
           raw_payload: Json | null
           scraped_at: string
+          sentiment: string | null
           title: string | null
           topics_extracted_at: string | null
           trip_type: string | null
@@ -227,6 +228,7 @@ export type Database = {
           rating?: number | null
           raw_payload?: Json | null
           scraped_at?: string
+          sentiment?: string | null
           title?: string | null
           topics_extracted_at?: string | null
           trip_type?: string | null
@@ -244,6 +246,7 @@ export type Database = {
           rating?: number | null
           raw_payload?: Json | null
           scraped_at?: string
+          sentiment?: string | null
           title?: string | null
           topics_extracted_at?: string | null
           trip_type?: string | null

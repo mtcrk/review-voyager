@@ -1,0 +1,1 @@
+ALTER TABLE public.ci_competitor_reviews ADD COLUMN IF NOT EXISTS sentiment text;

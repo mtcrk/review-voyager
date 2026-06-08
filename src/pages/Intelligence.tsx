@@ -34,6 +34,7 @@ import {
   Check,
   MapPin,
   CheckCircle2,
+  Download,
 } from "lucide-react";
 import { IntelligenceTabs } from "@/components/intelligence/IntelligenceTabs";
 
@@ -95,6 +96,9 @@ export default function Intelligence() {
   const [discovering, setDiscovering] = useState(false);
   const [radius, setRadius] = useState(5000);
   const [generatingBrief, setGeneratingBrief] = useState(false);
+  const [fetchingId, setFetchingId] = useState<string | null>(null);
+  const [fetchingAll, setFetchingAll] = useState(false);
+  const [bulkOpen, setBulkOpen] = useState(false);
 
   const [addOpen, setAddOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -106,6 +110,7 @@ export default function Intelligence() {
   const searchSeq = useRef(0);
 
   const competitorsKey = ["ci_competitors", businessId] as const;
+  const reviewStatsKey = ["ci_competitor_review_stats", businessId] as const;
 
   useEffect(() => {
     if (!addOpen) {
@@ -188,6 +193,30 @@ export default function Intelligence() {
       return (data?.ran_at as string | undefined) ?? null;
     },
   });
+
+  const reviewStatsQuery = useQuery({
+    queryKey: reviewStatsKey,
+    enabled: !!businessId,
+    queryFn: async () => {
+      const { data: comps } = await supabase
+        .from("ci_competitors")
+        .select("id")
+        .eq("business_id", businessId!)
+        .eq("status", "confirmed");
+      const ids = (comps ?? []).map((c) => c.id);
+      if (ids.length === 0) return {} as Record<string, number>;
+      const { data } = await supabase
+        .from("ci_competitor_reviews")
+        .select("competitor_id")
+        .in("competitor_id", ids);
+      const counts: Record<string, number> = {};
+      for (const r of data ?? []) {
+        counts[r.competitor_id] = (counts[r.competitor_id] ?? 0) + 1;
+      }
+      return counts;
+    },
+  });
+  const reviewCounts = reviewStatsQuery.data ?? {};
 
   const competitors = competitorsQuery.data ?? [];
   const loadingComp = competitorsQuery.isLoading;
@@ -309,6 +338,56 @@ export default function Intelligence() {
     }
     toast({ title: "Brief hazır", description: "En son brief yüklendi." });
     queryClient.invalidateQueries({ queryKey: ["ci_monday_brief", businessId] });
+  }
+
+  async function fetchReviewsFor(c: Competitor) {
+    setFetchingId(c.id);
+    const { data, error } = await supabase.functions.invoke("fetch-competitor-reviews", {
+      body: { competitor_id: c.id },
+    });
+    setFetchingId(null);
+    if (error) {
+      toast({ title: "Yorum çekme başlatılamadı", description: error.message, variant: "destructive" });
+      return;
+    }
+    const skipped = (data as any)?.skipped?.[0];
+    const noPlace = (data as any)?.no_place_id?.[0];
+    if (noPlace) {
+      toast({ title: `${c.name}`, description: "Place ID bulunamadı, çekme atlandı." });
+    } else if (skipped?.reason === "within_7d_cooldown") {
+      toast({ title: `${c.name}`, description: "Son 7 günde tarandı (tekrar için bekleyin)." });
+    } else if ((data as any)?.started?.length) {
+      toast({
+        title: `${c.name} için yorum toplama başlatıldı`,
+        description: "Birkaç dakikada işlenir; bittikçe sayaç güncellenir.",
+      });
+    } else {
+      toast({ title: `${c.name}`, description: "İşlem başlatılamadı." });
+    }
+    queryClient.invalidateQueries({ queryKey: competitorsKey });
+    queryClient.invalidateQueries({ queryKey: reviewStatsKey });
+  }
+
+  async function fetchReviewsAll() {
+    if (!businessId) return;
+    setFetchingAll(true);
+    const { data, error } = await supabase.functions.invoke("fetch-competitor-reviews", {
+      body: { business_id: businessId },
+    });
+    setFetchingAll(false);
+    setBulkOpen(false);
+    if (error) {
+      toast({ title: "Toplu çekme başarısız", description: error.message, variant: "destructive" });
+      return;
+    }
+    const startedN = (data as any)?.started?.length ?? 0;
+    const skippedN = (data as any)?.skipped?.length ?? 0;
+    toast({
+      title: "Yorum çekme başlatıldı",
+      description: `${startedN} rakip için başlatıldı, ${skippedN} atlandı (7 gün cooldown).`,
+    });
+    queryClient.invalidateQueries({ queryKey: competitorsKey });
+    queryClient.invalidateQueries({ queryKey: reviewStatsKey });
   }
 
   // Business context still loading — show skeleton instead of "select a business"
@@ -472,11 +551,43 @@ export default function Intelligence() {
                 {/* Confirmed FIRST */}
                 {confirmed.length > 0 && (
                   <section>
-                    <div className="flex items-center gap-2 mb-2">
-                      <h2 className="text-sm font-medium">Rakiplerim</h2>
-                      <Badge variant="secondary" className="h-5">
-                        {confirmed.length}
-                      </Badge>
+                    <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-sm font-medium">Rakiplerim</h2>
+                        <Badge variant="secondary" className="h-5">
+                          {confirmed.length}
+                        </Badge>
+                      </div>
+                      <Dialog open={bulkOpen} onOpenChange={setBulkOpen}>
+                        <DialogTrigger asChild>
+                          <Button size="sm" variant="outline" disabled={fetchingAll}>
+                            {fetchingAll ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Download className="h-4 w-4" />
+                            )}
+                            Tüm rakiplerin yorumlarını çek
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Tüm rakipler için yorum çekilsin mi?</DialogTitle>
+                          </DialogHeader>
+                          <p className="text-sm text-muted-foreground">
+                            Bu işlem Apify üzerinden onaylı rakipleriniz için yorum toplamayı tetikler
+                            ve birkaç dakika sürebilir. Son 7 gün içinde taranan rakipler atlanır.
+                          </p>
+                          <DialogFooter>
+                            <Button variant="outline" onClick={() => setBulkOpen(false)}>
+                              Vazgeç
+                            </Button>
+                            <Button onClick={fetchReviewsAll} disabled={fetchingAll}>
+                              {fetchingAll && <Loader2 className="h-4 w-4 animate-spin" />}
+                              Başlat
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {confirmed.map((c) => (
@@ -484,14 +595,31 @@ export default function Intelligence() {
                           key={c.id}
                           c={c}
                           confirmed
+                          reviewCount={reviewCounts[c.id] ?? 0}
+                          fetching={fetchingId === c.id}
                           actions={
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => setStatus(c.id, "rejected")}
-                            >
-                              <X className="h-4 w-4" /> Çıkar
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => fetchReviewsFor(c)}
+                                disabled={fetchingId === c.id || !c.place_id}
+                              >
+                                {fetchingId === c.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Download className="h-4 w-4" />
+                                )}
+                                Yorumları Çek
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setStatus(c.id, "rejected")}
+                              >
+                                <X className="h-4 w-4" /> Çıkar
+                              </Button>
+                            </div>
                           }
                         />
                       ))}
@@ -605,10 +733,14 @@ function CompetitorCard({
   c,
   actions,
   confirmed,
+  reviewCount,
+  fetching,
 }: {
   c: Competitor;
   actions: React.ReactNode;
   confirmed?: boolean;
+  reviewCount?: number;
+  fetching?: boolean;
 }) {
   const distanceKm = c.proximity_m != null ? (c.proximity_m / 1000).toFixed(1) : null;
   return (
@@ -647,6 +779,18 @@ function CompetitorCard({
             </Badge>
           )}
         </div>
+        {confirmed && (
+          <div className="text-xs text-muted-foreground flex flex-wrap gap-x-2">
+            <span>{reviewCount ?? 0} yorum toplandı</span>
+            {(c as any).last_scraped_at && (
+              <>
+                <span>·</span>
+                <span>son tarama: {relativeTime((c as any).last_scraped_at)}</span>
+              </>
+            )}
+            {fetching && <span className="text-primary">başlatılıyor…</span>}
+          </div>
+        )}
         <div className="flex justify-end">{actions}</div>
       </CardContent>
     </Card>
