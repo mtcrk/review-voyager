@@ -59,6 +59,16 @@ type Competitor = {
   status: string;
   source: string;
   created_at: string;
+  star_rating?: number | null;
+  segment?: string | null;
+  price_tier?: number | null;
+  match_score_breakdown?: {
+    proximity?: number;
+    star?: number;
+    segment?: number;
+    price?: number;
+    volume?: number;
+  } | null;
 };
 
 type Brief = {
@@ -77,6 +87,22 @@ const RADIUS_OPTIONS = [
   { label: "5 km", value: 5000 },
   { label: "10 km", value: 10000 },
 ];
+
+const SEGMENT_LABEL: Record<string, string> = {
+  luxury: "Lüks",
+  boutique: "Butik",
+  resort: "Resort",
+  business: "Business",
+  budget: "Ekonomik",
+  bnb: "B&B",
+  hostel: "Hostel",
+  apart: "Apart",
+};
+
+function priceLabel(t?: number | null) {
+  if (!t) return null;
+  return "₺".repeat(Math.max(1, Math.min(4, t)));
+}
 
 function scoreColor(score: number | null) {
   if (score == null) return "bg-muted text-muted-foreground";
@@ -108,6 +134,10 @@ export default function Intelligence() {
   const [fetchingId, setFetchingId] = useState<string | null>(null);
   const [fetchingAll, setFetchingAll] = useState(false);
   const [bulkOpen, setBulkOpen] = useState(false);
+
+  // Phase 4 filters
+  const [filterSameSegment, setFilterSameSegment] = useState(false);
+  const [filterSameStar, setFilterSameStar] = useState(false);
 
   const [addOpen, setAddOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -293,8 +323,17 @@ export default function Intelligence() {
     () =>
       competitors
         .filter((c) => c.status === "suggested")
+        .filter((c) => {
+          if (!filterSameSegment) return true;
+          return c.segment && (activeBusiness as any)?.segment && c.segment === (activeBusiness as any).segment;
+        })
+        .filter((c) => {
+          if (!filterSameStar) return true;
+          const own = (activeBusiness as any)?.star_rating;
+          return c.star_rating != null && own != null && Math.abs(Number(c.star_rating) - Number(own)) < 0.5;
+        })
         .sort((a, b) => (b.match_score ?? 0) - (a.match_score ?? 0)),
-    [competitors],
+    [competitors, filterSameSegment, filterSameStar, activeBusiness],
   );
   const confirmed = useMemo(
     () => competitors.filter((c) => c.status === "confirmed"),
@@ -542,6 +581,13 @@ export default function Intelligence() {
 
           {/* ===== TAB 1: COMPETITORS ===== */}
           <TabsContent value="competitors" className="space-y-6 mt-4">
+            <OwnProfileCard
+              business={activeBusiness}
+              onSaved={() => {
+                queryClient.invalidateQueries({ queryKey: ["business"] });
+                queryClient.invalidateQueries({ queryKey: competitorsKey });
+              }}
+            />
             {Object.keys(pendingFetches).length > 0 && (
               <Alert className="border-primary/40 bg-primary/5">
                 <Clock className="h-4 w-4 text-primary" />
@@ -739,6 +785,30 @@ export default function Intelligence() {
                     <Badge variant="secondary" className="h-5">
                       {suggested.length}
                     </Badge>
+                    {((activeBusiness as any)?.segment || (activeBusiness as any)?.star_rating != null) && (
+                      <div className="ml-auto flex items-center gap-2">
+                        {(activeBusiness as any)?.segment && (
+                          <Button
+                            size="sm"
+                            variant={filterSameSegment ? "default" : "outline"}
+                            className="h-7 text-xs"
+                            onClick={() => setFilterSameSegment((v) => !v)}
+                          >
+                            Sadece aynı segment
+                          </Button>
+                        )}
+                        {(activeBusiness as any)?.star_rating != null && (
+                          <Button
+                            size="sm"
+                            variant={filterSameStar ? "default" : "outline"}
+                            className="h-7 text-xs"
+                            onClick={() => setFilterSameStar((v) => !v)}
+                          >
+                            Sadece aynı yıldız
+                          </Button>
+                        )}
+                      </div>
+                    )}
                   </div>
                   {suggested.length === 0 && confirmed.length === 0 ? (
                     <Card>
@@ -878,12 +948,45 @@ function CompetitorCard({
                   {distanceKm} km
                 </span>
               )}
+              {c.star_rating != null && (
+                <span className="inline-flex items-center gap-0.5 text-amber-600">
+                  {Array.from({ length: Math.round(Number(c.star_rating)) }).map((_, i) => (
+                    <Star key={i} className="h-3 w-3 fill-current" />
+                  ))}
+                </span>
+              )}
+              {c.segment && SEGMENT_LABEL[c.segment] && (
+                <Badge variant="outline" className="h-5 px-1.5 text-[10px] font-normal">
+                  {SEGMENT_LABEL[c.segment]}
+                </Badge>
+              )}
+              {priceLabel(c.price_tier) && (
+                <span className="text-foreground/70 font-medium">{priceLabel(c.price_tier)}</span>
+              )}
             </div>
           </div>
           {c.match_score != null && (
-            <Badge variant="outline" className={scoreColor(c.match_score)}>
-              {Math.round(c.match_score)}
-            </Badge>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge variant="outline" className={`${scoreColor(c.match_score)} cursor-help`}>
+                  {Math.round(c.match_score)}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent className="text-xs">
+                {c.match_score_breakdown ? (
+                  <div className="space-y-0.5">
+                    <div className="font-medium mb-1">Eşleşme skoru kırılımı</div>
+                    <div>Yakınlık: {c.match_score_breakdown.proximity ?? 0}/40</div>
+                    <div>Yıldız uyumu: {c.match_score_breakdown.star ?? 0}/20</div>
+                    <div>Segment uyumu: {c.match_score_breakdown.segment ?? 0}/15</div>
+                    <div>Fiyat uyumu: {c.match_score_breakdown.price ?? 0}/15</div>
+                    <div>Yorum hacmi: {c.match_score_breakdown.volume ?? 0}/10</div>
+                  </div>
+                ) : (
+                  <span>Eşleşme skoru</span>
+                )}
+              </TooltipContent>
+            </Tooltip>
           )}
         </div>
         {confirmed && (
@@ -1005,5 +1108,133 @@ function BriefRow({ label, value }: { label: string; value?: string | null }) {
       <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">{label}</p>
       <p className="text-sm">{value ?? "—"}</p>
     </div>
+  );
+}
+
+const SEGMENT_OPTIONS = [
+  { value: "luxury", label: "Lüks" },
+  { value: "boutique", label: "Butik" },
+  { value: "resort", label: "Resort" },
+  { value: "business", label: "Business" },
+  { value: "budget", label: "Ekonomik" },
+  { value: "bnb", label: "B&B" },
+  { value: "hostel", label: "Hostel" },
+  { value: "apart", label: "Apart" },
+];
+
+function OwnProfileCard({
+  business,
+  onSaved,
+}: {
+  business: any;
+  onSaved: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [star, setStar] = useState<string>(business?.star_rating != null ? String(business.star_rating) : "");
+  const [segment, setSegment] = useState<string>(business?.segment ?? "");
+  const [price, setPrice] = useState<string>(business?.price_tier != null ? String(business.price_tier) : "");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setStar(business?.star_rating != null ? String(business.star_rating) : "");
+    setSegment(business?.segment ?? "");
+    setPrice(business?.price_tier != null ? String(business.price_tier) : "");
+  }, [business?.id, business?.star_rating, business?.segment, business?.price_tier]);
+
+  if (!business) return null;
+  const hasAll = business.star_rating != null && business.segment && business.price_tier != null;
+
+  async function save() {
+    setSaving(true);
+    const { error } = await supabase
+      .from("businesses")
+      .update({
+        star_rating: star ? Number(star) : null,
+        segment: segment || null,
+        price_tier: price ? Number(price) : null,
+      })
+      .eq("id", business.id);
+    setSaving(false);
+    if (error) {
+      toast({ title: "Kaydedilemedi", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Otel profili güncellendi", description: "Akıllı eşleştirme aktif." });
+    setOpen(false);
+    onSaved();
+  }
+
+  return (
+    <Card className={hasAll ? "" : "border-primary/40 bg-primary/5"}>
+      <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+        <div className="text-sm">
+          <div className="font-medium">Otelinizin profili</div>
+          <div className="text-xs text-muted-foreground mt-0.5">
+            {hasAll ? (
+              <>
+                {Number(business.star_rating)}★ · {SEGMENT_LABEL[business.segment] ?? business.segment} · {priceLabel(business.price_tier)} — akıllı eşleştirme aktif
+              </>
+            ) : (
+              "Yıldız, segment ve fiyat seviyenizi girin; rakip eşleştirme çok daha hassas olsun."
+            )}
+          </div>
+        </div>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button size="sm" variant={hasAll ? "outline" : "default"}>
+              {hasAll ? "Düzenle" : "Profili tamamla"}
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Otelinizin profili</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-medium mb-1.5 block">Yıldız</label>
+                <Select value={star} onValueChange={setStar}>
+                  <SelectTrigger><SelectValue placeholder="Seçin" /></SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <SelectItem key={n} value={String(n)}>{n} yıldız</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs font-medium mb-1.5 block">Segment</label>
+                <Select value={segment} onValueChange={setSegment}>
+                  <SelectTrigger><SelectValue placeholder="Seçin" /></SelectTrigger>
+                  <SelectContent>
+                    {SEGMENT_OPTIONS.map((s) => (
+                      <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs font-medium mb-1.5 block">Fiyat seviyesi</label>
+                <Select value={price} onValueChange={setPrice}>
+                  <SelectTrigger><SelectValue placeholder="Seçin" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">₺ — Ekonomik</SelectItem>
+                    <SelectItem value="2">₺₺ — Orta</SelectItem>
+                    <SelectItem value="3">₺₺₺ — Üst</SelectItem>
+                    <SelectItem value="4">₺₺₺₺ — Lüks</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setOpen(false)}>Vazgeç</Button>
+              <Button onClick={save} disabled={saving}>
+                {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+                Kaydet
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </CardContent>
+    </Card>
   );
 }
