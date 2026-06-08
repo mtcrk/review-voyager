@@ -91,7 +91,7 @@ Mevcut `ci_review_topics` ve `ci_topics` tablolarını canlandır + zenginleşti
 
 1. **Faz 1** (Karşılaştırma Dashboard) — TAMAMLANDI
 2. **Faz 4** (Akıllı Eşleştirme) — TAMAMLANDI
-3. **Faz 2** (Konu Analizi) — AI maliyeti var, Apify'dan veri olgunlaşınca anlamlı
+3. **Faz 2** (Konu Analizi) — TAMAMLANDI
 4. **Faz 3** (Alertler) — Faz 2 sinyallerine dayanır, en sona
 
 ## Teknik notlar
