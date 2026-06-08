@@ -1,0 +1,1 @@
+ALTER TABLE public.ci_competitor_reviews ALTER COLUMN rating TYPE numeric(4,2);
