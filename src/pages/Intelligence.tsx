@@ -840,12 +840,14 @@ function CompetitorCard({
   confirmed,
   reviewCount,
   fetching,
+  pending,
 }: {
   c: Competitor;
   actions: React.ReactNode;
   confirmed?: boolean;
   reviewCount?: number;
   fetching?: boolean;
+  pending?: boolean;
 }) {
   const distanceKm = c.proximity_m != null ? (c.proximity_m / 1000).toFixed(1) : null;
   return (
@@ -894,6 +896,11 @@ function CompetitorCard({
               </>
             )}
             {fetching && <span className="text-primary">başlatılıyor…</span>}
+            {!fetching && pending && (
+              <span className="text-primary inline-flex items-center gap-1">
+                <Loader2 className="h-3 w-3 animate-spin" /> yorumlar çekiliyor (~2-5 dk)
+              </span>
+            )}
           </div>
         )}
         <div className="flex justify-end">{actions}</div>
