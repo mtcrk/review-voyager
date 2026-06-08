@@ -941,12 +941,45 @@ function CompetitorCard({
                   {distanceKm} km
                 </span>
               )}
+              {c.star_rating != null && (
+                <span className="inline-flex items-center gap-0.5 text-amber-600">
+                  {Array.from({ length: Math.round(Number(c.star_rating)) }).map((_, i) => (
+                    <Star key={i} className="h-3 w-3 fill-current" />
+                  ))}
+                </span>
+              )}
+              {c.segment && SEGMENT_LABEL[c.segment] && (
+                <Badge variant="outline" className="h-5 px-1.5 text-[10px] font-normal">
+                  {SEGMENT_LABEL[c.segment]}
+                </Badge>
+              )}
+              {priceLabel(c.price_tier) && (
+                <span className="text-foreground/70 font-medium">{priceLabel(c.price_tier)}</span>
+              )}
             </div>
           </div>
           {c.match_score != null && (
-            <Badge variant="outline" className={scoreColor(c.match_score)}>
-              {Math.round(c.match_score)}
-            </Badge>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge variant="outline" className={`${scoreColor(c.match_score)} cursor-help`}>
+                  {Math.round(c.match_score)}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent className="text-xs">
+                {c.match_score_breakdown ? (
+                  <div className="space-y-0.5">
+                    <div className="font-medium mb-1">Eşleşme skoru kırılımı</div>
+                    <div>Yakınlık: {c.match_score_breakdown.proximity ?? 0}/40</div>
+                    <div>Yıldız uyumu: {c.match_score_breakdown.star ?? 0}/20</div>
+                    <div>Segment uyumu: {c.match_score_breakdown.segment ?? 0}/15</div>
+                    <div>Fiyat uyumu: {c.match_score_breakdown.price ?? 0}/15</div>
+                    <div>Yorum hacmi: {c.match_score_breakdown.volume ?? 0}/10</div>
+                  </div>
+                ) : (
+                  <span>Eşleşme skoru</span>
+                )}
+              </TooltipContent>
+            </Tooltip>
           )}
         </div>
         {confirmed && (
