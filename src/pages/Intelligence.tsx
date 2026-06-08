@@ -778,6 +778,30 @@ export default function Intelligence() {
                     <Badge variant="secondary" className="h-5">
                       {suggested.length}
                     </Badge>
+                    {((activeBusiness as any)?.segment || (activeBusiness as any)?.star_rating != null) && (
+                      <div className="ml-auto flex items-center gap-2">
+                        {(activeBusiness as any)?.segment && (
+                          <Button
+                            size="sm"
+                            variant={filterSameSegment ? "default" : "outline"}
+                            className="h-7 text-xs"
+                            onClick={() => setFilterSameSegment((v) => !v)}
+                          >
+                            Sadece aynı segment
+                          </Button>
+                        )}
+                        {(activeBusiness as any)?.star_rating != null && (
+                          <Button
+                            size="sm"
+                            variant={filterSameStar ? "default" : "outline"}
+                            className="h-7 text-xs"
+                            onClick={() => setFilterSameStar((v) => !v)}
+                          >
+                            Sadece aynı yıldız
+                          </Button>
+                        )}
+                      </div>
+                    )}
                   </div>
                   {suggested.length === 0 && confirmed.length === 0 ? (
                     <Card>
