@@ -1,6 +1,43 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
+// Mirror of PROVIDER_MAP in apify-fetch-reviews so competitor ingest uses
+// the same platform naming convention as the own-review pipeline.
+const PROVIDER_MAP: Record<string, string> = {
+  "booking.com": "booking",
+  booking: "booking",
+  tripadvisor: "tripadvisor",
+  expedia: "expedia",
+  "hotels.com": "hotelscom",
+  hotelscom: "hotelscom",
+  hotels: "hotelscom",
+  google: "google",
+  "google-maps": "google",
+  yelp: "yelp",
+  airbnb: "airbnb",
+};
+
+function normalizePlatform(provider?: string | null): string {
+  if (!provider) return "google";
+  const key = String(provider).toLowerCase().trim();
+  return PROVIDER_MAP[key] || key;
+}
+
+function isTenScale(platform: string): boolean {
+  return platform === "booking" || platform === "expedia" || platform === "hotelscom" || platform === "tripcom";
+}
+
+function ratingToSentiment(rating: number, platform: string): string {
+  if (isTenScale(platform)) {
+    if (rating >= 8) return "positive";
+    if (rating >= 6) return "neutral";
+    return "negative";
+  }
+  if (rating >= 4) return "positive";
+  if (rating >= 3) return "neutral";
+  return "negative";
+}
+
 function pick<T = any>(obj: any, keys: string[]): T | null {
   for (const k of keys) {
     const v = k.split(".").reduce((o: any, p: string) => (o == null ? o : o[p]), obj);
@@ -23,6 +60,7 @@ function toIsoDate(v: any): string | null {
 function normalizeItem(item: any) {
   const place_id =
     pick<string>(item, [
+      "googleMapsPlaceId",
       "placeId",
       "place_id",
       "sourcePlaceId",
@@ -41,9 +79,10 @@ function normalizeItem(item: any) {
       "reviewIdStr",
     ]) || null;
 
-  const rating = pick<number>(item, ["rating", "stars", "score", "ratingValue"]);
-  const body = pick<string>(item, ["text", "reviewText", "comment", "body", "review", "content"]);
-  const title = pick<string>(item, ["title", "reviewTitle", "headline"]);
+  const ratingRaw = pick<number | string>(item, ["reviewRating", "rating", "stars", "score", "ratingValue"]);
+  const bodyRaw = pick<string>(item, ["reviewText", "text", "comment", "body", "review", "content"]);
+  const title = pick<string>(item, ["reviewTitle", "title", "headline"]);
+  const body = title && bodyRaw ? `${title}\n\n${bodyRaw}` : (bodyRaw || title || null);
   const author_name = pick<string>(item, [
     "authorName",
     "author_name",
@@ -53,21 +92,34 @@ function normalizeItem(item: any) {
     "userName",
   ]);
   const language = pick<string>(item, ["language", "lang", "originalLanguage", "detectedLanguage"]);
-  const platform =
-    pick<string>(item, ["platform", "source", "provider", "site"]) || "google";
+  const providerRaw =
+    pick<string>(item, ["provider", "platform", "source", "site"]) || "google";
+  const platform = normalizePlatform(providerRaw);
   const posted_at = toIsoDate(
     pick(item, ["publishedAtDate", "publishedAt", "date", "createdAt", "reviewDate", "time"]),
   );
 
+  // Keep rating in NATIVE scale and clamp to that scale's max.
+  let rating: number | null = null;
+  if (ratingRaw != null && ratingRaw !== "") {
+    const num = typeof ratingRaw === "string" ? parseFloat(ratingRaw) : Number(ratingRaw);
+    if (!isNaN(num)) {
+      const max = isTenScale(platform) ? 10 : 5;
+      rating = Math.min(max, Math.max(1, num));
+    }
+  }
+  const sentiment = rating != null ? ratingToSentiment(rating, platform) : null;
+
   return {
     place_id,
     external_id,
-    rating: rating != null ? Number(rating) : null,
+    rating,
+    sentiment,
     body,
     title,
     author_name,
     language,
-    platform: String(platform).toLowerCase(),
+    platform,
     posted_at,
   };
 }
@@ -161,6 +213,7 @@ Deno.serve(async (req) => {
         external_id: String(n.external_id),
         platform: n.platform || "google",
         rating: n.rating,
+        sentiment: n.sentiment,
         language: n.language,
         title: n.title,
         body: n.body,
