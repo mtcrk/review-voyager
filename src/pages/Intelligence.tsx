@@ -135,6 +135,10 @@ export default function Intelligence() {
   const [fetchingAll, setFetchingAll] = useState(false);
   const [bulkOpen, setBulkOpen] = useState(false);
 
+  // Phase 4 filters
+  const [filterSameSegment, setFilterSameSegment] = useState(false);
+  const [filterSameStar, setFilterSameStar] = useState(false);
+
   const [addOpen, setAddOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searching, setSearching] = useState(false);
@@ -319,8 +323,17 @@ export default function Intelligence() {
     () =>
       competitors
         .filter((c) => c.status === "suggested")
+        .filter((c) => {
+          if (!filterSameSegment) return true;
+          return c.segment && (activeBusiness as any)?.segment && c.segment === (activeBusiness as any).segment;
+        })
+        .filter((c) => {
+          if (!filterSameStar) return true;
+          const own = (activeBusiness as any)?.star_rating;
+          return c.star_rating != null && own != null && Math.abs(Number(c.star_rating) - Number(own)) < 0.5;
+        })
         .sort((a, b) => (b.match_score ?? 0) - (a.match_score ?? 0)),
-    [competitors],
+    [competitors, filterSameSegment, filterSameStar, activeBusiness],
   );
   const confirmed = useMemo(
     () => competitors.filter((c) => c.status === "confirmed"),
