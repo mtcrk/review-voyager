@@ -1,97 +1,105 @@
+# Rakip Analizi — Derinleştirme Planı
 
-# Build-Time Prerender Planı (Vite SPA → Statik HTML kabukları)
+4 alanı sırayla, küçük PR'lar halinde inşa edeceğiz. Her faz tek başına çalışır ve test edilebilir.
 
-## Sorun
-78 public URL aynı `index.html` kabuğunu döndürüyor. JS execute etmeyen tüm crawler'lar (LinkedIn, WhatsApp, Slack/Facebook OG, GPTBot, ClaudeBot, PerplexityBot, CCBot, Bing, Yandex) her sayfayı identik görüyor. Sosyal paylaşımlar generic, AI cevapları boş.
+---
 
-## Karar: Hangi prerender çözümü?
+## Faz 1 — Karşılaştırma Dashboard'u (en yüksek görünür etki)
 
-Üç gerçek aday var; her birinin trade-off'u var:
+Rakip Analizi sayfasına **3. tab: "Karşılaştırma"** eklenecek. Senin oteline vs onaylı rakiplere yan yana metrikler.
 
-### A) **Puppeteer post-build (önerilen)** — `@prerenderer/rollup-plugin` veya custom `vite preview + puppeteer` script
-- **Artı**: Mevcut React Router, contexts, lazy import, react-helmet-async, AEOSection — **hiçbir koda dokunulmaz**. Build edilmiş gerçek SPA bir headless Chrome'da render edilir, sonuç HTML diske yazılır. SSR uyumsuzluğu yok (window/localStorage problemleri yok).
-- **Eksi**: Chromium indirir (~150 MB build cache). 90 sayfa için ~3-4 dk build süresi. Lovable build ortamında puppeteer-core + @sparticuz/chromium veya `puppeteer` paketi ile çalışır.
-- **Risk**: Build ortamı Chromium'a izin vermezse fallback gerekir.
+**Görseller:**
+- KPI kartları (4 adet): Ortalama Puan, Toplam Yorum, Yanıt Oranı, Son 30g Yorum Hacmi — sen vs rakip ortalaması delta'sı ile
+- Bar grafiği: Her rakip + sen, ortalama puan karşılaştırması (Recharts)
+- Çizgi grafiği: Son 90 günde yorum hacmi trendi (sen vs en yakın 3 rakip)
+- Platform dağılımı tablosu: Booking / TripAdvisor / Expedia / Hotels.com / Google başına ortalama puan (sen + her rakip)
+- Sıralama (rank) rozeti: "Bölgenizde X. sıradasın"
 
-### B) **vite-react-ssg** (SSR-based SSG)
-- **Artı**: Build hızlı (~1 dk), Chromium yok, native React SSR.
-- **Eksi**: `BrowserRouter` → onların `ViteReactSSG` entry'sine geçiş gerekiyor. `AuthProvider`, `BusinessProvider`, `supabase client` import zinciri **server tarafında çalıştırılınca** her `window`, `localStorage`, `document` referansı patlar. `react-helmet-async` zaten desteklenir ama her public route component'ini SSR-safe hale getirmek (typeof window guard'ları, dinamik import'lar) ciddi audit demek. Senin "mevcut routing yapısını bozma" kısıtınla çelişiyor.
+**Veri kaynağı:**
+- Senin: `reviews` (business_id'ye göre)
+- Rakip: `ci_competitor_reviews` (competitor_id → ci_competitors)
 
-### C) **react-snap** — eskimiş, puppeteer'ın eski versiyonuna kilitli, bakımsız. Eliyoruz.
+**Lokasyon dropdown'u** zaten mevcut; bu tab da onu kullanır.
 
-**Öneri: A (Puppeteer post-build).** Kısıtlarına (routing'i bozma, SEO/AEOSection kalsın, build < 5 dk) tam uyuyor. Implementation custom script olacak — third-party plugin'lerin çoğu Vite 5 ile sorunlu.
+---
 
-## Mimari
+## Faz 2 — Konu & Sentiment Analizi
 
-```text
-npm run build
-  ├── vite build                    (mevcut, değişmiyor)
-  ├── node scripts/prerender.mjs    (yeni)
-  │     ├── vite preview --port 4173 (background)
-  │     ├── puppeteer.launch()
-  │     ├── her ROUTE için:
-  │     │     page.goto(http://localhost:4173/route)
-  │     │     waitForSelector('[data-prerender-ready]') veya networkidle
-  │     │     html = await page.content()
-  │     │     dist/route/index.html yaz
-  │     └── teardown
-  └── done
+Mevcut `ci_review_topics` ve `ci_topics` tablolarını canlandır + zenginleştir.
+
+**Yeni edge function: `analyze-competitor-topics`**
+- Trigger: Apify ingest sonrası otomatik (webhook) + manuel "Yeniden analiz et" butonu
+- Gemini 2.5 Flash ile rakip yorumlarından konu çıkarımı (temizlik, personel, kahvaltı, gürültü, fiyat, konum, vb.)
+- Her konu için: pozitif/negatif sayısı, son 30g delta, hangi rakipte daha çok
+
+**UI: Tab "Karşılaştırma" altında "Konu Analizi" bölümü**
+- Heat map / matris: Konular × Rakipler, hücre rengi sentiment'a göre
+- "Sende fırsat" kartı: Rakipte negatif yükseliyor, sende henüz şikayet yok
+- "Sende risk" kartı: Sende negatif var, rakiplerde yok
+- Konuya tıklayınca o konudaki son yorum örnekleri
+
+---
+
+## Faz 3 — Otomatik Alertler (Email)
+
+**Yeni edge function: `competitor-alerts-cron`** (haftalık pg_cron, Pazartesi 09:00)
+
+**Tetikleyiciler:**
+- Rakip ortalama puanı ±0.2 değişti
+- Rakip yorum hacmi son 7g'de %50+ arttı
+- Yeni rakip otomatik keşfedildi (suggested)
+- Rakipte yükselen şikayet konusu (Faz 2'ye bağlı)
+- Sen bir konuda rakiplerin tamamını geçtin (kazanım)
+
+**Email:** Resend / `notify@voyagerespond.com` üzerinden VoyageRespond brand template (mevcut Approach A). Markdown bullet'lı haftalık özet + dashboard linki.
+
+**Ayarlar UI:** Intelligence sayfasında küçük "Bildirim Tercihleri" pop-over — alert tipleri açık/kapalı, e-posta adresi.
+
+**Yeni tablo: `ci_alert_preferences`** (business_id, alert_types jsonb, email, enabled, last_sent_at)
+
+---
+
+## Faz 4 — Akıllı Eşleştirme (match_score iyileştirme)
+
+`discover-competitors` edge function'ını ve `ci_competitors` tablosunu güçlendir.
+
+**Yeni alanlar (`ci_competitors`):**
+- `star_rating` (otel yıldız sayısı, 1-5)
+- `segment` (boutique / resort / business / budget / luxury)
+- `price_tier` (1-4, Google Places price_level)
+- `room_count` (varsa)
+
+**Yeni match_score formülü (0-100):**
+```
+40% Yakınlık (proximity, mevcut)
+20% Yıldız uyumu (aynı yıldız = 100, ±1 = 60, diğer = 20)
+15% Segment uyumu (aynı segment = 100)
+15% Fiyat tier uyumu
+10% Yorum hacmi benzerliği (log scale)
 ```
 
-### Prerender edilecek route'lar (whitelist, kod içine gömülü)
+**Segment çıkarımı:** Gemini 2.5 Flash, otel adı + Google açıklaması üzerinden tek sefer (rakip eklenirken).
 
-Public + SEO ağırlıklı, auth gerektirmeyen:
-- `/`, `/about`, `/contact`, `/demo`, `/pricing`, `/blog`, `/hub`
-- `/google-yorum-cevap-ornekleri`, `/restoran-yorum-cevaplari`, `/otel-yorum-cevaplari`, `/yorum-yonetim-araclari`, `/online-itibar-yonetimi`, `/musteri-memnuniyeti`, `/restoran-musteri-memnuniyeti`
-- `/platform/:slug` — `platformLandingData.ts`'den enumerate
-- `/otel-yorum-yonetimi/:sehir` — `cityHotelData.ts`'den enumerate
-- `/blog/:slug` — 3 blog cluster dosyasından enumerate (sitemap script'iyle aynı kaynak)
-- `/automations/*`, `/privacy-policy`, `/terms-of-service`, `/login`, `/register`, `/forgot-password`, `/onboarding`
-- `/en/*` mirror — Turkish set'in tamamı + `/en` prefix
+**UI:**
+- Rakip kartında yeni rozetler: yıldız, segment, fiyat
+- Filtre çubuğu: "Sadece aynı segment" / "Sadece aynı yıldız"
+- Match score breakdown tooltip (neden bu skor?)
 
-### Prerender edilmeyecekler (mevcut SPA kalır, dist'e yazılmaz)
-- `/dashboard`, `/reviews`, `/reviews/:id`, `/inbox`, `/auto-reply`, `/statistics`, `/report`, `/chat`, `/settings`, `/email`, `/performance`, `/rep-score`, `/google-accounts`, `/intelligence`, `/intelligence/karsilastirma`, `/locations`, `/locations/*`, `/youtube`, `/social-analytics`, `/tiktok-*`, `/channels/*`, `/auth/*`, `/admin/*`, `/share/:businessSlug`, `/story-kit`
+---
 
-Bunlara hit gelirse Cloudflare Pages mevcut SPA fallback'i (`/index.html`) yine devreye girer, davranış değişmez.
+## Sıra & Tahmini Süre
 
-## Kod değişiklikleri (minimum)
+1. **Faz 1** (Karşılaştırma Dashboard) — en hızlı görünür değer, sadece frontend + read-only sorgular
+2. **Faz 4** (Akıllı Eşleştirme) — keşif kalitesini artırır, Faz 2'yi besler
+3. **Faz 2** (Konu Analizi) — AI maliyeti var, Apify'dan veri olgunlaşınca anlamlı
+4. **Faz 3** (Alertler) — Faz 2 sinyallerine dayanır, en sona
 
-1. **`package.json`** — `puppeteer` (devDependency), `wait-on` (vite preview hazır mı diye bekler).
-   `"build": "vite build && node scripts/prerender.mjs"`.
-2. **`scripts/prerender.mjs`** (yeni) — yukarıdaki akış. Route listesi sitemap script'inin enumerate fonksiyonlarını paylaşır (refactor: shared `scripts/routes.mjs`).
-3. **`src/main.tsx`** (1 satır) — root render bittikten sonra `requestIdleCallback` içinde `document.documentElement.setAttribute('data-prerender-ready','1')`. Puppeteer bu attribute'u bekler. Production'da zararsız.
-4. **`src/components/seo/SEO.tsx`** — değişiklik yok; `react-helmet-async` Helmet tag'larını DOM'a basıyor, `page.content()` bunları yakalar.
-5. **`src/components/seo/AEOSection.tsx`** — değişiklik yok; JSON-LD `dangerouslySetInnerHTML` ile basılıyor, DOM'a düşüyor, prerender yakalar.
-6. **Cloudflare Pages** — deploy adımı **değişmez**. `dist/` upload edilir. Statik HTML'ler önce sunulur, kalan path'ler `index.html` SPA fallback'ine düşer (mevcut davranış).
-7. **404 / soft 404** — `dist/404.html` üretilir (puppeteer rastgele `/__nope` URL'sine gider, NotFound DOM yakalanır). Cloudflare Pages bunu otomatik kullanır.
+## Teknik notlar
 
-## Doğrulama (Faz 3)
+- Tüm yeni edge function'lar: `verify_jwt = false` + Authorization header forwarding (mevcut pattern)
+- RLS: tüm yeni tablolar `business_id` üzerinden, mevcut `has_role` pattern
+- AI: Gemini 2.5 Flash via Lovable AI Gateway (`LOVABLE_API_KEY` zaten var)
+- Apify ek maliyet yok (mevcut veriyi işliyoruz)
+- pg_cron job Faz 3'te eklenir
 
-```bash
-npm run build
-npx serve dist
-curl -s http://localhost:3000/otel-yorum-yonetimi/istanbul | grep -o '<title>[^<]*</title>'
-curl -s http://localhost:3000/blog/google-yorumlarim-nasil-yonetilir | grep -o '<title>[^<]*</title>'
-curl -s http://localhost:3000/platform/booking-yorumlari-icin-yapay-zeka | grep -o 'application/ld+json'
-```
-
-Her sayfa: unique `<title>`, unique `description`, canonical, og:*, FAQPage / Article JSON-LD HTML'de gömülü olmalı.
-
-## Riskler ve açık sorular
-
-1. **Puppeteer Lovable build ortamında çalışır mı?** Çalışmazsa fallback: `playwright` veya `vite-plugin-prerender-spa` (aynı puppeteer'a sarıyor ama plugin formatında).
-2. **Build süresi**: Tek Chrome instance, route başına ~1-1.5sn paralel 4 tab → ~3 dk tahminim. Kısıt 5 dk, marjda.
-3. **Auth context'ler public sayfalarda mount oluyor mu?** `App.tsx`'te AuthProvider/BusinessProvider en üstte; mount edilirler, supabase session probe yapar (network), prerender bunu bekler. `waitForFunction(() => document.documentElement.dataset.prerenderReady)` ile çözeriz — render bittikten sonra flag basarız, session geç gelse bile public içerik DOM'da hazır.
-4. **Dinamik içerik (counter, demo verileri)** prerender anında "0" olarak HTML'e düşer. SEO için sorun değil, kullanıcı JS yüklenince güncel değer görür. AI Visibility Score için bu kabul edilebilir.
-5. **Süre/cost**: Lovable build dakika kotası varsa kullanıcıya bildirilmeli.
-
-## Fazlar
-
-1. **Faz 1** — `puppeteer` + `wait-on` ekle, `scripts/prerender.mjs` yaz, `scripts/routes.mjs` shared module çıkar, `main.tsx`'e ready flag ekle, `package.json` build script güncelle.
-2. **Faz 2** — Doğrulama: lokalde `npm run build`, `dist/` içinde `otel-yorum-yonetimi/istanbul/index.html` gibi dosyalar var mı kontrol, içlerinde unique title/meta/JSON-LD var mı `grep`'le.
-3. **Faz 3** — Deploy (publish), production'da curl ile final doğrulama.
-4. **Faz 4** — Build süresi > 5 dk çıkarsa: route concurrency artır, gereksiz network request'leri (Google Analytics, supabase ping) prerender sırasında abort et (`page.setRequestInterception`).
-
-## Onay sonrası başlangıç noktası
-
-İstersen "evet, devam et" yaz; ben Faz 1'i tek seferde uygulayıp lokal doğrulamayı yapayım.
+Hangi fazdan başlayalım — sırayla 1'den mi, yoksa farklı bir öncelik mi?
