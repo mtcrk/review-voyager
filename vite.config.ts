@@ -35,7 +35,14 @@ const PUBLIC_PATHS = [
 // https://vitejs.dev/config/
 // `ssgOptions` is consumed by vite-react-ssg and isn't part of Vite's UserConfig,
 // so we cast through `any` to keep TS happy without losing the rest of the config.
-export default defineConfig(({ mode, isSsrBuild }) => (({
+export default defineConfig(({ mode, isSsrBuild, command }) => {
+  // vite-react-ssg's SSR pass sets neither `isSsrBuild` reliably nor a custom flag,
+  // but it does pass `--ssr` to vite. Detect either signal.
+  const isSsr =
+    isSsrBuild === true ||
+    process.argv.includes("--ssr") ||
+    process.argv.some((a) => a.startsWith("--ssr"));
+  return (({
   server: {
     host: "::",
     port: 8080,
@@ -76,7 +83,7 @@ export default defineConfig(({ mode, isSsrBuild }) => (({
     cssMinify: true,
     sourcemap: false,
     chunkSizeWarningLimit: 800,
-    rollupOptions: isSsrBuild
+    rollupOptions: isSsr
       ? {}
       : {
           output: {
@@ -99,4 +106,5 @@ export default defineConfig(({ mode, isSsrBuild }) => (({
           },
         },
   },
-}) as any));
+}) as any);
+});
