@@ -7,7 +7,7 @@
     "predev": "node scripts/generate-sitemap.mjs && node scripts/generate-llms.mjs",
     "dev": "vite",
     "prebuild": "node scripts/generate-sitemap.mjs && node scripts/generate-llms.mjs",
-    "build": "vite build && node scripts/prerender.mjs",
+    "build": "vite-react-ssg build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview"
