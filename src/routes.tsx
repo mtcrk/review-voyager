@@ -1,0 +1,203 @@
+import type { RouteRecord } from "vite-react-ssg";
+import { Navigate, useLocation, useParams } from "react-router-dom";
+import RootLayout from "./App";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+
+// Convert default-export pages into the { Component } shape data-router lazy expects.
+const lazyDefault =
+  (importer: () => Promise<{ default: React.ComponentType<any> }>) =>
+  async () => ({ Component: (await importer()).default });
+
+// Wraps a lazy default-exported page in <ProtectedRoute><AppLayout>...</AppLayout></ProtectedRoute>
+const lazyProtectedLayout =
+  (importer: () => Promise<{ default: React.ComponentType<any> }>) =>
+  async () => {
+    const Page = (await importer()).default;
+    return {
+      Component: () => (
+        <ProtectedRoute>
+          <AppLayout>
+            <Page />
+          </AppLayout>
+        </ProtectedRoute>
+      ),
+    };
+  };
+
+const lazyProtected =
+  (importer: () => Promise<{ default: React.ComponentType<any> }>) =>
+  async () => {
+    const Page = (await importer()).default;
+    return {
+      Component: () => (
+        <ProtectedRoute>
+          <Page />
+        </ProtectedRoute>
+      ),
+    };
+  };
+
+const lazyProtectedTiktokLayout =
+  (importer: () => Promise<{ default: React.ComponentType<any> }>) =>
+  async () => {
+    const Page = (await importer()).default;
+    return {
+      Component: () => (
+        <ProtectedRoute>
+          <AppLayout>
+            <Page />
+          </AppLayout>
+        </ProtectedRoute>
+      ),
+    };
+  };
+
+// /en/* runtime redirector — strips /en prefix and navigates to TR canonical.
+function EnRedirect() {
+  const loc = useLocation();
+  const target = loc.pathname.replace(/^\/en/, "") || "/";
+  return <Navigate to={target + loc.search + loc.hash} replace />;
+}
+
+// Pull dynamic-route slug lists for getStaticPaths.
+// Imports happen at build time (SSG node side) and are tree-shaken from client.
+function loadCityHotelSlugs(): string[] {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const mod = require("./lib/cityHotelData");
+  const arr = mod.cityHotelData ?? mod.default ?? [];
+  return arr.map((x: any) => x.slug).filter(Boolean);
+}
+function loadPlatformSlugs(): string[] {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const mod = require("./lib/platformLandingData");
+  const arr = mod.platformLandingData ?? mod.default ?? [];
+  return arr.map((x: any) => x.slug).filter(Boolean);
+}
+function loadBlogSlugs(): string[] {
+  const slugs = new Set<string>();
+  for (const path of ["./lib/blogPosts", "./lib/blogClusterRestoran", "./lib/blogClusterMemnuniyet"]) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const mod = require(path);
+      const arr = mod.blogPosts ?? mod.default ?? Object.values(mod).find((v: any) => Array.isArray(v)) ?? [];
+      for (const p of arr as any[]) if (p?.slug) slugs.add(p.slug);
+    } catch {}
+  }
+  return [...slugs];
+}
+
+export const routes: RouteRecord[] = [
+  {
+    path: "/",
+    Component: RootLayout,
+    children: [
+      // ---------- Public / SEO (prerendered) ----------
+      { index: true, lazy: lazyDefault(() => import("./pages/Index")) },
+      { path: "login", lazy: lazyDefault(() => import("./pages/Login")) },
+      { path: "register", lazy: lazyDefault(() => import("./pages/Register")) },
+      { path: "forgot-password", lazy: lazyDefault(() => import("./pages/ForgotPassword")) },
+      { path: "privacy-policy", lazy: lazyDefault(() => import("./pages/PrivacyPolicy")) },
+      { path: "terms-of-service", lazy: lazyDefault(() => import("./pages/TermsOfService")) },
+      { path: "auth/callback", lazy: lazyDefault(() => import("./pages/AuthCallback")) },
+      { path: "auth/google-business/callback", lazy: lazyDefault(() => import("./pages/GoogleBusinessCallback")) },
+      { path: "auth/reset", lazy: lazyDefault(() => import("./pages/ResetPassword")) },
+      { path: "onboarding", lazy: lazyDefault(() => import("./pages/Onboarding")) },
+      { path: "hub", lazy: lazyDefault(() => import("./pages/Hub")) },
+      { path: "pricing", Component: () => <Navigate to="/#pricing" replace /> },
+      { path: "contact", lazy: lazyDefault(() => import("./pages/Contact")) },
+      { path: "demo", lazy: lazyDefault(() => import("./pages/DemoPage")) },
+      { path: "about", lazy: lazyDefault(() => import("./pages/About")) },
+      { path: "blog", lazy: lazyDefault(() => import("./pages/Blog")) },
+      {
+        path: "blog/:slug",
+        lazy: lazyDefault(() => import("./pages/BlogPost")),
+        getStaticPaths: () => loadBlogSlugs().map((s) => `blog/${s}`),
+      },
+      { path: "google-yorum-cevap-ornekleri", lazy: lazyDefault(() => import("./pages/seo/GoogleYorumCevapOrnekleri")) },
+      { path: "restoran-yorum-cevaplari", lazy: lazyDefault(() => import("./pages/seo/RestoranYorumCevaplari")) },
+      { path: "otel-yorum-cevaplari", lazy: lazyDefault(() => import("./pages/seo/OtelYorumCevaplari")) },
+      {
+        path: "otel-yorum-yonetimi/:sehir",
+        lazy: lazyDefault(() => import("./pages/seo/SehirOtelYorumYonetimi")),
+        getStaticPaths: () => loadCityHotelSlugs().map((s) => `otel-yorum-yonetimi/${s}`),
+      },
+      { path: "yorum-yonetim-araclari", lazy: lazyDefault(() => import("./pages/seo/YorumYonetimAraclari")) },
+      { path: "online-itibar-yonetimi", lazy: lazyDefault(() => import("./pages/seo/OnlineItibarYonetimi")) },
+      { path: "musteri-memnuniyeti", lazy: lazyDefault(() => import("./pages/seo/MusteriMemnuniyeti")) },
+      { path: "restoran-musteri-memnuniyeti", lazy: lazyDefault(() => import("./pages/seo/RestoranMusteriMemnuniyeti")) },
+      {
+        path: "platform/:slug",
+        lazy: lazyDefault(() => import("./pages/seo/PlatformLanding")),
+        getStaticPaths: () => loadPlatformSlugs().map((s) => `platform/${s}`),
+      },
+      { path: "automations/instagram-sales", lazy: lazyDefault(() => import("./pages/automations/InstagramSales")) },
+      { path: "automations/google-reviews", lazy: lazyDefault(() => import("./pages/automations/GoogleReviews")) },
+      { path: "automations/whatsapp", lazy: lazyDefault(() => import("./pages/automations/WhatsAppAutomation")) },
+      { path: "automations/other", lazy: lazyDefault(() => import("./pages/automations/OtherAutomations")) },
+
+      // ---------- Protected (not prerendered; render at runtime only) ----------
+      { path: "auth/tiktok/callback", lazy: lazyDefault(() => import("./pages/TikTokCallback")) },
+      { path: "channels/tiktok", lazy: lazyProtected(() => import("./pages/channels/TikTok")) },
+      { path: "tiktok-inbox", lazy: lazyProtectedTiktokLayout(() => import("./pages/TikTokInbox")) },
+      { path: "tiktok-review-kit", lazy: lazyProtected(() => import("./pages/TikTokReviewKit")) },
+      { path: "tiktok-dm", lazy: lazyProtected(() => import("./pages/TikTokDMInbox")) },
+      { path: "share/:businessSlug", lazy: lazyDefault(() => import("./pages/StoryKit")) },
+      { path: "story-kit", lazy: lazyProtected(() => import("./pages/StoryKitSettings")) },
+      { path: "locations", lazy: lazyProtectedLayout(() => import("./pages/Locations")) },
+      { path: "locations/platform-ratings", lazy: lazyProtectedLayout(() => import("./pages/PlatformRatings")) },
+      { path: "locations/platform-ratings/:id", lazy: lazyProtectedLayout(() => import("./pages/PlatformRatingDetail")) },
+      { path: "dashboard", lazy: lazyProtectedLayout(() => import("./pages/Dashboard")) },
+      { path: "inbox", lazy: lazyProtectedLayout(() => import("./pages/Inbox")) },
+      { path: "reviews", lazy: lazyProtectedLayout(() => import("./pages/Reviews")) },
+      { path: "reviews/:id", lazy: lazyProtectedLayout(() => import("./pages/ReviewDetailPage")) },
+      { path: "auto-reply", lazy: lazyProtectedLayout(() => import("./pages/AutoReply")) },
+      { path: "statistics", lazy: lazyProtectedLayout(() => import("./pages/Statistics")) },
+      { path: "report", lazy: lazyProtectedLayout(() => import("./pages/Report")) },
+      { path: "chat", lazy: lazyProtectedLayout(() => import("./pages/ChatWithReviewsPage")) },
+      { path: "settings", lazy: lazyProtectedLayout(() => import("./pages/Settings")) },
+      { path: "email", lazy: lazyProtectedLayout(() => import("./pages/EmailCenter")) },
+      { path: "performance", lazy: lazyProtectedLayout(() => import("./pages/GooglePerformance")) },
+      { path: "rep-score", lazy: lazyProtectedLayout(() => import("./pages/RepScore")) },
+      { path: "google-accounts", lazy: lazyProtectedLayout(() => import("./pages/GoogleAccounts")) },
+      { path: "admin/apify-logs", lazy: lazyDefault(() => import("./pages/AdminApifyLogs")) },
+      { path: "youtube", lazy: lazyProtectedLayout(() => import("./pages/YouTubeInbox")) },
+      { path: "social-analytics", lazy: lazyProtectedLayout(() => import("./pages/SocialAnalytics")) },
+      { path: "intelligence", lazy: lazyProtectedLayout(() => import("./pages/Intelligence")) },
+      { path: "intelligence/karsilastirma", lazy: lazyProtectedLayout(() => import("./pages/IntelligenceComparison")) },
+
+      // ---------- /en/* runtime redirect (no SSG) ----------
+      { path: "en/*", Component: EnRedirect },
+
+      // ---------- 404 ----------
+      { path: "*", lazy: lazyDefault(() => import("./pages/NotFound")) },
+    ],
+  },
+];
+
+// Public routes that SHOULD be prerendered. Used by ssgOptions.includedRoutes in vite.config.
+export const PRERENDER_PUBLIC_PATHS = [
+  "/",
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/privacy-policy",
+  "/terms-of-service",
+  "/onboarding",
+  "/hub",
+  "/contact",
+  "/demo",
+  "/about",
+  "/blog",
+  "/google-yorum-cevap-ornekleri",
+  "/restoran-yorum-cevaplari",
+  "/otel-yorum-cevaplari",
+  "/yorum-yonetim-araclari",
+  "/online-itibar-yonetimi",
+  "/musteri-memnuniyeti",
+  "/restoran-musteri-memnuniyeti",
+  "/automations/instagram-sales",
+  "/automations/google-reviews",
+  "/automations/whatsapp",
+  "/automations/other",
+];
