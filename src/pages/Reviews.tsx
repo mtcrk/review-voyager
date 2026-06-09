@@ -157,7 +157,7 @@ export default function Reviews() {
           // Save to DB
           await supabase
             .from("businesses")
-            .update({ [config.dbField]: parsedId })
+            .update({ [config.dbField]: parsedId } as any)
             .eq("id", targetBusiness.id);
           // Fetch reviews
           const result = await invokeApifyFetchWithPolling(platform);
@@ -325,7 +325,7 @@ export default function Reviews() {
 
       const { error: updateError } = await supabase
         .from('businesses')
-        .update({ [config.dbField]: parsedId })
+        .update({ [config.dbField]: parsedId } as any)
         .eq('id', targetBusiness.id);
       if (updateError) throw updateError;
 
