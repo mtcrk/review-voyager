@@ -131,7 +131,7 @@ export function PlatformDiscovery() {
 
       const { error } = await supabase
         .from("businesses")
-        .update({ [field]: valueToStore })
+        .update({ [field]: valueToStore } as any)
         .eq("id", activeBusiness.id);
 
       if (error) throw error;
