@@ -71,9 +71,13 @@ export default defineConfig(({ mode, isSsrBuild, command }) => {
     // contribute their getStaticPaths() output to `paths`. We keep ALL dynamic-route
     // paths and ONLY the public static paths from `PUBLIC_PATHS`.
     includedRoutes(paths: string[]) {
+      // eslint-disable-next-line no-console
+      console.log("[ssg] includedRoutes input:", paths);
+      const norm = (p: string) => (p.startsWith("/") ? p : `/${p}`);
       const publicSet = new Set(PUBLIC_PATHS);
       const result = new Set<string>(PUBLIC_PATHS);
-      for (const p of paths) {
+      for (const raw of paths) {
+        const p = norm(raw);
         if (
           p.startsWith("/blog/") ||
           p.startsWith("/platform/") ||
