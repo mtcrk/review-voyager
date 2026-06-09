@@ -1,4 +1,0 @@
-const voyageRespondLogo = "data:image/svg+xml,%3csvg%20width='32'%20height='32'%20viewBox='0%200%2032%2032'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3c!--%20Main%20V%20--%3e%3cpath%20d='M16%2028L4%206H9.6L16%2018.4L22.4%206H28L16%2028Z'%20fill='%232D3748'%20stroke='%232D3748'%20stroke-width='1.5'%20stroke-linejoin='round'/%3e%3c!--%20Minimal%20message%20bubble%20overlay%20(top-right)%20--%3e%3cg%20transform='translate(20,%204)'%3e%3crect%20x='0'%20y='0'%20width='10'%20height='8'%20rx='2'%20fill='%237A5AF8'/%3e%3cpath%20d='M8%208L9%2010L10%208'%20fill='%237A5AF8'/%3e%3c!--%20Message%20lines%20inside%20bubble%20--%3e%3cline%20x1='2'%20y1='3'%20x2='8'%20y2='3'%20stroke='white'%20stroke-width='1'%20stroke-linecap='round'/%3e%3cline%20x1='2'%20y1='5.5'%20x2='6'%20y2='5.5'%20stroke='white'%20stroke-width='1'%20stroke-linecap='round'/%3e%3c/g%3e%3c/svg%3e";
-export {
-  voyageRespondLogo as v
-};
