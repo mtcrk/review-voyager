@@ -33,7 +33,9 @@ const PUBLIC_PATHS = [
 ];
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+// `ssgOptions` is consumed by vite-react-ssg and isn't part of Vite's UserConfig,
+// so we cast through `any` to keep TS happy without losing the rest of the config.
+export default defineConfig(({ mode }) => (({
   server: {
     host: "::",
     port: 8080,
@@ -95,4 +97,4 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
-}));
+}) as any));
