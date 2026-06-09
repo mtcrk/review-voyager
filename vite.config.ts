@@ -35,7 +35,7 @@ const PUBLIC_PATHS = [
 // https://vitejs.dev/config/
 // `ssgOptions` is consumed by vite-react-ssg and isn't part of Vite's UserConfig,
 // so we cast through `any` to keep TS happy without losing the rest of the config.
-export default defineConfig(({ mode }) => (({
+export default defineConfig(({ mode, isSsrBuild }) => (({
   server: {
     host: "::",
     port: 8080,
@@ -76,25 +76,27 @@ export default defineConfig(({ mode }) => (({
     cssMinify: true,
     sourcemap: false,
     chunkSizeWarningLimit: 800,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          "react-vendor": ["react", "react-dom", "react-router-dom"],
-          "ui-vendor": [
-            "@radix-ui/react-dialog",
-            "@radix-ui/react-dropdown-menu",
-            "@radix-ui/react-popover",
-            "@radix-ui/react-tabs",
-            "@radix-ui/react-tooltip",
-            "@radix-ui/react-select",
-            "@radix-ui/react-accordion",
-          ],
-          "chart-vendor": ["recharts"],
-          "supabase-vendor": ["@supabase/supabase-js"],
-          "query-vendor": ["@tanstack/react-query"],
-          "i18n-vendor": ["i18next", "react-i18next"],
+    rollupOptions: isSsrBuild
+      ? {}
+      : {
+          output: {
+            manualChunks: {
+              "react-vendor": ["react", "react-dom", "react-router-dom"],
+              "ui-vendor": [
+                "@radix-ui/react-dialog",
+                "@radix-ui/react-dropdown-menu",
+                "@radix-ui/react-popover",
+                "@radix-ui/react-tabs",
+                "@radix-ui/react-tooltip",
+                "@radix-ui/react-select",
+                "@radix-ui/react-accordion",
+              ],
+              "chart-vendor": ["recharts"],
+              "supabase-vendor": ["@supabase/supabase-js"],
+              "query-vendor": ["@tanstack/react-query"],
+              "i18n-vendor": ["i18next", "react-i18next"],
+            },
+          },
         },
-      },
-    },
   },
 }) as any));
