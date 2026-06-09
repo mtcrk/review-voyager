@@ -1,5 +1,5 @@
 import type { RouteRecord } from "vite-react-ssg";
-import { Navigate, useLocation, useParams } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import RootLayout from "./App";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
