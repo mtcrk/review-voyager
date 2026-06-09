@@ -1,0 +1,110 @@
+# VoyageRespond
+
+> AI destekli yorum yönetim platformu. Otel, restoran ve işletmeler için Google, Booking, TripAdvisor, Hotels.com ve TikTok yorumlarını yapay zeka ile tek panelden yönetin.
+
+VoyageRespond; çok platformlu yorum toplama, 8 farklı tonda AI destekli yanıt önerileri, duygu analizi, AI Görünürlük Skoru, çoklu lokasyon yönetimi ve haftalık strateji raporları sunan bir SaaS ürünüdür. Türkçe ve İngilizce desteği vardır.
+
+## Pages
+
+- [Ana Sayfa](/): Ürün özeti, özellikler ve 3 ay ücretsiz deneme.
+- [Fiyatlandırma](/pricing): Plan seçenekleri ve fiyat bilgileri.
+- [Hakkımızda](/about): Şirket, misyon ve ekip bilgileri.
+- [İletişim](/contact): Demo talebi ve iletişim formu.
+- [Demo](/demo): Etkileşimli AI yanıt demosu — yorumdan saniyeler içinde marka uyumlu cevap üretimi.
+- [Blog](/blog): Yorum yönetimi, AI görünürlük ve dijital itibar rehberleri.
+- [Otomasyon Hub](/hub): Bağlı kanallarınıza göre kişiselleştirilmiş otomasyon merkezi.
+
+## Hub Sayfaları
+
+- [Google Yorum Cevap Örnekleri](/google-yorum-cevap-ornekleri): Google yorumları için 25+ hazır yanıt şablonu ve örnek.
+- [Restoran Yorum Cevapları](/restoran-yorum-cevaplari): Restoranlar için 30+ olumlu/olumsuz yanıt şablonu.
+- [Otel Yorum Cevapları](/otel-yorum-cevaplari): Booking, TripAdvisor ve Google için 30+ otel yanıt şablonu.
+- [Yorum Yönetim Araçları](/yorum-yonetim-araclari): Türkiye'de yorum yönetim platformlarının karşılaştırması.
+- [Online İtibar Yönetimi](/online-itibar-yonetimi): Dijital itibar yönetiminin tanımı, süreçleri ve araçları.
+- [Müşteri Memnuniyeti](/musteri-memnuniyeti): Müşteri memnuniyeti ölçümü, anket ve geri bildirim rehberi.
+- [Restoran Müşteri Memnuniyeti](/restoran-musteri-memnuniyeti): Restoranlar için müşteri memnuniyeti stratejileri ve KPI'lar.
+
+## Platform Sayfaları
+
+- [Google Yorumları için AI](/platform/google-yorumlari-icin-yapay-zeka): Google işletme yorumlarına yapay zeka ile saniyeler içinde marka uyumlu cevap yazın. Otomatik moderasyon, çoklu lokasyon ve duygu analizi t…
+- [Instagram Yorumları için AI](/platform/instagram-yorumlari-icin-yapay-zeka): Instagram gönderi ve reels yorumlarını yapay zeka ile yönetin. Spam koruması, marka sesinde cevap önerileri ve duygu analizi tek panelde.
+- [TripAdvisor Yorumları için AI](/platform/tripadvisor-yorumlari-icin-yapay-zeka): TripAdvisor otel ve restoran yorumlarına yapay zeka ile çoklu dilde profesyonel yanıt yazın. Negatif yorum uyarısı ve duygu analizi.
+- [Booking.com Yorumları için AI](/platform/booking-yorumlari-icin-yapay-zeka): Booking.com misafir yorumlarına yapay zeka ile çoklu dilde, marka sesinde profesyonel cevap. Negatif uyarı, duygu analizi ve raporlama.
+- [TikTok Yorumları için AI](/platform/tiktok-yorumlari-icin-yapay-zeka): TikTok video yorumlarına yapay zeka ile saniyeler içinde marka sesinde yanıt. Spam koruması, etiketli video keşfi ve duygu analizi.
+- [Tüm Platformlar için AI](/platform/yorumlara-yapay-zeka-ile-cevap-yazma): Google, Booking, TripAdvisor, Instagram, TikTok yorumlarına yapay zeka ile saniyeler içinde marka sesinde otomatik cevap. Tek panel, tüm pl…
+- [Facebook Yorumları için AI](/platform/facebook-yorumlari-icin-yapay-zeka): Facebook sayfa yorumlarına, paylaşım yorumlarına ve değerlendirmelere yapay zeka ile saniyeler içinde marka uyumlu cevap yazın. Tek panelde…
+- [YouTube Yorumları için AI](/platform/youtube-yorumlari-icin-yapay-zeka): YouTube video yorumlarınıza yapay zeka ile saniyeler içinde marka uyumlu cevap yazın. Spam filtresi, duygu analizi ve toplu yanıt tek panel…
+- [Hotels.com Yorumları için AI](/platform/hotels-com-yorumlari-icin-yapay-zeka): Hotels.com'daki misafir yorumlarınıza yapay zeka ile profesyonel cevaplar yazın. Booking, TripAdvisor ve Google ile tek panelden yönetin.
+- [Trendyol Yorumları için AI](/platform/trendyol-yorumlari-icin-yapay-zeka): Trendyol mağaza ve ürün yorumlarına yapay zeka ile marka uyumlu cevap yazın. Otomatik satıcı yanıtları, negatif yorum uyarısı ve duygu anal…
+- [Yemeksepeti Yorumları için AI](/platform/yemeksepeti-yorumlari-icin-yapay-zeka): Yemeksepeti sipariş ve restoran yorumlarına yapay zeka ile anında profesyonel cevap yazın. Negatif yorum uyarısı ve marka sesinde yanıtlar.
+- [Airbnb Yorumları için AI](/platform/airbnb-yorumlari-icin-yapay-zeka): Airbnb misafir yorumlarına yapay zeka ile profesyonel ev sahibi yanıtları yazın. Superhost puanınızı koruyun, negatif yorumları kurtarın.
+- [Zomato Yorumları için AI](/platform/zomato-yorumlari-icin-yapay-zeka): Zomato restoran yorumlarına yapay zeka ile marka uyumlu cevap yazın. Otomatik yanıtlar, duygu analizi ve global restoran itibar yönetimi.
+
+## Lokasyon Sayfaları
+
+- [İstanbul Otel Yorum Yönetimi](/otel-yorum-yonetimi/istanbul): İstanbul, Türkiye'nin en yoğun otel pazarı. Sultanahmet'ten Beyoğlu'na, Levent'ten Kadıköy'e binlerce otel her gün yüzlerce yeni yorum alıy…
+- [Antalya Otel Yorum Yönetimi](/otel-yorum-yonetimi/antalya): Antalya, Türkiye turizminin başkenti. Konyaaltı, Lara ve Kemer bölgelerindeki resort otelleri sezonda haftada 500+ yorum alıyor. Rus, Alman…
+- [Bodrum Otel Yorum Yönetimi](/otel-yorum-yonetimi/bodrum): Bodrum, lüks butik otellerin ve villa kiralamalarının merkezi. Yalıkavak, Türkbükü ve Gümbet bölgelerindeki tesisler Instagram ve TripAdvis…
+- [Kapadokya Otel Yorum Yönetimi](/otel-yorum-yonetimi/kapadokya): Kapadokya, Türkiye'nin en yüksek puanlı bölgesi. Göreme, Ürgüp ve Uçhisar'daki cave hotel ve butik otelleri yabancı turistler için dünya ça…
+- [İzmir Otel Yorum Yönetimi](/otel-yorum-yonetimi/izmir): İzmir, hem iş seyahatleri hem de Ege turizminin geçiş noktası. Alsancak, Konak ve havalimanı çevresindeki oteller yoğun şehir trafiği alıyo…
+- [Ankara Otel Yorum Yönetimi](/otel-yorum-yonetimi/ankara): Ankara, Türkiye'nin yönetim merkezi. Kavaklıdere, Çankaya ve havalimanı çevresindeki oteller ağırlıklı olarak iş seyahati misafirleri alıyo…
+- [Alanya Otel Yorum Yönetimi](/otel-yorum-yonetimi/alanya): Alanya, Rus, Alman ve İskandinav turistlerinin yoğun ilgi gösterdiği resort bölgesi. All-inclusive otellerinde sezonda yoğun yorum trafiği…
+- [Marmaris Otel Yorum Yönetimi](/otel-yorum-yonetimi/marmaris): Marmaris, İngiliz ve İskandinav turistlerinin tercih ettiği Ege incisi. İçmeler, Turunç ve marina çevresindeki oteller yoğun rezervasyon al…
+- [Kemer Otel Yorum Yönetimi](/otel-yorum-yonetimi/kemer): Kemer, Antalya'nın en yoğun all-inclusive bölgelerinden. Beldibi, Göynük ve Tekirova'daki oteller Rus ve Alman misafirler için ana destinas…
+- [Fethiye Otel Yorum Yönetimi](/otel-yorum-yonetimi/fethiye): Fethiye, Ölüdeniz ve Hisarönü bölgesiyle butik otel ve villa kiralamasının merkezi. İngiliz turistleri için dünya çapında popüler. TripAdvi…
+- [Çeşme Otel Yorum Yönetimi](/otel-yorum-yonetimi/cesme): Çeşme & Alaçatı, lüks butik otellerin ve dizayn otellerinin Türkiye merkezi. Yerli misafir ağırlıklı sezon, Instagram ve Google yorumları ö…
+- [Kuşadası Otel Yorum Yönetimi](/otel-yorum-yonetimi/kusadasi): Kuşadası, kruvaziyer turizmi ve aile otellerinin merkezi. Ephesus turlarıyla bağlantılı, uluslararası yoğun misafir trafiği.
+- [Bursa Otel Yorum Yönetimi](/otel-yorum-yonetimi/bursa): Bursa, kış turizmi (Uludağ) ve termal otelleri ile yıl boyu yoğun. İş ve aile misafirleri karışık.
+- [Trabzon Otel Yorum Yönetimi](/otel-yorum-yonetimi/trabzon): Trabzon, Körfez Arap turistlerinin (özellikle Suudi, Kuveyt, Katar) tercih ettiği şehir. Yaz aylarında yoğun Arapça yorum trafiği.
+- [Kayseri Otel Yorum Yönetimi](/otel-yorum-yonetimi/kayseri): Kayseri, Erciyes kış turizmi ve şehir merkezi iş otelleri ile yıl boyu aktif. Sanayi şehri olması nedeniyle iş seyahati ağırlıklı.
+
+## Blog
+
+- [Google Yorumlarına Nasıl Yanıt Verilir? 2026 Rehberi](/blog/google-yorumlarina-nasil-yanit-verilir): Google yorumlarına profesyonel ve etkili yanıt vermenin 10 altın kuralı. Olumsuz yorumları fırsata çevirin, müşteri sadakatini artırın.
+- [AI Visibility Score Nedir? İşletmeniz Yapay Zekada Nasıl Görünüyor?](/blog/ai-gorunurluk-skoru-nedir): AI Visibility Score, işletmenizin ChatGPT, Gemini ve diğer AI asistanlarında nasıl göründüğünü ölçer. Skorunuzu nasıl artıracağınızı öğreni…
+- [Otel ve Restoran İçin Yorum Yönetimi: Kapsamlı Rehber](/blog/otel-restoran-yorum-yonetimi-rehberi): Otel ve restoran sahipleri için Google, Booking, TripAdvisor yorumlarını profesyonelce yönetme rehberi. Çok platformlu yorum stratejisi.
+- [Kötü Yorumlara Nasıl Cevap Verilir? 15 Altın Kural ve Örnekler](/blog/kotu-yorumlara-nasil-cevap-verilir): Olumsuz Google yorumlarına profesyonel cevap verme rehberi. 15 gerçek örnek ve hazır şablonlarla kötü yorumları fırsata çevirin.
+- [Google Yorum Cevap Örnekleri: 20 Hazır Yanıt Şablonu (2026)](/blog/google-yorum-cevap-ornekleri): Google yorumlarına kopyala-yapıştır hazır yanıt şablonları. Olumlu, olumsuz ve nötr yorumlar için 20 profesyonel cevap örneği.
+- [Yorumlara Neden Cevap Vermek Önemlidir? Verilerle 7 Neden](/blog/yorumlara-neden-cevap-vermek-onemlidir): Müşteri yorumlarına cevap vermenin satış, güven ve SEO üzerindeki etkisini verilerle açıklıyoruz. İşletmeniz için neden kritik olduğunu öğr…
+- [Google Yorumlarına Cevap Vermek İçin En İyi Araçlar (2026)](/blog/google-yorum-cevap-araclari-2026): Google yorum yönetimi için en iyi AI araçlarını karşılaştırdık. VoyageRespond, Birdeye, Podium ve daha fazlası — hangisi sizin için en uygu…
+- [ChatGPT ile Google Yorumlarına Nasıl Cevap Yazılır? (Adım Adım)](/blog/chatgpt-ile-google-yorumlarina-nasil-cevap-yazilir): ChatGPT kullanarak Google yorumlarına profesyonel cevap yazmanın yollarını öğrenin. Örnek promptlar, gerçek çıktılar ve otomatik çözüm.
+- [How to Respond Professionally to a Bad Review](/blog/how-to-respond-professionally-to-a-bad-review): A practical framework for replying to negative reviews with empathy, professionalism, and a clear path to resolution.
+- [What Should a Company Do After Getting a Bad Review?](/blog/what-should-a-company-do-after-getting-a-bad-review): The exact playbook to follow in the first 24 hours after a negative review lands — from triage to public reply to internal follow-up.
+- [How Do Companies Recover From Bad Reviews?](/blog/how-do-companies-recover-from-bad-reviews): Real recovery strategies used by hotels, restaurants and SaaS brands to rebuild trust after a wave of negative feedback.
+- [How Long Does It Take to Fix a Bad Reputation?](/blog/how-long-does-it-take-to-fix-a-bad-reputation): Realistic timelines for reputation recovery, the math behind your average rating, and what actually moves the needle.
+- [How to Get Better Customer Reviews for Your Business](/blog/how-to-get-better-customer-reviews): Beyond just asking — the messaging, timing and channels that consistently produce higher-quality, more detailed customer reviews.
+- [How Do Review Scores Actually Impact Businesses?](/blog/how-do-review-scores-impact-businesses): The data behind star ratings — how a single tenth of a star can change revenue, search rankings and conversion rate.
+- [How Fast Do Companies Respond to Bad Reviews?](/blog/how-fast-should-companies-respond-to-bad-reviews): The benchmark response times that customers and Google's algorithm actually reward — and how to hit them at scale.
+- [How to Get More Google Reviews for Your Business](/blog/how-to-get-more-google-reviews): Compliant, scalable tactics for collecting more Google reviews — including QR codes, post-stay emails and SMS automations.
+- [What Is Review Management Software? (And Do You Need It?)](/blog/what-is-review-management-software): A clear breakdown of what review management software does, the must-have features, and how to choose the right tool for your business.
+- [How to Improve Your Google Rating](/blog/how-to-improve-your-google-rating): Step-by-step strategies — from operational fixes to review velocity tactics — that move your Google star rating up and keep it there.
+- [How to Respond to Negative Reviews: The Complete Guide](/blog/how-to-respond-to-negative-reviews): The complete guide to writing negative review replies that protect your brand, satisfy the customer and reassure future buyers.
+- [Google Yorum: İşletmeler İçin 2026 Tam Rehberi](/blog/google-yorum-rehberi): Google yorum nedir, nasıl yönetilir, nasıl artırılır? İşletme sahipleri için yorum yönetimi, yanıtlama ve SEO etkisi rehberi.
+- [Google Yorum Silme: Sahte ve Haksız Yorumları Kaldırma Rehberi](/blog/google-yorum-silme-rehberi): Google yorum nasıl silinir? Sahte, hakaret içeren veya politika ihlali yapan yorumları kaldırma adımları, şikayet süreci ve alternatif çözü…
+- [Google İşletme Profili Optimizasyonu: 2026 Tam Rehberi](/blog/google-isletme-profili-optimizasyonu): Google İşletme Profilinizi optimize ederek yerel aramalarda üst sıralara çıkın. Adım adım rehber, kontrol listesi ve sıralama faktörleri.
+- [Online İtibar Yönetimi: 2026 İşletme Rehberi](/blog/online-itibar-yonetimi-rehberi): Online itibar yönetimi nedir, nasıl yapılır? Google, sosyal medya ve OTA platformlarında dijital itibarınızı koruma ve büyütme rehberi.
+- [Booking.com Yorum Yönetimi: Oteller İçin 2026 Rehberi](/blog/booking-yorum-yonetimi): Booking.com yorumlarını yönetme rehberi. Misafir yorumlarına yanıt verme, puan artırma stratejileri ve otomatik yönetim çözümleri.
+- [TripAdvisor Yorum Yönetimi: Otel ve Restoran Rehberi](/blog/tripadvisor-yorum-yonetimi): TripAdvisor yorumlarını yönetme rehberi. Sıralama algoritması, yanıt stratejileri ve Travelers' Choice rozeti kazanma yolları.
+- [Instagram Yorum Yönetimi: İşletmeler İçin 2026 Rehberi](/blog/instagram-yorum-yonetimi): Instagram yorumlarını yönetme rehberi. Spam filtreleme, AI yanıt stratejileri ve dönüşümü artıran yorum yaklaşımları.
+- [TikTok Yorum Yönetimi: Markalar İçin 2026 Rehberi](/blog/tiktok-yorum-yonetimi): TikTok yorumlarını yönetme rehberi. AI yanıt stratejileri, spam koruma ve viral içerik yönetimi.
+- [YouTube Yorum Yönetimi: Kanal Sahipleri İçin 2026 Rehberi](/blog/youtube-yorum-yonetimi): YouTube yorumlarını yönetme rehberi. AI yanıt stratejileri, spam filtreleme, topluluk inşası ve algoritma etkisi.
+- [Otel Yorum Yönetimi: A'dan Z'ye 2026 Rehberi](/blog/otel-yorum-yonetimi-rehberi): Otel yorum yönetimi nedir, neden kritik, Google Booking TripAdvisor yorumları nasıl yönetilir? Otel sahipleri için 2026 kapsamlı rehber.
+- [TripAdvisor Nedir, Yorumları Nasıl Yönetilir? 2026 Rehberi](/blog/tripadvisor-yorum-yonetimi-rehberi): TripAdvisor nedir, otel ve restoran için neden önemli, yorumları nasıl yönetilir? Türkiye'deki işletmeler için kapsamlı rehber.
+- [Otel Karşılaştırma Sitelerinde Üst Sıralara Çıkma Rehberi](/blog/otel-karsilastirma-sitelerinde-ust-siralara-cikma): Trivago, Google Otel, Kayak gibi otel karşılaştırma sitelerinde üst sıralara çıkmanın 10 yolu. Sıralama algoritmaları ve pratik ipuçları.
+- [Airbnb Şikayet ve Yorum Yönetimi: Ev Sahipleri için Rehber](/blog/airbnb-sikayet-ve-yorum-yonetimi): Airbnb şikayetleri nasıl çözülür, olumsuz yoruma nasıl cevap verilir, Superhost olmak için 5 adım. Türkiye'deki Airbnb ev sahipleri için 20…
+- [Olumsuz Google Yorumu Nasıl Cevaplanır? Adım Adım Rehber + 15 Örnek Şablon](/blog/olumsuz-google-yorumu-nasil-cevaplanir): Olumsuz Google yorumlarına profesyonel cevap vermenin 5 adımlı çerçevesi, 15 gerçekçi örnek ve hazır şablonlarla adım adım rehber.
+- [Olumlu Restoran Yorumu Cevap Örnekleri: 30+ Hazır Şablon](/blog/olumlu-yorum-cevap-ornekleri): Olumlu restoran yorumlarına nasıl cevap verilir? 30+ kategoriye göre hazır şablon, kişiselleştirme formülü ve doğru ton rehberi.
+- [Google Yorum Cevap Şablonları: 50 Hazır Yanıt (Kopyala-Yapıştır)](/blog/google-yorum-cevap-sablonlari): 5 yıldızdan 1 yıldıza, otel-restoran-klinik-kuaför için 50 Google yorum cevap şablonu. Her yanıt kişiselleştirme notu ile birlikte.
+- [Otel Yorum Cevaplama Rehberi: Booking, TripAdvisor & Google için Örnekler](/blog/otel-yorum-cevaplama-rehberi): Otel yorumlarını Booking, TripAdvisor ve Google'da cevaplama rehberi. Oda, temizlik, personel ve F&B şikayetleri için örnekler, OTA özel st…
+- [AI ile Yorum Cevaplama: ChatGPT vs Özel Araçlar (2026 Karşılaştırma)](/blog/ai-ile-yorum-cevaplama): AI ile yorum cevaplama 2026 rehberi: ChatGPT/Gemini'nin işletme için limitleri, özel araç karşılaştırması, ROI hesabı ve VoyageRespond'un 8…
+- [Google Yorumlarım Nasıl Yönetilir? Adım Adım Rehber (2026)](/blog/google-yorumlarim-nasil-yonetilir): Google yorumlarınızı tek panelden yönetmenin yolları: yorumları görmek, yanıtlamak, raporlamak, kaldırmak ve AI ile otomatikleştirmek.
+- [Google Yorum Nedir, Nasıl Yapılır ve Nasıl Yönetilir?](/blog/google-yorum-nedir-nasil-yapilir): Google yorum sisteminin nasıl çalıştığını, müşteri olarak nasıl yorum yazılacağını ve işletme olarak yorumların nasıl yönetileceğini öğreni…
+- [Müşteri Memnuniyet Anketi Örnekleri: 20 Hazır Soru + 5 Şablon (2026)](/blog/musteri-memnuniyet-anketi-ornekleri): Müşteri memnuniyet anketi tasarlamanın 5 kuralı, NPS/CSAT/CES farkları ve sektöre göre 20 hazır soru.
+- [Müşteri Memnuniyet Mesajı Örnekleri: 50 Hazır Şablon (2026)](/blog/musteri-memnuniyet-mesaji-ornekleri): Restoran, otel ve e-ticaret işletmeleri için müşteri memnuniyet mesajı şablonları — teşekkür, özür, takip, yorum talebi ve teşvik.
+
+## Optional
+
+- [Gizlilik Politikası](/privacy-policy): Veri işleme ve gizlilik koşulları.
+- [Kullanım Koşulları](/terms-of-service): Hizmet kullanım şartları ve sorumluluklar.
+
+<!-- generated 2026-06-09 — 85 pages -->

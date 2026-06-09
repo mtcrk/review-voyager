@@ -53,6 +53,14 @@ export default defineConfig(({ mode, isSsrBuild, command }) => {
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  ssr: {
+    // react-helmet-async holds Helmet state in a module-scoped React Context.
+    // If both vite-react-ssg's runtime (from node_modules) AND our SSR bundle
+    // each load their own copy, the provider and consumer end up on different
+    // Context instances and helmetInstances becomes undefined. Externalizing
+    // forces a single shared module instance.
+    external: ["react-helmet-async"],
+  },
   ssgOptions: {
     script: "async",
     formatting: "none",
