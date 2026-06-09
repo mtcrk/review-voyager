@@ -3,6 +3,11 @@ import { Navigate, useLocation, useParams } from "react-router-dom";
 import RootLayout from "./App";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { cityHotelData } from "./lib/cityHotelData";
+import { platformLandingPages } from "./lib/platformLandingData";
+import { blogPosts } from "./lib/blogPosts";
+import { restoranClusterPosts } from "./lib/blogClusterRestoran";
+import { memnuniyetClusterPosts } from "./lib/blogClusterMemnuniyet";
 
 // Convert default-export pages into the { Component } shape data-router lazy expects.
 const lazyDefault =
@@ -60,32 +65,14 @@ function EnRedirect() {
   return <Navigate to={target + loc.search + loc.hash} replace />;
 }
 
-// Pull dynamic-route slug lists for getStaticPaths.
-// Imports happen at build time (SSG node side) and are tree-shaken from client.
-function loadCityHotelSlugs(): string[] {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const mod = require("./lib/cityHotelData");
-  const arr = mod.cityHotelData ?? mod.default ?? [];
-  return arr.map((x: any) => x.slug).filter(Boolean);
-}
-function loadPlatformSlugs(): string[] {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const mod = require("./lib/platformLandingData");
-  const arr = mod.platformLandingData ?? mod.default ?? [];
-  return arr.map((x: any) => x.slug).filter(Boolean);
-}
-function loadBlogSlugs(): string[] {
-  const slugs = new Set<string>();
-  for (const path of ["./lib/blogPosts", "./lib/blogClusterRestoran", "./lib/blogClusterMemnuniyet"]) {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const mod = require(path);
-      const arr = mod.blogPosts ?? mod.default ?? Object.values(mod).find((v: any) => Array.isArray(v)) ?? [];
-      for (const p of arr as any[]) if (p?.slug) slugs.add(p.slug);
-    } catch {}
-  }
-  return [...slugs];
-}
+const loadCityHotelSlugs = (): string[] =>
+  cityHotelData.map((x) => x.slug).filter(Boolean);
+const loadPlatformSlugs = (): string[] =>
+  platformLandingPages.map((x) => x.slug).filter(Boolean);
+const loadBlogSlugs = (): string[] => {
+  const all = [...blogPosts, ...restoranClusterPosts, ...memnuniyetClusterPosts];
+  return [...new Set(all.map((p) => p.slug).filter(Boolean))];
+};
 
 export const routes: RouteRecord[] = [
   {
