@@ -30,12 +30,12 @@ const tools: Tool[] = [
     pricing: "Erken erişim: 3 ay ücretsiz",
     pricingRank: 1,
     targetSector: "Otel, restoran, çoklu lokasyon",
-    languages: "TR, EN (+ 12 dilde yanıt)",
-    platformCoverage: "Google, Booking, TripAdvisor, Hotels.com, TikTok",
-    platformCount: 5,
-    aiFeatures: "8 tonda AI yanıt, duygu analizi, AI Görünürlük Skoru, haftalık AI strateji raporu",
-    strength: "Türkçe NLP kalitesi, çoklu lokasyon karşılaştırması, AI Görünürlük (ChatGPT/Gemini) takibi, yerel pazara optimize.",
-    weakness: "Erken erişim aşamasında — uluslararası PMS entegrasyonları henüz sınırlı.",
+    languages: "TR, EN arayüz · çok dilli AI yanıt",
+    platformCoverage: "Google, Booking, TripAdvisor, Hotels.com (TikTok 🚀 Beta)",
+    platformCount: 4,
+    aiFeatures: "8 tonda AI yanıt + Google'a otomatik post ✅, duygu analizi ✅, haftalık AI strateji raporu ✅, AI Görünürlük Skoru 🚀 Beta, Review Request (WhatsApp + QR) 🚀 Beta",
+    strength: "AI yanıt + Google'a tek tık otomatik post, çoklu lokasyon karşılaştırması, Türkçe NLP kalitesi, yerel pazara optimize.",
+    weakness: "Erken erişim — AI Görünürlük Skoru ve Review Request otomasyonu Beta; SMS/Email review request henüz yok; uluslararası PMS entegrasyonları sınırlı.",
     bestFor: "Türkiye'de faaliyet gösteren oteller, restoran zincirleri, çoklu lokasyonlu işletmeler.",
     highlight: true,
   },
@@ -410,6 +410,9 @@ const YorumYonetimAraclari = () => {
           <h2 className="text-2xl font-bold mb-4">Karşılaştırma Tablosu</h2>
           <p className="text-sm text-muted-foreground mb-4">Başlıklara tıklayarak sıralayın. Fiyat sütununda düşük = ekonomik, yüksek = enterprise.</p>
           <ComparisonTable />
+          <p className="mt-4 text-xs text-muted-foreground italic">
+            🚀 <strong>Beta</strong> etiketli özellikler aktif geliştirme aşamasında olup erken erişim kullanıcılarıyla test edilmektedir. ✅ etiketli özellikler tüm hesaplarda canlı kullanılabilir.
+          </p>
         </section>
 
         <section className="space-y-6 mb-16">
