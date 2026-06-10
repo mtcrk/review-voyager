@@ -1242,7 +1242,7 @@ Train staff to say: *"If you enjoyed your experience today, we'd really apprecia
 
 Going from 20 to 100 Google reviews doesn't just raise your rating — it improves your local search ranking, increases click-through rates, and builds the trust that converts browsers into customers.
 
-[VoyageRespond](https://voyagerespond.com) automates SMS, email, and QR-based review requests across all your locations.
+[VoyageRespond](https://voyagerespond.com) automates email-based review requests across all your locations (WhatsApp, SMS, and QR channels are on the active roadmap).
 
 **[Start your free trial →](https://voyagerespond.com/onboarding)**
     `,
