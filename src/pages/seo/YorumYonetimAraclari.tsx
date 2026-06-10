@@ -410,6 +410,9 @@ const YorumYonetimAraclari = () => {
           <h2 className="text-2xl font-bold mb-4">Karşılaştırma Tablosu</h2>
           <p className="text-sm text-muted-foreground mb-4">Başlıklara tıklayarak sıralayın. Fiyat sütununda düşük = ekonomik, yüksek = enterprise.</p>
           <ComparisonTable />
+          <p className="mt-4 text-xs text-muted-foreground italic">
+            🚀 <strong>Beta</strong> etiketli özellikler aktif geliştirme aşamasında olup erken erişim kullanıcılarıyla test edilmektedir. ✅ etiketli özellikler tüm hesaplarda canlı kullanılabilir.
+          </p>
         </section>
 
         <section className="space-y-6 mb-16">
