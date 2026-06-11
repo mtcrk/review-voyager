@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Check, Star, MessageSquare, Eye, TrendingUp, Sparkles, Zap, Target, Shield, Users, Menu, X, Building2, UtensilsCrossed, Hotel, Stethoscope, Store, Dumbbell } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from 'react-i18next';
@@ -14,17 +14,9 @@ const Index = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 80);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div className="min-h-screen bg-[#0A0A1A] overflow-x-hidden">
       <SEO
         title="VoyageRespond — AI Google Yorum Yönetimi"
         description="Google, Booking ve TripAdvisor yorumlarını yapay zeka ile yönetin. Otomatik yanıt önerileri, duygu analizi, AI görünürlük skoru. Ücretsiz kaydolun."
@@ -69,13 +61,7 @@ const Index = () => {
         }}
       />
       {/* Navbar — Clean, minimal */}
-      <nav
-        className={`sticky top-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? "border-b border-border/60 backdrop-blur-xl bg-background/80"
-            : "border-b border-white/5 backdrop-blur-md bg-[#0A0A1A]/40"
-        }`}
-      >
+      <nav className="sticky top-0 z-50 border-b border-white/5 backdrop-blur-xl bg-[#0A0A1A]/70">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
@@ -86,9 +72,9 @@ const Index = () => {
               <img
                 src={voyageRespondLogo}
                 alt="VoyageRespond"
-                className={`h-7 w-7 transition-all duration-300 ${scrolled ? "" : "brightness-0 invert"}`}
+                className="h-7 w-7 brightness-0 invert"
               />
-              <span className={`text-base tracking-tight transition-colors duration-300 ${scrolled ? "text-foreground" : "text-white"}`}>
+              <span className="text-base tracking-tight text-white">
                 <span className="font-normal">Voyage</span>
                 <span className="font-semibold">Respond</span>
               </span>
@@ -98,25 +84,25 @@ const Index = () => {
             <div className="hidden md:flex items-center gap-8">
               <button
                 onClick={() => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })}
-                className={`text-sm font-medium transition-colors ${scrolled ? "text-muted-foreground hover:text-foreground" : "text-white/70 hover:text-white"}`}
+                className="text-sm font-medium transition-colors text-white/70 hover:text-white"
               >
                 {t('indexPage.nav.features')}
               </button>
               <button
                 onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })}
-                className={`text-sm font-medium transition-colors ${scrolled ? "text-muted-foreground hover:text-foreground" : "text-white/70 hover:text-white"}`}
+                className="text-sm font-medium transition-colors text-white/70 hover:text-white"
               >
                 {t('indexPage.nav.pricing')}
               </button>
               <button
                 onClick={() => navigate("/blog")}
-                className={`text-sm font-medium transition-colors ${scrolled ? "text-muted-foreground hover:text-foreground" : "text-white/70 hover:text-white"}`}
+                className="text-sm font-medium transition-colors text-white/70 hover:text-white"
               >
                 {t('indexPage.nav.blog')}
               </button>
               <button
                 onClick={() => navigate("/contact")}
-                className={`text-sm font-medium transition-colors ${scrolled ? "text-muted-foreground hover:text-foreground" : "text-white/70 hover:text-white"}`}
+                className="text-sm font-medium transition-colors text-white/70 hover:text-white"
               >
                 {t('indexPage.nav.contact')}
               </button>
@@ -127,7 +113,7 @@ const Index = () => {
               <LanguageSwitcher />
               <button
                 onClick={() => navigate(user ? "/dashboard" : "/login")}
-                className={`text-sm font-medium transition-colors px-3 py-2 ${scrolled ? "text-muted-foreground hover:text-foreground" : "text-white/80 hover:text-white"}`}
+                className="text-sm font-medium transition-colors px-3 py-2 text-white/80 hover:text-white"
               >
                 {user ? t('indexPage.nav.dashboard') : t('indexPage.nav.login')}
               </button>
@@ -144,7 +130,7 @@ const Index = () => {
               <LanguageSwitcher />
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={`p-2 transition-colors ${scrolled ? "text-foreground" : "text-white"}`}
+                className="p-2 text-white"
                 aria-label={mobileMenuOpen ? "Menüyü kapat" : "Menüyü aç"}
                 aria-expanded={mobileMenuOpen}
               >
@@ -155,7 +141,7 @@ const Index = () => {
 
           {/* Mobile Dropdown */}
           {mobileMenuOpen && (
-            <div className="md:hidden border-t border-border py-4 space-y-1">
+            <div className="md:hidden border-t border-white/10 py-4 space-y-1">
               {[
                 { label: t('indexPage.nav.features'), action: () => { document.getElementById("features")?.scrollIntoView({ behavior: "smooth" }); setMobileMenuOpen(false); } },
                 { label: t('indexPage.nav.pricing'), action: () => { document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" }); setMobileMenuOpen(false); } },
@@ -166,7 +152,7 @@ const Index = () => {
                 <button
                   key={item.label}
                   onClick={item.action}
-                  className="block w-full text-left px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted rounded-lg transition-colors"
+                  className="block w-full text-left px-4 py-2.5 text-sm font-medium text-white/80 hover:bg-white/5 hover:text-white rounded-lg transition-colors"
                 >
                   {item.label}
                 </button>
