@@ -18,7 +18,7 @@ const Index = () => {
     <div className="min-h-screen bg-background overflow-x-hidden">
       <SEO
         title="VoyageRespond — AI Google Yorum Yönetimi"
-        description="Google, Booking ve TripAdvisor yorumlarını yapay zeka ile yönetin. Otomatik yanıt önerileri, duygu analizi, AI görünürlük skoru. 3 ay ücretsiz deneyin."
+        description="Google, Booking ve TripAdvisor yorumlarını yapay zeka ile yönetin. Otomatik yanıt önerileri, duygu analizi, AI görünürlük skoru. Ücretsiz kaydolun."
         canonical="https://voyagerespond.com/"
         jsonLd={{
           "@context": "https://schema.org",
@@ -53,7 +53,7 @@ const Index = () => {
               name: "VoyageRespond ücretsiz mi?",
               acceptedAnswer: {
                 "@type": "Answer",
-                text: "Evet, VoyageRespond erken erişim döneminde 3 ay boyunca tüm özellikler ve sınırsız lokasyon ile tamamen ücretsizdir.",
+                text: "Evet, ücretsiz kaydolarak hemen kullanmaya başlayabilirsiniz. Erken erişim döneminde tüm özellikler ve sınırsız lokasyon dahildir.",
               },
             },
           ],
