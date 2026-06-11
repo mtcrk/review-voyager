@@ -13,6 +13,7 @@ type Example = {
   language: string;
   replyText: string;
   sentTo: string;
+  ctaLabel: string;
 };
 
 const EXAMPLES: Example[] = [
@@ -36,6 +37,7 @@ const EXAMPLES: Example[] = [
     replyText:
       "Ahmet Bey, güzel yorumunuz için çok teşekkür ederiz! Ekibimizin ilgisinden ve deneyiminizden memnun kalmanız bizim için çok değerli. Sizi tekrar ağırlamak için sabırsızlanıyoruz. 🙏",
     sentTo: "Google'a gönderildi",
+    ctaLabel: "Onayla & Gönder",
   },
   {
     platform: { label: "Booking.com", logo: "B", bg: "bg-[#003580]", fg: "text-white" },
@@ -53,6 +55,7 @@ const EXAMPLES: Example[] = [
     replyText:
       "Dear Maria, thank you so much for your kind words! We're delighted you enjoyed our breakfast and hospitality. We look forward to welcoming you again.",
     sentTo: "Sent to Booking.com",
+    ctaLabel: "Approve & Send",
   },
   {
     platform: { label: "Google", logo: "G", bg: "bg-white border border-border", fg: "text-[#4285F4]" },
@@ -77,6 +80,7 @@ const EXAMPLES: Example[] = [
     replyText:
       "Selin Hanım, yaşadığınız aksaklık için içtenlikle özür dileriz. Konuyu hemen inceledik ve rezervasyon sürecimizi iyileştirdik. Size telafi için ulaşmak isteriz, bizimle iletişime geçebilir misiniz?",
     sentTo: "Google'a gönderildi",
+    ctaLabel: "Onayla & Gönder",
   },
   {
     platform: { label: "TripAdvisor", logo: "T", bg: "bg-[#00AF87]", fg: "text-white" },
@@ -98,235 +102,383 @@ const EXAMPLES: Example[] = [
     replyText:
       "Thank you James! Our chef will be thrilled to hear this. We can't wait to serve you again on your next visit!",
     sentTo: "Sent to TripAdvisor",
+    ctaLabel: "Approve & Send",
   },
 ];
 
-const AUTOPLAY_MS = 5500;
-const TRANSITION_MS = 600;
+type Phase = "incoming" | "thinking" | "typing" | "approved" | "exit";
+const PHASE_ORDER: Phase[] = ["incoming", "thinking", "typing", "approved", "exit"];
+const PHASE_DUR: Record<Phase, number> = {
+  incoming: 900,
+  thinking: 1100,
+  typing: 3500,
+  approved: 1500,
+  exit: 900,
+};
+
+function useReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(mq.matches);
+    const h = (e: MediaQueryListEvent) => setReduced(e.matches);
+    mq.addEventListener("change", h);
+    return () => mq.removeEventListener("change", h);
+  }, []);
+  return reduced;
+}
+
+function DeckCard({ offset, accent }: { offset: 1 | 2; accent: string }) {
+  const scale = offset === 1 ? 0.96 : 0.92;
+  const y = offset === 1 ? 12 : 24;
+  const opacity = offset === 1 ? 0.55 : 0.3;
+  return (
+    <div
+      aria-hidden
+      className="absolute inset-0 rounded-2xl border border-border/40 bg-card shadow-lg overflow-hidden pointer-events-none transition-all duration-700 ease-out"
+      style={{ transform: `translateY(${y}px) scale(${scale})`, opacity, zIndex: offset === 1 ? 1 : 0 }}
+    >
+      <div className="h-[2px] transition-colors duration-700" style={{ backgroundColor: accent }} />
+      <div className="p-5 space-y-3">
+        <div className="h-3 w-32 rounded bg-muted/70" />
+        <div className="h-16 rounded-lg bg-muted/50" />
+        <div className="h-20 rounded-lg bg-muted/40" />
+      </div>
+    </div>
+  );
+}
 
 export function HeroReviewCarousel() {
+  const reduced = useReducedMotion();
   const [index, setIndex] = useState(0);
+  const [phase, setPhase] = useState<Phase>("incoming");
+  const [typed, setTyped] = useState("");
   const [paused, setPaused] = useState(false);
-  const [entered, setEntered] = useState(true);
-  const touchStartX = useRef<number | null>(null);
-  const enterTimer = useRef<number | null>(null);
+  const [count, setCount] = useState(12);
 
-  useEffect(() => {
-    if (paused) return;
-    const timer = setInterval(() => {
-      setIndex((i) => (i + 1) % EXAMPLES.length);
-    }, AUTOPLAY_MS);
-    return () => clearInterval(timer);
-  }, [paused]);
-
-  // Trigger staggered "entered" state after slide finishes sliding into place
-  useEffect(() => {
-    setEntered(false);
-    if (enterTimer.current) window.clearTimeout(enterTimer.current);
-    enterTimer.current = window.setTimeout(() => setEntered(true), TRANSITION_MS);
-    return () => {
-      if (enterTimer.current) window.clearTimeout(enterTimer.current);
-    };
-  }, [index]);
+  const phaseTimer = useRef<number | null>(null);
+  const phaseStart = useRef<number>(Date.now());
+  const phaseRemaining = useRef<number>(PHASE_DUR.incoming);
 
   const active = EXAMPLES[index];
+  const next1 = EXAMPLES[(index + 1) % EXAMPLES.length];
+  const next2 = EXAMPLES[(index + 2) % EXAMPLES.length];
 
-  const onTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-  const onTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current === null) return;
-    const delta = e.changedTouches[0].clientX - touchStartX.current;
-    if (Math.abs(delta) > 40) {
-      setIndex((i) => {
-        if (delta < 0) return (i + 1) % EXAMPLES.length;
-        return (i - 1 + EXAMPLES.length) % EXAMPLES.length;
-      });
+  // Phase scheduler
+  useEffect(() => {
+    if (paused) return;
+
+    if (reduced) {
+      // No phase machine — just rotate cards calmly
+      const t = window.setTimeout(() => {
+        setIndex((i) => (i + 1) % EXAMPLES.length);
+        setCount((c) => c + 1);
+      }, 3500);
+      return () => window.clearTimeout(t);
     }
-    touchStartX.current = null;
-  };
+
+    phaseStart.current = Date.now();
+    const dur = phaseRemaining.current;
+
+    phaseTimer.current = window.setTimeout(() => {
+      if (phase === "approved") setCount((c) => c + 1);
+
+      if (phase === "exit") {
+        setIndex((i) => (i + 1) % EXAMPLES.length);
+        setTyped("");
+        setPhase("incoming");
+        phaseRemaining.current = PHASE_DUR.incoming;
+      } else {
+        const nextPhase = PHASE_ORDER[PHASE_ORDER.indexOf(phase) + 1];
+        setPhase(nextPhase);
+        phaseRemaining.current = PHASE_DUR[nextPhase];
+      }
+    }, dur);
+
+    return () => {
+      if (phaseTimer.current) {
+        window.clearTimeout(phaseTimer.current);
+        const elapsed = Date.now() - phaseStart.current;
+        phaseRemaining.current = Math.max(0, phaseRemaining.current - elapsed);
+      }
+    };
+  }, [phase, index, paused, reduced]);
+
+  // Typewriter
+  useEffect(() => {
+    if (reduced) {
+      setTyped(active.replyText);
+      return;
+    }
+    if (phase === "incoming" || phase === "thinking") {
+      setTyped("");
+      return;
+    }
+    if (phase === "approved" || phase === "exit") {
+      setTyped(active.replyText);
+      return;
+    }
+    // typing phase
+    if (paused) return;
+    const full = active.replyText;
+    const tickMs = Math.max(22, PHASE_DUR.typing / full.length);
+    let i = typed.length;
+    const id = window.setInterval(() => {
+      i = Math.min(full.length, i + 1);
+      setTyped(full.slice(0, i));
+      if (i >= full.length) window.clearInterval(id);
+    }, tickMs);
+    return () => window.clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, index, paused, reduced]);
+
+  const showReplyContent = phase === "typing" || phase === "approved" || phase === "exit";
+  const showApproved = phase === "approved" || phase === "exit";
 
   return (
     <div
       className="relative mt-10 md:mt-12 max-w-2xl mx-auto"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
     >
       {/* Ambient glow */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -inset-10 -z-10 blur-3xl opacity-40 motion-reduce:opacity-20"
+        className="pointer-events-none absolute -inset-12 -z-10 blur-3xl opacity-50 motion-reduce:opacity-20"
         style={{
           background:
-            "radial-gradient(60% 50% at 50% 50%, hsl(var(--primary) / 0.18), transparent 70%)",
+            "radial-gradient(55% 45% at 50% 50%, hsl(var(--primary) / 0.22), transparent 70%)",
         }}
       />
 
-      <div className="relative rounded-xl overflow-hidden border border-border/60 shadow-2xl shadow-primary/10 bg-card">
-        {/* Platform accent line — smoothly transitions color between slides */}
-        <div
-          aria-hidden
-          className="h-[2px] w-full transition-colors duration-700 ease-out"
-          style={{ backgroundColor: active.accent }}
-        />
+      {/* Live counter chip */}
+      <div className="flex justify-center mb-4">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-background/80 border border-border backdrop-blur-sm text-xs shadow-sm">
+          <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-green-500/15">
+            <Check className="w-2.5 h-2.5 text-green-600" />
+          </span>
+          <span
+            key={count}
+            className="font-semibold tabular-nums text-foreground animate-vr-count"
+          >
+            {count}
+          </span>
+          <span className="text-muted-foreground">yorum yanıtlandı</span>
+        </div>
+      </div>
 
-        {/* Browser chrome */}
-        <div className="flex items-center gap-2 px-3 py-2 border-b border-border/40 bg-muted/30">
-          <div className="flex gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-red-400/70"></div>
-            <div className="w-2.5 h-2.5 rounded-full bg-yellow-400/70"></div>
-            <div className="w-2.5 h-2.5 rounded-full bg-green-400/70"></div>
-          </div>
-          <div className="flex-1 mx-3">
-            <div className="h-5 rounded-md bg-muted/60 max-w-xs mx-auto flex items-center justify-center">
-              <span className="text-[10px] text-muted-foreground font-mono">voyagerespond.com/dashboard</span>
+      {/* Deck container — fixed height to prevent layout shift */}
+      <div className="relative" style={{ minHeight: 500 }}>
+        <DeckCard offset={2} accent={next2.accent} />
+        <DeckCard offset={1} accent={next1.accent} />
+
+        {/* Front card */}
+        <div
+          key={index}
+          className={`relative z-10 rounded-2xl border border-border/60 bg-card overflow-hidden shadow-[0_24px_60px_-24px_hsl(var(--primary)/0.4)] ${
+            reduced ? "" : "animate-vr-incoming"
+          } ${phase === "exit" && !reduced ? "animate-vr-exit" : ""}`}
+        >
+          {/* Platform accent line */}
+          <div
+            className="h-[2px] transition-colors duration-700"
+            style={{ backgroundColor: active.accent }}
+          />
+
+          <div className="p-5 sm:p-6 space-y-4 min-h-[460px]">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 min-h-[20px]">
+                <span className="text-xs font-semibold text-foreground">Yorum Detayları</span>
+                {phase === "incoming" && !reduced && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-medium border border-primary/20 animate-vr-pulse-soft">
+                    <Sparkles className="w-3 h-3" /> Yeni yorum
+                  </span>
+                )}
+                {showApproved && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 text-[10px] font-medium border border-green-500/20 animate-vr-fade-up">
+                    <Check className="w-3 h-3" /> Yanıtlandı
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                <span
+                  className={`inline-flex items-center justify-center h-4 w-4 rounded text-[8px] font-bold ${active.platform.bg} ${active.platform.fg}`}
+                >
+                  {active.platform.logo}
+                </span>
+                {active.platform.label}
+              </div>
+            </div>
+
+            {/* Review */}
+            <div className="rounded-lg border border-border bg-card p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center text-[10px] font-semibold text-primary">
+                    {active.reviewerInitials}
+                  </div>
+                  <div>
+                    <div className="text-xs font-medium text-foreground leading-tight">{active.reviewerName}</div>
+                    <div className="text-[10px] text-muted-foreground">{active.timeAgo}</div>
+                  </div>
+                </div>
+                {active.ratingNode}
+              </div>
+              <p className="text-xs text-foreground/80 leading-relaxed">{active.reviewText}</p>
+            </div>
+
+            {/* AI Reply area — fixed min-height */}
+            <div className="rounded-lg border border-primary/25 bg-primary/[0.03] p-3 space-y-2 min-h-[180px] flex flex-col">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <Sparkles
+                    className={`w-3 h-3 text-primary ${
+                      phase === "thinking" && !reduced ? "animate-vr-glow" : ""
+                    }`}
+                  />
+                  <span className="text-[11px] font-semibold text-primary">AI Önerilen Yanıt</span>
+                  {phase === "thinking" && !reduced ? (
+                    <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[9px] font-medium animate-vr-fade-up">
+                      {active.tones[0]} seçildi
+                    </span>
+                  ) : (
+                    showReplyContent &&
+                    active.tones.map((t) => (
+                      <span key={t} className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[9px] font-medium">
+                        {t}
+                      </span>
+                    ))
+                  )}
+                </div>
+                <span className="text-[10px] text-muted-foreground">{active.language}</span>
+              </div>
+
+              <div className="flex-1">
+                {phase === "incoming" && !reduced && (
+                  <div className="text-[11px] text-muted-foreground/70 italic">Yorum inceleniyor…</div>
+                )}
+                {phase === "thinking" && !reduced && (
+                  <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                    <span className="inline-flex gap-0.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary/70 animate-vr-dot" style={{ animationDelay: "0ms" }} />
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary/70 animate-vr-dot" style={{ animationDelay: "150ms" }} />
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary/70 animate-vr-dot" style={{ animationDelay: "300ms" }} />
+                    </span>
+                    <span>AI yanıt oluşturuyor...</span>
+                  </div>
+                )}
+                {(showReplyContent || reduced) && (
+                  <p className="text-xs text-foreground leading-relaxed">
+                    {typed}
+                    {phase === "typing" && !reduced && (
+                      <span className="inline-block w-[2px] h-3 bg-primary align-[-2px] ml-0.5 animate-vr-cursor" />
+                    )}
+                  </p>
+                )}
+              </div>
+
+              {/* Footer row — fixed min-height for layout stability */}
+              <div className="flex items-center justify-between pt-2 min-h-[28px]">
+                <div className="flex items-center">
+                  {showApproved && (
+                    <span className="inline-flex items-center gap-1.5 text-[10px] text-green-600 font-medium animate-vr-fade-up">
+                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-green-500/15 animate-vr-check-pop">
+                        <Check className="w-2.5 h-2.5 text-green-600" />
+                      </span>
+                      {active.sentTo}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1.5">
+                  {phase === "typing" && !reduced && (
+                    <span className="text-[10px] text-muted-foreground italic">yazıyor…</span>
+                  )}
+                  {(showApproved || reduced) && (
+                    <>
+                      <span className="px-2 py-1 rounded-md bg-muted text-[10px] text-muted-foreground">Düzenle</span>
+                      <span
+                        className={`px-2 py-1 rounded-md gradient-primary text-white text-[10px] font-medium ${
+                          phase === "approved" && !reduced ? "animate-vr-click" : ""
+                        }`}
+                      >
+                        {showApproved ? active.ctaLabel : active.ctaLabel}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
-
-        {/* Track viewport */}
-        <div
-          className="overflow-hidden bg-gradient-to-br from-background to-muted/20"
-          aria-roledescription="carousel"
-          aria-label="VoyageRespond AI yanıt örnekleri"
-        >
-          <div
-            className="flex motion-reduce:!transition-none"
-            style={{
-              transform: `translate3d(-${index * 100}%, 0, 0)`,
-              transition: `transform ${TRANSITION_MS}ms cubic-bezier(0.32, 0.72, 0, 1)`,
-              willChange: "transform",
-            }}
-          >
-            {EXAMPLES.map((ex, i) => {
-              const isActive = i === index;
-              const stagger = isActive && entered;
-              return (
-                <div
-                  key={i}
-                  className="w-full flex-shrink-0 p-4 sm:p-5 text-left space-y-4 min-h-[440px] sm:min-h-[420px]"
-                  aria-hidden={!isActive}
-                  aria-roledescription="slide"
-                >
-                  {/* Header */}
-                  <div
-                    className="flex items-center justify-between transition-all duration-500 ease-out motion-reduce:!transition-none"
-                    style={{
-                      opacity: stagger ? 1 : 0,
-                      transform: stagger ? "translateY(0)" : "translateY(6px)",
-                      transitionDelay: stagger ? "60ms" : "0ms",
-                    }}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-foreground">Yorum Detayları</span>
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 text-[10px] font-medium border border-green-500/20">
-                        <Check className="w-3 h-3" /> Yanıtlandı
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                      <span className={`inline-flex items-center justify-center h-4 w-4 rounded text-[8px] font-bold ${ex.platform.bg} ${ex.platform.fg}`}>
-                        {ex.platform.logo}
-                      </span>
-                      {ex.platform.label}
-                    </div>
-                  </div>
-
-                  {/* Review */}
-                  <div className="rounded-lg border border-border bg-card p-3 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center text-[10px] font-semibold text-primary">
-                          {ex.reviewerInitials}
-                        </div>
-                        <div>
-                          <div className="text-xs font-medium text-foreground leading-tight">{ex.reviewerName}</div>
-                          <div className="text-[10px] text-muted-foreground">{ex.timeAgo}</div>
-                        </div>
-                      </div>
-                      {ex.ratingNode}
-                    </div>
-                    <p className="text-xs text-foreground/80 leading-relaxed">{ex.reviewText}</p>
-                  </div>
-
-                  {/* AI Reply */}
-                  <div
-                    className="rounded-lg border border-primary/25 bg-primary/[0.03] p-3 space-y-2 transition-all duration-500 ease-out motion-reduce:!transition-none"
-                    style={{
-                      opacity: stagger ? 1 : 0,
-                      transform: stagger ? "translateY(0)" : "translateY(8px)",
-                      transitionDelay: stagger ? "140ms" : "0ms",
-                    }}
-                  >
-                    <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <Sparkles className="w-3 h-3 text-primary" />
-                        <span className="text-[11px] font-semibold text-primary">AI Önerilen Yanıt</span>
-                        {ex.tones.map((t) => (
-                          <span key={t} className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[9px] font-medium">
-                            {t}
-                          </span>
-                        ))}
-                      </div>
-                      <span className="text-[10px] text-muted-foreground">{ex.language}</span>
-                    </div>
-                    <p className="text-xs text-foreground leading-relaxed">{ex.replyText}</p>
-                    <div className="flex items-center justify-between pt-1">
-                      <span className="inline-flex items-center gap-1 text-[10px] text-green-600 font-medium">
-                        <Check className="w-3 h-3" /> {ex.sentTo}
-                      </span>
-                      <div className="flex gap-1.5">
-                        <span className="px-2 py-1 rounded-md bg-muted text-[10px] text-muted-foreground">Düzenle</span>
-                        <span className="px-2 py-1 rounded-md gradient-primary text-white text-[10px] font-medium">Onaylandı</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Dots — active dot is a progress bar */}
-      <div className="flex items-center justify-center gap-2 mt-4">
-        {EXAMPLES.map((_, i) => {
-          const isActive = i === index;
-          return (
-            <button
-              key={i}
-              onClick={() => setIndex(i)}
-              aria-label={`Örnek ${i + 1}`}
-              aria-current={isActive}
-              className={`h-1.5 rounded-full overflow-hidden transition-all duration-300 ${
-                isActive
-                  ? "w-8 bg-muted-foreground/20"
-                  : "w-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"
-              }`}
-            >
-              {isActive && (
-                <span
-                  key={`${index}-${paused ? "p" : "r"}`}
-                  className="block h-full bg-primary motion-reduce:!animation-none"
-                  style={{
-                    animation: `vr-dot-progress ${AUTOPLAY_MS}ms linear forwards`,
-                    animationPlayState: paused ? "paused" : "running",
-                  }}
-                />
-              )}
-            </button>
-          );
-        })}
       </div>
 
       <style>{`
-        @keyframes vr-dot-progress {
-          from { width: 0%; }
-          to { width: 100%; }
+        @keyframes vr-incoming {
+          0% { opacity: 0; transform: translateY(-18px) scale(0.97); }
+          60% { opacity: 1; transform: translateY(3px) scale(1.005); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
         }
+        @keyframes vr-exit {
+          0% { opacity: 1; transform: translateX(0) scale(1); }
+          100% { opacity: 0; transform: translateX(-48px) scale(0.98); }
+        }
+        @keyframes vr-fade-up {
+          from { opacity: 0; transform: translateY(4px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes vr-cursor {
+          0%, 50% { opacity: 1; }
+          51%, 100% { opacity: 0; }
+        }
+        @keyframes vr-check-pop {
+          0% { transform: scale(0); }
+          60% { transform: scale(1.15); }
+          100% { transform: scale(1); }
+        }
+        @keyframes vr-click {
+          0%, 100% { transform: scale(1); }
+          40% { transform: scale(0.94); }
+          70% { transform: scale(1.02); }
+        }
+        @keyframes vr-dot {
+          0%, 60%, 100% { transform: translateY(0); opacity: 0.45; }
+          30% { transform: translateY(-3px); opacity: 1; }
+        }
+        @keyframes vr-glow {
+          0%, 100% { opacity: 0.65; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.15); }
+        }
+        @keyframes vr-pulse-soft {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.6; }
+        }
+        @keyframes vr-count {
+          from { opacity: 0; transform: translateY(-3px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-vr-incoming { animation: vr-incoming 700ms cubic-bezier(0.34, 1.4, 0.5, 1) both; }
+        .animate-vr-exit { animation: vr-exit 700ms cubic-bezier(0.4, 0, 0.6, 1) both; }
+        .animate-vr-fade-up { animation: vr-fade-up 400ms ease-out both; }
+        .animate-vr-cursor { animation: vr-cursor 900ms steps(1, end) infinite; }
+        .animate-vr-check-pop { animation: vr-check-pop 450ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+        .animate-vr-click { animation: vr-click 350ms ease-out both; animation-delay: 400ms; }
+        .animate-vr-dot { animation: vr-dot 1.2s ease-in-out infinite; display: inline-block; }
+        .animate-vr-glow { animation: vr-glow 1.4s ease-in-out infinite; }
+        .animate-vr-pulse-soft { animation: vr-pulse-soft 1.6s ease-in-out infinite; }
+        .animate-vr-count { animation: vr-count 350ms ease-out both; display: inline-block; }
         @media (prefers-reduced-motion: reduce) {
-          [data-vr-carousel-track] { transition: none !important; }
+          .animate-vr-incoming,
+          .animate-vr-exit,
+          .animate-vr-fade-up,
+          .animate-vr-cursor,
+          .animate-vr-check-pop,
+          .animate-vr-click,
+          .animate-vr-dot,
+          .animate-vr-glow,
+          .animate-vr-pulse-soft,
+          .animate-vr-count { animation: none !important; }
         }
       `}</style>
     </div>
