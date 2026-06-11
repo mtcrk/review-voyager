@@ -276,28 +276,10 @@ const Index = () => {
 
           <HeroReviewCarousel />
         </div>
-
-        {/* Soft transition to light section below */}
-        <div
-          aria-hidden
-          className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
-          style={{
-            background:
-              "linear-gradient(to bottom, transparent 0%, rgba(10,10,26,0.5) 60%, hsl(var(--background)) 100%)",
-          }}
-        />
       </section>
 
       {/* ─── SOCIAL PROOF BAR — dark, sits inside hero atmosphere ─── */}
-      <section className="relative bg-[#0A0A1A] border-b border-white/5">
-        <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "linear-gradient(to bottom, #0A0A1A 0%, #0A0A1A 40%, hsl(var(--background)) 100%)",
-          }}
-        />
+      <section className="relative bg-[#0A0A1A]">
         <div className="container mx-auto px-4 sm:px-6 py-8 md:py-10 relative z-10">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
             <div className="flex items-center justify-center gap-3">
