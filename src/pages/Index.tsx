@@ -225,8 +225,9 @@ const Index = () => {
                     "linear-gradient(90deg, #A78BFA 0%, #7A5AF8 45%, #4F8BFF 100%)",
                 }}
               >
-                Yapay Zeka ile Otomatik Yönetin
-              </span>
+                Yapay Zeka
+              </span>{" "}
+              ile Otomatik Yönetin
             </h1>
 
             {/* Subtitle */}
