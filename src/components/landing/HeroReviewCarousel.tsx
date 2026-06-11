@@ -40,13 +40,13 @@ const EXAMPLES: Example[] = [
     ctaLabel: "Onayla & Gönder",
   },
   {
-    platform: { label: "Booking.com", logo: "B", bg: "bg-[#1E6BFF]", fg: "text-white" },
-    accent: "#1E6BFF",
+    platform: { label: "Booking.com", logo: "B", bg: "bg-[#003580]", fg: "text-white" },
+    accent: "#003580",
     reviewerInitials: "MS",
     reviewerName: "Maria S.",
     timeAgo: "5 hours ago",
     ratingNode: (
-      <span className="px-1.5 py-0.5 rounded bg-[#1E6BFF] text-white text-[10px] font-bold">9.2</span>
+      <span className="px-1.5 py-0.5 rounded bg-[#003580] text-white text-[10px] font-bold">9.2</span>
     ),
     reviewText:
       "Wonderful stay! The staff was incredibly helpful and the breakfast was amazing.",
@@ -69,7 +69,7 @@ const EXAMPLES: Example[] = [
           <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
         ))}
         {[3, 4, 5].map((i) => (
-          <Star key={i} className="w-3 h-3 text-white/20" />
+          <Star key={i} className="w-3 h-3 text-muted-foreground/30" />
         ))}
       </div>
     ),
@@ -132,18 +132,18 @@ function useReducedMotion() {
 function DeckCard({ offset, accent }: { offset: 1 | 2; accent: string }) {
   const scale = offset === 1 ? 0.96 : 0.92;
   const y = offset === 1 ? 12 : 24;
-  const opacity = offset === 1 ? 0.4 : 0.2;
+  const opacity = offset === 1 ? 0.6 : 0.35;
   return (
     <div
       aria-hidden
-      className="absolute inset-0 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-md shadow-2xl overflow-hidden pointer-events-none transition-all duration-700 ease-out"
+      className="absolute inset-0 rounded-2xl border border-border/60 bg-card shadow-lg overflow-hidden pointer-events-none transition-all duration-700 ease-out"
       style={{ transform: `translateY(${y}px) scale(${scale})`, opacity, zIndex: offset === 1 ? 1 : 0 }}
     >
       <div className="h-[2px] transition-colors duration-700" style={{ backgroundColor: accent }} />
       <div className="p-5 space-y-3">
-        <div className="h-3 w-32 rounded bg-white/10" />
-        <div className="h-16 rounded-lg bg-white/[0.06]" />
-        <div className="h-20 rounded-lg bg-white/[0.05]" />
+        <div className="h-3 w-32 rounded bg-muted" />
+        <div className="h-16 rounded-lg bg-muted/70" />
+        <div className="h-20 rounded-lg bg-muted/60" />
       </div>
     </div>
   );
@@ -248,23 +248,23 @@ export function HeroReviewCarousel() {
         className="pointer-events-none absolute -inset-16 -z-10 blur-3xl opacity-80 motion-reduce:opacity-40"
         style={{
           background:
-            "radial-gradient(55% 45% at 50% 50%, rgba(122,90,248,0.35), transparent 70%)",
+            "radial-gradient(55% 45% at 50% 50%, rgba(122,90,248,0.14), transparent 70%)",
         }}
       />
 
       {/* Live counter chip */}
       <div className="flex justify-center mb-4">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-md text-xs shadow-sm">
-          <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-green-400/20">
-            <Check className="w-2.5 h-2.5 text-green-400" />
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-background/80 border border-border backdrop-blur-md text-xs shadow-sm">
+          <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-green-500/15">
+            <Check className="w-2.5 h-2.5 text-green-600" />
           </span>
           <span
             key={count}
-            className="font-semibold tabular-nums text-white animate-vr-count"
+            className="font-semibold tabular-nums text-foreground animate-vr-count"
           >
             {count}
           </span>
-          <span className="text-white/60">yorum yanıtlandı</span>
+          <span className="text-muted-foreground">yorum yanıtlandı</span>
         </div>
       </div>
 
@@ -276,7 +276,7 @@ export function HeroReviewCarousel() {
         {/* Front card */}
         <div
           key={index}
-          className={`relative z-10 rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-xl overflow-hidden shadow-[0_30px_80px_-20px_rgba(122,90,248,0.45),inset_0_1px_0_rgba(255,255,255,0.06)] ${
+          className={`relative z-10 rounded-2xl border border-border/60 bg-card overflow-hidden shadow-[0_24px_60px_-24px_rgba(122,90,248,0.35)] ${
             reduced ? "" : "animate-vr-incoming"
           } ${phase === "exit" && !reduced ? "animate-vr-exit" : ""}`}
         >
@@ -290,21 +290,21 @@ export function HeroReviewCarousel() {
             {/* Header */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 min-h-[20px]">
-                <span className="text-xs font-semibold text-white">Yorum Detayları</span>
+                <span className="text-xs font-semibold text-foreground">Yorum Detayları</span>
                 {phase === "incoming" && !reduced && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#A78BFA]/15 text-[#C4B5FD] text-[10px] font-medium border border-[#A78BFA]/30 animate-vr-pulse-soft">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-medium border border-primary/25 animate-vr-pulse-soft">
                     <Sparkles className="w-3 h-3" /> Yeni yorum
                   </span>
                 )}
                 {showApproved && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-400/15 text-green-300 text-[10px] font-medium border border-green-400/30 animate-vr-fade-up">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 text-[10px] font-medium border border-green-500/20 animate-vr-fade-up">
                     <Check className="w-3 h-3" /> Yanıtlandı
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-1 text-[10px] text-white/60">
+              <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
                 <span
-                  className={`inline-flex items-center justify-center h-4 w-4 rounded text-[8px] font-bold ${active.platform.bg} ${active.platform.fg}`}
+                  className={`inline-flex items-center justify-center h-4 w-4 rounded text-[8px] font-bold ${active.platform.bg} ${active.platform.fg} ${active.platform.bg === "bg-white" ? "border border-border" : ""}`}
                 >
                   {active.platform.logo}
                 </span>
@@ -313,70 +313,69 @@ export function HeroReviewCarousel() {
             </div>
 
             {/* Review */}
-            <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3 space-y-2">
+            <div className="rounded-lg border border-border bg-background p-3 space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full bg-[#A78BFA]/20 flex items-center justify-center text-[10px] font-semibold text-[#C4B5FD]">
+                  <div className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center text-[10px] font-semibold text-primary">
                     {active.reviewerInitials}
                   </div>
                   <div>
-                    <div className="text-xs font-medium text-white leading-tight">{active.reviewerName}</div>
-                    <div className="text-[10px] text-white/55">{active.timeAgo}</div>
+                    <div className="text-xs font-medium text-foreground leading-tight">{active.reviewerName}</div>
+                    <div className="text-[10px] text-muted-foreground">{active.timeAgo}</div>
                   </div>
                 </div>
                 {active.ratingNode}
               </div>
-              <p className="text-xs text-white/80 leading-relaxed">{active.reviewText}</p>
+              <p className="text-xs text-foreground/85 leading-relaxed">{active.reviewText}</p>
             </div>
 
             {/* AI Reply area — fixed min-height */}
             <div
-              className="relative rounded-lg border border-[#A78BFA]/30 bg-[#A78BFA]/[0.08] p-3 space-y-2 min-h-[160px] sm:min-h-[140px] flex flex-col"
-              style={{ boxShadow: "0 0 30px -8px rgba(122,90,248,0.25) inset" }}
+              className="relative rounded-lg border border-primary/25 bg-primary/[0.04] p-3 space-y-2 min-h-[160px] sm:min-h-[140px] flex flex-col"
             >
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <Sparkles
-                    className={`w-3 h-3 text-[#C4B5FD] ${
+                    className={`w-3 h-3 text-primary ${
                       phase === "thinking" && !reduced ? "animate-vr-glow" : ""
                     }`}
                   />
-                  <span className="text-[11px] font-semibold text-[#C4B5FD]">AI Önerilen Yanıt</span>
+                  <span className="text-[11px] font-semibold text-primary">AI Önerilen Yanıt</span>
                   {phase === "thinking" && !reduced ? (
-                    <span className="px-1.5 py-0.5 rounded bg-[#A78BFA]/15 text-[#C4B5FD] text-[9px] font-medium animate-vr-fade-up">
+                    <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[9px] font-medium animate-vr-fade-up">
                       {active.tones[0]} seçildi
                     </span>
                   ) : (
                     showReplyContent &&
                     active.tones.map((t) => (
-                      <span key={t} className="px-1.5 py-0.5 rounded bg-[#A78BFA]/15 text-[#C4B5FD] text-[9px] font-medium">
+                      <span key={t} className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[9px] font-medium">
                         {t}
                       </span>
                     ))
                   )}
                 </div>
-                <span className="text-[10px] text-white/55">{active.language}</span>
+                <span className="text-[10px] text-muted-foreground">{active.language}</span>
               </div>
 
               <div className="flex-1">
                 {phase === "incoming" && !reduced && (
-                  <div className="text-[11px] text-white/50 italic">Yorum inceleniyor…</div>
+                  <div className="text-[11px] text-muted-foreground italic">Yorum inceleniyor…</div>
                 )}
                 {phase === "thinking" && !reduced && (
-                  <div className="flex items-center gap-2 text-[11px] text-white/70">
+                  <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
                     <span className="inline-flex gap-0.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#C4B5FD] animate-vr-dot" style={{ animationDelay: "0ms" }} />
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#C4B5FD] animate-vr-dot" style={{ animationDelay: "150ms" }} />
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#C4B5FD] animate-vr-dot" style={{ animationDelay: "300ms" }} />
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary animate-vr-dot" style={{ animationDelay: "0ms" }} />
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary animate-vr-dot" style={{ animationDelay: "150ms" }} />
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary animate-vr-dot" style={{ animationDelay: "300ms" }} />
                     </span>
                     <span>AI yanıt oluşturuyor...</span>
                   </div>
                 )}
                 {(showReplyContent || reduced) && (
-                  <p className="text-xs text-white/90 leading-relaxed">
+                  <p className="text-xs text-foreground leading-relaxed">
                     {typed}
                     {phase === "typing" && !reduced && (
-                      <span className="inline-block w-[2px] h-3 bg-[#C4B5FD] align-[-2px] ml-0.5 animate-vr-cursor" />
+                      <span className="inline-block w-[2px] h-3 bg-primary align-[-2px] ml-0.5 animate-vr-cursor" />
                     )}
                   </p>
                 )}
@@ -386,9 +385,9 @@ export function HeroReviewCarousel() {
               <div className="flex items-center justify-between pt-2 min-h-[28px]">
                 <div className="flex items-center">
                   {showApproved && (
-                    <span className="inline-flex items-center gap-1.5 text-[10px] text-green-300 font-medium animate-vr-fade-up">
-                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-green-400/20 animate-vr-check-pop">
-                        <Check className="w-2.5 h-2.5 text-green-300" />
+                    <span className="inline-flex items-center gap-1.5 text-[10px] text-green-600 font-medium animate-vr-fade-up">
+                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-green-500/15 animate-vr-check-pop">
+                        <Check className="w-2.5 h-2.5 text-green-600" />
                       </span>
                       {active.sentTo}
                     </span>
@@ -396,16 +395,16 @@ export function HeroReviewCarousel() {
                 </div>
                 <div className="flex items-center gap-1.5">
                   {phase === "typing" && !reduced && (
-                    <span className="text-[10px] text-white/55 italic">yazıyor…</span>
+                    <span className="text-[10px] text-muted-foreground italic">yazıyor…</span>
                   )}
                   {(showApproved || reduced) && (
                     <>
-                      <span className="px-2 py-1 rounded-md bg-white/10 text-[10px] text-white/70 border border-white/10">Düzenle</span>
+                      <span className="px-2 py-1 rounded-md bg-muted text-[10px] text-muted-foreground border border-border">Düzenle</span>
                       <span
                         className={`px-2 py-1 rounded-md gradient-primary text-white text-[10px] font-medium ${
                           phase === "approved" && !reduced ? "animate-vr-click" : ""
                         }`}
-                        style={{ boxShadow: "0 4px 16px -4px rgba(122,90,248,0.6)" }}
+                        style={{ boxShadow: "0 4px 16px -4px rgba(122,90,248,0.45)" }}
                       >
                         {showApproved ? active.ctaLabel : active.ctaLabel}
                       </span>
