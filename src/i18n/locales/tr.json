@@ -760,10 +760,10 @@
     "pricingSection": {
       "badge": "Erken Erişim",
       "title": "İlk 100 işletmeye özel",
-      "subtitle": "3 ay boyunca tüm özellikler ve sınırsız lokasyon ücretsiz. Sonrasında lokasyon başına uygun fiyatlarla devam edin.",
-      "perk1": "3 ay tüm özellikler ücretsiz",
+      "subtitle": "Ücretsiz kaydolun, hemen kullanmaya başlayın. Tüm özellikler ve sınırsız lokasyon erken erişim döneminde dahil.",
+      "perk1": "Sınırsız lokasyon",
       "perk2": "Öncelikli destek",
-      "cta": "3 Ay Ücretsiz Başla"
+      "cta": "Ücretsiz Kaydolun"
     },
     "footerSection": {
       "tagline": "AI destekli yorum yönetimi ve görünürlük optimizasyonu.",
