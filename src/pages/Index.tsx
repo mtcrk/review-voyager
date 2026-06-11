@@ -1,9 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Check, Star, MessageSquare, Eye, TrendingUp, Sparkles, Zap, Target, Shield, Users, Menu, X } from "lucide-react";
+import { ArrowRight, Check, Star, MessageSquare, Eye, TrendingUp, Sparkles, Zap, Target, Shield, Users, Menu, X, Building2, UtensilsCrossed, Hotel, Stethoscope, Store, Dumbbell } from "lucide-react";
 import { useState } from "react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
-import demoPoster from "@/assets/voyagerespond-demo-poster.jpg";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -218,52 +217,145 @@ const Index = () => {
             </p>
           </div>
 
-          {/* Product Screenshot */}
-          <div className="mt-16 max-w-4xl mx-auto">
-            <div className="relative rounded-xl overflow-hidden border border-border/60 shadow-2xl shadow-primary/5 bg-card">
+          {/* Product Mockup — Review Detail with filled AI reply */}
+          <div className="mt-10 md:mt-12 max-w-2xl mx-auto">
+            <div className="relative rounded-xl overflow-hidden border border-border/60 shadow-2xl shadow-primary/10 bg-card">
               {/* Browser chrome bar */}
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-border/40 bg-muted/30">
+              <div className="flex items-center gap-2 px-3 py-2 border-b border-border/40 bg-muted/30">
                 <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-400/70"></div>
-                  <div className="w-3 h-3 rounded-full bg-yellow-400/70"></div>
-                  <div className="w-3 h-3 rounded-full bg-green-400/70"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-400/70"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-400/70"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-green-400/70"></div>
                 </div>
-                <div className="flex-1 mx-4">
-                  <div className="h-6 rounded-md bg-muted/60 max-w-xs mx-auto flex items-center justify-center">
+                <div className="flex-1 mx-3">
+                  <div className="h-5 rounded-md bg-muted/60 max-w-xs mx-auto flex items-center justify-center">
                     <span className="text-[10px] text-muted-foreground font-mono">voyagerespond.com/dashboard</span>
                   </div>
                 </div>
               </div>
-              <img
-                src={demoPoster}
-                alt={t('indexPage.hero.screenshotAlt')}
-                className="w-full h-auto block"
-                width={1280}
-                height={800}
-                fetchPriority="high"
-                decoding="async"
-              />
+
+              {/* Mockup body */}
+              <div className="p-4 sm:p-5 text-left space-y-4 bg-gradient-to-br from-background to-muted/20">
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-foreground">Yorum Detayları</span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 text-[10px] font-medium border border-green-500/20">
+                      <Check className="w-3 h-3" /> Yanıtlandı
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-white border border-border text-[8px] font-bold text-[#4285F4]">G</span>
+                    Google
+                  </div>
+                </div>
+
+                {/* Review card */}
+                <div className="rounded-lg border border-border bg-card p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center text-[10px] font-semibold text-primary">AY</div>
+                      <div>
+                        <div className="text-xs font-medium text-foreground leading-tight">Ahmet Y.</div>
+                        <div className="text-[10px] text-muted-foreground">2 saat önce</div>
+                      </div>
+                    </div>
+                    <div className="flex gap-0.5">
+                      {[1,2,3,4,5].map(i => <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />)}
+                    </div>
+                  </div>
+                  <p className="text-xs text-foreground/80 leading-relaxed">
+                    Harika bir deneyimdi! Ekibin ilgisi ve hizmet kalitesi mükemmeldi. Kesinlikle tekrar geleceğim.
+                  </p>
+                </div>
+
+                {/* AI Reply box — filled */}
+                <div className="rounded-lg border border-primary/25 bg-primary/[0.03] p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <Sparkles className="w-3 h-3 text-primary" />
+                      <span className="text-[11px] font-semibold text-primary">AI Önerilen Yanıt</span>
+                      <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[9px] font-medium">Samimi ton</span>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground">Türkçe</span>
+                  </div>
+                  <p className="text-xs text-foreground leading-relaxed">
+                    Ahmet Bey, güzel yorumunuz için çok teşekkür ederiz! Ekibimizin ilgisinden ve deneyiminizden memnun kalmanız bizim için çok değerli. Sizi tekrar ağırlamak için sabırsızlanıyoruz. 🙏
+                  </p>
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="inline-flex items-center gap-1 text-[10px] text-green-600 font-medium">
+                      <Check className="w-3 h-3" /> Google'a gönderildi
+                    </span>
+                    <div className="flex gap-1.5">
+                      <span className="px-2 py-1 rounded-md bg-muted text-[10px] text-muted-foreground">Düzenle</span>
+                      <span className="px-2 py-1 rounded-md gradient-primary text-white text-[10px] font-medium">Onaylandı</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ─── SOCIAL PROOF BAR ─── */}
-      <section className="border-y border-border/40 bg-muted/20">
-        <div className="container mx-auto px-4 sm:px-6 py-6">
-          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-primary" />
-              <span><strong className="text-foreground">100+</strong> {t('indexPage.socialProof.businesses')}</span>
+      {/* ─── SOCIAL PROOF BAR — prominent stats ─── */}
+      <section className="border-y border-border/40 bg-gradient-to-b from-muted/30 to-background">
+        <div className="container mx-auto px-4 sm:px-6 py-8 md:py-10">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div className="flex items-center justify-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Users className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <div className="text-2xl md:text-3xl font-bold text-foreground leading-tight">100+</div>
+                <div className="text-xs md:text-sm text-muted-foreground">{t('indexPage.socialProof.businesses')}</div>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Star className="w-4 h-4 text-primary" />
-              <span><strong className="text-foreground">50K+</strong> {t('indexPage.socialProof.reviews')}</span>
+            <div className="flex items-center justify-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Star className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <div className="text-2xl md:text-3xl font-bold text-foreground leading-tight">50K+</div>
+                <div className="text-xs md:text-sm text-muted-foreground">{t('indexPage.socialProof.reviews')}</div>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-primary" />
-              <span>{t('indexPage.socialProof.avgResponse')} <strong className="text-foreground">&lt; 2 dk</strong></span>
+            <div className="flex items-center justify-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Zap className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <div className="text-2xl md:text-3xl font-bold text-foreground leading-tight">&lt; 2 dk</div>
+                <div className="text-xs md:text-sm text-muted-foreground">{t('indexPage.socialProof.avgResponse')}</div>
+              </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── TRUST / LOGO STRIP ─── */}
+      <section className="border-b border-border/40 bg-background">
+        <div className="container mx-auto px-4 sm:px-6 py-10 md:py-12">
+          <p className="text-center text-xs uppercase tracking-wider text-muted-foreground font-medium mb-6">
+            Türkiye ve dünyadan işletmeler VoyageRespond'a güveniyor
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-6 max-w-4xl mx-auto">
+            {[
+              { icon: Hotel, label: "Butik Otel" },
+              { icon: UtensilsCrossed, label: "Restoran" },
+              { icon: Stethoscope, label: "Klinik" },
+              { icon: Building2, label: "Zincir İşletme" },
+              { icon: Store, label: "Perakende" },
+              { icon: Dumbbell, label: "Fitness" },
+            ].map((item, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-2 text-muted-foreground/60 hover:text-primary transition-colors duration-200 grayscale hover:grayscale-0"
+              >
+                <item.icon className="w-5 h-5" />
+                <span className="text-sm font-medium">{item.label}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -285,6 +377,7 @@ const Index = () => {
               icon: MessageSquare,
               title: t('indexPage.featuresSection.aiReplyTitle'),
               desc: t('indexPage.featuresSection.aiReplyDesc'),
+              visual: "ai-reply",
             },
             {
               icon: Eye,
@@ -295,6 +388,7 @@ const Index = () => {
               icon: Star,
               title: t('indexPage.featuresSection.centralTitle'),
               desc: t('indexPage.featuresSection.centralDesc'),
+              visual: "platforms",
             },
             {
               icon: TrendingUp,
@@ -314,13 +408,49 @@ const Index = () => {
           ].map((feature, i) => (
             <div
               key={i}
-              className="group p-6 rounded-xl border border-border bg-card hover:border-primary/20 hover:shadow-lg transition-all duration-300"
+              className="group p-6 rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
             >
-              <div className="w-10 h-10 rounded-lg bg-primary/8 flex items-center justify-center mb-4 group-hover:bg-primary/12 transition-colors">
-                <feature.icon className="w-5 h-5 text-primary" />
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center mb-5 group-hover:from-primary/20 group-hover:to-primary/10 transition-colors">
+                <feature.icon className="w-7 h-7 text-primary" />
               </div>
-              <h3 className="text-base font-semibold text-foreground mb-2">{feature.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{feature.desc}</p>
+              <h3 className="text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4">{feature.desc}</p>
+
+              {feature.visual === "ai-reply" && (
+                <div className="mt-auto rounded-lg border border-primary/15 bg-primary/[0.04] p-3 space-y-2">
+                  <div className="flex items-start gap-2">
+                    <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center text-[8px] font-semibold text-muted-foreground flex-shrink-0">A</div>
+                    <div className="text-[11px] text-foreground/70 leading-snug">Servis çok yavaştı...</div>
+                  </div>
+                  <div className="flex items-start gap-2 pl-3">
+                    <Sparkles className="w-3 h-3 text-primary flex-shrink-0 mt-0.5" />
+                    <div className="text-[11px] text-foreground leading-snug">Geri bildiriminiz için teşekkürler, hemen iletişime geçiyoruz...</div>
+                  </div>
+                </div>
+              )}
+
+              {feature.visual === "platforms" && (
+                <div className="mt-auto rounded-lg border border-border bg-muted/30 p-3">
+                  <div className="flex items-center justify-around">
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="w-7 h-7 rounded-md bg-white border border-border flex items-center justify-center text-[10px] font-bold text-[#4285F4]">G</div>
+                      <span className="text-[9px] text-muted-foreground">Google</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="w-7 h-7 rounded-md bg-[#003580] flex items-center justify-center text-[10px] font-bold text-white">B</div>
+                      <span className="text-[9px] text-muted-foreground">Booking</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="w-7 h-7 rounded-md bg-[#00AF87] flex items-center justify-center text-[10px] font-bold text-white">T</div>
+                      <span className="text-[9px] text-muted-foreground">Trip</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="w-7 h-7 rounded-md bg-foreground flex items-center justify-center text-[10px] font-bold text-background">H</div>
+                      <span className="text-[9px] text-muted-foreground">Hotels</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
