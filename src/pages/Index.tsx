@@ -16,7 +16,7 @@ const Index = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#0A0A1A] overflow-x-hidden">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <SEO
         title="VoyageRespond — AI Google Yorum Yönetimi"
         description="Google, Booking ve TripAdvisor yorumlarını yapay zeka ile yönetin. Otomatik yanıt önerileri, duygu analizi, AI görünürlük skoru. Ücretsiz kaydolun."
@@ -61,7 +61,7 @@ const Index = () => {
         }}
       />
       {/* Navbar — Clean, minimal */}
-      <nav className="sticky top-0 z-50 border-b border-white/5 backdrop-blur-xl bg-[#0A0A1A]/70">
+      <nav className="sticky top-0 z-50 border-b border-border/60 backdrop-blur-xl bg-background/80">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
@@ -72,9 +72,9 @@ const Index = () => {
               <img
                 src={voyageRespondLogo}
                 alt="VoyageRespond"
-                className="h-7 w-7 brightness-0 invert"
+                className="h-7 w-7"
               />
-              <span className="text-base tracking-tight text-white">
+              <span className="text-base tracking-tight text-foreground">
                 <span className="font-normal">Voyage</span>
                 <span className="font-semibold">Respond</span>
               </span>
@@ -84,25 +84,25 @@ const Index = () => {
             <div className="hidden md:flex items-center gap-8">
               <button
                 onClick={() => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })}
-                className="text-sm font-medium transition-colors text-white/70 hover:text-white"
+                className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
               >
                 {t('indexPage.nav.features')}
               </button>
               <button
                 onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })}
-                className="text-sm font-medium transition-colors text-white/70 hover:text-white"
+                className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
               >
                 {t('indexPage.nav.pricing')}
               </button>
               <button
                 onClick={() => navigate("/blog")}
-                className="text-sm font-medium transition-colors text-white/70 hover:text-white"
+                className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
               >
                 {t('indexPage.nav.blog')}
               </button>
               <button
                 onClick={() => navigate("/contact")}
-                className="text-sm font-medium transition-colors text-white/70 hover:text-white"
+                className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
               >
                 {t('indexPage.nav.contact')}
               </button>
@@ -113,7 +113,7 @@ const Index = () => {
               <LanguageSwitcher />
               <button
                 onClick={() => navigate(user ? "/dashboard" : "/login")}
-                className="text-sm font-medium transition-colors px-3 py-2 text-white/80 hover:text-white"
+                className="text-sm font-medium transition-colors px-3 py-2 text-muted-foreground hover:text-foreground"
               >
                 {user ? t('indexPage.nav.dashboard') : t('indexPage.nav.login')}
               </button>
@@ -130,7 +130,7 @@ const Index = () => {
               <LanguageSwitcher />
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 text-white"
+                className="p-2 text-foreground"
                 aria-label={mobileMenuOpen ? "Menüyü kapat" : "Menüyü aç"}
                 aria-expanded={mobileMenuOpen}
               >
@@ -141,7 +141,7 @@ const Index = () => {
 
           {/* Mobile Dropdown */}
           {mobileMenuOpen && (
-            <div className="md:hidden border-t border-white/10 py-4 space-y-1">
+            <div className="md:hidden border-t border-border py-4 space-y-1">
               {[
                 { label: t('indexPage.nav.features'), action: () => { document.getElementById("features")?.scrollIntoView({ behavior: "smooth" }); setMobileMenuOpen(false); } },
                 { label: t('indexPage.nav.pricing'), action: () => { document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" }); setMobileMenuOpen(false); } },
@@ -152,7 +152,7 @@ const Index = () => {
                 <button
                   key={item.label}
                   onClick={item.action}
-                  className="block w-full text-left px-4 py-2.5 text-sm font-medium text-white/80 hover:bg-white/5 hover:text-white rounded-lg transition-colors"
+                  className="block w-full text-left px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
                 >
                   {item.label}
                 </button>
@@ -171,34 +171,34 @@ const Index = () => {
       </nav>
 
       {/* ─── HERO ─── */}
-      <section className="relative overflow-hidden -mt-16 pt-16 bg-[#0A0A1A]">
-        {/* Deep gradient base */}
+      <section className="relative overflow-hidden -mt-16 pt-16 bg-background">
+        {/* Soft tinted base */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse 100% 80% at 50% 0%, #15152E 0%, #0A0A1A 60%, #08081A 100%)",
+              "radial-gradient(ellipse 100% 80% at 50% 0%, #F6F4FF 0%, #FAFAFC 60%, #FFFFFF 100%)",
           }}
         />
         {/* Primary glow (top center) */}
         <div
           aria-hidden
-          className="absolute left-1/2 -translate-x-1/2 top-[8%] w-[640px] h-[640px] rounded-full blur-[120px] opacity-50 pointer-events-none hidden sm:block"
-          style={{ background: "radial-gradient(circle, rgba(122,90,248,0.45), transparent 65%)" }}
+          className="absolute left-1/2 -translate-x-1/2 top-[8%] w-[640px] h-[640px] rounded-full blur-[120px] opacity-70 pointer-events-none hidden sm:block"
+          style={{ background: "radial-gradient(circle, rgba(122,90,248,0.10), transparent 65%)" }}
         />
         {/* Blue glow (bottom right) */}
         <div
           aria-hidden
-          className="absolute right-[-10%] bottom-[10%] w-[520px] h-[520px] rounded-full blur-[120px] opacity-40 pointer-events-none hidden sm:block"
-          style={{ background: "radial-gradient(circle, rgba(30,107,255,0.45), transparent 65%)" }}
+          className="absolute right-[-10%] bottom-[10%] w-[520px] h-[520px] rounded-full blur-[120px] opacity-50 pointer-events-none hidden sm:block"
+          style={{ background: "radial-gradient(circle, rgba(37,99,235,0.07), transparent 65%)" }}
         />
         {/* Grid overlay */}
         <div
           aria-hidden
-          className="absolute inset-0 pointer-events-none opacity-[0.05]"
+          className="absolute inset-0 pointer-events-none"
           style={{
             backgroundImage:
-              "linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)",
+              "linear-gradient(to right, rgba(10,10,26,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(10,10,26,0.04) 1px, transparent 1px)",
             backgroundSize: "56px 56px",
             maskImage:
               "radial-gradient(ellipse 70% 60% at 50% 40%, black 40%, transparent 100%)",
@@ -210,19 +210,19 @@ const Index = () => {
         <div className="container mx-auto px-4 sm:px-6 pt-20 pb-16 md:pt-32 md:pb-24 relative z-10">
           <div className="max-w-3xl mx-auto text-center space-y-6">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/90 text-xs font-medium backdrop-blur-md">
-              <Sparkles className="w-3.5 h-3.5 text-[#A78BFA]" />
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-background/80 border border-border text-foreground text-xs font-medium backdrop-blur-md shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-primary" />
               {t('indexPage.hero.badge')}
             </div>
 
             {/* Headline */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-[1.1] tracking-tight">
               Google Yorumlarınızı{" "}
               <span
                 className="bg-clip-text text-transparent"
                 style={{
                   backgroundImage:
-                    "linear-gradient(90deg, #A78BFA 0%, #7A5AF8 45%, #4F8BFF 100%)",
+                    "linear-gradient(90deg, #7A5AF8 0%, #6B46E5 50%, #2563EB 100%)",
                 }}
               >
                 Yapay Zeka
@@ -231,7 +231,7 @@ const Index = () => {
             </h1>
 
             {/* Subtitle */}
-            <p className="text-lg md:text-xl text-white/70 leading-relaxed max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
               VoyageRespond, Google, Booking, TripAdvisor ve birçok platformdaki müşteri yorumlarınızı tek bir panelde toplar. Yapay zeka her yoruma kişiselleştirilmiş yanıt üretir, duygu analizi yapar ve işletmenizin AI görünürlük skorunu takip eder.
             </p>
 
@@ -241,7 +241,7 @@ const Index = () => {
                 size="lg"
                 onClick={() => navigate("/onboarding")}
                 className="gradient-primary text-white text-base px-8 py-6 w-full sm:w-auto hover:scale-[1.02] transition-all duration-200 group"
-                style={{ boxShadow: "0 10px 40px -10px rgba(122,90,248,0.7), 0 0 0 1px rgba(255,255,255,0.08) inset" }}
+                style={{ boxShadow: "0 10px 40px -10px rgba(122,90,248,0.55)" }}
               >
                 Ücretsiz Kaydolun
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
@@ -249,14 +249,14 @@ const Index = () => {
               <Button
                 size="lg"
                 onClick={() => navigate("/demo")}
-                className="text-base px-8 py-6 w-full sm:w-auto bg-transparent border border-white/15 text-white hover:bg-white/5 hover:border-white/25 transition-all duration-200"
+                className="text-base px-8 py-6 w-full sm:w-auto bg-transparent border border-border text-foreground hover:bg-muted hover:border-border/80 transition-all duration-200"
               >
                 {t('indexPage.hero.ctaSecondary')}
               </Button>
             </div>
 
             {/* Trust line */}
-            <p className="text-xs text-white/55 pt-1">
+            <p className="text-xs text-muted-foreground pt-1">
               {t('indexPage.hero.trust')}
             </p>
           </div>
@@ -265,35 +265,35 @@ const Index = () => {
         </div>
       </section>
 
-      {/* ─── SOCIAL PROOF BAR — dark, sits inside hero atmosphere ─── */}
-      <section className="relative bg-[#0A0A1A]">
+      {/* ─── SOCIAL PROOF BAR ─── */}
+      <section className="relative bg-muted/20 border-y border-border/40">
         <div className="container mx-auto px-4 sm:px-6 py-8 md:py-10 relative z-10">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
             <div className="flex items-center justify-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
-                <Users className="w-5 h-5 text-[#A78BFA]" />
+              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Users className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <div className="text-2xl md:text-3xl font-bold text-white leading-tight">100+</div>
-                <div className="text-xs md:text-sm text-white/60">{t('indexPage.socialProof.businesses')}</div>
+                <div className="text-2xl md:text-3xl font-bold text-foreground leading-tight">100+</div>
+                <div className="text-xs md:text-sm text-muted-foreground">{t('indexPage.socialProof.businesses')}</div>
               </div>
             </div>
             <div className="flex items-center justify-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
-                <Star className="w-5 h-5 text-[#A78BFA]" />
+              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Star className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <div className="text-2xl md:text-3xl font-bold text-white leading-tight">50K+</div>
-                <div className="text-xs md:text-sm text-white/60">{t('indexPage.socialProof.reviews')}</div>
+                <div className="text-2xl md:text-3xl font-bold text-foreground leading-tight">50K+</div>
+                <div className="text-xs md:text-sm text-muted-foreground">{t('indexPage.socialProof.reviews')}</div>
               </div>
             </div>
             <div className="flex items-center justify-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
-                <Zap className="w-5 h-5 text-[#A78BFA]" />
+              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Zap className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <div className="text-2xl md:text-3xl font-bold text-white leading-tight">&lt; 2 dk</div>
-                <div className="text-xs md:text-sm text-white/60">{t('indexPage.socialProof.avgResponse')}</div>
+                <div className="text-2xl md:text-3xl font-bold text-foreground leading-tight">&lt; 2 dk</div>
+                <div className="text-xs md:text-sm text-muted-foreground">{t('indexPage.socialProof.avgResponse')}</div>
               </div>
             </div>
           </div>
@@ -301,9 +301,9 @@ const Index = () => {
       </section>
 
       {/* ─── TRUST / LOGO STRIP ─── */}
-      <section className="border-y border-white/5 bg-[#0D0D20]">
+      <section className="bg-background">
         <div className="container mx-auto px-4 sm:px-6 py-10 md:py-12">
-          <p className="text-center text-xs uppercase tracking-wider text-white/50 font-medium mb-6">
+          <p className="text-center text-xs uppercase tracking-wider text-muted-foreground font-medium mb-6">
             Türkiye ve dünyadan işletmeler VoyageRespond'a güveniyor
           </p>
           <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-6 max-w-4xl mx-auto">
@@ -317,7 +317,7 @@ const Index = () => {
             ].map((item, i) => (
               <div
                 key={i}
-                className="flex items-center gap-2 text-white/40 hover:text-[#C4B5FD] transition-colors duration-200"
+                className="flex items-center gap-2 text-muted-foreground/60 hover:text-primary transition-colors duration-200"
               >
                 <item.icon className="w-5 h-5" />
                 <span className="text-sm font-medium">{item.label}</span>
@@ -328,19 +328,19 @@ const Index = () => {
       </section>
 
       {/* ─── FEATURES ─── */}
-      <section id="features" className="relative bg-[#0A0A1A] overflow-hidden">
+      <section id="features" className="relative bg-muted/20 overflow-hidden">
         {/* Subtle ambient glow */}
         <div
           aria-hidden
-          className="absolute left-[-10%] top-[20%] w-[480px] h-[480px] rounded-full blur-[120px] opacity-25 pointer-events-none hidden md:block"
-          style={{ background: "radial-gradient(circle, rgba(122,90,248,0.5), transparent 65%)" }}
+          className="absolute left-[-10%] top-[20%] w-[480px] h-[480px] rounded-full blur-[120px] opacity-30 pointer-events-none hidden md:block"
+          style={{ background: "radial-gradient(circle, rgba(122,90,248,0.12), transparent 65%)" }}
         />
         <div className="container mx-auto px-4 sm:px-6 py-20 md:py-28 relative z-10">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             {t('indexPage.featuresSection.title')}
           </h2>
-          <p className="text-lg text-white/60 max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             {t('indexPage.featuresSection.subtitle')}
           </p>
         </div>
