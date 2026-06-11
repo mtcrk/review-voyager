@@ -18,8 +18,8 @@ type Example = {
 
 const EXAMPLES: Example[] = [
   {
-    platform: { label: "Google", logo: "G", bg: "bg-white border border-border", fg: "text-[#4285F4]" },
-    accent: "#4285F4",
+    platform: { label: "Google", logo: "G", bg: "bg-white", fg: "text-[#4285F4]" },
+    accent: "#5B9DFF",
     reviewerInitials: "AY",
     reviewerName: "Ahmet Y.",
     timeAgo: "2 saat önce",
@@ -40,13 +40,13 @@ const EXAMPLES: Example[] = [
     ctaLabel: "Onayla & Gönder",
   },
   {
-    platform: { label: "Booking.com", logo: "B", bg: "bg-[#003580]", fg: "text-white" },
-    accent: "#003580",
+    platform: { label: "Booking.com", logo: "B", bg: "bg-[#1E6BFF]", fg: "text-white" },
+    accent: "#1E6BFF",
     reviewerInitials: "MS",
     reviewerName: "Maria S.",
     timeAgo: "5 hours ago",
     ratingNode: (
-      <span className="px-1.5 py-0.5 rounded bg-[#003580] text-white text-[10px] font-bold">9.2</span>
+      <span className="px-1.5 py-0.5 rounded bg-[#1E6BFF] text-white text-[10px] font-bold">9.2</span>
     ),
     reviewText:
       "Wonderful stay! The staff was incredibly helpful and the breakfast was amazing.",
@@ -58,8 +58,8 @@ const EXAMPLES: Example[] = [
     ctaLabel: "Approve & Send",
   },
   {
-    platform: { label: "Google", logo: "G", bg: "bg-white border border-border", fg: "text-[#4285F4]" },
-    accent: "#4285F4",
+    platform: { label: "Google", logo: "G", bg: "bg-white", fg: "text-[#4285F4]" },
+    accent: "#5B9DFF",
     reviewerInitials: "SK",
     reviewerName: "Selin K.",
     timeAgo: "1 gün önce",
@@ -69,7 +69,7 @@ const EXAMPLES: Example[] = [
           <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
         ))}
         {[3, 4, 5].map((i) => (
-          <Star key={i} className="w-3 h-3 text-muted-foreground/30" />
+          <Star key={i} className="w-3 h-3 text-white/20" />
         ))}
       </div>
     ),
