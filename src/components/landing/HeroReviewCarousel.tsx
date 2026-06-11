@@ -269,7 +269,7 @@ export function HeroReviewCarousel() {
       </div>
 
       {/* Deck container — fixed height to prevent layout shift */}
-      <div className="relative" style={{ minHeight: 500 }}>
+      <div className="relative min-h-[470px] sm:min-h-[440px]">
         <DeckCard offset={2} accent={next2.accent} />
         <DeckCard offset={1} accent={next1.accent} />
 
@@ -286,7 +286,7 @@ export function HeroReviewCarousel() {
             style={{ backgroundColor: active.accent }}
           />
 
-          <div className="p-5 sm:p-6 space-y-4 min-h-[460px]">
+          <div className="p-5 sm:p-6 space-y-4 min-h-[430px] sm:min-h-[400px]">
             {/* Header */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 min-h-[20px]">
@@ -331,7 +331,7 @@ export function HeroReviewCarousel() {
 
             {/* AI Reply area — fixed min-height */}
             <div
-              className="relative rounded-lg border border-[#A78BFA]/30 bg-[#A78BFA]/[0.08] p-3 space-y-2 min-h-[180px] flex flex-col"
+              className="relative rounded-lg border border-[#A78BFA]/30 bg-[#A78BFA]/[0.08] p-3 space-y-2 min-h-[160px] sm:min-h-[140px] flex flex-col"
               style={{ boxShadow: "0 0 30px -8px rgba(122,90,248,0.25) inset" }}
             >
               <div className="flex items-center justify-between gap-2 flex-wrap">
