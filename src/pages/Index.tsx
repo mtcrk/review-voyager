@@ -302,11 +302,16 @@ const Index = () => {
 
       {/* ─── TRUST / LOGO STRIP ─── */}
       <section className="bg-background">
-        <div className="container mx-auto px-4 sm:px-6 py-10 md:py-12">
-          <p className="text-center text-xs uppercase tracking-wider text-muted-foreground font-medium mb-6">
-            Türkiye ve dünyadan işletmeler VoyageRespond'a güveniyor
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-6 max-w-4xl mx-auto">
+        <div className="container mx-auto px-4 sm:px-6 py-14 md:py-16">
+          <div className="text-center mb-8 space-y-2">
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
+              Her sektörden işletme için
+            </h2>
+            <p className="text-sm md:text-base text-muted-foreground max-w-xl mx-auto">
+              Otelden kliniğe, restorandan zincir markalara — yorum yönetimi tek panelde.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-2.5 sm:gap-3 max-w-4xl mx-auto">
             {[
               { icon: Hotel, label: "Butik Otel" },
               { icon: UtensilsCrossed, label: "Restoran" },
@@ -317,13 +322,28 @@ const Index = () => {
             ].map((item, i) => (
               <div
                 key={i}
-                className="flex items-center gap-2 text-muted-foreground/60 hover:text-primary transition-colors duration-200"
+                className="group flex items-center gap-2.5 bg-card border border-border rounded-full pl-2 pr-4 py-1.5 hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-12px_rgba(122,90,248,0.25)] transition-all duration-200 motion-reduce:transform-none motion-reduce:transition-none"
+                style={{
+                  animation: "vr-pill-in 500ms cubic-bezier(0.34, 1.4, 0.5, 1) both",
+                  animationDelay: `${i * 60}ms`,
+                }}
               >
-                <item.icon className="w-5 h-5" />
-                <span className="text-sm font-medium">{item.label}</span>
+                <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 group-hover:bg-primary/15 transition-colors">
+                  <item.icon className="w-3.5 h-3.5 text-primary" />
+                </span>
+                <span className="text-sm font-medium text-foreground">{item.label}</span>
               </div>
             ))}
           </div>
+          <style>{`
+            @keyframes vr-pill-in {
+              from { opacity: 0; transform: translateY(8px); }
+              to { opacity: 1; transform: translateY(0); }
+            }
+            @media (prefers-reduced-motion: reduce) {
+              [style*="vr-pill-in"] { animation: none !important; opacity: 1 !important; transform: none !important; }
+            }
+          `}</style>
         </div>
       </section>
 
