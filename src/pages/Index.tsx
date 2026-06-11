@@ -188,7 +188,7 @@ const Index = () => {
 
             {/* Subtitle */}
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-              VoyageRespond, Google, Booking, TripAdvisor ve 80+ platformdaki müşteri yorumlarınızı tek bir panelde toplar. Yapay zeka her yoruma kişiselleştirilmiş yanıt üretir, duygu analizi yapar ve işletmenizin AI görünürlük skorunu takip eder.
+              VoyageRespond, Google, Booking, TripAdvisor ve birçok platformdaki müşteri yorumlarınızı tek bir panelde toplar. Yapay zeka her yoruma kişiselleştirilmiş yanıt üretir, duygu analizi yapar ve işletmenizin AI görünürlük skorunu takip eder.
             </p>
 
             {/* CTA Row */}
@@ -198,7 +198,7 @@ const Index = () => {
                 onClick={() => navigate("/onboarding")}
                 className="gradient-primary text-white shadow-lg text-base px-8 py-6 w-full sm:w-auto hover:shadow-xl hover:scale-[1.02] transition-all duration-200 group"
               >
-                3 Ay Ücretsiz Deneyin
+                Ücretsiz Kaydolun
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
               </Button>
               <Button
