@@ -313,7 +313,7 @@ const Index = () => {
           </div>
           <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-2.5 sm:gap-3 max-w-4xl mx-auto">
             {[
-              { icon: Hotel, label: "Butik Otel" },
+              { icon: Hotel, label: "Otel" },
               { icon: UtensilsCrossed, label: "Restoran" },
               { icon: Stethoscope, label: "Klinik" },
               { icon: Building2, label: "Zincir İşletme" },
