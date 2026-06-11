@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Check, Star, MessageSquare, Eye, TrendingUp, Sparkles, Zap, Target, Shield, Users, Menu, X, Building2, UtensilsCrossed, Hotel, Stethoscope, Store, Dumbbell } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from 'react-i18next';
@@ -14,6 +14,14 @@ const Index = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 80);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
@@ -61,7 +69,13 @@ const Index = () => {
         }}
       />
       {/* Navbar — Clean, minimal */}
-      <nav className="sticky top-0 z-50 border-b border-border/60 backdrop-blur-xl bg-background/80">
+      <nav
+        className={`sticky top-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? "border-b border-border/60 backdrop-blur-xl bg-background/80"
+            : "border-b border-white/5 backdrop-blur-md bg-[#0A0A1A]/40"
+        }`}
+      >
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
@@ -69,8 +83,12 @@ const Index = () => {
               onClick={() => navigate("/")}
               className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
             >
-              <img src={voyageRespondLogo} alt="VoyageRespond" className="h-7 w-7" />
-              <span className="text-base tracking-tight text-foreground">
+              <img
+                src={voyageRespondLogo}
+                alt="VoyageRespond"
+                className={`h-7 w-7 transition-all duration-300 ${scrolled ? "" : "brightness-0 invert"}`}
+              />
+              <span className={`text-base tracking-tight transition-colors duration-300 ${scrolled ? "text-foreground" : "text-white"}`}>
                 <span className="font-normal">Voyage</span>
                 <span className="font-semibold">Respond</span>
               </span>
@@ -80,25 +98,25 @@ const Index = () => {
             <div className="hidden md:flex items-center gap-8">
               <button
                 onClick={() => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className={`text-sm font-medium transition-colors ${scrolled ? "text-muted-foreground hover:text-foreground" : "text-white/70 hover:text-white"}`}
               >
                 {t('indexPage.nav.features')}
               </button>
               <button
                 onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className={`text-sm font-medium transition-colors ${scrolled ? "text-muted-foreground hover:text-foreground" : "text-white/70 hover:text-white"}`}
               >
                 {t('indexPage.nav.pricing')}
               </button>
               <button
                 onClick={() => navigate("/blog")}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className={`text-sm font-medium transition-colors ${scrolled ? "text-muted-foreground hover:text-foreground" : "text-white/70 hover:text-white"}`}
               >
                 {t('indexPage.nav.blog')}
               </button>
               <button
                 onClick={() => navigate("/contact")}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className={`text-sm font-medium transition-colors ${scrolled ? "text-muted-foreground hover:text-foreground" : "text-white/70 hover:text-white"}`}
               >
                 {t('indexPage.nav.contact')}
               </button>
@@ -109,7 +127,7 @@ const Index = () => {
               <LanguageSwitcher />
               <button
                 onClick={() => navigate(user ? "/dashboard" : "/login")}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2"
+                className={`text-sm font-medium transition-colors px-3 py-2 ${scrolled ? "text-muted-foreground hover:text-foreground" : "text-white/80 hover:text-white"}`}
               >
                 {user ? t('indexPage.nav.dashboard') : t('indexPage.nav.login')}
               </button>
@@ -126,7 +144,7 @@ const Index = () => {
               <LanguageSwitcher />
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 text-foreground"
+                className={`p-2 transition-colors ${scrolled ? "text-foreground" : "text-white"}`}
                 aria-label={mobileMenuOpen ? "Menüyü kapat" : "Menüyü aç"}
                 aria-expanded={mobileMenuOpen}
               >
@@ -167,28 +185,66 @@ const Index = () => {
       </nav>
 
       {/* ─── HERO ─── */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 gradient-hero"></div>
-        <div className="absolute inset-0 gradient-mesh"></div>
+      <section className="relative overflow-hidden -mt-16 pt-16 bg-[#0A0A1A]">
+        {/* Deep gradient base */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 100% 80% at 50% 0%, #15152E 0%, #0A0A1A 60%, #08081A 100%)",
+          }}
+        />
+        {/* Primary glow (top center) */}
+        <div
+          aria-hidden
+          className="absolute left-1/2 -translate-x-1/2 top-[8%] w-[640px] h-[640px] rounded-full blur-[120px] opacity-50 pointer-events-none hidden sm:block"
+          style={{ background: "radial-gradient(circle, rgba(122,90,248,0.45), transparent 65%)" }}
+        />
+        {/* Blue glow (bottom right) */}
+        <div
+          aria-hidden
+          className="absolute right-[-10%] bottom-[10%] w-[520px] h-[520px] rounded-full blur-[120px] opacity-40 pointer-events-none hidden sm:block"
+          style={{ background: "radial-gradient(circle, rgba(30,107,255,0.45), transparent 65%)" }}
+        />
+        {/* Grid overlay */}
+        <div
+          aria-hidden
+          className="absolute inset-0 pointer-events-none opacity-[0.05]"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)",
+            backgroundSize: "56px 56px",
+            maskImage:
+              "radial-gradient(ellipse 70% 60% at 50% 40%, black 40%, transparent 100%)",
+            WebkitMaskImage:
+              "radial-gradient(ellipse 70% 60% at 50% 40%, black 40%, transparent 100%)",
+          }}
+        />
 
         <div className="container mx-auto px-4 sm:px-6 pt-20 pb-16 md:pt-32 md:pb-24 relative z-10">
           <div className="max-w-3xl mx-auto text-center space-y-6">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/15 text-primary text-xs font-medium">
-              <Sparkles className="w-3.5 h-3.5" />
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/90 text-xs font-medium backdrop-blur-md">
+              <Sparkles className="w-3.5 h-3.5 text-[#A78BFA]" />
               {t('indexPage.hero.badge')}
             </div>
 
             {/* Headline */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-[1.1] tracking-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tight">
               Google Yorumlarınızı{" "}
-              <span className="bg-gradient-to-r from-primary to-purple-700 bg-clip-text text-transparent">
+              <span
+                className="bg-clip-text text-transparent"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(90deg, #A78BFA 0%, #7A5AF8 45%, #4F8BFF 100%)",
+                }}
+              >
                 Yapay Zeka ile Otomatik Yönetin
               </span>
             </h1>
 
             {/* Subtitle */}
-            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-white/70 leading-relaxed max-w-2xl mx-auto">
               VoyageRespond, Google, Booking, TripAdvisor ve birçok platformdaki müşteri yorumlarınızı tek bir panelde toplar. Yapay zeka her yoruma kişiselleştirilmiş yanıt üretir, duygu analizi yapar ve işletmenizin AI görünürlük skorunu takip eder.
             </p>
 
@@ -197,60 +253,78 @@ const Index = () => {
               <Button
                 size="lg"
                 onClick={() => navigate("/onboarding")}
-                className="gradient-primary text-white shadow-lg text-base px-8 py-6 w-full sm:w-auto hover:shadow-xl hover:scale-[1.02] transition-all duration-200 group"
+                className="gradient-primary text-white text-base px-8 py-6 w-full sm:w-auto hover:scale-[1.02] transition-all duration-200 group"
+                style={{ boxShadow: "0 10px 40px -10px rgba(122,90,248,0.7), 0 0 0 1px rgba(255,255,255,0.08) inset" }}
               >
                 Ücretsiz Kaydolun
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
               </Button>
               <Button
                 size="lg"
-                variant="outline"
                 onClick={() => navigate("/demo")}
-                className="text-base px-8 py-6 w-full sm:w-auto border-border hover:bg-muted/50 transition-all duration-200"
+                className="text-base px-8 py-6 w-full sm:w-auto bg-transparent border border-white/15 text-white hover:bg-white/5 hover:border-white/25 transition-all duration-200"
               >
                 {t('indexPage.hero.ctaSecondary')}
               </Button>
             </div>
 
             {/* Trust line */}
-            <p className="text-xs text-muted-foreground pt-1">
+            <p className="text-xs text-white/55 pt-1">
               {t('indexPage.hero.trust')}
             </p>
           </div>
 
           <HeroReviewCarousel />
         </div>
+
+        {/* Soft transition to light section below */}
+        <div
+          aria-hidden
+          className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(to bottom, transparent 0%, rgba(10,10,26,0.5) 60%, hsl(var(--background)) 100%)",
+          }}
+        />
       </section>
 
-      {/* ─── SOCIAL PROOF BAR — prominent stats ─── */}
-      <section className="border-y border-border/40 bg-gradient-to-b from-muted/30 to-background">
-        <div className="container mx-auto px-4 sm:px-6 py-8 md:py-10">
+      {/* ─── SOCIAL PROOF BAR — dark, sits inside hero atmosphere ─── */}
+      <section className="relative bg-[#0A0A1A] border-b border-white/5">
+        <div
+          aria-hidden
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(to bottom, #0A0A1A 0%, #0A0A1A 40%, hsl(var(--background)) 100%)",
+          }}
+        />
+        <div className="container mx-auto px-4 sm:px-6 py-8 md:py-10 relative z-10">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
             <div className="flex items-center justify-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Users className="w-5 h-5 text-primary" />
+              <div className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
+                <Users className="w-5 h-5 text-[#A78BFA]" />
               </div>
               <div>
-                <div className="text-2xl md:text-3xl font-bold text-foreground leading-tight">100+</div>
-                <div className="text-xs md:text-sm text-muted-foreground">{t('indexPage.socialProof.businesses')}</div>
+                <div className="text-2xl md:text-3xl font-bold text-white leading-tight">100+</div>
+                <div className="text-xs md:text-sm text-white/60">{t('indexPage.socialProof.businesses')}</div>
               </div>
             </div>
             <div className="flex items-center justify-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Star className="w-5 h-5 text-primary" />
+              <div className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
+                <Star className="w-5 h-5 text-[#A78BFA]" />
               </div>
               <div>
-                <div className="text-2xl md:text-3xl font-bold text-foreground leading-tight">50K+</div>
-                <div className="text-xs md:text-sm text-muted-foreground">{t('indexPage.socialProof.reviews')}</div>
+                <div className="text-2xl md:text-3xl font-bold text-white leading-tight">50K+</div>
+                <div className="text-xs md:text-sm text-white/60">{t('indexPage.socialProof.reviews')}</div>
               </div>
             </div>
             <div className="flex items-center justify-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Zap className="w-5 h-5 text-primary" />
+              <div className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
+                <Zap className="w-5 h-5 text-[#A78BFA]" />
               </div>
               <div>
-                <div className="text-2xl md:text-3xl font-bold text-foreground leading-tight">&lt; 2 dk</div>
-                <div className="text-xs md:text-sm text-muted-foreground">{t('indexPage.socialProof.avgResponse')}</div>
+                <div className="text-2xl md:text-3xl font-bold text-white leading-tight">&lt; 2 dk</div>
+                <div className="text-xs md:text-sm text-white/60">{t('indexPage.socialProof.avgResponse')}</div>
               </div>
             </div>
           </div>
