@@ -377,6 +377,7 @@ const Index = () => {
               icon: MessageSquare,
               title: t('indexPage.featuresSection.aiReplyTitle'),
               desc: t('indexPage.featuresSection.aiReplyDesc'),
+              visual: "ai-reply",
             },
             {
               icon: Eye,
@@ -387,6 +388,7 @@ const Index = () => {
               icon: Star,
               title: t('indexPage.featuresSection.centralTitle'),
               desc: t('indexPage.featuresSection.centralDesc'),
+              visual: "platforms",
             },
             {
               icon: TrendingUp,
@@ -406,13 +408,49 @@ const Index = () => {
           ].map((feature, i) => (
             <div
               key={i}
-              className="group p-6 rounded-xl border border-border bg-card hover:border-primary/20 hover:shadow-lg transition-all duration-300"
+              className="group p-6 rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
             >
-              <div className="w-10 h-10 rounded-lg bg-primary/8 flex items-center justify-center mb-4 group-hover:bg-primary/12 transition-colors">
-                <feature.icon className="w-5 h-5 text-primary" />
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center mb-5 group-hover:from-primary/20 group-hover:to-primary/10 transition-colors">
+                <feature.icon className="w-7 h-7 text-primary" />
               </div>
-              <h3 className="text-base font-semibold text-foreground mb-2">{feature.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{feature.desc}</p>
+              <h3 className="text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4">{feature.desc}</p>
+
+              {feature.visual === "ai-reply" && (
+                <div className="mt-auto rounded-lg border border-primary/15 bg-primary/[0.04] p-3 space-y-2">
+                  <div className="flex items-start gap-2">
+                    <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center text-[8px] font-semibold text-muted-foreground flex-shrink-0">A</div>
+                    <div className="text-[11px] text-foreground/70 leading-snug">Servis çok yavaştı...</div>
+                  </div>
+                  <div className="flex items-start gap-2 pl-3">
+                    <Sparkles className="w-3 h-3 text-primary flex-shrink-0 mt-0.5" />
+                    <div className="text-[11px] text-foreground leading-snug">Geri bildiriminiz için teşekkürler, hemen iletişime geçiyoruz...</div>
+                  </div>
+                </div>
+              )}
+
+              {feature.visual === "platforms" && (
+                <div className="mt-auto rounded-lg border border-border bg-muted/30 p-3">
+                  <div className="flex items-center justify-around">
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="w-7 h-7 rounded-md bg-white border border-border flex items-center justify-center text-[10px] font-bold text-[#4285F4]">G</div>
+                      <span className="text-[9px] text-muted-foreground">Google</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="w-7 h-7 rounded-md bg-[#003580] flex items-center justify-center text-[10px] font-bold text-white">B</div>
+                      <span className="text-[9px] text-muted-foreground">Booking</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="w-7 h-7 rounded-md bg-[#00AF87] flex items-center justify-center text-[10px] font-bold text-white">T</div>
+                      <span className="text-[9px] text-muted-foreground">Trip</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="w-7 h-7 rounded-md bg-foreground flex items-center justify-center text-[10px] font-bold text-background">H</div>
+                      <span className="text-[9px] text-muted-foreground">Hotels</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
