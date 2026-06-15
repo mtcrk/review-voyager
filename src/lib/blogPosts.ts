@@ -2623,7 +2623,7 @@ blogPosts.push(...restoranClusterPosts);
 import { memnuniyetClusterPosts } from "./blogClusterMemnuniyet";
 blogPosts.push(...memnuniyetClusterPosts);
 
-const englishPosts: BlogPost[] = [
+const englishReviewReplyPosts: BlogPost[] = [
   {
     slug: "should-i-respond-to-every-google-review",
     title: "Should I Respond to Every Google Review My Business Gets?",
