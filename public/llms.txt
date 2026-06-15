@@ -92,6 +92,9 @@ VoyageRespond; çok platformlu yorum toplama, 8 farklı tonda AI destekli yanıt
 - [TripAdvisor Nedir, Yorumları Nasıl Yönetilir? 2026 Rehberi](/blog/tripadvisor-yorum-yonetimi-rehberi): TripAdvisor nedir, otel ve restoran için neden önemli, yorumları nasıl yönetilir? Türkiye'deki işletmeler için kapsamlı rehber.
 - [Otel Karşılaştırma Sitelerinde Üst Sıralara Çıkma Rehberi](/blog/otel-karsilastirma-sitelerinde-ust-siralara-cikma): Trivago, Google Otel, Kayak gibi otel karşılaştırma sitelerinde üst sıralara çıkmanın 10 yolu. Sıralama algoritmaları ve pratik ipuçları.
 - [Airbnb Şikayet ve Yorum Yönetimi: Ev Sahipleri için Rehber](/blog/airbnb-sikayet-ve-yorum-yonetimi): Airbnb şikayetleri nasıl çözülür, olumsuz yoruma nasıl cevap verilir, Superhost olmak için 5 adım. Türkiye'deki Airbnb ev sahipleri için 20…
+- [Should I Respond to Every Google Review My Business Gets?](/blog/should-i-respond-to-every-google-review): Do you really need to reply to every Google review? An honest, practical answer for busy and multi-location businesses — including the rati…
+- [How to Reply to a 1-Star Google Review Without Getting Defensive](/blog/how-to-reply-to-1-star-google-review): A calm, step-by-step framework for answering a 1-star Google review without getting defensive — what to say, what to never say, and how to…
+- [What to Say When Replying to a 5-Star Google Review](/blog/what-to-say-replying-5-star-google-review): Five-star replies are free marketing. Learn what to say in a 5-star Google review response, the copy-paste trap to avoid, and examples for…
 - [Olumsuz Google Yorumu Nasıl Cevaplanır? Adım Adım Rehber + 15 Örnek Şablon](/blog/olumsuz-google-yorumu-nasil-cevaplanir): Olumsuz Google yorumlarına profesyonel cevap vermenin 5 adımlı çerçevesi, 15 gerçekçi örnek ve hazır şablonlarla adım adım rehber.
 - [Olumlu Restoran Yorumu Cevap Örnekleri: 30+ Hazır Şablon](/blog/olumlu-yorum-cevap-ornekleri): Olumlu restoran yorumlarına nasıl cevap verilir? 30+ kategoriye göre hazır şablon, kişiselleştirme formülü ve doğru ton rehberi.
 - [Google Yorum Cevap Şablonları: 50 Hazır Yanıt (Kopyala-Yapıştır)](/blog/google-yorum-cevap-sablonlari): 5 yıldızdan 1 yıldıza, otel-restoran-klinik-kuaför için 50 Google yorum cevap şablonu. Her yanıt kişiselleştirme notu ile birlikte.
@@ -107,4 +110,4 @@ VoyageRespond; çok platformlu yorum toplama, 8 farklı tonda AI destekli yanıt
 - [Gizlilik Politikası](/privacy-policy): Veri işleme ve gizlilik koşulları.
 - [Kullanım Koşulları](/terms-of-service): Hizmet kullanım şartları ve sorumluluklar.
 
-<!-- generated 2026-06-15 — 85 pages -->
+<!-- generated 2026-06-15 — 88 pages -->
