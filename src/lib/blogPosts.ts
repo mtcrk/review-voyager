@@ -2879,7 +2879,7 @@ Don't treat your five-star reviews as a box to tick. Each one is a chance to adv
   },
 ];
 
-blogPosts.push(...englishPosts);
+blogPosts.push(...englishReviewReplyPosts);
 
 export const getBlogPost = (slug: string): BlogPost | undefined => {
   return blogPosts.find((post) => post.slug === slug);
