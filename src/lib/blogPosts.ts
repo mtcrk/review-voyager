@@ -2661,7 +2661,7 @@ That last category is the one worth slowing down on.
 
 ## The Rating-Only Review Problem Nobody Talks About
 
-A large share of the reviews a popular location gets are just a star rating with no words attached. Someone tapped five stars on their way out the door and never typed anything. These are the reviews people argue about, because replying to a wordless five-star feels a little strange, and at high volume it eats real time.
+A good chunk of the reviews a popular location gets are just a star rating with no words attached. Someone tapped five stars on their way out the door and never typed anything. These are the reviews people argue about, because replying to a wordless five-star feels a little strange, and at high volume it eats real time.
 
 Here's the nuance. A reply to a wordless five-star still does two useful things: it signals to Google and to readers that the business is active and engaged, and it gives you a natural place to drop a warm, human line. But the marginal value of each one is low, and if answering them means you fall behind on the reviews that genuinely need attention, you've optimized the wrong thing.
 
@@ -2681,7 +2681,7 @@ A profile where the owner engages with reviews looks alive. While Google doesn't
 
 ### It gives you a second chance with unhappy customers
 
-A surprising number of people update or remove a negative review after a genuine, non-defensive reply that resolves the issue. You don't get that chance if you stay silent.
+Occasionally someone will update or even remove a negative review after a genuine, non-defensive reply that resolves the issue. It doesn't happen often, but it happens. And even when it doesn't, that calm reply is still working on every other person who reads it later. Stay silent and you get neither.
 
 ## When You Genuinely Don't Need to Reply
 
