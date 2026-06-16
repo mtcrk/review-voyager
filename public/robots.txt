@@ -1,20 +1,7 @@
-User-agent: Googlebot
-Allow: /
-Crawl-delay: 1
-
-User-agent: Bingbot
-Allow: /
-Crawl-delay: 2
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
-User-agent: LinkedInBot
-Allow: /
-
+# All crawlers (search engines + AI assistants) may access public content.
+# AI crawlers explicitly welcomed: ClaudeBot, anthropic-ai, GPTBot, OAI-SearchBot,
+# ChatGPT-User, Google-Extended, PerplexityBot, CCBot, Applebot-Extended,
+# Bytespider, Google-CloudVertexBot, cohere-ai.
 User-agent: *
 Allow: /
 Disallow: /dashboard
@@ -31,13 +18,21 @@ Disallow: /statistics
 Disallow: /rep-score
 Disallow: /report
 Disallow: /onboarding
+Disallow: /admin
+Disallow: /api/
 Disallow: /auth/callback
 Disallow: /auth/google-business/callback
 Disallow: /auth/reset
 Disallow: /auth/tiktok/callback
-Disallow: /en/
 Disallow: /reset-password
 Disallow: /login
 Disallow: /register
+
+# Polite crawl delays for high-volume search bots
+User-agent: Googlebot
+Crawl-delay: 1
+
+User-agent: Bingbot
+Crawl-delay: 2
 
 Sitemap: https://voyagerespond.com/sitemap.xml
