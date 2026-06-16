@@ -31,6 +31,9 @@ const hubGuides = [
   ["/online-itibar-yonetimi", "Online İtibar Yönetimi", "Dijital itibar yönetiminin tanımı, süreçleri ve araçları."],
   ["/musteri-memnuniyeti", "Müşteri Memnuniyeti", "Müşteri memnuniyeti ölçümü, anket ve geri bildirim rehberi."],
   ["/restoran-musteri-memnuniyeti", "Restoran Müşteri Memnuniyeti", "Restoranlar için müşteri memnuniyeti stratejileri ve KPI'lar."],
+  ["/saglik-itibar-yonetimi", "Sağlık Kuruluşları İtibar Yönetimi", "Klinik, doktor, hastane ve estetik için KVKK + 1219 uyumlu yorum & itibar yönetimi hub'ı."],
+  ["/dis-hekimi-yorum-yonetimi", "Diş Hekimi Yorum Yönetimi", "Diş hekimi ve klinikleri için Google + Doktortakvimi yorum yönetimi rehberi."],
+  ["/estetik-klinik-yorum-yonetimi", "Estetik Klinik Yorum Yönetimi", "Estetik klinik ve güzellik merkezleri için hassas branş yorum yönetimi rehberi."],
 ];
 
 // --- Dynamic: platform landing pages ---
@@ -67,6 +70,7 @@ function blogPages() {
     "src/lib/blogPosts.ts",
     "src/lib/blogClusterRestoran.ts",
     "src/lib/blogClusterMemnuniyet.ts",
+    "src/lib/blogClusterSaglik.ts",
   ];
   const re = /\{\s*slug:\s*"([^"]+)"[\s\S]*?title:\s*"([^"]+)"[\s\S]*?description:\s*"([^"]+)"/g;
   const seen = new Set();

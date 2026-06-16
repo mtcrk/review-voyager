@@ -8,6 +8,7 @@ import { platformLandingPages } from "./lib/platformLandingData";
 import { blogPosts } from "./lib/blogPosts";
 import { restoranClusterPosts } from "./lib/blogClusterRestoran";
 import { memnuniyetClusterPosts } from "./lib/blogClusterMemnuniyet";
+import { saglikClusterPosts } from "./lib/blogClusterSaglik";
 
 // Convert default-export pages into the { Component } shape data-router lazy expects.
 const lazyDefault =
@@ -70,7 +71,7 @@ const loadCityHotelSlugs = (): string[] =>
 const loadPlatformSlugs = (): string[] =>
   platformLandingPages.map((x) => x.slug).filter(Boolean);
 const loadBlogSlugs = (): string[] => {
-  const all = [...blogPosts, ...restoranClusterPosts, ...memnuniyetClusterPosts];
+  const all = [...blogPosts, ...restoranClusterPosts, ...memnuniyetClusterPosts, ...saglikClusterPosts];
   return [...new Set(all.map((p) => p.slug).filter(Boolean))];
 };
 
@@ -113,6 +114,9 @@ export const routes: RouteRecord[] = [
       { path: "online-itibar-yonetimi", lazy: lazyDefault(() => import("./pages/seo/OnlineItibarYonetimi")) },
       { path: "musteri-memnuniyeti", lazy: lazyDefault(() => import("./pages/seo/MusteriMemnuniyeti")) },
       { path: "restoran-musteri-memnuniyeti", lazy: lazyDefault(() => import("./pages/seo/RestoranMusteriMemnuniyeti")) },
+      { path: "saglik-itibar-yonetimi", lazy: lazyDefault(() => import("./pages/seo/SaglikItibarYonetimi")) },
+      { path: "dis-hekimi-yorum-yonetimi", lazy: lazyDefault(() => import("./pages/seo/DisHekimiYorumYonetimi")) },
+      { path: "estetik-klinik-yorum-yonetimi", lazy: lazyDefault(() => import("./pages/seo/EstetikKlinikYorumYonetimi")) },
       {
         path: "platform/:slug",
         lazy: lazyDefault(() => import("./pages/seo/PlatformLanding")),
@@ -183,6 +187,9 @@ export const PRERENDER_PUBLIC_PATHS = [
   "/online-itibar-yonetimi",
   "/musteri-memnuniyeti",
   "/restoran-musteri-memnuniyeti",
+  "/saglik-itibar-yonetimi",
+  "/dis-hekimi-yorum-yonetimi",
+  "/estetik-klinik-yorum-yonetimi",
   "/automations/instagram-sales",
   "/automations/google-reviews",
   "/automations/whatsapp",
