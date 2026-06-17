@@ -22,6 +22,7 @@ const staticRoutes = [
   { path: "/saglik-itibar-yonetimi", changefreq: "monthly", priority: "0.9", lastmod: "2026-06-16" },
   { path: "/dis-hekimi-yorum-yonetimi", changefreq: "monthly", priority: "0.85", lastmod: "2026-06-16" },
   { path: "/estetik-klinik-yorum-yonetimi", changefreq: "monthly", priority: "0.85", lastmod: "2026-06-16" },
+  { path: "/zincir-restoran-yorum-yonetimi", changefreq: "monthly", priority: "0.9", lastmod: "2026-06-17" },
   { path: "/platform/yorumlara-yapay-zeka-ile-cevap-yazma", changefreq: "weekly", priority: "0.9", lastmod: "2026-05-22" },
   { path: "/platform/google-yorumlari-icin-yapay-zeka", changefreq: "weekly", priority: "0.9", lastmod: "2026-05-22" },
   { path: "/platform/instagram-yorumlari-icin-yapay-zeka", changefreq: "weekly", priority: "0.9", lastmod: "2026-05-22" },
@@ -66,6 +67,7 @@ function extractBlogPosts() {
     "src/lib/blogClusterRestoran.ts",
     "src/lib/blogClusterMemnuniyet.ts",
     "src/lib/blogClusterSaglik.ts",
+    "src/lib/blogClusterRestoranZinciri.ts",
   ];
   const posts = [];
   const seen = new Set();

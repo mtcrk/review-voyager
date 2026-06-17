@@ -2624,6 +2624,8 @@ import { memnuniyetClusterPosts } from "./blogClusterMemnuniyet";
 blogPosts.push(...memnuniyetClusterPosts);
 import { saglikClusterPosts } from "./blogClusterSaglik";
 blogPosts.push(...saglikClusterPosts);
+import { restoranZinciriClusterPosts } from "./blogClusterRestoranZinciri";
+blogPosts.push(...restoranZinciriClusterPosts);
 
 const englishReviewReplyPosts: BlogPost[] = [
   {

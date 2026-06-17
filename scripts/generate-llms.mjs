@@ -34,6 +34,7 @@ const hubGuides = [
   ["/saglik-itibar-yonetimi", "Sağlık Kuruluşları İtibar Yönetimi", "Klinik, doktor, hastane ve estetik için KVKK + 1219 uyumlu yorum & itibar yönetimi hub'ı."],
   ["/dis-hekimi-yorum-yonetimi", "Diş Hekimi Yorum Yönetimi", "Diş hekimi ve klinikleri için Google + Doktortakvimi yorum yönetimi rehberi."],
   ["/estetik-klinik-yorum-yonetimi", "Estetik Klinik Yorum Yönetimi", "Estetik klinik ve güzellik merkezleri için hassas branş yorum yönetimi rehberi."],
+  ["/zincir-restoran-yorum-yonetimi", "Zincir Restoran Yorum Yönetimi", "Çok şubeli restoran zincirleri için Google + Yemeksepeti + Getir çoklu lokasyon yorum yönetimi hub'ı."],
 ];
 
 // --- Dynamic: platform landing pages ---
@@ -71,6 +72,7 @@ function blogPages() {
     "src/lib/blogClusterRestoran.ts",
     "src/lib/blogClusterMemnuniyet.ts",
     "src/lib/blogClusterSaglik.ts",
+    "src/lib/blogClusterRestoranZinciri.ts",
   ];
   const re = /\{\s*slug:\s*"([^"]+)"[\s\S]*?title:\s*"([^"]+)"[\s\S]*?description:\s*"([^"]+)"/g;
   const seen = new Set();

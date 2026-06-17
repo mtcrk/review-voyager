@@ -26,6 +26,7 @@ VoyageRespond; çok platformlu yorum toplama, 8 farklı tonda AI destekli yanıt
 - [Sağlık Kuruluşları İtibar Yönetimi](/saglik-itibar-yonetimi): Klinik, doktor, hastane ve estetik için KVKK + 1219 uyumlu yorum & itibar yönetimi hub'ı.
 - [Diş Hekimi Yorum Yönetimi](/dis-hekimi-yorum-yonetimi): Diş hekimi ve klinikleri için Google + Doktortakvimi yorum yönetimi rehberi.
 - [Estetik Klinik Yorum Yönetimi](/estetik-klinik-yorum-yonetimi): Estetik klinik ve güzellik merkezleri için hassas branş yorum yönetimi rehberi.
+- [Zincir Restoran Yorum Yönetimi](/zincir-restoran-yorum-yonetimi): Çok şubeli restoran zincirleri için Google + Yemeksepeti + Getir çoklu lokasyon yorum yönetimi hub'ı.
 
 ## Platform Sayfaları
 
@@ -109,10 +110,13 @@ VoyageRespond; çok platformlu yorum toplama, 8 farklı tonda AI destekli yanıt
 - [Müşteri Memnuniyet Mesajı Örnekleri: 50 Hazır Şablon (2026)](/blog/musteri-memnuniyet-mesaji-ornekleri): Restoran, otel ve e-ticaret işletmeleri için müşteri memnuniyet mesajı şablonları — teşekkür, özür, takip, yorum talebi ve teşvik.
 - [Doktor Yorumları Nasıl Yönetilir? Hekimler için 2026 Rehberi](/blog/doktor-yorumlari-nasil-yonetilir): Google, Doktorsitesi ve Doktortakvimi'nde çıkan doktor yorumlarını KVKK ve sağlık reklamı yasasına uygun yönetmenin tam rehberi. Olumsuz yo…
 - [Sahte Sağlık Yorumu Nasıl Şikayet Edilir? (Google + Yasal Yol)](/blog/sahte-saglik-yorumu-sikayet): Sahte sağlık yorumlarını Google'a şikayet etme adımları, 5651 sayılı kanun ile içerik kaldırma süreci ve haksız yorum karşısında profesyone…
+- [Yemeksepeti Yorum Cevaplama Rehberi 2026](/blog/yemeksepeti-yorum-cevaplama-rehberi): Yemeksepeti restoran panelinden yorum cevaplama, olumsuz yorum yönetimi ve puan yükseltme stratejilerinin tam rehberi. Örnek yanıtlarla.
+- [Getir Yemek Yorum Yönetimi: Restoranlar için Rehber](/blog/getir-yemek-yorum-yonetimi): Getir Yemek partner panelinden yorum yönetimi, restoran puanını yükseltme ve sipariş sıralamasını iyileştirme rehberi.
+- [Restoran Google Yorum Puanı Nasıl Yükseltilir? (2026)](/blog/restoran-google-yorum-puani-yukseltme): Restoranınızın Google yıldız puanını 90 günde nasıl yükseltirsiniz? Yorum daveti, olumsuz yorum yönetimi ve yerel SEO ile pratik strateji.
 
 ## Optional
 
 - [Gizlilik Politikası](/privacy-policy): Veri işleme ve gizlilik koşulları.
 - [Kullanım Koşulları](/terms-of-service): Hizmet kullanım şartları ve sorumluluklar.
 
-<!-- generated 2026-06-17 — 93 pages -->
+<!-- generated 2026-06-17 — 97 pages -->
