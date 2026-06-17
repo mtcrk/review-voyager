@@ -601,6 +601,16 @@ const Index = () => {
                 <span className="inline-flex items-center justify-center h-5 w-5 rounded bg-[#FF6F4D] text-white text-[10px] font-bold">G</span>
                 <span>GetApp</span>
               </a>
+              <a
+                href="https://www.linkedin.com/company/voyagerespond/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-background border border-border hover:bg-muted hover:text-foreground transition-colors"
+                aria-label="VoyageRespond on LinkedIn"
+              >
+                <span className="inline-flex items-center justify-center h-5 w-5 rounded bg-[#0A66C2] text-white text-[10px] font-bold">in</span>
+                <span>LinkedIn</span>
+              </a>
               <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-muted/40 border border-border opacity-70" aria-label="G2 coming soon">
                 <span className="inline-flex items-center justify-center h-5 w-5 rounded bg-muted text-muted-foreground text-[10px] font-bold">G2</span>
                 <span>G2 (soon)</span>
