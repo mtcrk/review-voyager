@@ -9,6 +9,7 @@ import { blogPosts } from "./lib/blogPosts";
 import { restoranClusterPosts } from "./lib/blogClusterRestoran";
 import { memnuniyetClusterPosts } from "./lib/blogClusterMemnuniyet";
 import { saglikClusterPosts } from "./lib/blogClusterSaglik";
+import { restoranZinciriClusterPosts } from "./lib/blogClusterRestoranZinciri";
 
 // Convert default-export pages into the { Component } shape data-router lazy expects.
 const lazyDefault =
@@ -71,7 +72,7 @@ const loadCityHotelSlugs = (): string[] =>
 const loadPlatformSlugs = (): string[] =>
   platformLandingPages.map((x) => x.slug).filter(Boolean);
 const loadBlogSlugs = (): string[] => {
-  const all = [...blogPosts, ...restoranClusterPosts, ...memnuniyetClusterPosts, ...saglikClusterPosts];
+  const all = [...blogPosts, ...restoranClusterPosts, ...memnuniyetClusterPosts, ...saglikClusterPosts, ...restoranZinciriClusterPosts];
   return [...new Set(all.map((p) => p.slug).filter(Boolean))];
 };
 
@@ -117,6 +118,7 @@ export const routes: RouteRecord[] = [
       { path: "saglik-itibar-yonetimi", lazy: lazyDefault(() => import("./pages/seo/SaglikItibarYonetimi")) },
       { path: "dis-hekimi-yorum-yonetimi", lazy: lazyDefault(() => import("./pages/seo/DisHekimiYorumYonetimi")) },
       { path: "estetik-klinik-yorum-yonetimi", lazy: lazyDefault(() => import("./pages/seo/EstetikKlinikYorumYonetimi")) },
+      { path: "zincir-restoran-yorum-yonetimi", lazy: lazyDefault(() => import("./pages/seo/ZincirRestoranYorumYonetimi")) },
       {
         path: "platform/:slug",
         lazy: lazyDefault(() => import("./pages/seo/PlatformLanding")),
@@ -190,6 +192,7 @@ export const PRERENDER_PUBLIC_PATHS = [
   "/saglik-itibar-yonetimi",
   "/dis-hekimi-yorum-yonetimi",
   "/estetik-klinik-yorum-yonetimi",
+  "/zincir-restoran-yorum-yonetimi",
   "/automations/instagram-sales",
   "/automations/google-reviews",
   "/automations/whatsapp",
