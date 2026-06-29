@@ -29,8 +29,13 @@ const FUNCTION_MAP: Record<string, { fn: string; query?: string; label: string }
   "google-reviews-auto-sync": { fn: "google-business-reviews", label: "Google Yorumları Çek" },
   "auto-fetch-apify-only-daily-06": {
     fn: "auto-fetch-reviews",
-    query: "platforms=booking,tripadvisor,hotelscom,expedia,trustpilot",
-    label: "Apify Yorumları Çek",
+    query: "platforms=tripadvisor,hotelscom,expedia,trustpilot",
+    label: "OTA Yorumları Çek",
+  },
+  "auto-fetch-booking-daily-03": {
+    fn: "auto-fetch-reviews",
+    query: "platforms=booking",
+    label: "Booking.com Yorumları Çek",
   },
   "weekly-report-daily-tr-11": { fn: "weekly-report", label: "Haftalık Rapor Gönder" },
 };
