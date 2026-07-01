@@ -70,7 +70,7 @@ export default function BillingCheckout() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!consent) {
+    if (!updateCardMode && !consent) {
       toast({ title: "Onay gerekli", description: "Devam etmek için otomatik yenileme onayını verin." });
       return;
     }
@@ -80,15 +80,17 @@ export default function BillingCheckout() {
     }
     setLoading(true);
     try {
-      // 1) log consent
-      await supabase.from("subscription_consent_log").insert({
+      // 1) log consent (skip in card-update mode; user already consented on initial subscription)
+      if (!updateCardMode) {
+        await supabase.from("subscription_consent_log").insert({
         business_id: businessId,
         user_id: user!.id,
         plan_code: plan.code,
         amount: plan.amount,
         currency: "TL",
         consent_text_snapshot: consentText,
-      });
+        });
+      }
 
       // 2) get PayTR fields from edge function
       const { data, error } = await supabase.functions.invoke("paytr-first-payment", {
