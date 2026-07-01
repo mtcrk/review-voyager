@@ -38,6 +38,7 @@ import {
   LayoutGrid,
   Sparkles,
   Swords,
+  Wallet,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -87,6 +88,7 @@ const commonItems = [
   { title: "Sosyal Medya Analizi", url: "/social-analytics", icon: Sparkles },
   { title: "Google Performance", url: "/performance", icon: TrendingUp },
   { title: "Rapor Oluştur", url: "/report", icon: FileText },
+  { title: "Abonelik", url: "/billing", icon: Wallet },
   { title: "Ayarlar", url: "/settings", icon: Settings },
 ];
 
