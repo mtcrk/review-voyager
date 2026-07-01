@@ -52,17 +52,16 @@ Deno.serve(async (req) => {
     );
     const { data: biz } = await admin
       .from("businesses")
-      .select("id,user_id,address")
+      .select("id,user_id,city")
       .eq("id", business_id)
       .maybeSingle();
     if (!biz || biz.user_id !== userId) return json({ error: "Forbidden" }, 403);
 
-    // PayTR requires user_address to be non-empty. Prefer business address on
-    // file; fall back to a generic placeholder so PayTR does not reject.
-    const user_address =
-      (typeof (biz as { address?: string }).address === "string" &&
-        (biz as { address?: string }).address!.trim()) ||
-      "Türkiye";
+    // PayTR requires user_address to be non-empty. We don't collect a real
+    // billing address (no invoice flow yet); use the business city if set,
+    // otherwise a generic placeholder so PayTR does not reject the request.
+    const bizCity = (biz as { city?: string | null }).city?.trim();
+    const user_address = bizCity ? `${bizCity}, Türkiye` : "Türkiye";
 
     const merchant_id = Deno.env.get("PAYTR_MERCHANT_ID") ?? "";
     const merchant_key = Deno.env.get("PAYTR_MERCHANT_KEY") ?? "";
