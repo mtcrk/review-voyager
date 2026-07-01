@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,8 @@ const PLANS: Plan[] = [
 export default function BillingCheckout() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const [searchParams] = useSearchParams();
+  const updateCardMode = searchParams.get("mode") === "update-card";
   const [businessId, setBusinessId] = useState<string>("");
   const [businesses, setBusinesses] = useState<{ id: string; name: string }[]>([]);
   const [plan, setPlan] = useState<Plan>(PLANS[1]);
@@ -127,11 +129,14 @@ export default function BillingCheckout() {
   return (
     <div className="min-h-screen bg-background py-10">
       <div className="container max-w-2xl mx-auto px-4">
-        <h1 className="text-3xl font-bold mb-2">Abonelik Ödemesi</h1>
+        <h1 className="text-3xl font-bold mb-2">
+          {updateCardMode ? "Kartı Güncelle" : "Abonelik Ödemesi"}
+        </h1>
         <p className="text-muted-foreground mb-6 flex items-center gap-2">
           <ShieldCheck className="w-4 h-4" /> Kart bilgileriniz doğrudan PayTR'ye iletilir, sunucularımıza uğramaz.
         </p>
 
+        {!updateCardMode && (
         <Card>
           <CardHeader><CardTitle>Plan</CardTitle></CardHeader>
           <CardContent className="grid sm:grid-cols-3 gap-3">
@@ -150,6 +155,7 @@ export default function BillingCheckout() {
             ))}
           </CardContent>
         </Card>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6 mt-6">
           <Card>
