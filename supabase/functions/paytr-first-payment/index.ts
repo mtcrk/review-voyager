@@ -36,13 +36,12 @@ Deno.serve(async (req) => {
       plan_code = "pro_monthly",
       amount, // TL, integer or float
       user_name,
-      user_address,
       user_phone,
       email,
       basket, // optional
     } = body ?? {};
 
-    if (!business_id || !amount || !email || !user_name || !user_address || !user_phone) {
+    if (!business_id || !amount || !email || !user_name || !user_phone) {
       return json({ error: "Missing required fields" }, 400);
     }
 
@@ -53,10 +52,17 @@ Deno.serve(async (req) => {
     );
     const { data: biz } = await admin
       .from("businesses")
-      .select("id,user_id")
+      .select("id,user_id,address")
       .eq("id", business_id)
       .maybeSingle();
     if (!biz || biz.user_id !== userId) return json({ error: "Forbidden" }, 403);
+
+    // PayTR requires user_address to be non-empty. Prefer business address on
+    // file; fall back to a generic placeholder so PayTR does not reject.
+    const user_address =
+      (typeof (biz as { address?: string }).address === "string" &&
+        (biz as { address?: string }).address!.trim()) ||
+      "Türkiye";
 
     const merchant_id = Deno.env.get("PAYTR_MERCHANT_ID") ?? "";
     const merchant_key = Deno.env.get("PAYTR_MERCHANT_KEY") ?? "";
