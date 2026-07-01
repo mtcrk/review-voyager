@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       blocked_email_domains: {
         Row: {
           created_at: string
@@ -817,6 +835,97 @@ export type Database = {
           },
         ]
       }
+      paytr_customer_tokens: {
+        Row: {
+          business_id: string
+          card_bank: string | null
+          card_brand: string | null
+          created_at: string
+          ctoken: string
+          id: string
+          last_4: string | null
+          require_cvv: boolean | null
+          updated_at: string
+          utoken: string
+        }
+        Insert: {
+          business_id: string
+          card_bank?: string | null
+          card_brand?: string | null
+          created_at?: string
+          ctoken: string
+          id?: string
+          last_4?: string | null
+          require_cvv?: boolean | null
+          updated_at?: string
+          utoken: string
+        }
+        Update: {
+          business_id?: string
+          card_bank?: string | null
+          card_brand?: string | null
+          created_at?: string
+          ctoken?: string
+          id?: string
+          last_4?: string | null
+          require_cvv?: boolean | null
+          updated_at?: string
+          utoken?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paytr_customer_tokens_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: true
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      paytr_payment_log: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          is_recurring: boolean | null
+          merchant_oid: string
+          payment_amount: number | null
+          raw_notification: Json | null
+          status: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          is_recurring?: boolean | null
+          merchant_oid: string
+          payment_amount?: number | null
+          raw_notification?: Json | null
+          status: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          is_recurring?: boolean | null
+          merchant_oid?: string
+          payment_amount?: number | null
+          raw_notification?: Json | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paytr_payment_log_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       performance_metrics_cache: {
         Row: {
           business_id: string
@@ -1308,6 +1417,103 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "story_kit_templates_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscription_billing: {
+        Row: {
+          amount: number
+          business_id: string
+          created_at: string
+          currency: string
+          id: string
+          last_payment_at: string | null
+          last_payment_status: string | null
+          next_billing_date: string | null
+          plan_code: string
+          retry_count: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          business_id: string
+          created_at?: string
+          currency?: string
+          id?: string
+          last_payment_at?: string | null
+          last_payment_status?: string | null
+          next_billing_date?: string | null
+          plan_code: string
+          retry_count?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          business_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          last_payment_at?: string | null
+          last_payment_status?: string | null
+          next_billing_date?: string | null
+          plan_code?: string
+          retry_count?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_billing_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: true
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscription_consent_log: {
+        Row: {
+          amount: number
+          business_id: string
+          consent_ip: string | null
+          consent_text_snapshot: string
+          consented_at: string
+          currency: string
+          id: string
+          plan_code: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          business_id: string
+          consent_ip?: string | null
+          consent_text_snapshot: string
+          consented_at?: string
+          currency?: string
+          id?: string
+          plan_code: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          business_id?: string
+          consent_ip?: string | null
+          consent_text_snapshot?: string
+          consented_at?: string
+          currency?: string
+          id?: string
+          plan_code?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_consent_log_business_id_fkey"
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"

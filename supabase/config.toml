@@ -74,3 +74,9 @@ verify_jwt = false
 
 [functions.fetch-competitor-reviews]
 verify_jwt = false
+
+[functions.paytr-notification]
+verify_jwt = false
+
+[functions.paytr-recurring-billing]
+verify_jwt = false

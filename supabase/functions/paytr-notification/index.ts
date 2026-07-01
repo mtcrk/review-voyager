@@ -1,0 +1,134 @@
+// paytr-notification: PUBLIC webhook. PayTR posts here after each payment.
+// Must always respond with "OK" (text/plain) so PayTR stops retrying.
+
+import { createClient } from "npm:@supabase/supabase-js@2";
+import { CORS_HEADERS, formToRecord, paytrNotificationHash } from "../_shared/paytr.ts";
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
+
+  try {
+    const fd = await req.formData();
+    const p = formToRecord(fd);
+    const {
+      merchant_oid = "",
+      status = "",
+      total_amount = "",
+      hash = "",
+    } = p;
+
+    const merchant_key = Deno.env.get("PAYTR_MERCHANT_KEY") ?? "";
+    const merchant_salt = Deno.env.get("PAYTR_MERCHANT_SALT") ?? "";
+
+    const expected = await paytrNotificationHash({
+      merchant_oid,
+      status,
+      total_amount,
+      merchant_key,
+      merchant_salt,
+    });
+
+    if (expected !== hash) {
+      console.warn("PayTR notification hash mismatch", { merchant_oid });
+      return ok();
+    }
+
+    const admin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+
+    const { data: origLog } = await admin
+      .from("paytr_payment_log")
+      .select("business_id,is_recurring")
+      .eq("merchant_oid", merchant_oid)
+      .maybeSingle();
+
+    const business_id = origLog?.business_id ?? null;
+
+    await admin
+      .from("paytr_payment_log")
+      .upsert({
+        merchant_oid,
+        business_id,
+        payment_amount: Number(total_amount) / 100,
+        is_recurring: origLog?.is_recurring ?? false,
+        status: status === "success" ? "success" : "failed",
+        error_message: p.failed_reason_msg ?? null,
+        raw_notification: p,
+      }, { onConflict: "merchant_oid" });
+
+    if (status === "success" && business_id) {
+      if (p.utoken && p.ctoken) {
+        await admin.from("paytr_customer_tokens").upsert({
+          business_id,
+          utoken: p.utoken,
+          ctoken: p.ctoken,
+          last_4: p.last_4 ?? null,
+          card_brand: p.card_type ?? null,
+          card_bank: p.card_bank ?? null,
+          require_cvv: p.require_cvv === "1",
+        }, { onConflict: "business_id" });
+      }
+
+      const next = new Date();
+      next.setMonth(next.getMonth() + 1);
+      const nextDate = next.toISOString().slice(0, 10);
+
+      const { data: existingSub } = await admin
+        .from("subscription_billing")
+        .select("id")
+        .eq("business_id", business_id)
+        .maybeSingle();
+
+      if (existingSub) {
+        await admin
+          .from("subscription_billing")
+          .update({
+            status: "active",
+            next_billing_date: nextDate,
+            retry_count: 0,
+            last_payment_status: "success",
+            last_payment_at: new Date().toISOString(),
+          })
+          .eq("business_id", business_id);
+      } else {
+        await admin.from("subscription_billing").insert({
+          business_id,
+          plan_code: "pro_monthly",
+          amount: Number(total_amount) / 100,
+          currency: "TL",
+          status: "active",
+          next_billing_date: nextDate,
+          last_payment_status: "success",
+          last_payment_at: new Date().toISOString(),
+        });
+      }
+    } else if (status !== "success" && business_id) {
+      const { data: sub } = await admin
+        .from("subscription_billing")
+        .select("retry_count")
+        .eq("business_id", business_id)
+        .maybeSingle();
+      const rc = (sub?.retry_count ?? 0) + 1;
+      await admin
+        .from("subscription_billing")
+        .update({
+          retry_count: rc,
+          last_payment_status: "failed",
+          last_payment_at: new Date().toISOString(),
+          status: rc >= 3 ? "past_due" : "active",
+        })
+        .eq("business_id", business_id);
+    }
+
+    return ok();
+  } catch (e) {
+    console.error("paytr-notification error", e);
+    return ok();
+  }
+});
+
+function ok() {
+  return new Response("OK", { status: 200, headers: { "Content-Type": "text/plain" } });
+}
