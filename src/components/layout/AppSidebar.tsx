@@ -88,7 +88,6 @@ const commonItems = [
   { title: "Sosyal Medya Analizi", url: "/social-analytics", icon: Sparkles },
   { title: "Google Performance", url: "/performance", icon: TrendingUp },
   { title: "Rapor Oluştur", url: "/report", icon: FileText },
-  { title: "Abonelik", url: "/billing", icon: Wallet },
   { title: "Ayarlar", url: "/settings", icon: Settings },
 ];
 
@@ -531,6 +530,21 @@ export function AppSidebar() {
         <SidebarGroup className="mt-auto">
           <SidebarGroupContent>
             <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={location.pathname.startsWith("/billing")}
+                  tooltip="Abonelik"
+                >
+                  <NavLink
+                    to="/billing"
+                    className="flex items-center gap-3 transition-smooth"
+                  >
+                    <Wallet className="h-5 w-5" />
+                    <span>Abonelik</span>
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
