@@ -24,7 +24,6 @@ export default function BillingCheckout() {
   const [businesses, setBusinesses] = useState<{ id: string; name: string }[]>([]);
   const [plan, setPlan] = useState<Plan>(PLANS[1]);
   const [name, setName] = useState("");
-  const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
   const [ccOwner, setCcOwner] = useState("");
   const [ccNumber, setCcNumber] = useState("");
@@ -94,7 +93,6 @@ export default function BillingCheckout() {
           amount: plan.amount,
           email: user!.email,
           user_name: name,
-          user_address: address,
           user_phone: phone,
         },
       });
@@ -151,7 +149,7 @@ export default function BillingCheckout() {
 
         <form onSubmit={handleSubmit} className="space-y-6 mt-6">
           <Card>
-            <CardHeader><CardTitle>Fatura Bilgileri</CardTitle></CardHeader>
+            <CardHeader><CardTitle>Ödeme Bilgileri</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               {businesses.length > 1 && (
                 <div>
@@ -170,10 +168,6 @@ export default function BillingCheckout() {
               <div>
                 <Label>Ad Soyad</Label>
                 <Input value={name} onChange={(e) => setName(e.target.value)} required maxLength={100} />
-              </div>
-              <div>
-                <Label>Adres</Label>
-                <Input value={address} onChange={(e) => setAddress(e.target.value)} required maxLength={400} />
               </div>
               <div>
                 <Label>Telefon</Label>
