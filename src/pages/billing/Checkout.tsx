@@ -246,16 +246,18 @@ export default function BillingCheckout() {
             </CardContent>
           </Card>
 
+          {!updateCardMode && (
           <div className="flex items-start gap-3 border rounded-lg p-4 bg-muted/30">
             <Checkbox id="consent" checked={consent} onCheckedChange={(v) => setConsent(!!v)} />
             <label htmlFor="consent" className="text-sm leading-relaxed cursor-pointer">
               {consentText}
             </label>
           </div>
+          )}
 
-          <Button type="submit" className="w-full h-12" disabled={loading || !consent}>
+          <Button type="submit" className="w-full h-12" disabled={loading || (!updateCardMode && !consent)}>
             {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-            Güvenli Ödemeye Geç ({plan.amount} TL)
+            {updateCardMode ? "Kartı Güvenle Güncelle" : `Güvenli Ödemeye Geç (${plan.amount} TL)`}
           </Button>
         </form>
 
