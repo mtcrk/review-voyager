@@ -153,6 +153,7 @@ export const routes: RouteRecord[] = [
       { path: "performance", lazy: lazyProtectedLayout(() => import("./pages/GooglePerformance")) },
       { path: "rep-score", lazy: lazyProtectedLayout(() => import("./pages/RepScore")) },
       { path: "google-accounts", lazy: lazyProtectedLayout(() => import("./pages/GoogleAccounts")) },
+      { path: "billing", lazy: lazyProtectedLayout(() => import("./pages/billing/Billing")) },
       { path: "billing/checkout", lazy: lazyProtected(() => import("./pages/billing/Checkout")) },
       { path: "billing/success", lazy: lazyDefault(() => import("./pages/billing/Success")) },
       { path: "billing/failed", lazy: lazyDefault(() => import("./pages/billing/Failed")) },
