@@ -24,7 +24,8 @@ export default function BillingCheckout() {
   const [businesses, setBusinesses] = useState<{ id: string; name: string }[]>([]);
   const [plan, setPlan] = useState<Plan>(PLANS[1]);
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [city, setCity] = useState("");
+  const [country, setCountry] = useState("Türkiye");
   const [ccOwner, setCcOwner] = useState("");
   const [ccNumber, setCcNumber] = useState("");
   const [ccExpMonth, setCcExpMonth] = useState("");
@@ -93,7 +94,8 @@ export default function BillingCheckout() {
           amount: plan.amount,
           email: user!.email,
           user_name: name,
-          user_phone: phone,
+          city,
+          country,
         },
       });
       if (error) throw error;
@@ -169,9 +171,15 @@ export default function BillingCheckout() {
                 <Label>Ad Soyad</Label>
                 <Input value={name} onChange={(e) => setName(e.target.value)} required maxLength={100} />
               </div>
-              <div>
-                <Label>Telefon</Label>
-                <Input value={phone} onChange={(e) => setPhone(e.target.value)} required maxLength={20} />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Şehir</Label>
+                  <Input value={city} onChange={(e) => setCity(e.target.value)} required maxLength={60} />
+                </div>
+                <div>
+                  <Label>Ülke</Label>
+                  <Input value={country} onChange={(e) => setCountry(e.target.value)} required maxLength={60} />
+                </div>
               </div>
             </CardContent>
           </Card>

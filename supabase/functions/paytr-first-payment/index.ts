@@ -36,12 +36,13 @@ Deno.serve(async (req) => {
       plan_code = "pro_monthly",
       amount, // TL, integer or float
       user_name,
-      user_phone,
       email,
+      city,
+      country,
       basket, // optional
     } = body ?? {};
 
-    if (!business_id || !amount || !email || !user_name || !user_phone) {
+    if (!business_id || !amount || !email || !user_name || !city) {
       return json({ error: "Missing required fields" }, 400);
     }
 
@@ -52,16 +53,19 @@ Deno.serve(async (req) => {
     );
     const { data: biz } = await admin
       .from("businesses")
-      .select("id,user_id,city")
+      .select("id,user_id")
       .eq("id", business_id)
       .maybeSingle();
     if (!biz || biz.user_id !== userId) return json({ error: "Forbidden" }, 403);
 
-    // PayTR requires user_address to be non-empty. We don't collect a real
-    // billing address (no invoice flow yet); use the business city if set,
-    // otherwise a generic placeholder so PayTR does not reject the request.
-    const bizCity = (biz as { city?: string | null }).city?.trim();
-    const user_address = bizCity ? `${bizCity}, Türkiye` : "Türkiye";
+    // PayTR requires user_address to be non-empty. Build it from the city/country
+    // supplied by the user on the checkout form (no invoice flow yet).
+    const safeCity = String(city).trim();
+    const safeCountry = (country ? String(country).trim() : "") || "Türkiye";
+    const user_address = `${safeCity}, ${safeCountry}`;
+    // We no longer collect a real phone number; PayTR only requires the field
+    // to be non-empty for the request to be accepted.
+    const user_phone = "0000000000";
 
     const merchant_id = Deno.env.get("PAYTR_MERCHANT_ID") ?? "";
     const merchant_key = Deno.env.get("PAYTR_MERCHANT_KEY") ?? "";
