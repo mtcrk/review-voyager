@@ -27,7 +27,7 @@ export default function BillingCheckout() {
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("Türkiye");
   const [countryOther, setCountryOther] = useState("");
-  const COUNTRY_OPTIONS = ["Türkiye", "Almanya", "Birleşik Krallık", "ABD", "Diğer"];
+  const COUNTRY_OPTIONS = ["Türkiye", "Almanya", "Birleşik Krallık", "ABD", "Fransa", "Hollanda", "İtalya", "İspanya", "Rusya", "Suudi Arabistan", "Birleşik Arap Emirlikleri", "Katar", "Azerbaycan", "KKTC", "Bulgaristan", "Yunanistan", "Diğer"];
   const [ccOwner, setCcOwner] = useState("");
   const [ccNumber, setCcNumber] = useState("");
   const [ccExpMonth, setCcExpMonth] = useState("");
