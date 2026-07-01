@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,8 @@ const PLANS: Plan[] = [
 export default function BillingCheckout() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const [searchParams] = useSearchParams();
+  const updateCardMode = searchParams.get("mode") === "update-card";
   const [businessId, setBusinessId] = useState<string>("");
   const [businesses, setBusinesses] = useState<{ id: string; name: string }[]>([]);
   const [plan, setPlan] = useState<Plan>(PLANS[1]);
@@ -68,7 +70,7 @@ export default function BillingCheckout() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!consent) {
+    if (!updateCardMode && !consent) {
       toast({ title: "Onay gerekli", description: "Devam etmek için otomatik yenileme onayını verin." });
       return;
     }
@@ -78,15 +80,17 @@ export default function BillingCheckout() {
     }
     setLoading(true);
     try {
-      // 1) log consent
-      await supabase.from("subscription_consent_log").insert({
+      // 1) log consent (skip in card-update mode; user already consented on initial subscription)
+      if (!updateCardMode) {
+        await supabase.from("subscription_consent_log").insert({
         business_id: businessId,
         user_id: user!.id,
         plan_code: plan.code,
         amount: plan.amount,
         currency: "TL",
         consent_text_snapshot: consentText,
-      });
+        });
+      }
 
       // 2) get PayTR fields from edge function
       const { data, error } = await supabase.functions.invoke("paytr-first-payment", {
@@ -127,11 +131,14 @@ export default function BillingCheckout() {
   return (
     <div className="min-h-screen bg-background py-10">
       <div className="container max-w-2xl mx-auto px-4">
-        <h1 className="text-3xl font-bold mb-2">Abonelik Ödemesi</h1>
+        <h1 className="text-3xl font-bold mb-2">
+          {updateCardMode ? "Kartı Güncelle" : "Abonelik Ödemesi"}
+        </h1>
         <p className="text-muted-foreground mb-6 flex items-center gap-2">
           <ShieldCheck className="w-4 h-4" /> Kart bilgileriniz doğrudan PayTR'ye iletilir, sunucularımıza uğramaz.
         </p>
 
+        {!updateCardMode && (
         <Card>
           <CardHeader><CardTitle>Plan</CardTitle></CardHeader>
           <CardContent className="grid sm:grid-cols-3 gap-3">
@@ -150,6 +157,7 @@ export default function BillingCheckout() {
             ))}
           </CardContent>
         </Card>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6 mt-6">
           <Card>
@@ -240,16 +248,18 @@ export default function BillingCheckout() {
             </CardContent>
           </Card>
 
+          {!updateCardMode && (
           <div className="flex items-start gap-3 border rounded-lg p-4 bg-muted/30">
             <Checkbox id="consent" checked={consent} onCheckedChange={(v) => setConsent(!!v)} />
             <label htmlFor="consent" className="text-sm leading-relaxed cursor-pointer">
               {consentText}
             </label>
           </div>
+          )}
 
-          <Button type="submit" className="w-full h-12" disabled={loading || !consent}>
+          <Button type="submit" className="w-full h-12" disabled={loading || (!updateCardMode && !consent)}>
             {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-            Güvenli Ödemeye Geç ({plan.amount} TL)
+            {updateCardMode ? "Kartı Güvenle Güncelle" : `Güvenli Ödemeye Geç (${plan.amount} TL)`}
           </Button>
         </form>
 
