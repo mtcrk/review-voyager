@@ -26,6 +26,8 @@ export default function BillingCheckout() {
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("Türkiye");
+  const [countryOther, setCountryOther] = useState("");
+  const COUNTRY_OPTIONS = ["Türkiye", "Almanya", "Birleşik Krallık", "ABD", "Diğer"];
   const [ccOwner, setCcOwner] = useState("");
   const [ccNumber, setCcNumber] = useState("");
   const [ccExpMonth, setCcExpMonth] = useState("");
@@ -95,7 +97,7 @@ export default function BillingCheckout() {
           email: user!.email,
           user_name: name,
           city,
-          country,
+          country: country === "Diğer" ? (countryOther.trim() || "Diğer") : country,
         },
       });
       if (error) throw error;
@@ -178,7 +180,25 @@ export default function BillingCheckout() {
                 </div>
                 <div>
                   <Label>Ülke</Label>
-                  <Input value={country} onChange={(e) => setCountry(e.target.value)} required maxLength={60} />
+                  <select
+                    className="w-full border rounded-md h-10 px-3 bg-background"
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                  >
+                    {COUNTRY_OPTIONS.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                  {country === "Diğer" && (
+                    <Input
+                      className="mt-2"
+                      placeholder="Ülke adı"
+                      value={countryOther}
+                      onChange={(e) => setCountryOther(e.target.value)}
+                      required
+                      maxLength={60}
+                    />
+                  )}
                 </div>
               </div>
             </CardContent>
