@@ -126,6 +126,8 @@ Deno.serve(async (req) => {
       payment_amount: Number(amount),
       is_recurring: false,
       status: "initiated",
+      user_ip,
+      plan_code,
     });
 
     const fields: Record<string, string> = {
