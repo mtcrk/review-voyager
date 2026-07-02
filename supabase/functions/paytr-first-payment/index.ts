@@ -91,8 +91,9 @@ Deno.serve(async (req) => {
 
     const merchant_oid = newMerchantOid();
     const user_ip = getClientIp(req);
-    // PayTR wants payment_amount as integer (kuruş = amount * 100)
-    const payment_amount = String(Math.round(Number(amount) * 100));
+    // PayTR Direkt API expects payment_amount as decimal with two digits (e.g. "999.00").
+    // Do NOT multiply by 100 — that's the iFrame API format and would cause a 100x overcharge.
+    const payment_amount = Number(amount).toFixed(2);
     const payment_type = "card";
     const installment_count = "0";
     const currency = "TL";

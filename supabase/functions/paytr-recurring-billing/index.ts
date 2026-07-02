@@ -98,7 +98,8 @@ Deno.serve(async (req) => {
       }
 
       const merchant_oid = newMerchantOid("VRR");
-      const payment_amount = String(Math.round(Number(sub.amount) * 100));
+      // Direkt API: decimal with two digits (e.g. "999.00"). Never multiply by 100.
+      const payment_amount = Number(sub.amount).toFixed(2);
       const currency = sub.currency ?? "TL";
       const payment_type = "card";
       const installment_count = "0";
@@ -148,10 +149,12 @@ Deno.serve(async (req) => {
         user_address: "N/A",
         user_phone: "N/A",
         user_basket: JSON.stringify([[sub.plan_code, String(sub.amount), 1]]),
+        merchant_ok_url: "https://voyagerespond.com/billing/success",
+        merchant_fail_url: "https://voyagerespond.com/billing/failed",
         paytr_token,
       });
 
-      const resp = await fetch("https://www.paytr.com/odeme/capi/recurring", {
+      const resp = await fetch("https://www.paytr.com/odeme", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: form.toString(),
