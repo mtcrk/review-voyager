@@ -40,11 +40,14 @@ Deno.serve(async (req) => {
 
     const { data: origLog } = await admin
       .from("paytr_payment_log")
-      .select("business_id,is_recurring")
+      .select("business_id,is_recurring,user_ip,plan_code")
       .eq("merchant_oid", merchant_oid)
       .maybeSingle();
 
     const business_id = origLog?.business_id ?? null;
+    const is_recurring = origLog?.is_recurring ?? false;
+    const orig_plan_code = origLog?.plan_code ?? "pro_monthly";
+    const orig_user_ip = origLog?.user_ip ?? null;
 
     await admin
       .from("paytr_payment_log")
@@ -52,7 +55,7 @@ Deno.serve(async (req) => {
         merchant_oid,
         business_id,
         payment_amount: Number(total_amount) / 100,
-        is_recurring: origLog?.is_recurring ?? false,
+        is_recurring,
         status: status === "success" ? "success" : "failed",
         error_message: p.failed_reason_msg ?? null,
         raw_notification: p,
@@ -68,6 +71,7 @@ Deno.serve(async (req) => {
           card_brand: p.card_type ?? null,
           card_bank: p.card_bank ?? null,
           require_cvv: p.require_cvv === "1",
+          last_payment_ip: orig_user_ip,
         }, { onConflict: "business_id" });
       }
 
@@ -95,7 +99,7 @@ Deno.serve(async (req) => {
       } else {
         await admin.from("subscription_billing").insert({
           business_id,
-          plan_code: "pro_monthly",
+          plan_code: orig_plan_code,
           amount: Number(total_amount) / 100,
           currency: "TL",
           status: "active",
@@ -104,7 +108,10 @@ Deno.serve(async (req) => {
           last_payment_at: new Date().toISOString(),
         });
       }
-    } else if (status !== "success" && business_id) {
+    } else if (status !== "success" && business_id && is_recurring) {
+      // Only recurring failures should degrade the subscription. First-payment
+      // attempts (is_recurring=false) must not push an existing active plan
+      // into past_due when a user mistypes card details at checkout.
       const { data: sub } = await admin
         .from("subscription_billing")
         .select("retry_count")

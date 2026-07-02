@@ -105,20 +105,9 @@ export default function Billing() {
       setPayments((payRes.data as PaymentLog[] | null) ?? []);
 
       if (!cardRes.error && cardRes.data) {
-        const d: any = cardRes.data;
-        if (d.cards && Array.isArray(d.cards) && d.cards.length === 0) {
-          setCard(null);
-        } else if (d.fallback || d.raw) {
-          const raw = d.raw?.cards?.[0] ?? d.raw;
-          setCard({
-            last_4: raw?.last_4 ?? d.fallback?.last_4 ?? null,
-            brand: raw?.c_brand ?? d.fallback?.brand ?? null,
-            bank: raw?.c_bank ?? d.fallback?.bank ?? null,
-            schema: raw?.schema ?? null,
-          });
-        } else {
-          setCard(null);
-        }
+        const d = cardRes.data as { cards?: CardInfo[] };
+        const first = Array.isArray(d.cards) && d.cards.length > 0 ? d.cards[0] : null;
+        setCard(first && first.last_4 ? first : null);
       } else {
         setCard(null);
       }

@@ -44,13 +44,20 @@ Deno.serve(async (req) => {
 
     if (!tok?.utoken) return json({ cards: [] });
 
+    const fallbackCard = {
+      last_4: tok.last_4 ?? null,
+      brand: tok.card_brand ?? null,
+      bank: tok.card_bank ?? null,
+      schema: null as string | null,
+      month: null as string | null,
+      year: null as string | null,
+    };
+
     const merchant_id = Deno.env.get("PAYTR_MERCHANT_ID") ?? "";
     const merchant_key = Deno.env.get("PAYTR_MERCHANT_KEY") ?? "";
     const merchant_salt = Deno.env.get("PAYTR_MERCHANT_SALT") ?? "";
     if (!merchant_id || !merchant_key || !merchant_salt) {
-      return json({
-        cards: [{ last_4: tok.last_4, brand: tok.card_brand, bank: tok.card_bank }],
-      });
+      return json({ cards: [fallbackCard] });
     }
 
     const paytr_token = await paytrUtokenListToken({
@@ -72,10 +79,21 @@ Deno.serve(async (req) => {
     });
     const data = await resp.json().catch(() => ({}));
 
-    return json({
-      raw: data,
-      fallback: { last_4: tok.last_4, brand: tok.card_brand, bank: tok.card_bank },
-    });
+    // NEVER leak utoken / ctoken / paytr_token back to the browser.
+    // Only project the safe display fields from PayTR's response.
+    const rawCards = Array.isArray((data as any)?.cards) ? (data as any).cards : [];
+    const cards = rawCards.length > 0
+      ? rawCards.map((c: any) => ({
+          last_4: c?.last_4 ?? c?.masked_pan?.slice(-4) ?? fallbackCard.last_4,
+          brand: c?.c_brand ?? fallbackCard.brand,
+          bank: c?.c_bank ?? fallbackCard.bank,
+          schema: c?.schema ?? null,
+          month: c?.month ?? null,
+          year: c?.year ?? null,
+        }))
+      : [fallbackCard];
+
+    return json({ cards });
   } catch (e) {
     console.error("paytr-list-cards error", e);
     return json({ error: (e as Error).message }, 500);

@@ -844,6 +844,7 @@ export type Database = {
           ctoken: string
           id: string
           last_4: string | null
+          last_payment_ip: string | null
           require_cvv: boolean | null
           updated_at: string
           utoken: string
@@ -856,6 +857,7 @@ export type Database = {
           ctoken: string
           id?: string
           last_4?: string | null
+          last_payment_ip?: string | null
           require_cvv?: boolean | null
           updated_at?: string
           utoken: string
@@ -868,6 +870,7 @@ export type Database = {
           ctoken?: string
           id?: string
           last_4?: string | null
+          last_payment_ip?: string | null
           require_cvv?: boolean | null
           updated_at?: string
           utoken?: string
@@ -891,8 +894,10 @@ export type Database = {
           is_recurring: boolean | null
           merchant_oid: string
           payment_amount: number | null
+          plan_code: string | null
           raw_notification: Json | null
           status: string
+          user_ip: string | null
         }
         Insert: {
           business_id?: string | null
@@ -902,8 +907,10 @@ export type Database = {
           is_recurring?: boolean | null
           merchant_oid: string
           payment_amount?: number | null
+          plan_code?: string | null
           raw_notification?: Json | null
           status: string
+          user_ip?: string | null
         }
         Update: {
           business_id?: string | null
@@ -913,8 +920,10 @@ export type Database = {
           is_recurring?: boolean | null
           merchant_oid?: string
           payment_amount?: number | null
+          plan_code?: string | null
           raw_notification?: Json | null
           status?: string
+          user_ip?: string | null
         }
         Relationships: [
           {

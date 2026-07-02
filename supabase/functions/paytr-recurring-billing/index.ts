@@ -12,6 +12,12 @@ import {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
 
+  // Shared-secret gate: only the pg_cron job may trigger this endpoint.
+  const cronSecret = Deno.env.get("PAYTR_CRON_SECRET") ?? "";
+  if (!cronSecret || req.headers.get("x-cron-secret") !== cronSecret) {
+    return json({ error: "Unauthorized" }, 401);
+  }
+
   const admin = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
@@ -52,9 +58,26 @@ Deno.serve(async (req) => {
 
   for (const sub of due ?? []) {
     try {
+      // Double-charge guard: skip if we already attempted a recurring charge
+      // for this business today (initiated / wait_callback / success).
+      const startOfDay = new Date();
+      startOfDay.setUTCHours(0, 0, 0, 0);
+      const { data: todayLog } = await admin
+        .from("paytr_payment_log")
+        .select("id,status")
+        .eq("business_id", sub.business_id)
+        .eq("is_recurring", true)
+        .in("status", ["initiated", "success", "wait_callback"])
+        .gte("created_at", startOfDay.toISOString())
+        .limit(1);
+      if (todayLog && todayLog.length > 0) {
+        results.push({ business_id: sub.business_id, skipped: "already attempted today" });
+        continue;
+      }
+
       const { data: tok } = await admin
         .from("paytr_customer_tokens")
-        .select("utoken,ctoken")
+        .select("utoken,ctoken,last_payment_ip")
         .eq("business_id", sub.business_id)
         .maybeSingle();
 
@@ -80,7 +103,7 @@ Deno.serve(async (req) => {
       const payment_type = "card";
       const installment_count = "0";
       const non_3d = "1";
-      const user_ip = "127.0.0.1";
+      const user_ip = tok.last_payment_ip || "127.0.0.1";
 
       const paytr_token = await paytrPaymentToken({
         merchant_id,
@@ -103,6 +126,8 @@ Deno.serve(async (req) => {
         payment_amount: Number(sub.amount),
         is_recurring: true,
         status: "initiated",
+        user_ip,
+        plan_code: sub.plan_code,
       });
 
       const form = new URLSearchParams({
