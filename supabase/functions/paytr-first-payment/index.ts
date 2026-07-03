@@ -40,6 +40,10 @@ Deno.serve(async (req) => {
       city,
       country,
       basket, // optional
+      plan_id = null,
+      location_count = 1,
+      computed_total = null,
+      addon_codes = [],
     } = body ?? {};
 
     if (!business_id || !amount || !email || !user_name || !city) {
@@ -129,6 +133,10 @@ Deno.serve(async (req) => {
       status: "initiated",
       user_ip,
       plan_code,
+      plan_id,
+      location_count: Number(location_count) || 1,
+      computed_total: computed_total != null ? Number(computed_total) : Number(amount),
+      addon_codes: Array.isArray(addon_codes) ? addon_codes : [],
     });
 
     const fields: Record<string, string> = {
