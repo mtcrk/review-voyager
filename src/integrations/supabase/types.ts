@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      addons: {
+        Row: {
+          addon_code: string
+          amount: number
+          created_at: string
+          id: string
+          is_active: boolean
+          label: string
+        }
+        Insert: {
+          addon_code: string
+          amount: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label: string
+        }
+        Update: {
+          addon_code?: string
+          amount?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           key: string
@@ -887,40 +914,52 @@ export type Database = {
       }
       paytr_payment_log: {
         Row: {
+          addon_codes: string[] | null
           business_id: string | null
+          computed_total: number | null
           created_at: string
           error_message: string | null
           id: string
           is_recurring: boolean | null
+          location_count: number | null
           merchant_oid: string
           payment_amount: number | null
           plan_code: string | null
+          plan_id: string | null
           raw_notification: Json | null
           status: string
           user_ip: string | null
         }
         Insert: {
+          addon_codes?: string[] | null
           business_id?: string | null
+          computed_total?: number | null
           created_at?: string
           error_message?: string | null
           id?: string
           is_recurring?: boolean | null
+          location_count?: number | null
           merchant_oid: string
           payment_amount?: number | null
           plan_code?: string | null
+          plan_id?: string | null
           raw_notification?: Json | null
           status: string
           user_ip?: string | null
         }
         Update: {
+          addon_codes?: string[] | null
           business_id?: string | null
+          computed_total?: number | null
           created_at?: string
           error_message?: string | null
           id?: string
           is_recurring?: boolean | null
+          location_count?: number | null
           merchant_oid?: string
           payment_amount?: number | null
           plan_code?: string | null
+          plan_id?: string | null
           raw_notification?: Json | null
           status?: string
           user_ip?: string | null
@@ -978,6 +1017,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      plans: {
+        Row: {
+          base_amount: number
+          created_at: string
+          id: string
+          is_active: boolean
+          label: string
+          plan_code: string
+          segment: string
+          unit_type: string
+        }
+        Insert: {
+          base_amount: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label: string
+          plan_code: string
+          segment: string
+          unit_type: string
+        }
+        Update: {
+          base_amount?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          plan_code?: string
+          segment?: string
+          unit_type?: string
+        }
+        Relationships: []
       }
       platform_rankings: {
         Row: {
@@ -1435,43 +1507,55 @@ export type Database = {
       }
       subscription_billing: {
         Row: {
+          addon_codes: string[]
           amount: number
           business_id: string
+          computed_total: number | null
           created_at: string
           currency: string
           id: string
           last_payment_at: string | null
           last_payment_status: string | null
+          location_count: number
           next_billing_date: string | null
           plan_code: string
+          plan_id: string | null
           retry_count: number
           status: string
           updated_at: string
         }
         Insert: {
+          addon_codes?: string[]
           amount: number
           business_id: string
+          computed_total?: number | null
           created_at?: string
           currency?: string
           id?: string
           last_payment_at?: string | null
           last_payment_status?: string | null
+          location_count?: number
           next_billing_date?: string | null
           plan_code: string
+          plan_id?: string | null
           retry_count?: number
           status?: string
           updated_at?: string
         }
         Update: {
+          addon_codes?: string[]
           amount?: number
           business_id?: string
+          computed_total?: number | null
           created_at?: string
           currency?: string
           id?: string
           last_payment_at?: string | null
           last_payment_status?: string | null
+          location_count?: number
           next_billing_date?: string | null
           plan_code?: string
+          plan_id?: string | null
           retry_count?: number
           status?: string
           updated_at?: string
@@ -1482,6 +1566,13 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: true
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_billing_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
             referencedColumns: ["id"]
           },
         ]
