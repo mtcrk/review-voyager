@@ -76,7 +76,16 @@ Deno.serve(async (req) => {
       return json({ error: "invalid_plan" }, 400);
     }
 
-    const safeLocationCount = Math.max(1, Number(location_count) || 1);
+    const rawLocationCount = Math.trunc(Number(location_count));
+    if (!Number.isFinite(rawLocationCount) || rawLocationCount < 1 || rawLocationCount > 500) {
+      console.warn("paytr-first-payment: location_count_out_of_range", {
+        business_id,
+        plan_id,
+        raw: location_count,
+      });
+      return json({ error: "location_count_out_of_range" }, 400);
+    }
+    const safeLocationCount = rawLocationCount;
     const planSubtotal = planRow.unit_type === "per_location"
       ? Number(planRow.base_amount) * safeLocationCount
       : Number(planRow.base_amount);
