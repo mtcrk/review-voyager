@@ -456,7 +456,7 @@ export default function BillingCheckout() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-semibold">{plan.label}</span>
                         <Badge variant="secondary" className="text-[10px] uppercase tracking-wider">
-                          {SEGMENT_LABEL[plan.segment]}
+                          {SEGMENT_LABEL[plan.segment] ?? "Paket"}
                         </Badge>
                       </div>
                       {plan.unit_type === "per_location" ? (
