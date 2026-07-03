@@ -127,8 +127,9 @@ export default function BillingCheckout() {
 
   const planSubtotal = useMemo(() => {
     if (!plan) return 0;
+    const loc = Math.min(500, Math.max(1, Math.trunc(Number(locationCount) || 1)));
     return plan.unit_type === "per_location"
-      ? Number(plan.base_amount) * Math.max(1, Number(locationCount) || 1)
+      ? Number(plan.base_amount) * loc
       : Number(plan.base_amount);
   }, [plan, locationCount]);
 
@@ -369,8 +370,14 @@ export default function BillingCheckout() {
                 <Input
                   type="number"
                   min={1}
+                  max={500}
+                  step={1}
                   value={locationCount}
-                  onChange={(e) => setLocationCount(Math.max(1, Number(e.target.value) || 1))}
+                  onChange={(e) =>
+                    setLocationCount(
+                      Math.min(500, Math.max(1, Math.trunc(Number(e.target.value) || 1))),
+                    )
+                  }
                   className="max-w-[160px] mt-1"
                 />
                 <p className="text-xs text-muted-foreground mt-2">
