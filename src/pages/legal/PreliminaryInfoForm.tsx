@@ -35,6 +35,7 @@ export default function PreliminaryInfoForm({
         title="Ön Bilgilendirme Formu | VoyageRespond"
         description="Mesafeli Sözleşmeler Yönetmeliği kapsamında ödeme öncesi ön bilgilendirme formu taslağı."
         canonical="https://voyagerespond.com/on-bilgilendirme-formu"
+        noindex
       />
       <div className="container mx-auto px-6 py-12 max-w-4xl">
         <Button variant="ghost" onClick={() => navigate(-1)} className="mb-8">
