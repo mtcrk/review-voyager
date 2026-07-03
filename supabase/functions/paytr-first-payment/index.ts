@@ -49,6 +49,9 @@ Deno.serve(async (req) => {
     if (!business_id || !amount || !email || !user_name || !city) {
       return json({ error: "Missing required fields" }, 400);
     }
+    if (!plan_id || typeof plan_id !== "string") {
+      return json({ error: "invalid_plan" }, 400);
+    }
 
     // Verify the user owns this business
     const admin = createClient(
@@ -61,6 +64,72 @@ Deno.serve(async (req) => {
       .eq("id", business_id)
       .maybeSingle();
     if (!biz || biz.user_id !== userId) return json({ error: "Forbidden" }, 403);
+
+    // ============ SERVER-SIDE AMOUNT AUTHORITY ============
+    // Never trust client-supplied amount. Recompute from plans/addons.
+    const { data: planRow } = await admin
+      .from("plans")
+      .select("id,plan_code,base_amount,unit_type,is_active")
+      .eq("id", plan_id)
+      .maybeSingle();
+    if (!planRow || planRow.is_active === false) {
+      return json({ error: "invalid_plan" }, 400);
+    }
+
+    const safeLocationCount = Math.max(1, Number(location_count) || 1);
+    const planSubtotal = planRow.unit_type === "per_location"
+      ? Number(planRow.base_amount) * safeLocationCount
+      : Number(planRow.base_amount);
+
+    const requestedAddonCodes: string[] = Array.isArray(addon_codes)
+      ? addon_codes.filter((c: unknown): c is string => typeof c === "string")
+      : [];
+    let addonSubtotal = 0;
+    let validAddonCodes: string[] = [];
+    if (requestedAddonCodes.length) {
+      const { data: addonRows } = await admin
+        .from("addons")
+        .select("addon_code,amount,is_active")
+        .in("addon_code", requestedAddonCodes)
+        .eq("is_active", true);
+      const known = new Set((addonRows ?? []).map((a) => a.addon_code));
+      const unknown = requestedAddonCodes.filter((c) => !known.has(c));
+      if (unknown.length) {
+        console.warn("paytr-first-payment: ignoring unknown/inactive addons", unknown);
+      }
+      for (const a of addonRows ?? []) addonSubtotal += Number(a.amount);
+      validAddonCodes = (addonRows ?? []).map((a) => a.addon_code);
+    }
+
+    const serverComputedTotal = Math.round((planSubtotal + addonSubtotal) * 100) / 100;
+    const clientAmount = Number(computed_total ?? amount);
+    if (!Number.isFinite(clientAmount) || Math.abs(clientAmount - serverComputedTotal) > 0.01) {
+      console.warn("paytr-first-payment: amount_mismatch", {
+        business_id,
+        plan_id,
+        clientAmount,
+        serverComputedTotal,
+      });
+      await admin.from("paytr_payment_log").insert({
+        business_id,
+        merchant_oid: newMerchantOid(),
+        payment_amount: clientAmount || 0,
+        is_recurring: false,
+        status: "rejected_amount_mismatch",
+        user_ip: getClientIp(req),
+        plan_code: planRow.plan_code,
+        plan_id: planRow.id,
+        location_count: safeLocationCount,
+        computed_total: serverComputedTotal,
+        addon_codes: validAddonCodes,
+        error_message: `client=${clientAmount} server=${serverComputedTotal}`,
+      });
+      return json({ error: "amount_mismatch", server_total: serverComputedTotal }, 400);
+    }
+    // From here on, use serverComputedTotal as the single source of truth.
+    const authoritativeAmount = serverComputedTotal;
+    const authoritativePlanCode = planRow.plan_code;
+    // ======================================================
 
     // PayTR requires user_address to be non-empty. Build it from the city/country
     // supplied by the user on the checkout form (no invoice flow yet).
@@ -97,7 +166,7 @@ Deno.serve(async (req) => {
     const user_ip = getClientIp(req);
     // PayTR Direkt API expects payment_amount as decimal with two digits (e.g. "999.00").
     // Do NOT multiply by 100 — that's the iFrame API format and would cause a 100x overcharge.
-    const payment_amount = Number(amount).toFixed(2);
+    const payment_amount = authoritativeAmount.toFixed(2);
     const payment_type = "card";
     const installment_count = "0";
     const currency = "TL";
@@ -121,22 +190,22 @@ Deno.serve(async (req) => {
     const origin = req.headers.get("origin") ?? "https://voyagerespondcom.lovable.app";
 
     const user_basket = JSON.stringify(
-      basket ?? [[plan_code, String(amount), 1]],
+      basket ?? [[authoritativePlanCode, payment_amount, 1]],
     );
 
     // Log the initiated attempt
     await admin.from("paytr_payment_log").insert({
       business_id,
       merchant_oid,
-      payment_amount: Number(amount),
+      payment_amount: authoritativeAmount,
       is_recurring: false,
       status: "initiated",
       user_ip,
-      plan_code,
-      plan_id,
-      location_count: Number(location_count) || 1,
-      computed_total: computed_total != null ? Number(computed_total) : Number(amount),
-      addon_codes: Array.isArray(addon_codes) ? addon_codes : [],
+      plan_code: authoritativePlanCode,
+      plan_id: planRow.id,
+      location_count: safeLocationCount,
+      computed_total: authoritativeAmount,
+      addon_codes: validAddonCodes,
     });
 
     const fields: Record<string, string> = {
