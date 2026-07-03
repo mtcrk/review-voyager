@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
   const today = new Date().toISOString().slice(0, 10);
   const { data: due } = await admin
     .from("subscription_billing")
-    .select("business_id,plan_code,amount,currency,retry_count")
+    .select("business_id,plan_code,amount,currency,retry_count,computed_total,location_count,addon_codes,plan_id")
     .eq("status", "active")
     .lte("next_billing_date", today);
 
@@ -99,7 +99,9 @@ Deno.serve(async (req) => {
 
       const merchant_oid = newMerchantOid("VRR");
       // Direkt API: decimal with two digits (e.g. "999.00"). Never multiply by 100.
-      const payment_amount = Number(sub.amount).toFixed(2);
+      // Prefer computed_total (dynamic pricing: plan + addons + per-location) when set.
+      const chargeAmount = sub.computed_total != null ? Number(sub.computed_total) : Number(sub.amount);
+      const payment_amount = chargeAmount.toFixed(2);
       const currency = sub.currency ?? "TL";
       const payment_type = "card";
       const installment_count = "0";
@@ -124,11 +126,15 @@ Deno.serve(async (req) => {
       await admin.from("paytr_payment_log").insert({
         business_id: sub.business_id,
         merchant_oid,
-        payment_amount: Number(sub.amount),
+        payment_amount: chargeAmount,
         is_recurring: true,
         status: "initiated",
         user_ip,
         plan_code: sub.plan_code,
+        plan_id: sub.plan_id ?? null,
+        location_count: sub.location_count ?? 1,
+        computed_total: chargeAmount,
+        addon_codes: sub.addon_codes ?? [],
       });
 
       const form = new URLSearchParams({
@@ -148,7 +154,7 @@ Deno.serve(async (req) => {
         user_name: biz?.name ?? "Customer",
         user_address: "N/A",
         user_phone: "N/A",
-        user_basket: JSON.stringify([[sub.plan_code, String(sub.amount), 1]]),
+        user_basket: JSON.stringify([[sub.plan_code, String(chargeAmount), 1]]),
         merchant_ok_url: "https://voyagerespond.com/billing/success",
         merchant_fail_url: "https://voyagerespond.com/billing/failed",
         paytr_token,
