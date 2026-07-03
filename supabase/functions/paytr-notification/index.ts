@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
 
     const { data: origLog } = await admin
       .from("paytr_payment_log")
-      .select("business_id,is_recurring,user_ip,plan_code")
+      .select("business_id,is_recurring,user_ip,plan_code,plan_id,location_count,computed_total,addon_codes")
       .eq("merchant_oid", merchant_oid)
       .maybeSingle();
 
@@ -48,6 +48,10 @@ Deno.serve(async (req) => {
     const is_recurring = origLog?.is_recurring ?? false;
     const orig_plan_code = origLog?.plan_code ?? "pro_monthly";
     const orig_user_ip = origLog?.user_ip ?? null;
+    const orig_plan_id = origLog?.plan_id ?? null;
+    const orig_location_count = origLog?.location_count ?? 1;
+    const orig_computed_total = origLog?.computed_total ?? null;
+    const orig_addon_codes = origLog?.addon_codes ?? [];
 
     await admin
       .from("paytr_payment_log")
@@ -94,6 +98,12 @@ Deno.serve(async (req) => {
             retry_count: 0,
             last_payment_status: "success",
             last_payment_at: new Date().toISOString(),
+            plan_code: orig_plan_code,
+            amount: Number(total_amount) / 100,
+            plan_id: orig_plan_id,
+            location_count: orig_location_count,
+            computed_total: orig_computed_total ?? Number(total_amount) / 100,
+            addon_codes: orig_addon_codes,
           })
           .eq("business_id", business_id);
       } else {
@@ -106,6 +116,10 @@ Deno.serve(async (req) => {
           next_billing_date: nextDate,
           last_payment_status: "success",
           last_payment_at: new Date().toISOString(),
+          plan_id: orig_plan_id,
+          location_count: orig_location_count,
+          computed_total: orig_computed_total ?? Number(total_amount) / 100,
+          addon_codes: orig_addon_codes,
         });
       }
     } else if (status !== "success" && business_id && is_recurring) {
