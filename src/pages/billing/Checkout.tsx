@@ -8,7 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, ShieldCheck, Hotel, UtensilsCrossed, Scissors, Stethoscope } from "lucide-react";
+import { Loader2, ShieldCheck, Hotel, UtensilsCrossed, Scissors, Stethoscope, Info, Check } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Badge } from "@/components/ui/badge";
 
 type Plan = {
   id: string;
@@ -25,6 +27,63 @@ const SEGMENT_ICON: Record<Plan["segment"], typeof Hotel> = {
   restaurant: UtensilsCrossed,
   salon: Scissors,
   clinic: Stethoscope,
+};
+
+const SEGMENT_META: Record<Plan["segment"], { tagline: string; details: string[]; audience: string }> = {
+  hotel: {
+    tagline: "Yorum yönetimi, çoklu platform entegrasyonu ve sentiment analizi.",
+    details: [
+      "Google, Booking, TripAdvisor ve Hotels.com entegrasyonu",
+      "AI destekli çok dilli yanıt üretimi",
+      "Rakip karşılaştırma ve konum bazlı raporlar",
+      "Haftalık yönetici özet e-postaları",
+    ],
+    audience: "Butik oteller, resort ve zincir otel yöneticileri için.",
+  },
+  restaurant: {
+    tagline: "Şubeler arası yorum takibi ve otomatik yanıt yönetimi.",
+    details: [
+      "Her lokasyon için ayrı puan ve trend analizi",
+      "Google & TripAdvisor yorumlarına AI yanıt",
+      "Menü/servis konularına göre kategori raporları",
+      "Şube performans karşılaştırması",
+    ],
+    audience: "Tek şube veya zincir restoranlar, kafeler için.",
+  },
+  salon: {
+    tagline: "Randevu sonrası itibar yönetimi ve müşteri geri dönüşü.",
+    details: [
+      "Google Business yorumlarına otomatik yanıt",
+      "Müşteri memnuniyet skoru takibi",
+      "Olumsuz yorumlar için anında bildirim",
+      "Yorum toplama QR ve kısa linkleri",
+    ],
+    audience: "Güzellik salonları, kuaförler ve spa'lar için.",
+  },
+  clinic: {
+    tagline: "Hasta yorumları için hassas ve profesyonel itibar yönetimi.",
+    details: [
+      "Sağlık jargonuna uygun AI yanıt tonu",
+      "Google ve sektörel platform takibi",
+      "Olumsuz yorumlarda gerçek zamanlı uyarı",
+      "Hekim/branş bazlı memnuniyet raporları",
+    ],
+    audience: "Poliklinikler, diş klinikleri ve estetik merkezleri için.",
+  },
+};
+
+const SEGMENT_LABEL: Record<Plan["segment"], string> = {
+  hotel: "Otel",
+  restaurant: "Restoran",
+  salon: "Salon",
+  clinic: "Klinik",
+};
+
+const ADDON_META: Record<string, string> = {
+  competitor_analysis:
+    "Bölgenizdeki rakip işletmelerin puan ve yorum trendini otomatik olarak izler; kıyaslamalı raporlar sunar.",
+  ai_visibility:
+    "ChatGPT, Gemini gibi AI arama motorlarında işletmenizin ne sıklıkla ve nasıl önerildiğini takip eder.",
 };
 
 export default function BillingCheckout() {
@@ -202,37 +261,91 @@ export default function BillingCheckout() {
 
         {!updateCardMode && (
         <>
-          <Card>
-            <CardHeader><CardTitle>İşletme Türü</CardTitle></CardHeader>
-            <CardContent className="grid sm:grid-cols-2 gap-3">
+          <section>
+            <div className="flex items-baseline gap-3 mb-1">
+              <span className="text-xs font-semibold text-primary tracking-wider">ADIM 1</span>
+              <h2 className="text-xl font-semibold">İşletme Türü</h2>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              İşletmenize en uygun paketi seçin. Her paket sektöre özel entegrasyonlarla gelir.
+            </p>
+            <div className="grid sm:grid-cols-2 gap-4">
               {plans.map((p) => {
                 const Icon = SEGMENT_ICON[p.segment];
                 const active = plan?.id === p.id;
+                const meta = SEGMENT_META[p.segment];
                 return (
-                  <button
-                    type="button"
-                    key={p.id}
-                    onClick={() => setPlan(p)}
-                    className={`border rounded-lg p-4 text-left transition flex items-start gap-3 ${
-                      active ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-muted-foreground/40"
-                    }`}
-                  >
-                    <Icon className="w-5 h-5 mt-0.5 text-primary shrink-0" />
-                    <div>
-                      <div className="font-semibold">{p.label}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {Number(p.base_amount).toLocaleString("tr-TR")} TL{p.unit_type === "per_location" ? " / lokasyon / ay" : " / ay"}
+                  <div key={p.id} className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setPlan(p)}
+                      className={`w-full text-left rounded-xl border bg-card p-5 transition-all duration-200 ${
+                        active
+                          ? "border-primary ring-2 ring-primary/25 shadow-md scale-[1.01]"
+                          : "border-border hover:border-primary/40 hover:shadow-sm hover:-translate-y-0.5"
+                      }`}
+                    >
+                      {active && (
+                        <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+                          <Check className="w-3.5 h-3.5 text-primary-foreground" />
+                        </div>
+                      )}
+                      <div className="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+                        <Icon className="w-5 h-5 text-primary" />
                       </div>
-                    </div>
-                  </button>
+                      <div className="font-semibold text-base mb-1">{p.label}</div>
+                      <p className="text-xs text-muted-foreground leading-relaxed mb-3 pr-6">
+                        {meta.tagline}
+                      </p>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-2xl font-bold tracking-tight">
+                          {Number(p.base_amount).toLocaleString("tr-TR")}
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                          TL{p.unit_type === "per_location" ? " / lokasyon / ay" : " / ay"}
+                        </span>
+                      </div>
+                    </button>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          onClick={(e) => e.stopPropagation()}
+                          className="absolute bottom-4 right-4 w-7 h-7 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition"
+                          aria-label="Detaylar"
+                        >
+                          <Info className="w-4 h-4" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent align="end" className="w-80">
+                        <div className="space-y-3">
+                          <div>
+                            <div className="font-semibold text-sm">{p.label} — Neler Dahil?</div>
+                            <p className="text-xs text-muted-foreground mt-0.5">{meta.audience}</p>
+                          </div>
+                          <ul className="space-y-1.5">
+                            {meta.details.map((d) => (
+                              <li key={d} className="flex items-start gap-2 text-xs">
+                                <Check className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+                                <span className="text-muted-foreground leading-relaxed">{d}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                 );
               })}
-            </CardContent>
-          </Card>
+            </div>
+          </section>
 
           {plan?.unit_type === "per_location" && (
-            <Card className="mt-6">
-              <CardHeader><CardTitle>Lokasyon Sayısı</CardTitle></CardHeader>
+            <Card className="mt-6 rounded-xl">
+              <CardHeader>
+                <CardTitle className="text-lg">Lokasyon Sayısı</CardTitle>
+                <p className="text-sm text-muted-foreground">Her lokasyon ayrı fiyatlandırılır.</p>
+              </CardHeader>
               <CardContent>
                 <Label>Kaç lokasyonunuz var?</Label>
                 <Input
@@ -243,26 +356,41 @@ export default function BillingCheckout() {
                   className="max-w-[160px] mt-1"
                 />
                 <p className="text-xs text-muted-foreground mt-2">
-                  {Number(plan.base_amount).toLocaleString("tr-TR")} TL × {locationCount} lokasyon = {" "}
-                  <span className="font-medium text-foreground">{planSubtotal.toLocaleString("tr-TR")} TL</span>
+                  {Number(plan.base_amount).toLocaleString("tr-TR")} TL × {locationCount} lokasyon ={" "}
+                  <span className="font-medium text-foreground">
+                    {planSubtotal.toLocaleString("tr-TR")} TL
+                  </span>
                 </p>
               </CardContent>
             </Card>
           )}
 
           {addons.length > 0 && (
-            <Card className="mt-6">
-              <CardHeader><CardTitle>Ek Modüller (Opsiyonel)</CardTitle></CardHeader>
-              <CardContent className="space-y-3">
+            <section className="mt-8">
+              <div className="flex items-baseline gap-3 mb-1">
+                <span className="text-xs font-semibold text-primary tracking-wider">ADIM 2</span>
+                <h2 className="text-xl font-semibold">Ek Modüller</h2>
+                <span className="text-xs text-muted-foreground">Opsiyonel</span>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                İhtiyacınıza göre paketinizi güçlendirin. İstediğiniz zaman ekleyip kaldırabilirsiniz.
+              </p>
+              <div className="grid gap-3">
                 {addons.map((a) => {
                   const checked = selectedAddons.includes(a.addon_code);
+                  const info = ADDON_META[a.addon_code];
                   return (
-                    <label
+                    <div
                       key={a.id}
-                      className="flex items-center justify-between gap-3 border rounded-lg p-3 cursor-pointer hover:border-muted-foreground/40"
+                      className={`rounded-xl border bg-card p-4 transition ${
+                        checked
+                          ? "border-primary ring-1 ring-primary/20"
+                          : "border-border hover:border-primary/40"
+                      }`}
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-start gap-3">
                         <Checkbox
+                          className="mt-1"
                           checked={checked}
                           onCheckedChange={(v) =>
                             setSelectedAddons((prev) =>
@@ -270,37 +398,101 @@ export default function BillingCheckout() {
                             )
                           }
                         />
-                        <span className="text-sm font-medium">{a.label}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold">{a.label}</span>
+                            {info && (
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <button
+                                    type="button"
+                                    className="text-muted-foreground hover:text-primary transition"
+                                    aria-label="Modül bilgisi"
+                                  >
+                                    <Info className="w-3.5 h-3.5" />
+                                  </button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-72 text-xs text-muted-foreground leading-relaxed">
+                                  {info}
+                                </PopoverContent>
+                              </Popover>
+                            )}
+                          </div>
+                          {info && (
+                            <p className="text-xs text-muted-foreground mt-1 leading-relaxed line-clamp-2">
+                              {info}
+                            </p>
+                          )}
+                        </div>
+                        <div className="text-sm font-medium whitespace-nowrap">
+                          +{Number(a.amount).toLocaleString("tr-TR")} TL
+                          <span className="text-muted-foreground font-normal"> / ay</span>
+                        </div>
                       </div>
-                      <span className="text-sm text-muted-foreground">
-                        +{Number(a.amount).toLocaleString("tr-TR")} TL / ay
-                      </span>
-                    </label>
+                    </div>
                   );
                 })}
-              </CardContent>
-            </Card>
+              </div>
+            </section>
           )}
 
-          <Card className="mt-6 border-primary/40 bg-primary/5">
-            <CardContent className="pt-6 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Plan</span>
-                <span>{planSubtotal.toLocaleString("tr-TR")} TL</span>
-              </div>
-              {addonsSubtotal > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Ek modüller</span>
-                  <span>{addonsSubtotal.toLocaleString("tr-TR")} TL</span>
+          <div className="mt-8">
+            <div className="text-xs font-semibold text-primary tracking-wider mb-2">SİPARİŞ ÖZETİ</div>
+            <Card className="rounded-xl border-primary/30 shadow-[0_10px_40px_-20px_rgba(122,90,248,0.35)]">
+              <CardContent className="pt-6 space-y-4">
+                {plan && (
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-semibold">{plan.label}</span>
+                        <Badge variant="secondary" className="text-[10px] uppercase tracking-wider">
+                          {SEGMENT_LABEL[plan.segment]}
+                        </Badge>
+                      </div>
+                      {plan.unit_type === "per_location" ? (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {Number(plan.base_amount).toLocaleString("tr-TR")} TL × {locationCount} lokasyon
+                        </p>
+                      ) : (
+                        <p className="text-xs text-muted-foreground mt-1">Sabit aylık plan</p>
+                      )}
+                    </div>
+                    <span className="text-sm font-medium whitespace-nowrap">
+                      {planSubtotal.toLocaleString("tr-TR")} TL
+                    </span>
+                  </div>
+                )}
+
+                {selectedAddons.length > 0 && (
+                  <div className="space-y-2 pt-2 border-t border-dashed border-border">
+                    {addons
+                      .filter((a) => selectedAddons.includes(a.addon_code))
+                      .map((a) => (
+                        <div key={a.id} className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">+ {a.label}</span>
+                          <span>{Number(a.amount).toLocaleString("tr-TR")} TL</span>
+                        </div>
+                      ))}
+                  </div>
+                )}
+
+                <div className="h-px bg-border" />
+
+                <div className="flex items-end justify-between">
+                  <div>
+                    <div className="text-base font-semibold">Aylık Toplam</div>
+                    <div className="text-[11px] text-muted-foreground">
+                      Her ay otomatik yenilenir · istediğinizde iptal edin
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold tracking-tight">
+                    {computedTotal.toLocaleString("tr-TR")}{" "}
+                    <span className="text-sm font-medium text-muted-foreground">TL</span>
+                  </div>
                 </div>
-              )}
-              <div className="h-px bg-border my-2" />
-              <div className="flex justify-between text-base font-semibold">
-                <span>Aylık Toplam</span>
-                <span>{computedTotal.toLocaleString("tr-TR")} TL</span>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </>
         )}
 
