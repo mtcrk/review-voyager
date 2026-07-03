@@ -568,6 +568,9 @@ const Index = () => {
               <div className="space-y-2">
                 <button onClick={() => navigate("/privacy-policy")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.privacy')}</button>
                 <button onClick={() => navigate("/terms-of-service")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.terms')}</button>
+                <button onClick={() => navigate("/mesafeli-satis-sozlesmesi")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Mesafeli Satış Sözleşmesi</button>
+                <button onClick={() => navigate("/on-bilgilendirme-formu")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Ön Bilgilendirme Formu</button>
+                <button onClick={() => navigate("/iptal-iade-kosullari")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">İptal &amp; İade Koşulları</button>
                 <p className="text-sm text-muted-foreground pt-1">support@voyagerespond.com</p>
               </div>
             </div>

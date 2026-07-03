@@ -119,6 +119,7 @@ export default function BillingCheckout() {
   const [ccExpYear, setCcExpYear] = useState("");
   const [ccCvv, setCcCvv] = useState("");
   const [consent, setConsent] = useState(false);
+  const [legalConsent, setLegalConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const [postFields, setPostFields] = useState<Record<string, string> | null>(null);
@@ -195,6 +196,13 @@ export default function BillingCheckout() {
     e.preventDefault();
     if (!updateCardMode && !consent) {
       toast({ title: "Onay gerekli", description: "Devam etmek için otomatik yenileme onayını verin." });
+      return;
+    }
+    if (!updateCardMode && !legalConsent) {
+      toast({
+        title: "Sözleşme onayı gerekli",
+        description: "Mesafeli Satış Sözleşmesi ve Ön Bilgilendirme Formu'nu onaylamanız gerekiyor.",
+      });
       return;
     }
     if (!businessId) {
@@ -596,15 +604,60 @@ export default function BillingCheckout() {
           </Card>
 
           {!updateCardMode && (
-          <div className="flex items-start gap-3 border rounded-lg p-4 bg-muted/30">
-            <Checkbox id="consent" checked={consent} onCheckedChange={(v) => setConsent(!!v)} />
-            <label htmlFor="consent" className="text-sm leading-relaxed cursor-pointer">
-              {consentText}
-            </label>
+          <div className="space-y-3">
+            <div className="flex items-start gap-3 border rounded-lg p-4 bg-muted/30">
+              <Checkbox id="consent" checked={consent} onCheckedChange={(v) => setConsent(!!v)} />
+              <label htmlFor="consent" className="text-sm leading-relaxed cursor-pointer">
+                {consentText}
+              </label>
+            </div>
+            <div className="flex items-start gap-3 border rounded-lg p-4 bg-muted/30">
+              <Checkbox
+                id="legal-consent"
+                checked={legalConsent}
+                onCheckedChange={(v) => setLegalConsent(!!v)}
+              />
+              <label htmlFor="legal-consent" className="text-sm leading-relaxed cursor-pointer">
+                <a
+                  href="/mesafeli-satis-sozlesmesi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline text-primary hover:opacity-80"
+                >
+                  Mesafeli Satış Sözleşmesi
+                </a>
+                'ni ve{" "}
+                <a
+                  href="/on-bilgilendirme-formu"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline text-primary hover:opacity-80"
+                >
+                  Ön Bilgilendirme Formu
+                </a>
+                'nu okudum, kabul ediyorum.
+              </label>
+            </div>
+            <p className="text-xs text-muted-foreground px-1">
+              Abonelik iptali ve iade koşulları için{" "}
+              <a
+                href="/iptal-iade-kosullari"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-foreground"
+              >
+                İptal &amp; İade Koşulları
+              </a>{" "}
+              sayfasına bakınız.
+            </p>
           </div>
           )}
 
-          <Button type="submit" className="w-full h-12" disabled={loading || (!updateCardMode && !consent)}>
+          <Button
+            type="submit"
+            className="w-full h-12"
+            disabled={loading || (!updateCardMode && (!consent || !legalConsent))}
+          >
             {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
             {updateCardMode ? "Kartı Güvenle Güncelle" : `Güvenli Ödemeye Geç (${computedTotal.toLocaleString("tr-TR")} TL)`}
           </Button>
