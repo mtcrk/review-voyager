@@ -8,14 +8,24 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, ShieldCheck } from "lucide-react";
+import { Loader2, ShieldCheck, Hotel, UtensilsCrossed, Scissors, Stethoscope } from "lucide-react";
 
-type Plan = { code: string; name: string; amount: number };
-const PLANS: Plan[] = [
-  { code: "starter_monthly", name: "Starter", amount: 499 },
-  { code: "pro_monthly", name: "Pro", amount: 999 },
-  { code: "agency_monthly", name: "Agency", amount: 2499 },
-];
+type Plan = {
+  id: string;
+  segment: "hotel" | "restaurant" | "salon" | "clinic";
+  plan_code: string;
+  label: string;
+  base_amount: number;
+  unit_type: "flat" | "per_location";
+};
+type Addon = { id: string; addon_code: string; label: string; amount: number };
+
+const SEGMENT_ICON: Record<Plan["segment"], typeof Hotel> = {
+  hotel: Hotel,
+  restaurant: UtensilsCrossed,
+  salon: Scissors,
+  clinic: Stethoscope,
+};
 
 export default function BillingCheckout() {
   const navigate = useNavigate();
@@ -24,7 +34,11 @@ export default function BillingCheckout() {
   const updateCardMode = searchParams.get("mode") === "update-card";
   const [businessId, setBusinessId] = useState<string>("");
   const [businesses, setBusinesses] = useState<{ id: string; name: string }[]>([]);
-  const [plan, setPlan] = useState<Plan>(PLANS[1]);
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [addons, setAddons] = useState<Addon[]>([]);
+  const [plan, setPlan] = useState<Plan | null>(null);
+  const [locationCount, setLocationCount] = useState<number>(1);
+  const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("Türkiye");
@@ -41,10 +55,32 @@ export default function BillingCheckout() {
   const [postFields, setPostFields] = useState<Record<string, string> | null>(null);
   const [postAction, setPostAction] = useState("");
 
+  const planSubtotal = useMemo(() => {
+    if (!plan) return 0;
+    return plan.unit_type === "per_location"
+      ? Number(plan.base_amount) * Math.max(1, Number(locationCount) || 1)
+      : Number(plan.base_amount);
+  }, [plan, locationCount]);
+
+  const addonsSubtotal = useMemo(
+    () =>
+      addons
+        .filter((a) => selectedAddons.includes(a.addon_code))
+        .reduce((s, a) => s + Number(a.amount), 0),
+    [addons, selectedAddons],
+  );
+
+  const computedTotal = useMemo(
+    () => Math.round((planSubtotal + addonsSubtotal) * 100) / 100,
+    [planSubtotal, addonsSubtotal],
+  );
+
   const consentText = useMemo(
     () =>
-      `${plan.name} planı için kartım her ay otomatik olarak ${plan.amount} TL tutarında yenilenecek. İptal edene kadar bu abonelik devam edecek.`,
-    [plan],
+      plan
+        ? `${plan.label} planı için kartım her ay otomatik olarak ${computedTotal} TL tutarında yenilenecek. İptal edene kadar bu abonelik devam edecek.`
+        : "",
+    [plan, computedTotal],
   );
 
   useEffect(() => {
@@ -63,6 +99,24 @@ export default function BillingCheckout() {
     })();
   }, [authLoading, user, navigate]);
 
+  // Load pricing catalog
+  useEffect(() => {
+    (async () => {
+      const [{ data: p }, { data: a }] = await Promise.all([
+        supabase.from("plans").select("*").eq("is_active", true).order("base_amount"),
+        supabase.from("addons").select("*").eq("is_active", true).order("amount"),
+      ]);
+      const orderedSegments: Plan["segment"][] = ["hotel", "restaurant", "salon", "clinic"];
+      const sorted = ((p ?? []) as Plan[]).sort(
+        (x, y) => orderedSegments.indexOf(x.segment) - orderedSegments.indexOf(y.segment),
+      );
+      setPlans(sorted);
+      setAddons((a ?? []) as Addon[]);
+      if (sorted.length && !plan) setPlan(sorted[0]);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // When postFields set, auto-submit form to PayTR
   useEffect(() => {
     if (postFields && formRef.current) formRef.current.submit();
@@ -78,6 +132,10 @@ export default function BillingCheckout() {
       toast({ title: "İşletme seçin", variant: "destructive" });
       return;
     }
+    if (!updateCardMode && !plan) {
+      toast({ title: "Plan seçin", variant: "destructive" });
+      return;
+    }
     setLoading(true);
     try {
       // 1) log consent (skip in card-update mode; user already consented on initial subscription)
@@ -85,8 +143,8 @@ export default function BillingCheckout() {
         await supabase.from("subscription_consent_log").insert({
         business_id: businessId,
         user_id: user!.id,
-        plan_code: plan.code,
-        amount: plan.amount,
+        plan_code: plan!.plan_code,
+        amount: computedTotal,
         currency: "TL",
         consent_text_snapshot: consentText,
         });
@@ -96,12 +154,16 @@ export default function BillingCheckout() {
       const { data, error } = await supabase.functions.invoke("paytr-first-payment", {
         body: {
           business_id: businessId,
-          plan_code: plan.code,
-          amount: plan.amount,
+          plan_code: plan!.plan_code,
+          amount: computedTotal,
           email: user!.email,
           user_name: name,
           city,
           country: country === "Diğer" ? (countryOther.trim() || "Diğer") : country,
+          plan_id: plan!.id,
+          location_count: plan!.unit_type === "per_location" ? Math.max(1, Number(locationCount) || 1) : 1,
+          computed_total: computedTotal,
+          addon_codes: selectedAddons,
         },
       });
       if (error) throw error;
@@ -139,24 +201,107 @@ export default function BillingCheckout() {
         </p>
 
         {!updateCardMode && (
-        <Card>
-          <CardHeader><CardTitle>Plan</CardTitle></CardHeader>
-          <CardContent className="grid sm:grid-cols-3 gap-3">
-            {PLANS.map((p) => (
-              <button
-                type="button"
-                key={p.code}
-                onClick={() => setPlan(p)}
-                className={`border rounded-lg p-4 text-left transition ${
-                  plan.code === p.code ? "border-primary ring-2 ring-primary/30" : "border-border"
-                }`}
-              >
-                <div className="font-semibold">{p.name}</div>
-                <div className="text-sm text-muted-foreground">{p.amount} TL / ay</div>
-              </button>
-            ))}
-          </CardContent>
-        </Card>
+        <>
+          <Card>
+            <CardHeader><CardTitle>İşletme Türü</CardTitle></CardHeader>
+            <CardContent className="grid sm:grid-cols-2 gap-3">
+              {plans.map((p) => {
+                const Icon = SEGMENT_ICON[p.segment];
+                const active = plan?.id === p.id;
+                return (
+                  <button
+                    type="button"
+                    key={p.id}
+                    onClick={() => setPlan(p)}
+                    className={`border rounded-lg p-4 text-left transition flex items-start gap-3 ${
+                      active ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-muted-foreground/40"
+                    }`}
+                  >
+                    <Icon className="w-5 h-5 mt-0.5 text-primary shrink-0" />
+                    <div>
+                      <div className="font-semibold">{p.label}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {Number(p.base_amount).toLocaleString("tr-TR")} TL{p.unit_type === "per_location" ? " / lokasyon / ay" : " / ay"}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </CardContent>
+          </Card>
+
+          {plan?.unit_type === "per_location" && (
+            <Card className="mt-6">
+              <CardHeader><CardTitle>Lokasyon Sayısı</CardTitle></CardHeader>
+              <CardContent>
+                <Label>Kaç lokasyonunuz var?</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={locationCount}
+                  onChange={(e) => setLocationCount(Math.max(1, Number(e.target.value) || 1))}
+                  className="max-w-[160px] mt-1"
+                />
+                <p className="text-xs text-muted-foreground mt-2">
+                  {Number(plan.base_amount).toLocaleString("tr-TR")} TL × {locationCount} lokasyon = {" "}
+                  <span className="font-medium text-foreground">{planSubtotal.toLocaleString("tr-TR")} TL</span>
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {addons.length > 0 && (
+            <Card className="mt-6">
+              <CardHeader><CardTitle>Ek Modüller (Opsiyonel)</CardTitle></CardHeader>
+              <CardContent className="space-y-3">
+                {addons.map((a) => {
+                  const checked = selectedAddons.includes(a.addon_code);
+                  return (
+                    <label
+                      key={a.id}
+                      className="flex items-center justify-between gap-3 border rounded-lg p-3 cursor-pointer hover:border-muted-foreground/40"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Checkbox
+                          checked={checked}
+                          onCheckedChange={(v) =>
+                            setSelectedAddons((prev) =>
+                              v ? [...prev, a.addon_code] : prev.filter((c) => c !== a.addon_code),
+                            )
+                          }
+                        />
+                        <span className="text-sm font-medium">{a.label}</span>
+                      </div>
+                      <span className="text-sm text-muted-foreground">
+                        +{Number(a.amount).toLocaleString("tr-TR")} TL / ay
+                      </span>
+                    </label>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          )}
+
+          <Card className="mt-6 border-primary/40 bg-primary/5">
+            <CardContent className="pt-6 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Plan</span>
+                <span>{planSubtotal.toLocaleString("tr-TR")} TL</span>
+              </div>
+              {addonsSubtotal > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Ek modüller</span>
+                  <span>{addonsSubtotal.toLocaleString("tr-TR")} TL</span>
+                </div>
+              )}
+              <div className="h-px bg-border my-2" />
+              <div className="flex justify-between text-base font-semibold">
+                <span>Aylık Toplam</span>
+                <span>{computedTotal.toLocaleString("tr-TR")} TL</span>
+              </div>
+            </CardContent>
+          </Card>
+        </>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6 mt-6">
@@ -259,7 +404,7 @@ export default function BillingCheckout() {
 
           <Button type="submit" className="w-full h-12" disabled={loading || (!updateCardMode && !consent)}>
             {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-            {updateCardMode ? "Kartı Güvenle Güncelle" : `Güvenli Ödemeye Geç (${plan.amount} TL)`}
+            {updateCardMode ? "Kartı Güvenle Güncelle" : `Güvenli Ödemeye Geç (${computedTotal.toLocaleString("tr-TR")} TL)`}
           </Button>
         </form>
 
