@@ -229,6 +229,9 @@ export default function BillingCheckout() {
       }
 
       // 2) get PayTR fields from edge function
+      const safeLocationCount = plan!.unit_type === "per_location"
+        ? Math.min(500, Math.max(1, Math.trunc(Number(locationCount) || 1)))
+        : 1;
       const { data, error } = await supabase.functions.invoke("paytr-first-payment", {
         body: {
           business_id: businessId,
@@ -239,12 +242,44 @@ export default function BillingCheckout() {
           city,
           country: country === "Diğer" ? (countryOther.trim() || "Diğer") : country,
           plan_id: plan!.id,
-          location_count: plan!.unit_type === "per_location" ? Math.max(1, Number(locationCount) || 1) : 1,
+          location_count: safeLocationCount,
           computed_total: computedTotal,
           addon_codes: selectedAddons,
         },
       });
-      if (error) throw error;
+      if (error) {
+        // Try to parse body from the edge function response for meaningful messages
+        let parsed: { error?: string; server_total?: number } | null = null;
+        try {
+          const ctx = (error as unknown as { context?: Response }).context;
+          if (ctx && typeof ctx.text === "function") {
+            const txt = await ctx.text();
+            parsed = txt ? JSON.parse(txt) : null;
+          }
+        } catch {
+          /* ignore parse errors */
+        }
+        if (parsed?.error === "amount_mismatch") {
+          toast({
+            title: "Fiyat bilgisi güncellendi",
+            description:
+              "Lütfen sayfayı yenileyip tekrar deneyin. Güncel paket fiyatı seçiminizle eşleşmiyor.",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+        if (parsed?.error === "location_count_out_of_range") {
+          toast({
+            title: "Lokasyon sayısı geçersiz",
+            description: "Lokasyon sayısı 1 ile 500 arasında olmalıdır.",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+        throw error;
+      }
       if (!data?.fields || !data?.action) throw new Error("PayTR yanıtı geçersiz");
 
       // 3) Merge card fields for the form POST
