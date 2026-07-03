@@ -26,6 +26,9 @@ type Subscription = {
   currency: string;
   status: string;
   next_billing_date: string | null;
+  location_count?: number | null;
+  addon_codes?: string[] | null;
+  computed_total?: number | null;
 };
 
 type CardInfo = {
@@ -44,9 +47,19 @@ type PaymentLog = {
 };
 
 const PLAN_LABEL: Record<string, string> = {
+  hotel_flat: "Otel",
+  restaurant_base: "Restoran",
+  salon_flat: "Kuaför / Güzellik / Spa",
+  clinic_flat: "Klinik",
+  // Legacy fallbacks (older subscriptions)
   starter_monthly: "Starter",
   pro_monthly: "Pro",
   agency_monthly: "Agency",
+};
+
+const ADDON_LABEL: Record<string, string> = {
+  competitor_analysis: "Rakip Analizi",
+  ai_visibility: "AI Görünürlük Takibi",
 };
 
 function statusBadge(status: string) {
@@ -85,7 +98,7 @@ export default function Billing() {
       const [subRes, payRes, cardRes] = await Promise.all([
         supabase
           .from("subscription_billing")
-          .select("id,plan_code,amount,currency,status,next_billing_date")
+          .select("id,plan_code,amount,currency,status,next_billing_date,location_count,addon_codes,computed_total")
           .eq("business_id", activeBusiness.id)
           .order("created_at", { ascending: false })
           .limit(1)
@@ -175,6 +188,21 @@ export default function Billing() {
                 <div className="text-muted-foreground text-sm">
                   {Number(subscription.amount).toLocaleString("tr-TR")} {subscription.currency} / ay
                 </div>
+                {(subscription.location_count && subscription.location_count > 1) ||
+                (subscription.addon_codes && subscription.addon_codes.length > 0) ? (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {subscription.location_count && subscription.location_count > 1 && (
+                      <Badge variant="secondary" className="font-normal">
+                        {subscription.location_count} lokasyon
+                      </Badge>
+                    )}
+                    {(subscription.addon_codes ?? []).map((code) => (
+                      <Badge key={code} variant="secondary" className="font-normal">
+                        {ADDON_LABEL[code] ?? code}
+                      </Badge>
+                    ))}
+                  </div>
+                ) : null}
                 {subscription.next_billing_date && subscription.status === "active" && (
                   <div className="text-sm text-muted-foreground">
                     Sonraki tahsilat:{" "}
