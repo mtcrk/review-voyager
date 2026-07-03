@@ -20,6 +20,7 @@ export default function DistanceSalesAgreement() {
         title="Mesafeli Satış Sözleşmesi | VoyageRespond"
         description="VoyageRespond SaaS abonelik hizmeti için mesafeli satış sözleşmesi taslağı."
         canonical="https://voyagerespond.com/mesafeli-satis-sozlesmesi"
+        noindex
       />
       <div className="container mx-auto px-6 py-12 max-w-4xl">
         <Button variant="ghost" onClick={() => navigate(-1)} className="mb-8">
