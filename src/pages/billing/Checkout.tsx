@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, ShieldCheck, Hotel, UtensilsCrossed, Scissors, Stethoscope, Info, Check } from "lucide-react";
+import { Loader2, ShieldCheck, Hotel, UtensilsCrossed, Scissors, Stethoscope, Info, Check, Building2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 
@@ -27,6 +27,16 @@ const SEGMENT_ICON: Record<Plan["segment"], typeof Hotel> = {
   restaurant: UtensilsCrossed,
   salon: Scissors,
   clinic: Stethoscope,
+};
+const DEFAULT_SEGMENT_ICON = Building2;
+const DEFAULT_SEGMENT_META = {
+  tagline: "Yorum yönetimi ve itibar takibi.",
+  details: [
+    "Google ve sektörel platform yorum takibi",
+    "AI destekli yanıt üretimi",
+    "Trend ve memnuniyet raporları",
+  ],
+  audience: "İşletmeniz için.",
 };
 
 const SEGMENT_META: Record<Plan["segment"], { tagline: string; details: string[]; audience: string }> = {
@@ -271,9 +281,9 @@ export default function BillingCheckout() {
             </p>
             <div className="grid sm:grid-cols-2 gap-4">
               {plans.map((p) => {
-                const Icon = SEGMENT_ICON[p.segment];
+                const Icon = SEGMENT_ICON[p.segment] ?? DEFAULT_SEGMENT_ICON;
                 const active = plan?.id === p.id;
-                const meta = SEGMENT_META[p.segment];
+                const meta = SEGMENT_META[p.segment] ?? DEFAULT_SEGMENT_META;
                 return (
                   <div key={p.id} className="relative">
                     <button
