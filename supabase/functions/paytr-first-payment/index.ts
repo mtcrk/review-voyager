@@ -173,9 +173,10 @@ Deno.serve(async (req) => {
 
     const merchant_oid = newMerchantOid();
     const user_ip = getClientIp(req);
-    // PayTR Direkt API expects payment_amount as decimal with two digits (e.g. "999.00").
-    // Do NOT multiply by 100 — that's the iFrame API format and would cause a 100x overcharge.
-    const payment_amount = authoritativeAmount.toFixed(2);
+    // PayTR Direkt API requires payment_amount as an INTEGER in kuruş (TL * 100).
+    // Example: 990.00 TL → "99000". Same value MUST be used both in the hash
+    // string and in the form fields — any mismatch causes hash rejection.
+    const payment_amount = String(Math.round(authoritativeAmount * 100));
     const payment_type = "card";
     const installment_count = "0";
     const currency = "TL";
