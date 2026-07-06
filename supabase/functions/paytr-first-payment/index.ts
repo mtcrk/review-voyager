@@ -242,6 +242,12 @@ Deno.serve(async (req) => {
       // max_installment=0 → taksit limiti belirtme (zaten kapalı).
       no_installment: "1",
       max_installment: "0",
+      // PayTR arayüz dili ("tr" | "en"). Hash'e dahil değil.
+      // Direkt API dokümanı `client_lang` ismini kullanıyor; iFrame API ise `lang`
+      // kullanıyor. PayTR hata mesajı "lang" diyor, ikisini de göndererek her iki
+      // varyantı kapsıyoruz — fazlalık alanlar PayTR tarafından yok sayılır.
+      lang: "tr",
+      client_lang: "tr",
     };
     if (existing?.utoken) fields.utoken = existing.utoken;
 
