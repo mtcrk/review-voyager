@@ -242,6 +242,8 @@ Deno.serve(async (req) => {
       // max_installment=0 → taksit limiti belirtme (zaten kapalı).
       no_installment: "1",
       max_installment: "0",
+      // PayTR Direkt API zorunlu alan: arayüz dili ("tr" | "en"). Hash'e dahil değil.
+      lang: "tr",
     };
     if (existing?.utoken) fields.utoken = existing.utoken;
 
