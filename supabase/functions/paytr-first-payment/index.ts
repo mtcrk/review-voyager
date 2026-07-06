@@ -237,6 +237,11 @@ Deno.serve(async (req) => {
       debug_on: "1",
       store_card: "1",
       paytr_token,
+      // PayTR Kart Saklama / Yeni Kart Ekleme akışında zorunlu; hash'e DAHİL DEĞİL.
+      // no_installment=1 → taksit seçenekleri gösterme (abonelik/kart saklamada standart).
+      // max_installment=0 → taksit limiti belirtme (zaten kapalı).
+      no_installment: "1",
+      max_installment: "0",
     };
     if (existing?.utoken) fields.utoken = existing.utoken;
 
