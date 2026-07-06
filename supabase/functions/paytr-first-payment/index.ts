@@ -199,8 +199,9 @@ Deno.serve(async (req) => {
 
     const origin = req.headers.get("origin") ?? "https://voyagerespondcom.lovable.app";
 
+    // user_basket amounts are in TL (decimal string) per PayTR docs, not kuruş.
     const user_basket = JSON.stringify(
-      basket ?? [[authoritativePlanCode, payment_amount, 1]],
+      basket ?? [[authoritativePlanCode, authoritativeAmount.toFixed(2), 1]],
     );
 
     // Log the initiated attempt
