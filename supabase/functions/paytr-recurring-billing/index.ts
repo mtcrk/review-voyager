@@ -98,10 +98,11 @@ Deno.serve(async (req) => {
       }
 
       const merchant_oid = newMerchantOid("VRR");
-      // Direkt API: decimal with two digits (e.g. "999.00"). Never multiply by 100.
+      // PayTR Direkt API requires payment_amount as an INTEGER in kuruş (TL * 100).
+      // Same value MUST be used in the hash and the form body.
       // Prefer computed_total (dynamic pricing: plan + addons + per-location) when set.
       const chargeAmount = sub.computed_total != null ? Number(sub.computed_total) : Number(sub.amount);
-      const payment_amount = chargeAmount.toFixed(2);
+      const payment_amount = String(Math.round(chargeAmount * 100));
       const currency = sub.currency ?? "TL";
       const payment_type = "card";
       const installment_count = "0";
@@ -154,7 +155,8 @@ Deno.serve(async (req) => {
         user_name: biz?.name ?? "Customer",
         user_address: "N/A",
         user_phone: "N/A",
-        user_basket: JSON.stringify([[sub.plan_code, String(chargeAmount), 1]]),
+        // user_basket unit price is TL decimal, not kuruş.
+        user_basket: JSON.stringify([[sub.plan_code, chargeAmount.toFixed(2), 1]]),
         merchant_ok_url: "https://voyagerespond.com/billing/success",
         merchant_fail_url: "https://voyagerespond.com/billing/failed",
         paytr_token,
