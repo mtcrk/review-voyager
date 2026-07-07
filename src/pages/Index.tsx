@@ -274,7 +274,7 @@ const Index = () => {
                 <Globe className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <div className="text-sm font-semibold text-foreground leading-tight whitespace-nowrap">
+                <div className="text-sm font-semibold text-foreground leading-tight">
                   {t('indexPage.socialProof.platformsList')}
                 </div>
                 <div className="text-xs md:text-sm text-muted-foreground">{t('indexPage.socialProof.platformsLabel')}</div>
