@@ -491,6 +491,12 @@ export default function DemoPage() {
           </div>
         </div>
       </section>
+      <EmailGateModal
+        open={gateModalOpen}
+        onOpenChange={setGateModalOpen}
+        onUnlock={() => setUnlocked(true)}
+        source="demo_copy"
+      />
     </div>
   );
 }
