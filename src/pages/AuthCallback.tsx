@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslation } from 'react-i18next';
+import { trackEvent } from '@/lib/analytics';
 
 export default function AuthCallback() {
   const navigate = useNavigate();
@@ -21,6 +22,12 @@ export default function AuthCallback() {
         }
 
         if (data.session) {
+          try {
+            if (sessionStorage.getItem('signup_intent') === 'true') {
+              trackEvent('sign_up', { method: 'google' });
+              sessionStorage.removeItem('signup_intent');
+            }
+          } catch {}
           setMessage(t('auth.authCallback.success'));
           setTimeout(() => navigate('/dashboard'), 2000);
         } else {

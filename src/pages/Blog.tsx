@@ -33,7 +33,7 @@ const Blog = () => {
                 Ana Sayfa
               </button>
               <button
-                onClick={() => navigate("/onboarding")}
+                onClick={() => navigate("/demo")}
                 className="px-4 py-2 rounded-md text-sm font-medium text-white transition-all"
                 style={{ backgroundColor: "#7A5AF8" }}
               >
@@ -114,7 +114,7 @@ const Blog = () => {
             3 ay ücretsiz, tüm özellikler dahil.
           </p>
           <button
-            onClick={() => navigate("/onboarding")}
+            onClick={() => navigate("/demo")}
             className="px-8 py-3 rounded-md text-white font-medium transition-all hover:shadow-lg min-h-[48px]"
             style={{ backgroundColor: "#7A5AF8" }}
           >
