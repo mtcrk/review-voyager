@@ -126,7 +126,7 @@ const GoogleReviews = () => {
                 Hub
               </button>
               <button
-                onClick={() => navigate("/onboarding")}
+                onClick={() => navigate("/demo")}
                 className="px-5 py-2.5 rounded-md text-sm font-medium text-white transition-all shadow-sm hover:shadow-md"
                 style={{ backgroundColor: "#7A5AF8" }}
               >

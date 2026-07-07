@@ -521,7 +521,7 @@ export function AIVisibilityChecker() {
               <Button 
                 size="lg" 
                 className="gradient-primary text-white px-8"
-                onClick={() => window.location.href = "/onboarding"}
+                onClick={() => window.location.href = "/demo"}
               >
                 Tam Analiz İçin Kayıt Ol
                 <ArrowRight className="w-5 h-5 ml-2" />

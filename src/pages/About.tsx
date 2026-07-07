@@ -46,7 +46,7 @@ export default function About() {
             </div>
             <div className="flex items-center gap-3">
               <LanguageSwitcher />
-              <Button onClick={() => navigate(user ? "/dashboard" : "/onboarding")} className="gradient-primary text-white">
+              <Button onClick={() => navigate(user ? "/dashboard" : "/demo")} className="gradient-primary text-white">
                 {t('nav.getStarted')}
               </Button>
             </div>
@@ -161,7 +161,7 @@ export default function About() {
           </p>
           <Button
             size="lg"
-            onClick={() => navigate("/onboarding")}
+            onClick={() => navigate("/demo")}
             className="gradient-primary text-white shadow-lg text-base sm:text-lg px-8 sm:px-10 py-6 w-full sm:w-auto min-h-[48px] hover:shadow-2xl transition-all duration-300 hover:scale-105"
           >
             {t('landing.heroCta', 'See Your AI Visibility Score')}

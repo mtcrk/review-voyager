@@ -64,7 +64,7 @@ const InstagramSales = () => {
               <Button variant="ghost" onClick={() => navigate("/hub")}>
                 Automation Hub
               </Button>
-              <Button className="gradient-primary text-white" onClick={() => navigate("/onboarding")}>
+              <Button className="gradient-primary text-white" onClick={() => navigate("/demo")}>
                 Get Started
               </Button>
             </div>
@@ -94,7 +94,7 @@ const InstagramSales = () => {
             <Button
               size="lg"
               className="gradient-primary text-white px-8"
-              onClick={() => navigate("/onboarding")}
+              onClick={() => navigate("/demo")}
             >
               Start Free Trial
               <ArrowRight className="w-5 h-5 ml-2" />
@@ -228,7 +228,7 @@ const InstagramSales = () => {
           <Button
             size="lg"
             className="gradient-primary text-white px-8"
-            onClick={() => navigate("/onboarding")}
+            onClick={() => navigate("/demo")}
           >
             Get Started Free
             <ArrowRight className="w-5 h-5 ml-2" />

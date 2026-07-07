@@ -26,7 +26,7 @@ const RestoranMusteriMemnuniyeti = () => {
             </button>
             <div className="flex items-center gap-4">
               <button onClick={() => navigate("/blog")} className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-foreground">Blog</button>
-              <button onClick={() => navigate("/onboarding")} className="px-4 py-2 rounded-md text-sm font-medium text-white" style={{ backgroundColor: "#7A5AF8" }}>
+              <button onClick={() => navigate("/demo")} className="px-4 py-2 rounded-md text-sm font-medium text-white" style={{ backgroundColor: "#7A5AF8" }}>
                 Ücretsiz Dene
               </button>
             </div>
@@ -124,7 +124,7 @@ const RestoranMusteriMemnuniyeti = () => {
           <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
             Tüm Google, Yemeksepeti ve TripAdvisor yorumlarınızı AI ile yönetin. 3 ay ücretsiz deneyin.
           </p>
-          <button onClick={() => navigate("/onboarding")} className="px-8 py-3 rounded-md text-white font-medium hover:shadow-lg min-h-[48px]" style={{ backgroundColor: "#7A5AF8" }}>
+          <button onClick={() => navigate("/demo")} className="px-8 py-3 rounded-md text-white font-medium hover:shadow-lg min-h-[48px]" style={{ backgroundColor: "#7A5AF8" }}>
             Ücretsiz Başla <ArrowRight className="w-4 h-4 inline ml-1" />
           </button>
         </div>
