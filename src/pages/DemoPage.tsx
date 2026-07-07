@@ -68,12 +68,8 @@ export default function DemoPage() {
 
   const canGenerate = reviewText.trim().length > 10 && rating > 0;
 
-  const handleGenerate = async () => {
+  const runGenerate = async () => {
     if (!canGenerate) return;
-    if (!user && !unlocked) {
-      setGateModalOpen(true);
-      return;
-    }
     setLoading(true);
     setGeneratedReply("");
 
@@ -101,6 +97,15 @@ export default function DemoPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGenerate = async () => {
+    if (!canGenerate) return;
+    if (!user && !unlocked) {
+      setGateModalOpen(true);
+      return;
+    }
+    await runGenerate();
   };
 
   const handleCopy = () => {
@@ -496,7 +501,7 @@ export default function DemoPage() {
         onOpenChange={setGateModalOpen}
         onUnlock={() => {
           setUnlocked(true);
-          setTimeout(() => { handleGenerate(); }, 100);
+          setTimeout(() => { runGenerate(); }, 100);
         }}
         source="demo_generate"
       />
