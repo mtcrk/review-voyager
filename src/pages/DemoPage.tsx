@@ -68,7 +68,7 @@ export default function DemoPage() {
 
   const canGenerate = reviewText.trim().length > 10 && rating > 0;
 
-  const handleGenerate = async () => {
+  const runGenerate = async () => {
     if (!canGenerate) return;
     setLoading(true);
     setGeneratedReply("");
@@ -99,11 +99,16 @@ export default function DemoPage() {
     }
   };
 
-  const handleCopy = () => {
+  const handleGenerate = async () => {
+    if (!canGenerate) return;
     if (!user && !unlocked) {
       setGateModalOpen(true);
       return;
     }
+    await runGenerate();
+  };
+
+  const handleCopy = () => {
     navigator.clipboard.writeText(generatedReply);
     setCopied(true);
     toast.success("Yanıt panoya kopyalandı!");
@@ -143,7 +148,7 @@ export default function DemoPage() {
     <div className="min-h-screen bg-background">
       <SEO
         title="AI Yorum Yanıt Demo | Ücretsiz Dene | VoyageRespond"
-        description="VoyageRespond AI yorum yanıt aracını kayıt olmadan deneyin. Olumlu ve olumsuz yorumlar için saniyeler içinde profesyonel yanıtlar üretin."
+        description="VoyageRespond AI yorum yanıt aracını ücretsiz deneyin. Olumlu ve olumsuz yorumlar için saniyeler içinde profesyonel yanıtlar üretin."
         canonical="/demo"
       />
       {/* Navbar */}
@@ -200,7 +205,7 @@ export default function DemoPage() {
       <section className="container mx-auto px-4 sm:px-6 pt-8 pb-4 text-center">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
           <Sparkles className="w-4 h-4" />
-          Ücretsiz Deneyin — Kayıt Gerekmez
+          Ücretsiz Deneyin — Kredi Kartı Gerekmez
         </div>
         <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-3 tracking-tight leading-tight">
           AI ile Profesyonel Yorum Yanıtları
@@ -494,8 +499,11 @@ export default function DemoPage() {
       <EmailGateModal
         open={gateModalOpen}
         onOpenChange={setGateModalOpen}
-        onUnlock={() => setUnlocked(true)}
-        source="demo_copy"
+        onUnlock={() => {
+          setUnlocked(true);
+          setTimeout(() => { runGenerate(); }, 100);
+        }}
+        source="demo_generate"
       />
     </div>
   );
