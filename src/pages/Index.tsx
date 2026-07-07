@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Check, Star, MessageSquare, Eye, TrendingUp, Sparkles, Zap, Target, Shield, Users, Menu, X, Building2, UtensilsCrossed, Hotel, Stethoscope, Store, Dumbbell, Scissors } from "lucide-react";
+import { ArrowRight, Check, Star, MessageSquare, Eye, TrendingUp, Sparkles, Zap, Target, Shield, Globe, Menu, X, Building2, UtensilsCrossed, Hotel, Stethoscope, Store, Dumbbell, Scissors } from "lucide-react";
 import { useState } from "react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { useAuth } from "@/contexts/AuthContext";
@@ -271,11 +271,13 @@ const Index = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
             <div className="flex items-center justify-center gap-3">
               <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Users className="w-5 h-5 text-primary" />
+                <Globe className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <div className="text-2xl md:text-3xl font-bold text-foreground leading-tight">80+</div>
-                <div className="text-xs md:text-sm text-muted-foreground">{t('indexPage.socialProof.businesses')}</div>
+                <div className="text-sm font-semibold text-foreground leading-tight">
+                  {t('indexPage.socialProof.platformsList')}
+                </div>
+                <div className="text-xs md:text-sm text-muted-foreground">{t('indexPage.socialProof.platformsLabel')}</div>
               </div>
             </div>
             <div className="flex items-center justify-center gap-3">

@@ -857,7 +857,8 @@
       "screenshotAlt": "VoyageRespond dashboard — AI-powered review management"
     },
     "socialProof": {
-      "businesses": "Platform integrations",
+      "platformsList": "Google, Booking, TripAdvisor + more",
+      "platformsLabel": "Platform integrations",
       "reviews": "reviews managed",
       "avgResponse": "Avg. response time"
     },
