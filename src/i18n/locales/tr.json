@@ -737,7 +737,8 @@
       "screenshotAlt": "VoyageRespond dashboard — AI ile yorum yönetimi"
     },
     "socialProof": {
-      "businesses": "Platform entegrasyonu",
+      "platformsList": "Google, Booking, TripAdvisor + daha fazlası",
+      "platformsLabel": "Platform entegrasyonu",
       "reviews": "yorum yönetildi",
       "avgResponse": "Ortalama yanıt süresi"
     },
