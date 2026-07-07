@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Check, Star, MessageSquare, Eye, TrendingUp, Sparkles, Zap, Target, Shield, Users, Menu, X, Building2, UtensilsCrossed, Hotel, Stethoscope, Store, Dumbbell, Scissors } from "lucide-react";
+import { ArrowRight, Check, Star, MessageSquare, Eye, TrendingUp, Sparkles, Zap, Target, Shield, Globe, Menu, X, Building2, UtensilsCrossed, Hotel, Stethoscope, Store, Dumbbell, Scissors } from "lucide-react";
 import { useState } from "react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { useAuth } from "@/contexts/AuthContext";
