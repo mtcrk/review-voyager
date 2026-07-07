@@ -207,7 +207,7 @@ const BlogPost = () => {
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Blog
+          Blog'a Dön
         </button>
 
         {/* Meta */}
@@ -248,10 +248,10 @@ const BlogPost = () => {
         <div className="mt-12 p-6 sm:p-8 rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-background flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-center sm:text-left">
             <h3 className="text-lg sm:text-xl font-bold text-foreground">
-              Manage all your reviews in one place
+              Tüm yorumlarını tek yerden yönet
             </h3>
             <p className="text-sm text-muted-foreground mt-1">
-              Reply to Google, Booking & TripAdvisor with AI — in seconds.
+              Google, Booking ve TripAdvisor yorumlarına yapay zeka ile saniyeler içinde cevap ver.
             </p>
           </div>
           <button
@@ -259,7 +259,7 @@ const BlogPost = () => {
             className="px-6 py-3 rounded-md text-white font-medium transition-all hover:shadow-lg whitespace-nowrap min-h-[48px]"
             style={{ backgroundColor: "#7A5AF8" }}
           >
-            Start Free Trial →
+            Ücretsiz Dene →
           </button>
         </div>
 
