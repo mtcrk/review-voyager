@@ -76,7 +76,6 @@ export function EmailGateModal({ open, onOpenChange, onUnlock, source = "demo" }
             <Input
               id="gate-email"
               type="email"
-              placeholder="ornek@isletmeniz.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
