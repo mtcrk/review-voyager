@@ -862,6 +862,33 @@ export type Database = {
           },
         ]
       }
+      leads: {
+        Row: {
+          converted_to_user: boolean
+          created_at: string
+          email: string
+          id: string
+          marketing_consent: boolean
+          source: string | null
+        }
+        Insert: {
+          converted_to_user?: boolean
+          created_at?: string
+          email: string
+          id?: string
+          marketing_consent?: boolean
+          source?: string | null
+        }
+        Update: {
+          converted_to_user?: boolean
+          created_at?: string
+          email?: string
+          id?: string
+          marketing_consent?: boolean
+          source?: string | null
+        }
+        Relationships: []
+      }
       paytr_customer_tokens: {
         Row: {
           business_id: string
