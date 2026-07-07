@@ -274,7 +274,7 @@ const Index = () => {
                 <Users className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <div className="text-2xl md:text-3xl font-bold text-foreground leading-tight">100+</div>
+                <div className="text-2xl md:text-3xl font-bold text-foreground leading-tight">80+</div>
                 <div className="text-xs md:text-sm text-muted-foreground">{t('indexPage.socialProof.businesses')}</div>
               </div>
             </div>
@@ -283,7 +283,7 @@ const Index = () => {
                 <Star className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <div className="text-2xl md:text-3xl font-bold text-foreground leading-tight">50K+</div>
+                <div className="text-2xl md:text-3xl font-bold text-foreground leading-tight">17K+</div>
                 <div className="text-xs md:text-sm text-muted-foreground">{t('indexPage.socialProof.reviews')}</div>
               </div>
             </div>
