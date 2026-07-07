@@ -70,6 +70,10 @@ export default function DemoPage() {
 
   const handleGenerate = async () => {
     if (!canGenerate) return;
+    if (!user && !unlocked) {
+      setGateModalOpen(true);
+      return;
+    }
     setLoading(true);
     setGeneratedReply("");
 
@@ -100,10 +104,6 @@ export default function DemoPage() {
   };
 
   const handleCopy = () => {
-    if (!user && !unlocked) {
-      setGateModalOpen(true);
-      return;
-    }
     navigator.clipboard.writeText(generatedReply);
     setCopied(true);
     toast.success("Yanıt panoya kopyalandı!");
@@ -494,8 +494,11 @@ export default function DemoPage() {
       <EmailGateModal
         open={gateModalOpen}
         onOpenChange={setGateModalOpen}
-        onUnlock={() => setUnlocked(true)}
-        source="demo_copy"
+        onUnlock={() => {
+          setUnlocked(true);
+          setTimeout(() => { handleGenerate(); }, 100);
+        }}
+        source="demo_generate"
       />
     </div>
   );
