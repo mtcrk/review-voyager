@@ -128,13 +128,16 @@ export default function Register() {
 
   const handleGoogleSignIn = async () => {
     try {
+      sessionStorage.setItem('signup_intent', 'true');
       const { error } = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
       if (error) {
+        sessionStorage.removeItem('signup_intent');
         setError(error.message || t('auth.register.error'));
       }
     } catch {
+      sessionStorage.removeItem('signup_intent');
       setError(t('auth.register.error'));
     }
   };
