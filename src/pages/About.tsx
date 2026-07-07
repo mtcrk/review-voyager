@@ -46,7 +46,7 @@ export default function About() {
             </div>
             <div className="flex items-center gap-3">
               <LanguageSwitcher />
-              <Button onClick={() => navigate(user ? "/dashboard" : "/onboarding")} className="gradient-primary text-white">
+              <Button onClick={() => navigate(user ? "/dashboard" : "/demo")} className="gradient-primary text-white">
                 {t('nav.getStarted')}
               </Button>
             </div>
