@@ -167,7 +167,7 @@ const Pricing = () => {
                   Dashboard
                 </Button>
               ) : (
-                <Button className="gradient-primary text-white" onClick={() => navigate("/onboarding")}>
+                <Button className="gradient-primary text-white" onClick={() => navigate("/demo")}>
                   Get Started
                 </Button>
               )}
@@ -255,7 +255,7 @@ const Pricing = () => {
                   plan.highlighted ? "gradient-primary text-white" : ""
                 }`}
                 variant={plan.highlighted ? "default" : "outline"}
-                onClick={() => navigate("/onboarding")}
+                onClick={() => navigate("/demo")}
               >
                 {plan.cta}
               </Button>
@@ -323,7 +323,7 @@ const Pricing = () => {
                 variant="outline"
                 className="w-full"
                 disabled={addon.status === "coming-soon"}
-                onClick={() => navigate("/onboarding")}
+                onClick={() => navigate("/demo")}
               >
                 {addon.status === "coming-soon"
                   ? "Coming Soon"
@@ -347,7 +347,7 @@ const Pricing = () => {
           <Button
             size="lg"
             className="gradient-primary text-white"
-            onClick={() => navigate("/onboarding")}
+            onClick={() => navigate("/demo")}
           >
             Start Free Trial
             <ArrowRight className="w-5 h-5 ml-2" />

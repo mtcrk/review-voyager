@@ -9,6 +9,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import SEO from "@/components/seo/SEO";
+import { EmailGateModal } from "@/components/EmailGateModal";
 
 // GA4 event helper
 const gtagEvent = (eventName: string, category: string, label: string) => {
@@ -60,6 +61,10 @@ export default function DemoPage() {
   const [copied, setCopied] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [hasGenerated, setHasGenerated] = useState(false);
+  const [unlocked, setUnlocked] = useState(() =>
+    typeof window !== "undefined" && localStorage.getItem("demo_unlocked") === "true"
+  );
+  const [gateModalOpen, setGateModalOpen] = useState(false);
 
   const canGenerate = reviewText.trim().length > 10 && rating > 0;
 
@@ -95,6 +100,10 @@ export default function DemoPage() {
   };
 
   const handleCopy = () => {
+    if (!user && !unlocked) {
+      setGateModalOpen(true);
+      return;
+    }
     navigator.clipboard.writeText(generatedReply);
     setCopied(true);
     toast.success("Yanıt panoya kopyalandı!");

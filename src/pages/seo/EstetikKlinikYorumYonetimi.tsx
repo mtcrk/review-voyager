@@ -38,7 +38,7 @@ const EstetikKlinikYorumYonetimi = () => {
                 <span className="font-normal">Voyage</span><span className="font-semibold">Respond</span>
               </span>
             </button>
-            <button onClick={() => navigate("/onboarding")} className="px-4 py-2 rounded-md text-sm font-medium text-white" style={{ backgroundColor: "#7A5AF8" }}>
+            <button onClick={() => navigate("/demo")} className="px-4 py-2 rounded-md text-sm font-medium text-white" style={{ backgroundColor: "#7A5AF8" }}>
               Ücretsiz Dene
             </button>
           </div>
@@ -147,7 +147,7 @@ const EstetikKlinikYorumYonetimi = () => {
           <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
             KVKK + 1219 uyumlu AI yanıt akışı, çoklu kanal tek panel, duygu trend raporu. Ücretsiz başlayın.
           </p>
-          <button onClick={() => navigate("/onboarding")} className="px-8 py-3 rounded-md text-white font-medium hover:shadow-lg min-h-[48px]" style={{ backgroundColor: "#7A5AF8" }}>
+          <button onClick={() => navigate("/demo")} className="px-8 py-3 rounded-md text-white font-medium hover:shadow-lg min-h-[48px]" style={{ backgroundColor: "#7A5AF8" }}>
             Ücretsiz Başla <ArrowRight className="w-4 h-4 inline ml-1" />
           </button>
         </div>

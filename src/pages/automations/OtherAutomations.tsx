@@ -75,7 +75,7 @@ const OtherAutomations = () => {
               <Button variant="ghost" onClick={() => navigate("/hub")}>
                 Automation Hub
               </Button>
-              <Button className="gradient-primary text-white" onClick={() => navigate("/onboarding")}>
+              <Button className="gradient-primary text-white" onClick={() => navigate("/demo")}>
                 Get Started
               </Button>
             </div>

@@ -56,7 +56,7 @@ const AEOSection = ({ faqs, pageUrl, showAISection = true }: AEOSectionProps) =>
           </p>
 
           <button
-            onClick={() => navigate("/onboarding")}
+            onClick={() => navigate("/demo")}
             className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white text-sm font-medium transition-all hover:shadow-lg"
             style={{ backgroundColor: "#7A5AF8" }}
           >

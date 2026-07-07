@@ -67,7 +67,7 @@ const GoogleYorumCevapOrnekleri = () => {
             </button>
             <div className="flex items-center gap-4">
               <button onClick={() => navigate("/blog")} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Blog</button>
-              <button onClick={() => navigate("/onboarding")} className="px-4 py-2 rounded-md text-sm font-medium text-white transition-all" style={{ backgroundColor: "#7A5AF8" }}>Ücretsiz Dene</button>
+              <button onClick={() => navigate("/demo")} className="px-4 py-2 rounded-md text-sm font-medium text-white transition-all" style={{ backgroundColor: "#7A5AF8" }}>Ücretsiz Dene</button>
             </div>
           </div>
         </div>
@@ -124,7 +124,7 @@ const GoogleYorumCevapOrnekleri = () => {
           <p className="text-muted-foreground mb-6">
             VoyageRespond, her yorumu analiz ederek kişiselleştirilmiş, markanıza uygun yanıtlar üretir.
           </p>
-          <button onClick={() => navigate("/onboarding")} className="px-8 py-3 rounded-md text-white font-medium transition-all hover:shadow-lg" style={{ backgroundColor: "#7A5AF8" }}>
+          <button onClick={() => navigate("/demo")} className="px-8 py-3 rounded-md text-white font-medium transition-all hover:shadow-lg" style={{ backgroundColor: "#7A5AF8" }}>
             Ücretsiz Deneyin <ArrowRight className="w-4 h-4 inline ml-1" />
           </button>
         </div>

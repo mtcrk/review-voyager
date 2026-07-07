@@ -118,7 +118,7 @@ const Index = () => {
                 {user ? t('indexPage.nav.dashboard') : t('indexPage.nav.login')}
               </button>
               <Button
-                onClick={() => navigate("/onboarding")}
+                onClick={() => navigate("/demo")}
                 className="gradient-primary text-white text-sm px-5 py-2 h-9 hover:shadow-lg transition-all duration-200"
               >
                 {t('indexPage.nav.startFree')}
@@ -159,7 +159,7 @@ const Index = () => {
               ))}
               <div className="px-4 pt-2">
                 <Button
-                  onClick={() => { navigate("/onboarding"); setMobileMenuOpen(false); }}
+                  onClick={() => { navigate("/demo"); setMobileMenuOpen(false); }}
                   className="w-full gradient-primary text-white"
                 >
                   {t('indexPage.nav.startFree')}
@@ -239,7 +239,7 @@ const Index = () => {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <Button
                 size="lg"
-                onClick={() => navigate("/onboarding")}
+                onClick={() => navigate("/demo")}
                 className="gradient-primary text-white text-base px-8 py-6 w-full sm:w-auto hover:scale-[1.02] transition-all duration-200 group"
                 style={{ boxShadow: "0 10px 40px -10px rgba(122,90,248,0.55)" }}
               >
