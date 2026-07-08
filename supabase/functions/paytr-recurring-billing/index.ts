@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
       const payment_amount = String(Math.round(chargeAmount * 100));
       const currency = sub.currency ?? "TL";
       const payment_type = "card";
-      const installment_count = "";
+      const installment_count = "0";
       const non_3d = "1";
       const user_ip = tok.last_payment_ip || "127.0.0.1";
 
