@@ -177,11 +177,9 @@ Deno.serve(async (req) => {
 
     const merchant_oid = newMerchantOid();
     const user_ip = getClientIp(req);
-    // PayTR Direkt API official docs use TL decimal strings for payment_amount
-    // in BOTH the hash string and POST body (example: "100.99" / "990.00").
-    // Kuruş integer strings belong to the iFrame token flow and produce an
-    // invalid Direkt API paytr_token for this card-form POST flow.
-    const payment_amount = authoritativeAmount.toFixed(2);
+    // PayTR Direkt API validates payment_amount as an integer in kuruş.
+    // The exact same string must be used in BOTH the hash and POST body.
+    const payment_amount = String(Math.round(authoritativeAmount * 100));
     const currency = "TL";
     // Direkt API (kendi formumuzda kart toplayıp /odeme'ye POST):
     //   payment_type      = "card"

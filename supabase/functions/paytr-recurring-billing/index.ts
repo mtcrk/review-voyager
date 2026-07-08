@@ -98,11 +98,11 @@ Deno.serve(async (req) => {
       }
 
       const merchant_oid = newMerchantOid("VRR");
-      // PayTR Direkt API / Recurring Payment docs use TL decimal strings for
-      // payment_amount in BOTH the hash string and POST body.
+      // PayTR Direkt API / Recurring Payment validates payment_amount as an
+      // integer in kuruş. Use the exact same string in hash and POST body.
       // Prefer computed_total (dynamic pricing: plan + addons + per-location) when set.
       const chargeAmount = sub.computed_total != null ? Number(sub.computed_total) : Number(sub.amount);
-      const payment_amount = chargeAmount.toFixed(2);
+      const payment_amount = String(Math.round(chargeAmount * 100));
       const currency = sub.currency ?? "TL";
       const payment_type = "card";
       const installment_count = "0";
