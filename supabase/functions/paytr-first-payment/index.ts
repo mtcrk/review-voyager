@@ -4,11 +4,10 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import {
-  buildPaytrPaymentHashStr,
   CORS_HEADERS,
   getClientIp,
   newMerchantOid,
-  paytrPaymentToken,
+  paytrIframeToken,
 } from "../_shared/paytr.ts";
 
 Deno.serve(async (req) => {
@@ -177,68 +176,53 @@ Deno.serve(async (req) => {
 
     const merchant_oid = newMerchantOid();
     const user_ip = getClientIp(req);
-    // PayTR Direkt API validates payment_amount as an integer in kuruş.
+    // PayTR SPP/iFrame validation expects payment_amount as integer kuruş.
     // The exact same string must be used in BOTH the hash and POST body.
     const payment_amount = String(Math.round(authoritativeAmount * 100));
     const currency = "TL";
-    // Direkt API (kendi formumuzda kart toplayıp /odeme'ye POST):
-    //   payment_type      = "card"
-    //   installment_count = "0"  → Kart saklama / Direkt API dokümanı: tek çekim
-    //   non_3d            = "0"  → 3D Secure akışı
     const payment_type = "card";
     const installment_count = "0";
     const non_3d = "0";
+    const no_installment = "1";
+    const max_installment = "0";
     const origin = req.headers.get("origin") ?? "https://voyagerespondcom.lovable.app";
 
-    // user_basket amounts are in TL (decimal string) per PayTR docs, not kuruş.
-    // Direkt API'de opsiyoneldir ama gönderilmesinin zararı yoktur.
-    const user_basket = JSON.stringify(
+    // PayTR SPP validates user_basket as base64(JSON). Unit prices remain TL decimal.
+    const user_basket_json = JSON.stringify(
       basket ?? [[authoritativePlanCode, authoritativeAmount.toFixed(2), 1]],
     );
+    const user_basket = base64Utf8(user_basket_json);
 
-    // Direkt API hash (Checkout.tsx kart alanlarını kendi formunda toplayıp
-    // https://www.paytr.com/odeme'ye POST ediyor):
-    //   hash_str = merchant_id + user_ip + merchant_oid + email + payment_amount
-    //            + payment_type + installment_count + currency + test_mode + non_3d
+    // PayTR is validating this flow as SPP, so token must include the SPP fields:
+    //   merchant_id + user_ip + merchant_oid + email + payment_amount
+    //   + user_basket + no_installment + max_installment + currency + test_mode
     //   token    = base64(HMAC_SHA256(merchant_key, hash_str + merchant_salt))
-    const paytr_token = await paytrPaymentToken({
+    const { token: paytr_token, hashStr: hash_str } = await paytrIframeToken({
       merchant_id,
       user_ip,
       merchant_oid,
       email,
       payment_amount,
-      payment_type,
-      installment_count,
+      user_basket,
+      no_installment,
+      max_installment,
       currency,
       test_mode,
-      non_3d,
       merchant_key,
       merchant_salt,
     });
 
     if (test_mode === "1") {
-      const hash_str = buildPaytrPaymentHashStr({
-        merchant_id,
-        user_ip,
-        merchant_oid,
-        email,
-        payment_amount,
-        payment_type,
-        installment_count,
-        currency,
-        test_mode,
-        non_3d,
-      });
       console.log("paytr-first-payment debug", {
         hash_str,
         hash_str_len: hash_str.length,
         token_prefix: paytr_token.slice(0, 8),
         payment_amount,
-        payment_type,
-        installment_count,
+        user_basket_len: user_basket.length,
+        no_installment,
+        max_installment,
         currency,
         test_mode,
-        non_3d,
         merchant_oid,
       });
     }
@@ -279,9 +263,10 @@ Deno.serve(async (req) => {
       store_card: "1",
       paytr_token,
       non3d_test_failed: "0",
-      no_installment: "1",
-      max_installment: "0",
-      // PayTR arayüz dili — hash'e dahil değil.
+      no_installment,
+      max_installment,
+      client_lang: "tr",
+      // PayTR SPP arayüz dili — hash'e dahil değil.
       lang: "tr",
     };
     if (existing?.utoken) fields.utoken = existing.utoken;
@@ -302,4 +287,11 @@ function json(data: unknown, status = 200) {
     status,
     headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
   });
+}
+
+function base64Utf8(value: string): string {
+  const bytes = new TextEncoder().encode(value);
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary);
 }
