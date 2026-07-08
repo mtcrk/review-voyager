@@ -4,6 +4,7 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import {
+  buildPaytrPaymentHashStr,
   CORS_HEADERS,
   getClientIp,
   newMerchantOid,
@@ -176,10 +177,11 @@ Deno.serve(async (req) => {
 
     const merchant_oid = newMerchantOid();
     const user_ip = getClientIp(req);
-    // PayTR Direkt API requires payment_amount as an INTEGER in kuruş (TL * 100).
-    // Example: 990.00 TL → "99000". Same value MUST be used both in the hash
-    // string and in the form fields — any mismatch causes hash rejection.
-    const payment_amount = String(Math.round(authoritativeAmount * 100));
+    // PayTR Direkt API official docs use TL decimal strings for payment_amount
+    // in BOTH the hash string and POST body (example: "100.99" / "990.00").
+    // Kuruş integer strings belong to the iFrame token flow and produce an
+    // invalid Direkt API paytr_token for this card-form POST flow.
+    const payment_amount = authoritativeAmount.toFixed(2);
     const currency = "TL";
     // Direkt API (kendi formumuzda kart toplayıp /odeme'ye POST):
     //   payment_type      = "card"
@@ -221,6 +223,33 @@ Deno.serve(async (req) => {
       merchant_key,
       merchant_salt,
     });
+
+    if (test_mode === "1") {
+      const hash_str = buildPaytrPaymentHashStr({
+        merchant_id,
+        user_ip,
+        merchant_oid,
+        email,
+        payment_amount,
+        payment_type,
+        installment_count,
+        currency,
+        test_mode,
+        non_3d,
+      });
+      console.log("paytr-first-payment debug", {
+        hash_str,
+        hash_str_len: hash_str.length,
+        token_prefix: paytr_token.slice(0, 8),
+        payment_amount,
+        payment_type,
+        installment_count,
+        currency,
+        test_mode,
+        non_3d,
+        merchant_oid,
+      });
+    }
 
     // Log the initiated attempt
     await admin.from("paytr_payment_log").insert({

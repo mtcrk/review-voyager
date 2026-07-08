@@ -25,7 +25,37 @@ export async function hmacSha256Base64(key: string, message: string): Promise<st
  *   hash_str = merchant_id + user_ip + merchant_oid + email + payment_amount
  *            + payment_type + installment_count + currency + test_mode + non_3d
  *   token    = base64(HMAC_SHA256(merchant_key, hash_str + merchant_salt))
+ *
+ * Direct API uses the exact same payment_amount string in both the token and
+ * POST body. PayTR's official Direct API examples use TL decimal strings such
+ * as "100.99" / "990.00" here, not the iFrame API kuruş integer format.
  */
+export function buildPaytrPaymentHashStr(params: {
+  merchant_id: string;
+  user_ip: string;
+  merchant_oid: string;
+  email: string;
+  payment_amount: string | number;
+  payment_type: string;
+  installment_count: string | number;
+  currency: string;
+  test_mode: string | number;
+  non_3d: string | number;
+}): string {
+  return (
+    String(params.merchant_id) +
+    String(params.user_ip) +
+    String(params.merchant_oid) +
+    String(params.email) +
+    String(params.payment_amount) +
+    String(params.payment_type) +
+    String(params.installment_count) +
+    String(params.currency) +
+    String(params.test_mode) +
+    String(params.non_3d)
+  );
+}
+
 export async function paytrPaymentToken(params: {
   merchant_id: string;
   user_ip: string;
@@ -40,17 +70,7 @@ export async function paytrPaymentToken(params: {
   merchant_key: string;
   merchant_salt: string;
 }): Promise<string> {
-  const hashStr =
-    String(params.merchant_id) +
-    String(params.user_ip) +
-    String(params.merchant_oid) +
-    String(params.email) +
-    String(params.payment_amount) +
-    String(params.payment_type) +
-    String(params.installment_count) +
-    String(params.currency) +
-    String(params.test_mode) +
-    String(params.non_3d);
+  const hashStr = buildPaytrPaymentHashStr(params);
   return await hmacSha256Base64(params.merchant_key, hashStr + params.merchant_salt);
 }
 
