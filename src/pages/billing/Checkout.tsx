@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -113,17 +113,10 @@ export default function BillingCheckout() {
   const [country, setCountry] = useState("Türkiye");
   const [countryOther, setCountryOther] = useState("");
   const COUNTRY_OPTIONS = ["Türkiye", "Almanya", "Birleşik Krallık", "ABD", "Fransa", "Hollanda", "İtalya", "İspanya", "Rusya", "Suudi Arabistan", "Birleşik Arap Emirlikleri", "Katar", "Azerbaycan", "KKTC", "Bulgaristan", "Yunanistan", "Diğer"];
-  const [ccOwner, setCcOwner] = useState("");
-  const [ccNumber, setCcNumber] = useState("");
-  const [ccExpMonth, setCcExpMonth] = useState("");
-  const [ccExpYear, setCcExpYear] = useState("");
-  const [ccCvv, setCcCvv] = useState("");
   const [consent, setConsent] = useState(false);
   const [legalConsent, setLegalConsent] = useState(false);
   const [loading, setLoading] = useState(false);
-  const formRef = useRef<HTMLFormElement>(null);
-  const [postFields, setPostFields] = useState<Record<string, string> | null>(null);
-  const [postAction, setPostAction] = useState("");
+  const [iframeToken, setIframeToken] = useState<string | null>(null);
 
   const planSubtotal = useMemo(() => {
     if (!plan) return 0;
@@ -188,10 +181,30 @@ export default function BillingCheckout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // When postFields set, auto-submit form to PayTR
+  // Load PayTR iFrameResizer script + init once iframe is rendered
   useEffect(() => {
-    if (postFields && formRef.current) formRef.current.submit();
-  }, [postFields]);
+    if (!iframeToken) return;
+    const SCRIPT_ID = "paytr-iframe-resizer";
+    const init = () => {
+      const w = window as unknown as { iFrameResize?: (opts: object, sel: string) => void };
+      try {
+        w.iFrameResize?.({}, "#paytriframe");
+      } catch (e) {
+        console.error("iFrameResize init failed", e);
+      }
+    };
+    const existing = document.getElementById(SCRIPT_ID) as HTMLScriptElement | null;
+    if (existing) {
+      init();
+      return;
+    }
+    const s = document.createElement("script");
+    s.id = SCRIPT_ID;
+    s.src = "https://www.paytr.com/js/iframeResizer.min.js";
+    s.async = true;
+    s.onload = init;
+    document.body.appendChild(s);
+  }, [iframeToken]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -280,19 +293,17 @@ export default function BillingCheckout() {
         }
         throw error;
       }
-      if (!data?.fields || !data?.action) throw new Error("PayTR yanıtı geçersiz");
-
-      // 3) Merge card fields for the form POST
-      const merged: Record<string, string> = {
-        ...data.fields,
-        cc_owner: ccOwner,
-        card_number: ccNumber.replace(/\s+/g, ""),
-        expiry_month: ccExpMonth,
-        expiry_year: ccExpYear,
-        cvv: ccCvv,
-      };
-      setPostAction(data.action);
-      setPostFields(merged);
+      if (data?.error) {
+        toast({
+          title: "Ödeme başlatılamadı",
+          description: data.reason ?? data.error,
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+      if (!data?.iframe_token) throw new Error("PayTR yanıtı geçersiz");
+      setIframeToken(data.iframe_token as string);
     } catch (err) {
       toast({
         title: "Ödeme başlatılamadı",
