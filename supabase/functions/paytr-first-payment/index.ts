@@ -7,7 +7,7 @@ import {
   CORS_HEADERS,
   getClientIp,
   newMerchantOid,
-  paytrIframeToken,
+  paytrPaymentToken,
 } from "../_shared/paytr.ts";
 
 Deno.serve(async (req) => {
@@ -181,49 +181,45 @@ Deno.serve(async (req) => {
     // string and in the form fields — any mismatch causes hash rejection.
     const payment_amount = String(Math.round(authoritativeAmount * 100));
     const currency = "TL";
+    // Direkt API (kendi formumuzda kart toplayıp /odeme'ye POST):
+    //   payment_type      = "card"
+    //   installment_count = "0"  → PayTR dokümanı: "Tek çekim için 0"
+    //   non_3d            = "0"  → 3D Secure akışı
+    const payment_type = "card";
+    const installment_count = "0";
+    const non_3d = "0";
+    // Extra iFrame-style form fields (hash'e DAHİL DEĞİL, PayTR bunları form
+    // gövdesinde tolere ediyor — daha önceki denemelerde eksikliğinde hata
+    // vermişti, o yüzden koruyoruz).
     const no_installment = "1";
     const max_installment = "0";
 
     const origin = req.headers.get("origin") ?? "https://voyagerespondcom.lovable.app";
 
     // user_basket amounts are in TL (decimal string) per PayTR docs, not kuruş.
-    // MUST be computed BEFORE the token because it participates in the hash.
+    // Direkt API'de opsiyoneldir ama gönderilmesinin zararı yoktur.
     const user_basket = JSON.stringify(
       basket ?? [[authoritativePlanCode, authoritativeAmount.toFixed(2), 1]],
     );
 
-    // iFrame / Yönlendirmeli API (POST → https://www.paytr.com/odeme):
-    //   hash = merchant_id + user_ip + merchant_oid + email + payment_amount
-    //        + user_basket + no_installment + max_installment + currency + test_mode
-    // NOT the Direkt API formula (payment_type/installment_count/non_3d) —
-    // that path requires card fields (cc_owner, card_number, cvv…) which we do
-    // not send. Sending the wrong hash produces "paytr_token gecersiz".
-    const { token: paytr_token, hashStr } = await paytrIframeToken({
+    // Direkt API hash (Checkout.tsx kart alanlarını kendi formunda toplayıp
+    // https://www.paytr.com/odeme'ye POST ediyor):
+    //   hash_str = merchant_id + user_ip + merchant_oid + email + payment_amount
+    //            + payment_type + installment_count + currency + test_mode + non_3d
+    //   token    = base64(HMAC_SHA256(merchant_key, hash_str + merchant_salt))
+    const paytr_token = await paytrPaymentToken({
       merchant_id,
       user_ip,
       merchant_oid,
       email,
       payment_amount,
-      user_basket,
-      no_installment,
-      max_installment,
+      payment_type,
+      installment_count,
       currency,
       test_mode,
+      non_3d,
       merchant_key,
       merchant_salt,
-    });
-
-    // Temporary diagnostic — safe to log: hash_str contains no secrets, and we
-    // only print the first 8 chars of the token. Remove once PayTR accepts.
-    console.log("paytr-first-payment debug", {
-      hash_str: hashStr,
-      hash_str_len: hashStr.length,
-      token_prefix: paytr_token.slice(0, 8),
-      merchant_key_len: merchant_key.length,
-      merchant_salt_len: merchant_salt.length,
-      payment_amount,
-      test_mode,
-      merchant_oid,
     });
 
     // Log the initiated attempt
@@ -247,8 +243,11 @@ Deno.serve(async (req) => {
       merchant_oid,
       email,
       payment_amount,
+      payment_type,
+      installment_count,
       currency,
       test_mode,
+      non_3d,
       merchant_ok_url: `${origin}/billing/success`,
       merchant_fail_url: `${origin}/billing/failed`,
       user_name,
@@ -258,14 +257,10 @@ Deno.serve(async (req) => {
       debug_on: "1",
       store_card: "1",
       paytr_token,
-      // no_installment ve max_installment iFrame API hash'ine DAHİLDİR
-      // (yukarıda hesaplanan hashStr'nin parçası).
+      // no_installment / max_installment hash'e DAHİL DEĞİL, sadece form alanı.
       no_installment,
       max_installment,
-      // PayTR arayüz dili ("tr" | "en"). Hash'e dahil değil.
-      // Direkt API dokümanı `client_lang` ismini kullanıyor; iFrame API ise `lang`
-      // kullanıyor. PayTR hata mesajı "lang" diyor, ikisini de göndererek her iki
-      // varyantı kapsıyoruz — fazlalık alanlar PayTR tarafından yok sayılır.
+      // PayTR arayüz dili — hash'e dahil değil.
       lang: "tr",
       client_lang: "tr",
     };
