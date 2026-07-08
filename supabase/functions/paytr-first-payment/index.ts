@@ -5,9 +5,10 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import {
   CORS_HEADERS,
+  buildPaytrPaymentHashStr,
   getClientIp,
   newMerchantOid,
-  paytrIframeToken,
+  paytrPaymentToken,
 } from "../_shared/paytr.ts";
 
 Deno.serve(async (req) => {
@@ -176,7 +177,7 @@ Deno.serve(async (req) => {
 
     const merchant_oid = newMerchantOid();
     const user_ip = getClientIp(req);
-    // PayTR SPP/iFrame validation expects payment_amount as integer kuruş.
+    // PayTR Direkt API validates payment_amount as integer kuruş.
     // The exact same string must be used in BOTH the hash and POST body.
     const payment_amount = String(Math.round(authoritativeAmount * 100));
     const currency = "TL";
@@ -187,27 +188,41 @@ Deno.serve(async (req) => {
     const max_installment = "0";
     const origin = req.headers.get("origin") ?? "https://voyagerespondcom.lovable.app";
 
-    // PayTR SPP validates user_basket as base64(JSON). Unit prices remain TL decimal.
-    const user_basket_json = JSON.stringify(
+    // Direkt API expects user_basket as JSON string in the POST body; it is NOT
+    // part of the Direkt API token hash. Unit prices remain TL decimal.
+    const user_basket = JSON.stringify(
       basket ?? [[authoritativePlanCode, authoritativeAmount.toFixed(2), 1]],
     );
-    const user_basket = base64Utf8(user_basket_json);
 
-    // PayTR is validating this flow as SPP, so token must include the SPP fields:
+    // This is the card-posting Direkt API flow. Keep SPP-required POST fields
+    // (no_installment/max_installment/lang) in fields, but DO NOT include them
+    // in paytr_token. Direkt API token formula is:
     //   merchant_id + user_ip + merchant_oid + email + payment_amount
-    //   + user_basket + no_installment + max_installment + currency + test_mode
+    //   + payment_type + installment_count + currency + test_mode + non_3d
     //   token    = base64(HMAC_SHA256(merchant_key, hash_str + merchant_salt))
-    const { token: paytr_token, hashStr: hash_str } = await paytrIframeToken({
+    const hash_str = buildPaytrPaymentHashStr({
       merchant_id,
       user_ip,
       merchant_oid,
       email,
       payment_amount,
-      user_basket,
-      no_installment,
-      max_installment,
+      payment_type,
+      installment_count,
       currency,
       test_mode,
+      non_3d,
+    });
+    const paytr_token = await paytrPaymentToken({
+      merchant_id,
+      user_ip,
+      merchant_oid,
+      email,
+      payment_amount,
+      payment_type,
+      installment_count,
+      currency,
+      test_mode,
+      non_3d,
       merchant_key,
       merchant_salt,
     });
@@ -218,9 +233,9 @@ Deno.serve(async (req) => {
         hash_str_len: hash_str.length,
         token_prefix: paytr_token.slice(0, 8),
         payment_amount,
-        user_basket_len: user_basket.length,
-        no_installment,
-        max_installment,
+        payment_type,
+        installment_count,
+        non_3d,
         currency,
         test_mode,
         merchant_oid,
@@ -287,11 +302,4 @@ function json(data: unknown, status = 200) {
     status,
     headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
   });
-}
-
-function base64Utf8(value: string): string {
-  const bytes = new TextEncoder().encode(value);
-  let binary = "";
-  for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary);
 }
