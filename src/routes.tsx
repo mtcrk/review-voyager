@@ -85,6 +85,7 @@ export const routes: RouteRecord[] = [
       { index: true, lazy: lazyDefault(() => import("./pages/Index")) },
       { path: "login", lazy: lazyDefault(() => import("./pages/Login")) },
       { path: "register", lazy: lazyDefault(() => import("./pages/Register")) },
+      { path: "~oauth/initiate", lazy: lazyDefault(() => import("./pages/OAuthInitiateRedirect")) },
       { path: "forgot-password", lazy: lazyDefault(() => import("./pages/ForgotPassword")) },
       { path: "privacy-policy", lazy: lazyDefault(() => import("./pages/PrivacyPolicy")) },
       { path: "terms-of-service", lazy: lazyDefault(() => import("./pages/TermsOfService")) },
