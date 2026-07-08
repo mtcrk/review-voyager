@@ -280,11 +280,11 @@ Deno.serve(async (req) => {
     void existing;
 
     // Server-side POST to PayTR get-token endpoint
-    const body = new URLSearchParams(fields);
+    const formBody = new URLSearchParams(fields);
     const paytrRes = await fetch("https://www.paytr.com/odeme/api/get-token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body,
+      body: formBody,
     });
     const paytrText = await paytrRes.text();
     let paytrJson: { status?: string; token?: string; reason?: string } = {};
