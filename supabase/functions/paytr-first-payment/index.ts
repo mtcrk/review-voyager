@@ -7,7 +7,7 @@ import {
   CORS_HEADERS,
   getClientIp,
   newMerchantOid,
-  paytrPaymentToken,
+  paytrIframeToken,
 } from "../_shared/paytr.ts";
 
 Deno.serve(async (req) => {
@@ -150,8 +150,11 @@ Deno.serve(async (req) => {
     const user_phone = "0000000000";
 
     const merchant_id = Deno.env.get("PAYTR_MERCHANT_ID") ?? "";
-    const merchant_key = Deno.env.get("PAYTR_MERCHANT_KEY") ?? "";
-    const merchant_salt = Deno.env.get("PAYTR_MERCHANT_SALT") ?? "";
+    // Trim to guard against accidental whitespace / trailing newlines in the
+    // stored secret — PayTR HMAC is byte-exact and a stray \n silently
+    // invalidates every token.
+    const merchant_key = (Deno.env.get("PAYTR_MERCHANT_KEY") ?? "").trim();
+    const merchant_salt = (Deno.env.get("PAYTR_MERCHANT_SALT") ?? "").trim();
     if (!merchant_id || !merchant_key || !merchant_salt) {
       return json({ error: "PayTR credentials not configured" }, 500);
     }
@@ -177,32 +180,51 @@ Deno.serve(async (req) => {
     // Example: 990.00 TL → "99000". Same value MUST be used both in the hash
     // string and in the form fields — any mismatch causes hash rejection.
     const payment_amount = String(Math.round(authoritativeAmount * 100));
-    const payment_type = "card";
-    const installment_count = "0";
     const currency = "TL";
-    const non_3d = "0";
+    const no_installment = "1";
+    const max_installment = "0";
 
-    const paytr_token = await paytrPaymentToken({
+    const origin = req.headers.get("origin") ?? "https://voyagerespondcom.lovable.app";
+
+    // user_basket amounts are in TL (decimal string) per PayTR docs, not kuruş.
+    // MUST be computed BEFORE the token because it participates in the hash.
+    const user_basket = JSON.stringify(
+      basket ?? [[authoritativePlanCode, authoritativeAmount.toFixed(2), 1]],
+    );
+
+    // iFrame / Yönlendirmeli API (POST → https://www.paytr.com/odeme):
+    //   hash = merchant_id + user_ip + merchant_oid + email + payment_amount
+    //        + user_basket + no_installment + max_installment + currency + test_mode
+    // NOT the Direkt API formula (payment_type/installment_count/non_3d) —
+    // that path requires card fields (cc_owner, card_number, cvv…) which we do
+    // not send. Sending the wrong hash produces "paytr_token gecersiz".
+    const { token: paytr_token, hashStr } = await paytrIframeToken({
       merchant_id,
       user_ip,
       merchant_oid,
       email,
       payment_amount,
-      payment_type,
-      installment_count,
+      user_basket,
+      no_installment,
+      max_installment,
       currency,
       test_mode,
-      non_3d,
       merchant_key,
       merchant_salt,
     });
 
-    const origin = req.headers.get("origin") ?? "https://voyagerespondcom.lovable.app";
-
-    // user_basket amounts are in TL (decimal string) per PayTR docs, not kuruş.
-    const user_basket = JSON.stringify(
-      basket ?? [[authoritativePlanCode, authoritativeAmount.toFixed(2), 1]],
-    );
+    // Temporary diagnostic — safe to log: hash_str contains no secrets, and we
+    // only print the first 8 chars of the token. Remove once PayTR accepts.
+    console.log("paytr-first-payment debug", {
+      hash_str: hashStr,
+      hash_str_len: hashStr.length,
+      token_prefix: paytr_token.slice(0, 8),
+      merchant_key_len: merchant_key.length,
+      merchant_salt_len: merchant_salt.length,
+      payment_amount,
+      test_mode,
+      merchant_oid,
+    });
 
     // Log the initiated attempt
     await admin.from("paytr_payment_log").insert({
@@ -224,12 +246,9 @@ Deno.serve(async (req) => {
       user_ip,
       merchant_oid,
       email,
-      payment_type,
       payment_amount,
-      installment_count,
       currency,
       test_mode,
-      non_3d,
       merchant_ok_url: `${origin}/billing/success`,
       merchant_fail_url: `${origin}/billing/failed`,
       user_name,
@@ -239,11 +258,10 @@ Deno.serve(async (req) => {
       debug_on: "1",
       store_card: "1",
       paytr_token,
-      // PayTR Kart Saklama / Yeni Kart Ekleme akışında zorunlu; hash'e DAHİL DEĞİL.
-      // no_installment=1 → taksit seçenekleri gösterme (abonelik/kart saklamada standart).
-      // max_installment=0 → taksit limiti belirtme (zaten kapalı).
-      no_installment: "1",
-      max_installment: "0",
+      // no_installment ve max_installment iFrame API hash'ine DAHİLDİR
+      // (yukarıda hesaplanan hashStr'nin parçası).
+      no_installment,
+      max_installment,
       // PayTR arayüz dili ("tr" | "en"). Hash'e dahil değil.
       // Direkt API dokümanı `client_lang` ismini kullanıyor; iFrame API ise `lang`
       // kullanıyor. PayTR hata mesajı "lang" diyor, ikisini de göndererek her iki
