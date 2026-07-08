@@ -183,18 +183,11 @@ Deno.serve(async (req) => {
     const currency = "TL";
     // Direkt API (kendi formumuzda kart toplayıp /odeme'ye POST):
     //   payment_type      = "card"
-    //   installment_count = ""   → PayTR Direkt API örneğinde tek çekimde boş
-    //                              bırakılıyor; "0" token hash'ini bozuyor.
+    //   installment_count = "0"  → Kart saklama / Direkt API dokümanı: tek çekim
     //   non_3d            = "0"  → 3D Secure akışı
     const payment_type = "card";
-    const installment_count = "";
+    const installment_count = "0";
     const non_3d = "0";
-    // Extra iFrame-style form fields (hash'e DAHİL DEĞİL, PayTR bunları form
-    // gövdesinde tolere ediyor — daha önceki denemelerde eksikliğinde hata
-    // vermişti, o yüzden koruyoruz).
-    const no_installment = "1";
-    const max_installment = "0";
-
     const origin = req.headers.get("origin") ?? "https://voyagerespondcom.lovable.app";
 
     // user_basket amounts are in TL (decimal string) per PayTR docs, not kuruş.
@@ -285,11 +278,8 @@ Deno.serve(async (req) => {
       debug_on: "1",
       store_card: "1",
       paytr_token,
-      // no_installment / max_installment hash'e DAHİL DEĞİL, sadece form alanı.
-      no_installment,
-      max_installment,
+      non3d_test_failed: "0",
       // PayTR arayüz dili — hash'e dahil değil.
-      lang: "tr",
       client_lang: "tr",
     };
     if (existing?.utoken) fields.utoken = existing.utoken;
