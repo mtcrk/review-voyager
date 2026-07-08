@@ -279,6 +279,8 @@ Deno.serve(async (req) => {
       store_card: "1",
       paytr_token,
       non3d_test_failed: "0",
+      no_installment: "1",
+      max_installment: "0",
       // PayTR arayüz dili — hash'e dahil değil.
       client_lang: "tr",
     };
