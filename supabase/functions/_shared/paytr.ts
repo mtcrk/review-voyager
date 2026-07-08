@@ -55,6 +55,45 @@ export async function paytrPaymentToken(params: {
 }
 
 /**
+ * iFrame / Yönlendirmeli API token (POST to https://www.paytr.com/odeme or
+ * /odeme/api/get-token). Hash formula:
+ *   hash_str = merchant_id + user_ip + merchant_oid + email + payment_amount
+ *            + user_basket + no_installment + max_installment + currency + test_mode
+ *   token    = base64(HMAC_SHA256(merchant_key, hash_str + merchant_salt))
+ */
+export async function paytrIframeToken(params: {
+  merchant_id: string;
+  user_ip: string;
+  merchant_oid: string;
+  email: string;
+  payment_amount: string | number;
+  user_basket: string;
+  no_installment: string | number;
+  max_installment: string | number;
+  currency: string;
+  test_mode: string | number;
+  merchant_key: string;
+  merchant_salt: string;
+}): Promise<{ token: string; hashStr: string }> {
+  const hashStr =
+    String(params.merchant_id) +
+    String(params.user_ip) +
+    String(params.merchant_oid) +
+    String(params.email) +
+    String(params.payment_amount) +
+    String(params.user_basket) +
+    String(params.no_installment) +
+    String(params.max_installment) +
+    String(params.currency) +
+    String(params.test_mode);
+  const token = await hmacSha256Base64(
+    params.merchant_key,
+    hashStr + params.merchant_salt,
+  );
+  return { token, hashStr };
+}
+
+/**
  * Notification callback verification:
  *   expected = base64(HMAC_SHA256(merchant_key, merchant_oid + merchant_salt + status + total_amount))
  */
