@@ -34,8 +34,8 @@ Deno.serve(async (req) => {
   }
 
   const merchant_id = Deno.env.get("PAYTR_MERCHANT_ID") ?? "";
-  const merchant_key = Deno.env.get("PAYTR_MERCHANT_KEY") ?? "";
-  const merchant_salt = Deno.env.get("PAYTR_MERCHANT_SALT") ?? "";
+    const merchant_key = (Deno.env.get("PAYTR_MERCHANT_KEY") ?? "").trim();
+    const merchant_salt = (Deno.env.get("PAYTR_MERCHANT_SALT") ?? "").trim();
   if (!merchant_id || !merchant_key || !merchant_salt) {
     return json({ error: "PayTR credentials not configured" }, 500);
   }
@@ -98,11 +98,11 @@ Deno.serve(async (req) => {
       }
 
       const merchant_oid = newMerchantOid("VRR");
-      // PayTR Direkt API requires payment_amount as an INTEGER in kuruş (TL * 100).
-      // Same value MUST be used in the hash and the form body.
+      // PayTR Direkt API / Recurring Payment docs use TL decimal strings for
+      // payment_amount in BOTH the hash string and POST body.
       // Prefer computed_total (dynamic pricing: plan + addons + per-location) when set.
       const chargeAmount = sub.computed_total != null ? Number(sub.computed_total) : Number(sub.amount);
-      const payment_amount = String(Math.round(chargeAmount * 100));
+      const payment_amount = chargeAmount.toFixed(2);
       const currency = sub.currency ?? "TL";
       const payment_type = "card";
       const installment_count = "0";
