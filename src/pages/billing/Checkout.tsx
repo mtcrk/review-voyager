@@ -620,41 +620,7 @@ export default function BillingCheckout() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader><CardTitle>Kart Bilgileri</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label>Kart Sahibi</Label>
-                <Input value={ccOwner} onChange={(e) => setCcOwner(e.target.value)} required maxLength={100} />
-              </div>
-              <div>
-                <Label>Kart Numarası</Label>
-                <Input
-                  inputMode="numeric"
-                  autoComplete="cc-number"
-                  value={ccNumber}
-                  onChange={(e) => setCcNumber(e.target.value)}
-                  required
-                  maxLength={23}
-                  placeholder="0000 0000 0000 0000"
-                />
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <Label>Ay</Label>
-                  <Input value={ccExpMonth} onChange={(e) => setCcExpMonth(e.target.value)} required maxLength={2} placeholder="MM" />
-                </div>
-                <div>
-                  <Label>Yıl</Label>
-                  <Input value={ccExpYear} onChange={(e) => setCcExpYear(e.target.value)} required maxLength={2} placeholder="YY" />
-                </div>
-                <div>
-                  <Label>CVV</Label>
-                  <Input value={ccCvv} onChange={(e) => setCcCvv(e.target.value)} required maxLength={4} />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Kart bilgileri artık PayTR iframe'i içinde alınıyor. */}
 
           {!updateCardMode && (
           <div className="space-y-3">
@@ -706,6 +672,7 @@ export default function BillingCheckout() {
           </div>
           )}
 
+          {!iframeToken && (
           <Button
             type="submit"
             className="w-full h-12"
@@ -714,20 +681,29 @@ export default function BillingCheckout() {
             {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
             {updateCardMode ? "Kartı Güvenle Güncelle" : `Güvenli Ödemeye Geç (${computedTotal.toLocaleString("tr-TR")} TL)`}
           </Button>
+          )}
         </form>
 
-        {/* Hidden auto-submit form to PayTR (real navigation to 3D page) */}
-        {postFields && (
-          <form
-            ref={formRef}
-            method="post"
-            action={postAction}
-            style={{ display: "none" }}
-          >
-            {Object.entries(postFields).map(([k, v]) => (
-              <input key={k} type="hidden" name={k} value={v} />
-            ))}
-          </form>
+        {iframeToken && (
+          <div className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Güvenli Ödeme</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Kart bilgilerinizi aşağıdaki PayTR güvenli ödeme formuna girin.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <iframe
+                  src={`https://www.paytr.com/odeme/guvenli/${iframeToken}`}
+                  id="paytriframe"
+                  frameBorder={0}
+                  scrolling="no"
+                  style={{ width: "100%", minHeight: 600 }}
+                />
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
     </div>
