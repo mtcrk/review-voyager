@@ -183,10 +183,11 @@ Deno.serve(async (req) => {
     const currency = "TL";
     // Direkt API (kendi formumuzda kart toplayıp /odeme'ye POST):
     //   payment_type      = "card"
-    //   installment_count = "0"  → PayTR dokümanı: "Tek çekim için 0"
+    //   installment_count = ""   → PayTR Direkt API örneğinde tek çekimde boş
+    //                              bırakılıyor; "0" token hash'ini bozuyor.
     //   non_3d            = "0"  → 3D Secure akışı
     const payment_type = "card";
-    const installment_count = "0";
+    const installment_count = "";
     const non_3d = "0";
     // Extra iFrame-style form fields (hash'e DAHİL DEĞİL, PayTR bunları form
     // gövdesinde tolere ediyor — daha önceki denemelerde eksikliğinde hata
