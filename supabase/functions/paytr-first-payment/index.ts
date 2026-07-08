@@ -282,7 +282,7 @@ Deno.serve(async (req) => {
       no_installment: "1",
       max_installment: "0",
       // PayTR arayüz dili — hash'e dahil değil.
-      client_lang: "tr",
+      lang: "tr",
     };
     if (existing?.utoken) fields.utoken = existing.utoken;
 
