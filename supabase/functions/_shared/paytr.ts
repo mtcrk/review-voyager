@@ -27,8 +27,8 @@ export async function hmacSha256Base64(key: string, message: string): Promise<st
  *   token    = base64(HMAC_SHA256(merchant_key, hash_str + merchant_salt))
  *
  * Direct API uses the exact same payment_amount string in both the token and
- * POST body. PayTR's official Direct API examples use TL decimal strings such
- * as "100.99" / "990.00" here, not the iFrame API kuruş integer format.
+ * POST body. PayTR validates this field as an integer in the smallest currency
+ * unit for TRY (kuruş), e.g. 990 TL => "99000".
  */
 export function buildPaytrPaymentHashStr(params: {
   merchant_id: string;
