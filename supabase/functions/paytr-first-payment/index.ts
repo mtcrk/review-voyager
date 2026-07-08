@@ -1,15 +1,28 @@
-// paytr-first-payment: prepares the fields the browser will POST to
-// https://www.paytr.com/odeme (Yeni Kart Ekleme, 3D). Card details are NEVER
-// touched here — they go directly from the user's browser to PayTR.
+// paytr-first-payment: iFrame API akışı.
+// Sunucu, PayTR'nin get-token endpoint'ine istek atar ve dönen token'ı
+// frontend'e iletir. Frontend token ile PayTR iframe'ini render eder ve
+// kart bilgileri sadece PayTR iframe'inin içine girilir.
+//
+// NOT: Direkt API akışı hesap onayı gelince tekrar aktive edilecek.
+// _shared/paytr.ts içindeki `paytrPaymentToken` / `buildPaytrPaymentHashStr`
+// helper'ları bilerek silinmedi — Direkt API'ye dönüş için hazır.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import {
   CORS_HEADERS,
-  buildPaytrPaymentHashStr,
   getClientIp,
   newMerchantOid,
-  paytrPaymentToken,
+  paytrIframeToken,
 } from "../_shared/paytr.ts";
+
+function b64Utf8(s: string): string {
+  // btoa handles Latin1; encode UTF-8 first for safety (plan_code is ASCII
+  // but user data may contain non-ASCII characters).
+  const bytes = new TextEncoder().encode(s);
+  let bin = "";
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
@@ -177,68 +190,51 @@ Deno.serve(async (req) => {
 
     const merchant_oid = newMerchantOid();
     const user_ip = getClientIp(req);
-    // PayTR Direkt API validates payment_amount as integer kuruş.
+    // PayTR iFrame API validates payment_amount as integer kuruş.
     // The exact same string must be used in BOTH the hash and POST body.
     const payment_amount = String(Math.round(authoritativeAmount * 100));
     const currency = "TL";
-    const payment_type = "card";
-    const installment_count = "0";
-    const non_3d = "0";
     const no_installment = "1";
     const max_installment = "0";
     const origin = req.headers.get("origin") ?? "https://voyagerespondcom.lovable.app";
 
-    // Direkt API expects user_basket as JSON string in the POST body; it is NOT
-    // part of the Direkt API token hash. Unit prices remain TL decimal.
-    const user_basket = JSON.stringify(
+    // iFrame API: user_basket = base64(json_encode(...)). Both hash ve POST
+    // body içinde AYNI base64 string kullanılmalı.
+    const basketJson = JSON.stringify(
       basket ?? [[authoritativePlanCode, authoritativeAmount.toFixed(2), 1]],
     );
+    const user_basket = b64Utf8(basketJson);
 
-    // This is the card-posting Direkt API flow. Keep SPP-required POST fields
-    // (no_installment/max_installment/lang) in fields, but DO NOT include them
-    // in paytr_token. Direkt API token formula is:
-    //   merchant_id + user_ip + merchant_oid + email + payment_amount
-    //   + payment_type + installment_count + currency + test_mode + non_3d
+    // iFrame API token formula:
+    //   hash_str = merchant_id + user_ip + merchant_oid + email
+    //            + payment_amount + user_basket(base64) + no_installment
+    //            + max_installment + currency + test_mode
     //   token    = base64(HMAC_SHA256(merchant_key, hash_str + merchant_salt))
-    const hash_str = buildPaytrPaymentHashStr({
+    const { token: paytr_token, hashStr: hash_str } = await paytrIframeToken({
       merchant_id,
       user_ip,
       merchant_oid,
       email,
       payment_amount,
-      payment_type,
-      installment_count,
+      user_basket,
+      no_installment,
+      max_installment,
       currency,
       test_mode,
-      non_3d,
-    });
-    const paytr_token = await paytrPaymentToken({
-      merchant_id,
-      user_ip,
-      merchant_oid,
-      email,
-      payment_amount,
-      payment_type,
-      installment_count,
-      currency,
-      test_mode,
-      non_3d,
       merchant_key,
       merchant_salt,
     });
 
     if (test_mode === "1") {
-      console.log("paytr-first-payment debug", {
+      console.log("paytr-first-payment iframe debug", {
         hash_str,
         hash_str_len: hash_str.length,
         token_prefix: paytr_token.slice(0, 8),
         payment_amount,
-        payment_type,
-        installment_count,
-        non_3d,
         currency,
         test_mode,
         merchant_oid,
+        user_basket_b64_len: user_basket.length,
       });
     }
 
@@ -257,38 +253,62 @@ Deno.serve(async (req) => {
       addon_codes: validAddonCodes,
     });
 
+    // POST fields for https://www.paytr.com/odeme/api/get-token
     const fields: Record<string, string> = {
       merchant_id,
       user_ip,
       merchant_oid,
       email,
       payment_amount,
-      payment_type,
-      installment_count,
-      currency,
-      test_mode,
-      non_3d,
-      merchant_ok_url: `${origin}/billing/success`,
-      merchant_fail_url: `${origin}/billing/failed`,
+      paytr_token,
+      user_basket,
+      debug_on: "1",
+      no_installment,
+      max_installment,
       user_name,
       user_address,
       user_phone,
-      user_basket,
-      debug_on: "1",
-      store_card: "1",
-      paytr_token,
-      non3d_test_failed: "0",
-      no_installment,
-      max_installment,
-      client_lang: "tr",
-      // PayTR SPP arayüz dili — hash'e dahil değil.
+      merchant_ok_url: `${origin}/billing/success`,
+      merchant_fail_url: `${origin}/billing/failed`,
+      timeout_limit: "30",
+      currency,
+      test_mode,
       lang: "tr",
     };
-    if (existing?.utoken) fields.utoken = existing.utoken;
+    // Not: `store_card` kart saklama onayımız gelene kadar GÖNDERİLMİYOR.
+    // `existing.utoken` sadece Direkt API için anlamlıydı — iFrame'e eklemiyoruz.
+    void existing;
+
+    // Server-side POST to PayTR get-token endpoint
+    const body = new URLSearchParams(fields);
+    const paytrRes = await fetch("https://www.paytr.com/odeme/api/get-token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body,
+    });
+    const paytrText = await paytrRes.text();
+    let paytrJson: { status?: string; token?: string; reason?: string } = {};
+    try {
+      paytrJson = JSON.parse(paytrText);
+    } catch {
+      console.error("paytr-first-payment: non-JSON response", paytrText);
+      return json({ error: "paytr_invalid_response", raw: paytrText }, 502);
+    }
+
+    if (paytrJson.status !== "success" || !paytrJson.token) {
+      console.error("paytr-first-payment: get-token failed", paytrJson);
+      await admin.from("paytr_payment_log").update({
+        status: "token_failed",
+        error_message: paytrJson.reason ?? "unknown",
+      }).eq("merchant_oid", merchant_oid);
+      return json({
+        error: "paytr_token_failed",
+        reason: paytrJson.reason ?? "unknown",
+      }, 400);
+    }
 
     return json({
-      action: "https://www.paytr.com/odeme",
-      fields,
+      iframe_token: paytrJson.token,
       merchant_oid,
     });
   } catch (e) {

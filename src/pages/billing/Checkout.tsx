@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -113,17 +113,10 @@ export default function BillingCheckout() {
   const [country, setCountry] = useState("Türkiye");
   const [countryOther, setCountryOther] = useState("");
   const COUNTRY_OPTIONS = ["Türkiye", "Almanya", "Birleşik Krallık", "ABD", "Fransa", "Hollanda", "İtalya", "İspanya", "Rusya", "Suudi Arabistan", "Birleşik Arap Emirlikleri", "Katar", "Azerbaycan", "KKTC", "Bulgaristan", "Yunanistan", "Diğer"];
-  const [ccOwner, setCcOwner] = useState("");
-  const [ccNumber, setCcNumber] = useState("");
-  const [ccExpMonth, setCcExpMonth] = useState("");
-  const [ccExpYear, setCcExpYear] = useState("");
-  const [ccCvv, setCcCvv] = useState("");
   const [consent, setConsent] = useState(false);
   const [legalConsent, setLegalConsent] = useState(false);
   const [loading, setLoading] = useState(false);
-  const formRef = useRef<HTMLFormElement>(null);
-  const [postFields, setPostFields] = useState<Record<string, string> | null>(null);
-  const [postAction, setPostAction] = useState("");
+  const [iframeToken, setIframeToken] = useState<string | null>(null);
 
   const planSubtotal = useMemo(() => {
     if (!plan) return 0;
@@ -188,10 +181,30 @@ export default function BillingCheckout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // When postFields set, auto-submit form to PayTR
+  // Load PayTR iFrameResizer script + init once iframe is rendered
   useEffect(() => {
-    if (postFields && formRef.current) formRef.current.submit();
-  }, [postFields]);
+    if (!iframeToken) return;
+    const SCRIPT_ID = "paytr-iframe-resizer";
+    const init = () => {
+      const w = window as unknown as { iFrameResize?: (opts: object, sel: string) => void };
+      try {
+        w.iFrameResize?.({}, "#paytriframe");
+      } catch (e) {
+        console.error("iFrameResize init failed", e);
+      }
+    };
+    const existing = document.getElementById(SCRIPT_ID) as HTMLScriptElement | null;
+    if (existing) {
+      init();
+      return;
+    }
+    const s = document.createElement("script");
+    s.id = SCRIPT_ID;
+    s.src = "https://www.paytr.com/js/iframeResizer.min.js";
+    s.async = true;
+    s.onload = init;
+    document.body.appendChild(s);
+  }, [iframeToken]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -280,19 +293,17 @@ export default function BillingCheckout() {
         }
         throw error;
       }
-      if (!data?.fields || !data?.action) throw new Error("PayTR yanıtı geçersiz");
-
-      // 3) Merge card fields for the form POST
-      const merged: Record<string, string> = {
-        ...data.fields,
-        cc_owner: ccOwner,
-        card_number: ccNumber.replace(/\s+/g, ""),
-        expiry_month: ccExpMonth,
-        expiry_year: ccExpYear,
-        cvv: ccCvv,
-      };
-      setPostAction(data.action);
-      setPostFields(merged);
+      if (data?.error) {
+        toast({
+          title: "Ödeme başlatılamadı",
+          description: data.reason ?? data.error,
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+      if (!data?.iframe_token) throw new Error("PayTR yanıtı geçersiz");
+      setIframeToken(data.iframe_token as string);
     } catch (err) {
       toast({
         title: "Ödeme başlatılamadı",
@@ -609,41 +620,7 @@ export default function BillingCheckout() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader><CardTitle>Kart Bilgileri</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label>Kart Sahibi</Label>
-                <Input value={ccOwner} onChange={(e) => setCcOwner(e.target.value)} required maxLength={100} />
-              </div>
-              <div>
-                <Label>Kart Numarası</Label>
-                <Input
-                  inputMode="numeric"
-                  autoComplete="cc-number"
-                  value={ccNumber}
-                  onChange={(e) => setCcNumber(e.target.value)}
-                  required
-                  maxLength={23}
-                  placeholder="0000 0000 0000 0000"
-                />
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <Label>Ay</Label>
-                  <Input value={ccExpMonth} onChange={(e) => setCcExpMonth(e.target.value)} required maxLength={2} placeholder="MM" />
-                </div>
-                <div>
-                  <Label>Yıl</Label>
-                  <Input value={ccExpYear} onChange={(e) => setCcExpYear(e.target.value)} required maxLength={2} placeholder="YY" />
-                </div>
-                <div>
-                  <Label>CVV</Label>
-                  <Input value={ccCvv} onChange={(e) => setCcCvv(e.target.value)} required maxLength={4} />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Kart bilgileri artık PayTR iframe'i içinde alınıyor. */}
 
           {!updateCardMode && (
           <div className="space-y-3">
@@ -695,6 +672,7 @@ export default function BillingCheckout() {
           </div>
           )}
 
+          {!iframeToken && (
           <Button
             type="submit"
             className="w-full h-12"
@@ -703,20 +681,29 @@ export default function BillingCheckout() {
             {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
             {updateCardMode ? "Kartı Güvenle Güncelle" : `Güvenli Ödemeye Geç (${computedTotal.toLocaleString("tr-TR")} TL)`}
           </Button>
+          )}
         </form>
 
-        {/* Hidden auto-submit form to PayTR (real navigation to 3D page) */}
-        {postFields && (
-          <form
-            ref={formRef}
-            method="post"
-            action={postAction}
-            style={{ display: "none" }}
-          >
-            {Object.entries(postFields).map(([k, v]) => (
-              <input key={k} type="hidden" name={k} value={v} />
-            ))}
-          </form>
+        {iframeToken && (
+          <div className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Güvenli Ödeme</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Kart bilgilerinizi aşağıdaki PayTR güvenli ödeme formuna girin.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <iframe
+                  src={`https://www.paytr.com/odeme/guvenli/${iframeToken}`}
+                  id="paytriframe"
+                  frameBorder={0}
+                  scrolling="no"
+                  style={{ width: "100%", minHeight: 600 }}
+                />
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
     </div>
