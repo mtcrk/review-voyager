@@ -189,6 +189,7 @@ export function AIVisibilityChecker() {
     } catch (e) {
       console.error("Lead save failed:", e);
     }
+    try { localStorage.setItem(EMAIL_KEY, "1"); } catch {}
     setEmailUnlocked(true);
     setGateOpen(false);
   };
