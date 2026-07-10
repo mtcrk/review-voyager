@@ -864,27 +864,42 @@ export type Database = {
       }
       leads: {
         Row: {
+          ai_mentioned: boolean | null
+          business_name: string | null
           converted_to_user: boolean
           created_at: string
           email: string
           id: string
+          location: string | null
           marketing_consent: boolean
+          metadata: Json | null
+          score: number | null
           source: string | null
         }
         Insert: {
+          ai_mentioned?: boolean | null
+          business_name?: string | null
           converted_to_user?: boolean
           created_at?: string
           email: string
           id?: string
+          location?: string | null
           marketing_consent?: boolean
+          metadata?: Json | null
+          score?: number | null
           source?: string | null
         }
         Update: {
+          ai_mentioned?: boolean | null
+          business_name?: string | null
           converted_to_user?: boolean
           created_at?: string
           email?: string
           id?: string
+          location?: string | null
           marketing_consent?: boolean
+          metadata?: Json | null
+          score?: number | null
           source?: string | null
         }
         Relationships: []
