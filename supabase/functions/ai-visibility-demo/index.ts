@@ -71,19 +71,23 @@ function sectorFromName(name: string, types: string[] = []): { key: string; labe
     [["bungalov", "bungalow"], "bungalow", "Bungalov", "bungalov"],
     [["glamping"], "glamping", "Glamping", "glamping"],
     [["tatil koyu", "tatil köyü", "holiday village"], "holiday_village", "Tatil Köyü", "tatil köyü"],
+    [["suite", "suit", "apart", "aparthotel", "apart hotel", "residence", "rezidans"], "apart_suite", "Apart / Suit Otel", "apart otel"],
     [["butik otel", "boutique hotel"], "boutique_hotel", "Butik Otel", "butik otel"],
+    [["resort", "beach hotel", "beach resort"], "resort", "Resort Otel", "resort otel"],
+    [["termal"], "thermal", "Termal Otel", "termal otel"],
+    [["spa hotel", "spa otel"], "spa_hotel", "Spa Otel", "spa otel"],
     [["hostel"], "hostel", "Hostel", "hostel"],
     [["pansiyon", "guesthouse", "guest house"], "guesthouse", "Pansiyon", "pansiyon"],
-    [["apart otel", "aparthotel", "apart hotel", "apart"], "apart", "Apart Otel", "apart otel"],
     [["villa"], "villa", "Villa", "kiralık villa"],
   ];
   for (const [kws, key, label, term] of keywordMap) {
     if (kws.some((kw) => hay.includes(kw))) return { key, label, searchTerm: term };
   }
+  if (t.has("resort_hotel")) return { key: "resort", label: "Resort Otel", searchTerm: "resort otel" };
   return null;
 }
 
-// Places formatted_address'ten ilçe+il çıkar (TR odaklı)
+// Places formatted_address'ten ilçe+il çıkar (TR odaklı) — fallback
 function extractLocality(address: string | null | undefined): string {
   if (!address) return "";
   const clean = address.replace(/\bTürkiye\b|\bTurkey\b/gi, "").trim();
@@ -99,14 +103,51 @@ function extractLocality(address: string | null | undefined): string {
     }
     return parts[parts.length - 1] || "";
   }
-  // Virgüllü format: "Mah., Sok. No, İlçe, İl 34000, Türkiye"
-  const parts = clean.split(",").map((p) => p.replace(/\b\d{4,6}\b/g, "").trim()).filter(Boolean);
+  // Virgüllü format: "Mah., Sok. No:108 D:1, İlçe, İl 34000, Türkiye"
+  // Sokak adres segmentlerini ele (No:, Blv, Cad, Sok, D:, Mah.)
+  const streetRe = /\b(no\s*[:.]?\s*\d|d\s*[:.]?\s*\d|blv|bulvar|cad(desi)?|sok(ak|agi|ağı)?|mah(alle(si)?)?|apt|kat\b)\b/i;
+  const parts = clean
+    .split(",")
+    .map((p) => p.replace(/\b\d{4,6}\b/g, "").trim())
+    .filter((p) => p && !streetRe.test(p));
   if (parts.length >= 2) {
     const last = parts[parts.length - 1];
     const prev = parts[parts.length - 2];
     return `${prev}, ${last}`;
   }
-  return parts[0] || "";
+  return parts[parts.length - 1] || "";
+}
+
+// Google Place Details → address_components'ten ilçe+il
+async function fetchLocalityFromDetails(
+  placeId: string,
+  apiKey: string,
+): Promise<string> {
+  try {
+    const url =
+      "https://maps.googleapis.com/maps/api/place/details/json?place_id=" +
+      encodeURIComponent(placeId) +
+      "&fields=address_components&language=tr&region=tr&key=" +
+      apiKey;
+    const res = await fetchWithTimeout(url, {}, 8000);
+    if (!res.ok) return "";
+    const data = await res.json();
+    const comps: Array<{ long_name: string; types: string[] }> =
+      data?.result?.address_components || [];
+    if (!comps.length) return "";
+    const find = (t: string) => comps.find((c) => c.types?.includes(t))?.long_name || "";
+    const il = find("administrative_area_level_1");
+    const ilce =
+      find("administrative_area_level_2") ||
+      find("locality") ||
+      find("sublocality_level_1") ||
+      find("sublocality");
+    if (ilce && il) return `${ilce}, ${il}`;
+    return ilce || il || "";
+  } catch (e) {
+    console.error("Place details error:", e);
+    return "";
+  }
 }
 
 async function fetchWithTimeout(url: string, init: RequestInit, ms: number): Promise<Response> {
@@ -210,7 +251,11 @@ serve(async (req) => {
 
     const biz = firstMatch;
     const sector = sectorFromName(biz.name || bn, biz.types || []) || sectorFromTypes(biz.types || []);
-    const derivedLocality = extractLocality(biz.formatted_address) || loc;
+    const detailsLocality = biz.place_id
+      ? await fetchLocalityFromDetails(biz.place_id, GOOGLE_PLACES_API_KEY)
+      : "";
+    const derivedLocality =
+      detailsLocality || extractLocality(biz.formatted_address) || loc;
     const bizRating: number = typeof biz.rating === "number" ? biz.rating : 0;
     const bizReviews: number =
       typeof biz.user_ratings_total === "number" ? biz.user_ratings_total : 0;
