@@ -931,6 +931,24 @@
     "footnote": "AI answers are a sample and change over time. This is not a guarantee; it helps you strengthen the signals AI looks at.",
     "rateLimited": "Checks are limited to once every 6 hours.",
     "error": "Check failed: {{msg}}",
+    "firstMeasureRunning": "Preparing your first measurement automatically…",
+    "firstMeasureHint": "This can take 20-40 seconds. Stay on the page.",
+    "autoRunFailed": "Automatic check failed: {{msg}}",
+    "tryAgain": "Try again",
+    "stages": {
+      "stage1": "Searching your business on Google…",
+      "stage2": "Scanning local competitors…",
+      "stage3": "Asking AI assistants live…"
+    },
+    "competitorsTitle": "Local Competitors",
+    "competitorsYou": "You",
+    "competitorsAiBadge": "Recommended by AI",
+    "competitorsMedian": "Local median is {{median}} reviews — you have {{you}}.",
+    "competitorsCols": {
+      "name": "Business",
+      "rating": "Rating",
+      "reviews": "Reviews"
+    },
     "checklistItems": {
       "gbp_description": "Google Business Profile description is fresh and rich",
       "gbp_categories": "Primary and secondary categories set correctly",
@@ -942,23 +960,35 @@
       "site_faq": "FAQ / service details on the website"
     },
     "autoCompleted": "Auto-completed",
+    "checklistGroups": {
+      "gbp": "Google Business Profile",
+      "gbpSoon": "Auto-audit coming soon",
+      "reviews": "Reviews",
+      "site": "Website"
+    },
+    "checklistAuto": {
+      "responseRate": "Auto: {{rate}}% reply rate",
+      "responseCurrent": "Currently {{rate}}% — target 90%+.",
+      "responseCta": "Reply to reviews"
+    },
     "actionSteps": {
       "title": "Action Steps",
       "context": "The strongest AI visibility signal is a steady review flow — these steps feed your score.",
-      "emptyMotivation": "You haven't started yet — set it up in 2 minutes.",
       "step1Title": "Review request setup",
       "step1Done": "Setup complete",
       "step1Cta": "Set it up",
       "step2Title": "Add guests",
-      "step2Done": "{{count}} guests added",
+      "step2Live": "{{count}} guests",
       "step2Cta": "Add your first guest",
       "step3Title": "Send review requests",
-      "step3Progress": "Sent to {{sent}} / {{total}} guests",
+      "step3Live": "{{sent}} sent",
       "step3Cta": "Start sending",
       "step4Title": "Clicks",
-      "step4Progress": "{{count}} guests visited the review page ({{rate}}%)",
+      "step4Live": "{{count}} clicks ({{rate}}%)",
       "step4Cta": "View results",
-      "goToTab": "Go to Review Request tab"
+      "goToTab": "Go to Review Request tab",
+      "summary": "Review engine live: {{total}} guests → {{sent}} sent → {{clicked}} clicks ({{rate}}%)",
+      "manage": "Manage"
     }
   }
 }
