@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 
 import { PriorityActions } from "@/components/dashboard/PriorityActions";
 import { CompetitorComparison } from "@/components/dashboard/CompetitorComparison";
+import { AIVisibilityChecker } from "@/components/landing/AIVisibilityChecker";
 import { DemoModeBanner } from "@/components/dashboard/DemoModeBanner";
 import { AllBusinessesView } from "@/components/dashboard/AllBusinessesView";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
