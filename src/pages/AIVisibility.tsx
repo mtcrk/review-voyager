@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { supabase } from "@/integrations/supabase/client";
 import { invokeAuthedFunction } from "@/lib/invokeAuthedFunction";
@@ -10,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "@/hooks/use-toast";
 import {
   ResponsiveContainer,
@@ -20,7 +22,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
-import { Radar, RefreshCw, Sparkles, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
+import { Radar, RefreshCw, Sparkles, CheckCircle2, XCircle, AlertTriangle, ArrowRight, Circle } from "lucide-react";
 
 const CHECKLIST_KEYS = [
   "gbp_description",
