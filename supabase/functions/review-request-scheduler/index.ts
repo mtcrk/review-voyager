@@ -83,6 +83,59 @@ Deno.serve(async (req) => {
     return json({ error: "RESEND_API_KEY not configured", provider_ready: false }, 500);
   }
 
+  // Manual single-contact send: bypass enabled + delay, still requires consent
+  let manualContactId: string | null = null;
+  try {
+    if (req.method === "POST") {
+      const body = await req.json().catch(() => ({}));
+      if (body && typeof body.contact_id === "string") manualContactId = body.contact_id;
+    }
+  } catch { /* ignore */ }
+
+  if (manualContactId) {
+    const { data: c } = await supabase
+      .from("review_request_contacts")
+      .select("*")
+      .eq("id", manualContactId)
+      .maybeSingle();
+    if (!c) return json({ error: "contact_not_found" }, 404);
+    if (!c.consent) return json({ error: "consent_required" }, 400);
+    if (c.status === "unsubscribed") return json({ error: "unsubscribed" }, 400);
+
+    const { data: biz } = await supabase
+      .from("businesses").select("id, name, place_id").eq("id", c.business_id).maybeSingle();
+    if (!biz) return json({ error: "business_not_found" }, 404);
+
+    const { data: s2 } = await supabase
+      .from("review_request_settings").select("*").eq("business_id", biz.id).maybeSingle();
+    const reviewLink = (s2?.review_link?.trim())
+      || (biz.place_id ? `https://search.google.com/local/writereview?placeid=${biz.place_id}` : null);
+    if (!reviewLink) return json({ error: "review_link_missing" }, 400);
+
+    const fnBase = `${supabaseUrl}/functions/v1/review-request-click`;
+    const click = `${fnBase}?t=${c.unsubscribe_token}`;
+    const unsub = `${fnBase}?t=${c.unsubscribe_token}&action=unsubscribe`;
+    const { subject, html } = template((c.language === "en" ? "en" : "tr") as Lang, {
+      businessName: biz.name,
+      senderName: s2?.sender_name,
+      name: c.name,
+      intro: s2?.template_intro,
+      clickUrl: click,
+      unsubscribeUrl: unsub,
+      isReminder: false,
+    });
+    const ok = await sendEmail(RESEND_API_KEY, biz.name, c.email, subject, html);
+    if (ok.ok) {
+      await supabase.from("review_request_contacts")
+        .update({ status: "sent", sent_at: new Date().toISOString(), error_message: null })
+        .eq("id", c.id);
+      return json({ ok: true, manual: true, sent: 1 });
+    }
+    await supabase.from("review_request_contacts")
+      .update({ status: "failed", error_message: ok.error }).eq("id", c.id);
+    return json({ ok: false, error: ok.error }, 500);
+  }
+
   const now = new Date();
   const summary = { processed: 0, sent: 0, reminded: 0, failed: 0, businesses: 0 };
 
