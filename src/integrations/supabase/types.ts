@@ -1369,6 +1369,115 @@ export type Database = {
           },
         ]
       }
+      review_request_contacts: {
+        Row: {
+          business_id: string
+          checkout_date: string
+          clicked_at: string | null
+          consent: boolean
+          created_at: string
+          email: string
+          error_message: string | null
+          id: string
+          language: string
+          name: string | null
+          reminded_at: string | null
+          sent_at: string | null
+          status: string
+          unsubscribe_token: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          checkout_date: string
+          clicked_at?: string | null
+          consent?: boolean
+          created_at?: string
+          email: string
+          error_message?: string | null
+          id?: string
+          language?: string
+          name?: string | null
+          reminded_at?: string | null
+          sent_at?: string | null
+          status?: string
+          unsubscribe_token?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          checkout_date?: string
+          clicked_at?: string | null
+          consent?: boolean
+          created_at?: string
+          email?: string
+          error_message?: string | null
+          id?: string
+          language?: string
+          name?: string | null
+          reminded_at?: string | null
+          sent_at?: string | null
+          status?: string
+          unsubscribe_token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_request_contacts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_request_settings: {
+        Row: {
+          business_id: string
+          created_at: string
+          delay_hours: number
+          enabled: boolean
+          reminder_days: number
+          reminder_enabled: boolean
+          review_link: string | null
+          sender_name: string | null
+          template_intro: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          delay_hours?: number
+          enabled?: boolean
+          reminder_days?: number
+          reminder_enabled?: boolean
+          review_link?: string | null
+          sender_name?: string | null
+          template_intro?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          delay_hours?: number
+          enabled?: boolean
+          reminder_days?: number
+          reminder_enabled?: boolean
+          review_link?: string | null
+          sender_name?: string | null
+          template_intro?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_request_settings_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: true
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews: {
         Row: {
           approved_reply: string | null

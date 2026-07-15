@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContactsTab } from "@/components/email/ContactsTab";
 import { ComposeTab } from "@/components/email/ComposeTab";
 import { CampaignsTab } from "@/components/email/CampaignsTab";
+import { ReviewRequestTab } from "@/components/email/ReviewRequestTab";
 import { Mail } from "lucide-react";
 
 export default function EmailCenter() {
@@ -23,12 +24,17 @@ export default function EmailCenter() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="bg-muted/30">
           <TabsTrigger value="compose">Email Gönder</TabsTrigger>
+          <TabsTrigger value="review-request">Yorum Talebi</TabsTrigger>
           <TabsTrigger value="contacts">Müşteri Listesi</TabsTrigger>
           <TabsTrigger value="campaigns">Gönderim Geçmişi</TabsTrigger>
         </TabsList>
 
         <TabsContent value="compose">
           <ComposeTab />
+        </TabsContent>
+
+        <TabsContent value="review-request">
+          <ReviewRequestTab />
         </TabsContent>
 
         <TabsContent value="contacts">
