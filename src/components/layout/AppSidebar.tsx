@@ -480,6 +480,21 @@ export function AppSidebar() {
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={location.pathname === "/ai-visibility"}
+                  tooltip="Yapay Zekada Görünürlük"
+                >
+                  <NavLink
+                    to="/ai-visibility"
+                    className="flex items-center gap-3 transition-smooth"
+                  >
+                    <Radar className="h-5 w-5" />
+                    <span>Yapay Zekada Görünürlük</span>
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
