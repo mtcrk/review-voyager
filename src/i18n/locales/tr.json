@@ -811,6 +811,24 @@
     "footnote": "AI cevapları örneklemdir ve zamanla değişebilir. Bu ölçüm bir garanti değildir; AI'ın baktığı sinyalleri güçlendirmenize yardımcı olur.",
     "rateLimited": "6 saatte bir ölçüm yapılabilir.",
     "error": "Ölçüm başarısız: {{msg}}",
+    "firstMeasureRunning": "İlk ölçümünüz otomatik hazırlanıyor…",
+    "firstMeasureHint": "Bu 20-40 saniye sürebilir. Sayfada kalın.",
+    "autoRunFailed": "Otomatik ölçüm başarısız: {{msg}}",
+    "tryAgain": "Tekrar Dene",
+    "stages": {
+      "stage1": "İşletmeniz Google'da aranıyor…",
+      "stage2": "Bölgedeki rakipler taranıyor…",
+      "stage3": "AI asistanlara canlı soruluyor…"
+    },
+    "competitorsTitle": "Bölgedeki Rakipler",
+    "competitorsYou": "Siz",
+    "competitorsAiBadge": "AI'da önerildi",
+    "competitorsMedian": "Bölge medyanı {{median}} yorum — siz {{you}}'desiniz.",
+    "competitorsCols": {
+      "name": "İşletme",
+      "rating": "Puan",
+      "reviews": "Yorum"
+    },
     "checklistItems": {
       "gbp_description": "Google Business Profile açıklaması güncel ve zengin",
       "gbp_categories": "Ana ve alt kategoriler doğru seçili",
@@ -822,23 +840,35 @@
       "site_faq": "Web sitesinde sık sorulan sorular / hizmet detayları var"
     },
     "autoCompleted": "Otomatik tamamlandı",
+    "checklistGroups": {
+      "gbp": "Google Business Profile",
+      "gbpSoon": "Yakında otomatik denetim",
+      "reviews": "Yorumlar",
+      "site": "Web sitesi"
+    },
+    "checklistAuto": {
+      "responseRate": "Otomatik: %{{rate}} yanıt oranı",
+      "responseCurrent": "Şu an %{{rate}} — hedef %90+.",
+      "responseCta": "Yorumları yanıtla"
+    },
     "actionSteps": {
       "title": "Aksiyon Adımları",
       "context": "AI görünürlüğün en güçlü sinyali düzenli yorum akışıdır — bu adımlar skorunuzu besler.",
-      "emptyMotivation": "Henüz başlamadınız — 2 dakikada kurun.",
       "step1Title": "Yorum talebi kurulumu",
       "step1Done": "Kurulum tamam",
       "step1Cta": "Kurulumu yap",
       "step2Title": "Misafir ekle",
-      "step2Done": "{{count}} misafir eklendi",
+      "step2Live": "{{count}} misafir",
       "step2Cta": "İlk misafirinizi ekleyin",
       "step3Title": "Yorum talebi gönder",
-      "step3Progress": "{{sent}} / {{total}} misafire gönderildi",
+      "step3Live": "{{sent}} gönderim",
       "step3Cta": "Gönderime başlayın",
       "step4Title": "Tıklamalar",
-      "step4Progress": "{{count}} misafir yorum sayfasına gitti ({{rate}}%)",
+      "step4Live": "{{count}} tıklama (%{{rate}})",
       "step4Cta": "Sonuçları görün",
-      "goToTab": "Yorum Talebi sekmesine git"
+      "goToTab": "Yorum Talebi sekmesine git",
+      "summary": "Yorum motoru aktif: {{total}} misafir → {{sent}} gönderim → {{clicked}} tıklama (%{{rate}})",
+      "manage": "Yönet"
     }
   }
 }

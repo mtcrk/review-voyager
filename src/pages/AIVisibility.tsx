@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
@@ -22,7 +22,18 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
-import { Radar, RefreshCw, Sparkles, CheckCircle2, XCircle, AlertTriangle, ArrowRight, Circle } from "lucide-react";
+import {
+  Radar,
+  RefreshCw,
+  Sparkles,
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  ArrowRight,
+  Star,
+  Users,
+  Loader2,
+} from "lucide-react";
 
 const CHECKLIST_KEYS = [
   "gbp_description",
@@ -34,6 +45,8 @@ const CHECKLIST_KEYS = [
   "site_schema",
   "site_faq",
 ] as const;
+
+const GBP_KEYS = new Set(["gbp_description", "gbp_categories", "gbp_attributes", "gbp_photos"]);
 
 type Snapshot = {
   id: string;
@@ -58,12 +71,24 @@ type Snapshot = {
 };
 
 type Rec = { key: string; priority: "high" | "medium" | "low"; title: string; detail: string };
+type Competitor = { name: string; rating: number; reviewCount: number; address?: string | null };
+
+const normalizeName = (s: string) =>
+  (s || "")
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 
 export default function AIVisibility() {
   const { t, i18n } = useTranslation();
   const { activeBusiness } = useBusiness();
   const qc = useQueryClient();
   const [running, setRunning] = useState(false);
+  const [runError, setRunError] = useState<string | null>(null);
+  const [runStage, setRunStage] = useState(0);
+  const autoRanRef = useRef<string | null>(null);
 
   const businessId = activeBusiness?.id ?? null;
 
@@ -131,6 +156,31 @@ export default function AIVisibility() {
     },
   });
 
+  const replyStatsQuery = useQuery({
+    queryKey: ["ai-visibility-reply-stats", businessId],
+    enabled: !!businessId,
+    queryFn: async () => {
+      const since = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
+      const { data, error } = await supabase
+        .from("reviews")
+        .select("id, status, approved_reply, posted_at")
+        .eq("business_id", businessId!)
+        .gte("posted_at", since);
+      if (error) throw error;
+      const rows = data ?? [];
+      const total = rows.length;
+      const replied = rows.filter(
+        (r: any) => !!r.approved_reply || r.status === "replied" || r.status === "approved"
+      ).length;
+      return {
+        total,
+        replied,
+        rate: total > 0 ? Math.round((replied / total) * 100) : 0,
+        hasData: total > 0,
+      };
+    },
+  });
+
   const latest = snapshotsQuery.data?.[0] ?? null;
   const [cachedInfo, setCachedInfo] = useState<{ cached: boolean; next_available_at?: string } | null>(null);
 
@@ -147,6 +197,11 @@ export default function AIVisibility() {
   async function runCheck(force = false) {
     if (!businessId) return;
     setRunning(true);
+    setRunError(null);
+    setRunStage(0);
+    const stageTimer = setInterval(() => {
+      setRunStage((s) => (s < 2 ? s + 1 : s));
+    }, 1800);
     try {
       const res = await invokeAuthedFunction<{ cached: boolean; snapshot: Snapshot; next_available_at?: string }>(
         "ai-visibility-check",
@@ -155,11 +210,14 @@ export default function AIVisibility() {
       setCachedInfo({ cached: !!res?.cached, next_available_at: res?.next_available_at });
       await qc.invalidateQueries({ queryKey: ["ai-visibility-snapshots", businessId] });
     } catch (e: any) {
+      const msg = e?.message || "";
+      setRunError(msg);
       toast({
-        title: t("aiVisibilityPage.error", { msg: e?.message || "" }),
+        title: t("aiVisibilityPage.error", { msg }),
         variant: "destructive",
       });
     } finally {
+      clearInterval(stageTimer);
       setRunning(false);
     }
   }
@@ -182,7 +240,21 @@ export default function AIVisibility() {
 
   useEffect(() => {
     setCachedInfo(null);
+    setRunError(null);
+    autoRanRef.current = null;
   }, [businessId]);
+
+  // Auto-run first measurement when no snapshot exists
+  useEffect(() => {
+    if (!businessId) return;
+    if (snapshotsQuery.isLoading) return;
+    if (snapshotsQuery.data && snapshotsQuery.data.length > 0) return;
+    if (running) return;
+    if (autoRanRef.current === businessId) return;
+    autoRanRef.current = businessId;
+    runCheck(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [businessId, snapshotsQuery.isLoading, snapshotsQuery.data]);
 
   if (!businessId) {
     return (
@@ -194,6 +266,71 @@ export default function AIVisibility() {
 
   const recs: Rec[] = Array.isArray(latest?.recommendations) ? (latest!.recommendations as Rec[]) : [];
   const breakdown = (latest?.breakdown ?? {}) as Record<string, { points: number; max: number; label: string }>;
+  const competitors: Competitor[] = Array.isArray(latest?.competitors) ? (latest!.competitors as Competitor[]) : [];
+  const mentionedComp: string[] = Array.isArray(latest?.mentioned_competitors)
+    ? (latest!.mentioned_competitors as string[])
+    : [];
+  const mentionedSet = new Set(mentionedComp.map(normalizeName));
+
+  const replyStats = replyStatsQuery.data;
+  const funnel = reviewFunnelQuery.data;
+
+  // Stepper
+  const step1Done = !!funnel?.setupDone;
+  const step2Done = !!(funnel && funnel.total > 0);
+  const step3Done = !!(funnel && funnel.sent > 0);
+  const step4Done = !!(funnel && funnel.clicked > 0);
+  const allDone = step1Done && step2Done && step3Done && step4Done;
+  const steps = [
+    {
+      key: 1,
+      done: step1Done,
+      title: t("aiVisibilityPage.actionSteps.step1Title"),
+      live: step1Done ? t("aiVisibilityPage.actionSteps.step1Done") : "—",
+      cta: t("aiVisibilityPage.actionSteps.step1Cta"),
+    },
+    {
+      key: 2,
+      done: step2Done,
+      title: t("aiVisibilityPage.actionSteps.step2Title"),
+      live: t("aiVisibilityPage.actionSteps.step2Live", { count: funnel?.total ?? 0 }),
+      cta: t("aiVisibilityPage.actionSteps.step2Cta"),
+    },
+    {
+      key: 3,
+      done: step3Done,
+      title: t("aiVisibilityPage.actionSteps.step3Title"),
+      live: t("aiVisibilityPage.actionSteps.step3Live", { sent: funnel?.sent ?? 0 }),
+      cta: t("aiVisibilityPage.actionSteps.step3Cta"),
+    },
+    {
+      key: 4,
+      done: step4Done,
+      title: t("aiVisibilityPage.actionSteps.step4Title"),
+      live: t("aiVisibilityPage.actionSteps.step4Live", {
+        count: funnel?.clicked ?? 0,
+        rate: funnel?.clickRate ?? 0,
+      }),
+      cta: t("aiVisibilityPage.actionSteps.step4Cta"),
+    },
+  ];
+  const activeIdx = steps.findIndex((s) => !s.done);
+  const target = "/email?tab=review-request";
+
+  // Competitor stats
+  const compReviewMedian = (() => {
+    if (competitors.length === 0) return 0;
+    const arr = [...competitors.map((c) => c.reviewCount)].sort((a, b) => a - b);
+    const mid = Math.floor(arr.length / 2);
+    return arr.length % 2 ? arr[mid] : Math.round((arr[mid - 1] + arr[mid]) / 2);
+  })();
+
+  const measuring = running && !latest;
+  const stageLabels = [
+    t("aiVisibilityPage.stages.stage1"),
+    t("aiVisibilityPage.stages.stage2"),
+    t("aiVisibilityPage.stages.stage3"),
+  ];
 
   return (
     <div className="p-4 sm:p-6 space-y-6 max-w-6xl mx-auto">
@@ -205,22 +342,55 @@ export default function AIVisibility() {
           </h1>
           <p className="text-sm text-muted-foreground mt-1 max-w-2xl">{t("aiVisibilityPage.subtitle")}</p>
         </div>
-        <Button onClick={() => runCheck(false)} disabled={running} className="gap-2">
-          <RefreshCw className={`h-4 w-4 ${running ? "animate-spin" : ""}`} />
-          {latest ? t("aiVisibilityPage.refresh") : t("aiVisibilityPage.runCheck")}
-        </Button>
+        {latest && (
+          <Button onClick={() => runCheck(false)} disabled={running} className="gap-2">
+            <RefreshCw className={`h-4 w-4 ${running ? "animate-spin" : ""}`} />
+            {t("aiVisibilityPage.refresh")}
+          </Button>
+        )}
       </div>
 
       {snapshotsQuery.isLoading ? (
         <Skeleton className="h-40 w-full" />
       ) : !latest ? (
         <Card>
-          <CardContent className="p-8 text-center space-y-4">
-            <Radar className="h-10 w-10 mx-auto text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">{t("aiVisibilityPage.noSnapshot")}</p>
-            <Button onClick={() => runCheck(false)} disabled={running}>
-              {running ? t("aiVisibilityPage.running") : t("aiVisibilityPage.runCheck")}
-            </Button>
+          <CardContent className="p-8 space-y-5">
+            {runError ? (
+              <div className="text-center space-y-4">
+                <AlertTriangle className="h-10 w-10 mx-auto text-destructive" />
+                <p className="text-sm text-muted-foreground">
+                  {t("aiVisibilityPage.autoRunFailed", { msg: runError })}
+                </p>
+                <Button onClick={() => runCheck(false)} disabled={running}>
+                  {t("aiVisibilityPage.tryAgain")}
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                  <p className="text-sm font-medium">{t("aiVisibilityPage.firstMeasureRunning")}</p>
+                </div>
+                <div className="space-y-2">
+                  {stageLabels.map((label, idx) => {
+                    const state = idx < runStage ? "done" : idx === runStage ? "active" : "pending";
+                    return (
+                      <div key={idx} className="flex items-center gap-3 text-sm">
+                        {state === "done" ? (
+                          <CheckCircle2 className="h-4 w-4 text-green-600" />
+                        ) : state === "active" ? (
+                          <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                        ) : (
+                          <div className="h-4 w-4 rounded-full border border-muted-foreground/30" />
+                        )}
+                        <span className={state === "pending" ? "text-muted-foreground" : ""}>{label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="text-xs text-muted-foreground">{t("aiVisibilityPage.firstMeasureHint")}</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       ) : (
@@ -291,11 +461,11 @@ export default function AIVisibility() {
                     </Badge>
                   )}
                 </div>
-                {Array.isArray(latest.mentioned_competitors) && latest.mentioned_competitors.length > 0 && (
+                {mentionedComp.length > 0 && (
                   <div>
                     <p className="text-xs text-muted-foreground mb-1">{t("aiVisibilityPage.mentionedCompetitors")}</p>
                     <div className="flex flex-wrap gap-1">
-                      {(latest.mentioned_competitors as string[]).map((c) => (
+                      {mentionedComp.map((c) => (
                         <Badge key={c} variant="secondary" className="text-xs">{c}</Badge>
                       ))}
                     </div>
@@ -315,6 +485,81 @@ export default function AIVisibility() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Competitors */}
+          {competitors.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Users className="h-4 w-4 text-primary" />
+                  {t("aiVisibilityPage.competitorsTitle")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-xs text-muted-foreground border-b">
+                        <th className="py-2 pr-3 font-medium">{t("aiVisibilityPage.competitorsCols.name")}</th>
+                        <th className="py-2 px-3 font-medium text-right">{t("aiVisibilityPage.competitorsCols.rating")}</th>
+                        <th className="py-2 pl-3 font-medium text-right">{t("aiVisibilityPage.competitorsCols.reviews")}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="border-b bg-primary/5">
+                        <td className="py-2 pr-3 font-semibold">
+                          {latest.business_name || activeBusiness?.name}
+                          <Badge className="ml-2 text-[10px]" variant="default">
+                            {t("aiVisibilityPage.competitorsYou")}
+                          </Badge>
+                        </td>
+                        <td className="py-2 px-3 text-right tabular-nums">
+                          {latest.rating ? (
+                            <span className="inline-flex items-center gap-1">
+                              <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                              {Number(latest.rating).toFixed(1)}
+                            </span>
+                          ) : "—"}
+                        </td>
+                        <td className="py-2 pl-3 text-right tabular-nums">{latest.review_count ?? "—"}</td>
+                      </tr>
+                      {competitors.map((c, idx) => {
+                        const isMentioned = mentionedSet.has(normalizeName(c.name));
+                        return (
+                          <tr key={idx} className="border-b last:border-0">
+                            <td className="py-2 pr-3">
+                              {c.name}
+                              {isMentioned && (
+                                <Badge variant="secondary" className="ml-2 text-[10px] gap-1">
+                                  <Sparkles className="h-2.5 w-2.5" />
+                                  {t("aiVisibilityPage.competitorsAiBadge")}
+                                </Badge>
+                              )}
+                            </td>
+                            <td className="py-2 px-3 text-right tabular-nums">
+                              <span className="inline-flex items-center gap-1">
+                                <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                                {c.rating.toFixed(1)}
+                              </span>
+                            </td>
+                            <td className="py-2 pl-3 text-right tabular-nums">{c.reviewCount}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                {compReviewMedian > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {t("aiVisibilityPage.competitorsMedian", {
+                      median: compReviewMedian,
+                      you: latest.review_count ?? 0,
+                    })}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Trend */}
           <Card>
@@ -339,196 +584,280 @@ export default function AIVisibility() {
               )}
             </CardContent>
           </Card>
-
-          {/* Recommendations */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">{t("aiVisibilityPage.recommendationsTitle")}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {recs.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t("aiVisibilityPage.recommendationsEmpty")}</p>
-              ) : (
-                recs.map((r) => (
-                  <div key={r.key} className="flex gap-3 p-3 border rounded-lg">
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-sm">{r.title}</p>
-                        <Badge
-                          variant={r.priority === "high" ? "destructive" : r.priority === "medium" ? "default" : "secondary"}
-                          className="text-xs"
-                        >
-                          {t(`aiVisibilityPage.priority${r.priority === "high" ? "High" : r.priority === "medium" ? "Medium" : "Low"}`)}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground">{r.detail}</p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
         </>
       )}
 
-      {/* Action Steps */}
-      {(() => {
-        const funnel = reviewFunnelQuery.data;
-        const step1Done = !!funnel?.setupDone;
-        const step2Done = !!(funnel && funnel.total > 0);
-        const step3Done = !!(funnel && funnel.sent > 0);
-        const step4Done = !!(funnel && funnel.clicked > 0);
-        const anyProgress = step1Done || step2Done || step3Done || step4Done;
-        const target = "/email?tab=review-request";
-        const steps = [
-          {
-            key: 1,
-            done: step1Done,
-            title: t("aiVisibilityPage.actionSteps.step1Title"),
-            desc: step1Done ? t("aiVisibilityPage.actionSteps.step1Done") : t("aiVisibilityPage.actionSteps.step1Cta"),
-          },
-          {
-            key: 2,
-            done: step2Done,
-            title: t("aiVisibilityPage.actionSteps.step2Title"),
-            desc: step2Done
-              ? t("aiVisibilityPage.actionSteps.step2Done", { count: funnel?.total ?? 0 })
-              : t("aiVisibilityPage.actionSteps.step2Cta"),
-          },
-          {
-            key: 3,
-            done: step3Done,
-            title: t("aiVisibilityPage.actionSteps.step3Title"),
-            desc: step3Done
-              ? t("aiVisibilityPage.actionSteps.step3Progress", {
-                  sent: funnel?.sent ?? 0,
-                  total: funnel?.consented ?? 0,
-                })
-              : t("aiVisibilityPage.actionSteps.step3Cta"),
-          },
-          {
-            key: 4,
-            done: step4Done,
-            title: t("aiVisibilityPage.actionSteps.step4Title"),
-            desc: step4Done
-              ? t("aiVisibilityPage.actionSteps.step4Progress", {
-                  count: funnel?.clicked ?? 0,
-                  rate: funnel?.clickRate ?? 0,
-                })
-              : t("aiVisibilityPage.actionSteps.step4Cta"),
-          },
-        ];
-        const activeIdx = steps.findIndex((s) => !s.done);
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">{t("aiVisibilityPage.actionSteps.title")}</CardTitle>
-              <p className="text-xs text-muted-foreground">{t("aiVisibilityPage.actionSteps.context")}</p>
-              {!anyProgress && (
-                <p className="text-xs text-primary font-medium">
-                  {t("aiVisibilityPage.actionSteps.emptyMotivation")}
-                </p>
-              )}
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                {steps.map((s, idx) => {
-                  const isActive = idx === activeIdx;
-                  return (
-                    <div
-                      key={s.key}
-                      className={`rounded-lg border p-3 flex flex-col gap-2 transition ${
-                        s.done
-                          ? "border-green-600/40 bg-green-500/5"
-                          : isActive
-                            ? "border-primary bg-primary/5 shadow-sm"
-                            : "border-border"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        {s.done ? (
-                          <CheckCircle2 className="h-5 w-5 text-green-600" />
-                        ) : (
+      {/* Action Steps — connected horizontal stepper */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{t("aiVisibilityPage.actionSteps.title")}</CardTitle>
+          <p className="text-xs text-muted-foreground">{t("aiVisibilityPage.actionSteps.context")}</p>
+        </CardHeader>
+        <CardContent>
+          {allDone ? (
+            <div className="flex items-center justify-between gap-3 rounded-lg border border-green-600/40 bg-green-500/5 p-3">
+              <div className="flex items-center gap-3 text-sm">
+                <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                <span>
+                  {t("aiVisibilityPage.actionSteps.summary", {
+                    total: funnel?.total ?? 0,
+                    sent: funnel?.sent ?? 0,
+                    clicked: funnel?.clicked ?? 0,
+                    rate: funnel?.clickRate ?? 0,
+                  })}
+                </span>
+              </div>
+              <Button asChild variant="ghost" size="sm" className="gap-1 shrink-0">
+                <Link to={target}>
+                  {t("aiVisibilityPage.actionSteps.manage")}
+                  <ArrowRight className="h-3 w-3" />
+                </Link>
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="relative">
+                <div className="hidden md:flex items-center justify-between">
+                  {steps.map((s, idx) => {
+                    const isActive = idx === activeIdx;
+                    return (
+                      <div key={s.key} className="flex-1 flex items-center">
+                        <div className="flex flex-col items-center gap-2 min-w-0 flex-1">
                           <div
-                            className={`h-5 w-5 rounded-full flex items-center justify-center text-xs font-semibold ${
-                              isActive ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                            className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-semibold border-2 transition ${
+                              s.done
+                                ? "bg-green-600 border-green-600 text-white"
+                                : isActive
+                                  ? "bg-primary border-primary text-primary-foreground shadow-md"
+                                  : "bg-background border-muted text-muted-foreground"
                             }`}
                           >
-                            {s.key}
+                            {s.done ? <CheckCircle2 className="h-5 w-5" /> : s.key}
                           </div>
+                          <p
+                            className={`text-xs text-center leading-tight px-1 ${
+                              isActive ? "font-semibold" : s.done ? "" : "text-muted-foreground"
+                            }`}
+                          >
+                            {s.title}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground text-center leading-tight">{s.live}</p>
+                        </div>
+                        {idx < steps.length - 1 && (
+                          <div
+                            className={`h-0.5 flex-1 mx-1 -mt-10 ${
+                              s.done ? "bg-green-600" : "bg-muted"
+                            }`}
+                          />
                         )}
-                        <span className="text-xs uppercase tracking-wide text-muted-foreground">
-                          {s.key}/4
-                        </span>
                       </div>
-                      <p className="text-sm font-medium">{s.title}</p>
-                      <p className="text-xs text-muted-foreground min-h-[2.5em]">{s.desc}</p>
-                      <Button
-                        asChild
-                        variant={s.done ? "outline" : isActive ? "default" : "secondary"}
-                        size="sm"
-                        className="mt-auto gap-1"
-                      >
-                        <Link to={target}>
-                          {t("aiVisibilityPage.actionSteps.goToTab")}
-                          <ArrowRight className="h-3 w-3" />
-                        </Link>
-                      </Button>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })()}
+                    );
+                  })}
+                </div>
 
-      {/* Checklist */}
+                {/* Mobile vertical */}
+                <div className="md:hidden space-y-3">
+                  {steps.map((s, idx) => {
+                    const isActive = idx === activeIdx;
+                    return (
+                      <div key={s.key} className="flex items-start gap-3">
+                        <div
+                          className={`h-8 w-8 shrink-0 rounded-full flex items-center justify-center text-sm font-semibold border-2 ${
+                            s.done
+                              ? "bg-green-600 border-green-600 text-white"
+                              : isActive
+                                ? "bg-primary border-primary text-primary-foreground"
+                                : "bg-background border-muted text-muted-foreground"
+                          }`}
+                        >
+                          {s.done ? <CheckCircle2 className="h-4 w-4" /> : s.key}
+                        </div>
+                        <div className="flex-1">
+                          <p className={`text-sm ${isActive ? "font-semibold" : ""}`}>{s.title}</p>
+                          <p className="text-xs text-muted-foreground">{s.live}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {activeIdx !== -1 && (
+                <div className="flex justify-center pt-2">
+                  <Button asChild size="sm" className="gap-1">
+                    <Link to={target}>
+                      {steps[activeIdx].cta}
+                      <ArrowRight className="h-3 w-3" />
+                    </Link>
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Recommendations */}
+      {latest && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">{t("aiVisibilityPage.recommendationsTitle")}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {recs.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{t("aiVisibilityPage.recommendationsEmpty")}</p>
+            ) : (
+              recs.map((r) => (
+                <div key={r.key} className="flex gap-3 p-3 border rounded-lg">
+                  <div className="flex-1 space-y-1">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-sm">{r.title}</p>
+                      <Badge
+                        variant={r.priority === "high" ? "destructive" : r.priority === "medium" ? "default" : "secondary"}
+                        className="text-xs"
+                      >
+                        {t(`aiVisibilityPage.priority${r.priority === "high" ? "High" : r.priority === "medium" ? "Medium" : "Low"}`)}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{r.detail}</p>
+                  </div>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Checklist — grouped */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base">{t("aiVisibilityPage.checklistTitle")}</CardTitle>
           <p className="text-xs text-muted-foreground">{t("aiVisibilityPage.checklistSubtitle")}</p>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className="space-y-5">
           <TooltipProvider>
-            {CHECKLIST_KEYS.map((k) => {
-              const funnel = reviewFunnelQuery.data;
-              const autoDone =
-                k === "review_flow" && !!funnel && (funnel.enabled || funnel.sent > 0);
-              const done = autoDone || !!checklistQuery.data?.[k];
-              const row = (
-                <label
-                  key={k}
-                  className={`flex items-start gap-3 p-2 rounded ${
-                    autoDone ? "opacity-90 cursor-default" : "hover:bg-muted/50 cursor-pointer"
-                  }`}
-                >
-                  <Checkbox
-                    checked={done}
-                    disabled={autoDone}
-                    onCheckedChange={(v) => !autoDone && toggleChecklist(k, !!v)}
-                    className="mt-0.5"
-                  />
-                  <span className={`text-sm ${done ? "line-through text-muted-foreground" : ""}`}>
-                    {t(`aiVisibilityPage.checklistItems.${k}`)}
-                    {autoDone && (
-                      <Badge variant="outline" className="ml-2 text-[10px]">
-                        {t("aiVisibilityPage.autoCompleted")}
-                      </Badge>
-                    )}
-                  </span>
-                </label>
-              );
-              if (autoDone) {
+            {/* Google Business Profile group */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {t("aiVisibilityPage.checklistGroups.gbp")}
+                </p>
+                <Badge variant="outline" className="text-[10px]">
+                  {t("aiVisibilityPage.checklistGroups.gbpSoon")}
+                </Badge>
+              </div>
+              {CHECKLIST_KEYS.filter((k) => GBP_KEYS.has(k)).map((k) => {
+                const done = !!checklistQuery.data?.[k];
                 return (
-                  <UITooltip key={k}>
-                    <TooltipTrigger asChild>{row}</TooltipTrigger>
-                    <TooltipContent>{t("aiVisibilityPage.autoCompleted")}</TooltipContent>
-                  </UITooltip>
+                  <label
+                    key={k}
+                    className="flex items-start gap-3 p-2 rounded hover:bg-muted/50 cursor-pointer"
+                  >
+                    <Checkbox
+                      checked={done}
+                      onCheckedChange={(v) => toggleChecklist(k, !!v)}
+                      className="mt-0.5"
+                    />
+                    <span className={`text-sm ${done ? "line-through text-muted-foreground" : ""}`}>
+                      {t(`aiVisibilityPage.checklistItems.${k}`)}
+                    </span>
+                  </label>
                 );
-              }
-              return row;
-            })}
+              })}
+            </div>
+
+            {/* Reviews group */}
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {t("aiVisibilityPage.checklistGroups.reviews")}
+              </p>
+              {(["reviews_response", "review_flow"] as const).map((k) => {
+                let autoDone = false;
+                let autoBadge: string | null = null;
+                let inlineHint: React.ReactNode = null;
+
+                if (k === "review_flow") {
+                  autoDone = !!funnel && (funnel.enabled || funnel.sent > 0);
+                } else if (k === "reviews_response" && replyStats?.hasData) {
+                  if (replyStats.rate >= 90) {
+                    autoDone = true;
+                    autoBadge = t("aiVisibilityPage.checklistAuto.responseRate", { rate: replyStats.rate });
+                  } else {
+                    inlineHint = (
+                      <span className="text-xs text-muted-foreground ml-2">
+                        {t("aiVisibilityPage.checklistAuto.responseCurrent", { rate: replyStats.rate })}{" "}
+                        <Link to="/reviews?status=not_replied" className="text-primary underline">
+                          {t("aiVisibilityPage.checklistAuto.responseCta")}
+                        </Link>
+                      </span>
+                    );
+                  }
+                }
+
+                const done = autoDone || !!checklistQuery.data?.[k];
+                const row = (
+                  <label
+                    key={k}
+                    className={`flex items-start gap-3 p-2 rounded ${
+                      autoDone ? "opacity-90 cursor-default" : "hover:bg-muted/50 cursor-pointer"
+                    }`}
+                  >
+                    <Checkbox
+                      checked={done}
+                      disabled={autoDone}
+                      onCheckedChange={(v) => !autoDone && toggleChecklist(k, !!v)}
+                      className="mt-0.5"
+                    />
+                    <span className={`text-sm ${done ? "line-through text-muted-foreground" : ""}`}>
+                      {t(`aiVisibilityPage.checklistItems.${k}`)}
+                      {autoBadge && (
+                        <Badge variant="outline" className="ml-2 text-[10px]">{autoBadge}</Badge>
+                      )}
+                      {autoDone && !autoBadge && (
+                        <Badge variant="outline" className="ml-2 text-[10px]">
+                          {t("aiVisibilityPage.autoCompleted")}
+                        </Badge>
+                      )}
+                      {inlineHint}
+                    </span>
+                  </label>
+                );
+                if (autoDone) {
+                  return (
+                    <UITooltip key={k}>
+                      <TooltipTrigger asChild>{row}</TooltipTrigger>
+                      <TooltipContent>{t("aiVisibilityPage.autoCompleted")}</TooltipContent>
+                    </UITooltip>
+                  );
+                }
+                return row;
+              })}
+            </div>
+
+            {/* Website group */}
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {t("aiVisibilityPage.checklistGroups.site")}
+              </p>
+              {(["site_schema", "site_faq"] as const).map((k) => {
+                const done = !!checklistQuery.data?.[k];
+                return (
+                  <label
+                    key={k}
+                    className="flex items-start gap-3 p-2 rounded hover:bg-muted/50 cursor-pointer"
+                  >
+                    <Checkbox
+                      checked={done}
+                      onCheckedChange={(v) => toggleChecklist(k, !!v)}
+                      className="mt-0.5"
+                    />
+                    <span className={`text-sm ${done ? "line-through text-muted-foreground" : ""}`}>
+                      {t(`aiVisibilityPage.checklistItems.${k}`)}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
           </TooltipProvider>
         </CardContent>
       </Card>
