@@ -523,7 +523,7 @@ export function AIVisibilityChecker() {
                 )}
               </div>
 
-              {!emailUnlocked && (
+              {!emailUnlocked && !isAuthed && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="bg-card border-2 border-primary/30 rounded-2xl p-6 sm:p-8 shadow-xl max-w-md text-center">
                     <Lock className="w-8 h-8 text-primary mx-auto mb-3" />
