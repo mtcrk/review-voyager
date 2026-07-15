@@ -150,6 +150,22 @@ export function ReviewRequestTab() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["review-request-contacts"] }),
   });
 
+  const sendOne = useMutation({
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase.functions.invoke("review-request-scheduler", {
+        body: { contact_id: id },
+      });
+      if (error) throw error;
+      const d = data as { ok?: boolean; error?: string };
+      if (!d?.ok) throw new Error(d?.error || "Gönderim başarısız");
+    },
+    onSuccess: () => {
+      toast({ title: "E-posta gönderildi" });
+      qc.invalidateQueries({ queryKey: ["review-request-contacts"] });
+    },
+    onError: (e) => toast({ title: "Hata", description: e instanceof Error ? e.message : "", variant: "destructive" }),
+  });
+
   const handleCsv = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !activeBusiness) return;
@@ -438,9 +454,25 @@ export function ReviewRequestTab() {
                       <TableCell><Badge variant="secondary" className="text-xs uppercase">{c.language}</Badge></TableCell>
                       <TableCell><Badge variant={m.variant} className="text-xs">{m.label}</Badge></TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="icon" onClick={() => del.mutate(c.id)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                        <div className="flex items-center justify-end gap-1">
+                          {c.status !== "unsubscribed" && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={sendOne.isPending}
+                              onClick={() => sendOne.mutate(c.id)}
+                              title={c.status === "sent" || c.status === "reminded" || c.status === "clicked"
+                                ? "Yeniden gönder"
+                                : "Şimdi gönder"}
+                            >
+                              <Send className="h-3.5 w-3.5 mr-1" />
+                              {c.status === "pending" ? "Gönder" : "Tekrar"}
+                            </Button>
+                          )}
+                          <Button variant="ghost" size="icon" onClick={() => del.mutate(c.id)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
