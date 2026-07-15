@@ -371,6 +371,118 @@ export default function AIVisibility() {
         </>
       )}
 
+      {/* Action Steps */}
+      {(() => {
+        const funnel = reviewFunnelQuery.data;
+        const step1Done = !!funnel?.setupDone;
+        const step2Done = !!(funnel && funnel.total > 0);
+        const step3Done = !!(funnel && funnel.sent > 0);
+        const step4Done = !!(funnel && funnel.clicked > 0);
+        const anyProgress = step1Done || step2Done || step3Done || step4Done;
+        const target = "/email?tab=review-request";
+        const steps = [
+          {
+            key: 1,
+            done: step1Done,
+            title: t("aiVisibilityPage.actionSteps.step1Title"),
+            desc: step1Done ? t("aiVisibilityPage.actionSteps.step1Done") : t("aiVisibilityPage.actionSteps.step1Cta"),
+          },
+          {
+            key: 2,
+            done: step2Done,
+            title: t("aiVisibilityPage.actionSteps.step2Title"),
+            desc: step2Done
+              ? t("aiVisibilityPage.actionSteps.step2Done", { count: funnel?.total ?? 0 })
+              : t("aiVisibilityPage.actionSteps.step2Cta"),
+          },
+          {
+            key: 3,
+            done: step3Done,
+            title: t("aiVisibilityPage.actionSteps.step3Title"),
+            desc: step3Done
+              ? t("aiVisibilityPage.actionSteps.step3Progress", {
+                  sent: funnel?.sent ?? 0,
+                  total: funnel?.consented ?? 0,
+                })
+              : t("aiVisibilityPage.actionSteps.step3Cta"),
+          },
+          {
+            key: 4,
+            done: step4Done,
+            title: t("aiVisibilityPage.actionSteps.step4Title"),
+            desc: step4Done
+              ? t("aiVisibilityPage.actionSteps.step4Progress", {
+                  count: funnel?.clicked ?? 0,
+                  rate: funnel?.clickRate ?? 0,
+                })
+              : t("aiVisibilityPage.actionSteps.step4Cta"),
+          },
+        ];
+        const activeIdx = steps.findIndex((s) => !s.done);
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">{t("aiVisibilityPage.actionSteps.title")}</CardTitle>
+              <p className="text-xs text-muted-foreground">{t("aiVisibilityPage.actionSteps.context")}</p>
+              {!anyProgress && (
+                <p className="text-xs text-primary font-medium">
+                  {t("aiVisibilityPage.actionSteps.emptyMotivation")}
+                </p>
+              )}
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                {steps.map((s, idx) => {
+                  const isActive = idx === activeIdx;
+                  return (
+                    <div
+                      key={s.key}
+                      className={`rounded-lg border p-3 flex flex-col gap-2 transition ${
+                        s.done
+                          ? "border-green-600/40 bg-green-500/5"
+                          : isActive
+                            ? "border-primary bg-primary/5 shadow-sm"
+                            : "border-border"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        {s.done ? (
+                          <CheckCircle2 className="h-5 w-5 text-green-600" />
+                        ) : (
+                          <div
+                            className={`h-5 w-5 rounded-full flex items-center justify-center text-xs font-semibold ${
+                              isActive ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                            }`}
+                          >
+                            {s.key}
+                          </div>
+                        )}
+                        <span className="text-xs uppercase tracking-wide text-muted-foreground">
+                          {s.key}/4
+                        </span>
+                      </div>
+                      <p className="text-sm font-medium">{s.title}</p>
+                      <p className="text-xs text-muted-foreground min-h-[2.5em]">{s.desc}</p>
+                      <Button
+                        asChild
+                        variant={s.done ? "outline" : isActive ? "default" : "secondary"}
+                        size="sm"
+                        className="mt-auto gap-1"
+                      >
+                        <Link to={target}>
+                          {t("aiVisibilityPage.actionSteps.goToTab")}
+                          <ArrowRight className="h-3 w-3" />
+                        </Link>
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
+
       {/* Checklist */}
       <Card>
         <CardHeader>
@@ -378,17 +490,46 @@ export default function AIVisibility() {
           <p className="text-xs text-muted-foreground">{t("aiVisibilityPage.checklistSubtitle")}</p>
         </CardHeader>
         <CardContent className="space-y-2">
-          {CHECKLIST_KEYS.map((k) => {
-            const done = !!checklistQuery.data?.[k];
-            return (
-              <label key={k} className="flex items-start gap-3 p-2 hover:bg-muted/50 rounded cursor-pointer">
-                <Checkbox checked={done} onCheckedChange={(v) => toggleChecklist(k, !!v)} className="mt-0.5" />
-                <span className={`text-sm ${done ? "line-through text-muted-foreground" : ""}`}>
-                  {t(`aiVisibilityPage.checklistItems.${k}`)}
-                </span>
-              </label>
-            );
-          })}
+          <TooltipProvider>
+            {CHECKLIST_KEYS.map((k) => {
+              const funnel = reviewFunnelQuery.data;
+              const autoDone =
+                k === "review_flow" && !!funnel && (funnel.enabled || funnel.sent > 0);
+              const done = autoDone || !!checklistQuery.data?.[k];
+              const row = (
+                <label
+                  key={k}
+                  className={`flex items-start gap-3 p-2 rounded ${
+                    autoDone ? "opacity-90 cursor-default" : "hover:bg-muted/50 cursor-pointer"
+                  }`}
+                >
+                  <Checkbox
+                    checked={done}
+                    disabled={autoDone}
+                    onCheckedChange={(v) => !autoDone && toggleChecklist(k, !!v)}
+                    className="mt-0.5"
+                  />
+                  <span className={`text-sm ${done ? "line-through text-muted-foreground" : ""}`}>
+                    {t(`aiVisibilityPage.checklistItems.${k}`)}
+                    {autoDone && (
+                      <Badge variant="outline" className="ml-2 text-[10px]">
+                        {t("aiVisibilityPage.autoCompleted")}
+                      </Badge>
+                    )}
+                  </span>
+                </label>
+              );
+              if (autoDone) {
+                return (
+                  <UITooltip key={k}>
+                    <TooltipTrigger asChild>{row}</TooltipTrigger>
+                    <TooltipContent>{t("aiVisibilityPage.autoCompleted")}</TooltipContent>
+                  </UITooltip>
+                );
+              }
+              return row;
+            })}
+          </TooltipProvider>
         </CardContent>
       </Card>
 
