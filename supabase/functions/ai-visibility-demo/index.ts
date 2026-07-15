@@ -131,9 +131,24 @@ serve(async (req) => {
 
     // ADIM A — Google'da işletmeyi bul
     const businessQuery = loc ? `${bn} ${loc}` : bn;
-    const businessResults = await placesTextSearch(businessQuery, GOOGLE_PLACES_API_KEY);
+    let businessResults: any[] = [];
+    try {
+      businessResults = await placesTextSearch(businessQuery, GOOGLE_PLACES_API_KEY);
+    } catch (e) {
+      console.error("Places search error:", e);
+      return new Response(
+        JSON.stringify({
+          error:
+            "Google'a şu an ulaşılamıyor. Lütfen birkaç saniye sonra tekrar deneyin.",
+        }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
-    if (!businessResults || businessResults.length === 0) {
+    // Sıkı isim eşleşmesi — yanlış işletme dönerse not_found
+    const firstMatch = businessResults.find((r: any) => nameMatches(bn, r.name || ""));
+
+    if (!businessResults || businessResults.length === 0 || !firstMatch) {
       return new Response(
         JSON.stringify({
           status: "not_found",
@@ -146,7 +161,7 @@ serve(async (req) => {
       );
     }
 
-    const biz = businessResults[0];
+    const biz = firstMatch;
     const sector = sectorFromTypes(biz.types || []);
     const bizRating: number = typeof biz.rating === "number" ? biz.rating : 0;
     const bizReviews: number =
@@ -154,7 +169,13 @@ serve(async (req) => {
 
     // ADIM B — Gerçek rakipler
     const compQuery = loc ? `${sector.searchTerm} ${loc}` : `${sector.searchTerm} ${bn}`;
-    let competitorsRaw = await placesTextSearch(compQuery, GOOGLE_PLACES_API_KEY);
+    let competitorsRaw: any[] = [];
+    try {
+      competitorsRaw = await placesTextSearch(compQuery, GOOGLE_PLACES_API_KEY);
+    } catch (e) {
+      console.error("Competitor search failed:", e);
+      competitorsRaw = [];
+    }
     competitorsRaw = competitorsRaw.filter(
       (c: any) => c.place_id !== biz.place_id && normalize(c.name) !== normalize(biz.name)
     );
@@ -181,11 +202,12 @@ serve(async (req) => {
 
     let aiAnswer = "";
     let aiMentioned = false;
+    let aiUnavailable = false;
     const mentionedCompetitors: string[] = [];
 
     if (LOVABLE_API_KEY) {
       try {
-        const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        const aiRes = await fetchWithTimeout("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${LOVABLE_API_KEY}`,
@@ -203,7 +225,7 @@ serve(async (req) => {
             ],
             temperature: 0.3,
           }),
-        });
+        }, 15000);
         if (aiRes.ok) {
           const j = await aiRes.json();
           aiAnswer = j.choices?.[0]?.message?.content || "";
@@ -213,10 +235,14 @@ serve(async (req) => {
           }
         } else {
           console.error("AI query failed:", aiRes.status, await aiRes.text());
+          aiUnavailable = true;
         }
       } catch (e) {
         console.error("AI query error:", e);
+        aiUnavailable = true;
       }
+    } else {
+      aiUnavailable = true;
     }
 
     // ADIM D — Deterministik skor
@@ -244,14 +270,27 @@ serve(async (req) => {
     }
 
     const gbpPoints = 10;
-    const total = aiPoints + ratingPoints + reviewPoints + gbpPoints;
 
-    const scoreBreakdown = {
-      aiVisibility: { points: aiPoints, max: 40, label: "AI asistanda görünürlük" },
-      rating: { points: ratingPoints, max: 25, label: "Rakip medyanına göre puan" },
-      reviewVolume: { points: reviewPoints, max: 25, label: "Rakip medyanına göre yorum sayısı" },
-      gbpPresence: { points: gbpPoints, max: 10, label: "Google Business Profile varlığı" },
-    };
+    let total: number;
+    let scoreBreakdown: Record<string, { points: number; max: number; label: string }>;
+    if (aiUnavailable) {
+      // AI ölçülemedi — kalan bileşenleri 100'e normalize et (25+25+10 = 60 max)
+      const rawSum = ratingPoints + reviewPoints + gbpPoints;
+      total = Math.round((rawSum / 60) * 100);
+      scoreBreakdown = {
+        rating: { points: ratingPoints, max: 25, label: "Rakip medyanına göre puan" },
+        reviewVolume: { points: reviewPoints, max: 25, label: "Rakip medyanına göre yorum sayısı" },
+        gbpPresence: { points: gbpPoints, max: 10, label: "Google Business Profile varlığı" },
+      };
+    } else {
+      total = aiPoints + ratingPoints + reviewPoints + gbpPoints;
+      scoreBreakdown = {
+        aiVisibility: { points: aiPoints, max: 40, label: "AI asistanda görünürlük" },
+        rating: { points: ratingPoints, max: 25, label: "Rakip medyanına göre puan" },
+        reviewVolume: { points: reviewPoints, max: 25, label: "Rakip medyanına göre yorum sayısı" },
+        gbpPresence: { points: gbpPoints, max: 10, label: "Google Business Profile varlığı" },
+      };
+    }
 
     // ADIM E — Kısa özet ve öneriler (sadece gerçek veriye dayalı)
     let summary = "";
@@ -274,7 +313,7 @@ serve(async (req) => {
           mentionedCompetitors,
           score: total,
         };
-        const sumRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        const sumRes = await fetchWithTimeout("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${LOVABLE_API_KEY}`,
@@ -292,7 +331,7 @@ serve(async (req) => {
             ],
             temperature: 0.2,
           }),
-        });
+        }, 15000);
         if (sumRes.ok) {
           const j = await sumRes.json();
           const content = j.choices?.[0]?.message?.content || "";
@@ -343,6 +382,7 @@ serve(async (req) => {
         aiCheck: {
           query: aiQuery,
           model: "google/gemini-2.5-flash",
+          status: aiUnavailable ? "unavailable" : "ok",
           mentioned: aiMentioned,
           mentionedCompetitors,
           answerPreview: aiAnswer.slice(0, 600),
