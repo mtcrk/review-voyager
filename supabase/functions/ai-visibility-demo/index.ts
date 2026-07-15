@@ -62,19 +62,40 @@ function sectorFromTypes(types: string[] = []): { key: string; label: string; se
   return { key: "business", label: "İşletme", searchTerm: "işletme" };
 }
 
+async function fetchWithTimeout(url: string, init: RequestInit, ms: number): Promise<Response> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), ms);
+  try {
+    return await fetch(url, { ...init, signal: ctrl.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function placesTextSearch(query: string, apiKey: string) {
   const url =
     "https://maps.googleapis.com/maps/api/place/textsearch/json?query=" +
     encodeURIComponent(query) +
     "&language=tr&region=tr&key=" +
     apiKey;
-  const res = await fetch(url);
+  const res = await fetchWithTimeout(url, {}, 8000);
   if (!res.ok) throw new Error(`Google Places arama başarısız: ${res.status}`);
   const data = await res.json();
   if (data.status !== "OK" && data.status !== "ZERO_RESULTS") {
     throw new Error(`Google Places hatası: ${data.status} ${data.error_message || ""}`);
   }
   return data.results || [];
+}
+
+function nameMatches(inputName: string, foundName: string): boolean {
+  const inp = normalize(inputName);
+  const found = normalize(foundName);
+  if (!inp || !found) return false;
+  if (found.includes(inp) || inp.includes(found)) return true;
+  const inpTokens = inp.split(" ").filter((t) => t.length >= 3);
+  if (inpTokens.length === 0) return false;
+  const hits = inpTokens.filter((t) => found.includes(t)).length;
+  return hits / inpTokens.length >= 0.6;
 }
 
 serve(async (req) => {
