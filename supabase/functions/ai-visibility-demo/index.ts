@@ -62,6 +62,53 @@ function sectorFromTypes(types: string[] = []): { key: string; label: string; se
   return { key: "business", label: "İşletme", searchTerm: "işletme" };
 }
 
+// İsim bazlı sektör override — Places types'tan önce kontrol edilir
+function sectorFromName(name: string, types: string[] = []): { key: string; label: string; searchTerm: string } | null {
+  const n = normalize(name);
+  const t = new Set(types);
+  const hay = n + " " + [...t].join(" ");
+  const keywordMap: Array<[string[], string, string, string]> = [
+    [["bungalov", "bungalow"], "bungalow", "Bungalov", "bungalov"],
+    [["glamping"], "glamping", "Glamping", "glamping"],
+    [["tatil koyu", "tatil köyü", "holiday village"], "holiday_village", "Tatil Köyü", "tatil köyü"],
+    [["butik otel", "boutique hotel"], "boutique_hotel", "Butik Otel", "butik otel"],
+    [["hostel"], "hostel", "Hostel", "hostel"],
+    [["pansiyon", "guesthouse", "guest house"], "guesthouse", "Pansiyon", "pansiyon"],
+    [["apart otel", "aparthotel", "apart hotel", "apart"], "apart", "Apart Otel", "apart otel"],
+    [["villa"], "villa", "Villa", "kiralık villa"],
+  ];
+  for (const [kws, key, label, term] of keywordMap) {
+    if (kws.some((kw) => hay.includes(kw))) return { key, label, searchTerm: term };
+  }
+  return null;
+}
+
+// Places formatted_address'ten ilçe+il çıkar (TR odaklı)
+function extractLocality(address: string | null | undefined): string {
+  if (!address) return "";
+  const clean = address.replace(/\bTürkiye\b|\bTurkey\b/gi, "").trim();
+  // "53480 Yeşiltepe/Ardeşen/Rize" gibi slash formatı
+  if (clean.includes("/")) {
+    const parts = clean.split("/").map((p) => p.trim()).filter(Boolean);
+    if (parts.length >= 2) {
+      const last = parts[parts.length - 1];
+      const prev = parts[parts.length - 2];
+      // posta kodu vs. temizle
+      const cleanPrev = prev.replace(/\b\d{4,6}\b/g, "").trim();
+      return `${cleanPrev}, ${last}`.replace(/^,\s*/, "");
+    }
+    return parts[parts.length - 1] || "";
+  }
+  // Virgüllü format: "Mah., Sok. No, İlçe, İl 34000, Türkiye"
+  const parts = clean.split(",").map((p) => p.replace(/\b\d{4,6}\b/g, "").trim()).filter(Boolean);
+  if (parts.length >= 2) {
+    const last = parts[parts.length - 1];
+    const prev = parts[parts.length - 2];
+    return `${prev}, ${last}`;
+  }
+  return parts[0] || "";
+}
+
 async function fetchWithTimeout(url: string, init: RequestInit, ms: number): Promise<Response> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), ms);
@@ -162,13 +209,16 @@ serve(async (req) => {
     }
 
     const biz = firstMatch;
-    const sector = sectorFromTypes(biz.types || []);
+    const sector = sectorFromName(biz.name || bn, biz.types || []) || sectorFromTypes(biz.types || []);
+    const derivedLocality = extractLocality(biz.formatted_address) || loc;
     const bizRating: number = typeof biz.rating === "number" ? biz.rating : 0;
     const bizReviews: number =
       typeof biz.user_ratings_total === "number" ? biz.user_ratings_total : 0;
 
     // ADIM B — Gerçek rakipler
-    const compQuery = loc ? `${sector.searchTerm} ${loc}` : `${sector.searchTerm} ${bn}`;
+    const compQuery = derivedLocality
+      ? `${sector.searchTerm} ${derivedLocality}`
+      : `${sector.searchTerm} ${bn}`;
     let competitorsRaw: any[] = [];
     try {
       competitorsRaw = await placesTextSearch(compQuery, GOOGLE_PLACES_API_KEY);
@@ -196,8 +246,8 @@ serve(async (req) => {
       }));
 
     // ADIM C — Canlı AI sorgusu
-    const aiQuery = loc
-      ? `${loc} bölgesinde en iyi ${sector.searchTerm} önerir misin? 5-8 isim listele.`
+    const aiQuery = derivedLocality
+      ? `${derivedLocality} bölgesinde en iyi ${sector.searchTerm} önerir misin? 5-8 isim listele.`
       : `Türkiye'de en iyi ${sector.searchTerm} önerir misin? 5-8 isim listele.`;
 
     let aiAnswer = "";
