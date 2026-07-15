@@ -30,16 +30,11 @@ const LOCATIONS = [
 ];
 
 interface Competitor { name: string; rating: number; reviewCount: number; address: string | null; }
-interface ScoreBreakdown {
-  aiVisibility: { points: number; max: number; label: string };
-  rating: { points: number; max: number; label: string };
-  reviewVolume: { points: number; max: number; label: string };
-  gbpPresence: { points: number; max: number; label: string };
-}
+type ScoreBreakdown = Record<string, { points: number; max: number; label: string }>;
 interface AnalysisResult {
   status: "ok" | "not_found";
   business?: { name: string; rating: number; reviewCount: number; address: string | null; sector: string };
-  aiCheck?: { query: string; model: string; mentioned: boolean; mentionedCompetitors: string[]; answerPreview: string };
+  aiCheck?: { query: string; model: string; status?: "ok" | "unavailable"; mentioned: boolean; mentionedCompetitors: string[]; answerPreview: string };
   competitors?: Competitor[];
   stats?: { ratingMedian: number; reviewMedian: number };
   score?: { total: number; breakdown: ScoreBreakdown };
