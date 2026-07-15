@@ -251,7 +251,11 @@ serve(async (req) => {
 
     const biz = firstMatch;
     const sector = sectorFromName(biz.name || bn, biz.types || []) || sectorFromTypes(biz.types || []);
-    const derivedLocality = extractLocality(biz.formatted_address) || loc;
+    const detailsLocality = biz.place_id
+      ? await fetchLocalityFromDetails(biz.place_id, GOOGLE_PLACES_API_KEY)
+      : "";
+    const derivedLocality =
+      detailsLocality || extractLocality(biz.formatted_address) || loc;
     const bizRating: number = typeof biz.rating === "number" ? biz.rating : 0;
     const bizReviews: number =
       typeof biz.user_ratings_total === "number" ? biz.user_ratings_total : 0;
