@@ -97,6 +97,40 @@ export default function AIVisibility() {
     },
   });
 
+  const reviewFunnelQuery = useQuery({
+    queryKey: ["ai-visibility-review-funnel", businessId],
+    enabled: !!businessId,
+    queryFn: async () => {
+      const [settingsRes, contactsRes] = await Promise.all([
+        supabase
+          .from("review_request_settings")
+          .select("enabled, review_link")
+          .eq("business_id", businessId!)
+          .maybeSingle(),
+        supabase
+          .from("review_request_contacts")
+          .select("status, clicked_at, consent")
+          .eq("business_id", businessId!),
+      ]);
+      const settings = settingsRes.data as { enabled: boolean; review_link: string | null } | null;
+      const contacts = (contactsRes.data ?? []) as { status: string; clicked_at: string | null; consent: boolean }[];
+      const total = contacts.length;
+      const consented = contacts.filter((c) => c.consent).length;
+      const sent = contacts.filter((c) => ["sent", "reminded", "clicked"].includes(c.status)).length;
+      const clicked = contacts.filter((c) => !!c.clicked_at).length;
+      const setupDone = !!(settings && !!settings.review_link);
+      return {
+        setupDone,
+        enabled: !!settings?.enabled,
+        total,
+        consented,
+        sent,
+        clicked,
+        clickRate: sent > 0 ? Math.round((clicked / sent) * 100) : 0,
+      };
+    },
+  });
+
   const latest = snapshotsQuery.data?.[0] ?? null;
   const [cachedInfo, setCachedInfo] = useState<{ cached: boolean; next_available_at?: string } | null>(null);
 
