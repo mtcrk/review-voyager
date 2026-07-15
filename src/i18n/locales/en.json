@@ -898,5 +898,48 @@
       "terms": "Terms of Service",
       "rights": "All rights reserved."
     }
+  },
+  "aiVisibilityPage": {
+    "title": "AI Visibility",
+    "subtitle": "Are you showing up in AI assistants' recommendations for your area? Measure, track, improve.",
+    "runCheck": "Run check",
+    "running": "Running...",
+    "refresh": "Re-run",
+    "cachedBadge": "From 6h cache",
+    "nextAvailable": "Next check: {{time}}",
+    "noSnapshot": "No snapshot yet. Run a check to see how AI assistants perceive your business.",
+    "noBusiness": "Select a business first.",
+    "scoreLabel": "AI Visibility Score",
+    "outOf": "/ 100",
+    "breakdown": "Score breakdown",
+    "aiHeroTitle": "AI assistant answer",
+    "aiHeroQuery": "Query",
+    "aiMentioned": "You were mentioned in the answer",
+    "aiNotMentioned": "You were not mentioned in the answer",
+    "aiUnavailable": "AI answer unavailable this round",
+    "mentionedCompetitors": "Competitors mentioned",
+    "answerPreview": "Answer excerpt",
+    "trendTitle": "Score trend",
+    "trendEmpty": "Trend needs at least 2 snapshots.",
+    "recommendationsTitle": "Personalized recommendations",
+    "recommendationsEmpty": "No recommendations available.",
+    "priorityHigh": "High",
+    "priorityMedium": "Medium",
+    "priorityLow": "Low",
+    "checklistTitle": "AI visibility checklist",
+    "checklistSubtitle": "Core signals AI assistants look at. Check off as you complete them.",
+    "footnote": "AI answers are a sample and change over time. This is not a guarantee; it helps you strengthen the signals AI looks at.",
+    "rateLimited": "Checks are limited to once every 6 hours.",
+    "error": "Check failed: {{msg}}",
+    "checklistItems": {
+      "gbp_description": "Google Business Profile description is fresh and rich",
+      "gbp_categories": "Primary and secondary categories set correctly",
+      "gbp_attributes": "Attributes / services (WiFi, parking, breakfast, etc.) filled",
+      "gbp_photos": "Photos added in the last 30 days",
+      "reviews_response": "90%+ reply rate on reviews in the last 30 days",
+      "review_flow": "Active review collection flow (QR/SMS/email)",
+      "site_schema": "LocalBusiness schema.org on the website",
+      "site_faq": "FAQ / service details on the website"
+    }
   }
 }
