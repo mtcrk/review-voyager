@@ -304,8 +304,14 @@ export function AIVisibilityChecker() {
                 )}
               </Button>
               <p className="text-xs text-muted-foreground text-center">
-                Kalan hak: <span className="font-medium text-foreground">{remainingTries}</span>
-                {" · "}Sınırsız için <button onClick={() => navigate("/register")} className="text-primary hover:underline">kayıt olun</button>
+                {isAuthed ? (
+                  <>Sınırsız kullanım aktif · üye hesabınızla giriş yaptınız</>
+                ) : (
+                  <>
+                    Kalan hak: <span className="font-medium text-foreground">{remainingTries}</span>
+                    {" · "}Sınırsız için <button onClick={() => navigate("/register")} className="text-primary hover:underline">kayıt olun</button>
+                  </>
+                )}
               </p>
             </div>
           )}
