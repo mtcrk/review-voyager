@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 
 import { PriorityActions } from "@/components/dashboard/PriorityActions";
 import { CompetitorComparison } from "@/components/dashboard/CompetitorComparison";
+import { AIVisibilityChecker } from "@/components/landing/AIVisibilityChecker";
 import { DemoModeBanner } from "@/components/dashboard/DemoModeBanner";
 import { AllBusinessesView } from "@/components/dashboard/AllBusinessesView";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -340,6 +341,10 @@ export default function Dashboard() {
               <CompetitorComparison />
               {isDemoMode && <UpgradeCTA feature={t('dashboard.demo.features.competitorAnalysis', 'Rakip Analizi')} />}
             </div>
+          </div>
+
+          <div className="mt-6">
+            <AIVisibilityChecker />
           </div>
 
           {reviewsLoading && !isDemoMode ? (
