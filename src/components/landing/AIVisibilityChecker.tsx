@@ -356,7 +356,7 @@ export function AIVisibilityChecker() {
         {result && !loading && result.status === "ok" && result.business && result.aiCheck && result.score && (
           <div className="animate-fade-in space-y-6">
             {/* HERO: AI kararı */}
-            <div className={`rounded-2xl p-6 sm:p-8 border-2 ${result.aiCheck.mentioned ? "border-green-300 bg-green-50/50" : "border-red-300 bg-red-50/40"}`}>
+            <div className={`rounded-2xl p-6 sm:p-8 border-2 ${result.aiCheck.status === "unavailable" ? "border-amber-300 bg-amber-50/50" : result.aiCheck.mentioned ? "border-green-300 bg-green-50/50" : "border-red-300 bg-red-50/40"}`}>
               <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground mb-3">
                 <Bot className="w-4 h-4" />
                 <span>AI'a az önce soruldu · Gemini 2.5 · canlı</span>
@@ -365,7 +365,19 @@ export function AIVisibilityChecker() {
                 "{result.aiCheck.query}"
               </div>
               <div className="flex items-start gap-4">
-                {result.aiCheck.mentioned ? (
+                {result.aiCheck.status === "unavailable" ? (
+                  <>
+                    <AlertCircle className="w-10 h-10 text-amber-600 flex-shrink-0" />
+                    <div>
+                      <div className="text-2xl sm:text-3xl font-bold text-amber-800 mb-1">
+                        AI ölçümü şu an yapılamadı
+                      </div>
+                      <p className="text-amber-700">
+                        Skorunuz diğer sinyaller (Google puanı, yorum hacmi, GBP varlığı) üzerinden hesaplandı. AI görünürlüğü birazdan tekrar denenebilir.
+                      </p>
+                    </div>
+                  </>
+                ) : result.aiCheck.mentioned ? (
                   <>
                     <CheckCircle2 className="w-10 h-10 text-green-600 flex-shrink-0" />
                     <div>
