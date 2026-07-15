@@ -940,6 +940,25 @@
       "review_flow": "Active review collection flow (QR/SMS/email)",
       "site_schema": "LocalBusiness schema.org on the website",
       "site_faq": "FAQ / service details on the website"
+    },
+    "autoCompleted": "Auto-completed",
+    "actionSteps": {
+      "title": "Action Steps",
+      "context": "The strongest AI visibility signal is a steady review flow — these steps feed your score.",
+      "emptyMotivation": "You haven't started yet — set it up in 2 minutes.",
+      "step1Title": "Review request setup",
+      "step1Done": "Setup complete",
+      "step1Cta": "Set it up",
+      "step2Title": "Add guests",
+      "step2Done": "{{count}} guests added",
+      "step2Cta": "Add your first guest",
+      "step3Title": "Send review requests",
+      "step3Progress": "Sent to {{sent}} / {{total}} guests",
+      "step3Cta": "Start sending",
+      "step4Title": "Clicks",
+      "step4Progress": "{{count}} guests visited the review page ({{rate}}%)",
+      "step4Cta": "View results",
+      "goToTab": "Go to Review Request tab"
     }
   }
 }
