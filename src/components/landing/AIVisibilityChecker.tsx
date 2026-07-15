@@ -78,6 +78,7 @@ export function AIVisibilityChecker() {
   const [filteredLocs, setFilteredLocs] = useState<string[]>([]);
   const [usageCount, setUsageCount] = useState(0);
   const [emailUnlocked, setEmailUnlocked] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
   const locRef = useRef<HTMLInputElement>(null);
   const sugRef = useRef<HTMLDivElement>(null);
@@ -85,6 +86,9 @@ export function AIVisibilityChecker() {
   useEffect(() => {
     setUsageCount(getUsageCount());
     setEmailUnlocked(isEmailUnlocked());
+    supabase.auth.getSession().then(({ data }) => setIsAuthed(!!data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => setIsAuthed(!!session));
+    return () => { sub.subscription.unsubscribe(); };
   }, []);
 
   useEffect(() => {
@@ -109,9 +113,9 @@ export function AIVisibilityChecker() {
     return () => document.removeEventListener("mousedown", h);
   }, []);
 
-  const maxTries = emailUnlocked ? MAX_EMAIL_TRIES : MAX_FREE_TRIES;
-  const remainingTries = Math.max(0, maxTries - usageCount);
-  const limitReached = usageCount >= maxTries;
+  const maxTries = isAuthed ? Infinity : emailUnlocked ? MAX_EMAIL_TRIES : MAX_FREE_TRIES;
+  const remainingTries = isAuthed ? Infinity : Math.max(0, maxTries - usageCount);
+  const limitReached = !isAuthed && usageCount >= maxTries;
 
   const handleAnalyze = async () => {
     if (limitReached) return;
@@ -300,8 +304,14 @@ export function AIVisibilityChecker() {
                 )}
               </Button>
               <p className="text-xs text-muted-foreground text-center">
-                Kalan hak: <span className="font-medium text-foreground">{remainingTries}</span>
-                {" · "}Sınırsız için <button onClick={() => navigate("/register")} className="text-primary hover:underline">kayıt olun</button>
+                {isAuthed ? (
+                  <>Sınırsız kullanım aktif · üye hesabınızla giriş yaptınız</>
+                ) : (
+                  <>
+                    Kalan hak: <span className="font-medium text-foreground">{remainingTries}</span>
+                    {" · "}Sınırsız için <button onClick={() => navigate("/register")} className="text-primary hover:underline">kayıt olun</button>
+                  </>
+                )}
               </p>
             </div>
           )}
