@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContactsTab } from "@/components/email/ContactsTab";
 import { ComposeTab } from "@/components/email/ComposeTab";
@@ -6,8 +7,28 @@ import { CampaignsTab } from "@/components/email/CampaignsTab";
 import { ReviewRequestTab } from "@/components/email/ReviewRequestTab";
 import { Mail } from "lucide-react";
 
+const VALID_TABS = ["compose", "review-request", "contacts", "campaigns"] as const;
+
 export default function EmailCenter() {
-  const [activeTab, setActiveTab] = useState("compose");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState(
+    initialTab && VALID_TABS.includes(initialTab as any) ? initialTab : "compose"
+  );
+
+  useEffect(() => {
+    const t = searchParams.get("tab");
+    if (t && VALID_TABS.includes(t as any) && t !== activeTab) {
+      setActiveTab(t);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    const next = new URLSearchParams(searchParams);
+    next.set("tab", value);
+    setSearchParams(next, { replace: true });
+  };
 
   return (
     <div className="p-8 space-y-6">
@@ -21,7 +42,7 @@ export default function EmailCenter() {
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
         <TabsList className="bg-muted/30">
           <TabsTrigger value="compose">Email Gönder</TabsTrigger>
           <TabsTrigger value="review-request">Yorum Talebi</TabsTrigger>

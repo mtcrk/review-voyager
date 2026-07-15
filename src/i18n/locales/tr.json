@@ -820,6 +820,25 @@
       "review_flow": "Müşteriden yorum toplama akışı (QR/SMS/email) aktif",
       "site_schema": "Web sitesinde LocalBusiness schema.org mevcut",
       "site_faq": "Web sitesinde sık sorulan sorular / hizmet detayları var"
+    },
+    "autoCompleted": "Otomatik tamamlandı",
+    "actionSteps": {
+      "title": "Aksiyon Adımları",
+      "context": "AI görünürlüğün en güçlü sinyali düzenli yorum akışıdır — bu adımlar skorunuzu besler.",
+      "emptyMotivation": "Henüz başlamadınız — 2 dakikada kurun.",
+      "step1Title": "Yorum talebi kurulumu",
+      "step1Done": "Kurulum tamam",
+      "step1Cta": "Kurulumu yap",
+      "step2Title": "Misafir ekle",
+      "step2Done": "{{count}} misafir eklendi",
+      "step2Cta": "İlk misafirinizi ekleyin",
+      "step3Title": "Yorum talebi gönder",
+      "step3Progress": "{{sent}} / {{total}} misafire gönderildi",
+      "step3Cta": "Gönderime başlayın",
+      "step4Title": "Tıklamalar",
+      "step4Progress": "{{count}} misafir yorum sayfasına gitti ({{rate}}%)",
+      "step4Cta": "Sonuçları görün",
+      "goToTab": "Yorum Talebi sekmesine git"
     }
   }
 }
