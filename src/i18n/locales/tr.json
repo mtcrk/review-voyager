@@ -778,5 +778,48 @@
       "terms": "Kullanım Şartları",
       "rights": "Tüm hakları saklıdır."
     }
+  },
+  "aiVisibilityPage": {
+    "title": "Yapay Zekada Görünürlük",
+    "subtitle": "AI asistanların bölgenizdeki önerilerinde yer alıyor musunuz? Ölçün, izleyin, iyileştirin.",
+    "runCheck": "Ölçümü Başlat",
+    "running": "Ölçülüyor...",
+    "refresh": "Yeniden Ölç",
+    "cachedBadge": "6 saatlik önbellekten",
+    "nextAvailable": "Sonraki ölçüm: {{time}}",
+    "noSnapshot": "Henüz bir ölçüm yok. AI asistanların işletmenizi nasıl gördüğünü öğrenmek için ölçümü başlatın.",
+    "noBusiness": "Önce bir işletme seçin.",
+    "scoreLabel": "AI Görünürlük Skoru",
+    "outOf": "/ 100",
+    "breakdown": "Skor kırılımı",
+    "aiHeroTitle": "AI asistan cevabı",
+    "aiHeroQuery": "Sorgu",
+    "aiMentioned": "Adınız cevapta geçti",
+    "aiNotMentioned": "Adınız cevapta geçmedi",
+    "aiUnavailable": "AI cevabı bu turda alınamadı",
+    "mentionedCompetitors": "Cevapta geçen rakipler",
+    "answerPreview": "Cevaptan alıntı",
+    "trendTitle": "Skor trendi",
+    "trendEmpty": "Trend için en az 2 ölçüm gerekiyor.",
+    "recommendationsTitle": "Kişiselleştirilmiş öneriler",
+    "recommendationsEmpty": "Öneri hazırlanamadı.",
+    "priorityHigh": "Yüksek",
+    "priorityMedium": "Orta",
+    "priorityLow": "Düşük",
+    "checklistTitle": "AI görünürlük checklist",
+    "checklistSubtitle": "AI asistanların baktığı temel sinyaller. Tamamladıkça işaretleyin.",
+    "footnote": "AI cevapları örneklemdir ve zamanla değişebilir. Bu ölçüm bir garanti değildir; AI'ın baktığı sinyalleri güçlendirmenize yardımcı olur.",
+    "rateLimited": "6 saatte bir ölçüm yapılabilir.",
+    "error": "Ölçüm başarısız: {{msg}}",
+    "checklistItems": {
+      "gbp_description": "Google Business Profile açıklaması güncel ve zengin",
+      "gbp_categories": "Ana ve alt kategoriler doğru seçili",
+      "gbp_attributes": "Özellikler / hizmetler (WiFi, otopark, kahvaltı vb.) işaretli",
+      "gbp_photos": "Son 30 gün içinde eklenen fotoğraf var",
+      "reviews_response": "Son 30 gün yorumlara yanıt oranı %90+",
+      "review_flow": "Müşteriden yorum toplama akışı (QR/SMS/email) aktif",
+      "site_schema": "Web sitesinde LocalBusiness schema.org mevcut",
+      "site_faq": "Web sitesinde sık sorulan sorular / hizmet detayları var"
+    }
   }
 }
