@@ -39,6 +39,7 @@ import {
   Sparkles,
   Swords,
   Wallet,
+  Radar,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -476,6 +477,21 @@ export function AppSidebar() {
                   >
                     <Swords className="h-5 w-5" />
                     <span>Rakip Analizi</span>
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={location.pathname === "/ai-visibility"}
+                  tooltip="Yapay Zekada Görünürlük"
+                >
+                  <NavLink
+                    to="/ai-visibility"
+                    className="flex items-center gap-3 transition-smooth"
+                  >
+                    <Radar className="h-5 w-5" />
+                    <span>Yapay Zekada Görünürlük</span>
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>

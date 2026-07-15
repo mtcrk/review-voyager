@@ -41,6 +41,118 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_visibility_checklist: {
+        Row: {
+          business_id: string
+          created_at: string
+          done: boolean
+          id: string
+          item_key: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          done?: boolean
+          id?: string
+          item_key: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          done?: boolean
+          id?: string
+          item_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_visibility_checklist_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_visibility_snapshots: {
+        Row: {
+          ai_mentioned: boolean
+          ai_status: string | null
+          answer_preview: string | null
+          breakdown: Json
+          business_address: string | null
+          business_id: string
+          business_name: string | null
+          competitors: Json
+          created_at: string
+          id: string
+          mentioned_competitors: Json
+          query: string | null
+          rating: number | null
+          rating_median: number | null
+          recommendations: Json
+          review_count: number | null
+          review_median: number | null
+          score: number
+          sector_label: string | null
+          summary: string | null
+        }
+        Insert: {
+          ai_mentioned?: boolean
+          ai_status?: string | null
+          answer_preview?: string | null
+          breakdown?: Json
+          business_address?: string | null
+          business_id: string
+          business_name?: string | null
+          competitors?: Json
+          created_at?: string
+          id?: string
+          mentioned_competitors?: Json
+          query?: string | null
+          rating?: number | null
+          rating_median?: number | null
+          recommendations?: Json
+          review_count?: number | null
+          review_median?: number | null
+          score?: number
+          sector_label?: string | null
+          summary?: string | null
+        }
+        Update: {
+          ai_mentioned?: boolean
+          ai_status?: string | null
+          answer_preview?: string | null
+          breakdown?: Json
+          business_address?: string | null
+          business_id?: string
+          business_name?: string | null
+          competitors?: Json
+          created_at?: string
+          id?: string
+          mentioned_competitors?: Json
+          query?: string | null
+          rating?: number | null
+          rating_median?: number | null
+          recommendations?: Json
+          review_count?: number | null
+          review_median?: number | null
+          score?: number
+          sector_label?: string | null
+          summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_visibility_snapshots_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_settings: {
         Row: {
           key: string

@@ -80,3 +80,6 @@ verify_jwt = false
 
 [functions.paytr-recurring-billing]
 verify_jwt = false
+
+[functions.ai-visibility-check]
+verify_jwt = false
