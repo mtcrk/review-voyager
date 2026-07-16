@@ -290,55 +290,34 @@ serve(async (req) => {
         address: c.formatted_address || null,
       }));
 
-    // ADIM C — Canlı AI sorgusu
+    // ADIM C — Canlı AI sorgusu (multi-engine)
     const aiQuery = derivedLocality
       ? `${derivedLocality} bölgesinde en iyi ${sector.searchTerm} önerir misin? 5-8 isim listele.`
       : `Türkiye'de en iyi ${sector.searchTerm} önerir misin? 5-8 isim listele.`;
 
-    let aiAnswer = "";
-    let aiMentioned = false;
-    let aiUnavailable = false;
-    const mentionedCompetitors: string[] = [];
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    const PERPLEXITY_API_KEY = Deno.env.get("PERPLEXITY_API_KEY");
 
-    if (LOVABLE_API_KEY) {
-      try {
-        const aiRes = await fetchWithTimeout("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${LOVABLE_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "google/gemini-2.5-flash",
-            messages: [
-              {
-                role: "system",
-                content:
-                  "Sen yerel öneri asistanısın. Kullanıcıya bilgin dahilindeki popüler işletmeleri numaralı liste halinde ver. Uydurma yapma, emin değilsen sadece emin olduklarını listele.",
-              },
-              { role: "user", content: aiQuery },
-            ],
-            temperature: 0.3,
-          }),
-        }, 15000);
-        if (aiRes.ok) {
-          const j = await aiRes.json();
-          aiAnswer = j.choices?.[0]?.message?.content || "";
-          aiMentioned = fuzzyIncludes(aiAnswer, biz.name);
-          for (const c of competitors) {
-            if (fuzzyIncludes(aiAnswer, c.name)) mentionedCompetitors.push(c.name);
-          }
-        } else {
-          console.error("AI query failed:", aiRes.status, await aiRes.text());
-          aiUnavailable = true;
-        }
-      } catch (e) {
-        console.error("AI query error:", e);
-        aiUnavailable = true;
-      }
-    } else {
-      aiUnavailable = true;
-    }
+    const aiChecks = await runEngines({
+      query: aiQuery,
+      businessName: biz.name,
+      competitors,
+      lovableKey: LOVABLE_API_KEY,
+      openaiKey: OPENAI_API_KEY,
+      perplexityKey: PERPLEXITY_API_KEY,
+    });
+
+    const measured = aiChecks.filter((c) => c.status === "ok");
+    const measuredCount = measured.length;
+    const mentionedCount = measured.filter((c) => c.mentioned).length;
+    const aiMentioned = mentionedCount > 0;
+    const aiUnavailable = measuredCount === 0;
+
+    // Backwards-compat aggregate
+    const aggregatedAnswer = measured.map((c) => c.answerPreview).filter(Boolean).join("\n---\n");
+    const mentionedCompetitors = Array.from(
+      new Set(measured.flatMap((c) => c.mentionedCompetitors || [])),
+    );
 
     // ADIM D — Deterministik skor
     const compRatings = competitors.map((c) => c.rating).filter((r) => r > 0);
@@ -346,7 +325,7 @@ serve(async (req) => {
     const ratingMedian = median(compRatings);
     const reviewMedian = median(compReviews);
 
-    const aiPoints = aiMentioned ? 40 : 0;
+    const aiPoints = measuredCount > 0 ? Math.round(40 * (mentionedCount / measuredCount)) : 0;
 
     let ratingPoints = 0;
     if (ratingMedian > 0 && bizRating > 0) {
@@ -476,12 +455,14 @@ serve(async (req) => {
         },
         aiCheck: {
           query: aiQuery,
-          model: "google/gemini-2.5-flash",
+          model: "multi-engine",
           status: aiUnavailable ? "unavailable" : "ok",
           mentioned: aiMentioned,
           mentionedCompetitors,
-          answerPreview: aiAnswer.slice(0, 600),
+          answerPreview: aggregatedAnswer.slice(0, 600),
         },
+        aiChecks,
+        aggregate: { measuredCount, mentionedCount },
         competitors,
         stats: { ratingMedian, reviewMedian },
         score: { total, breakdown: scoreBreakdown },
