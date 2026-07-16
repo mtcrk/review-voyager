@@ -68,10 +68,29 @@ type Snapshot = {
   review_median: number | null;
   mentioned_competitors: any;
   summary: string | null;
+  ai_checks?: any;
 };
 
 type Rec = { key: string; priority: "high" | "medium" | "low"; title: string; detail: string };
 type Competitor = { name: string; rating: number; reviewCount: number; address?: string | null };
+
+type EngineName = "gemini" | "chatgpt" | "perplexity";
+type EngineStatus = "ok" | "unavailable" | "not_configured";
+type EngineCheck = {
+  engine: EngineName;
+  status: EngineStatus;
+  mentioned: boolean;
+  mentionedCompetitors?: string[];
+  answerPreview?: string;
+  citations?: string[];
+  grounded?: boolean;
+};
+
+const ENGINE_LABELS: Record<EngineName, string> = {
+  gemini: "Gemini",
+  chatgpt: "ChatGPT",
+  perplexity: "Perplexity",
+};
 
 const normalizeName = (s: string) =>
   (s || "")
