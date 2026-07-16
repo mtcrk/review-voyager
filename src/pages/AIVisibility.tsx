@@ -107,6 +107,7 @@ export default function AIVisibility() {
   const [running, setRunning] = useState(false);
   const [runError, setRunError] = useState<string | null>(null);
   const [runStage, setRunStage] = useState(0);
+  const [openEngine, setOpenEngine] = useState<EngineName | null>(null);
   const autoRanRef = useRef<string | null>(null);
 
   const businessId = activeBusiness?.id ?? null;
@@ -356,7 +357,6 @@ export default function AIVisibility() {
     : [];
   const measuredEngines = aiChecks.filter((c) => c.status === "ok");
   const mentionedEngines = measuredEngines.filter((c) => c.mentioned);
-  const [openEngine, setOpenEngineRaw] = [] as any; // placeholder replaced below
 
   return (
     <div className="p-4 sm:p-6 space-y-6 max-w-6xl mx-auto">
