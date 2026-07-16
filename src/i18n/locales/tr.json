@@ -799,6 +799,15 @@
     "aiUnavailable": "AI cevabı bu turda alınamadı",
     "mentionedCompetitors": "Cevapta geçen rakipler",
     "answerPreview": "Cevaptan alıntı",
+    "aiEngines": {
+      "summary": "Ölçülen {{measured}} motorun {{mentioned}}'inde önerildiniz",
+      "notConfigured": "Yapılandırılmadı",
+      "unavailable": "Cevap alınamadı",
+      "webless": "Web erişimsiz ölçüldü",
+      "sources": "Cevabın kaynakları",
+      "mentionedShort": "Önerildi",
+      "notMentionedShort": "Önerilmedi"
+    },
     "trendTitle": "Skor trendi",
     "trendEmpty": "Trend için en az 2 ölçüm gerekiyor.",
     "recommendationsTitle": "Kişiselleştirilmiş öneriler",
