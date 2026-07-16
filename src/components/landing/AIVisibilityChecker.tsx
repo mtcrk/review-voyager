@@ -31,10 +31,22 @@ const LOCATIONS = [
 
 interface Competitor { name: string; rating: number; reviewCount: number; address: string | null; }
 type ScoreBreakdown = Record<string, { points: number; max: number; label: string }>;
+type EngineName = "gemini" | "chatgpt" | "perplexity";
+type EngineCheck = {
+  engine: EngineName;
+  status: "ok" | "unavailable" | "not_configured";
+  mentioned: boolean;
+  mentionedCompetitors: string[];
+  answerPreview: string;
+  citations?: string[];
+  grounded?: boolean;
+};
 interface AnalysisResult {
   status: "ok" | "not_found";
   business?: { name: string; rating: number; reviewCount: number; address: string | null; sector: string };
   aiCheck?: { query: string; model: string; status?: "ok" | "unavailable"; mentioned: boolean; mentionedCompetitors: string[]; answerPreview: string };
+  aiChecks?: EngineCheck[];
+  aggregate?: { measuredCount: number; mentionedCount: number };
   competitors?: Competitor[];
   stats?: { ratingMedian: number; reviewMedian: number };
   score?: { total: number; breakdown: ScoreBreakdown };
@@ -42,6 +54,12 @@ interface AnalysisResult {
   improvements?: string[];
   message?: string;
 }
+
+const ENGINE_LABELS: Record<EngineName, string> = {
+  gemini: "Gemini",
+  chatgpt: "ChatGPT",
+  perplexity: "Perplexity",
+};
 
 const STAGES = [
   { key: "google", label: "Google'da işletmeniz aranıyor…", icon: Search },
@@ -415,6 +433,51 @@ export function AIVisibilityChecker() {
                   </>
                 )}
               </div>
+              {(() => {
+                const visible = (result.aiChecks || []).filter((c) => c.status !== "not_configured");
+                if (visible.length === 0) return null;
+                const measured = visible.filter((c) => c.status === "ok");
+                const mentioned = measured.filter((c) => c.mentioned);
+                return (
+                  <div className="mt-4 space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground">
+                      Ölçülen {measured.length} motorun {mentioned.length}'inde önerildiniz
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {visible.map((c) => {
+                        const label = ENGINE_LABELS[c.engine];
+                        const cls =
+                          c.status === "unavailable"
+                            ? "border-amber-300 bg-amber-50 text-amber-800"
+                            : c.mentioned
+                              ? "border-green-300 bg-green-100 text-green-800"
+                              : "border-red-300 bg-red-50 text-red-700";
+                        return (
+                          <span key={c.engine} className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium ${cls}`}>
+                            {c.status === "unavailable" ? (
+                              <AlertCircle className="w-3 h-3" />
+                            ) : c.mentioned ? (
+                              <CheckCircle2 className="w-3 h-3" />
+                            ) : (
+                              <XCircle className="w-3 h-3" />
+                            )}
+                            {label}
+                            {c.engine === "chatgpt" && c.grounded === false && (
+                              <span className="ml-1 text-[10px] opacity-70">(web'siz)</span>
+                            )}
+                          </span>
+                        );
+                      })}
+                    </div>
+                    {visible.some((c) => c.engine === "perplexity" && c.citations && c.citations.length > 0) && (
+                      <p className="text-xs text-muted-foreground">
+                        <span className="font-medium text-foreground">Perplexity kaynakları:</span>{" "}
+                        {visible.find((c) => c.engine === "perplexity")?.citations?.join(", ")}
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
               <p className="text-xs text-muted-foreground mt-4 italic">
                 AI cevapları zamanla değişebilir; bu anlık bir ölçümdür.
               </p>

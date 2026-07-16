@@ -105,6 +105,7 @@ Deno.serve(async (req) => {
       review_median: result?.stats?.reviewMedian ?? null,
       mentioned_competitors: result?.aiCheck?.mentionedCompetitors ?? [],
       summary: result?.summary ?? null,
+      ai_checks: Array.isArray(result?.aiChecks) ? result.aiChecks : [],
     };
 
     const { data: inserted, error: insErr } = await admin

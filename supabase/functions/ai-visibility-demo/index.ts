@@ -186,6 +186,278 @@ function nameMatches(inputName: string, foundName: string): boolean {
   return hits / inpTokens.length >= 0.6;
 }
 
+// ============ Multi-engine AI runner ============
+
+type EngineName = "gemini" | "chatgpt" | "perplexity";
+type EngineStatus = "ok" | "unavailable" | "not_configured";
+
+interface EngineResult {
+  engine: EngineName;
+  status: EngineStatus;
+  mentioned: boolean;
+  mentionedCompetitors: string[];
+  answerPreview: string;
+  citations?: string[];
+  grounded?: boolean;
+  error?: string;
+}
+
+const AI_SYSTEM_PROMPT =
+  "Sen yerel öneri asistanısın. Kullanıcıya bilgin dahilindeki popüler işletmeleri numaralı liste halinde ver. Uydurma yapma, emin değilsen sadece emin olduklarını listele.";
+
+function extractMentions(
+  answer: string,
+  businessName: string,
+  competitors: Array<{ name: string }>,
+): { mentioned: boolean; mentionedCompetitors: string[] } {
+  const mentioned = fuzzyIncludes(answer, businessName);
+  const mentionedCompetitors: string[] = [];
+  for (const c of competitors) {
+    if (fuzzyIncludes(answer, c.name)) mentionedCompetitors.push(c.name);
+  }
+  return { mentioned, mentionedCompetitors };
+}
+
+function domainFromUrl(u: string): string {
+  try {
+    const url = new URL(u);
+    return url.hostname.replace(/^www\./, "");
+  } catch {
+    return "";
+  }
+}
+
+async function runGemini(
+  query: string,
+  key: string,
+  businessName: string,
+  competitors: Array<{ name: string }>,
+): Promise<EngineResult> {
+  try {
+    const res = await fetchWithTimeout("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: AI_SYSTEM_PROMPT },
+          { role: "user", content: query },
+        ],
+        temperature: 0.3,
+      }),
+    }, 15000);
+    if (!res.ok) {
+      const t = await res.text();
+      console.error("gemini failed", res.status, t.slice(0, 200));
+      return { engine: "gemini", status: "unavailable", mentioned: false, mentionedCompetitors: [], answerPreview: "" };
+    }
+    const j = await res.json();
+    const answer: string = j.choices?.[0]?.message?.content || "";
+    const { mentioned, mentionedCompetitors } = extractMentions(answer, businessName, competitors);
+    return {
+      engine: "gemini",
+      status: "ok",
+      mentioned,
+      mentionedCompetitors,
+      answerPreview: answer.slice(0, 600),
+    };
+  } catch (e) {
+    console.error("gemini error", e);
+    return { engine: "gemini", status: "unavailable", mentioned: false, mentionedCompetitors: [], answerPreview: "" };
+  }
+}
+
+async function runChatGPT(
+  query: string,
+  key: string,
+  businessName: string,
+  competitors: Array<{ name: string }>,
+): Promise<EngineResult> {
+  // First try Responses API with web_search tool
+  try {
+    const res = await fetchWithTimeout("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        input: query,
+        instructions: AI_SYSTEM_PROMPT,
+        tools: [{ type: "web_search" }],
+      }),
+    }, 15000);
+    if (res.ok) {
+      const j = await res.json();
+      let answer: string = j.output_text || "";
+      if (!answer && Array.isArray(j.output)) {
+        // Fallback: walk output array
+        for (const item of j.output) {
+          const parts = item?.content;
+          if (Array.isArray(parts)) {
+            for (const p of parts) {
+              if (typeof p?.text === "string") answer += p.text;
+            }
+          }
+        }
+      }
+      const { mentioned, mentionedCompetitors } = extractMentions(answer, businessName, competitors);
+      return {
+        engine: "chatgpt",
+        status: "ok",
+        mentioned,
+        mentionedCompetitors,
+        answerPreview: answer.slice(0, 600),
+        grounded: true,
+      };
+    }
+    const errText = await res.text();
+    console.error("chatgpt responses failed", res.status, errText.slice(0, 200));
+  } catch (e) {
+    console.error("chatgpt responses error", e);
+  }
+
+  // Fallback: chat.completions (no web search)
+  try {
+    const res = await fetchWithTimeout("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: AI_SYSTEM_PROMPT },
+          { role: "user", content: query },
+        ],
+        temperature: 0.3,
+      }),
+    }, 15000);
+    if (!res.ok) {
+      const t = await res.text();
+      console.error("chatgpt chat.completions failed", res.status, t.slice(0, 200));
+      return { engine: "chatgpt", status: "unavailable", mentioned: false, mentionedCompetitors: [], answerPreview: "" };
+    }
+    const j = await res.json();
+    const answer: string = j.choices?.[0]?.message?.content || "";
+    const { mentioned, mentionedCompetitors } = extractMentions(answer, businessName, competitors);
+    return {
+      engine: "chatgpt",
+      status: "ok",
+      mentioned,
+      mentionedCompetitors,
+      answerPreview: answer.slice(0, 600),
+      grounded: false,
+    };
+  } catch (e) {
+    console.error("chatgpt chat error", e);
+    return { engine: "chatgpt", status: "unavailable", mentioned: false, mentionedCompetitors: [], answerPreview: "" };
+  }
+}
+
+async function runPerplexity(
+  query: string,
+  key: string,
+  businessName: string,
+  competitors: Array<{ name: string }>,
+): Promise<EngineResult> {
+  try {
+    const res = await fetchWithTimeout("https://api.perplexity.ai/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "sonar",
+        messages: [
+          { role: "system", content: AI_SYSTEM_PROMPT },
+          { role: "user", content: query },
+        ],
+        temperature: 0.3,
+      }),
+    }, 15000);
+    if (!res.ok) {
+      const t = await res.text();
+      console.error("perplexity failed", res.status, t.slice(0, 200));
+      return { engine: "perplexity", status: "unavailable", mentioned: false, mentionedCompetitors: [], answerPreview: "" };
+    }
+    const j = await res.json();
+    const answer: string = j.choices?.[0]?.message?.content || "";
+    const rawCitations: string[] = Array.isArray(j.citations) ? j.citations : [];
+    const citations = Array.from(
+      new Set(rawCitations.map(domainFromUrl).filter(Boolean)),
+    ).slice(0, 5);
+    const { mentioned, mentionedCompetitors } = extractMentions(answer, businessName, competitors);
+    return {
+      engine: "perplexity",
+      status: "ok",
+      mentioned,
+      mentionedCompetitors,
+      answerPreview: answer.slice(0, 600),
+      citations,
+      grounded: true,
+    };
+  } catch (e) {
+    console.error("perplexity error", e);
+    return { engine: "perplexity", status: "unavailable", mentioned: false, mentionedCompetitors: [], answerPreview: "" };
+  }
+}
+
+async function runEngines(opts: {
+  query: string;
+  businessName: string;
+  competitors: Array<{ name: string }>;
+  lovableKey?: string;
+  openaiKey?: string;
+  perplexityKey?: string;
+}): Promise<EngineResult[]> {
+  const tasks: Array<Promise<EngineResult>> = [];
+
+  tasks.push(
+    opts.lovableKey
+      ? runGemini(opts.query, opts.lovableKey, opts.businessName, opts.competitors)
+      : Promise.resolve<EngineResult>({
+          engine: "gemini",
+          status: "not_configured",
+          mentioned: false,
+          mentionedCompetitors: [],
+          answerPreview: "",
+        }),
+  );
+
+  tasks.push(
+    opts.openaiKey
+      ? runChatGPT(opts.query, opts.openaiKey, opts.businessName, opts.competitors)
+      : Promise.resolve<EngineResult>({
+          engine: "chatgpt",
+          status: "not_configured",
+          mentioned: false,
+          mentionedCompetitors: [],
+          answerPreview: "",
+        }),
+  );
+
+  tasks.push(
+    opts.perplexityKey
+      ? runPerplexity(opts.query, opts.perplexityKey, opts.businessName, opts.competitors)
+      : Promise.resolve<EngineResult>({
+          engine: "perplexity",
+          status: "not_configured",
+          mentioned: false,
+          mentionedCompetitors: [],
+          answerPreview: "",
+        }),
+  );
+
+  const settled = await Promise.allSettled(tasks);
+  const fallbacks: EngineName[] = ["gemini", "chatgpt", "perplexity"];
+  return settled.map((r, i) =>
+    r.status === "fulfilled"
+      ? r.value
+      : {
+          engine: fallbacks[i],
+          status: "unavailable" as const,
+          mentioned: false,
+          mentionedCompetitors: [],
+          answerPreview: "",
+        },
+  );
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -290,55 +562,34 @@ serve(async (req) => {
         address: c.formatted_address || null,
       }));
 
-    // ADIM C — Canlı AI sorgusu
+    // ADIM C — Canlı AI sorgusu (multi-engine)
     const aiQuery = derivedLocality
       ? `${derivedLocality} bölgesinde en iyi ${sector.searchTerm} önerir misin? 5-8 isim listele.`
       : `Türkiye'de en iyi ${sector.searchTerm} önerir misin? 5-8 isim listele.`;
 
-    let aiAnswer = "";
-    let aiMentioned = false;
-    let aiUnavailable = false;
-    const mentionedCompetitors: string[] = [];
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    const PERPLEXITY_API_KEY = Deno.env.get("PERPLEXITY_API_KEY");
 
-    if (LOVABLE_API_KEY) {
-      try {
-        const aiRes = await fetchWithTimeout("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${LOVABLE_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "google/gemini-2.5-flash",
-            messages: [
-              {
-                role: "system",
-                content:
-                  "Sen yerel öneri asistanısın. Kullanıcıya bilgin dahilindeki popüler işletmeleri numaralı liste halinde ver. Uydurma yapma, emin değilsen sadece emin olduklarını listele.",
-              },
-              { role: "user", content: aiQuery },
-            ],
-            temperature: 0.3,
-          }),
-        }, 15000);
-        if (aiRes.ok) {
-          const j = await aiRes.json();
-          aiAnswer = j.choices?.[0]?.message?.content || "";
-          aiMentioned = fuzzyIncludes(aiAnswer, biz.name);
-          for (const c of competitors) {
-            if (fuzzyIncludes(aiAnswer, c.name)) mentionedCompetitors.push(c.name);
-          }
-        } else {
-          console.error("AI query failed:", aiRes.status, await aiRes.text());
-          aiUnavailable = true;
-        }
-      } catch (e) {
-        console.error("AI query error:", e);
-        aiUnavailable = true;
-      }
-    } else {
-      aiUnavailable = true;
-    }
+    const aiChecks = await runEngines({
+      query: aiQuery,
+      businessName: biz.name,
+      competitors,
+      lovableKey: LOVABLE_API_KEY,
+      openaiKey: OPENAI_API_KEY,
+      perplexityKey: PERPLEXITY_API_KEY,
+    });
+
+    const measured = aiChecks.filter((c) => c.status === "ok");
+    const measuredCount = measured.length;
+    const mentionedCount = measured.filter((c) => c.mentioned).length;
+    const aiMentioned = mentionedCount > 0;
+    const aiUnavailable = measuredCount === 0;
+
+    // Backwards-compat aggregate
+    const aggregatedAnswer = measured.map((c) => c.answerPreview).filter(Boolean).join("\n---\n");
+    const mentionedCompetitors = Array.from(
+      new Set(measured.flatMap((c) => c.mentionedCompetitors || [])),
+    );
 
     // ADIM D — Deterministik skor
     const compRatings = competitors.map((c) => c.rating).filter((r) => r > 0);
@@ -346,7 +597,7 @@ serve(async (req) => {
     const ratingMedian = median(compRatings);
     const reviewMedian = median(compReviews);
 
-    const aiPoints = aiMentioned ? 40 : 0;
+    const aiPoints = measuredCount > 0 ? Math.round(40 * (mentionedCount / measuredCount)) : 0;
 
     let ratingPoints = 0;
     if (ratingMedian > 0 && bizRating > 0) {
@@ -476,12 +727,14 @@ serve(async (req) => {
         },
         aiCheck: {
           query: aiQuery,
-          model: "google/gemini-2.5-flash",
+          model: "multi-engine",
           status: aiUnavailable ? "unavailable" : "ok",
           mentioned: aiMentioned,
           mentionedCompetitors,
-          answerPreview: aiAnswer.slice(0, 600),
+          answerPreview: aggregatedAnswer.slice(0, 600),
         },
+        aiChecks,
+        aggregate: { measuredCount, mentionedCount },
         competitors,
         stats: { ratingMedian, reviewMedian },
         score: { total, breakdown: scoreBreakdown },
