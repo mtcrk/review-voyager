@@ -31,10 +31,22 @@ const LOCATIONS = [
 
 interface Competitor { name: string; rating: number; reviewCount: number; address: string | null; }
 type ScoreBreakdown = Record<string, { points: number; max: number; label: string }>;
+type EngineName = "gemini" | "chatgpt" | "perplexity";
+type EngineCheck = {
+  engine: EngineName;
+  status: "ok" | "unavailable" | "not_configured";
+  mentioned: boolean;
+  mentionedCompetitors: string[];
+  answerPreview: string;
+  citations?: string[];
+  grounded?: boolean;
+};
 interface AnalysisResult {
   status: "ok" | "not_found";
   business?: { name: string; rating: number; reviewCount: number; address: string | null; sector: string };
   aiCheck?: { query: string; model: string; status?: "ok" | "unavailable"; mentioned: boolean; mentionedCompetitors: string[]; answerPreview: string };
+  aiChecks?: EngineCheck[];
+  aggregate?: { measuredCount: number; mentionedCount: number };
   competitors?: Competitor[];
   stats?: { ratingMedian: number; reviewMedian: number };
   score?: { total: number; breakdown: ScoreBreakdown };
@@ -42,6 +54,12 @@ interface AnalysisResult {
   improvements?: string[];
   message?: string;
 }
+
+const ENGINE_LABELS: Record<EngineName, string> = {
+  gemini: "Gemini",
+  chatgpt: "ChatGPT",
+  perplexity: "Perplexity",
+};
 
 const STAGES = [
   { key: "google", label: "Google'da işletmeniz aranıyor…", icon: Search },
