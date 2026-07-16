@@ -351,6 +351,13 @@ export default function AIVisibility() {
     t("aiVisibilityPage.stages.stage3"),
   ];
 
+  const aiChecks: EngineCheck[] = Array.isArray(latest?.ai_checks)
+    ? (latest!.ai_checks as EngineCheck[])
+    : [];
+  const measuredEngines = aiChecks.filter((c) => c.status === "ok");
+  const mentionedEngines = measuredEngines.filter((c) => c.mentioned);
+  const [openEngine, setOpenEngineRaw] = [] as any; // placeholder replaced below
+
   return (
     <div className="p-4 sm:p-6 space-y-6 max-w-6xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
