@@ -472,21 +472,116 @@ export default function AIVisibility() {
                   <p className="text-xs text-muted-foreground">{t("aiVisibilityPage.aiHeroQuery")}</p>
                   <p className="text-sm font-medium">{latest.query || "—"}</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  {latest.ai_status === "unavailable" ? (
-                    <Badge variant="outline" className="gap-1">
-                      <AlertTriangle className="h-3 w-3" /> {t("aiVisibilityPage.aiUnavailable")}
-                    </Badge>
-                  ) : latest.ai_mentioned ? (
-                    <Badge className="gap-1 bg-green-600 hover:bg-green-600">
-                      <CheckCircle2 className="h-3 w-3" /> {t("aiVisibilityPage.aiMentioned")}
-                    </Badge>
-                  ) : (
-                    <Badge variant="destructive" className="gap-1">
-                      <XCircle className="h-3 w-3" /> {t("aiVisibilityPage.aiNotMentioned")}
-                    </Badge>
-                  )}
-                </div>
+                {/* Engine summary + chips */}
+                {aiChecks.length > 0 ? (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">
+                      {measuredEngines.length > 0
+                        ? t("aiVisibilityPage.aiEngines.summary", {
+                            measured: measuredEngines.length,
+                            mentioned: mentionedEngines.length,
+                          })
+                        : t("aiVisibilityPage.aiUnavailable")}
+                    </p>
+                    <TooltipProvider>
+                      <div className="flex flex-wrap gap-2">
+                        {aiChecks.map((c) => {
+                          const label = ENGINE_LABELS[c.engine] ?? c.engine;
+                          const isOpen = openEngine === c.engine;
+                          const notConfigured = c.status === "not_configured";
+                          const unavailable = c.status === "unavailable";
+                          const chipCls = notConfigured
+                            ? "opacity-50 cursor-default"
+                            : unavailable
+                              ? "border-amber-400 text-amber-700"
+                              : c.mentioned
+                                ? "bg-green-600 hover:bg-green-600 text-white"
+                                : "border-red-300 text-red-700";
+                          const tooltip = notConfigured
+                            ? t("aiVisibilityPage.aiEngines.notConfigured")
+                            : unavailable
+                              ? t("aiVisibilityPage.aiEngines.unavailable")
+                              : c.engine === "chatgpt" && c.grounded === false
+                                ? t("aiVisibilityPage.aiEngines.webless")
+                                : c.mentioned
+                                  ? t("aiVisibilityPage.aiEngines.mentionedShort")
+                                  : t("aiVisibilityPage.aiEngines.notMentionedShort");
+                          const chip = (
+                            <button
+                              type="button"
+                              disabled={notConfigured || unavailable || !c.answerPreview}
+                              onClick={() => setOpenEngine(isOpen ? null : c.engine)}
+                              className="inline-flex"
+                            >
+                              <Badge
+                                variant={c.mentioned && c.status === "ok" ? "default" : "outline"}
+                                className={`gap-1 ${chipCls}`}
+                              >
+                                {notConfigured ? (
+                                  <XCircle className="h-3 w-3" />
+                                ) : unavailable ? (
+                                  <AlertTriangle className="h-3 w-3" />
+                                ) : c.mentioned ? (
+                                  <CheckCircle2 className="h-3 w-3" />
+                                ) : (
+                                  <XCircle className="h-3 w-3" />
+                                )}
+                                {label}
+                                {c.engine === "chatgpt" && c.grounded === false && (
+                                  <span className="text-[10px] ml-1">*</span>
+                                )}
+                              </Badge>
+                            </button>
+                          );
+                          return (
+                            <UITooltip key={c.engine}>
+                              <TooltipTrigger asChild>{chip}</TooltipTrigger>
+                              <TooltipContent>{tooltip}</TooltipContent>
+                            </UITooltip>
+                          );
+                        })}
+                      </div>
+                    </TooltipProvider>
+                    {openEngine && (() => {
+                      const c = aiChecks.find((x) => x.engine === openEngine);
+                      if (!c || !c.answerPreview) return null;
+                      return (
+                        <div className="space-y-2 rounded-lg border bg-muted/50 p-3">
+                          <p className="text-xs font-medium">
+                            {ENGINE_LABELS[c.engine]} · {t("aiVisibilityPage.answerPreview")}
+                          </p>
+                          <p className="text-xs whitespace-pre-wrap max-h-40 overflow-y-auto">
+                            {c.answerPreview}
+                          </p>
+                          {c.citations && c.citations.length > 0 && (
+                            <p className="text-xs text-muted-foreground">
+                              <span className="font-medium text-foreground">
+                                {t("aiVisibilityPage.aiEngines.sources")}:
+                              </span>{" "}
+                              {c.citations.join(", ")}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    {latest.ai_status === "unavailable" ? (
+                      <Badge variant="outline" className="gap-1">
+                        <AlertTriangle className="h-3 w-3" /> {t("aiVisibilityPage.aiUnavailable")}
+                      </Badge>
+                    ) : latest.ai_mentioned ? (
+                      <Badge className="gap-1 bg-green-600 hover:bg-green-600">
+                        <CheckCircle2 className="h-3 w-3" /> {t("aiVisibilityPage.aiMentioned")}
+                      </Badge>
+                    ) : (
+                      <Badge variant="destructive" className="gap-1">
+                        <XCircle className="h-3 w-3" /> {t("aiVisibilityPage.aiNotMentioned")}
+                      </Badge>
+                    )}
+                  </div>
+                )}
                 {mentionedComp.length > 0 && (
                   <div>
                     <p className="text-xs text-muted-foreground mb-1">{t("aiVisibilityPage.mentionedCompetitors")}</p>
