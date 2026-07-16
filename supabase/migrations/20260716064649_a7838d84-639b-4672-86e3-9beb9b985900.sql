@@ -1,0 +1,1 @@
+ALTER TABLE public.ai_visibility_snapshots ADD COLUMN IF NOT EXISTS ai_checks jsonb NOT NULL DEFAULT '[]'::jsonb;

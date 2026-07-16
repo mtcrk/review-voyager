@@ -78,6 +78,7 @@ export type Database = {
       }
       ai_visibility_snapshots: {
         Row: {
+          ai_checks: Json
           ai_mentioned: boolean
           ai_status: string | null
           answer_preview: string | null
@@ -100,6 +101,7 @@ export type Database = {
           summary: string | null
         }
         Insert: {
+          ai_checks?: Json
           ai_mentioned?: boolean
           ai_status?: string | null
           answer_preview?: string | null
@@ -122,6 +124,7 @@ export type Database = {
           summary?: string | null
         }
         Update: {
+          ai_checks?: Json
           ai_mentioned?: boolean
           ai_status?: string | null
           answer_preview?: string | null
