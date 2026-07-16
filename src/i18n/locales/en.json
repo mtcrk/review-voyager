@@ -919,6 +919,15 @@
     "aiUnavailable": "AI answer unavailable this round",
     "mentionedCompetitors": "Competitors mentioned",
     "answerPreview": "Answer excerpt",
+    "aiEngines": {
+      "summary": "Recommended by {{mentioned}} of {{measured}} measured engines",
+      "notConfigured": "Not configured",
+      "unavailable": "No response",
+      "webless": "Measured without web access",
+      "sources": "Answer sources",
+      "mentionedShort": "Recommended",
+      "notMentionedShort": "Not recommended"
+    },
     "trendTitle": "Score trend",
     "trendEmpty": "Trend needs at least 2 snapshots.",
     "recommendationsTitle": "Personalized recommendations",
