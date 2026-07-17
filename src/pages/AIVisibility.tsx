@@ -841,6 +841,64 @@ export default function AIVisibility() {
         </CardContent>
       </Card>
 
+      {/* Gap analysis via Perplexity — on-demand */}
+      {latest && (
+        <Card className="border-primary/20">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Search className="h-4 w-4 text-primary" />
+              {t("aiVisibilityPage.gap.title")}
+            </CardTitle>
+            <p className="text-xs text-muted-foreground">{t("aiVisibilityPage.gap.subtitle")}</p>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {!gapResult && !gapLoading && !gapError && (
+              <Button onClick={runGap} size="sm" className="gap-2">
+                <Sparkles className="h-4 w-4" />
+                {t("aiVisibilityPage.gap.cta")}
+              </Button>
+            )}
+            {gapLoading && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {t("aiVisibilityPage.gap.loading")}
+              </div>
+            )}
+            {gapError && (
+              <div className="space-y-2">
+                <p className="text-sm text-destructive">{t("aiVisibilityPage.gap.error", { msg: gapError })}</p>
+                <Button onClick={runGap} size="sm" variant="outline">
+                  {t("aiVisibilityPage.tryAgain")}
+                </Button>
+              </div>
+            )}
+            {gapResult && (
+              <div className="space-y-3">
+                <div className="text-sm whitespace-pre-wrap leading-relaxed">{gapResult.text}</div>
+                {gapResult.citations.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {gapResult.citations.map((d) => (
+                      <Badge key={d} variant="secondary" className="text-xs font-normal">
+                        {d}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+                <p className="text-[11px] text-muted-foreground">
+                  {t("aiVisibilityPage.gap.footnote", {
+                    time: new Date(gapResult.generated_at).toLocaleString(i18n.language),
+                  })}
+                </p>
+                <Button onClick={runGap} size="sm" variant="ghost" className="gap-2">
+                  <RefreshCw className="h-3 w-3" />
+                  {t("aiVisibilityPage.gap.rerun")}
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Recommendations */}
       {latest && (
         <Card>
