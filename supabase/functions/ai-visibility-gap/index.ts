@@ -60,8 +60,8 @@ Deno.serve(async (req) => {
     const competitorsStr = compList.length > 0 ? compList.join(", ") : "bölgedeki öne çıkan rakipler";
 
     const system =
-      "Sen bir çevrimiçi görünürlük analistisin. SADECE web'de bulduğun, kaynak gösterebildiğin bilgileri kullan. Bulamadığın şey hakkında spekülasyon yapma; bulamadıysan 'web'de bu konuda veri bulamadım' de.";
-    const user = `${name} (${locality}) adlı ${sector} işletmesinin çevrimiçi varlığını değerlendir. Şu rakiplerle kıyasla: ${competitorsStr}. Şunları web taramasına dayanarak listele: 1) Hangi platformlarda/listelerde var, hangilerinde yok veya zayıf (TripAdvisor, otel/tatil siteleri, bölgesel blog ve rehberler)? 2) Rakiplerin olup onun olmadığı görünürlük kaynakları neler? 3) Buna göre en etkili 3 somut iyileştirme adımı. Kısa ve maddeli yaz.`;
+      "Sen bir çevrimiçi görünürlük analistisin. SADECE web'de bulduğun, kaynak gösterebildiğin bilgileri kullan. Bulamadığın şey hakkında spekülasyon yapma; bulamadıysan not alanında 'web'de bu konuda veri bulamadım' yaz. Cevabını SADECE geçerli JSON olarak ver, başka hiçbir metin, markdown veya kod bloğu işareti ekleme. Şema: {\"present\":[{\"platform\":\"...\",\"note\":\"...\"}],\"weak_or_missing\":[{\"platform\":\"...\",\"note\":\"...\"}],\"competitor_sources\":[{\"source\":\"...\",\"note\":\"...\"}],\"steps\":[{\"title\":\"...\",\"detail\":\"...\"}]}. present=işletmenin web'de var olduğu platformlar, weak_or_missing=yok veya zayıf olduğu yerler, competitor_sources=rakiplerde olup onda olmayan görünürlük kaynakları, steps=en etkili 3 somut adım. Her note/detail 1-2 kısa cümle.";
+    const user = `${name} (${locality}) adlı ${sector} işletmesinin çevrimiçi varlığını değerlendir. Şu rakiplerle kıyasla: ${competitorsStr}. TripAdvisor, otel/tatil siteleri, bölgesel blog ve rehberler dahil web taramasına dayanarak şemayı doldur. SADECE JSON döndür.`;
 
     const ctl = new AbortController();
     const timer = setTimeout(() => ctl.abort(), 20000);
@@ -113,7 +113,12 @@ Deno.serve(async (req) => {
     );
     if (!text) return json({ error: "Perplexity boş cevap döndürdü" }, 502);
 
-    return json({ text, citations: domains, generated_at: new Date().toISOString() });
+    const generated_at = new Date().toISOString();
+    const structured = tryParseStructured(text);
+    if (structured) {
+      return json({ structured, citations: domains, generated_at });
+    }
+    return json({ text: stripCitations(text), citations: domains, generated_at });
   } catch (e) {
     console.error("ai-visibility-gap error", e);
     return json({ error: (e as Error).message || "Beklenmeyen hata" }, 500);
@@ -125,4 +130,51 @@ function json(payload: unknown, status = 200) {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
+}
+
+function stripCitations(s: string): string {
+  return (s || "").replace(/\[\d+\]/g, "");
+}
+
+type GapItem = { platform?: string; source?: string; note?: string; title?: string; detail?: string };
+type GapStructured = {
+  present: { platform: string; note: string }[];
+  weak_or_missing: { platform: string; note: string }[];
+  competitor_sources: { source: string; note: string }[];
+  steps: { title: string; detail: string }[];
+};
+
+function tryParseStructured(raw: string): GapStructured | null {
+  let s = raw.trim();
+  // Strip ```json ... ``` fences if present
+  s = s.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+  // Extract first {...} block if extra text surrounds it
+  if (!s.startsWith("{")) {
+    const m = s.match(/\{[\s\S]*\}/);
+    if (m) s = m[0];
+  }
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(s);
+  } catch {
+    return null;
+  }
+  const clean = (v: unknown) => (typeof v === "string" ? stripCitations(v).trim() : "");
+  const arr = (v: unknown): GapItem[] => (Array.isArray(v) ? (v as GapItem[]) : []);
+  const out: GapStructured = {
+    present: arr(parsed.present)
+      .map((i) => ({ platform: clean(i.platform), note: clean(i.note) }))
+      .filter((i) => i.platform),
+    weak_or_missing: arr(parsed.weak_or_missing)
+      .map((i) => ({ platform: clean(i.platform), note: clean(i.note) }))
+      .filter((i) => i.platform),
+    competitor_sources: arr(parsed.competitor_sources)
+      .map((i) => ({ source: clean(i.source), note: clean(i.note) }))
+      .filter((i) => i.source),
+    steps: arr(parsed.steps)
+      .map((i) => ({ title: clean(i.title), detail: clean(i.detail) }))
+      .filter((i) => i.title),
+  };
+  const total = out.present.length + out.weak_or_missing.length + out.competitor_sources.length + out.steps.length;
+  return total > 0 ? out : null;
 }
