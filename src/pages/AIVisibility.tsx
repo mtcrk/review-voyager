@@ -266,6 +266,8 @@ export default function AIVisibility() {
     setCachedInfo(null);
     setRunError(null);
     autoRanRef.current = null;
+    setGapResult(null);
+    setGapError(null);
   }, [businessId]);
 
   // Auto-run first measurement when no snapshot exists
