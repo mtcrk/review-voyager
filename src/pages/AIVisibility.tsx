@@ -35,6 +35,21 @@ import {
   Loader2,
 } from "lucide-react";
 import { Search } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+
+function cleanGapText(raw: string): string {
+  // Remove numeric citation refs like [1], [12], [1][3] — keep bracketed prose (e.g. "[kesin veri yok]").
+  return raw.replace(/\[\d+\]/g, "").replace(/[ \t]+\n/g, "\n").trim();
+}
+
+function GapMarkdown({ text }: { text: string }) {
+  const cleaned = cleanGapText(text);
+  return (
+    <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:font-semibold prose-headings:text-sm prose-headings:mt-3 prose-p:my-2 prose-li:my-0.5 prose-ul:my-2 prose-ol:my-2 leading-relaxed">
+      <ReactMarkdown>{cleaned}</ReactMarkdown>
+    </div>
+  );
+}
 
 const CHECKLIST_KEYS = [
   "gbp_description",
@@ -874,7 +889,9 @@ export default function AIVisibility() {
             )}
             {gapResult && (
               <div className="space-y-3">
-                <div className="text-sm whitespace-pre-wrap leading-relaxed">{gapResult.text}</div>
+                <div className="text-sm leading-relaxed max-h-96 overflow-y-auto pr-1">
+                  <GapMarkdown text={gapResult.text} />
+                </div>
                 {gapResult.citations.length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
                     {gapResult.citations.map((d) => (
