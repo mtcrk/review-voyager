@@ -874,7 +874,9 @@ export default function AIVisibility() {
             )}
             {gapResult && (
               <div className="space-y-3">
-                <div className="text-sm whitespace-pre-wrap leading-relaxed">{gapResult.text}</div>
+                <div className="text-sm leading-relaxed max-h-96 overflow-y-auto pr-1">
+                  <GapMarkdown text={gapResult.text} />
+                </div>
                 {gapResult.citations.length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
                     {gapResult.citations.map((d) => (
