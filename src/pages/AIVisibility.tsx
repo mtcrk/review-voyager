@@ -37,12 +37,13 @@ import {
 import { Search } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
-function cleanGapText(raw: string): string {
+function cleanGapText(raw: string | null | undefined): string {
   // Remove numeric citation refs like [1], [12], [1][3] — keep bracketed prose (e.g. "[kesin veri yok]").
-  return raw.replace(/\[\d+\]/g, "").replace(/[ \t]+\n/g, "\n").trim();
+  const s = raw || "";
+  return s.replace(/\[\d+\]/g, "").replace(/[ \t]+\n/g, "\n").trim();
 }
 
-function GapMarkdown({ text }: { text: string }) {
+function GapMarkdown({ text }: { text: string | null | undefined }) {
   const cleaned = cleanGapText(text);
   return (
     <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:font-semibold prose-headings:text-sm prose-headings:mt-3 prose-p:my-2 prose-li:my-0.5 prose-ul:my-2 prose-ol:my-2 leading-relaxed">
