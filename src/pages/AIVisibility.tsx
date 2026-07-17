@@ -906,6 +906,54 @@ export default function AIVisibility() {
             <CardTitle className="text-base">{t("aiVisibilityPage.recommendationsTitle")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
+            {replyStats?.hasData && (() => {
+              const unanswered = replyStats.total - replyStats.replied;
+              if (unanswered > 0) {
+                return (
+                  <div className="flex gap-3 p-3 border rounded-lg border-l-4 border-l-primary bg-primary/5">
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-sm">{t("aiVisibilityPage.replyRec.titleWarning")}</p>
+                        <Badge variant="destructive" className="text-xs">
+                          {t("aiVisibilityPage.replyRec.badgeHigh")}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {t("aiVisibilityPage.replyRec.descWarning", { unanswered, rate: replyStats.rate })}
+                      </p>
+                      <Button asChild size="sm" variant="outline" className="mt-2 gap-1">
+                        <Link to="/inbox">
+                          {t("aiVisibilityPage.replyRec.ctaReply")}
+                          <ArrowRight className="h-3 w-3" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                );
+              }
+              if (replyStats.rate >= 90) {
+                return (
+                  <div className="flex gap-3 p-3 border rounded-lg border-l-4 border-l-green-600 bg-green-500/5">
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-sm">
+                          {t("aiVisibilityPage.replyRec.titleGood", { rate: replyStats.rate })}
+                        </p>
+                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      </div>
+                      <p className="text-xs text-muted-foreground">{t("aiVisibilityPage.replyRec.descGood")}</p>
+                      <Button asChild size="sm" variant="ghost" className="mt-2 gap-1">
+                        <Link to="/inbox">
+                          {t("aiVisibilityPage.replyRec.ctaReviews")}
+                          <ArrowRight className="h-3 w-3" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
             {recs.length === 0 ? (
               <p className="text-sm text-muted-foreground">{t("aiVisibilityPage.recommendationsEmpty")}</p>
             ) : (

@@ -932,6 +932,15 @@
     "trendEmpty": "Trend needs at least 2 snapshots.",
     "recommendationsTitle": "Personalized recommendations",
     "recommendationsEmpty": "No recommendations available.",
+    "replyRec": {
+      "titleWarning": "Unanswered reviews are weakening your AI signal",
+      "badgeHigh": "High",
+      "descWarning": "{{unanswered}} unanswered reviews in the last 30 days; reply rate is {{rate}}%. Business replies are indexed on platforms and show your profile is active.",
+      "titleGood": "{{rate}}% reply rate — strong signal",
+      "descGood": "Keep this pace; every reply is indexed content.",
+      "ctaReply": "Reply to reviews",
+      "ctaReviews": "Reviews"
+    },
     "priorityHigh": "High",
     "priorityMedium": "Medium",
     "priorityLow": "Low",

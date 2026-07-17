@@ -812,6 +812,15 @@
     "trendEmpty": "Trend için en az 2 ölçüm gerekiyor.",
     "recommendationsTitle": "Kişiselleştirilmiş öneriler",
     "recommendationsEmpty": "Öneri hazırlanamadı.",
+    "replyRec": {
+      "titleWarning": "Cevapsız yorumlarınız AI sinyalinizi zayıflatıyor",
+      "badgeHigh": "Yüksek",
+      "descWarning": "Son 30 günde {{unanswered}} cevapsız yorum, yanıt oranınız %{{rate}}. İşletme cevapları platformlarda indekslenir ve profilinizin aktif olduğunu gösterir.",
+      "titleGood": "Yanıt oranınız %{{rate}} — güçlü sinyal",
+      "descGood": "Bu tempoyu koruyun; her cevap indekslenen içeriktir.",
+      "ctaReply": "Yorumları yanıtla",
+      "ctaReviews": "Yorumlar"
+    },
     "priorityHigh": "Yüksek",
     "priorityMedium": "Orta",
     "priorityLow": "Düşük",
