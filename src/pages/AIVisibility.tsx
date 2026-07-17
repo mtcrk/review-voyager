@@ -246,6 +246,23 @@ export default function AIVisibility() {
     }
   }
 
+  async function runGap() {
+    if (!businessId) return;
+    setGapLoading(true);
+    setGapError(null);
+    try {
+      const res = await invokeAuthedFunction<{ text: string; citations: string[]; generated_at: string }>(
+        "ai-visibility-gap",
+        { body: { business_id: businessId } },
+      );
+      setGapResult(res ?? null);
+    } catch (e: any) {
+      setGapError(e?.message || "Analiz alınamadı");
+    } finally {
+      setGapLoading(false);
+    }
+  }
+
   async function toggleChecklist(key: string, done: boolean) {
     if (!businessId) return;
     const prev = checklistQuery.data ?? {};
