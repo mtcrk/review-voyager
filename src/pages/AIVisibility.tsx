@@ -127,7 +127,18 @@ export default function AIVisibility() {
   const autoRanRef = useRef<string | null>(null);
   const [gapLoading, setGapLoading] = useState(false);
   const [gapError, setGapError] = useState<string | null>(null);
-  const [gapResult, setGapResult] = useState<{ text: string; citations: string[]; generated_at: string } | null>(null);
+  type GapStructured = {
+    present: { platform: string; note: string }[];
+    weak_or_missing: { platform: string; note: string }[];
+    competitor_sources: { source: string; note: string }[];
+    steps: { title: string; detail: string }[];
+  };
+  const [gapResult, setGapResult] = useState<{
+    text?: string;
+    structured?: GapStructured;
+    citations: string[];
+    generated_at: string;
+  } | null>(null);
 
   const businessId = activeBusiness?.id ?? null;
 
