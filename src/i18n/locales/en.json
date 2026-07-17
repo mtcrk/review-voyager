@@ -1015,7 +1015,13 @@
       "loading": "Scanning the web…",
       "error": "Analysis failed: {{msg}}",
       "footnote": "Perplexity web scan, snapshot at {{time}}.",
-      "rerun": "Re-scan"
+      "rerun": "Re-scan",
+      "sections": {
+        "present": "Where you're present",
+        "weak": "Weak or missing",
+        "competitors": "Competitors have, you don't",
+        "steps": "Top 3 actions"
+      }
     }
   }
 }

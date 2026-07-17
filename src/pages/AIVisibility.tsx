@@ -127,7 +127,18 @@ export default function AIVisibility() {
   const autoRanRef = useRef<string | null>(null);
   const [gapLoading, setGapLoading] = useState(false);
   const [gapError, setGapError] = useState<string | null>(null);
-  const [gapResult, setGapResult] = useState<{ text: string; citations: string[]; generated_at: string } | null>(null);
+  type GapStructured = {
+    present: { platform: string; note: string }[];
+    weak_or_missing: { platform: string; note: string }[];
+    competitor_sources: { source: string; note: string }[];
+    steps: { title: string; detail: string }[];
+  };
+  const [gapResult, setGapResult] = useState<{
+    text?: string;
+    structured?: GapStructured;
+    citations: string[];
+    generated_at: string;
+  } | null>(null);
 
   const businessId = activeBusiness?.id ?? null;
 
@@ -889,8 +900,87 @@ export default function AIVisibility() {
             )}
             {gapResult && (
               <div className="space-y-3">
-                <div className="text-sm leading-relaxed max-h-96 overflow-y-auto pr-1">
-                  <GapMarkdown text={gapResult.text} />
+                <div className="text-sm leading-relaxed max-h-96 overflow-y-auto pr-1 space-y-4">
+                  {gapResult.structured ? (
+                    <>
+                      {gapResult.structured.present.length > 0 && (
+                        <section className="space-y-2">
+                          <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            {t("aiVisibilityPage.gap.sections.present")}
+                          </h4>
+                          <ul className="space-y-1.5">
+                            {gapResult.structured.present.map((i, idx) => (
+                              <li key={idx} className="flex gap-2">
+                                <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+                                <div className="min-w-0">
+                                  <div className="font-medium">{i.platform}</div>
+                                  {i.note && <div className="text-xs text-muted-foreground">{i.note}</div>}
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        </section>
+                      )}
+                      {gapResult.structured.weak_or_missing.length > 0 && (
+                        <section className="space-y-2">
+                          <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            {t("aiVisibilityPage.gap.sections.weak")}
+                          </h4>
+                          <ul className="space-y-1.5">
+                            {gapResult.structured.weak_or_missing.map((i, idx) => (
+                              <li key={idx} className="flex gap-2">
+                                <XCircle className="h-4 w-4 text-red-600 mt-0.5 shrink-0" />
+                                <div className="min-w-0">
+                                  <div className="font-medium">{i.platform}</div>
+                                  {i.note && <div className="text-xs text-muted-foreground">{i.note}</div>}
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        </section>
+                      )}
+                      {gapResult.structured.competitor_sources.length > 0 && (
+                        <section className="space-y-2">
+                          <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            {t("aiVisibilityPage.gap.sections.competitors")}
+                          </h4>
+                          <ul className="space-y-1.5">
+                            {gapResult.structured.competitor_sources.map((i, idx) => (
+                              <li key={idx} className="flex gap-2">
+                                <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
+                                <div className="min-w-0">
+                                  <div className="font-medium">{i.source}</div>
+                                  {i.note && <div className="text-xs text-muted-foreground">{i.note}</div>}
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        </section>
+                      )}
+                      {gapResult.structured.steps.length > 0 && (
+                        <section className="space-y-2">
+                          <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            {t("aiVisibilityPage.gap.sections.steps")}
+                          </h4>
+                          <ol className="space-y-2">
+                            {gapResult.structured.steps.map((i, idx) => (
+                              <li key={idx} className="flex gap-3 p-2.5 rounded-lg border bg-muted/30">
+                                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold">
+                                  {idx + 1}
+                                </span>
+                                <div className="min-w-0">
+                                  <div className="font-semibold">{i.title}</div>
+                                  {i.detail && <div className="text-xs text-muted-foreground mt-0.5">{i.detail}</div>}
+                                </div>
+                              </li>
+                            ))}
+                          </ol>
+                        </section>
+                      )}
+                    </>
+                  ) : (
+                    <GapMarkdown text={gapResult.text || ""} />
+                  )}
                 </div>
                 {gapResult.citations.length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
