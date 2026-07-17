@@ -34,6 +34,7 @@ import {
   Users,
   Loader2,
 } from "lucide-react";
+import { Search } from "lucide-react";
 
 const CHECKLIST_KEYS = [
   "gbp_description",
