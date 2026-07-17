@@ -84,6 +84,9 @@ verify_jwt = false
 [functions.ai-visibility-check]
 verify_jwt = false
 
+[functions.ai-visibility-gap]
+verify_jwt = false
+
 [functions.review-request-scheduler]
 verify_jwt = false
 

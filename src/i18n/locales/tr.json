@@ -878,6 +878,15 @@
       "goToTab": "Yorum Talebi sekmesine git",
       "summary": "Yorum motoru aktif: {{total}} misafir → {{sent}} gönderim → {{clicked}} tıklama (%{{rate}})",
       "manage": "Yönet"
+    },
+    "gap": {
+      "title": "AI'ın Gözünden Eksikler",
+      "subtitle": "Perplexity'nin canlı web taramasıyla işletmenizin görünürlük boşlukları — kaynaklı analiz.",
+      "cta": "Analiz Et",
+      "loading": "Web taranıyor…",
+      "error": "Analiz alınamadı: {{msg}}",
+      "footnote": "Perplexity web taraması, {{time}} anlık sonucu.",
+      "rerun": "Tekrar tara"
     }
   }
 }
