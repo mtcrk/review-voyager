@@ -998,6 +998,15 @@
       "goToTab": "Go to Review Request tab",
       "summary": "Review engine live: {{total}} guests → {{sent}} sent → {{clicked}} clicks ({{rate}}%)",
       "manage": "Manage"
+    },
+    "gap": {
+      "title": "Gaps Through AI's Eyes",
+      "subtitle": "Live Perplexity web scan of your visibility gaps — cited analysis.",
+      "cta": "Analyze",
+      "loading": "Scanning the web…",
+      "error": "Analysis failed: {{msg}}",
+      "footnote": "Perplexity web scan, snapshot at {{time}}.",
+      "rerun": "Re-scan"
     }
   }
 }
