@@ -895,7 +895,13 @@
       "loading": "Web taranıyor…",
       "error": "Analiz alınamadı: {{msg}}",
       "footnote": "Perplexity web taraması, {{time}} anlık sonucu.",
-      "rerun": "Tekrar tara"
+      "rerun": "Tekrar tara",
+      "sections": {
+        "present": "Var olduğunuz platformlar",
+        "weak": "Zayıf veya yok",
+        "competitors": "Rakiplerde var, sizde yok",
+        "steps": "En etkili 3 adım"
+      }
     }
   }
 }
