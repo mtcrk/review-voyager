@@ -110,6 +110,9 @@ export default function AIVisibility() {
   const [runStage, setRunStage] = useState(0);
   const [openEngine, setOpenEngine] = useState<EngineName | null>(null);
   const autoRanRef = useRef<string | null>(null);
+  const [gapLoading, setGapLoading] = useState(false);
+  const [gapError, setGapError] = useState<string | null>(null);
+  const [gapResult, setGapResult] = useState<{ text: string; citations: string[]; generated_at: string } | null>(null);
 
   const businessId = activeBusiness?.id ?? null;
 
