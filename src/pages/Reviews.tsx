@@ -598,6 +598,8 @@ export default function Reviews() {
           sentiment: review.sentiment,
           tone: activeBusiness?.tone || 'Friendly',
           language: activeBusiness?.language || 'TR',
+          business_id: review.business_id,
+          platform: review.platform,
         },
       });
 
@@ -638,6 +640,8 @@ export default function Reviews() {
           sentiment: review.sentiment,
           tone,
           language: "auto",
+          business_id: review.business_id,
+          platform: review.platform,
         },
       });
       if (response.error) throw response.error;
