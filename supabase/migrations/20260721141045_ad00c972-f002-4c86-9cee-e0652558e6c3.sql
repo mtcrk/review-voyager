@@ -1,0 +1,1 @@
+UPDATE auth.users SET banned_until = 'infinity'::timestamptz WHERE email = 'gm@breezeofcappadocia.com';
