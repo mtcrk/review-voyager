@@ -14,6 +14,7 @@ import { useBusiness } from "@/contexts/BusinessContext";
 import { useNewReviews } from "@/contexts/NewReviewsContext";
 import { useState, useEffect } from "react";
 import { PasswordChangeCard } from "@/components/settings/PasswordChangeCard";
+import { BrandVoiceCard } from "@/components/settings/BrandVoiceCard";
 import { invokeAuthedFunction } from "@/lib/invokeAuthedFunction";
 import {
   AlertDialog,
@@ -219,6 +220,7 @@ export default function Settings() {
           <TabsTrigger value="business">İşletme Bilgileri</TabsTrigger>
           <TabsTrigger value="google">Google Entegrasyonu</TabsTrigger>
           <TabsTrigger value="auto-reply">Otomatik Yanıt</TabsTrigger>
+          <TabsTrigger value="brand-voice">Marka Sesi</TabsTrigger>
           <TabsTrigger value="notifications">Bildirimler</TabsTrigger>
         </TabsList>
 
@@ -362,6 +364,11 @@ export default function Settings() {
               </p>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Brand Voice Tab */}
+        <TabsContent value="brand-voice" className="space-y-6">
+          <BrandVoiceCard />
         </TabsContent>
 
         {/* Notifications Tab */}
