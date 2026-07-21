@@ -1,0 +1,1 @@
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS brand_voice jsonb NOT NULL DEFAULT '{}'::jsonb;
