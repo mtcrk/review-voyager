@@ -227,6 +227,7 @@ export type Database = {
       businesses: {
         Row: {
           booking_hotel_id: string | null
+          brand_voice: Json
           city: string | null
           created_at: string
           expedia_hotel_id: string | null
@@ -256,6 +257,7 @@ export type Database = {
         }
         Insert: {
           booking_hotel_id?: string | null
+          brand_voice?: Json
           city?: string | null
           created_at?: string
           expedia_hotel_id?: string | null
@@ -285,6 +287,7 @@ export type Database = {
         }
         Update: {
           booking_hotel_id?: string | null
+          brand_voice?: Json
           city?: string | null
           created_at?: string
           expedia_hotel_id?: string | null
