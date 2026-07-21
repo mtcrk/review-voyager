@@ -250,6 +250,22 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // 🚫 Per-business kill switch: fetch tamamen devre dışı ise hiçbir şey yapma.
+    if (!run_id) {
+      const { data: bizFlag } = await supabase
+        .from("businesses")
+        .select("fetch_disabled")
+        .eq("id", business_id)
+        .maybeSingle();
+      if (bizFlag?.fetch_disabled) {
+        console.log(`⛔ fetch_disabled=true for business ${business_id} — skipping.`);
+        return new Response(
+          JSON.stringify({ success: false, skipped: true, reason: "fetch_disabled", message: "Bu işletme için yorum çekme devre dışı bırakılmış." }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     // 🧠 GÜÇLENDİRİLMİŞ smart skip: cron (service-role) çağrılarında,
     // son 48 saat içinde bu işletme-platform için BAŞARILI BİR SCRAPE
     // yapıldıysa → tekrar scrape ETME. (Eskiden sadece 0-yeni-yorum durumda
