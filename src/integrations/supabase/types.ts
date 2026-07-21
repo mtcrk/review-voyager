@@ -231,6 +231,7 @@ export type Database = {
           city: string | null
           created_at: string
           expedia_hotel_id: string | null
+          fetch_disabled: boolean
           google_account_id: string | null
           google_connected: boolean | null
           google_location_id: string | null
@@ -261,6 +262,7 @@ export type Database = {
           city?: string | null
           created_at?: string
           expedia_hotel_id?: string | null
+          fetch_disabled?: boolean
           google_account_id?: string | null
           google_connected?: boolean | null
           google_location_id?: string | null
@@ -291,6 +293,7 @@ export type Database = {
           city?: string | null
           created_at?: string
           expedia_hotel_id?: string | null
+          fetch_disabled?: boolean
           google_account_id?: string | null
           google_connected?: boolean | null
           google_location_id?: string | null

@@ -130,6 +130,21 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    if (!run_id) {
+      const { data: bizFlag } = await supabase
+        .from("businesses")
+        .select("fetch_disabled")
+        .eq("id", business_id)
+        .maybeSingle();
+      if (bizFlag?.fetch_disabled) {
+        console.log(`⛔ fetch_disabled=true for business ${business_id} — skipping TripAdvisor.`);
+        return new Response(
+          JSON.stringify({ success: false, skipped: true, reason: "fetch_disabled", message: "Bu işletme için yorum çekme devre dışı bırakılmış." }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     // 🧠 Smart skip: Cron (service-role) çağrılarında, son 48 saat içinde
     // bu işletme için TripAdvisor scrape edilmişse → tekrar scrape etme.
     // TripAdvisor en pahalı aktörlerden biri (her run ~$0.30+), bu yüzden

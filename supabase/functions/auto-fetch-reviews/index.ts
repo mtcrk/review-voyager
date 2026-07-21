@@ -90,10 +90,12 @@ Deno.serve(async (req) => {
     let query = supabase
       .from("businesses")
       .select("id, user_id, name, place_id, booking_hotel_id, tripadvisor_id, hotelscom_url, expedia_hotel_id, trustpilot_url, city")
+      .eq("fetch_disabled", false)
       .or("booking_hotel_id.not.is.null,tripadvisor_id.not.is.null,hotelscom_url.not.is.null,expedia_hotel_id.not.is.null,trustpilot_url.not.is.null");
     if (businessIdFilter) query = supabase
       .from("businesses")
       .select("id, user_id, name, place_id, booking_hotel_id, tripadvisor_id, hotelscom_url, expedia_hotel_id, trustpilot_url, city")
+      .eq("fetch_disabled", false)
       .eq("id", businessIdFilter);
     const { data: businesses, error } = await query;
     if (error) throw error;

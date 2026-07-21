@@ -61,6 +61,7 @@ Deno.serve(async (req) => {
       .from("businesses")
       .select("id, name, google_account_id, google_location_id")
       .eq("google_connected", true)
+      .eq("fetch_disabled", false)
       .not("google_location_id", "is", null);
 
     if (targetBusinessIds.length > 0) {
