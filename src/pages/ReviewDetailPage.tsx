@@ -188,6 +188,8 @@ const ReviewDetailPage = () => {
           issues: review.issues,
           praises: review.praises,
           sentiment: review.sentiment,
+          business_id: review.business_id,
+          platform: review.platform,
         },
       });
 
