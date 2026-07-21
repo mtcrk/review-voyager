@@ -76,6 +76,11 @@ Deno.serve(async (req) => {
       supabase.auth.admin.listUsers({ page: 1, perPage: 1000 }),
     ]);
 
+    if (authUsersRes.error) {
+      console.error("listUsers error:", authUsersRes.error);
+    }
+    console.log("listUsers count:", authUsersRes.data?.users?.length ?? "null");
+
     // === Build maps ===
     const businessMap = new Map<string, { name: string; city: string | null; user_id: string }>();
     for (const b of businesses || []) businessMap.set(b.id, { name: b.name, city: b.city, user_id: b.user_id });
