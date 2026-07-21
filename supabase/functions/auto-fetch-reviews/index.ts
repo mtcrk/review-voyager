@@ -84,12 +84,18 @@ Deno.serve(async (req) => {
       ? new Set(platformsParam.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean))
       : undefined;
     const force = Boolean(body?.force || body?.manual);
+    const businessIdFilter: string | undefined = body?.business_id;
     console.log("Allowed platforms:", allowed ? [...allowed].join(",") : "ALL");
 
-    const { data: businesses, error } = await supabase
+    let query = supabase
       .from("businesses")
       .select("id, user_id, name, place_id, booking_hotel_id, tripadvisor_id, hotelscom_url, expedia_hotel_id, trustpilot_url, city")
       .or("booking_hotel_id.not.is.null,tripadvisor_id.not.is.null,hotelscom_url.not.is.null,expedia_hotel_id.not.is.null,trustpilot_url.not.is.null");
+    if (businessIdFilter) query = supabase
+      .from("businesses")
+      .select("id, user_id, name, place_id, booking_hotel_id, tripadvisor_id, hotelscom_url, expedia_hotel_id, trustpilot_url, city")
+      .eq("id", businessIdFilter);
+    const { data: businesses, error } = await query;
     if (error) throw error;
     if (!businesses?.length) {
       return new Response(JSON.stringify({ message: "No businesses configured" }), {
