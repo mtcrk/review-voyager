@@ -373,10 +373,10 @@ Deno.serve(async (req) => {
 
       const cappedItems = platform === "booking"
         ? items.slice(0, 1000)
-        : (platform === "hotelscom" || platform === "expedia" || platform === "tripcom")
+        : (platform === "hotelscom" || platform === "expedia" || platform === "tripcom" || platform === "yandex")
           ? items.slice(0, 200)
           : items;
-      const forcedPlatform = (platform === "hotelscom" || platform === "expedia" || platform === "trustpilot" || platform === "tripcom" || platform === "booking") ? platform : undefined;
+      const forcedPlatform = (platform === "hotelscom" || platform === "expedia" || platform === "trustpilot" || platform === "tripcom" || platform === "booking" || platform === "yandex") ? platform : undefined;
       const result = await insertReviews(supabase, cappedItems, business_id, forcedPlatform);
 
       await logSuccess(supabase, business_id, platform, items.length, result.inserted, result.updated, result.skipped);
