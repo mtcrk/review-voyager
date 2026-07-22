@@ -2185,6 +2185,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_warnings: {
+        Row: {
+          action_label: string | null
+          action_url: string | null
+          created_at: string | null
+          dismissed: boolean | null
+          id: string
+          message: string
+          title: string
+          type: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          action_label?: string | null
+          action_url?: string | null
+          created_at?: string | null
+          dismissed?: boolean | null
+          id?: string
+          message: string
+          title: string
+          type?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          action_label?: string | null
+          action_url?: string | null
+          created_at?: string | null
+          dismissed?: boolean | null
+          id?: string
+          message?: string
+          title?: string
+          type?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       youtube_comments: {
         Row: {
           analyzed_at: string | null
