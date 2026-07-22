@@ -12,7 +12,7 @@ const corsHeaders = {
 // to return data, instead of the broken aggregator pattern used previously.
 
 interface PlatformPlan {
-  platform: "booking" | "tripadvisor" | "hotelscom" | "expedia" | "trustpilot";
+  platform: "booking" | "tripadvisor" | "hotelscom" | "expedia" | "trustpilot" | "tripcom" | "yandex";
   functionName: "apify-fetch-reviews" | "tripadvisor-fetch-reviews";
 }
 
@@ -24,6 +24,8 @@ function planFor(biz: any, allowed?: Set<string>): PlatformPlan[] {
   if (ok("hotelscom") && (biz.hotelscom_url || biz.place_id)) plans.push({ platform: "hotelscom", functionName: "apify-fetch-reviews" });
   if (ok("expedia") && biz.expedia_hotel_id) plans.push({ platform: "expedia", functionName: "apify-fetch-reviews" });
   if (ok("trustpilot") && biz.trustpilot_url) plans.push({ platform: "trustpilot", functionName: "apify-fetch-reviews" });
+  if (ok("tripcom") && biz.tripcom_hotel_id) plans.push({ platform: "tripcom", functionName: "apify-fetch-reviews" });
+  if (ok("yandex") && biz.yandex_org_id) plans.push({ platform: "yandex", functionName: "apify-fetch-reviews" });
   return plans;
 }
 
@@ -89,12 +91,12 @@ Deno.serve(async (req) => {
 
     let query = supabase
       .from("businesses")
-      .select("id, user_id, name, place_id, booking_hotel_id, tripadvisor_id, hotelscom_url, expedia_hotel_id, trustpilot_url, city")
+      .select("id, user_id, name, place_id, booking_hotel_id, tripadvisor_id, hotelscom_url, expedia_hotel_id, trustpilot_url, tripcom_hotel_id, yandex_org_id, city")
       .eq("fetch_disabled", false)
-      .or("booking_hotel_id.not.is.null,tripadvisor_id.not.is.null,hotelscom_url.not.is.null,expedia_hotel_id.not.is.null,trustpilot_url.not.is.null");
+      .or("booking_hotel_id.not.is.null,tripadvisor_id.not.is.null,hotelscom_url.not.is.null,expedia_hotel_id.not.is.null,trustpilot_url.not.is.null,tripcom_hotel_id.not.is.null,yandex_org_id.not.is.null");
     if (businessIdFilter) query = supabase
       .from("businesses")
-      .select("id, user_id, name, place_id, booking_hotel_id, tripadvisor_id, hotelscom_url, expedia_hotel_id, trustpilot_url, city")
+      .select("id, user_id, name, place_id, booking_hotel_id, tripadvisor_id, hotelscom_url, expedia_hotel_id, trustpilot_url, tripcom_hotel_id, yandex_org_id, city")
       .eq("fetch_disabled", false)
       .eq("id", businessIdFilter);
     const { data: businesses, error } = await query;
