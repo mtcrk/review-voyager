@@ -34,7 +34,15 @@ export function UserWarningBanner() {
         setLoading(false);
         return;
       }
-      setWarnings(data || []);
+      const typed = (data || []).map((w: any) => ({
+        id: w.id,
+        type: w.type as "info" | "warning" | "error",
+        title: w.title,
+        message: w.message,
+        action_url: w.action_url,
+        action_label: w.action_label,
+      }));
+      setWarnings(typed);
       setLoading(false);
     }
 
