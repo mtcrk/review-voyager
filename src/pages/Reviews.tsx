@@ -1603,20 +1603,32 @@ export default function Reviews() {
                     className="flex-1 gap-2"
                     onClick={async () => {
                       await navigator.clipboard.writeText(replyText);
-                      // Also approve the review
                       handleApprove();
+                      const plat = (selectedReview as any).platform;
+                      if (plat === 'yandex') {
+                        const orgId = (selectedReview as any)?.businesses?.yandex_org_id
+                          || (activeBusiness as any)?.yandex_org_id;
+                        if (orgId) window.open(`https://yandex.com.tr/maps/org/${orgId}/reviews/`, '_blank');
+                      }
                       toast({
                         title: "Panoya Kopyalandı",
-                        description: `Yanıtı ${platformLabels[(selectedReview as any).platform]?.label || 'platform'} paneline yapıştırın.`,
+                        description: plat === 'yandex'
+                          ? "Yandex sayfası açıldı — yanıtı yapıştırıp gönderin."
+                          : `Yanıtı ${platformLabels[plat]?.label || 'platform'} paneline yapıştırın.`,
                       });
                     }}
                     disabled={!replyText}
                   >
                     <Copy className="h-4 w-4" />
-                    Kopyala & Onayla
+                    {(selectedReview as any).platform === 'yandex' ? "Yandex'te Yanıtla" : 'Kopyala & Onayla'}
                   </Button>
                 )}
               </div>
+              {(selectedReview as any).platform === 'yandex' && (
+                <p className="text-xs text-muted-foreground -mt-2">
+                  Yandex API ile otomatik gönderim desteklenmiyor — cevap kopyalanır, Yandex sayfasında yapıştırıp gönderin.
+                </p>
+              )}
 
               {/* Copy button for fallback */}
               <Button
