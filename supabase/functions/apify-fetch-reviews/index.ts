@@ -13,6 +13,7 @@ const TRUSTPILOT_ACTOR_ID = "zen-studio~trustpilot-review-scraper";
 const EXPEDIA_ACTOR_ID = "shahidirfan~expedia-reviews-scraper";
 const TRIPCOM_ACTOR_ID = "shahidirfan~trip-com-hotel-reviews-scraper";
 const BOOKING_ACTOR_ID = "voyager~booking-reviews-scraper";
+const YANDEX_ACTOR_ID = "zen-studio~yandex-maps-reviews-scraper";
 
 // Map Apify provider names to our platform names
 const PROVIDER_MAP: Record<string, string> = {
@@ -27,6 +28,8 @@ const PROVIDER_MAP: Record<string, string> = {
   "google-maps": "google",
   yelp: "yelp",
   airbnb: "airbnb",
+  yandex: "yandex",
+  "yandex-maps": "yandex",
 };
 
 // Our platform names → Apify provider filter values
@@ -430,7 +433,7 @@ Deno.serve(async (req) => {
     // Get business
     const { data: business, error: bizError } = await supabaseAuth
       .from("businesses")
-      .select("id, place_id, name, city, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url, expedia_hotel_id, tripcom_hotel_id")
+      .select("id, place_id, name, city, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url, expedia_hotel_id, tripcom_hotel_id, yandex_org_id")
       .eq("id", business_id)
       .maybeSingle();
 
@@ -486,6 +489,21 @@ Deno.serve(async (req) => {
         results_wanted: 20,
       };
       console.log(`Using Trip.com scraper for hotel ID: ${business.tripcom_hotel_id}`);
+    } else if (platform === "yandex") {
+      if (!business.yandex_org_id) {
+        return new Response(
+          JSON.stringify({ error: "Yandex işletme ID'si bulunamadı. Lütfen önce Yandex Haritalar URL'sini ekleyin." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      actorId = YANDEX_ACTOR_ID;
+      actorInput = {
+        businessIds: [String(business.yandex_org_id)],
+        maxReviewsPerPlace: 50,
+        reviewSort: "newest",
+        language: "tr",
+      };
+      console.log(`Using Yandex Maps scraper for org ID: ${business.yandex_org_id}`);
     } else if (platform === "trustpilot") {
       // Trustpilot is NOT supported by hotel-review-aggregator, use dedicated actor
       if (!business.trustpilot_url) {
