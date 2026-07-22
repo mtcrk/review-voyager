@@ -686,16 +686,7 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
       if (isYandexDedicated) {
         // Yandex Maps scraper (zen-studio/yandex-maps-reviews-scraper) — rating 1-5
         rating = Math.min(5, Math.max(1, Math.round(Number(item.rating ?? 3))));
-        const original = typeof item.text === "string" ? item.text : "";
-        const textLang = typeof item.textLanguage === "string" ? item.textLanguage.toUpperCase() : "";
-        const trTranslation = Array.isArray(item.textTranslations)
-          ? item.textTranslations.find((t: any) => typeof t?.language === "string" && t.language.toUpperCase() === "TR")
-          : null;
-        if (textLang !== "TR" && trTranslation && typeof trTranslation.text === "string" && trTranslation.text.trim()) {
-          text = original ? `${original}\n\n[Çeviri]\n${trTranslation.text}` : trTranslation.text;
-        } else {
-          text = original;
-        }
+        text = typeof item.text === "string" ? item.text : "";
         reviewerName = item.authorName || "Anonymous";
         postedAt = toSafeIsoDate(item.date);
         reviewId = item.reviewId ? String(item.reviewId) : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
