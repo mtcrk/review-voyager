@@ -1,6 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { ReviewFetchBanner } from "./ReviewFetchBanner";
+import { UserWarningBanner } from "./UserWarningBanner";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -18,6 +19,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             <span className="ml-3 text-sm font-semibold text-foreground">VoyageRespond</span>
           </header>
           <ReviewFetchBanner />
+          <UserWarningBanner />
           {children}
         </main>
       </div>
