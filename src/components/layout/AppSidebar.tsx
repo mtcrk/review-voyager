@@ -193,6 +193,7 @@ export function AppSidebar() {
     { title: "Expedia Yorumları", url: "/reviews?platform=expedia", icon: Building2 },
     { title: "Hotels.com Yorumları", url: "/reviews?platform=hotelscom", icon: Hotel },
     { title: "Trip.com Yorumları", url: "/reviews?platform=tripcom", icon: Building2 },
+    { title: "Yandex Yorumları", url: "/reviews?platform=yandex", icon: MapPin },
     { title: "YouTube Yorumları", url: "/youtube", icon: Video },
   ];
 

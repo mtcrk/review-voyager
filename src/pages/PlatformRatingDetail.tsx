@@ -19,6 +19,7 @@ const PLATFORM_META: Record<string, { label: string; dot: string; urlField?: str
   hotelscom: { label: "Hotels.com", dot: "bg-rose-500", urlField: "hotelscom_url" },
   expedia: { label: "Expedia", dot: "bg-amber-500", idField: "expedia_hotel_id" },
   tripcom: { label: "Trip.com", dot: "bg-orange-500", idField: "tripcom_hotel_id" },
+  yandex: { label: "Yandex", dot: "bg-red-500", idField: "yandex_org_id", buildUrl: (id) => `https://yandex.com.tr/maps/org/${id}/reviews/` },
   trustpilot: { label: "Trustpilot", dot: "bg-teal-500", urlField: "trustpilot_url" },
 };
 

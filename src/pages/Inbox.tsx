@@ -42,9 +42,10 @@ const PLATFORM_META: Record<string, { label: string; classes: string }> = {
   
   hotelscom: { label: "Hotels.com", classes: "bg-red-50 text-red-700 border-red-200" },
   tripcom: { label: "Trip.com", classes: "bg-orange-50 text-orange-700 border-orange-200" },
+  yandex: { label: "Yandex", classes: "bg-red-50 text-red-700 border-red-200" },
 };
 
-const PLATFORM_OPTIONS = ["google", "booking", "expedia", "tripadvisor", "hotelscom", "tripcom"];
+const PLATFORM_OPTIONS = ["google", "booking", "expedia", "tripadvisor", "hotelscom", "tripcom", "yandex"];
 
 type StatusTab = "all" | "unanswered" | "negative";
 

@@ -25,6 +25,7 @@ const platformIcons: Record<string, React.ReactNode> = {
   hotelscom: <Building2 className="h-5 w-5 text-red-600" />,
   expedia: <Building2 className="h-5 w-5 text-yellow-600" />,
   tripcom: <Building2 className="h-5 w-5 text-orange-600" />,
+  yandex: <Map className="h-5 w-5 text-red-600" />,
 };
 
 const platformBadgeStyles: Record<string, string> = {
@@ -34,6 +35,7 @@ const platformBadgeStyles: Record<string, string> = {
   hotelscom: "bg-red-100 text-red-700 border-red-200",
   expedia: "bg-yellow-100 text-yellow-700 border-yellow-200",
   tripcom: "bg-orange-100 text-orange-700 border-orange-200",
+  yandex: "bg-red-100 text-red-700 border-red-200",
 };
 
 const platformDisplayName: Record<string, string> = {
@@ -43,6 +45,7 @@ const platformDisplayName: Record<string, string> = {
   hotelscom: "Hotels.com",
   expedia: "Expedia",
   tripcom: "Trip.com",
+  yandex: "Yandex Haritalar",
 };
 
 const platformDbField: Record<string, string> = {
@@ -52,6 +55,7 @@ const platformDbField: Record<string, string> = {
   hotelscom: "hotelscom_url",
   expedia: "expedia_hotel_id",
   tripcom: "tripcom_hotel_id",
+  yandex: "yandex_org_id",
 };
 
 export function PlatformDiscovery() {
@@ -88,6 +92,7 @@ export function PlatformDiscovery() {
         hotelscom: activeBusiness.hotelscom_url,
         expedia: (activeBusiness as any).expedia_hotel_id,
         tripcom: (activeBusiness as any).tripcom_hotel_id,
+        yandex: (activeBusiness as any).yandex_org_id,
       };
 
       const filtered = (data.results || []).filter(
