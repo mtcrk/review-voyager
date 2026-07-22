@@ -60,6 +60,14 @@ function extractPlatformId(platform: string, url: string): string | null {
         if (m2) return m2[1];
         return null;
       }
+      case "yandex": {
+        // e.g. yandex.com.tr/maps/org/hotel-slug/52632836783/reviews/
+        const m1 = url.match(/\/maps\/org\/[^/]+\/(\d{4,})/i);
+        if (m1) return m1[1];
+        const m2 = url.match(/\/(\d{6,})(?:[/?#]|$)/);
+        if (m2) return m2[1];
+        return null;
+      }
       default:
         return null;
     }
@@ -117,6 +125,7 @@ Deno.serve(async (req) => {
       { key: "expedia", label: "Expedia", site: "expedia.com" },
       { key: "hotelscom", label: "Hotels.com", site: "hotels.com" },
       { key: "tripcom", label: "Trip.com", site: "trip.com" },
+      { key: "yandex", label: "Yandex Haritalar", site: "yandex.com" },
     ];
 
     const searchQuery = city
