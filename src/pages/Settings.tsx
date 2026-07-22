@@ -219,7 +219,7 @@ export default function Settings() {
           <TabsTrigger value="profile">Profil</TabsTrigger>
           <TabsTrigger value="business">İşletme Bilgileri</TabsTrigger>
           <TabsTrigger value="google">Google Entegrasyonu</TabsTrigger>
-          <TabsTrigger value="auto-reply">Otomatik Yanıt</TabsTrigger>
+          
           <TabsTrigger value="brand-voice">Marka Sesi</TabsTrigger>
           <TabsTrigger value="notifications">Bildirimler</TabsTrigger>
         </TabsList>
@@ -347,21 +347,6 @@ export default function Settings() {
                   <span className="text-sm font-medium">Hiçbir zaman</span>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Auto Reply Tab */}
-        <TabsContent value="auto-reply" className="space-y-6">
-          <Card className="shadow-card">
-            <CardHeader>
-              <CardTitle>Otomatik Yanıt Ayarları</CardTitle>
-              <CardDescription>Otomatik yanıtları yapılandırın</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Otomatik yanıt ayarlarını Otomatik Yanıt sayfasından yapılandırın.
-              </p>
             </CardContent>
           </Card>
         </TabsContent>

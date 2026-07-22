@@ -454,21 +454,6 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  isActive={location.pathname === "/auto-reply"}
-                  tooltip="Otomatik Yanıt"
-                >
-                  <NavLink
-                    to="/auto-reply"
-                    className="flex items-center gap-3 transition-smooth"
-                  >
-                    <Zap className="h-5 w-5" />
-                    <span>Otomatik Yanıt</span>
-                  </NavLink>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
                   isActive={location.pathname === "/intelligence"}
                   tooltip="Rakip Analizi"
                 >

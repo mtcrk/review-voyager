@@ -148,7 +148,7 @@ export const routes: RouteRecord[] = [
       { path: "inbox", lazy: lazyProtectedLayout(() => import("./pages/Inbox")) },
       { path: "reviews", lazy: lazyProtectedLayout(() => import("./pages/Reviews")) },
       { path: "reviews/:id", lazy: lazyProtectedLayout(() => import("./pages/ReviewDetailPage")) },
-      { path: "auto-reply", lazy: lazyProtectedLayout(() => import("./pages/AutoReply")) },
+      
       { path: "statistics", lazy: lazyProtectedLayout(() => import("./pages/Statistics")) },
       { path: "report", lazy: lazyProtectedLayout(() => import("./pages/Report")) },
       { path: "chat", lazy: lazyProtectedLayout(() => import("./pages/ChatWithReviewsPage")) },
