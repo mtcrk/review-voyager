@@ -1,0 +1,1 @@
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS yandex_org_id text;

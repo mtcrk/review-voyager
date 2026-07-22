@@ -255,6 +255,7 @@ export type Database = {
           trustpilot_url: string | null
           user_id: string
           weekly_report_enabled: boolean
+          yandex_org_id: string | null
         }
         Insert: {
           booking_hotel_id?: string | null
@@ -286,6 +287,7 @@ export type Database = {
           trustpilot_url?: string | null
           user_id: string
           weekly_report_enabled?: boolean
+          yandex_org_id?: string | null
         }
         Update: {
           booking_hotel_id?: string | null
@@ -317,6 +319,7 @@ export type Database = {
           trustpilot_url?: string | null
           user_id?: string
           weekly_report_enabled?: boolean
+          yandex_org_id?: string | null
         }
         Relationships: [
           {
