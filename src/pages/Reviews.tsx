@@ -45,7 +45,7 @@ type SortField = "posted_at" | "rating" | "reviewer_name";
 type SortOrder = "asc" | "desc";
 type StatusFilter = "all" | "pending" | "approved" | "replied" | "not_replied";
 type SentimentFilter = "all" | "positive" | "negative" | "neutral";
-type PlatformFilter = "all" | "google" | "booking" | "tripadvisor" | "expedia" | "hotelscom" | "tripcom";
+type PlatformFilter = "all" | "google" | "booking" | "tripadvisor" | "expedia" | "hotelscom" | "tripcom" | "yandex";
 type RatingFilter = "all" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10";
 type SortOption = "newest" | "oldest" | "rating_high" | "rating_low" | "name_az";
 
@@ -74,6 +74,7 @@ const platformLabels: Record<string, { label: string; color: string }> = {
   expedia: { label: "Expedia", color: "bg-yellow-50 text-yellow-700 border-yellow-200" },
   hotelscom: { label: "Hotels.com", color: "bg-red-50 text-red-700 border-red-200" },
   tripcom: { label: "Trip.com", color: "bg-orange-50 text-orange-700 border-orange-200" },
+  yandex: { label: "Yandex", color: "bg-red-50 text-red-700 border-red-200" },
 };
 
 export default function Reviews() {
@@ -231,6 +232,13 @@ export default function Reviews() {
       dbField: "tripcom_hotel_id",
       getIdFromBusiness: (b) => (b as any).tripcom_hotel_id,
     },
+    yandex: {
+      label: "Yandex Haritalar",
+      placeholder: "https://yandex.com.tr/maps/org/.../52632836783/ veya 52632836783",
+      hint: "Yandex Haritalar'daki işletme sayfanızın linkini yapıştırın.",
+      dbField: "yandex_org_id",
+      getIdFromBusiness: (b) => (b as any).yandex_org_id,
+    },
   };
 
   const parseUrlId = (input: string, platform: string): string => {
@@ -268,6 +276,11 @@ export default function Reviews() {
       if (m1) return m1[1];
       const m2 = trimmed.match(/hotel-detail-(\d{4,})/i);
       if (m2) return m2[1];
+      if (/^\d{4,}$/.test(trimmed)) return trimmed;
+    }
+    if (platform === "yandex") {
+      const m1 = trimmed.match(/\/maps\/org\/[^/]+\/(\d{4,})/i);
+      if (m1) return m1[1];
       if (/^\d{4,}$/.test(trimmed)) return trimmed;
     }
     return trimmed;
@@ -922,6 +935,7 @@ export default function Reviews() {
               <SelectItem value="expedia">Expedia</SelectItem>
               <SelectItem value="hotelscom">Hotels.com</SelectItem>
               <SelectItem value="tripcom">Trip.com</SelectItem>
+              <SelectItem value="yandex">Yandex Haritalar</SelectItem>
             </SelectContent>
           </Select>
           <Select value={ratingFilter} onValueChange={(v) => { setRatingFilter(v as RatingFilter); setCurrentPage(1); }}>
@@ -1589,20 +1603,32 @@ export default function Reviews() {
                     className="flex-1 gap-2"
                     onClick={async () => {
                       await navigator.clipboard.writeText(replyText);
-                      // Also approve the review
                       handleApprove();
+                      const plat = (selectedReview as any).platform;
+                      if (plat === 'yandex') {
+                        const orgId = (selectedReview as any)?.businesses?.yandex_org_id
+                          || (activeBusiness as any)?.yandex_org_id;
+                        if (orgId) window.open(`https://yandex.com.tr/maps/org/${orgId}/reviews/`, '_blank');
+                      }
                       toast({
                         title: "Panoya Kopyalandı",
-                        description: `Yanıtı ${platformLabels[(selectedReview as any).platform]?.label || 'platform'} paneline yapıştırın.`,
+                        description: plat === 'yandex'
+                          ? "Yandex sayfası açıldı — yanıtı yapıştırıp gönderin."
+                          : `Yanıtı ${platformLabels[plat]?.label || 'platform'} paneline yapıştırın.`,
                       });
                     }}
                     disabled={!replyText}
                   >
                     <Copy className="h-4 w-4" />
-                    Kopyala & Onayla
+                    {(selectedReview as any).platform === 'yandex' ? "Yandex'te Yanıtla" : 'Kopyala & Onayla'}
                   </Button>
                 )}
               </div>
+              {(selectedReview as any).platform === 'yandex' && (
+                <p className="text-xs text-muted-foreground -mt-2">
+                  Yandex API ile otomatik gönderim desteklenmiyor — cevap kopyalanır, Yandex sayfasında yapıştırıp gönderin.
+                </p>
+              )}
 
               {/* Copy button for fallback */}
               <Button

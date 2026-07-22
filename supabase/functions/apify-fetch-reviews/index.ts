@@ -13,6 +13,7 @@ const TRUSTPILOT_ACTOR_ID = "zen-studio~trustpilot-review-scraper";
 const EXPEDIA_ACTOR_ID = "shahidirfan~expedia-reviews-scraper";
 const TRIPCOM_ACTOR_ID = "shahidirfan~trip-com-hotel-reviews-scraper";
 const BOOKING_ACTOR_ID = "voyager~booking-reviews-scraper";
+const YANDEX_ACTOR_ID = "zen-studio~yandex-maps-reviews-scraper";
 
 // Map Apify provider names to our platform names
 const PROVIDER_MAP: Record<string, string> = {
@@ -27,6 +28,8 @@ const PROVIDER_MAP: Record<string, string> = {
   "google-maps": "google",
   yelp: "yelp",
   airbnb: "airbnb",
+  yandex: "yandex",
+  "yandex-maps": "yandex",
 };
 
 // Our platform names → Apify provider filter values
@@ -370,10 +373,10 @@ Deno.serve(async (req) => {
 
       const cappedItems = platform === "booking"
         ? items.slice(0, 1000)
-        : (platform === "hotelscom" || platform === "expedia" || platform === "tripcom")
+        : (platform === "hotelscom" || platform === "expedia" || platform === "tripcom" || platform === "yandex")
           ? items.slice(0, 200)
           : items;
-      const forcedPlatform = (platform === "hotelscom" || platform === "expedia" || platform === "trustpilot" || platform === "tripcom" || platform === "booking") ? platform : undefined;
+      const forcedPlatform = (platform === "hotelscom" || platform === "expedia" || platform === "trustpilot" || platform === "tripcom" || platform === "booking" || platform === "yandex") ? platform : undefined;
       const result = await insertReviews(supabase, cappedItems, business_id, forcedPlatform);
 
       await logSuccess(supabase, business_id, platform, items.length, result.inserted, result.updated, result.skipped);
@@ -430,7 +433,7 @@ Deno.serve(async (req) => {
     // Get business
     const { data: business, error: bizError } = await supabaseAuth
       .from("businesses")
-      .select("id, place_id, name, city, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url, expedia_hotel_id, tripcom_hotel_id")
+      .select("id, place_id, name, city, booking_hotel_id, tripadvisor_id, trustpilot_url, hotelscom_url, expedia_hotel_id, tripcom_hotel_id, yandex_org_id")
       .eq("id", business_id)
       .maybeSingle();
 
@@ -486,6 +489,21 @@ Deno.serve(async (req) => {
         results_wanted: 20,
       };
       console.log(`Using Trip.com scraper for hotel ID: ${business.tripcom_hotel_id}`);
+    } else if (platform === "yandex") {
+      if (!business.yandex_org_id) {
+        return new Response(
+          JSON.stringify({ error: "Yandex işletme ID'si bulunamadı. Lütfen önce Yandex Haritalar URL'sini ekleyin." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      actorId = YANDEX_ACTOR_ID;
+      actorInput = {
+        businessIds: [String(business.yandex_org_id)],
+        maxReviewsPerPlace: 50,
+        reviewSort: "newest",
+        language: "tr",
+      };
+      console.log(`Using Yandex Maps scraper for org ID: ${business.yandex_org_id}`);
     } else if (platform === "trustpilot") {
       // Trustpilot is NOT supported by hotel-review-aggregator, use dedicated actor
       if (!business.trustpilot_url) {
@@ -614,6 +632,7 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
       );
       const isTripcomDedicated = forcedPlatform === "tripcom";
       const isBookingDedicated = forcedPlatform === "booking";
+      const isYandexDedicated = forcedPlatform === "yandex";
       const platform = forcedPlatform || (isTrustpilotFormat ? "trustpilot" : normalizePlatform(item.provider || "unknown"));
 
       let rating: number;
@@ -655,12 +674,32 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
             if (t) return { text: String(t).trim(), date: d };
           }
         }
-        const dateCandidates = [it.responseFromOwnerDate, it.ownerResponseDate, it.replyDate, it.responseDate];
+        // Yandex actor: businessComment (empty string when absent) + businessCommentDate
+        if (typeof it.businessComment === "string" && it.businessComment.trim()) {
+          return { text: it.businessComment.trim(), date: it.businessCommentDate || null };
+        }
+        const dateCandidates = [it.responseFromOwnerDate, it.ownerResponseDate, it.replyDate, it.responseDate, it.businessCommentDate];
         const d = dateCandidates.find(x => typeof x === "string" && x);
         return { text: null, date: d || null };
       };
 
-      if (isBookingDedicated) {
+      if (isYandexDedicated) {
+        // Yandex Maps scraper (zen-studio/yandex-maps-reviews-scraper) — rating 1-5
+        rating = Math.min(5, Math.max(1, Math.round(Number(item.rating ?? 3))));
+        const original = typeof item.text === "string" ? item.text : "";
+        const textLang = typeof item.textLanguage === "string" ? item.textLanguage.toUpperCase() : "";
+        const trTranslation = Array.isArray(item.textTranslations)
+          ? item.textTranslations.find((t: any) => typeof t?.language === "string" && t.language.toUpperCase() === "TR")
+          : null;
+        if (textLang !== "TR" && trTranslation && typeof trTranslation.text === "string" && trTranslation.text.trim()) {
+          text = original ? `${original}\n\n[Çeviri]\n${trTranslation.text}` : trTranslation.text;
+        } else {
+          text = original;
+        }
+        reviewerName = item.authorName || "Anonymous";
+        postedAt = toSafeIsoDate(item.date);
+        reviewId = item.reviewId ? String(item.reviewId) : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      } else if (isBookingDedicated) {
         // voyager/booking-reviews-scraper — rating is 0-10 scale
         const rawRating = Number(item.rating ?? item.reviewScore ?? item.reviewRating ?? 6);
         rating = Math.min(10, Math.max(1, Math.round(rawRating)));

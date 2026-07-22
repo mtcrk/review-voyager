@@ -18,6 +18,7 @@ const PLATFORMS: { key: string; label: string; dot: string; scale: number }[] = 
   { key: "hotelscom", label: "Hotels.com", dot: "bg-rose-500", scale: 10 },
   { key: "expedia", label: "Expedia", dot: "bg-amber-500", scale: 10 },
   { key: "tripcom", label: "Trip.com", dot: "bg-orange-500", scale: 10 },
+  { key: "yandex", label: "Yandex", dot: "bg-red-500", scale: 5 },
   { key: "trustpilot", label: "Trustpilot", dot: "bg-teal-500", scale: 5 },
 ];
 

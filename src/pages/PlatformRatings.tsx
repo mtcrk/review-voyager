@@ -32,7 +32,7 @@ export default function PlatformRatings() {
         supabase.functions.invoke("fetch-platform-overall-rating", {
           body: {
             business_ids,
-            platforms: ["tripadvisor", "hotelscom", "expedia", "tripcom"],
+            platforms: ["tripadvisor", "hotelscom", "expedia", "tripcom", "yandex"],
           },
         }),
       ]);

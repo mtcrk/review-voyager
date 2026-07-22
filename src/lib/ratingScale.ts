@@ -13,6 +13,7 @@ const SCALE_BY_PLATFORM: Record<string, number> = {
   tripcom: 10,
   agoda: 10,
   holidaycheck: 6,
+  yandex: 5,
 };
 
 export function getPlatformScale(platform?: string | null): number {
