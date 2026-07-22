@@ -632,6 +632,7 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
       );
       const isTripcomDedicated = forcedPlatform === "tripcom";
       const isBookingDedicated = forcedPlatform === "booking";
+      const isYandexDedicated = forcedPlatform === "yandex";
       const platform = forcedPlatform || (isTrustpilotFormat ? "trustpilot" : normalizePlatform(item.provider || "unknown"));
 
       let rating: number;
@@ -673,12 +674,32 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
             if (t) return { text: String(t).trim(), date: d };
           }
         }
-        const dateCandidates = [it.responseFromOwnerDate, it.ownerResponseDate, it.replyDate, it.responseDate];
+        // Yandex actor: businessComment (empty string when absent) + businessCommentDate
+        if (typeof it.businessComment === "string" && it.businessComment.trim()) {
+          return { text: it.businessComment.trim(), date: it.businessCommentDate || null };
+        }
+        const dateCandidates = [it.responseFromOwnerDate, it.ownerResponseDate, it.replyDate, it.responseDate, it.businessCommentDate];
         const d = dateCandidates.find(x => typeof x === "string" && x);
         return { text: null, date: d || null };
       };
 
-      if (isBookingDedicated) {
+      if (isYandexDedicated) {
+        // Yandex Maps scraper (zen-studio/yandex-maps-reviews-scraper) — rating 1-5
+        rating = Math.min(5, Math.max(1, Math.round(Number(item.rating ?? 3))));
+        const original = typeof item.text === "string" ? item.text : "";
+        const textLang = typeof item.textLanguage === "string" ? item.textLanguage.toUpperCase() : "";
+        const trTranslation = Array.isArray(item.textTranslations)
+          ? item.textTranslations.find((t: any) => typeof t?.language === "string" && t.language.toUpperCase() === "TR")
+          : null;
+        if (textLang !== "TR" && trTranslation && typeof trTranslation.text === "string" && trTranslation.text.trim()) {
+          text = original ? `${original}\n\n[Çeviri]\n${trTranslation.text}` : trTranslation.text;
+        } else {
+          text = original;
+        }
+        reviewerName = item.authorName || "Anonymous";
+        postedAt = toSafeIsoDate(item.date);
+        reviewId = item.reviewId ? String(item.reviewId) : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      } else if (isBookingDedicated) {
         // voyager/booking-reviews-scraper — rating is 0-10 scale
         const rawRating = Number(item.rating ?? item.reviewScore ?? item.reviewRating ?? 6);
         rating = Math.min(10, Math.max(1, Math.round(rawRating)));
