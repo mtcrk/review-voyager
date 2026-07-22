@@ -105,18 +105,26 @@ const ReviewDetailPage = () => {
       } else {
         // Non-Google or no API access — copy to clipboard and mark as replied
         await navigator.clipboard.writeText(aiReply);
-        
+
+        // Yandex has no public reply API — also open the Yandex review page so
+        // the owner can paste the reply in their browser.
+        const yandexOrgId = biz?.businesses?.yandex_org_id;
+        if (biz?.platform === 'yandex' && yandexOrgId) {
+          window.open(`https://yandex.com.tr/maps/org/${yandexOrgId}/reviews/`, '_blank');
+        }
+
         const { error } = await supabase
           .from('reviews')
           .update({ 
             status: 'replied',
             approved_reply: aiReply,
             replied_at: new Date().toISOString(),
+            reply_source: 'manual',
           })
           .eq('id', id);
 
         if (error) throw error;
-        return { copied: true };
+        return { copied: true, yandex: biz?.platform === 'yandex' };
       }
     },
     onSuccess: (data) => {
@@ -126,6 +134,8 @@ const ReviewDetailPage = () => {
         toast.success("Yanıt Google'a başarıyla gönderildi! ✅");
       } else if (data?.googleStatus === 'failed') {
         toast.error("Yanıt onaylandı ama Google'a gönderilemedi. Hata: " + (data?.review?.google_reply_error_message || "Bilinmeyen hata"));
+      } else if (data?.yandex) {
+        toast.success("Yanıt kopyalandı ve Yandex sayfası açıldı. Yandex'te yapıştırıp gönderin.");
       } else if (data?.copied) {
         toast.success("Yanıt panoya kopyalandı. Platforma yapıştırın.");
       } else {
@@ -477,7 +487,11 @@ const ReviewDetailPage = () => {
             disabled={sendMutation.isPending || !aiReply}
             className="flex-1"
           >
-            Send to Google
+            {(review as any)?.platform === 'yandex'
+              ? "Yandex'te Yanıtla"
+              : (review as any)?.platform && (review as any).platform !== 'google'
+                ? 'Kopyala & Onayla'
+                : 'Send to Google'}
           </Button>
         </div>
       </div>
