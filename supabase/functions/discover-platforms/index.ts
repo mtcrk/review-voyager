@@ -125,7 +125,7 @@ Deno.serve(async (req) => {
       { key: "expedia", label: "Expedia", site: "expedia.com" },
       { key: "hotelscom", label: "Hotels.com", site: "hotels.com" },
       { key: "tripcom", label: "Trip.com", site: "trip.com" },
-      { key: "yandex", label: "Yandex Haritalar", site: "yandex.com" },
+      { key: "yandex", label: "Yandex Haritalar", site: "yandex" },
     ];
 
     const searchQuery = city
@@ -135,7 +135,9 @@ Deno.serve(async (req) => {
     // Search all platforms in parallel
     const searchPromises = platforms.map(async (platform) => {
       try {
-        const query = `${searchQuery} site:${platform.site}`;
+        const query = platform.key === "yandex"
+          ? `${searchQuery} (site:yandex.com OR site:yandex.ru OR site:yandex.com.tr OR site:yandex.tm)`
+          : `${searchQuery} site:${platform.site}`;
         console.log(`Searching: ${query}`);
 
         const response = await fetch("https://api.firecrawl.dev/v1/search", {
@@ -160,7 +162,9 @@ Deno.serve(async (req) => {
 
         for (const item of data.data || []) {
           const url = item.url || "";
-          if (!url.includes(platform.site)) continue;
+          if (platform.key === "yandex") {
+            if (!/yandex\.(com|ru|com\.tr|tm)\//i.test(url)) continue;
+          } else if (!url.includes(platform.site)) continue;
 
           const extractedId = extractPlatformId(platform.key, url);
           
