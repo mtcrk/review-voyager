@@ -498,6 +498,7 @@ Deno.serve(async (req) => {
       }
       actorId = YANDEX_ACTOR_ID;
       actorInput = {
+        startUrls: [{ url: `https://yandex.com/maps/org/${business.yandex_org_id}/reviews/` }],
         businessIds: [String(business.yandex_org_id)],
         maxReviewsPerPlace: 50,
         reviewSort: "newest",
