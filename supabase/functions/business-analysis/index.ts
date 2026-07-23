@@ -26,22 +26,50 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const { business_id } = await req.json();
+    const {
+      business_id,
+      start_date,
+      end_date,
+      platforms,
+      language = "tr",
+      report_type = "executive",
+    } = await req.json();
     if (!business_id) throw new Error("business_id is required");
 
-    // Fetch reviews
-    const { data: reviews, error: reviewError } = await supabase
+    // Determine period window
+    const now = new Date();
+    const to = end_date ? new Date(end_date) : now;
+    const from = start_date ? new Date(start_date) : new Date(to.getTime() - 30 * 86400000);
+    const windowMs = to.getTime() - from.getTime();
+    const prevTo = new Date(from.getTime() - 1);
+    const prevFrom = new Date(prevTo.getTime() - windowMs);
+
+    // Fetch reviews inside window (+ small buffer for prev period metrics)
+    let query = supabase
       .from("reviews")
       .select("*")
       .eq("business_id", business_id)
-      .order("posted_at", { ascending: false })
-      .limit(200);
+      .gte("posted_at", prevFrom.toISOString())
+      .lte("posted_at", to.toISOString())
+      .order("posted_at", { ascending: false });
+
+    if (Array.isArray(platforms) && platforms.length > 0) {
+      query = query.in("platform", platforms);
+    }
+    const { data: allReviews, error: reviewError } = await query;
 
     if (reviewError) throw reviewError;
 
-    if (!reviews || reviews.length === 0) {
+    const inWindow = (r: any, a: Date, b: Date) => {
+      const d = new Date(r.posted_at).getTime();
+      return d >= a.getTime() && d <= b.getTime();
+    };
+    const reviews = (allReviews || []).filter((r: any) => inWindow(r, from, to));
+    const prevReviews = (allReviews || []).filter((r: any) => inWindow(r, prevFrom, prevTo));
+
+    if (reviews.length === 0) {
       return new Response(
-        JSON.stringify({ error: "No reviews found for analysis" }),
+        JSON.stringify({ error: "Seçili dönemde yorum bulunamadı." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -51,75 +79,83 @@ serve(async (req) => {
       .from("reply_logs")
       .select("*")
       .eq("business_id", business_id)
-      .order("created_at", { ascending: false })
-      .limit(200);
+      .gte("created_at", from.toISOString())
+      .lte("created_at", to.toISOString())
+      .order("created_at", { ascending: false });
 
-    // Build review summary for AI
-    const reviewSummary = reviews.map((r: any) => ({
-      rating: r.rating,
-      text: r.text?.substring(0, 300) || "",
-      sentiment: r.sentiment,
-      posted_at: r.posted_at,
-      status: r.status,
-      platform: r.platform,
-    }));
-
-    // Calculate basic stats
-    const totalReviews = reviews.length;
-    const avgRating = reviews.reduce((s: number, r: any) => s + r.rating, 0) / totalReviews;
-    const sentimentCounts = {
-      positive: reviews.filter((r: any) => r.sentiment === "positive").length,
-      neutral: reviews.filter((r: any) => r.sentiment === "neutral").length,
-      negative: reviews.filter((r: any) => r.sentiment === "negative").length,
+    // ---- Compute stats for current & previous period ----
+    const computeStats = (arr: any[]) => {
+      const total = arr.length;
+      const avg = total > 0 ? arr.reduce((s, r) => s + (r.rating || 0), 0) / total : 0;
+      const sent = {
+        positive: arr.filter((r) => r.sentiment === "positive").length,
+        neutral: arr.filter((r) => r.sentiment === "neutral").length,
+        negative: arr.filter((r) => r.sentiment === "negative").length,
+      };
+      const replied = arr.filter((r) => r.status === "replied").length;
+      const replyRate = total > 0 ? (replied / total) * 100 : 0;
+      return { total, avg, sent, replied, replyRate };
     };
-    const repliedCount = reviews.filter((r: any) => r.status === "replied").length;
-    const replyRate = totalReviews > 0 ? (repliedCount / totalReviews) * 100 : 0;
+    const cur = computeStats(reviews);
+    const prev = computeStats(prevReviews);
 
-    // Reply performance
     const avgResponseTime = replyLogs && replyLogs.length > 0
       ? replyLogs.reduce((s: number, l: any) => s + (l.response_time_hours || 0), 0) / replyLogs.length
       : null;
 
-    const prompt = `Sen kıdemli bir müşteri deneyimi analistisin. Aşağıdaki yorumları analiz edip TÜRKÇE, TEMİZ ve MADDE MADDE bir rapor yaz.
+    const pct = (a: number, b: number) => (b === 0 ? null : ((a - b) / b) * 100);
 
-VERİLER:
-- Toplam Yorum: ${totalReviews}
-- Ortalama Puan: ${avgRating.toFixed(1)}/5
-- Duygu: Pozitif ${sentimentCounts.positive} • Nötr ${sentimentCounts.neutral} • Negatif ${sentimentCounts.negative}
-- Yanıt Oranı: %${replyRate.toFixed(0)}${avgResponseTime !== null ? ` • Ortalama Yanıt Süresi: ${avgResponseTime.toFixed(1)} saat` : ""}
+    // Platform breakdown
+    const platformCounts: Record<string, number> = {};
+    reviews.forEach((r: any) => {
+      platformCounts[r.platform] = (platformCounts[r.platform] || 0) + 1;
+    });
 
-YORUMLAR (JSON, en yeni ${Math.min(totalReviews, 200)}):
-${JSON.stringify(reviewSummary, null, 0)}
+    // Build compact review sample for AI (cap tokens)
+    const sample = reviews.slice(0, 180).map((r: any) => ({
+      r: r.rating,
+      s: r.sentiment,
+      p: r.platform,
+      d: r.posted_at?.substring(0, 10),
+      t: (r.text || r.content || "").substring(0, 260),
+    }));
 
-ÇIKTI KURALLARI (ÇOK ÖNEMLİ):
-- Sadece Markdown döndür. Girişe/kapanışa selamlama, açıklama, "işte rapor" gibi cümleler EKLEME.
-- Her başlık altında SADECE kısa bullet maddeler kullan; paragraf yazma.
-- Her bullet en fazla 1 cümle (maks. 20 kelime). Süslü dil yok, net ve iş odaklı yaz.
-- Somut örnek verirken tırnak içinde 5-10 kelimelik alıntı kullan.
-- Yüzde/sayı verdiğinde net rakam yaz. Uydurma; sadece verilerden çıkar.
-- Aynı fikri iki başlıkta tekrarlama.
-- Emoji SADECE başlıklarda kullan.
+    const isEN = language === "en";
+    const langInstr = isEN
+      ? "Write ALL output text in professional English business language."
+      : "TÜM çıktı metnini profesyonel Türkçe iş dilinde yaz. Pazarlama dili, emoji, abartı KULLANMA.";
 
-TAM OLARAK ŞU YAPIYI KULLAN:
+    const reportTypeInstr = report_type === "detailed"
+      ? (isEN ? "Deep detailed analysis. 6-8 themes each side, 5-7 actions." : "Detaylı analiz. Her taraf için 6-8 tema, 5-7 aksiyon.")
+      : report_type === "competitor"
+      ? (isEN ? "Executive summary framed as competitive benchmarking against local hospitality standards." : "Rakip kıyaslama çerçevesinde yönetici özeti; yerel sektör standartlarına göre konumlan.")
+      : (isEN ? "Concise executive summary. 4 themes each side, 4-5 actions." : "Kısa yönetici özeti. Her taraf için 4 tema, 4-5 aksiyon.");
 
-## 📊 Özet
-- 3-4 madde: genel durum, ortalama puan yorumu, en dikkat çekici trend, öncelikli aksiyon.
+    const prompt = `${langInstr}
+${reportTypeInstr}
 
-## 💪 Güçlü Yönler
-- 4-6 madde. Format: **Konu** — kısa açıklama. Örn: **Temizlik** — "odalar tertemiz" (12 yorumda geçiyor).
+CONTEXT DATA (do not repeat verbatim; derive insights):
+- Period: ${from.toISOString().slice(0,10)} → ${to.toISOString().slice(0,10)}
+- Reviews: ${cur.total} (prev period: ${prev.total})
+- Avg rating: ${cur.avg.toFixed(2)}/5 (prev: ${prev.avg.toFixed(2)})
+- Sentiment: +${cur.sent.positive} / =${cur.sent.neutral} / -${cur.sent.negative}
+- Reply rate: ${cur.replyRate.toFixed(0)}%${avgResponseTime !== null ? ` • Avg response time: ${avgResponseTime.toFixed(1)}h` : ""}
+- Platforms: ${JSON.stringify(platformCounts)}
 
-## ⚠️ İyileştirme Alanları
-- 4-6 madde. Format: **Sorun** — etkisi + örnek alıntı.
+REVIEWS (JSON, ${sample.length} most recent):
+${JSON.stringify(sample)}
 
-## 📈 Trend
-- 3-4 madde: son 30/90 gün karşılaştırması, puan yönü, artan/azalan şikayet konuları.
+Return ONLY valid JSON matching this exact TypeScript shape — no prose, no markdown fences:
+{
+  "executiveSummary": string[],            // 4-6 bullets, action-oriented, <=22 words each
+  "strengths": Array<{ "topic": string, "description": string, "count": number, "quote": string }>,   // count = approx mentions, quote 5-12 words in original language
+  "improvements": Array<{ "topic": string, "description": string, "count": number, "quote": string }>,
+  "themes": Array<{ "name": string, "count": number, "sentiment": "positive"|"neutral"|"negative" }>, // 8-12 recurring themes
+  "actions": Array<{ "title": string, "description": string, "impact": "high"|"medium"|"low", "effort": "high"|"medium"|"low" }>,   // ordered by priority
+  "trend": string[]                        // 3-4 bullets comparing current vs previous period
+}
 
-## 🎯 Aksiyon Önerileri
-- 4-6 madde. Her madde şu formatta: **Aksiyon** — beklenen etki (kısa).
-- Öncelik sırasına göre yaz (en kritik en üstte).
-
-## 🔑 Anahtar Konular
-- Tek satırda virgülle ayrılmış 8-12 konu (ör: temizlik (24), personel (18), kahvaltı (15) ...). Parantez içinde yaklaşık geçme sayısı.`;
+Rules: Use ONLY facts derivable from the data. Never invent numbers. Quotes must be real fragments from reviews. Keep each bullet <=22 words. No emoji anywhere.`;
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -129,8 +165,14 @@ TAM OLARAK ŞU YAPIYI KULLAN:
       },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
+        response_format: { type: "json_object" },
         messages: [
-          { role: "system", content: "Sen profesyonel bir işletme danışmanı ve yorum analiz uzmanısın." },
+          {
+            role: "system",
+            content: isEN
+              ? "You are a senior customer experience consultant producing enterprise-grade B2B reports. Return strict JSON only."
+              : "Sen kurumsal B2B raporlar üreten kıdemli bir müşteri deneyimi danışmanısın. Sadece geçerli JSON döndür.",
+          },
           { role: "user", content: prompt },
         ],
       }),
@@ -153,21 +195,37 @@ TAM OLARAK ŞU YAPIYI KULLAN:
     }
 
     const aiData = await aiResponse.json();
-    const analysisText = aiData.choices?.[0]?.message?.content || "";
+    const raw = aiData.choices?.[0]?.message?.content || "{}";
+    let structured: any = {};
+    try {
+      structured = JSON.parse(raw);
+    } catch {
+      const m = raw.match(/\{[\s\S]*\}/);
+      structured = m ? JSON.parse(m[0]) : {};
+    }
 
-    // Return everything
     return new Response(
       JSON.stringify({
-        analysis: analysisText,
+        structured,
         stats: {
-          totalReviews,
-          avgRating: parseFloat(avgRating.toFixed(1)),
-          sentimentCounts,
-          replyRate: parseFloat(replyRate.toFixed(0)),
+          totalReviews: cur.total,
+          avgRating: parseFloat(cur.avg.toFixed(2)),
+          sentimentCounts: cur.sent,
+          replyRate: parseFloat(cur.replyRate.toFixed(0)),
           avgResponseTimeHours: avgResponseTime ? parseFloat(avgResponseTime.toFixed(1)) : null,
-          repliedCount,
+          repliedCount: cur.replied,
           pendingCount: reviews.filter((r: any) => r.status === "pending_reply" || !r.status).length,
+          platformCounts,
         },
+        deltas: {
+          totalReviews: pct(cur.total, prev.total),
+          avgRating: pct(cur.avg, prev.avg),
+          replyRate: pct(cur.replyRate, prev.replyRate),
+          positive: pct(cur.sent.positive, prev.sent.positive),
+          negative: pct(cur.sent.negative, prev.sent.negative),
+        },
+        period: { from: from.toISOString(), to: to.toISOString() },
+        previousPeriod: { from: prevFrom.toISOString(), to: prevTo.toISOString() },
         replyLogs: replyLogs || [],
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
