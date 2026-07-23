@@ -310,7 +310,7 @@ export default function Report() {
 
   ${aiReport ? `
   <div style="margin-bottom:24px">
-    <h2 style="font-size:16px;color:#1a1a2e;margin:0 0 8px">AI Analiz Raporu</h2>
+    <h2 style="font-size:16px;color:#1a1a2e;margin:0 0 8px">AI Raporu</h2>
     <div style="background:#f8f9fa;border-radius:12px;padding:16px;font-size:14px;color:#374151;line-height:1.6">
       ${aiReport.replace(/\n/g, "<br/>")}
     </div>
@@ -658,7 +658,7 @@ export default function Report() {
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base flex items-center gap-2">
                       <Brain className="h-4 w-4 text-primary" />
-                      AI İşletme Analiz Raporu
+                      AI Raporu
                     </CardTitle>
                     <Badge variant="secondary" className="text-xs">
                       <CheckCircle2 className="h-3 w-3 mr-1" />
@@ -740,7 +740,7 @@ export default function Report() {
                 <li>Genel metrikler (puan, yorum sayısı, yanıt oranı)</li>
                 <li>Duygu dağılımı</li>
                 <li>Platform dağılımı</li>
-                {aiReport && <li>AI analiz raporu</li>}
+                {aiReport && <li>AI raporu</li>}
               </ul>
             </div>
           </div>
