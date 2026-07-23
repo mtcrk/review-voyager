@@ -731,6 +731,39 @@ export default function Report() {
               </Card>
             )}
 
+            {/* Reviews list (optional) */}
+            {includeReviews && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4 text-primary" />
+                    Yorumlar ({reviews.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {reviews.map((r: any) => (
+                    <div key={r.id} className="border-b last:border-b-0 pb-3 last:pb-0">
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mb-1">
+                        <Badge variant="outline" className="text-[10px] capitalize">{r.platform}</Badge>
+                        <span className="flex items-center gap-0.5 text-amber-500">
+                          {Array.from({ length: r.rating }).map((_, i) => (
+                            <Star key={i} className="h-3 w-3 fill-current" />
+                          ))}
+                        </span>
+                        <span>{format(new Date(r.posted_at), "dd MMM yyyy", { locale: tr })}</span>
+                        {r.reviewer_name && <span>• {r.reviewer_name}</span>}
+                      </div>
+                      {r.content && (
+                        <p className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">
+                          {r.content}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Footer */}
             <div className="flex items-center justify-between pt-4 border-t text-xs text-muted-foreground">
               <div className="flex items-center gap-2">
