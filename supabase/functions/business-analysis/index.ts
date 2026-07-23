@@ -80,39 +80,46 @@ serve(async (req) => {
       ? replyLogs.reduce((s: number, l: any) => s + (l.response_time_hours || 0), 0) / replyLogs.length
       : null;
 
-    const prompt = `Sen bir işletme analiz uzmanısın. Aşağıdaki müşteri yorumlarını analiz et ve Türkçe olarak kapsamlı bir rapor hazırla.
+    const prompt = `Sen kıdemli bir müşteri deneyimi analistisin. Aşağıdaki yorumları analiz edip TÜRKÇE, TEMİZ ve MADDE MADDE bir rapor yaz.
 
-İŞLETME İSTATİSTİKLERİ:
+VERİLER:
 - Toplam Yorum: ${totalReviews}
 - Ortalama Puan: ${avgRating.toFixed(1)}/5
-- Duygu Dağılımı: Pozitif: ${sentimentCounts.positive}, Nötr: ${sentimentCounts.neutral}, Negatif: ${sentimentCounts.negative}
-- Yanıt Oranı: %${replyRate.toFixed(0)}
-${avgResponseTime !== null ? `- Ortalama Yanıt Süresi: ${avgResponseTime.toFixed(1)} saat` : ""}
+- Duygu: Pozitif ${sentimentCounts.positive} • Nötr ${sentimentCounts.neutral} • Negatif ${sentimentCounts.negative}
+- Yanıt Oranı: %${replyRate.toFixed(0)}${avgResponseTime !== null ? ` • Ortalama Yanıt Süresi: ${avgResponseTime.toFixed(1)} saat` : ""}
 
-SON YORUMLAR (en yeni ${Math.min(totalReviews, 200)} yorum):
+YORUMLAR (JSON, en yeni ${Math.min(totalReviews, 200)}):
 ${JSON.stringify(reviewSummary, null, 0)}
 
-Lütfen şu başlıklar altında analiz yap:
+ÇIKTI KURALLARI (ÇOK ÖNEMLİ):
+- Sadece Markdown döndür. Girişe/kapanışa selamlama, açıklama, "işte rapor" gibi cümleler EKLEME.
+- Her başlık altında SADECE kısa bullet maddeler kullan; paragraf yazma.
+- Her bullet en fazla 1 cümle (maks. 20 kelime). Süslü dil yok, net ve iş odaklı yaz.
+- Somut örnek verirken tırnak içinde 5-10 kelimelik alıntı kullan.
+- Yüzde/sayı verdiğinde net rakam yaz. Uydurma; sadece verilerden çıkar.
+- Aynı fikri iki başlıkta tekrarlama.
+- Emoji SADECE başlıklarda kullan.
 
-## 📊 Genel Durum Değerlendirmesi
-İşletmenin genel performansını 1-2 paragrafta özetle.
+TAM OLARAK ŞU YAPIYI KULLAN:
+
+## 📊 Özet
+- 3-4 madde: genel durum, ortalama puan yorumu, en dikkat çekici trend, öncelikli aksiyon.
 
 ## 💪 Güçlü Yönler
-Müşterilerin en çok beğendiği 3-5 konu (yorumlardan somut örneklerle).
+- 4-6 madde. Format: **Konu** — kısa açıklama. Örn: **Temizlik** — "odalar tertemiz" (12 yorumda geçiyor).
 
 ## ⚠️ İyileştirme Alanları
-En çok şikayet edilen veya düşük puan alan 3-5 konu (yorumlardan somut örneklerle).
+- 4-6 madde. Format: **Sorun** — etkisi + örnek alıntı.
 
-## 📈 Trend Analizi
-Zaman içindeki değişimi yorumla (iyileşme/kötüleşme).
+## 📈 Trend
+- 3-4 madde: son 30/90 gün karşılaştırması, puan yönü, artan/azalan şikayet konuları.
 
 ## 🎯 Aksiyon Önerileri
-İşletmenin hemen yapabileceği 3-5 somut öneri.
+- 4-6 madde. Her madde şu formatta: **Aksiyon** — beklenen etki (kısa).
+- Öncelik sırasına göre yaz (en kritik en üstte).
 
 ## 🔑 Anahtar Konular
-Yorumlarda en çok geçen konuları listele (ör: temizlik, fiyat, servis, konum, personel).
-
-Raporun profesyonel ama anlaşılır olsun. Emoji kullan, bullet pointler kullan.`;
+- Tek satırda virgülle ayrılmış 8-12 konu (ör: temizlik (24), personel (18), kahvaltı (15) ...). Parantez içinde yaklaşık geçme sayısı.`;
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
