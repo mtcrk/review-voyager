@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import {
   FileDown, Mail, CalendarIcon, Star, MessageSquare, ThumbsUp, ThumbsDown,
@@ -52,6 +54,7 @@ export default function Report() {
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [emailTo, setEmailTo] = useState("");
   const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [includeReviews, setIncludeReviews] = useState(false);
 
   // Fetch all reviews
   const { data: allReviews = [], isLoading } = useQuery({
@@ -263,6 +266,20 @@ export default function Report() {
       .map(([k, v]) => `<tr><td style="padding:8px 16px;border-bottom:1px solid #f0f0f0">${platformNames[k] || k}</td><td style="padding:8px 16px;border-bottom:1px solid #f0f0f0;text-align:right;font-weight:600">${v}</td></tr>`)
       .join("");
 
+    const reviewsBlock = includeReviews && reviews.length ? `
+  <div style="margin-bottom:24px">
+    <h2 style="font-size:16px;color:#1a1a2e;margin:0 0 8px">Yorumlar (${reviews.length})</h2>
+    <div style="background:#f8f9fa;border-radius:12px;padding:8px">
+      ${reviews.map((r: any) => `
+        <div style="padding:12px;border-bottom:1px solid #eef0f3">
+          <div style="font-size:12px;color:#6b7280;margin-bottom:4px">
+            ${platformNames[r.platform] || r.platform} • ${r.rating}★ • ${format(new Date(r.posted_at), "dd MMM yyyy", { locale: tr })}${r.reviewer_name ? ` • ${r.reviewer_name}` : ""}
+          </div>
+          <div style="font-size:13px;color:#374151;line-height:1.5;white-space:pre-wrap">${(r.content || "").replace(/</g, "&lt;")}</div>
+        </div>`).join("")}
+    </div>
+  </div>` : "";
+
     return `
 <!DOCTYPE html>
 <html>
@@ -315,6 +332,8 @@ export default function Report() {
       ${aiReport.replace(/\n/g, "<br/>")}
     </div>
   </div>` : ""}
+
+  ${reviewsBlock}
 
   <div style="text-align:center;padding-top:24px;border-top:1px solid #e5e7eb">
     <p style="color:#9ca3af;font-size:12px;margin:0">Bu rapor VoyageRespond tarafından otomatik oluşturulmuştur.</p>
