@@ -460,6 +460,15 @@ export default function Report() {
               </Popover>
             </div>
           </div>
+          <div className="flex items-center justify-between mt-4 pt-4 border-t">
+            <div>
+              <Label htmlFor="include-reviews" className="text-sm font-medium">Yorumları rapora ekle</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Açıldığında tüm yorumlar tam metinleriyle rapora ve PDF/E-posta çıktısına eklenir.
+              </p>
+            </div>
+            <Switch id="include-reviews" checked={includeReviews} onCheckedChange={setIncludeReviews} />
+          </div>
         </CardContent>
       </Card>
 
