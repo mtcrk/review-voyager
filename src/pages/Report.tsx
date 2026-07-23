@@ -675,7 +675,7 @@ export default function Report() {
                       <KpiCard label={t(lang, "totalReviews")} value={String(effectiveStats.total)} delta={deltas?.totalReviews} />
                       <KpiCard label={t(lang, "avgRating")} value={effectiveStats.avg.toFixed(2)} suffix="/5" delta={deltas?.avgRating} icon={Star} />
                       <KpiCard label={t(lang, "replyRate")} value={`${effectiveStats.replyRate.toFixed(0)}%`} delta={deltas?.replyRate} />
-                      <KpiCard label={t(lang, "avgResponse")} value={effectiveStats.avgResponseTimeHours != null ? `${effectiveStats.avgResponseTimeHours}h` : "—"} />
+      <KpiCard label={t(lang, "avgResponse")} value={(effectiveStats as any).avgResponseTimeHours != null ? `${(effectiveStats as any).avgResponseTimeHours}h` : "—"} />
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
                       <KpiMini label={t(lang, "positive")} value={effectiveStats.sent.positive} color={CHART.positive} />
