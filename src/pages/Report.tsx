@@ -396,9 +396,9 @@ export default function Report() {
       const { error } = await supabase.functions.invoke("send-customer-email", {
         body: {
           business_id: activeBusiness.id,
-          to: emailTo,
+          recipients: [{ email: emailTo }],
           subject: `${activeBusiness.name} — ${t(lang, "reportOf")} (${format(dateRange.from, "dd MMM yyyy", { locale })} – ${format(dateRange.to, "dd MMM yyyy", { locale })})`,
-          html,
+          body_html: html,
         },
       });
       if (error) throw error;
