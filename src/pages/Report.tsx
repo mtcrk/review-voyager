@@ -667,8 +667,37 @@ export default function Report() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="prose prose-sm max-w-none dark:prose-invert">
-                    <ReactMarkdown>{aiReport}</ReactMarkdown>
+                  <div className="max-w-none text-sm leading-relaxed text-foreground">
+                    <ReactMarkdown
+                      components={{
+                        h2: ({ children }) => (
+                          <h2 className="mt-6 mb-3 text-base font-semibold text-foreground border-b pb-2 flex items-center gap-2">
+                            {children}
+                          </h2>
+                        ),
+                        h3: ({ children }) => (
+                          <h3 className="mt-4 mb-2 text-sm font-semibold text-foreground">{children}</h3>
+                        ),
+                        ul: ({ children }) => (
+                          <ul className="my-2 space-y-1.5 pl-1">{children}</ul>
+                        ),
+                        li: ({ children }) => (
+                          <li className="flex gap-2 text-sm text-foreground/90">
+                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                            <span className="flex-1">{children}</span>
+                          </li>
+                        ),
+                        p: ({ children }) => (
+                          <p className="my-2 text-sm text-foreground/90">{children}</p>
+                        ),
+                        strong: ({ children }) => (
+                          <strong className="font-semibold text-foreground">{children}</strong>
+                        ),
+                        em: ({ children }) => <em className="text-foreground/80">{children}</em>,
+                      }}
+                    >
+                      {aiReport}
+                    </ReactMarkdown>
                   </div>
                 </CardContent>
               </Card>
