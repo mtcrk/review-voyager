@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import {
   FileDown, Mail, CalendarIcon, Star, MessageSquare, ThumbsUp, ThumbsDown,
@@ -52,6 +54,7 @@ export default function Report() {
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [emailTo, setEmailTo] = useState("");
   const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [includeReviews, setIncludeReviews] = useState(false);
 
   // Fetch all reviews
   const { data: allReviews = [], isLoading } = useQuery({
@@ -263,6 +266,20 @@ export default function Report() {
       .map(([k, v]) => `<tr><td style="padding:8px 16px;border-bottom:1px solid #f0f0f0">${platformNames[k] || k}</td><td style="padding:8px 16px;border-bottom:1px solid #f0f0f0;text-align:right;font-weight:600">${v}</td></tr>`)
       .join("");
 
+    const reviewsBlock = includeReviews && reviews.length ? `
+  <div style="margin-bottom:24px">
+    <h2 style="font-size:16px;color:#1a1a2e;margin:0 0 8px">Yorumlar (${reviews.length})</h2>
+    <div style="background:#f8f9fa;border-radius:12px;padding:8px">
+      ${reviews.map((r: any) => `
+        <div style="padding:12px;border-bottom:1px solid #eef0f3">
+          <div style="font-size:12px;color:#6b7280;margin-bottom:4px">
+            ${platformNames[r.platform] || r.platform} • ${r.rating}★ • ${format(new Date(r.posted_at), "dd MMM yyyy", { locale: tr })}${r.reviewer_name ? ` • ${r.reviewer_name}` : ""}
+          </div>
+          <div style="font-size:13px;color:#374151;line-height:1.5;white-space:pre-wrap">${(r.content || "").replace(/</g, "&lt;")}</div>
+        </div>`).join("")}
+    </div>
+  </div>` : "";
+
     return `
 <!DOCTYPE html>
 <html>
@@ -315,6 +332,8 @@ export default function Report() {
       ${aiReport.replace(/\n/g, "<br/>")}
     </div>
   </div>` : ""}
+
+  ${reviewsBlock}
 
   <div style="text-align:center;padding-top:24px;border-top:1px solid #e5e7eb">
     <p style="color:#9ca3af;font-size:12px;margin:0">Bu rapor VoyageRespond tarafından otomatik oluşturulmuştur.</p>
@@ -440,6 +459,15 @@ export default function Report() {
                 </PopoverContent>
               </Popover>
             </div>
+          </div>
+          <div className="flex items-center justify-between mt-4 pt-4 border-t">
+            <div>
+              <Label htmlFor="include-reviews" className="text-sm font-medium">Yorumları rapora ekle</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Açıldığında tüm yorumlar tam metinleriyle rapora ve PDF/E-posta çıktısına eklenir.
+              </p>
+            </div>
+            <Switch id="include-reviews" checked={includeReviews} onCheckedChange={setIncludeReviews} />
           </div>
         </CardContent>
       </Card>
@@ -703,6 +731,39 @@ export default function Report() {
               </Card>
             )}
 
+            {/* Reviews list (optional) */}
+            {includeReviews && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4 text-primary" />
+                    Yorumlar ({reviews.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {reviews.map((r: any) => (
+                    <div key={r.id} className="border-b last:border-b-0 pb-3 last:pb-0">
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mb-1">
+                        <Badge variant="outline" className="text-[10px] capitalize">{r.platform}</Badge>
+                        <span className="flex items-center gap-0.5 text-amber-500">
+                          {Array.from({ length: r.rating }).map((_, i) => (
+                            <Star key={i} className="h-3 w-3 fill-current" />
+                          ))}
+                        </span>
+                        <span>{format(new Date(r.posted_at), "dd MMM yyyy", { locale: tr })}</span>
+                        {r.reviewer_name && <span>• {r.reviewer_name}</span>}
+                      </div>
+                      {r.content && (
+                        <p className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">
+                          {r.content}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Footer */}
             <div className="flex items-center justify-between pt-4 border-t text-xs text-muted-foreground">
               <div className="flex items-center gap-2">
@@ -741,6 +802,7 @@ export default function Report() {
                 <li>Duygu dağılımı</li>
                 <li>Platform dağılımı</li>
                 {aiReport && <li>AI raporu</li>}
+                {includeReviews && <li>Tüm yorumların tam metni ({reviews.length})</li>}
               </ul>
             </div>
           </div>
