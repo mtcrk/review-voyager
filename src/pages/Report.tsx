@@ -362,7 +362,7 @@ export default function Report() {
             className="gap-2"
           >
             {analysisMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brain className="h-4 w-4" />}
-            {analysisMutation.isPending ? "Analiz..." : "AI Analiz"}
+            {analysisMutation.isPending ? "Rapor oluşturuluyor..." : "AI Rapor Oluştur"}
           </Button>
           <Button
             onClick={handleExportPDF}
