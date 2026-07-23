@@ -733,11 +733,6 @@ export default function Report() {
 
             {/* Footer */}
             <div className="flex items-center justify-between pt-4 border-t text-xs text-muted-foreground">
-              {/* placeholder */}
-            </div>
-          </>
-        )}
-      </div>
               <div className="flex items-center gap-2">
                 <img src={logo} alt="VoyageRespond" className="h-5 w-5" />
                 <span>VoyageRespond ile oluşturulmuştur</span>
