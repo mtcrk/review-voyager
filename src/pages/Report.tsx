@@ -802,6 +802,7 @@ export default function Report() {
                 <li>Duygu dağılımı</li>
                 <li>Platform dağılımı</li>
                 {aiReport && <li>AI raporu</li>}
+                {includeReviews && <li>Tüm yorumların tam metni ({reviews.length})</li>}
               </ul>
             </div>
           </div>
