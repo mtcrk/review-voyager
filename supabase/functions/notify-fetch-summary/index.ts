@@ -486,6 +486,9 @@ Deno.serve(async (req) => {
 
     // Normalize payload: support both old (single business) and new (user + locations) formats
     let userId: string | undefined = body.user_id;
+    const extraRecipients: string[] = Array.isArray(body.extra_recipients) ? body.extra_recipients : [];
+    const skipOwner: boolean = body.skip_owner === true;
+    const skipAdmin: boolean = body.skip_admin === true;
     let locations: Array<{
       business_id: string;
       business_name?: string;
@@ -621,7 +624,10 @@ Deno.serve(async (req) => {
     const adminPayload = buildSummaryPayload(enrichedLocations);
     const recipients = new Set<string>([ADMIN_EMAIL]);
 
-    const adminRes = await fetch("https://api.resend.com/emails", {
+    const adminToList: string[] = skipAdmin ? [] : [ADMIN_EMAIL];
+    if (skipAdmin) recipients.delete(ADMIN_EMAIL);
+    for (const r of extraRecipients) { adminToList.push(r); recipients.add(r); }
+    const adminRes = adminToList.length > 0 ? await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -630,15 +636,15 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         from: "VoyageRespond <notify@voyagerespond.com>",
         reply_to: "metecorukbasari@gmail.com",
-        to: [ADMIN_EMAIL],
+        to: adminToList,
         subject: adminPayload.subject,
         html: adminPayload.html,
       }),
-    });
+    }) : null;
 
-    const adminResult = await adminRes.json();
+    const adminResult = adminRes ? await adminRes.json() : { skipped: true };
 
-    if (ownerEmail && ownerEligibleLocations.length > 0) {
+    if (!skipOwner && ownerEmail && ownerEligibleLocations.length > 0) {
       const ownerPayload = buildSummaryPayload(ownerEligibleLocations);
       const ownerRes = await fetch("https://api.resend.com/emails", {
         method: "POST",
