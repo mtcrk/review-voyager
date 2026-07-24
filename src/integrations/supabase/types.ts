@@ -757,6 +757,58 @@ export type Database = {
           },
         ]
       }
+      conversation_windows: {
+        Row: {
+          business_id: string
+          channel_id: string
+          created_at: string
+          expires_at: string
+          guest_id: string
+          id: string
+          opened_at: string
+        }
+        Insert: {
+          business_id: string
+          channel_id: string
+          created_at?: string
+          expires_at: string
+          guest_id: string
+          id?: string
+          opened_at?: string
+        }
+        Update: {
+          business_id?: string
+          channel_id?: string
+          created_at?: string
+          expires_at?: string
+          guest_id?: string
+          id?: string
+          opened_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_windows_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversation_windows_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversation_windows_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_contacts: {
         Row: {
           business_id: string
@@ -935,6 +987,261 @@ export type Database = {
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "customer_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      extra_requests: {
+        Row: {
+          business_id: string
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          guest_id: string
+          guest_stay_id: string | null
+          hotel_extra_id: string
+          id: string
+          note: string | null
+          quantity: number
+          requested_for_date: string | null
+          status: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          guest_id: string
+          guest_stay_id?: string | null
+          hotel_extra_id: string
+          id?: string
+          note?: string | null
+          quantity?: number
+          requested_for_date?: string | null
+          status?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          guest_id?: string
+          guest_stay_id?: string | null
+          hotel_extra_id?: string
+          id?: string
+          note?: string | null
+          quantity?: number
+          requested_for_date?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "extra_requests_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "extra_requests_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "extra_requests_guest_stay_id_fkey"
+            columns: ["guest_stay_id"]
+            isOneToOne: false
+            referencedRelation: "guest_stays"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "extra_requests_hotel_extra_id_fkey"
+            columns: ["hotel_extra_id"]
+            isOneToOne: false
+            referencedRelation: "hotel_extras"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guest_stays: {
+        Row: {
+          business_id: string
+          check_in_date: string
+          check_out_date: string
+          created_at: string
+          guest_id: string
+          id: string
+          reservation_ref: string | null
+          room_type: string | null
+          source: string
+          status: string
+        }
+        Insert: {
+          business_id: string
+          check_in_date: string
+          check_out_date: string
+          created_at?: string
+          guest_id: string
+          id?: string
+          reservation_ref?: string | null
+          room_type?: string | null
+          source?: string
+          status?: string
+        }
+        Update: {
+          business_id?: string
+          check_in_date?: string
+          check_out_date?: string
+          created_at?: string
+          guest_id?: string
+          id?: string
+          reservation_ref?: string | null
+          room_type?: string | null
+          source?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guest_stays_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guest_stays_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guests: {
+        Row: {
+          business_id: string
+          consent_at: string | null
+          consent_source: string | null
+          consent_status: string
+          country_code: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          iys_synced_at: string | null
+          locale: string | null
+          opted_out_at: string | null
+          phone_number: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          consent_at?: string | null
+          consent_source?: string | null
+          consent_status?: string
+          country_code?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          iys_synced_at?: string | null
+          locale?: string | null
+          opted_out_at?: string | null
+          phone_number: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          consent_at?: string | null
+          consent_source?: string | null
+          consent_status?: string
+          country_code?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          iys_synced_at?: string | null
+          locale?: string | null
+          opted_out_at?: string | null
+          phone_number?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guests_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hotel_extras: {
+        Row: {
+          approval_type: string
+          available_from: string | null
+          available_to: string | null
+          business_id: string
+          category: string
+          created_at: string
+          currency: string
+          daily_capacity: number | null
+          description: Json
+          id: string
+          is_active: boolean
+          lead_time_hours: number
+          min_nights: number | null
+          name: Json
+          price: number
+          sort_order: number
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          approval_type?: string
+          available_from?: string | null
+          available_to?: string | null
+          business_id: string
+          category: string
+          created_at?: string
+          currency?: string
+          daily_capacity?: number | null
+          description?: Json
+          id?: string
+          is_active?: boolean
+          lead_time_hours?: number
+          min_nights?: number | null
+          name?: Json
+          price?: number
+          sort_order?: number
+          unit: string
+          updated_at?: string
+        }
+        Update: {
+          approval_type?: string
+          available_from?: string | null
+          available_to?: string | null
+          business_id?: string
+          category?: string
+          created_at?: string
+          currency?: string
+          daily_capacity?: number | null
+          description?: Json
+          id?: string
+          is_active?: boolean
+          lead_time_hours?: number
+          min_nights?: number | null
+          name?: Json
+          price?: number
+          sort_order?: number
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hotel_extras_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
             referencedColumns: ["id"]
           },
         ]
@@ -2223,6 +2530,220 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      whatsapp_channels: {
+        Row: {
+          business_id: string
+          connected_at: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          phone_number: string
+          provider: string
+          provider_account_ref: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          connected_at?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          phone_number: string
+          provider: string
+          provider_account_ref?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          connected_at?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          phone_number?: string
+          provider?: string
+          provider_account_ref?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_channels_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_messages: {
+        Row: {
+          body_text: string | null
+          business_id: string
+          category: string
+          channel_id: string
+          cost_currency: string
+          cost_estimate: number
+          created_at: string
+          direction: string
+          error_code: string | null
+          error_message: string | null
+          guest_id: string | null
+          id: string
+          meta_fee: number
+          provider: string
+          provider_fee: number
+          provider_message_id: string | null
+          recipient_country: string | null
+          service_window_open: boolean
+          status: string
+          template_id: string | null
+        }
+        Insert: {
+          body_text?: string | null
+          business_id: string
+          category: string
+          channel_id: string
+          cost_currency?: string
+          cost_estimate?: number
+          created_at?: string
+          direction: string
+          error_code?: string | null
+          error_message?: string | null
+          guest_id?: string | null
+          id?: string
+          meta_fee?: number
+          provider: string
+          provider_fee?: number
+          provider_message_id?: string | null
+          recipient_country?: string | null
+          service_window_open?: boolean
+          status?: string
+          template_id?: string | null
+        }
+        Update: {
+          body_text?: string | null
+          business_id?: string
+          category?: string
+          channel_id?: string
+          cost_currency?: string
+          cost_estimate?: number
+          created_at?: string
+          direction?: string
+          error_code?: string | null
+          error_message?: string | null
+          guest_id?: string | null
+          id?: string
+          meta_fee?: number
+          provider?: string
+          provider_fee?: number
+          provider_message_id?: string | null
+          recipient_country?: string | null
+          service_window_open?: boolean
+          status?: string
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_messages_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_messages_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_messages_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_messages_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_templates: {
+        Row: {
+          approved_at: string | null
+          body_text: string
+          business_id: string
+          category: string
+          channel_id: string | null
+          created_at: string
+          id: string
+          language: string
+          name: string
+          provider_template_ref: string | null
+          rejection_reason: string | null
+          status: string
+          submitted_at: string | null
+          updated_at: string
+          variables: Json
+        }
+        Insert: {
+          approved_at?: string | null
+          body_text: string
+          business_id: string
+          category: string
+          channel_id?: string | null
+          created_at?: string
+          id?: string
+          language: string
+          name: string
+          provider_template_ref?: string | null
+          rejection_reason?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          variables?: Json
+        }
+        Update: {
+          approved_at?: string | null
+          body_text?: string
+          business_id?: string
+          category?: string
+          channel_id?: string | null
+          created_at?: string
+          id?: string
+          language?: string
+          name?: string
+          provider_template_ref?: string | null
+          rejection_reason?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          variables?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_templates_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_templates_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_channels"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       youtube_comments: {
         Row: {
