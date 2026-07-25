@@ -995,6 +995,7 @@ export type Database = {
         Row: {
           business_id: string
           created_at: string
+          currency_snapshot: string | null
           decided_at: string | null
           decided_by: string | null
           guest_id: string
@@ -1002,6 +1003,7 @@ export type Database = {
           hotel_extra_id: string
           id: string
           note: string | null
+          price_snapshot: number | null
           quantity: number
           requested_for_date: string | null
           status: string
@@ -1009,6 +1011,7 @@ export type Database = {
         Insert: {
           business_id: string
           created_at?: string
+          currency_snapshot?: string | null
           decided_at?: string | null
           decided_by?: string | null
           guest_id: string
@@ -1016,6 +1019,7 @@ export type Database = {
           hotel_extra_id: string
           id?: string
           note?: string | null
+          price_snapshot?: number | null
           quantity?: number
           requested_for_date?: string | null
           status?: string
@@ -1023,6 +1027,7 @@ export type Database = {
         Update: {
           business_id?: string
           created_at?: string
+          currency_snapshot?: string | null
           decided_at?: string | null
           decided_by?: string | null
           guest_id?: string
@@ -1030,6 +1035,7 @@ export type Database = {
           hotel_extra_id?: string
           id?: string
           note?: string | null
+          price_snapshot?: number | null
           quantity?: number
           requested_for_date?: string | null
           status?: string
@@ -1067,9 +1073,11 @@ export type Database = {
       }
       guest_stays: {
         Row: {
+          adults: number | null
           business_id: string
           check_in_date: string
           check_out_date: string
+          children: number | null
           created_at: string
           guest_id: string
           id: string
@@ -1079,9 +1087,11 @@ export type Database = {
           status: string
         }
         Insert: {
+          adults?: number | null
           business_id: string
           check_in_date: string
           check_out_date: string
+          children?: number | null
           created_at?: string
           guest_id: string
           id?: string
@@ -1091,9 +1101,11 @@ export type Database = {
           status?: string
         }
         Update: {
+          adults?: number | null
           business_id?: string
           check_in_date?: string
           check_out_date?: string
+          children?: number | null
           created_at?: string
           guest_id?: string
           id?: string
@@ -2536,8 +2548,10 @@ export type Database = {
           business_id: string
           connected_at: string | null
           created_at: string
+          credentials_secret_name: string | null
           display_name: string | null
           id: string
+          is_active: boolean
           phone_number: string
           provider: string
           provider_account_ref: string | null
@@ -2548,8 +2562,10 @@ export type Database = {
           business_id: string
           connected_at?: string | null
           created_at?: string
+          credentials_secret_name?: string | null
           display_name?: string | null
           id?: string
+          is_active?: boolean
           phone_number: string
           provider: string
           provider_account_ref?: string | null
@@ -2560,8 +2576,10 @@ export type Database = {
           business_id?: string
           connected_at?: string | null
           created_at?: string
+          credentials_secret_name?: string | null
           display_name?: string | null
           id?: string
+          is_active?: boolean
           phone_number?: string
           provider?: string
           provider_account_ref?: string | null
@@ -2580,6 +2598,7 @@ export type Database = {
       }
       whatsapp_messages: {
         Row: {
+          billable: boolean
           body_text: string | null
           business_id: string
           category: string
@@ -2587,6 +2606,7 @@ export type Database = {
           cost_currency: string
           cost_estimate: number
           created_at: string
+          delivered_at: string | null
           direction: string
           error_code: string | null
           error_message: string | null
@@ -2597,11 +2617,13 @@ export type Database = {
           provider_fee: number
           provider_message_id: string | null
           recipient_country: string | null
+          sent_at: string | null
           service_window_open: boolean
           status: string
           template_id: string | null
         }
         Insert: {
+          billable?: boolean
           body_text?: string | null
           business_id: string
           category: string
@@ -2609,6 +2631,7 @@ export type Database = {
           cost_currency?: string
           cost_estimate?: number
           created_at?: string
+          delivered_at?: string | null
           direction: string
           error_code?: string | null
           error_message?: string | null
@@ -2619,11 +2642,13 @@ export type Database = {
           provider_fee?: number
           provider_message_id?: string | null
           recipient_country?: string | null
+          sent_at?: string | null
           service_window_open?: boolean
           status?: string
           template_id?: string | null
         }
         Update: {
+          billable?: boolean
           body_text?: string | null
           business_id?: string
           category?: string
@@ -2631,6 +2656,7 @@ export type Database = {
           cost_currency?: string
           cost_estimate?: number
           created_at?: string
+          delivered_at?: string | null
           direction?: string
           error_code?: string | null
           error_message?: string | null
@@ -2641,6 +2667,7 @@ export type Database = {
           provider_fee?: number
           provider_message_id?: string | null
           recipient_country?: string | null
+          sent_at?: string | null
           service_window_open?: boolean
           status?: string
           template_id?: string | null
