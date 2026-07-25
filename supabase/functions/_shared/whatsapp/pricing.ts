@@ -1,19 +1,18 @@
 import type { MessageCategory } from "./types.ts";
 
 // Meta conversation fees (USD). Keys are ISO 3166-1 alpha-2 codes of the RECIPIENT.
+// NOTE: Meta updates this rate card quarterly — values here are indicative and
+// should be re-checked against the current Meta pricing sheet before invoicing.
 type MetaTable = Partial<Record<"marketing" | "utility" | "authentication", number>>;
 const META_FEES: Record<string, MetaTable> = {
   TR: { marketing: 0.0109, utility: 0.0009, authentication: 0.0009 },
-  DE: { marketing: 0.1365, utility: 0.055, authentication: 0.055 },
-  US: { marketing: 0.025, utility: 0.0034, authentication: 0.0034 },
-  CA: { marketing: 0.025, utility: 0.0034, authentication: 0.0034 },
-  GB: { marketing: 0.053, utility: 0.0264, authentication: 0.0264 },
-  FR: { marketing: 0.1432, utility: 0.077, authentication: 0.077 },
-  RU: { marketing: 0.0621, utility: 0.006, authentication: 0.006 },
-  SA: { marketing: 0.0356, utility: 0.006, authentication: 0.006 },
-  AE: { marketing: 0.0343, utility: 0.006, authentication: 0.006 },
+  DE: { marketing: 0.1365, utility: 0.0550, authentication: 0.0550 },
+  GB: { marketing: 0.0530, utility: 0.0264, authentication: 0.0264 },
+  RU: { marketing: 0.0621, utility: 0.0060, authentication: 0.0060 },
+  NL: { marketing: 0.1108, utility: 0.0400, authentication: 0.0400 },
+  US: { marketing: 0.0250, utility: 0.0034, authentication: 0.0034 },
 };
-const META_FEES_DEFAULT: MetaTable = { marketing: 0.05, utility: 0.005, authentication: 0.005 };
+const META_FEES_DEFAULT: MetaTable = { marketing: 0.0500, utility: 0.0050, authentication: 0.0050 };
 
 export const TWILIO_PROVIDER_FEE = 0.005;
 
