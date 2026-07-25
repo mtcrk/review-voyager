@@ -32,13 +32,17 @@ Deno.serve(async (req) => {
     }
 
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
+    const now = new Date().toISOString();
+    const patch: Record<string, unknown> = {
+      status: update.status,
+      error_code: update.errorCode ?? null,
+      error_message: update.errorMessage ?? null,
+    };
+    if (update.status === "sent") patch.sent_at = now;
+    if (update.status === "delivered") patch.delivered_at = now;
     const { error } = await supabase
       .from("whatsapp_messages")
-      .update({
-        status: update.status,
-        error_code: update.errorCode ?? null,
-        error_message: update.errorMessage ?? null,
-      })
+      .update(patch)
       .eq("provider_message_id", update.providerMessageId);
 
     if (error) throw error;
