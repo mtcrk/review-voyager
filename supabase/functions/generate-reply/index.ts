@@ -110,6 +110,7 @@ No markdown, no code fences, JSON only.`;
 
 function buildSystemPrompt(opts: {
   lang: "tr" | "en";
+  langForced?: boolean;
   tone: string;
   category: string;
   rating: number;
@@ -123,9 +124,13 @@ function buildSystemPrompt(opts: {
   gold: string[];
 }) {
   const {
-    lang, tone, category, rating, reviewer, businessName, city, platform,
+    lang, langForced, tone, category, rating, reviewer, businessName, city, platform,
     brandVoice, customInstructions, recentOpenings, gold,
   } = opts;
+  const langName = lang === "tr" ? "TURKISH (Türkçe)" : "ENGLISH";
+  const languageRule = langForced
+    ? `4. Write the ENTIRE reply in ${langName}, regardless of the language the guest wrote in. No other language, no translations, no bilingual output.`
+    : `4. Reply STRICTLY in the reviewer's language. Fallback hint: ${lang.toUpperCase()}.`;
   const toneCfg = toneDescriptions[tone] || toneDescriptions.friendly;
   const signature = brandVoice?.signature_name
     ? `${brandVoice.signature_name}${brandVoice.signature_role ? ", " + brandVoice.signature_role : ""}`
@@ -151,7 +156,7 @@ function buildSystemPrompt(opts: {
 1. The reply MUST reference at least one concrete, specific detail from the guest's review (person named, dish, room/location, specific complaint or praise). If nothing concrete is present, reference the specific rating experience — never a generic "great review".
 2. NEVER open with a generic thank-you cliché ("Thank you for your wonderful review", "Harika yorumunuz için çok teşekkür ederiz", "Dear valued customer", etc.). Open with the reviewer's name or a specific detail.
 3. Vary sentence structure and length. No template feel.
-4. Reply STRICTLY in the reviewer's language. Fallback hint: ${lang.toUpperCase()}.
+${languageRule}
 5. Do NOT use these forbidden phrases: ${JSON.stringify(brandVoice?.forbidden_phrases || [])}.
 6. Do NOT reuse or paraphrase these recent opening sentences from this business:
 ${recentOpenings.map((o, i) => `   ${i + 1}. "${o}"`).join("\n") || "   (none)"}
