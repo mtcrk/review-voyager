@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type ToneOption = "Friendly" | "Professional" | "Formal";
 const toneMap: Record<ToneOption, string> = {
@@ -16,11 +17,22 @@ const toneMap: Record<ToneOption, string> = {
   Formal: "formal",
 };
 
+const languageOptions: { value: string; label: string }[] = [
+  { value: "auto", label: "🌐 Misafirin dili" },
+  { value: "TR", label: "🇹🇷 Türkçe" },
+  { value: "EN", label: "🇬🇧 İngilizce" },
+  { value: "DE", label: "🇩🇪 Almanca" },
+  { value: "RU", label: "🇷🇺 Rusça" },
+  { value: "FR", label: "🇫🇷 Fransızca" },
+  { value: "AR", label: "🇸🇦 Arapça" },
+];
+
 const ReviewDetailPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const queryClient = useQueryClient();
   const [selectedTone, setSelectedTone] = useState<ToneOption>("Friendly");
+  const [replyLanguage, setReplyLanguage] = useState<string>("auto");
   const [aiReply, setAiReply] = useState("");
 
   // Fetch review from Supabase
@@ -193,7 +205,7 @@ const ReviewDetailPage = () => {
           reviewer_name: review.reviewer_name,
           rating: review.rating,
           tone: toneMap[selectedTone],
-          language: (review as any)?.businesses?.language || "TR",
+          language: replyLanguage,
           summary: review.summary,
           issues: review.issues,
           praises: review.praises,
@@ -447,6 +459,16 @@ const ReviewDetailPage = () => {
                       </button>
                     ))}
                   </div>
+                  <Select value={replyLanguage} onValueChange={setReplyLanguage}>
+                    <SelectTrigger className="h-9 w-auto px-2 gap-1" title="Yanıt dili">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {languageOptions.map((l) => (
+                        <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <Button
                     variant="outline"
                     size="sm"
