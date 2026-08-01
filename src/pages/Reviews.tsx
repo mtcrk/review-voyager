@@ -1339,6 +1339,21 @@ export default function Reviews() {
                                 ))}
                               </SelectContent>
                             </Select>
+                            <Select
+                              value={getReviewLang(review.id)}
+                              onValueChange={(v) => setReviewLang(review.id, v)}
+                            >
+                              <SelectTrigger className="h-7 w-7 p-0 border-0 bg-transparent shadow-none [&>svg:last-child]:hidden" title="Yanıt dili">
+                                <span className="text-sm">{languageOptions.find(l => l.value === getReviewLang(review.id))?.flag}</span>
+                              </SelectTrigger>
+                              <SelectContent>
+                                {languageOptions.map((l) => (
+                                  <SelectItem key={l.value} value={l.value}>
+                                    {l.flag} {l.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                             <Button
                               size="icon"
                               variant="ghost"
@@ -1365,6 +1380,21 @@ export default function Reviews() {
                               {toneOptions.map((t) => (
                                 <SelectItem key={t.value} value={t.value}>
                                   {t.emoji} {t.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Select
+                            value={getReviewLang(review.id)}
+                            onValueChange={(v) => setReviewLang(review.id, v)}
+                          >
+                            <SelectTrigger className="h-8 w-auto px-2 border rounded bg-background shadow-sm gap-1" title="Yanıt dili">
+                              <span className="text-sm">{languageOptions.find(l => l.value === getReviewLang(review.id))?.flag}</span>
+                            </SelectTrigger>
+                            <SelectContent>
+                              {languageOptions.map((l) => (
+                                <SelectItem key={l.value} value={l.value}>
+                                  {l.flag} {l.label}
                                 </SelectItem>
                               ))}
                             </SelectContent>
