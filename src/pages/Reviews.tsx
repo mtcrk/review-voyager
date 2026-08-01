@@ -383,6 +383,7 @@ export default function Reviews() {
   const [isGeneratingReply, setIsGeneratingReply] = useState(false);
   const [generatingIds, setGeneratingIds] = useState<Set<string>>(new Set());
   const [tonePerId, setTonePerId] = useState<Record<string, ToneOption>>({});
+  const [langPerId, setLangPerId] = useState<Record<string, string>>({});
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 25;
 
@@ -620,7 +621,7 @@ export default function Reviews() {
           rating: review.rating,
           sentiment: review.sentiment,
           tone: activeBusiness?.tone || 'Friendly',
-          language: activeBusiness?.language || 'TR',
+          language: replyLanguage,
           business_id: review.business_id,
           platform: review.platform,
         },
@@ -650,6 +651,11 @@ export default function Reviews() {
     setTonePerId(prev => ({ ...prev, [reviewId]: tone }));
   };
 
+  const getReviewLang = (reviewId: string): string => langPerId[reviewId] || "auto";
+  const setReviewLang = (reviewId: string, lang: string) => {
+    setLangPerId(prev => ({ ...prev, [reviewId]: lang }));
+  };
+
   // Inline AI reply generation for table rows
   const inlineGenerateMutation = useMutation({
     mutationFn: async (review: any) => {
@@ -662,7 +668,7 @@ export default function Reviews() {
           rating: review.rating,
           sentiment: review.sentiment,
           tone,
-          language: (review as any)?.businesses?.language || "TR",
+          language: getReviewLang(review.id),
           business_id: review.business_id,
           platform: review.platform,
         },
