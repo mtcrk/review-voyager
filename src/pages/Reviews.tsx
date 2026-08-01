@@ -97,6 +97,7 @@ export default function Reviews() {
   
   const [selectedReview, setSelectedReview] = useState<any>(null);
   const [replyText, setReplyText] = useState("");
+  const [replyLanguage, setReplyLanguage] = useState<string>("auto");
   
   // Filters and sorting
   const [searchQuery, setSearchQuery] = useState("");
@@ -1576,6 +1577,19 @@ export default function Reviews() {
                   <h3 className="text-sm font-semibold text-foreground">
                     AI Önerilen Yanıt
                   </h3>
+                  <div className="flex items-center gap-1">
+                  <Select value={replyLanguage} onValueChange={setReplyLanguage}>
+                    <SelectTrigger className="h-8 w-auto px-2 gap-1" title="Yanıt dili">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {languageOptions.map((l) => (
+                        <SelectItem key={l.value} value={l.value}>
+                          {l.flag} {l.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <Button
                     size="sm"
                     variant="ghost"
@@ -1585,6 +1599,7 @@ export default function Reviews() {
                     <Sparkles className={`h-4 w-4 mr-1 ${isGeneratingReply ? 'animate-spin' : ''}`} />
                     {isGeneratingReply ? 'Oluşturuluyor...' : 'Yeniden Oluştur'}
                   </Button>
+                  </div>
                 </div>
                 <Textarea
                   value={replyText}
