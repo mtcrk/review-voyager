@@ -233,6 +233,7 @@ serve(async (req) => {
       }
     }
 
+    const langForced = !!language && String(language).toLowerCase() !== "auto";
     const lang = detectLang(reviewText, language);
     const category = sentimentCategory(rating, sentiment);
     const goldKey = `${category}_${lang}`;
@@ -248,7 +249,7 @@ serve(async (req) => {
     ].filter(Boolean).join("\n");
 
     const systemPrompt = buildSystemPrompt({
-      lang, tone, category, rating, reviewer: reviewer_name, businessName, city, platform,
+      lang, langForced, tone, category, rating, reviewer: reviewer_name, businessName, city, platform,
       brandVoice, customInstructions: custom_instructions, recentOpenings, gold,
     });
     const userPrompt = `Generate a reply for this ${rating}-star ${category} review.
