@@ -67,6 +67,16 @@ const toneOptions: { value: ToneOption; label: string; emoji: string }[] = [
   { value: "enthusiastic", label: "Coşkulu", emoji: "🔥" },
 ];
 
+const languageOptions: { value: string; label: string; flag: string }[] = [
+  { value: "auto", label: "Misafirin dili", flag: "🌐" },
+  { value: "TR", label: "Türkçe", flag: "🇹🇷" },
+  { value: "EN", label: "İngilizce", flag: "🇬🇧" },
+  { value: "DE", label: "Almanca", flag: "🇩🇪" },
+  { value: "RU", label: "Rusça", flag: "🇷🇺" },
+  { value: "FR", label: "Fransızca", flag: "🇫🇷" },
+  { value: "AR", label: "Arapça", flag: "🇸🇦" },
+];
+
 const platformLabels: Record<string, { label: string; color: string }> = {
   google: { label: "Google", color: "bg-blue-50 text-blue-700 border-blue-200" },
   booking: { label: "Booking.com", color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
@@ -87,6 +97,7 @@ export default function Reviews() {
   
   const [selectedReview, setSelectedReview] = useState<any>(null);
   const [replyText, setReplyText] = useState("");
+  const [replyLanguage, setReplyLanguage] = useState<string>("auto");
   
   // Filters and sorting
   const [searchQuery, setSearchQuery] = useState("");
@@ -373,6 +384,7 @@ export default function Reviews() {
   const [isGeneratingReply, setIsGeneratingReply] = useState(false);
   const [generatingIds, setGeneratingIds] = useState<Set<string>>(new Set());
   const [tonePerId, setTonePerId] = useState<Record<string, ToneOption>>({});
+  const [langPerId, setLangPerId] = useState<Record<string, string>>({});
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 25;
 
@@ -610,7 +622,7 @@ export default function Reviews() {
           rating: review.rating,
           sentiment: review.sentiment,
           tone: activeBusiness?.tone || 'Friendly',
-          language: activeBusiness?.language || 'TR',
+          language: replyLanguage,
           business_id: review.business_id,
           platform: review.platform,
         },
@@ -640,6 +652,11 @@ export default function Reviews() {
     setTonePerId(prev => ({ ...prev, [reviewId]: tone }));
   };
 
+  const getReviewLang = (reviewId: string): string => langPerId[reviewId] || "auto";
+  const setReviewLang = (reviewId: string, lang: string) => {
+    setLangPerId(prev => ({ ...prev, [reviewId]: lang }));
+  };
+
   // Inline AI reply generation for table rows
   const inlineGenerateMutation = useMutation({
     mutationFn: async (review: any) => {
@@ -652,7 +669,7 @@ export default function Reviews() {
           rating: review.rating,
           sentiment: review.sentiment,
           tone,
-          language: (review as any)?.businesses?.language || "TR",
+          language: getReviewLang(review.id),
           business_id: review.business_id,
           platform: review.platform,
         },
@@ -1322,6 +1339,21 @@ export default function Reviews() {
                                 ))}
                               </SelectContent>
                             </Select>
+                            <Select
+                              value={getReviewLang(review.id)}
+                              onValueChange={(v) => setReviewLang(review.id, v)}
+                            >
+                              <SelectTrigger className="h-7 w-7 p-0 border-0 bg-transparent shadow-none [&>svg:last-child]:hidden" title="Yanıt dili">
+                                <span className="text-sm">{languageOptions.find(l => l.value === getReviewLang(review.id))?.flag}</span>
+                              </SelectTrigger>
+                              <SelectContent>
+                                {languageOptions.map((l) => (
+                                  <SelectItem key={l.value} value={l.value}>
+                                    {l.flag} {l.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                             <Button
                               size="icon"
                               variant="ghost"
@@ -1348,6 +1380,21 @@ export default function Reviews() {
                               {toneOptions.map((t) => (
                                 <SelectItem key={t.value} value={t.value}>
                                   {t.emoji} {t.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Select
+                            value={getReviewLang(review.id)}
+                            onValueChange={(v) => setReviewLang(review.id, v)}
+                          >
+                            <SelectTrigger className="h-8 w-auto px-2 border rounded bg-background shadow-sm gap-1" title="Yanıt dili">
+                              <span className="text-sm">{languageOptions.find(l => l.value === getReviewLang(review.id))?.flag}</span>
+                            </SelectTrigger>
+                            <SelectContent>
+                              {languageOptions.map((l) => (
+                                <SelectItem key={l.value} value={l.value}>
+                                  {l.flag} {l.label}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -1560,6 +1607,19 @@ export default function Reviews() {
                   <h3 className="text-sm font-semibold text-foreground">
                     AI Önerilen Yanıt
                   </h3>
+                  <div className="flex items-center gap-1">
+                  <Select value={replyLanguage} onValueChange={setReplyLanguage}>
+                    <SelectTrigger className="h-8 w-auto px-2 gap-1" title="Yanıt dili">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {languageOptions.map((l) => (
+                        <SelectItem key={l.value} value={l.value}>
+                          {l.flag} {l.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <Button
                     size="sm"
                     variant="ghost"
@@ -1569,6 +1629,7 @@ export default function Reviews() {
                     <Sparkles className={`h-4 w-4 mr-1 ${isGeneratingReply ? 'animate-spin' : ''}`} />
                     {isGeneratingReply ? 'Oluşturuluyor...' : 'Yeniden Oluştur'}
                   </Button>
+                  </div>
                 </div>
                 <Textarea
                   value={replyText}
