@@ -652,7 +652,7 @@ export default function Reviews() {
           rating: review.rating,
           sentiment: review.sentiment,
           tone,
-          language: "auto",
+          language: (review as any)?.businesses?.language || "TR",
           business_id: review.business_id,
           platform: review.platform,
         },
