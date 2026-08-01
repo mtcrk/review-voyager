@@ -67,6 +67,16 @@ const toneOptions: { value: ToneOption; label: string; emoji: string }[] = [
   { value: "enthusiastic", label: "Coşkulu", emoji: "🔥" },
 ];
 
+const languageOptions: { value: string; label: string; flag: string }[] = [
+  { value: "auto", label: "Misafirin dili", flag: "🌐" },
+  { value: "TR", label: "Türkçe", flag: "🇹🇷" },
+  { value: "EN", label: "İngilizce", flag: "🇬🇧" },
+  { value: "DE", label: "Almanca", flag: "🇩🇪" },
+  { value: "RU", label: "Rusça", flag: "🇷🇺" },
+  { value: "FR", label: "Fransızca", flag: "🇫🇷" },
+  { value: "AR", label: "Arapça", flag: "🇸🇦" },
+];
+
 const platformLabels: Record<string, { label: string; color: string }> = {
   google: { label: "Google", color: "bg-blue-50 text-blue-700 border-blue-200" },
   booking: { label: "Booking.com", color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
