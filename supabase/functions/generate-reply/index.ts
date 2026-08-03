@@ -28,6 +28,14 @@ const goldExamples: Record<string, string[]> = {
   neutral_en: [
     "Thanks David — great to hear the rooftop bar worked for you, and your note on the elevator wait is fair; it's already on our upgrade list for this quarter.",
   ],
+  mixed_tr: [
+    "Merhaba Burcu Hanım, havuz başındaki servisi ve Emre'nin ilgisini beğenmenize çok sevindik. Öte yandan odanızdaki su basıncının yetersiz kalması bizim standardımız değil; teknik ekibimiz bu hattı bu hafta gözden geçiriyor. Detayları paylaşmak isterseniz {contact} üzerinden bize yazabilirsiniz — tekrar ağırlamak isteriz.",
+    "Kaan Bey, kahvaltıdaki yerel ürün çeşitliliğini övmeniz bizim için değerli. Akşam restoranındaki bekleme süresi konusunda ise haklısınız; vardiya planımızı buna göre yeniden düzenliyoruz. Bir sonraki gelişinizde farkı görmenizi umuyoruz.",
+  ],
+  mixed_en: [
+    "Hi Laura, we're really glad the sunset terrace and Deniz's help with your transfer made the trip easier. That said, the noise from the corridor at night shouldn't have happened — we're reviewing the door closers on that floor this week. If you'd share the room number at {contact}, I'll follow up personally.",
+    "Tom, thank you for the kind words about the breakfast spread. Your point about the slow check-in is fair and we've added a second desk agent for peak arrivals. We'd love the chance to get it fully right next time.",
+  ],
 };
 
 const toneDescriptions: Record<string, { tr: string; en: string }> = {
@@ -49,6 +57,43 @@ function detectLang(text: string, hint: string): "tr" | "en" {
 function sentimentCategory(rating: number, sentiment?: string): "positive" | "negative" | "neutral" {
   if (sentiment?.toLowerCase() === "positive" || rating >= 4) return "positive";
   if (sentiment?.toLowerCase() === "negative" || rating <= 2) return "negative";
+  return "neutral";
+}
+
+type ReplyCategory = "positive" | "negative" | "neutral" | "mixed";
+
+type TopicCtx = {
+  topic_id: string;
+  name: string;
+  sentiment: number;
+  quote: string | null;
+};
+
+type AnalysisCtx = {
+  summary: string | null;
+  overall_sentiment: number;
+  sentiment_label: string | null;
+  flags: {
+    recovery_needed: boolean;
+    refund_request: boolean;
+    legal_risk: boolean;
+    staff_named: string[];
+    is_fake_suspect: boolean;
+  };
+  keywords: any[];
+  topics: TopicCtx[];
+  worstTopic: TopicCtx | null;
+};
+
+// Category from the guest's actual words, not the star rating.
+function categoryFromAnalysis(a: AnalysisCtx): ReplyCategory {
+  const s = a.overall_sentiment;
+  const hasNegativeTopic = a.topics.some((t) => t.sentiment <= -0.3);
+  if (a.flags.recovery_needed || s <= -0.2) return "negative";
+  // High-level positive that still carries a clearly negative topic → mixed.
+  if (s >= 0.2 && hasNegativeTopic) return "mixed";
+  if (s >= 0.2) return "positive";
+  if (hasNegativeTopic) return "mixed";
   return "neutral";
 }
 
