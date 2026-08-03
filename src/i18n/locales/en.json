@@ -535,6 +535,12 @@
         "subtitle": "Connect your Google Business account and start managing your real customer reviews with AI.",
         "button": "Connect My Account & Start"
       }
+    },
+    "topicCard": {
+      "title": "Topic Analysis",
+      "subtitle": "Topics needing attention in the last 90 days",
+      "lowData": "Analysis is still accumulating — not enough analysed reviews for a meaningful ranking yet.",
+      "viewAll": "View all"
     }
   },
   "reviews": {
