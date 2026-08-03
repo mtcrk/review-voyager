@@ -5,6 +5,13 @@ const LOVABLE_API_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-2.5-flash";
 const PROMPT_VERSION = 1;
 const MAX_ATTEMPTS = 3;
+/** Backfill window: only reviews newer than this are analyzed by the batch job. */
+const WINDOW_MONTHS = 6;
+const windowCutoffISO = () => {
+  const d = new Date();
+  d.setMonth(d.getMonth() - WINDOW_MONTHS);
+  return d.toISOString();
+};
 
 type Taxo = { id: string; category: string; label: string; driver: boolean };
 
@@ -277,10 +284,12 @@ Deno.serve(async (req) => {
     const body = (await req.json().catch(() => ({}))) as {
       limit?: number;
       business_id?: string;
+      review_id?: string;
     };
 
     const limit = clamp(Number(body.limit ?? 25) || 25, 1, 100);
     const businessId = body.business_id;
+    const singleReviewId = body.review_id ? String(body.review_id) : null;
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -289,19 +298,64 @@ Deno.serve(async (req) => {
 
     const admin = createClient(supabaseUrl, serviceKey);
 
-    // ---- claim a batch using the indexed status column
-    let q = admin
-      .from("reviews")
-      .select("id, business_id, platform, rating, text, posted_at, analysis_attempts")
-      .in("analysis_status", ["pending", "failed"])
-      .lt("analysis_attempts", MAX_ATTEMPTS)
-      .not("text", "is", null)
-      .order("posted_at", { ascending: false })
-      .limit(limit);
-    if (businessId) q = q.eq("business_id", businessId);
+    let reviews: any[] | null = null;
 
-    const { data: reviews, error: selErr } = await q;
-    if (selErr) throw selErr;
+    if (singleReviewId) {
+      // ---- on-demand: analyze exactly one review, bypassing the window/batch.
+      // Ownership is verified against the caller's JWT — never trust the id alone.
+      const authHeader = req.headers.get("Authorization") ?? "";
+      if (!authHeader.startsWith("Bearer ")) return json({ error: "Unauthorized" }, 401);
+      const userClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const { data: userData, error: userErr } = await userClient.auth.getUser();
+      const userId = userData?.user?.id;
+      if (userErr || !userId) return json({ error: "Unauthorized" }, 401);
+
+      const { data: row, error: rowErr } = await admin
+        .from("reviews")
+        .select("id, business_id, platform, rating, text, posted_at, analysis_attempts")
+        .eq("id", singleReviewId)
+        .maybeSingle();
+      if (rowErr) throw rowErr;
+      if (!row) return json({ error: "Review not found" }, 404);
+
+      const { data: biz, error: bizErr } = await admin
+        .from("businesses")
+        .select("id")
+        .eq("id", row.business_id)
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (bizErr) throw bizErr;
+      if (!biz) return json({ error: "Forbidden" }, 403);
+
+      if (!row.text) return json({ error: "Review has no text to analyze" }, 400);
+
+      // reset attempts so a previously exhausted review can be retried on demand
+      await admin
+        .from("reviews")
+        .update({ analysis_status: "pending", analysis_attempts: 0, analysis_error: null })
+        .eq("id", row.id);
+
+      reviews = [{ ...row, analysis_attempts: 0 }];
+    } else {
+      // ---- claim a batch using the indexed status column.
+      // Only the last WINDOW_MONTHS are analyzed; older rows sit in 'deferred'.
+      let q = admin
+        .from("reviews")
+        .select("id, business_id, platform, rating, text, posted_at, analysis_attempts")
+        .in("analysis_status", ["pending", "failed"])
+        .lt("analysis_attempts", MAX_ATTEMPTS)
+        .not("text", "is", null)
+        .gt("posted_at", windowCutoffISO())
+        .order("posted_at", { ascending: false })
+        .limit(limit);
+      if (businessId) q = q.eq("business_id", businessId);
+
+      const { data, error: selErr } = await q;
+      if (selErr) throw selErr;
+      reviews = data ?? [];
+    }
 
     const considered = reviews?.length ?? 0;
     if (considered === 0) {
