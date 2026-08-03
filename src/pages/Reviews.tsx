@@ -930,12 +930,15 @@ export default function Reviews() {
         </div>
       </div>
 
-      {/* Category chips (keyword-based) */}
+      {/* Topic chips from real analysis (keyword categories as fallback) */}
       {reviews.length > 0 && (
-        <ReviewCategoryChips
+        <ReviewAnalysisChips
           reviews={reviews}
-          selectedCategory={categoryFilter}
-          onSelectCategory={(c) => { setCategoryFilter(c); setCurrentPage(1); }}
+          analysisByReview={analysisByReview}
+          topicsByReview={topicsByReview}
+          topicLabels={topicLabels}
+          selected={chipFilter}
+          onSelect={(sel) => { setChipFilter(sel); setCurrentPage(1); }}
         />
       )}
 
