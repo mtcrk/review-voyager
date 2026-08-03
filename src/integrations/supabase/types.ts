@@ -3010,10 +3010,16 @@ export type Database = {
         Args: { _business_id: string }
         Returns: {
           analyzed_reviews: number
+          deferred_reviews: number
           failed_reviews: number
           pending_reviews: number
           skipped_reviews: number
           total_reviews: number
+          window_analyzed_reviews: number
+          window_failed_reviews: number
+          window_months: number
+          window_pending_reviews: number
+          window_total_reviews: number
         }[]
       }
       own_topic_monthly: {

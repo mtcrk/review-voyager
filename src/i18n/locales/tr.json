@@ -945,7 +945,13 @@
     "chips": {
       "all": "Tümü",
       "fallbackHint": "tahmini"
-    }
+    },
+    "deferred": "Bu yorum henüz analiz edilmedi.",
+    "deferredHint": "Otomatik analiz son 6 ayı kapsıyor. Bu yorumu istediğin an tek tıkla analiz edebilirsin.",
+    "analyzeNow": "Analiz et",
+    "analyzing": "Analiz ediliyor...",
+    "analyzeDone": "Analiz tamamlandı.",
+    "analyzeError": "Analiz başlatılamadı."
   },
   "topicAnalytics": {
     "metaTitle": "Konu Analizi | VoyageRespond",
@@ -956,7 +962,7 @@
     "trendTitle": "{{count}} aylık duygu trendi",
     "mentions": "{{count}} bahsedilme",
     "negativeShare": "%{{pct}} olumsuz",
-    "coverage": "Yorumların %{{pct}}'i analiz edildi ({{analyzed}}/{{total}}). Analiz devam ettikçe tablo tamamlanacak.",
+    "coverage": "Son {{months}} ayın yorumlarının %{{pct}}'i analiz edildi ({{analyzed}}/{{total}}). Analiz son 6 ayı kapsar.",
     "empty": "Bu işletme için henüz analiz edilmiş konu yok.",
     "lowConfidence": "az veri",
     "noBaseline": "karşılaştırma yok",
@@ -987,6 +993,7 @@
       "beauty": "Bakım",
       "sustainability": "Sürdürülebilirlik",
       "tech": "Teknoloji"
-    }
+    },
+    "deferredNote": "{{count}} eski yorum bilinçli olarak analiz kapsamı dışında; tek tek analiz edebilirsin."
   }
 }
