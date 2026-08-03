@@ -1065,7 +1065,13 @@
     "chips": {
       "all": "All",
       "fallbackHint": "estimated"
-    }
+    },
+    "deferred": "This review has not been analysed yet.",
+    "deferredHint": "Automatic analysis covers the last 6 months. You can analyse this review on demand.",
+    "analyzeNow": "Analyse",
+    "analyzing": "Analysing...",
+    "analyzeDone": "Analysis complete.",
+    "analyzeError": "Could not start the analysis."
   },
   "topicAnalytics": {
     "metaTitle": "Topic Analytics | VoyageRespond",
@@ -1076,7 +1082,7 @@
     "trendTitle": "{{count}}-month sentiment trend",
     "mentions": "{{count}} mentions",
     "negativeShare": "{{pct}}% negative",
-    "coverage": "{{pct}}% of reviews analysed ({{analyzed}}/{{total}}). Numbers will fill in as analysis continues.",
+    "coverage": "{{pct}}% of the last {{months}} months' reviews analysed ({{analyzed}}/{{total}}). Analysis covers the last 6 months.",
     "empty": "No analysed topics for this business yet.",
     "lowConfidence": "low data",
     "noBaseline": "no baseline",
@@ -1107,6 +1113,7 @@
       "beauty": "Beauty",
       "sustainability": "Sustainability",
       "tech": "Tech"
-    }
+    },
+    "deferredNote": "{{count}} older reviews are intentionally outside the analysis window; you can analyse them individually."
   }
 }
