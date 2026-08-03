@@ -295,7 +295,7 @@ serve(async (req) => {
       review_text, reviewText: reviewTextAlt, reviewer_name, rating, tone = "friendly",
       language = "TR", summary, issues, praises, sentiment,
       business_name, custom_instructions,
-      business_id, platform,
+      business_id, platform, review_id,
     } = body;
     const reviewText = review_text ?? reviewTextAlt ?? "";
 
@@ -307,56 +307,138 @@ serve(async (req) => {
     let businessName = business_name || "";
     let city = "";
     let recentOpenings: string[] = [];
-    if (business_id) {
+    let analysis: AnalysisCtx | null = null;
+
+    if (business_id || review_id) {
       try {
         const supabase = createClient(
           Deno.env.get("SUPABASE_URL")!,
           Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
         );
-        const { data: biz } = await supabase
-          .from("businesses")
-          .select("name, city, brand_voice")
-          .eq("id", business_id)
-          .maybeSingle();
-        if (biz) {
-          brandVoice = biz.brand_voice || {};
-          businessName = businessName || biz.name || "";
-          city = biz.city || "";
+        if (business_id) {
+          const { data: biz } = await supabase
+            .from("businesses")
+            .select("name, city, brand_voice")
+            .eq("id", business_id)
+            .maybeSingle();
+          if (biz) {
+            brandVoice = biz.brand_voice || {};
+            businessName = businessName || biz.name || "";
+            city = biz.city || "";
+          }
+          const { data: recent } = await supabase
+            .from("reviews")
+            .select("approved_reply, suggested_reply")
+            .eq("business_id", business_id)
+            .not("approved_reply", "is", null)
+            .order("replied_at", { ascending: false })
+            .limit(5);
+          recentOpenings = (recent || [])
+            .map((r: any) => (r.approved_reply || r.suggested_reply || "").split(/[.!?\n]/)[0].trim())
+            .filter((s: string) => s.length > 0)
+            .slice(0, 5);
         }
-        const { data: recent } = await supabase
-          .from("reviews")
-          .select("approved_reply, suggested_reply")
-          .eq("business_id", business_id)
-          .not("approved_reply", "is", null)
-          .order("replied_at", { ascending: false })
-          .limit(5);
-        recentOpenings = (recent || [])
-          .map((r: any) => (r.approved_reply || r.suggested_reply || "").split(/[.!?\n]/)[0].trim())
-          .filter((s: string) => s.length > 0)
-          .slice(0, 5);
+
+        // ---- Phase 4: load per-review analysis server-side (server data wins)
+        if (review_id) {
+          const { data: ra } = await supabase
+            .from("review_analysis")
+            .select("summary, overall_sentiment, sentiment_label, highlights, keywords, flags")
+            .eq("review_id", review_id)
+            .maybeSingle();
+
+          if (ra) {
+            const { data: topicRows } = await supabase
+              .from("ci_review_topics")
+              .select("topic_id, sentiment, excerpt, ci_topics(display_name)")
+              .eq("review_id", review_id)
+              .eq("review_source", "own");
+
+            const highlights = Array.isArray(ra.highlights) ? ra.highlights : [];
+            const quoteForTopic = (topicId: string): string | null => {
+              const h = highlights.find((x: any) => x?.topic_id === topicId && x?.quote);
+              return h?.quote ? String(h.quote).slice(0, 240) : null;
+            };
+
+            const lang0 = String(language || "").toLowerCase() === "en" ? "en" : "tr";
+            const topics: TopicCtx[] = (topicRows || [])
+              .map((t: any) => {
+                const dn = t.ci_topics?.display_name || {};
+                return {
+                  topic_id: String(t.topic_id),
+                  name: String(dn[lang0] || dn.tr || dn.en || t.topic_id),
+                  sentiment: Number(t.sentiment) || 0,
+                  quote: quoteForTopic(String(t.topic_id)),
+                };
+              })
+              // tightest useful prompt: top 5 by absolute sentiment
+              .sort((a, b) => Math.abs(b.sentiment) - Math.abs(a.sentiment))
+              .slice(0, 5);
+
+            const f = (ra.flags || {}) as any;
+            const negatives = topics.filter((t) => t.sentiment <= -0.3);
+            analysis = {
+              summary: ra.summary ?? null,
+              overall_sentiment: Number(ra.overall_sentiment) || 0,
+              sentiment_label: ra.sentiment_label ?? null,
+              flags: {
+                recovery_needed: !!f.recovery_needed,
+                refund_request: !!f.refund_request,
+                legal_risk: !!f.legal_risk,
+                staff_named: Array.isArray(f.staff_named) ? f.staff_named.map((s: any) => String(s)) : [],
+                is_fake_suspect: !!f.is_fake_suspect,
+              },
+              keywords: Array.isArray(ra.keywords) ? ra.keywords : [],
+              topics,
+              worstTopic: negatives.length
+                ? negatives.reduce((w, t) => (t.sentiment < w.sentiment ? t : w), negatives[0])
+                : null,
+            };
+          }
+        }
       } catch (e) {
-        console.log("brand_voice/recent lookup failed", (e as Error).message);
+        console.log("brand_voice/analysis lookup failed", (e as Error).message);
       }
     }
 
     const langForced = !!language && String(language).toLowerCase() !== "auto";
     const lang = detectLang(reviewText, language);
-    const category = sentimentCategory(rating, sentiment);
+    const categorySource: "analysis" | "rating" = analysis ? "analysis" : "rating";
+    const category: ReplyCategory = analysis
+      ? categoryFromAnalysis(analysis)
+      : sentimentCategory(rating, sentiment);
     const goldKey = `${category}_${lang}`;
     const gold = goldExamples[goldKey] || [];
-    const model = pickModel({ category, textLen: reviewText.length, brandVoice, customInstructions: custom_instructions });
-    const maxTokens = category === "negative" ? 600 : 300;
+    const legalRisk = !!analysis?.flags.legal_risk;
+    const requiresHumanReview = legalRisk;
+    // legal risk always goes to the pro model, regardless of review length
+    const model = legalRisk
+      ? "google/gemini-2.5-pro"
+      : pickModel({ category, textLen: reviewText.length, brandVoice, customInstructions: custom_instructions });
+    const maxTokens = category === "negative" || category === "mixed" ? 600 : 300;
     const seoOptimized = platform === "google" && brandVoice?.seo_optimized !== false;
 
-    const analysisCtx = [
-      summary ? `Summary: ${summary}` : "",
-      praises?.length ? `Positives: ${praises.join(", ")}` : "",
-      issues?.length ? `Concerns: ${issues.join(", ")}` : "",
-    ].filter(Boolean).join("\n");
+    // Server analysis wins over anything the caller sent.
+    const analysisCtx = analysis
+      ? [
+          analysis.summary ? `Analysis summary: ${analysis.summary}` : "",
+          `Overall sentiment score: ${analysis.overall_sentiment.toFixed(2)} (${analysis.sentiment_label || "n/a"})`,
+          analysis.topics.length
+            ? `Topics (see the WHAT THE GUEST ACTUALLY SAID block for quotes): ${analysis.topics
+                .map((t) => `${t.name} ${t.sentiment.toFixed(2)}`)
+                .join(", ")}`
+            : "",
+          analysis.worstTopic ? `MOST NEGATIVE TOPIC — address first: ${analysis.worstTopic.name}` : "",
+        ].filter(Boolean).join("\n")
+      : [
+          summary ? `Summary: ${summary}` : "",
+          praises?.length ? `Positives: ${praises.join(", ")}` : "",
+          issues?.length ? `Concerns: ${issues.join(", ")}` : "",
+        ].filter(Boolean).join("\n");
 
     const systemPrompt = buildSystemPrompt({
       lang, langForced, tone, category, rating, reviewer: reviewer_name, businessName, city, platform,
-      brandVoice, customInstructions: custom_instructions, recentOpenings, gold,
+      brandVoice, customInstructions: custom_instructions, recentOpenings, gold, analysis,
     });
     const userPrompt = `Generate a reply for this ${rating}-star ${category} review.
 ---
@@ -370,6 +452,12 @@ Return ONLY the reply text.`;
     console.log("generate-reply", {
       model, category, lang, textLen: reviewText.length, business_id: !!business_id,
       brand_voice_set: Object.keys(brandVoice || {}).length > 0, platform,
+      analysis_used: !!analysis,
+      category_source: categorySource,
+      topic_ids: analysis?.topics.map((t) => t.topic_id) ?? [],
+      worst_topic: analysis?.worstTopic?.topic_id ?? null,
+      flags: analysis?.flags ?? null,
+      requires_human_review: requiresHumanReview,
     });
 
     let draft = "";
