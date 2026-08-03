@@ -379,6 +379,20 @@ const ReviewDetailPage = () => {
           {/* AI Insights Card */}
           <Card className="rounded-xl shadow-sm border">
             <CardHeader>
+              <CardTitle className="text-lg">{t("analysis.title")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ReviewAnalysisPanel
+                reviewId={review.id}
+                text={review.text || ""}
+                analysisStatus={(review as any).analysis_status}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Legacy AI Insights Card */}
+          <Card className="rounded-xl shadow-sm border">
+            <CardHeader>
               <CardTitle className="text-lg">AI Insights</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
