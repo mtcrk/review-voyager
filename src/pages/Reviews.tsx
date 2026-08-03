@@ -39,6 +39,7 @@ import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { ReviewTranslator } from "@/components/reviews/ReviewTranslator";
 import { ReviewAnalysisChips, type ChipSelection } from "@/components/reviews/ReviewAnalysisChips";
+import { ReviewAnalysisPanel } from "@/components/reviews/ReviewAnalysisPanel";
 import { matchesCategory, REVIEW_CATEGORIES } from "@/lib/reviewCategories";
 import { useReviewAnalyses, useCiTopics, sentimentTone } from "@/hooks/useReviewAnalysis";
 import { useTranslation } from "react-i18next";
