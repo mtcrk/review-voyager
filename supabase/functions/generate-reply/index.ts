@@ -170,10 +170,11 @@ function buildSystemPrompt(opts: {
   customInstructions?: string;
   recentOpenings: string[];
   gold: string[];
+  analysis?: AnalysisCtx | null;
 }) {
   const {
     lang, langForced, tone, category, rating, reviewer, businessName, city, platform,
-    brandVoice, customInstructions, recentOpenings, gold,
+    brandVoice, customInstructions, recentOpenings, gold, analysis,
   } = opts;
   const langName = lang === "tr" ? "TURKISH (Türkçe)" : "ENGLISH";
   const languageRule = langForced
@@ -198,6 +199,61 @@ function buildSystemPrompt(opts: {
 - Warm, ${category === "positive" ? "grateful and specific" : "balanced and constructive"}.
 - Acknowledge concrete points; invite them back or thank them for the feedback.`;
 
+  const mixedBlock = `MIXED-REVIEW PLAYBOOK (rating ${rating}, praise AND a real complaint):
+- This guest liked things AND raised a genuine problem. A purely celebratory reply is a failure here.
+- Structure: (a) thank them for the SPECIFIC positives they named, (b) explicitly acknowledge the negative topic in their own terms — do not soften it away, (c) state what is being looked at or changed, (d) invite them back.
+- Never dispute their account. NEVER promise or imply compensation, refunds, upgrades or free stays.
+${contact ? `- Offer a private channel for details: ${contact}.` : ""}
+${signature ? `- Sign from: ${signature}.` : ""}`;
+
+  const playbook = category === "negative" ? negativeBlock : category === "mixed" ? mixedBlock : positiveNeutralBlock;
+
+  // ---- analysis-driven blocks
+  let topicsBlock = "";
+  let flagsBlock = "";
+  if (analysis) {
+    if (analysis.topics.length) {
+      topicsBlock = `## WHAT THE GUEST ACTUALLY SAID (from per-review analysis — highest priority context)
+${analysis.topics
+  .map(
+    (t) =>
+      `- ${t.name} (sentiment ${t.sentiment.toFixed(2)})${t.quote ? ` — guest's words: "${t.quote}"` : ""}`,
+  )
+  .join("\n")}
+RULES FOR THIS BLOCK:
+- Reference at least ONE of the quoted details above concretely in the reply.
+${analysis.worstTopic ? `- Address "${analysis.worstTopic.name}" FIRST — it is the guest's biggest problem. Do not bury it, do not skip it.` : ""}
+- Do not invent topics or details that are not listed above or in the review text.`;
+    }
+
+    const f = analysis.flags;
+    const flagLines: string[] = [];
+    if (f.legal_risk) {
+      flagLines.push(`- LEGAL-RISK REVIEW (claims such as theft, injury, harassment, food poisoning or discrimination). Use the most careful register possible:
+  * Express serious concern and that this is being taken seriously.
+  * NEVER admit fault, liability or negligence. NEVER dispute or correct the guest's account publicly.
+  * NEVER promise compensation, refunds, or any remedy.
+  * Move the conversation to a private channel IMMEDIATELY${contact ? ` (${contact})` : ""} — this is the main purpose of the reply.
+  * Sign from a named person${signature ? `: ${signature}` : " (e.g. the Guest Relations Manager)"}.
+  * Keep it short, calm and non-committal. No marketing language, no invitation to return.`);
+    }
+    if (f.refund_request) {
+      flagLines.push(`- REFUND REQUESTED: acknowledge that they have raised a billing/refund matter and move it to a private channel${contact ? ` (${contact})` : ""}. Do NOT confirm, deny, or hint at any refund decision publicly.`);
+    }
+    if (f.recovery_needed) {
+      flagLines.push(`- SERVICE RECOVERY NEEDED: apply the negative-review service-recovery playbook regardless of the star rating — specific apology, ownership, private channel, named signature.`);
+    }
+    if (f.staff_named.length && (category === "positive" || category === "mixed")) {
+      flagLines.push(`- STAFF NAMED BY THE GUEST: ${f.staff_named.join(", ")}. Name ${f.staff_named.length > 1 ? "them" : "this person"} in the reply and say their feedback was passed on to ${f.staff_named.length > 1 ? "them" : "them"} personally. This is required.`);
+    }
+    if (flagLines.length) {
+      flagsBlock = `## SITUATION FLAGS (override style preferences where they conflict)\n${flagLines.join("\n")}`;
+    }
+    if (f.recovery_needed && category !== "negative") {
+      flagsBlock += `\n\n## SERVICE-RECOVERY PLAYBOOK (applies due to flag)\n${negativeBlock}`;
+    }
+  }
+
   return `You are an enterprise-grade review response writer for ${businessName || "the business"}${city ? " in " + city : ""}. Craft a reply that reads as if written by an experienced Guest Relations Manager, not a template.
 
 ## HARD REQUIREMENTS (non-negotiable)
@@ -211,14 +267,16 @@ ${recentOpenings.map((o, i) => `   ${i + 1}. "${o}"`).join("\n") || "   (none)"}
 
 ## STYLE
 - Tone: ${tone.toUpperCase()} — ${lang === "tr" ? toneCfg.tr : toneCfg.en}
-- Length: ${category === "negative" ? "80-140 words" : "40-90 words"}.
+- Length: ${category === "negative" || category === "mixed" ? "80-140 words" : "40-90 words"}.
 - ${tone === "playful" ? "Up to 1 relevant emoji." : "No emojis unless tone demands it."}
 ${signature ? `- Sign the reply with: "— ${signature}" on a new line at the end.` : ""}
 ${brandVoice?.brand_values ? `- Reflect these brand values subtly: ${brandVoice.brand_values}` : ""}
 ${seoOn && businessName ? `- LOCAL SEO (Google review): weave the business name "${businessName}"${city ? " and location \"" + city + "\"" : ""} naturally ONCE. Never keyword-stuff. It must read naturally.` : ""}
 
+${topicsBlock ? topicsBlock + "\n" : ""}
+${flagsBlock ? flagsBlock + "\n" : ""}
 ## PLAYBOOK
-${category === "negative" ? negativeBlock : positiveNeutralBlock}
+${playbook}
 
 ${customInstructions ? `## CUSTOM INSTRUCTIONS\n${customInstructions}\n` : ""}
 
