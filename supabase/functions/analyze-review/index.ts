@@ -182,6 +182,31 @@ async function callLLM(
 
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
 
+/**
+ * Postgres rejects an INSERT ... ON CONFLICT DO UPDATE whose payload contains
+ * duplicate constrained tuples (SQLSTATE 21000). The model can legitimately map
+ * two separate quotes to the same topic_id, so collapse them here:
+ * keep the highest confidence, break ties by higher |sentiment|.
+ * NOTE: highlights are NOT deduped by topic — every distinct quote stays.
+ */
+function dedupeTopicRows(rows: any[]): any[] {
+  const byTopic = new Map<string, any>();
+  for (const row of rows) {
+    const key = String(row.topic_id);
+    const prev = byTopic.get(key);
+    if (!prev) {
+      byTopic.set(key, row);
+      continue;
+    }
+    const better =
+      row.confidence > prev.confidence ||
+      (row.confidence === prev.confidence &&
+        Math.abs(row.sentiment) > Math.abs(prev.sentiment));
+    if (better) byTopic.set(key, row);
+  }
+  return Array.from(byTopic.values());
+}
+
 function labelOf(v: any): "positive" | "neutral" | "negative" | "mixed" {
   const s = String(v || "").toLowerCase();
   return s === "positive" || s === "negative" || s === "mixed" ? (s as any) : "neutral";
