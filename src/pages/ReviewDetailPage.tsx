@@ -205,6 +205,7 @@ const ReviewDetailPage = () => {
       const { data, error } = await supabase.functions.invoke('generate-reply', {
         body: {
           review_text: review.text,
+          review_id: review.id,
           reviewer_name: review.reviewer_name,
           rating: review.rating,
           tone: toneMap[selectedTone],
