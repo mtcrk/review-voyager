@@ -40,6 +40,7 @@ import {
   Swords,
   Wallet,
   Radar,
+  Tags,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -83,6 +84,7 @@ const commonItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Tüm Yorumlar", url: "/inbox", icon: Inbox, highlight: true },
   { title: "Yorumlar", url: "/reviews", icon: MessageSquare },
+  { title: "Konu Analizi", url: "/konu-analizi", icon: Tags },
   { title: "Rep Score", url: "/rep-score", icon: Trophy },
   { title: "Google Hesapları", url: "/google-accounts", icon: Star },
   { title: "İstatistikler", url: "/statistics", icon: BarChart3 },
