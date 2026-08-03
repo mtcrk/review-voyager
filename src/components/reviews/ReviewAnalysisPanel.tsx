@@ -87,7 +87,7 @@ export function ReviewAnalysisPanel({
       });
       if (error || (res as any)?.error) throw error ?? new Error((res as any).error);
       toast.success(t("analysis.analyzeDone"));
-      await queryClient.invalidateQueries({ queryKey: ["review_analysis", reviewId] });
+      await queryClient.invalidateQueries({ queryKey: ["review_analysis_single", reviewId] });
       await queryClient.invalidateQueries({ queryKey: ["review", reviewId] });
       await queryClient.invalidateQueries({ queryKey: ["reviews"] });
     } catch {
