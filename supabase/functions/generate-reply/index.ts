@@ -471,18 +471,23 @@ Return ONLY the reply text.`;
     // QA pass
     let qa: any = null;
     let regenerated = false;
+    const mainConcern = analysis?.worstTopic
+      ? `${analysis.worstTopic.name}${analysis.worstTopic.quote ? ` — "${analysis.worstTopic.quote}"` : ""}`
+      : null;
     try {
       qa = await runQa(draft, {
         reviewText, lang,
         forbidden: brandVoice?.forbidden_phrases || [],
         apiKey: LOVABLE_API_KEY,
+        mainConcern,
       });
       const failed = qa && (
         !qa.references_specific_detail ||
         qa.generic_opening ||
         !qa.correct_language ||
         qa.contains_forbidden_phrase ||
-        qa.promises_compensation
+        qa.promises_compensation ||
+        (!!mainConcern && qa.addresses_main_concern === false)
       );
       if (failed) {
         const reasons: string[] = [];
@@ -491,6 +496,9 @@ Return ONLY the reply text.`;
         if (!qa.correct_language) reasons.push(`replied in wrong language (must be ${lang.toUpperCase()})`);
         if (qa.contains_forbidden_phrase) reasons.push("used a forbidden phrase");
         if (qa.promises_compensation) reasons.push("promised/implied compensation — remove any such wording");
+        if (!!mainConcern && qa.addresses_main_concern === false) {
+          reasons.push(`failed to address the guest's main concern (${mainConcern}) — acknowledge it explicitly and early, without disputing it or promising compensation`);
+        }
         const retryPrompt = userPrompt + `\n\nPREVIOUS ATTEMPT FAILED QA. Fix these issues: ${reasons.join("; ")}. Regenerate.`;
         console.log("qa regenerate", { reasons });
         const second = await callAi(model, systemPrompt, retryPrompt, maxTokens, LOVABLE_API_KEY);
@@ -498,7 +506,7 @@ Return ONLY the reply text.`;
           draft = second;
           regenerated = true;
           try {
-            qa = await runQa(draft, { reviewText, lang, forbidden: brandVoice?.forbidden_phrases || [], apiKey: LOVABLE_API_KEY }) || qa;
+            qa = await runQa(draft, { reviewText, lang, forbidden: brandVoice?.forbidden_phrases || [], apiKey: LOVABLE_API_KEY, mainConcern }) || qa;
           } catch (_) {}
         }
       }
@@ -516,6 +524,12 @@ Return ONLY the reply text.`;
           model,
           qa: qa ? { ...qa, regenerated, quality_checked: true } : { quality_checked: false },
           seo_optimized: seoOptimized,
+          analysis_used: !!analysis,
+          category_source: categorySource,
+          topic_ids: analysis?.topics.map((t) => t.topic_id) ?? [],
+          main_concern_topic_id: analysis?.worstTopic?.topic_id ?? null,
+          flags: analysis?.flags ?? null,
+          requires_human_review: requiresHumanReview,
         },
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
