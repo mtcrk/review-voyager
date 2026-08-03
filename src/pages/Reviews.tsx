@@ -664,6 +664,7 @@ export default function Reviews() {
       const response = await supabase.functions.invoke('generate-reply', {
         body: {
           review_text: review.text,
+          review_id: review.id,
           reviewer_name: review.reviewer_name,
           rating: review.rating,
           sentiment: review.sentiment,
@@ -711,6 +712,7 @@ export default function Reviews() {
       const response = await supabase.functions.invoke('generate-reply', {
         body: {
           review_text: review.text,
+          review_id: review.id,
           reviewer_name: review.reviewer_name,
           rating: review.rating,
           sentiment: review.sentiment,
