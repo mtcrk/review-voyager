@@ -267,7 +267,7 @@ Deno.serve(async (req) => {
     // ---- claim a batch using the indexed status column
     let q = admin
       .from("reviews")
-      .select("id, business_id, platform, rating, text, analysis_attempts")
+      .select("id, business_id, platform, rating, text, posted_at, analysis_attempts")
       .in("analysis_status", ["pending", "failed"])
       .lt("analysis_attempts", MAX_ATTEMPTS)
       .not("text", "is", null)
@@ -376,7 +376,7 @@ Deno.serve(async (req) => {
               confidence: clamp(confidence, 0, 1),
               excerpt: m.quote ? String(m.quote).slice(0, 280) : null,
               language: parsed?.detected_language ? String(parsed.detected_language).slice(0, 8) : null,
-              review_posted_at: null,
+              review_posted_at: r.posted_at ?? null,
             });
           }
 
