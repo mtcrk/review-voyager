@@ -130,7 +130,9 @@ HARD RULES:
 4. Derive overall_sentiment from the TEXT itself. The star rating is only weak context and must not override the text.
 5. flags.legal_risk = true for claims of theft, injury, harassment, food poisoning, or discrimination.
 6. flags.recovery_needed = true when a negative experience warrants operational follow-up with the guest.
-7. "summary" must be ONE sentence, written in the review's OWN language.
+7. "detected_language" is the language the guest actually wrote in (the ORIGINAL segment when a
+   Google translation wrapper is present), as a 2-letter ISO code.
+   "summary" must be ONE sentence and MUST be written in that same detected_language.
 8. keywords: short salient terms (1-3 words) drawn from the review, with polarity and weight 0..1.
 
 Respond with strict JSON only, no markdown, matching exactly:
