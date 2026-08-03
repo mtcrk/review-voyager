@@ -1066,5 +1066,47 @@
       "all": "All",
       "fallbackHint": "estimated"
     }
+  },
+  "topicAnalytics": {
+    "metaTitle": "Topic Analytics | VoyageRespond",
+    "metaDescription": "Department-level review topic trends over the last 12 months.",
+    "title": "Topic Analytics",
+    "subtitle": "Which departments improved and which declined recently?",
+    "window": "Last {{count}} months",
+    "trendTitle": "{{count}}-month sentiment trend",
+    "mentions": "{{count}} mentions",
+    "negativeShare": "{{pct}}% negative",
+    "coverage": "{{pct}}% of reviews analysed ({{analyzed}}/{{total}}). Numbers will fill in as analysis continues.",
+    "empty": "No analysed topics for this business yet.",
+    "lowConfidence": "low data",
+    "noBaseline": "no baseline",
+    "topicsIn": "{{category}} topics",
+    "pickCategory": "Topic detail",
+    "pickCategoryHint": "Select a category above to drill down.",
+    "examples": "{{topic}} — example excerpts",
+    "noExamples": "No excerpts found for this topic.",
+    "openReview": "Open review",
+    "priorityTitle": "Priority Topics",
+    "priorityFormula": "Score = 0.4 × volume + 0.4 × negativity + 0.2 × decision driver",
+    "volume": "Volume",
+    "negativity": "Negativity",
+    "driverWeight": "Decision driver",
+    "driver": "decision driver",
+    "categories": {
+      "room": "Rooms",
+      "cleanliness": "Cleanliness",
+      "food": "Food",
+      "service": "Service",
+      "location": "Location",
+      "value": "Value",
+      "facilities": "Facilities",
+      "ambiance": "Ambiance",
+      "family": "Family",
+      "business": "Business travel",
+      "health": "Health",
+      "beauty": "Beauty",
+      "sustainability": "Sustainability",
+      "tech": "Tech"
+    }
   }
 }

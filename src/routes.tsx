@@ -166,6 +166,7 @@ export const routes: RouteRecord[] = [
       { path: "social-analytics", lazy: lazyProtectedLayout(() => import("./pages/SocialAnalytics")) },
       { path: "intelligence", lazy: lazyProtectedLayout(() => import("./pages/Intelligence")) },
       { path: "intelligence/karsilastirma", lazy: lazyProtectedLayout(() => import("./pages/IntelligenceComparison")) },
+      { path: "intelligence/konu-analizi", lazy: lazyProtectedLayout(() => import("./pages/TopicAnalytics")) },
       { path: "ai-visibility", lazy: lazyProtectedLayout(() => import("./pages/AIVisibility")) },
 
       // ---------- /en/* runtime redirect (no SSG) ----------

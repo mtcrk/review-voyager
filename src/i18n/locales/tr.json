@@ -946,5 +946,47 @@
       "all": "Tümü",
       "fallbackHint": "tahmini"
     }
+  },
+  "topicAnalytics": {
+    "metaTitle": "Konu Analizi | VoyageRespond",
+    "metaDescription": "Departman bazında yorum konularının 12 aylık gelişimi.",
+    "title": "Konu Analizi",
+    "subtitle": "Son dönemde hangi departman iyileşti, hangisi geriledi?",
+    "window": "Son {{count}} ay",
+    "trendTitle": "{{count}} aylık duygu trendi",
+    "mentions": "{{count}} bahsedilme",
+    "negativeShare": "%{{pct}} olumsuz",
+    "coverage": "Yorumların %{{pct}}'i analiz edildi ({{analyzed}}/{{total}}). Analiz devam ettikçe tablo tamamlanacak.",
+    "empty": "Bu işletme için henüz analiz edilmiş konu yok.",
+    "lowConfidence": "az veri",
+    "noBaseline": "karşılaştırma yok",
+    "topicsIn": "{{category}} konuları",
+    "pickCategory": "Konu detayı",
+    "pickCategoryHint": "Detayları görmek için yukarıdan bir kategori seçin.",
+    "examples": "{{topic}} — örnek alıntılar",
+    "noExamples": "Bu konu için alıntı bulunamadı.",
+    "openReview": "Yorumu aç",
+    "priorityTitle": "Öncelikli Konular",
+    "priorityFormula": "Skor = 0.4 × hacim + 0.4 × olumsuzluk + 0.2 × karar etkisi",
+    "volume": "Hacim",
+    "negativity": "Olumsuzluk",
+    "driverWeight": "Karar etkisi",
+    "driver": "karar etkeni",
+    "categories": {
+      "room": "Oda",
+      "cleanliness": "Temizlik",
+      "food": "Yemek",
+      "service": "Hizmet",
+      "location": "Konum",
+      "value": "Fiyat/Değer",
+      "facilities": "Tesis",
+      "ambiance": "Atmosfer",
+      "family": "Aile",
+      "business": "İş Seyahati",
+      "health": "Sağlık",
+      "beauty": "Bakım",
+      "sustainability": "Sürdürülebilirlik",
+      "tech": "Teknoloji"
+    }
   }
 }
