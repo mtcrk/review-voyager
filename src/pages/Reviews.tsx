@@ -1590,6 +1590,19 @@ export default function Reviews() {
               {/* Rating */}
               <div>
                 <h3 className="text-sm font-semibold text-foreground mb-2">Puan</h3>
+              </div>
+
+              {/* Analysis */}
+              <div>
+                <h3 className="text-sm font-semibold text-foreground mb-2">{tt("analysis.title")}</h3>
+                <ReviewAnalysisPanel
+                  reviewId={selectedReview.id}
+                  text={selectedReview.text || ""}
+                  analysisStatus={selectedReview.analysis_status}
+                />
+              </div>
+
+              <div>
                 {getRatingScale(selectedReview.platform) === 10 ? (
                   <div className="flex items-center gap-2">
                     <Star className="h-5 w-5 fill-primary text-primary" />
