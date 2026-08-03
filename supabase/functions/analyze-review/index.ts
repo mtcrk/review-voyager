@@ -481,15 +481,16 @@ Deno.serve(async (req) => {
         if (raErr) throw raErr;
 
         // ---- write: ci_review_topics (same shape as extract-topics)
-        if (topicRows.length > 0) {
+        const uniqueTopicRows = dedupeTopicRows(topicRows);
+        if (uniqueTopicRows.length > 0) {
           const { error: topInsErr, count } = await admin
             .from("ci_review_topics")
-            .upsert(topicRows, {
+            .upsert(uniqueTopicRows, {
               onConflict: "review_id,review_source,topic_id",
               count: "exact",
             });
           if (topInsErr) throw topInsErr;
-          topicsInserted += count ?? topicRows.length;
+          topicsInserted += count ?? uniqueTopicRows.length;
         }
 
         // ---- write: legacy columns + status
