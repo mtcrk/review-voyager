@@ -532,6 +532,12 @@
         "subtitle": "Google Business hesabınızı bağlayın ve gerçek müşteri yorumlarınızı AI ile yönetmeye başlayın.",
         "button": "Hesabımı Bağla ve Başla"
       }
+    },
+    "topicCard": {
+      "title": "Konu Analizi",
+      "subtitle": "Son 90 günde dikkat isteyen konular",
+      "lowData": "Analiz birikiyor — anlamlı bir sıralama için yeterli analiz edilmiş yorum yok.",
+      "viewAll": "Tümünü gör"
     }
   },
   "reviews": {

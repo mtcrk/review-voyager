@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
 import { PriorityActions } from "@/components/dashboard/PriorityActions";
+import { TopicAnalyticsCard } from "@/components/dashboard/TopicAnalyticsCard";
 import { CompetitorComparison } from "@/components/dashboard/CompetitorComparison";
 import { AIVisibilityChecker } from "@/components/landing/AIVisibilityChecker";
 import { DemoModeBanner } from "@/components/dashboard/DemoModeBanner";
@@ -304,6 +305,9 @@ export default function Dashboard() {
             <div className="space-y-0">
               <PriorityActions reviews={effectiveReviews} />
               {isDemoMode && <UpgradeCTA feature={t('dashboard.demo.features.priorityActions', 'Öncelikli İşlemler')} />}
+            </div>
+            <div className="space-y-0">
+              <TopicAnalyticsCard />
             </div>
             <div className="space-y-0">
               <Card className="shadow-card h-[500px] flex flex-col cursor-pointer hover:shadow-md transition-all" onClick={() => navigate('/chat')}>
