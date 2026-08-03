@@ -3006,6 +3006,28 @@ export type Database = {
         }
         Returns: boolean
       }
+      own_analysis_coverage: {
+        Args: { _business_id: string }
+        Returns: {
+          analyzed_reviews: number
+          failed_reviews: number
+          pending_reviews: number
+          skipped_reviews: number
+          total_reviews: number
+        }[]
+      }
+      own_topic_monthly: {
+        Args: { _business_id: string; _months?: number }
+        Returns: {
+          avg_sentiment: number
+          bucket_month: string
+          category: string
+          is_decision_driver: boolean
+          mention_count: number
+          negative_share: number
+          topic_id: string
+        }[]
+      }
     }
     Enums: {
       app_role: "owner" | "admin" | "staff"
