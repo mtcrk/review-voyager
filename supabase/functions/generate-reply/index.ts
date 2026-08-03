@@ -129,16 +129,19 @@ async function callAi(model: string, systemPrompt: string, userPrompt: string, m
 }
 
 async function runQa(draft: string, params: {
-  reviewText: string; lang: string; forbidden: string[]; apiKey: string;
+  reviewText: string; lang: string; forbidden: string[]; apiKey: string; mainConcern?: string | null;
 }) {
-  const { reviewText, lang, forbidden, apiKey } = params;
+  const { reviewText, lang, forbidden, apiKey, mainConcern } = params;
   const sys = `You are a strict QA reviewer for customer review responses. Evaluate the DRAFT REPLY against the ORIGINAL REVIEW and return ONLY valid JSON matching:
-{"references_specific_detail":boolean,"generic_opening":boolean,"correct_language":boolean,"contains_forbidden_phrase":boolean,"promises_compensation":boolean,"notes":"short reason"}
+{"references_specific_detail":boolean,"generic_opening":boolean,"correct_language":boolean,"contains_forbidden_phrase":boolean,"promises_compensation":boolean,"addresses_main_concern":boolean,"notes":"short reason"}
 - references_specific_detail: true if reply cites a concrete detail from the review (person, dish, room, specific issue).
 - generic_opening: true ONLY if the opening is a cliché like "Thank you for your wonderful review" / "Harika yorumunuz için teşekkürler" with no personalization.
 - correct_language: true if reply language matches expected: ${lang.toUpperCase()}.
 - contains_forbidden_phrase: true if it uses any of: ${JSON.stringify(forbidden || [])}.
 - promises_compensation: true if it promises/implies refund, compensation, free stay, or admits legal fault.
+- addresses_main_concern: ${mainConcern
+    ? `true if the reply explicitly acknowledges this concern raised by the guest: "${mainConcern}". Acknowledging it in different words counts; ignoring it does not.`
+    : `true always (no specific concern was identified for this review).`}
 No markdown, no code fences, JSON only.`;
   const user = `ORIGINAL REVIEW:\n"""${reviewText || ""}"""\n\nDRAFT REPLY:\n"""${draft}"""`;
   try {
