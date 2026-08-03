@@ -38,8 +38,11 @@ import { useReviewFetch } from "@/contexts/ReviewFetchContext";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { ReviewTranslator } from "@/components/reviews/ReviewTranslator";
-import { ReviewCategoryChips } from "@/components/reviews/ReviewCategoryChips";
+import { ReviewAnalysisChips, type ChipSelection } from "@/components/reviews/ReviewAnalysisChips";
+import { ReviewAnalysisPanel } from "@/components/reviews/ReviewAnalysisPanel";
 import { matchesCategory, REVIEW_CATEGORIES } from "@/lib/reviewCategories";
+import { useReviewAnalyses, useCiTopics, sentimentTone } from "@/hooks/useReviewAnalysis";
+import { useTranslation } from "react-i18next";
 
 type SortField = "posted_at" | "rating" | "reviewer_name";
 type SortOrder = "asc" | "desc";
@@ -89,6 +92,7 @@ const platformLabels: Record<string, { label: string; color: string }> = {
 
 export default function Reviews() {
   const { activeBusiness, businesses, refetchBusinesses } = useBusiness();
+  const { t: tt } = useTranslation();
   const { startFetch, hasPendingRuns, setOnFetchComplete } = useReviewFetch();
   const [locationFilter, setLocationFilter] = useState<string>("active");
   const queryClient = useQueryClient();
@@ -106,7 +110,9 @@ export default function Reviews() {
   const [platformFilter, setPlatformFilter] = useState<PlatformFilter>(urlPlatform || "all");
   const [ratingFilter, setRatingFilter] = useState<RatingFilter>("all");
   const [sortOption, setSortOption] = useState<SortOption>("newest");
-  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+  const [chipFilter, setChipFilter] = useState<ChipSelection>(null);
+  const [topicFilter, setTopicFilter] = useState<string>("all");
+  const [attentionFilter, setAttentionFilter] = useState<"all" | "needed">("all");
   // Sync platformFilter with URL changes (sidebar navigation)
   useEffect(() => {
     const newPlatform = searchParams.get("platform") as PlatformFilter | null;
@@ -401,6 +407,19 @@ export default function Reviews() {
     return map;
   }, [businesses]);
 
+  // Batched analysis data (one query per table for the whole business scope)
+  const { analysisByReview, topicsByReview } = useReviewAnalyses(queryBusinessIds);
+  const { labels: topicLabels } = useCiTopics();
+
+  // Topics present in the current data set (for the dropdown filter)
+  const availableTopics = useMemo(() => {
+    const ids = new Set<string>();
+    topicsByReview.forEach((rows) => rows.forEach((r) => ids.add(r.topic_id)));
+    return Array.from(ids)
+      .map((id) => ({ id, label: topicLabels[id] || id }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [topicsByReview, topicLabels]);
+
   // Fetch reviews from Supabase (paginated to bypass 1000-row limit)
   const { data: reviews = [], isLoading, refetch } = useQuery({
     queryKey: ['reviews', queryBusinessIds],
@@ -462,7 +481,15 @@ export default function Reviews() {
 
     // Sentiment filter
     if (sentimentFilter !== "all") {
-      result = result.filter((r) => r.sentiment?.toLowerCase() === sentimentFilter);
+      result = result.filter((r) => {
+        const a = analysisByReview.get(r.id);
+        const label = a
+          ? a.sentiment_label === "mixed"
+            ? sentimentTone(Number(a.overall_sentiment ?? 0))
+            : a.sentiment_label
+          : r.sentiment?.toLowerCase();
+        return label === sentimentFilter;
+      });
     }
 
     // Rating filter
@@ -471,14 +498,33 @@ export default function Reviews() {
       result = result.filter((r) => r.rating === targetRating);
     }
 
-    // Category filter (keyword-based)
-    if (categoryFilter) {
-      const cat = REVIEW_CATEGORIES.find((c) => c.key === categoryFilter);
+    // Chip filter — real topic from analysis, or keyword category fallback
+    if (chipFilter?.type === "topic") {
+      result = result.filter((r) =>
+        (topicsByReview.get(r.id) ?? []).some((tr) => tr.topic_id === chipFilter.key),
+      );
+    } else if (chipFilter?.type === "category") {
+      const cat = REVIEW_CATEGORIES.find((c) => c.key === chipFilter.key);
       if (cat) {
         result = result.filter((r) =>
           matchesCategory(`${r.text || ""} ${r.summary || ""}`, cat)
         );
       }
+    }
+
+    // Topic filter (dropdown)
+    if (topicFilter !== "all") {
+      result = result.filter((r) =>
+        (topicsByReview.get(r.id) ?? []).some((tr) => tr.topic_id === topicFilter),
+      );
+    }
+
+    // Needs attention filter
+    if (attentionFilter === "needed") {
+      result = result.filter((r) => {
+        const flags = (analysisByReview.get(r.id)?.flags ?? {}) as any;
+        return !!flags.recovery_needed || !!flags.legal_risk;
+      });
     }
 
     // Sorting
@@ -504,7 +550,7 @@ export default function Reviews() {
     });
 
     return result;
-  }, [reviews, searchQuery, statusFilter, sentimentFilter, platformFilter, ratingFilter, categoryFilter, sortField, sortOrder]);
+  }, [reviews, searchQuery, statusFilter, sentimentFilter, platformFilter, ratingFilter, chipFilter, topicFilter, attentionFilter, analysisByReview, topicsByReview, sortField, sortOrder]);
 
   // Pagination
   const totalPages = Math.max(1, Math.ceil(filteredReviews.length / pageSize));
@@ -894,12 +940,15 @@ export default function Reviews() {
         </div>
       </div>
 
-      {/* Category chips (keyword-based) */}
+      {/* Topic chips from real analysis (keyword categories as fallback) */}
       {reviews.length > 0 && (
-        <ReviewCategoryChips
+        <ReviewAnalysisChips
           reviews={reviews}
-          selectedCategory={categoryFilter}
-          onSelectCategory={(c) => { setCategoryFilter(c); setCurrentPage(1); }}
+          analysisByReview={analysisByReview}
+          topicsByReview={topicsByReview}
+          topicLabels={topicLabels}
+          selected={chipFilter}
+          onSelect={(sel) => { setChipFilter(sel); setCurrentPage(1); }}
         />
       )}
 
@@ -930,13 +979,33 @@ export default function Reviews() {
           </Select>
           <Select value={sentimentFilter} onValueChange={(v) => { setSentimentFilter(v as SentimentFilter); setCurrentPage(1); }}>
             <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Duygu" />
+              <SelectValue placeholder={tt("analysis.filters.sentiment")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tüm Duygular</SelectItem>
-              <SelectItem value="positive">Pozitif</SelectItem>
-              <SelectItem value="neutral">Nötr</SelectItem>
-              <SelectItem value="negative">Negatif</SelectItem>
+              <SelectItem value="all">{tt("analysis.filters.sentimentAll")}</SelectItem>
+              <SelectItem value="positive">{tt("analysis.labels.positive")}</SelectItem>
+              <SelectItem value="neutral">{tt("analysis.labels.neutral")}</SelectItem>
+              <SelectItem value="negative">{tt("analysis.labels.negative")}</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={topicFilter} onValueChange={(v) => { setTopicFilter(v); setCurrentPage(1); }}>
+            <SelectTrigger className="w-[170px]">
+              <SelectValue placeholder={tt("analysis.filters.topic")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{tt("analysis.filters.topicAll")}</SelectItem>
+              {availableTopics.map((tp) => (
+                <SelectItem key={tp.id} value={tp.id}>{tp.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={attentionFilter} onValueChange={(v) => { setAttentionFilter(v as "all" | "needed"); setCurrentPage(1); }}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder={tt("analysis.filters.attention")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{tt("analysis.filters.attentionAll")}</SelectItem>
+              <SelectItem value="needed">{tt("analysis.filters.attentionNeeded")}</SelectItem>
             </SelectContent>
           </Select>
           <Select value={platformFilter} onValueChange={(v) => { setPlatformFilter(v as PlatformFilter); setCurrentPage(1); }}>
@@ -1522,6 +1591,19 @@ export default function Reviews() {
               {/* Rating */}
               <div>
                 <h3 className="text-sm font-semibold text-foreground mb-2">Puan</h3>
+              </div>
+
+              {/* Analysis */}
+              <div>
+                <h3 className="text-sm font-semibold text-foreground mb-2">{tt("analysis.title")}</h3>
+                <ReviewAnalysisPanel
+                  reviewId={selectedReview.id}
+                  text={selectedReview.text || ""}
+                  analysisStatus={selectedReview.analysis_status}
+                />
+              </div>
+
+              <div>
                 {getRatingScale(selectedReview.platform) === 10 ? (
                   <div className="flex items-center gap-2">
                     <Star className="h-5 w-5 fill-primary text-primary" />

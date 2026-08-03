@@ -165,7 +165,9 @@ async function callLLM(
 
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(`LLM ${res.status}: ${body.slice(0, 500)}`);
+    throw new Error(
+      `LLM call failed — HTTP ${res.status} ${res.statusText || ""} | body: ${body.slice(0, 800)}`,
+    );
   }
   const data = await res.json();
   const content = data?.choices?.[0]?.message?.content || "{}";
@@ -173,7 +175,7 @@ async function callLLM(
   try {
     parsed = JSON.parse(content);
   } catch {
-    throw new Error("LLM returned non-JSON content");
+    throw new Error(`LLM returned non-JSON content: ${String(content).slice(0, 500)}`);
   }
   return { parsed, usage: data?.usage ?? null };
 }
@@ -183,6 +185,54 @@ const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n
 function labelOf(v: any): "positive" | "neutral" | "negative" | "mixed" {
   const s = String(v || "").toLowerCase();
   return s === "positive" || s === "negative" || s === "mixed" ? (s as any) : "neutral";
+}
+
+/** Never produce "[object Object]" — Supabase/PostgREST errors are plain objects. */
+function serializeError(e: unknown): string {
+  if (e instanceof Error) {
+    const extra = (e as any).cause ? ` | cause: ${safeJson((e as any).cause)}` : "";
+    return `${e.name}: ${e.message}${extra}`;
+  }
+  if (typeof e === "string") return e;
+  if (e && typeof e === "object") {
+    const o = e as any;
+    // PostgREST error shape
+    if (o.message || o.code || o.details || o.hint) {
+      return [
+        o.code ? `[${o.code}]` : null,
+        o.message ?? null,
+        o.details ? `details: ${o.details}` : null,
+        o.hint ? `hint: ${o.hint}` : null,
+      ]
+        .filter(Boolean)
+        .join(" ");
+    }
+    return safeJson(o);
+  }
+  return String(e);
+}
+
+function safeJson(v: unknown): string {
+  try {
+    return JSON.stringify(v);
+  } catch {
+    return String(v);
+  }
+}
+
+/**
+ * Reconcile a possibly inconsistent (score, label) pair from the model.
+ * The score is kept; the label is derived from it when the signs disagree.
+ */
+function reconcileSentiment(
+  score: number,
+  label: "positive" | "neutral" | "negative" | "mixed",
+): { score: number; label: "positive" | "neutral" | "negative" | "mixed" } {
+  const derived: "positive" | "neutral" | "negative" =
+    score <= -0.15 ? "negative" : score >= 0.15 ? "positive" : "neutral";
+  if (label === "mixed") return { score, label };
+  if (label === derived) return { score, label };
+  return { score, label: derived };
 }
 
 // ---------------------------------------------------------------------------
@@ -375,8 +425,12 @@ Deno.serve(async (req) => {
           is_fake_suspect: !!f.is_fake_suspect,
         };
 
-        const overall = clamp(Number(parsed?.overall_sentiment) || 0, -1, 1);
-        const sentimentLabel = labelOf(parsed?.sentiment_label);
+        const reconciled = reconcileSentiment(
+          clamp(Number(parsed?.overall_sentiment) || 0, -1, 1),
+          labelOf(parsed?.sentiment_label),
+        );
+        const overall = reconciled.score;
+        const sentimentLabel = reconciled.label;
         const summary = parsed?.summary ? String(parsed.summary).slice(0, 1000) : null;
 
         // ---- write: review_analysis
@@ -435,7 +489,7 @@ Deno.serve(async (req) => {
         processed++;
       } catch (e) {
         errors++;
-        const message = e instanceof Error ? e.message : String(e);
+        const message = serializeError(e);
         console.error(`analyze-review failed for ${r.id}:`, message);
         const attempts = Number(r.analysis_attempts ?? 0) + 1;
         await admin
@@ -465,6 +519,6 @@ Deno.serve(async (req) => {
     return json(result);
   } catch (e) {
     console.error("analyze-review error:", e);
-    return json({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
+    return json({ error: serializeError(e) }, 500);
   }
 });

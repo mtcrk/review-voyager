@@ -1023,5 +1023,48 @@
         "steps": "Top 3 actions"
       }
     }
+  },
+  "analysis": {
+    "title": "Analysis",
+    "pending": "Analysis queued",
+    "pendingHint": "This review will be analysed shortly.",
+    "skipped": "Text is too short to analyse.",
+    "failed": "Analysis could not be completed.",
+    "retry": "Retry",
+    "retryQueued": "Review queued for analysis again.",
+    "retryError": "Could not start the retry.",
+    "summary": "Summary",
+    "sentiment": "Overall sentiment",
+    "topics": "Topics",
+    "keywords": "Keywords",
+    "highlightsHint": "Coloured parts are phrases marked by AI.",
+    "staffNamed": "Staff mentioned",
+    "noAnalysis": "No analysis for this review yet.",
+    "needsAttention": "Needs attention",
+    "labels": {
+      "positive": "Positive",
+      "negative": "Negative",
+      "neutral": "Neutral",
+      "mixed": "Mixed"
+    },
+    "flags": {
+      "legal_risk": "Legal risk",
+      "recovery_needed": "Recovery needed",
+      "refund_request": "Refund request",
+      "is_fake_suspect": "Possibly fake"
+    },
+    "filters": {
+      "sentiment": "Sentiment",
+      "sentimentAll": "All sentiments",
+      "topic": "Topic",
+      "topicAll": "All topics",
+      "attention": "Priority",
+      "attentionAll": "All",
+      "attentionNeeded": "Needs attention"
+    },
+    "chips": {
+      "all": "All",
+      "fallbackHint": "estimated"
+    }
   }
 }
