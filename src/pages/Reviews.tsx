@@ -471,7 +471,15 @@ export default function Reviews() {
 
     // Sentiment filter
     if (sentimentFilter !== "all") {
-      result = result.filter((r) => r.sentiment?.toLowerCase() === sentimentFilter);
+      result = result.filter((r) => {
+        const a = analysisByReview.get(r.id);
+        const label = a
+          ? a.sentiment_label === "mixed"
+            ? sentimentTone(Number(a.overall_sentiment ?? 0))
+            : a.sentiment_label
+          : r.sentiment?.toLowerCase();
+        return label === sentimentFilter;
+      });
     }
 
     // Rating filter
@@ -480,14 +488,33 @@ export default function Reviews() {
       result = result.filter((r) => r.rating === targetRating);
     }
 
-    // Category filter (keyword-based)
-    if (categoryFilter) {
-      const cat = REVIEW_CATEGORIES.find((c) => c.key === categoryFilter);
+    // Chip filter — real topic from analysis, or keyword category fallback
+    if (chipFilter?.type === "topic") {
+      result = result.filter((r) =>
+        (topicsByReview.get(r.id) ?? []).some((tr) => tr.topic_id === chipFilter.key),
+      );
+    } else if (chipFilter?.type === "category") {
+      const cat = REVIEW_CATEGORIES.find((c) => c.key === chipFilter.key);
       if (cat) {
         result = result.filter((r) =>
           matchesCategory(`${r.text || ""} ${r.summary || ""}`, cat)
         );
       }
+    }
+
+    // Topic filter (dropdown)
+    if (topicFilter !== "all") {
+      result = result.filter((r) =>
+        (topicsByReview.get(r.id) ?? []).some((tr) => tr.topic_id === topicFilter),
+      );
+    }
+
+    // Needs attention filter
+    if (attentionFilter === "needed") {
+      result = result.filter((r) => {
+        const flags = (analysisByReview.get(r.id)?.flags ?? {}) as any;
+        return !!flags.recovery_needed || !!flags.legal_risk;
+      });
     }
 
     // Sorting
@@ -513,7 +540,7 @@ export default function Reviews() {
     });
 
     return result;
-  }, [reviews, searchQuery, statusFilter, sentimentFilter, platformFilter, ratingFilter, categoryFilter, sortField, sortOrder]);
+  }, [reviews, searchQuery, statusFilter, sentimentFilter, platformFilter, ratingFilter, chipFilter, topicFilter, attentionFilter, analysisByReview, topicsByReview, sortField, sortOrder]);
 
   // Pagination
   const totalPages = Math.max(1, Math.ceil(filteredReviews.length / pageSize));
