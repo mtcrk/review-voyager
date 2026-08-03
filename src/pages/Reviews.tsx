@@ -406,6 +406,10 @@ export default function Reviews() {
     return map;
   }, [businesses]);
 
+  // Batched analysis data (one query per table for the whole business scope)
+  const { analysisByReview, topicsByReview } = useReviewAnalyses(queryBusinessIds);
+  const { labels: topicLabels } = useCiTopics();
+
   // Fetch reviews from Supabase (paginated to bypass 1000-row limit)
   const { data: reviews = [], isLoading, refetch } = useQuery({
     queryKey: ['reviews', queryBusinessIds],
