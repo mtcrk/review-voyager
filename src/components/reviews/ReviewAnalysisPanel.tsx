@@ -1,7 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, LifeBuoy, RefreshCw, Undo2, ShieldAlert } from "lucide-react";
+import { AlertTriangle, LifeBuoy, RefreshCw, Undo2, ShieldAlert, Sparkles, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -40,6 +40,7 @@ export function ReviewAnalysisPanel({
   const queryClient = useQueryClient();
   const { data, isLoading } = useSingleReviewAnalysis(reviewId);
   const { topicsById, labels, labelOf } = useCiTopics();
+  const [running, setRunning] = useState(false);
 
   const analysis = data?.analysis ?? null;
   const highlights = useMemo(
@@ -76,6 +77,26 @@ export function ReviewAnalysisPanel({
     queryClient.invalidateQueries({ queryKey: ["review", reviewId] });
   };
 
+  /** On-demand analysis for reviews outside the 6-month backfill window. */
+  const handleAnalyzeNow = async () => {
+    if (running) return;
+    setRunning(true);
+    try {
+      const { data: res, error } = await supabase.functions.invoke("analyze-review", {
+        body: { review_id: reviewId },
+      });
+      if (error || (res as any)?.error) throw error ?? new Error((res as any).error);
+      toast.success(t("analysis.analyzeDone"));
+      await queryClient.invalidateQueries({ queryKey: ["review_analysis", reviewId] });
+      await queryClient.invalidateQueries({ queryKey: ["review", reviewId] });
+      await queryClient.invalidateQueries({ queryKey: ["reviews"] });
+    } catch {
+      toast.error(t("analysis.analyzeError"));
+    } finally {
+      setRunning(false);
+    }
+  };
+
   const body = () => {
     if (isLoading) {
       return (
@@ -92,6 +113,22 @@ export function ReviewAnalysisPanel({
     }
 
     if (!analysis) {
+      if (analysisStatus === "deferred") {
+        return (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">{t("analysis.deferred")}</p>
+            <p className="text-xs text-muted-foreground">{t("analysis.deferredHint")}</p>
+            <Button size="sm" onClick={handleAnalyzeNow} disabled={running} className="gap-1.5">
+              {running ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="h-3.5 w-3.5" />
+              )}
+              {running ? t("analysis.analyzing") : t("analysis.analyzeNow")}
+            </Button>
+          </div>
+        );
+      }
       if (analysisStatus === "failed") {
         return (
           <div className="flex items-center justify-between gap-3">
