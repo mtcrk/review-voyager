@@ -119,8 +119,10 @@ export default function TopicAnalytics() {
     [stats.topicStats, selectedCategory],
   );
 
-  const coveragePct = coverage && coverage.total_reviews
-    ? Math.round((coverage.analyzed_reviews / coverage.total_reviews) * 100)
+  // Coverage is measured against the analysed window (last 6 months), not the
+  // whole history — older reviews are intentionally 'deferred', not missing.
+  const coveragePct = coverage && coverage.window_total_reviews
+    ? Math.round((coverage.window_analyzed_reviews / coverage.window_total_reviews) * 100)
     : null;
 
   const monthFmt = (m: string) =>
@@ -167,11 +169,17 @@ export default function TopicAnalytics() {
             <span>
               {t("topicAnalytics.coverage", {
                 pct: coveragePct,
-                analyzed: coverage.analyzed_reviews,
-                total: coverage.total_reviews,
+                analyzed: coverage.window_analyzed_reviews,
+                total: coverage.window_total_reviews,
+                months: coverage.window_months,
               })}
             </span>
             <Progress value={coveragePct} className="h-1.5" />
+            {coverage.deferred_reviews > 0 && (
+              <span className="block text-xs text-muted-foreground">
+                {t("topicAnalytics.deferredNote", { count: coverage.deferred_reviews })}
+              </span>
+            )}
           </AlertDescription>
         </Alert>
       )}
