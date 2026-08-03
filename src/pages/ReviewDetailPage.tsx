@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useTranslation } from "react-i18next";
+import { ReviewAnalysisPanel } from "@/components/reviews/ReviewAnalysisPanel";
 
 type ToneOption = "Friendly" | "Professional" | "Formal";
 const toneMap: Record<ToneOption, string> = {
@@ -30,6 +32,7 @@ const languageOptions: { value: string; label: string }[] = [
 const ReviewDetailPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedTone, setSelectedTone] = useState<ToneOption>("Friendly");
   const [replyLanguage, setReplyLanguage] = useState<string>("auto");
