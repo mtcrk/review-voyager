@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 const tabs = [
   { label: "Rakip Seçimi", to: "/intelligence" },
   { label: "Karşılaştırma", to: "/intelligence/karsilastirma" },
+  { label: "Konu Analizi", to: "/intelligence/konu-analizi" },
 ];
 
 export function IntelligenceTabs() {
