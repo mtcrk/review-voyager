@@ -66,6 +66,9 @@ verify_jwt = false
 [functions.extract-topics]
 verify_jwt = false
 
+[functions.analyze-review]
+verify_jwt = false
+
 [functions.generate-monday-brief]
 verify_jwt = false
 
