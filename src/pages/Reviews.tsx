@@ -410,6 +410,15 @@ export default function Reviews() {
   const { analysisByReview, topicsByReview } = useReviewAnalyses(queryBusinessIds);
   const { labels: topicLabels } = useCiTopics();
 
+  // Topics present in the current data set (for the dropdown filter)
+  const availableTopics = useMemo(() => {
+    const ids = new Set<string>();
+    topicsByReview.forEach((rows) => rows.forEach((r) => ids.add(r.topic_id)));
+    return Array.from(ids)
+      .map((id) => ({ id, label: topicLabels[id] || id }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [topicsByReview, topicLabels]);
+
   // Fetch reviews from Supabase (paginated to bypass 1000-row limit)
   const { data: reviews = [], isLoading, refetch } = useQuery({
     queryKey: ['reviews', queryBusinessIds],
