@@ -18,6 +18,13 @@ export type CoverageRow = {
   pending_reviews: number;
   failed_reviews: number;
   skipped_reviews: number;
+  /** Intentionally not analysed (older than the analysis window) — not an error. */
+  deferred_reviews: number;
+  window_total_reviews: number;
+  window_analyzed_reviews: number;
+  window_pending_reviews: number;
+  window_failed_reviews: number;
+  window_months: number;
 };
 
 /** Minimum mentions in a window before a delta/percentage is trustworthy. */
