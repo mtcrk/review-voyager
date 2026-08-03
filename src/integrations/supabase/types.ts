@@ -254,6 +254,7 @@ export type Database = {
           tripcom_hotel_id: string | null
           trustpilot_url: string | null
           user_id: string
+          vertical: string
           weekly_report_enabled: boolean
           yandex_org_id: string | null
         }
@@ -286,6 +287,7 @@ export type Database = {
           tripcom_hotel_id?: string | null
           trustpilot_url?: string | null
           user_id: string
+          vertical?: string
           weekly_report_enabled?: boolean
           yandex_org_id?: string | null
         }
@@ -318,6 +320,7 @@ export type Database = {
           tripcom_hotel_id?: string | null
           trustpilot_url?: string | null
           user_id?: string
+          vertical?: string
           weekly_report_enabled?: boolean
           yandex_org_id?: string | null
         }
@@ -1700,6 +1703,59 @@ export type Database = {
           },
         ]
       }
+      review_analysis: {
+        Row: {
+          analyzed_at: string
+          business_id: string
+          detected_language: string | null
+          flags: Json
+          highlights: Json
+          keywords: Json
+          model: string | null
+          overall_sentiment: number
+          prompt_version: number | null
+          review_id: string
+          sentiment_label: string
+          summary: string | null
+        }
+        Insert: {
+          analyzed_at?: string
+          business_id: string
+          detected_language?: string | null
+          flags?: Json
+          highlights?: Json
+          keywords?: Json
+          model?: string | null
+          overall_sentiment: number
+          prompt_version?: number | null
+          review_id: string
+          sentiment_label: string
+          summary?: string | null
+        }
+        Update: {
+          analyzed_at?: string
+          business_id?: string
+          detected_language?: string | null
+          flags?: Json
+          highlights?: Json
+          keywords?: Json
+          model?: string | null
+          overall_sentiment?: number
+          prompt_version?: number | null
+          review_id?: string
+          sentiment_label?: string
+          summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_analysis_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: true
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       review_request_contacts: {
         Row: {
           business_id: string
@@ -1811,6 +1867,10 @@ export type Database = {
       }
       reviews: {
         Row: {
+          analysis_attempts: number
+          analysis_error: string | null
+          analysis_status: string
+          analysis_version: number | null
           approved_reply: string | null
           business_id: string
           created_at: string
@@ -1840,6 +1900,10 @@ export type Database = {
           topics_extracted_at: string | null
         }
         Insert: {
+          analysis_attempts?: number
+          analysis_error?: string | null
+          analysis_status?: string
+          analysis_version?: number | null
           approved_reply?: string | null
           business_id: string
           created_at?: string
@@ -1869,6 +1933,10 @@ export type Database = {
           topics_extracted_at?: string | null
         }
         Update: {
+          analysis_attempts?: number
+          analysis_error?: string | null
+          analysis_status?: string
+          analysis_version?: number | null
           approved_reply?: string | null
           business_id?: string
           created_at?: string
