@@ -38,8 +38,10 @@ import { useReviewFetch } from "@/contexts/ReviewFetchContext";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { ReviewTranslator } from "@/components/reviews/ReviewTranslator";
-import { ReviewCategoryChips } from "@/components/reviews/ReviewCategoryChips";
+import { ReviewAnalysisChips, type ChipSelection } from "@/components/reviews/ReviewAnalysisChips";
 import { matchesCategory, REVIEW_CATEGORIES } from "@/lib/reviewCategories";
+import { useReviewAnalyses, useCiTopics, sentimentTone } from "@/hooks/useReviewAnalysis";
+import { useTranslation } from "react-i18next";
 
 type SortField = "posted_at" | "rating" | "reviewer_name";
 type SortOrder = "asc" | "desc";
@@ -89,6 +91,7 @@ const platformLabels: Record<string, { label: string; color: string }> = {
 
 export default function Reviews() {
   const { activeBusiness, businesses, refetchBusinesses } = useBusiness();
+  const { t: tt } = useTranslation();
   const { startFetch, hasPendingRuns, setOnFetchComplete } = useReviewFetch();
   const [locationFilter, setLocationFilter] = useState<string>("active");
   const queryClient = useQueryClient();
@@ -106,7 +109,9 @@ export default function Reviews() {
   const [platformFilter, setPlatformFilter] = useState<PlatformFilter>(urlPlatform || "all");
   const [ratingFilter, setRatingFilter] = useState<RatingFilter>("all");
   const [sortOption, setSortOption] = useState<SortOption>("newest");
-  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+  const [chipFilter, setChipFilter] = useState<ChipSelection>(null);
+  const [topicFilter, setTopicFilter] = useState<string>("all");
+  const [attentionFilter, setAttentionFilter] = useState<"all" | "needed">("all");
   // Sync platformFilter with URL changes (sidebar navigation)
   useEffect(() => {
     const newPlatform = searchParams.get("platform") as PlatformFilter | null;
