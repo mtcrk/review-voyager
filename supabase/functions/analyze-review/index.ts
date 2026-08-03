@@ -165,7 +165,9 @@ async function callLLM(
 
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(`LLM ${res.status}: ${body.slice(0, 500)}`);
+    throw new Error(
+      `LLM call failed — HTTP ${res.status} ${res.statusText || ""} | body: ${body.slice(0, 800)}`,
+    );
   }
   const data = await res.json();
   const content = data?.choices?.[0]?.message?.content || "{}";
@@ -173,7 +175,7 @@ async function callLLM(
   try {
     parsed = JSON.parse(content);
   } catch {
-    throw new Error("LLM returned non-JSON content");
+    throw new Error(`LLM returned non-JSON content: ${String(content).slice(0, 500)}`);
   }
   return { parsed, usage: data?.usage ?? null };
 }
@@ -423,8 +425,12 @@ Deno.serve(async (req) => {
           is_fake_suspect: !!f.is_fake_suspect,
         };
 
-        const overall = clamp(Number(parsed?.overall_sentiment) || 0, -1, 1);
-        const sentimentLabel = labelOf(parsed?.sentiment_label);
+        const reconciled = reconcileSentiment(
+          clamp(Number(parsed?.overall_sentiment) || 0, -1, 1),
+          labelOf(parsed?.sentiment_label),
+        );
+        const overall = reconciled.score;
+        const sentimentLabel = reconciled.label;
         const summary = parsed?.summary ? String(parsed.summary).slice(0, 1000) : null;
 
         // ---- write: review_analysis
@@ -483,7 +489,7 @@ Deno.serve(async (req) => {
         processed++;
       } catch (e) {
         errors++;
-        const message = e instanceof Error ? e.message : String(e);
+        const message = serializeError(e);
         console.error(`analyze-review failed for ${r.id}:`, message);
         const attempts = Number(r.analysis_attempts ?? 0) + 1;
         await admin
