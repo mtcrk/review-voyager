@@ -903,5 +903,48 @@
         "steps": "En etkili 3 adım"
       }
     }
+  },
+  "analysis": {
+    "title": "Analiz",
+    "pending": "Analiz sırada",
+    "pendingHint": "Bu yorum kısa süre içinde analiz edilecek.",
+    "skipped": "Metin analiz için çok kısa.",
+    "failed": "Analiz tamamlanamadı.",
+    "retry": "Tekrar dene",
+    "retryQueued": "Yorum yeniden analiz sırasına alındı.",
+    "retryError": "Yeniden deneme başlatılamadı.",
+    "summary": "Özet",
+    "sentiment": "Genel duygu",
+    "topics": "Konular",
+    "keywords": "Anahtar kelimeler",
+    "highlightsHint": "Renkli bölümler AI tarafından işaretlenen ifadelerdir.",
+    "staffNamed": "Bahsedilen personel",
+    "noAnalysis": "Bu yorum için henüz analiz yok.",
+    "needsAttention": "Aksiyon gerekli",
+    "labels": {
+      "positive": "Pozitif",
+      "negative": "Negatif",
+      "neutral": "Nötr",
+      "mixed": "Karışık"
+    },
+    "flags": {
+      "legal_risk": "Hukuki risk",
+      "recovery_needed": "Telafi gerekli",
+      "refund_request": "İade talebi",
+      "is_fake_suspect": "Sahte olabilir"
+    },
+    "filters": {
+      "sentiment": "Duygu",
+      "sentimentAll": "Tüm duygular",
+      "topic": "Konu",
+      "topicAll": "Tüm konular",
+      "attention": "Öncelik",
+      "attentionAll": "Tümü",
+      "attentionNeeded": "Aksiyon gerekli"
+    },
+    "chips": {
+      "all": "Tümü",
+      "fallbackHint": "tahmini"
+    }
   }
 }
