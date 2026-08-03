@@ -185,6 +185,54 @@ function labelOf(v: any): "positive" | "neutral" | "negative" | "mixed" {
   return s === "positive" || s === "negative" || s === "mixed" ? (s as any) : "neutral";
 }
 
+/** Never produce "[object Object]" — Supabase/PostgREST errors are plain objects. */
+function serializeError(e: unknown): string {
+  if (e instanceof Error) {
+    const extra = (e as any).cause ? ` | cause: ${safeJson((e as any).cause)}` : "";
+    return `${e.name}: ${e.message}${extra}`;
+  }
+  if (typeof e === "string") return e;
+  if (e && typeof e === "object") {
+    const o = e as any;
+    // PostgREST error shape
+    if (o.message || o.code || o.details || o.hint) {
+      return [
+        o.code ? `[${o.code}]` : null,
+        o.message ?? null,
+        o.details ? `details: ${o.details}` : null,
+        o.hint ? `hint: ${o.hint}` : null,
+      ]
+        .filter(Boolean)
+        .join(" ");
+    }
+    return safeJson(o);
+  }
+  return String(e);
+}
+
+function safeJson(v: unknown): string {
+  try {
+    return JSON.stringify(v);
+  } catch {
+    return String(v);
+  }
+}
+
+/**
+ * Reconcile a possibly inconsistent (score, label) pair from the model.
+ * The score is kept; the label is derived from it when the signs disagree.
+ */
+function reconcileSentiment(
+  score: number,
+  label: "positive" | "neutral" | "negative" | "mixed",
+): { score: number; label: "positive" | "neutral" | "negative" | "mixed" } {
+  const derived: "positive" | "neutral" | "negative" =
+    score <= -0.15 ? "negative" : score >= 0.15 ? "positive" : "neutral";
+  if (label === "mixed") return { score, label };
+  if (label === derived) return { score, label };
+  return { score, label: derived };
+}
+
 // ---------------------------------------------------------------------------
 // Handler
 // ---------------------------------------------------------------------------
