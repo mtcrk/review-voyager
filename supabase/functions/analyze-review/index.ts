@@ -519,6 +519,6 @@ Deno.serve(async (req) => {
     return json(result);
   } catch (e) {
     console.error("analyze-review error:", e);
-    return json({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
+    return json({ error: serializeError(e) }, 500);
   }
 });
