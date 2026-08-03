@@ -969,13 +969,33 @@ export default function Reviews() {
           </Select>
           <Select value={sentimentFilter} onValueChange={(v) => { setSentimentFilter(v as SentimentFilter); setCurrentPage(1); }}>
             <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Duygu" />
+              <SelectValue placeholder={tt("analysis.filters.sentiment")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tüm Duygular</SelectItem>
-              <SelectItem value="positive">Pozitif</SelectItem>
-              <SelectItem value="neutral">Nötr</SelectItem>
-              <SelectItem value="negative">Negatif</SelectItem>
+              <SelectItem value="all">{tt("analysis.filters.sentimentAll")}</SelectItem>
+              <SelectItem value="positive">{tt("analysis.labels.positive")}</SelectItem>
+              <SelectItem value="neutral">{tt("analysis.labels.neutral")}</SelectItem>
+              <SelectItem value="negative">{tt("analysis.labels.negative")}</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={topicFilter} onValueChange={(v) => { setTopicFilter(v); setCurrentPage(1); }}>
+            <SelectTrigger className="w-[170px]">
+              <SelectValue placeholder={tt("analysis.filters.topic")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{tt("analysis.filters.topicAll")}</SelectItem>
+              {availableTopics.map((tp) => (
+                <SelectItem key={tp.id} value={tp.id}>{tp.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={attentionFilter} onValueChange={(v) => { setAttentionFilter(v as "all" | "needed"); setCurrentPage(1); }}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder={tt("analysis.filters.attention")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{tt("analysis.filters.attentionAll")}</SelectItem>
+              <SelectItem value="needed">{tt("analysis.filters.attentionNeeded")}</SelectItem>
             </SelectContent>
           </Select>
           <Select value={platformFilter} onValueChange={(v) => { setPlatformFilter(v as PlatformFilter); setCurrentPage(1); }}>
