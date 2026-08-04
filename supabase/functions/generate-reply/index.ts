@@ -287,6 +287,8 @@ ${recentOpenings.map((o, i) => `   ${i + 1}. "${o}"`).join("\n") || "   (none)"}
    (d) a warm, human close${signature ? ` signed "— ${signature}"` : ""}.
 8. Write like a person: no corporate filler, no repeated sentence openings, no bullet points, no markdown.
 
+9. NEVER invent facilities, room types, dishes, views, offers or upgrades that are not mentioned in the review or in the business context above. The return hook must stay factual and general if no concrete detail is available.
+
 ## STYLE
 - Tone: ${tone.toUpperCase()} — ${lang === "tr" ? toneCfg.tr : toneCfg.en}
 - Length: ${category === "negative" || category === "mixed" ? "150-220 words" : "110-170 words"}. Depth is expected — a reply shorter than this reads cheap and is a failure. Never pad with filler to reach it; add real substance instead.
