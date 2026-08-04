@@ -439,7 +439,7 @@ serve(async (req) => {
       : pickModel({ category, textLen: reviewText.length, brandVoice, customInstructions: custom_instructions });
     // Generous budget: these are thinking models, so the visible reply is only a
     // fraction of the tokens they consume.
-    const maxTokens = category === "negative" || category === "mixed" ? 2000 : 1200;
+    const maxTokens = category === "negative" || category === "mixed" ? 3000 : 2200;
     const seoOptimized = platform === "google" && brandVoice?.seo_optimized !== false;
 
     // Server analysis wins over anything the caller sent.
