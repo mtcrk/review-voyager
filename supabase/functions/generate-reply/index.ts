@@ -106,7 +106,7 @@ function pickModel({ category, textLen, brandVoice, customInstructions }: {
   return "google/gemini-2.5-flash";
 }
 
-async function callAi(model: string, systemPrompt: string, userPrompt: string, maxTokens: number, apiKey: string) {
+async function callAi(model: string, systemPrompt: string, userPrompt: string, maxTokens: number, apiKey: string): Promise<string> {
   const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
@@ -125,7 +125,23 @@ async function callAi(model: string, systemPrompt: string, userPrompt: string, m
     throw new Response(JSON.stringify({ error: `AI error ${res.status}`, detail: err }), { status: res.status });
   }
   const json = await res.json();
-  return (json.choices?.[0]?.message?.content || "").trim();
+  const choice = json.choices?.[0];
+  const content = (choice?.message?.content || "").trim();
+  if (choice?.finish_reason === "length") {
+    console.log("callAi truncated", { model, maxTokens, len: content.length });
+    return "";
+  }
+  return content;
+}
+
+// Reasoning models spend part of the token budget on thinking; if the budget runs
+// out the reply comes back as a truncated fragment. Retry with a bigger budget.
+async function callAiSafe(model: string, systemPrompt: string, userPrompt: string, maxTokens: number, apiKey: string) {
+  let out = await callAi(model, systemPrompt, userPrompt, maxTokens, apiKey);
+  if (out.length < 60) {
+    out = await callAi(model, systemPrompt, userPrompt, maxTokens * 3, apiKey);
+  }
+  return out;
 }
 
 async function runQa(draft: string, params: {
@@ -145,7 +161,7 @@ async function runQa(draft: string, params: {
 No markdown, no code fences, JSON only.`;
   const user = `ORIGINAL REVIEW:\n"""${reviewText || ""}"""\n\nDRAFT REPLY:\n"""${draft}"""`;
   try {
-    const raw = await callAi("google/gemini-2.5-flash", sys, user, 300, apiKey);
+    const raw = await callAi("google/gemini-2.5-flash", sys, user, 1200, apiKey);
     const cleaned = raw.replace(/```json|```/g, "").trim();
     const start = cleaned.indexOf("{");
     const end = cleaned.lastIndexOf("}");
@@ -415,7 +431,9 @@ serve(async (req) => {
     const model = legalRisk
       ? "google/gemini-2.5-pro"
       : pickModel({ category, textLen: reviewText.length, brandVoice, customInstructions: custom_instructions });
-    const maxTokens = category === "negative" || category === "mixed" ? 600 : 300;
+    // Generous budget: these are thinking models, so the visible reply is only a
+    // fraction of the tokens they consume.
+    const maxTokens = category === "negative" || category === "mixed" ? 2000 : 1200;
     const seoOptimized = platform === "google" && brandVoice?.seo_optimized !== false;
 
     // Server analysis wins over anything the caller sent.
@@ -462,7 +480,7 @@ Return ONLY the reply text.`;
 
     let draft = "";
     try {
-      draft = await callAi(model, systemPrompt, userPrompt, maxTokens, LOVABLE_API_KEY);
+      draft = await callAiSafe(model, systemPrompt, userPrompt, maxTokens, LOVABLE_API_KEY);
     } catch (e) {
       if (e instanceof Response) return new Response(await e.text(), { status: e.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       throw e;
@@ -501,7 +519,7 @@ Return ONLY the reply text.`;
         }
         const retryPrompt = userPrompt + `\n\nPREVIOUS ATTEMPT FAILED QA. Fix these issues: ${reasons.join("; ")}. Regenerate.`;
         console.log("qa regenerate", { reasons });
-        const second = await callAi(model, systemPrompt, retryPrompt, maxTokens, LOVABLE_API_KEY);
+        const second = await callAiSafe(model, systemPrompt, retryPrompt, maxTokens, LOVABLE_API_KEY);
         if (second) {
           draft = second;
           regenerated = true;
