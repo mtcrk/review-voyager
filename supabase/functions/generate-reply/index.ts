@@ -280,18 +280,20 @@ ${languageRule}
 5. Do NOT use these forbidden phrases: ${JSON.stringify(brandVoice?.forbidden_phrases || [])}.
 6. Do NOT reuse or paraphrase these recent opening sentences from this business:
 ${recentOpenings.map((o, i) => `   ${i + 1}. "${o}"`).join("\n") || "   (none)"}
-7. STRUCTURE (write it as 3-4 short paragraphs, never one block):
+7. STRUCTURE (write it as exactly 3 tight paragraphs, never one block, never 4):
    (a) personalised opening tied to a concrete detail,
-   (b) substance — expand on what they praised, or own the problem and say what is being done,
-   (c) a forward-looking RETURN HOOK: give them a concrete reason to come back (a specific experience, season, dish, room type, facility or upcoming improvement mentioned in or implied by their review). Never a bare "we hope to see you again" — it must be specific and inviting. Skip this hook ONLY when a legal-risk flag is present.
-   (d) a warm, human close${signature ? ` signed "— ${signature}"` : ""}.
+   (b) substance — expand on what they praised, or own the problem and say what is being done. Where the guest named a team member, credit that person by name and say the feedback was shared with them.
+   (c) a forward-looking RETURN HOOK plus the warm close in the SAME paragraph: give them a concrete reason to come back (a specific experience, season, dish, room type, facility or upcoming improvement mentioned in or implied by their review). Never a bare "we hope to see you again" — it must be specific and inviting. Skip this hook ONLY when a legal-risk flag is present.${signature ? ` End signed "— ${signature}"` : ""}
 8. Write like a person: no corporate filler, no repeated sentence openings, no bullet points, no markdown.
 
 9. NEVER invent facilities, room types, dishes, views, offers or upgrades that are not mentioned in the review or in the business context above. The return hook must stay factual and general if no concrete detail is available.
+10. Thank the guest ONCE only. Never add a closing paragraph that repeats the thanks ("Nazik sözleriniz için…", "Thanks again…") — that padding makes the reply feel machine-written.
+11. NEVER restate an unverified attribute the guest assigned to your team or property as if it were your own fact (e.g. do not call someone "our Amsterdam-based guide" because the guest said so). Refer to people and places only as your own records support: by name and role.
+12. Make the guest feel personally seen: mirror the emotion they expressed (excitement, relief, disappointment) in your own words before moving on. Warmth beats formality — no "Sayın Misafirimiz" / "Dear Valued Guest" register.
 
 ## STYLE
 - Tone: ${tone.toUpperCase()} — ${lang === "tr" ? toneCfg.tr : toneCfg.en}
-- Length: ${category === "negative" || category === "mixed" ? "150-220 words" : "110-170 words"}. Depth is expected — a reply shorter than this reads cheap and is a failure. Never pad with filler to reach it; add real substance instead.
+- Length: ${category === "negative" || category === "mixed" ? "140-190 words" : "95-140 words"}. Every sentence must carry new information — if a sentence could be deleted without losing meaning, delete it. Depth without padding.
 - ${tone === "playful" ? "Up to 1 relevant emoji." : "No emojis unless tone demands it."}
 ${signature ? `- Sign the reply with: "— ${signature}" on a new line at the end.` : ""}
 ${brandVoice?.brand_values ? `- Reflect these brand values subtly: ${brandVoice.brand_values}` : ""}
