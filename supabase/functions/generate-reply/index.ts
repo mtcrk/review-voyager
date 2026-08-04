@@ -280,10 +280,18 @@ ${languageRule}
 5. Do NOT use these forbidden phrases: ${JSON.stringify(brandVoice?.forbidden_phrases || [])}.
 6. Do NOT reuse or paraphrase these recent opening sentences from this business:
 ${recentOpenings.map((o, i) => `   ${i + 1}. "${o}"`).join("\n") || "   (none)"}
+7. STRUCTURE (write it as 3-4 short paragraphs, never one block):
+   (a) personalised opening tied to a concrete detail,
+   (b) substance — expand on what they praised, or own the problem and say what is being done,
+   (c) a forward-looking RETURN HOOK: give them a concrete reason to come back (a specific experience, season, dish, room type, facility or upcoming improvement mentioned in or implied by their review). Never a bare "we hope to see you again" — it must be specific and inviting. Skip this hook ONLY when a legal-risk flag is present.
+   (d) a warm, human close${signature ? ` signed "— ${signature}"` : ""}.
+8. Write like a person: no corporate filler, no repeated sentence openings, no bullet points, no markdown.
+
+9. NEVER invent facilities, room types, dishes, views, offers or upgrades that are not mentioned in the review or in the business context above. The return hook must stay factual and general if no concrete detail is available.
 
 ## STYLE
 - Tone: ${tone.toUpperCase()} — ${lang === "tr" ? toneCfg.tr : toneCfg.en}
-- Length: ${category === "negative" || category === "mixed" ? "80-140 words" : "40-90 words"}.
+- Length: ${category === "negative" || category === "mixed" ? "150-220 words" : "110-170 words"}. Depth is expected — a reply shorter than this reads cheap and is a failure. Never pad with filler to reach it; add real substance instead.
 - ${tone === "playful" ? "Up to 1 relevant emoji." : "No emojis unless tone demands it."}
 ${signature ? `- Sign the reply with: "— ${signature}" on a new line at the end.` : ""}
 ${brandVoice?.brand_values ? `- Reflect these brand values subtly: ${brandVoice.brand_values}` : ""}
@@ -433,7 +441,7 @@ serve(async (req) => {
       : pickModel({ category, textLen: reviewText.length, brandVoice, customInstructions: custom_instructions });
     // Generous budget: these are thinking models, so the visible reply is only a
     // fraction of the tokens they consume.
-    const maxTokens = category === "negative" || category === "mixed" ? 2000 : 1200;
+    const maxTokens = category === "negative" || category === "mixed" ? 3000 : 2200;
     const seoOptimized = platform === "google" && brandVoice?.seo_optimized !== false;
 
     // Server analysis wins over anything the caller sent.
@@ -489,6 +497,27 @@ Return ONLY the reply text.`;
     // QA pass
     let qa: any = null;
     let regenerated = false;
+
+    // Depth guard: enterprise replies must have substance, not two lines.
+    const minWords = category === "negative" || category === "mixed" ? 130 : 95;
+    const wordCount = (s: string) => s.trim().split(/\s+/).filter(Boolean).length;
+    if (draft && wordCount(draft) < minWords && !analysis?.flags.legal_risk) {
+      try {
+        const deeper = await callAiSafe(
+          model,
+          systemPrompt,
+          userPrompt +
+            `\n\nPREVIOUS ATTEMPT WAS TOO SHORT AND TOO THIN (${wordCount(draft)} words). Rewrite it with real substance: expand on the guest's specific points, and finish with a concrete, personalised reason to come back. Target at least ${minWords} words without filler.`,
+          maxTokens,
+          LOVABLE_API_KEY,
+        );
+        if (deeper && wordCount(deeper) > wordCount(draft)) {
+          draft = deeper;
+          regenerated = true;
+        }
+      } catch (_) {}
+    }
+
     const mainConcern = analysis?.worstTopic
       ? `${analysis.worstTopic.name}${analysis.worstTopic.quote ? ` — "${analysis.worstTopic.quote}"` : ""}`
       : null;
