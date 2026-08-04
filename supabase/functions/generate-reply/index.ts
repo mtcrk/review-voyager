@@ -495,6 +495,27 @@ Return ONLY the reply text.`;
     // QA pass
     let qa: any = null;
     let regenerated = false;
+
+    // Depth guard: enterprise replies must have substance, not two lines.
+    const minWords = category === "negative" || category === "mixed" ? 130 : 95;
+    const wordCount = (s: string) => s.trim().split(/\s+/).filter(Boolean).length;
+    if (draft && wordCount(draft) < minWords && !analysis?.flags.legal_risk) {
+      try {
+        const deeper = await callAiSafe(
+          model,
+          systemPrompt,
+          userPrompt +
+            `\n\nPREVIOUS ATTEMPT WAS TOO SHORT AND TOO THIN (${wordCount(draft)} words). Rewrite it with real substance: expand on the guest's specific points, and finish with a concrete, personalised reason to come back. Target at least ${minWords} words without filler.`,
+          maxTokens,
+          LOVABLE_API_KEY,
+        );
+        if (deeper && wordCount(deeper) > wordCount(draft)) {
+          draft = deeper;
+          regenerated = true;
+        }
+      } catch (_) {}
+    }
+
     const mainConcern = analysis?.worstTopic
       ? `${analysis.worstTopic.name}${analysis.worstTopic.quote ? ` — "${analysis.worstTopic.quote}"` : ""}`
       : null;
