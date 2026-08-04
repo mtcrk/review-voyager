@@ -161,7 +161,7 @@ async function runQa(draft: string, params: {
 No markdown, no code fences, JSON only.`;
   const user = `ORIGINAL REVIEW:\n"""${reviewText || ""}"""\n\nDRAFT REPLY:\n"""${draft}"""`;
   try {
-    const raw = await callAi("google/gemini-2.5-flash", sys, user, 300, apiKey);
+    const raw = await callAi("google/gemini-2.5-flash", sys, user, 1200, apiKey);
     const cleaned = raw.replace(/```json|```/g, "").trim();
     const start = cleaned.indexOf("{");
     const end = cleaned.lastIndexOf("}");
@@ -431,7 +431,9 @@ serve(async (req) => {
     const model = legalRisk
       ? "google/gemini-2.5-pro"
       : pickModel({ category, textLen: reviewText.length, brandVoice, customInstructions: custom_instructions });
-    const maxTokens = category === "negative" || category === "mixed" ? 600 : 300;
+    // Generous budget: these are thinking models, so the visible reply is only a
+    // fraction of the tokens they consume.
+    const maxTokens = category === "negative" || category === "mixed" ? 2000 : 1200;
     const seoOptimized = platform === "google" && brandVoice?.seo_optimized !== false;
 
     // Server analysis wins over anything the caller sent.
@@ -478,7 +480,7 @@ Return ONLY the reply text.`;
 
     let draft = "";
     try {
-      draft = await callAi(model, systemPrompt, userPrompt, maxTokens, LOVABLE_API_KEY);
+      draft = await callAiSafe(model, systemPrompt, userPrompt, maxTokens, LOVABLE_API_KEY);
     } catch (e) {
       if (e instanceof Response) return new Response(await e.text(), { status: e.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       throw e;
@@ -517,7 +519,7 @@ Return ONLY the reply text.`;
         }
         const retryPrompt = userPrompt + `\n\nPREVIOUS ATTEMPT FAILED QA. Fix these issues: ${reasons.join("; ")}. Regenerate.`;
         console.log("qa regenerate", { reasons });
-        const second = await callAi(model, systemPrompt, retryPrompt, maxTokens, LOVABLE_API_KEY);
+        const second = await callAiSafe(model, systemPrompt, retryPrompt, maxTokens, LOVABLE_API_KEY);
         if (second) {
           draft = second;
           regenerated = true;
