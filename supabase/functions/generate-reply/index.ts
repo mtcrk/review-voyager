@@ -501,7 +501,7 @@ Return ONLY the reply text.`;
     let regenerated = false;
 
     // Depth guard: enterprise replies must have substance, not two lines.
-    const minWords = category === "negative" || category === "mixed" ? 130 : 95;
+    const minWords = category === "negative" || category === "mixed" ? 120 : 85;
     const wordCount = (s: string) => s.trim().split(/\s+/).filter(Boolean).length;
     if (draft && wordCount(draft) < minWords && !analysis?.flags.legal_risk) {
       try {
