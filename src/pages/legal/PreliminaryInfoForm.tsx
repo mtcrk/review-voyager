@@ -26,7 +26,7 @@ export default function PreliminaryInfoForm({
   const priceLine =
     typeof totalAmount === "number"
       ? `${totalAmount.toLocaleString("tr-TR")} ${currency} / ay (KDV dahil)`
-      : "[Ödeme ekranında hesaplanan güncel tutar / ay (KDV dahil)]";
+      : "Ödeme ekranında hesaplanan güncel tutar / ay (KDV dahil)";
 
   return (
     <div className="min-h-screen bg-background">
