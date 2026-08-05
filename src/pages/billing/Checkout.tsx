@@ -147,13 +147,8 @@ export default function BillingCheckout() {
     [plan, computedTotal],
   );
 
-  const withdrawalConsentText =
-    "Mesafeli Satış Sözleşmesi'ni ve Ön Bilgilendirme Formu'nu okudum, kabul ediyorum. Hizmetin derhâl ifasını talep ediyorum ve bu nedenle cayma hakkımın bulunmadığını biliyorum.";
+  const consentSnapshot = consentText;
 
-  const consentSnapshot = useMemo(
-    () => [consentText, withdrawalConsentText].filter(Boolean).join("\n\n"),
-    [consentText],
-  );
 
   useEffect(() => {
     if (authLoading) return;
@@ -662,8 +657,7 @@ export default function BillingCheckout() {
                 >
                   Ön Bilgilendirme Formu
                 </a>
-                'nu okudum, kabul ediyorum. Hizmetin derhâl ifasını talep ediyorum ve bu
-                nedenle cayma hakkımın bulunmadığını biliyorum.
+                'nu okudum, kabul ediyorum.
               </label>
             </div>
             <p className="text-xs text-muted-foreground px-1">
