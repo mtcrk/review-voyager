@@ -204,6 +204,31 @@ Deno.serve(async (req) => {
           error_message: data?.err_msg ?? "unknown",
           raw_notification: data,
         }).eq("merchant_oid", merchant_oid);
+
+        try {
+          await fetch(
+            `${Deno.env.get("SUPABASE_URL")}/functions/v1/notify-subscription-email`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+              },
+              body: JSON.stringify({
+                type: "recurring_failed",
+                business_id: sub.business_id,
+                to_email: email,
+                business_name: biz?.name ?? null,
+                plan_code: sub.plan_code,
+                amount: chargeAmount,
+                location_count: sub.location_count ?? 1,
+                addon_codes: sub.addon_codes ?? [],
+              }),
+            },
+          );
+        } catch (mailErr) {
+          console.error("recurring_failed mail error", sub.business_id, mailErr);
+        }
       }
 
       results.push({ business_id: sub.business_id, status });
