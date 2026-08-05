@@ -90,8 +90,7 @@ export default function DistanceSalesAgreement() {
           <Section title="5. Teslimat / İfa Şekli">
             <p>
               Hizmet dijitaldir. Ödemenin onaylanmasının ardından Abone hesabı aktive edilir ve
-              hizmete erişim derhâl sağlanır. Fatura, kayıtlı e-posta adresine [X iş günü] içinde
-              elektronik olarak gönderilir.
+              hizmete erişim derhâl sağlanır.
             </p>
           </Section>
 

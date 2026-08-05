@@ -94,8 +94,7 @@ export default function PreliminaryInfoForm({
 
           <Section title="5. Teslimat / İfa">
             <p>
-              Hizmet dijitaldir ve ödeme onayının ardından derhâl aktive edilir. Fatura,
-              kayıtlı e-posta adresine [X iş günü] içinde elektronik olarak iletilir.
+              Hizmet dijitaldir ve ödeme onayının ardından derhâl aktive edilir.
             </p>
           </Section>
 
