@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import SEO from "@/components/seo/SEO";
-import DraftBanner from "./DraftBanner";
 
 export default function CancellationPolicy() {
   const navigate = useNavigate();
@@ -18,9 +17,8 @@ export default function CancellationPolicy() {
     <div className="min-h-screen bg-background">
       <SEO
         title="İptal & İade Koşulları | VoyageRespond"
-        description="VoyageRespond abonelik iptal ve iade koşulları taslağı."
+        description="VoyageRespond abonelik iptal ve iade koşulları."
         canonical="https://voyagerespond.com/iptal-iade-kosullari"
-        noindex
       />
       <div className="container mx-auto px-6 py-12 max-w-4xl">
         <Button variant="ghost" onClick={() => navigate(-1)} className="mb-8">
@@ -30,15 +28,13 @@ export default function CancellationPolicy() {
         <h1 className="text-4xl font-bold text-foreground mb-4">
           Cayma Hakkı / İptal &amp; İade Koşulları
         </h1>
-        <p className="text-muted-foreground mb-8">Son güncelleme: [GG.AA.YYYY]</p>
-
-        <DraftBanner />
+        <p className="text-muted-foreground mb-8">Son güncelleme: 05.08.2026</p>
 
         <div className="prose prose-gray dark:prose-invert max-w-none">
           <Section title="1. Abonelik İptali Nasıl Yapılır?">
             <p>
               Aboneliğinizi istediğiniz zaman VoyageRespond paneli üzerinden
-              <strong> Ayarlar &rarr; Fatura &amp; Abonelik</strong> menüsünden tek tıkla iptal
+              <strong> Abonelik</strong> menüsünden tek tıkla iptal
               edebilirsiniz. Alternatif olarak admin@voyagerespond.com adresine yazılı
               talebinizi iletebilirsiniz.
             </p>
@@ -46,7 +42,7 @@ export default function CancellationPolicy() {
 
           <Section title="2. İptal Ne Zaman Geçerli Olur?">
             <p>
-              İptal talebi anında sisteme işlenir. Mevcut fatura dönemi sonuna kadar hizmete
+              İptal talebi anında sisteme işlenir. Mevcut abonelik dönemi sonuna kadar hizmete
               erişiminiz devam eder ve dönem sonunda otomatik yenileme durdurulur. Sonraki
               tahsilat yapılmaz.
             </p>
@@ -55,22 +51,21 @@ export default function CancellationPolicy() {
           <Section title="3. İade Koşulları">
             <p>
               VoyageRespond dijital ve anında ifa edilen bir hizmet olduğundan, kullanılmakta
-              olan fatura dönemine ait ücretler kural olarak iade edilmez.
-              [İSTİSNALAR / KISMİ İADE KOŞULLARI HUKUK DANIŞMANI TARAFINDAN NETLEŞTİRİLECEK.]
+              olan abonelik dönemine ait ücretler kural olarak iade edilmez.
             </p>
             <p>
               Aşağıdaki hâllerde talep üzerine kısmi/tam iade değerlendirilebilir:
             </p>
             <ul className="list-disc pl-6 space-y-1">
-              <li>Hizmetin, VoyageRespond kaynaklı bir arıza nedeniyle [X] iş gününden uzun süre sunulamaması</li>
+              <li>Hizmetin, VoyageRespond kaynaklı bir arıza nedeniyle 3 iş gününden uzun süre sunulamaması</li>
               <li>Mükerrer tahsilat</li>
-              <li>[EK KOŞULLAR]</li>
+              <li>Yanlışlıkla veya Abone'nin talebi olmaksızın yapılan tahsilatlar</li>
             </ul>
           </Section>
 
           <Section title="4. İade Süreci">
             <p>
-              Onaylanan iadeler, ödemenin yapıldığı karta [X iş günü] içinde iade edilir. Kartın
+              Onaylanan iadeler, ödemenin yapıldığı karta 7 iş günü içinde iade edilir. Kartın
               bankasına ulaşma süresi bankadan bankaya değişiklik gösterebilir.
             </p>
           </Section>

@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import SEO from "@/components/seo/SEO";
-import DraftBanner from "./DraftBanner";
 
 export default function DistanceSalesAgreement() {
   const navigate = useNavigate();
@@ -18,9 +17,8 @@ export default function DistanceSalesAgreement() {
     <div className="min-h-screen bg-background">
       <SEO
         title="Mesafeli Satış Sözleşmesi | VoyageRespond"
-        description="VoyageRespond SaaS abonelik hizmeti için mesafeli satış sözleşmesi taslağı."
+        description="VoyageRespond SaaS abonelik hizmeti için mesafeli satış sözleşmesi."
         canonical="https://voyagerespond.com/mesafeli-satis-sozlesmesi"
-        noindex
       />
       <div className="container mx-auto px-6 py-12 max-w-4xl">
         <Button variant="ghost" onClick={() => navigate(-1)} className="mb-8">
@@ -28,9 +26,7 @@ export default function DistanceSalesAgreement() {
         </Button>
 
         <h1 className="text-4xl font-bold text-foreground mb-4">Mesafeli Satış Sözleşmesi</h1>
-        <p className="text-muted-foreground mb-8">Son güncelleme: [GG.AA.YYYY]</p>
-
-        <DraftBanner />
+        <p className="text-muted-foreground mb-8">Son güncelleme: 05.08.2026</p>
 
         <div className="prose prose-gray dark:prose-invert max-w-none">
           <Section title="1. Taraflar">
@@ -45,8 +41,8 @@ export default function DistanceSalesAgreement() {
               Telefon: +90 537 267 53 14
             </p>
             <p>
-              <strong>Abone (Alıcı):</strong> Hizmete kayıt sırasında beyan edilen ad, soyad,
-              e-posta ve fatura bilgileri geçerlidir.
+              <strong>Abone (Alıcı):</strong> Hizmete kayıt sırasında beyan edilen ad, soyad ve
+              e-posta bilgileri geçerlidir.
             </p>
           </Section>
 
@@ -63,8 +59,8 @@ export default function DistanceSalesAgreement() {
             <p>
               Hizmet; işletmenin çevrimiçi platformlardaki yorumlarının toplanması, yapay zekâ
               destekli yanıt üretilmesi, raporlanması ve ilgili entegrasyonların sunulmasını içerir.
-              Seçilen pakete göre sunulan modüller ve limitler [ÜRÜN DOKÜMANI/URL] adresinde
-              tanımlıdır.
+              Seçilen pakete göre sunulan modüller ve limitler voyagerespond.com/fiyatlandirma
+              adresinde tanımlıdır.
             </p>
           </Section>
 
@@ -105,15 +101,20 @@ export default function DistanceSalesAgreement() {
 
           <Section title="7. Cayma Hakkı">
             <p>
-              6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği
-              uyarınca, elektronik ortamda anında ifa edilen dijital içerik/hizmetlerde
-              tüketicinin onayı ile ifaya başlanması hâlinde cayma hakkı kullanılamayabilir.
-              [KESİN HÜKÜM HUKUK DANIŞMANI TARAFINDAN NETLEŞTİRİLECEK.]
+              Hizmet, ödeme onayının ardından elektronik ortamda derhâl ifa edilmeye başlanan
+              dijital bir hizmettir. 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli
+              Sözleşmeler Yönetmeliği'nin ilgili hükümleri uyarınca, elektronik ortamda anında ifa
+              edilen hizmetler ile cayma hakkı süresi sona ermeden tüketicinin onayı ile ifasına
+              başlanan hizmetlere ilişkin sözleşmelerde cayma hakkı kullanılamaz. Abone, ödeme
+              ekranında bu Sözleşmeyi onaylayarak hizmetin derhâl ifasını talep ettiğini ve cayma
+              hakkının bulunmadığını kabul eder.
             </p>
             <p>
-              Cayma hakkının kullanılabildiği durumlarda ve abonelik iptal koşullarına ilişkin
-              ayrıntılar için <a href="/iptal-iade-kosullari" className="underline">İptal &amp; İade
-              Koşulları</a> sayfasına bakınız.
+              Abonelik, panel üzerinden her zaman iptal edilebilir. İptal hâlinde içinde bulunulan
+              abonelik döneminin sonuna kadar hizmete erişim devam eder ve sonraki dönem için
+              tahsilat yapılmaz. Ayrıntılar için{" "}
+              <a href="/iptal-iade-kosullari" className="underline">İptal &amp; İade Koşulları</a>{" "}
+              sayfasına bakınız.
             </p>
           </Section>
 
@@ -127,8 +128,8 @@ export default function DistanceSalesAgreement() {
 
           <Section title="9. Uyuşmazlıkların Çözümü">
             <p>
-              İşbu Sözleşmeden doğan uyuşmazlıklarda [ŞEHİR] Tüketici Hakem Heyetleri ve [ŞEHİR]
-              Tüketici Mahkemeleri yetkilidir. Parasal sınırın üzerindeki uyuşmazlıklarda [ŞEHİR]
+              İşbu Sözleşmeden doğan uyuşmazlıklarda Ankara Tüketici Hakem Heyetleri ve Ankara
+              Tüketici Mahkemeleri yetkilidir. Parasal sınırın üzerindeki uyuşmazlıklarda Ankara
               Mahkemeleri ve İcra Daireleri yetkilidir.
             </p>
           </Section>
