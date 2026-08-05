@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Loader2, Play, RefreshCw, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { Loader2, Play, RefreshCw, Clock, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface CronJob {
@@ -70,6 +70,7 @@ export function AdminCronJobs() {
   const [loading, setLoading] = useState(false);
   const [triggering, setTriggering] = useState<string | null>(null);
   const [lastResult, setLastResult] = useState<Record<string, TriggerResult>>({});
+  const [overdueCount, setOverdueCount] = useState<number | null>(null);
 
   const fetchJobs = async () => {
     setLoading(true);
@@ -89,6 +90,19 @@ export function AdminCronJobs() {
 
   useEffect(() => {
     fetchJobs();
+  }, []);
+
+  useEffect(() => {
+    const fetchOverdue = async () => {
+      const today = new Date().toISOString().slice(0, 10);
+      const { count, error } = await supabase
+        .from("subscription_billing")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "active")
+        .lt("next_billing_date", today);
+      if (!error) setOverdueCount(count ?? 0);
+    };
+    fetchOverdue();
   }, []);
 
   const triggerJob = async (jobname: string) => {
@@ -125,6 +139,23 @@ export function AdminCronJobs() {
   };
 
   return (
+    <div className="space-y-4">
+      {overdueCount !== null && overdueCount > 0 && (
+        <Card className="border-destructive/40">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-4 w-4" />
+              {overdueCount} abonelik vadesi geçmiş, tahsilat yapılmadı
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground">
+              Bu abonelikler hâlâ aktif görünüyor ancak yenileme tarihi geçmiş. Otomatik
+              tahsilat kapalıysa (PayTR non-3D onayı bekleniyor) tahsilatı manuel takip et.
+            </p>
+          </CardContent>
+        </Card>
+      )}
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between flex-wrap gap-3">
@@ -229,5 +260,6 @@ export function AdminCronJobs() {
         )}
       </CardContent>
     </Card>
+    </div>
   );
 }
