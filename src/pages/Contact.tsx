@@ -45,31 +45,31 @@ import SEO from "@/components/seo/SEO";
             {t('contact.subtitle', 'Sorularınız, önerileriniz veya destek talepleriniz için bizimle iletişime geçin.')}
            </p>
  
-           {/* Email Card */}
-           <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-lg mb-8">
-             <div className="flex flex-col items-center gap-4">
-               <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
-                 <Mail className="w-7 h-7 text-primary" />
-               </div>
-               <div>
-                <h2 className="text-xl font-semibold text-foreground mb-2">{t('contact.email', 'E-posta')}</h2>
-                 <a 
-                   href="mailto:support@voyagerespond.com"
-                   className="text-lg sm:text-2xl font-medium text-primary hover:underline transition-colors break-all"
-                 >
-                   support@voyagerespond.com
-                 </a>
-               </div>
-               <Button 
-                 size="lg"
-                 className="gradient-primary text-white mt-4"
-                 onClick={() => window.location.href = "mailto:support@voyagerespond.com"}
-               >
-                 <Mail className="w-5 h-5 mr-2" />
-                {t('contact.sendEmail', 'E-posta Gönder')}
-               </Button>
-             </div>
-           </div>
+            {/* Email Card */}
+            <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-lg mb-8">
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Mail className="w-7 h-7 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold text-foreground mb-2">{t('contact.email', 'E-posta')}</h2>
+                  <a
+                    href="mailto:admin@voyagerespond.com"
+                    className="text-lg sm:text-2xl font-medium text-primary hover:underline transition-colors break-all"
+                  >
+                    admin@voyagerespond.com
+                  </a>
+                </div>
+                <Button
+                  size="lg"
+                  className="gradient-primary text-white mt-4"
+                  onClick={() => window.location.href = "mailto:admin@voyagerespond.com"}
+                >
+                  <Mail className="w-5 h-5 mr-2" />
+                  {t('contact.sendEmail', 'E-posta Gönder')}
+                </Button>
+              </div>
+            </div>
  
            {/* Additional Info */}
             <div className="grid sm:grid-cols-3 gap-6 mt-12">
