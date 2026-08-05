@@ -50,23 +50,21 @@ export default function CancellationPolicy() {
 
           <Section title="3. İade Koşulları">
             <p>
-              VoyageRespond dijital ve anında ifa edilen bir hizmet olduğundan, kullanılmakta
-              olan abonelik dönemine ait ücretler kural olarak iade edilmez.
+              VoyageRespond, ödeme onayının ardından elektronik ortamda derhâl ifa edilen dijital
+              bir hizmettir. Bu nedenle kullanılmakta olan abonelik dönemine ait ücretler iade
+              edilmez. Abonelik istediğiniz zaman iptal edilebilir; iptal hâlinde dönem sonuna
+              kadar hizmete erişim devam eder ve sonraki dönem için tahsilat yapılmaz.
             </p>
             <p>
-              Aşağıdaki hâllerde talep üzerine kısmi/tam iade değerlendirilebilir:
+              Mükerrer veya hatalı tahsilat söz konusu olduğunda, ilgili tutar bir iade talebine
+              bağlı olmaksızın ödemenin yapıldığı karta iade edilir.
             </p>
-            <ul className="list-disc pl-6 space-y-1">
-              <li>Hizmetin, VoyageRespond kaynaklı bir arıza nedeniyle 3 iş gününden uzun süre sunulamaması</li>
-              <li>Mükerrer tahsilat</li>
-              <li>Yanlışlıkla veya Abone'nin talebi olmaksızın yapılan tahsilatlar</li>
-            </ul>
           </Section>
 
-          <Section title="4. İade Süreci">
+          <Section title="4. Hatalı Tahsilat İadeleri">
             <p>
-              Onaylanan iadeler, ödemenin yapıldığı karta 7 iş günü içinde iade edilir. Kartın
-              bankasına ulaşma süresi bankadan bankaya değişiklik gösterebilir.
+              Mükerrer veya hatalı tahsilatlarda iade, ödemenin yapıldığı karta yapılır. Tutarın
+              kart hesabına yansıma süresi bankadan bankaya değişiklik gösterebilir.
             </p>
           </Section>
 
