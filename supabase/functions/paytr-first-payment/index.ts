@@ -181,6 +181,16 @@ Deno.serve(async (req) => {
       .maybeSingle();
     const test_mode = setting?.value === false ? "0" : "1";
 
+    // Kart saklama (store_card) bayrağı: PayTR Kart Saklama / abonelik onayı
+    // gelince `app_settings.paytr_store_card_enabled` = true yapılması yeterli;
+    // kod değişikliği gerekmez.
+    const { data: storeCardSetting } = await admin
+      .from("app_settings")
+      .select("value")
+      .eq("key", "paytr_store_card_enabled")
+      .maybeSingle();
+    const storeCardEnabled = storeCardSetting?.value === true;
+
     // Existing utoken (returning customer)
     const { data: existing } = await admin
       .from("paytr_customer_tokens")
@@ -197,6 +207,14 @@ Deno.serve(async (req) => {
     const no_installment = "1";
     const max_installment = "0";
     const origin = req.headers.get("origin") ?? "https://voyagerespondcom.lovable.app";
+    // Canlı modda dönüş URL'leri her zaman production domainine sabitlenir.
+    // Test modunda origin bazlı davranış korunur (preview'da test edebilmek için).
+    const ok_url = test_mode === "0"
+      ? "https://voyagerespond.com/billing/success"
+      : `${origin}/billing/success`;
+    const fail_url = test_mode === "0"
+      ? "https://voyagerespond.com/billing/failed"
+      : `${origin}/billing/failed`;
 
     // iFrame API: user_basket = base64(json_encode(...)). Both hash ve POST
     // body içinde AYNI base64 string kullanılmalı.
@@ -262,20 +280,25 @@ Deno.serve(async (req) => {
       payment_amount,
       paytr_token,
       user_basket,
-      debug_on: "1",
+      debug_on: test_mode === "1" ? "1" : "0",
       no_installment,
       max_installment,
       user_name,
       user_address,
       user_phone,
-      merchant_ok_url: `${origin}/billing/success`,
-      merchant_fail_url: `${origin}/billing/failed`,
+      merchant_ok_url: ok_url,
+      merchant_fail_url: fail_url,
       timeout_limit: "30",
       currency,
       test_mode,
       lang: "tr",
     };
-    // Not: `store_card` kart saklama onayımız gelene kadar GÖNDERİLMİYOR.
+    // Not: `store_card` yalnızca `app_settings.paytr_store_card_enabled = true`
+    // olduğunda gönderilir. PayTR Kart Saklama onayı gelene kadar bayrak false
+    // kalır ve alan hiç gönderilmez.
+    if (storeCardEnabled) {
+      fields.store_card = "1";
+    }
     // `existing.utoken` sadece Direkt API için anlamlıydı — iFrame'e eklemiyoruz.
     void existing;
 
