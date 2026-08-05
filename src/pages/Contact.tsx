@@ -72,18 +72,27 @@ import SEO from "@/components/seo/SEO";
            </div>
  
            {/* Additional Info */}
-           <div className="grid sm:grid-cols-2 gap-6 mt-12">
-             <div className="p-6 rounded-xl border border-border bg-card/50">
-               <Clock className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-              <h3 className="font-semibold text-foreground mb-1">{t('contact.responseTime', 'Yanıt Süresi')}</h3>
-              <p className="text-sm text-muted-foreground">{t('contact.responseTimeDesc', 'Genellikle 24 saat içinde yanıt veriyoruz')}</p>
-             </div>
-             <div className="p-6 rounded-xl border border-border bg-card/50">
-               <MapPin className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-              <h3 className="font-semibold text-foreground mb-1">{t('contact.location', 'Konum')}</h3>
-              <p className="text-sm text-muted-foreground">{t('contact.locationValue', 'Türkiye')}</p>
-             </div>
-           </div>
+            <div className="grid sm:grid-cols-3 gap-6 mt-12">
+              <div className="p-6 rounded-xl border border-border bg-card/50">
+                <MapPin className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+                <h3 className="font-semibold text-foreground mb-1">{t('contact.address', 'Adres')}</h3>
+                <p className="text-sm text-muted-foreground">
+                  Bilkent Cyberpark,<br />
+                  Üniversiteler Mah. Bilkent Blv.,<br />
+                  06520 Çankaya / Ankara
+                </p>
+              </div>
+              <div className="p-6 rounded-xl border border-border bg-card/50">
+                <Clock className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+                <h3 className="font-semibold text-foreground mb-1">{t('contact.responseTime', 'Yanıt Süresi')}</h3>
+                <p className="text-sm text-muted-foreground">{t('contact.responseTimeDesc', 'Genellikle 24 saat içinde yanıt veriyoruz')}</p>
+              </div>
+              <div className="p-6 rounded-xl border border-border bg-card/50">
+                <Mail className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+                <h3 className="font-semibold text-foreground mb-1">{t('contact.email', 'E-posta')}</h3>
+                <p className="text-sm text-muted-foreground">support@voyagerespond.com</p>
+              </div>
+            </div>
          </div>
        </main>
      </div>

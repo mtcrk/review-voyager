@@ -47,7 +47,7 @@ export default function PreliminaryInfoForm({
           <Section title="1. Hizmet Sağlayıcı Bilgileri">
             <p>
               Hizmet Sağlayıcı: VoyageRespond<br />
-              Adres: Bilkent, Çankaya, Ankara<br />
+              Adres: Bilkent Cyberpark, Üniversiteler Mah. Bilkent Blv., 06520 Çankaya / Ankara<br />
               E-posta: admin@voyagerespond.com<br />
               Telefon: +90 537 267 53 14
             </p>

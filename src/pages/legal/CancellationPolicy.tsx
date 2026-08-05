@@ -70,7 +70,9 @@ export default function CancellationPolicy() {
 
           <Section title="5. İletişim">
             <p>
-              İptal veya iade süreciyle ilgili her türlü sorunuz için: admin@voyagerespond.com
+              İptal veya iade süreciyle ilgili her türlü sorunuz için:<br />
+              E-posta: admin@voyagerespond.com<br />
+              Adres: Bilkent Cyberpark, Üniversiteler Mah. Bilkent Blv., 06520 Çankaya / Ankara
             </p>
           </Section>
         </div>
