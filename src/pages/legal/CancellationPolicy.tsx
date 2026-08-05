@@ -39,7 +39,7 @@ export default function CancellationPolicy() {
             <p>
               Aboneliğinizi istediğiniz zaman VoyageRespond paneli üzerinden
               <strong> Ayarlar &rarr; Fatura &amp; Abonelik</strong> menüsünden tek tıkla iptal
-              edebilirsiniz. Alternatif olarak [support@voyagerespond.com] adresine yazılı
+              edebilirsiniz. Alternatif olarak admin@voyagerespond.com adresine yazılı
               talebinizi iletebilirsiniz.
             </p>
           </Section>
@@ -77,7 +77,7 @@ export default function CancellationPolicy() {
 
           <Section title="5. İletişim">
             <p>
-              İptal veya iade süreciyle ilgili her türlü sorunuz için: [support@voyagerespond.com]
+              İptal veya iade süreciyle ilgili her türlü sorunuz için: admin@voyagerespond.com
             </p>
           </Section>
         </div>

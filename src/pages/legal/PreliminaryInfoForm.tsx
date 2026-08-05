@@ -51,9 +51,9 @@ export default function PreliminaryInfoForm({
           <Section title="1. Hizmet Sağlayıcı Bilgileri">
             <p>
               Hizmet Sağlayıcı: VoyageRespond<br />
-              Adres: [ADRES]<br />
-              E-posta: [E-POSTA]<br />
-              Telefon: [TELEFON]
+              Adres: Bilkent, Çankaya, Ankara<br />
+              E-posta: admin@voyagerespond.com<br />
+              Telefon: +90 537 267 53 14
             </p>
           </Section>
 
@@ -112,7 +112,7 @@ export default function PreliminaryInfoForm({
 
           <Section title="7. Şikâyet ve Uyuşmazlık Başvuruları">
             <p>
-              Hizmete ilişkin şikâyetlerinizi [support@voyagerespond.com] adresine
+              Hizmete ilişkin şikâyetlerinizi admin@voyagerespond.com adresine
               iletebilirsiniz. Uyuşmazlıklarda parasal sınırlar dahilinde Tüketici Hakem
               Heyetleri ve Tüketici Mahkemeleri yetkilidir.
             </p>
