@@ -42,11 +42,12 @@ Deno.serve(async (req) => {
 
     const { data: origLog } = await admin
       .from("paytr_payment_log")
-      .select("business_id,is_recurring,user_ip,plan_code,plan_id,location_count,computed_total,addon_codes,payment_amount")
+      .select("business_id,is_recurring,user_ip,plan_code,plan_id,location_count,computed_total,addon_codes,payment_amount,status")
       .eq("merchant_oid", merchant_oid)
       .maybeSingle();
 
     const business_id = origLog?.business_id ?? null;
+    const alreadySucceeded = origLog?.status === "success";
     const is_recurring = origLog?.is_recurring ?? false;
     const orig_plan_code = origLog?.plan_code ?? "pro_monthly";
     const orig_user_ip = origLog?.user_ip ?? null;
@@ -143,6 +144,34 @@ Deno.serve(async (req) => {
           addon_codes: orig_addon_codes,
         });
       }
+
+      if (!alreadySucceeded) {
+        try {
+          const { data: biz } = await admin
+            .from("businesses")
+            .select("user_id,name")
+            .eq("id", business_id)
+            .maybeSingle();
+          const userRes = biz?.user_id
+            ? await admin.auth.admin.getUserById(biz.user_id)
+            : null;
+          const email = userRes?.data?.user?.email ?? null;
+
+          await notifySubscription({
+            type: "payment_success",
+            business_id,
+            to_email: email,
+            business_name: biz?.name ?? null,
+            plan_code: orig_plan_code,
+            amount: orig_computed_total ?? receivedAmount,
+            location_count: orig_location_count,
+            addon_codes: orig_addon_codes,
+            next_billing_date: nextDate,
+          });
+        } catch (mailErr) {
+          console.error("paytr-notification: payment_success mail failed", mailErr);
+        }
+      }
     } else if (status !== "success" && business_id && is_recurring) {
       // Only recurring failures should degrade the subscription. First-payment
       // attempts (is_recurring=false) must not push an existing active plan
@@ -162,6 +191,33 @@ Deno.serve(async (req) => {
           status: rc >= 3 ? "past_due" : "active",
         })
         .eq("business_id", business_id);
+
+      if (!alreadySucceeded) {
+        try {
+          const { data: biz } = await admin
+            .from("businesses")
+            .select("user_id,name")
+            .eq("id", business_id)
+            .maybeSingle();
+          const userRes = biz?.user_id
+            ? await admin.auth.admin.getUserById(biz.user_id)
+            : null;
+          const email = userRes?.data?.user?.email ?? null;
+
+          await notifySubscription({
+            type: "recurring_failed",
+            business_id,
+            to_email: email,
+            business_name: biz?.name ?? null,
+            plan_code: orig_plan_code,
+            amount: orig_computed_total ?? receivedAmount,
+            location_count: orig_location_count,
+            addon_codes: orig_addon_codes,
+          });
+        } catch (mailErr) {
+          console.error("paytr-notification: recurring_failed mail failed", mailErr);
+        }
+      }
     }
 
     return ok();
@@ -173,4 +229,19 @@ Deno.serve(async (req) => {
 
 function ok() {
   return new Response("OK", { status: 200, headers: { "Content-Type": "text/plain" } });
+}
+
+async function notifySubscription(payload: Record<string, unknown>) {
+  const url = `${Deno.env.get("SUPABASE_URL")}/functions/v1/notify-subscription-email`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    console.error("notify-subscription-email failed", res.status, await res.text());
+  }
 }
