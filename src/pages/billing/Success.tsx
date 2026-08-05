@@ -9,7 +9,7 @@ export default function BillingSuccess() {
         <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
         <h1 className="text-2xl font-bold mb-2">Ödemeniz alındı</h1>
         <p className="text-muted-foreground mb-6">
-          Aboneliğiniz kısa süre içinde aktive edilecek. Faturanız [X iş günü] içinde kayıtlı
+          Aboneliğiniz kısa süre içinde aktive edilecek. Faturanız 7 iş günü içinde kayıtlı
           e-posta adresinize gönderilecektir.
         </p>
         <Button asChild><Link to="/dashboard">Panele Dön</Link></Button>
