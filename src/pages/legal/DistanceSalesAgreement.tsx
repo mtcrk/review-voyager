@@ -59,8 +59,8 @@ export default function DistanceSalesAgreement() {
             <p>
               Hizmet; işletmenin çevrimiçi platformlardaki yorumlarının toplanması, yapay zekâ
               destekli yanıt üretilmesi, raporlanması ve ilgili entegrasyonların sunulmasını içerir.
-              Seçilen pakete göre sunulan modüller ve limitler [ÜRÜN DOKÜMANI/URL] adresinde
-              tanımlıdır.
+              Seçilen pakete göre sunulan modüller ve limitler voyagerespond.com/fiyatlandirma
+              adresinde tanımlıdır.
             </p>
           </Section>
 
