@@ -39,12 +39,9 @@ export default function DistanceSalesAgreement() {
               arasında elektronik ortamda akdedilmiştir.
             </p>
             <p>
-              <strong>Hizmet Sağlayıcı:</strong> [ŞİRKET UNVANI]<br />
+              <strong>Hizmet Sağlayıcı:</strong> VoyageRespond<br />
               Adres: [ADRES]<br />
-              Vergi Dairesi / No: [VERGİ DAİRESİ] / [VERGİ NO]<br />
-              MERSİS No: [MERSİS NO]<br />
-              Ticaret Sicil No: [TİCARET SİCİL NO]<br />
-              E-posta: [support@voyagerespond.com]<br />
+              E-posta: [E-POSTA]<br />
               Telefon: [TELEFON]
             </p>
             <p>
