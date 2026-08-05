@@ -40,9 +40,9 @@ export default function DistanceSalesAgreement() {
             </p>
             <p>
               <strong>Hizmet Sağlayıcı:</strong> VoyageRespond<br />
-              Adres: [ADRES]<br />
-              E-posta: [E-POSTA]<br />
-              Telefon: [TELEFON]
+              Adres: Bilkent, Çankaya, Ankara<br />
+              E-posta: admin@voyagerespond.com<br />
+              Telefon: +90 537 267 53 14
             </p>
             <p>
               <strong>Abone (Alıcı):</strong> Hizmete kayıt sırasında beyan edilen ad, soyad,
