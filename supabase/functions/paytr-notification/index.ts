@@ -17,8 +17,10 @@ Deno.serve(async (req) => {
       hash = "",
     } = p;
 
-    const merchant_key = Deno.env.get("PAYTR_MERCHANT_KEY") ?? "";
-    const merchant_salt = Deno.env.get("PAYTR_MERCHANT_SALT") ?? "";
+    // Trim: secret'ta kaçak boşluk/newline olursa HMAC byte-exact tutmaz ve
+    // ödeme alınmasına rağmen abonelik sessizce aktive olmaz.
+    const merchant_key = (Deno.env.get("PAYTR_MERCHANT_KEY") ?? "").trim();
+    const merchant_salt = (Deno.env.get("PAYTR_MERCHANT_SALT") ?? "").trim();
 
     const expected = await paytrNotificationHash({
       merchant_oid,
@@ -40,7 +42,7 @@ Deno.serve(async (req) => {
 
     const { data: origLog } = await admin
       .from("paytr_payment_log")
-      .select("business_id,is_recurring,user_ip,plan_code,plan_id,location_count,computed_total,addon_codes")
+      .select("business_id,is_recurring,user_ip,plan_code,plan_id,location_count,computed_total,addon_codes,payment_amount")
       .eq("merchant_oid", merchant_oid)
       .maybeSingle();
 
@@ -53,15 +55,34 @@ Deno.serve(async (req) => {
     const orig_computed_total = origLog?.computed_total ?? null;
     const orig_addon_codes = origLog?.addon_codes ?? [];
 
+    // Tutar doğrulaması: hash doğrulandığı için tutar güvenilir, ancak
+    // beklenen ile gelen tutar arasındaki fark görünür bir iz bırakmalı.
+    const receivedAmount = Number(total_amount) / 100;
+    const expectedAmount = origLog?.computed_total ?? origLog?.payment_amount ?? null;
+    let amountMismatchNote: string | null = null;
+    if (
+      status === "success" &&
+      expectedAmount != null &&
+      Math.abs(Number(expectedAmount) - receivedAmount) > 0.01
+    ) {
+      amountMismatchNote = `expected=${Number(expectedAmount)} received=${receivedAmount}`;
+      console.error("paytr-notification: amount_mismatch", {
+        merchant_oid,
+        business_id,
+        expected: Number(expectedAmount),
+        received: receivedAmount,
+      });
+    }
+
     await admin
       .from("paytr_payment_log")
       .upsert({
         merchant_oid,
         business_id,
-        payment_amount: Number(total_amount) / 100,
+        payment_amount: receivedAmount,
         is_recurring,
         status: status === "success" ? "success" : "failed",
-        error_message: p.failed_reason_msg ?? null,
+        error_message: amountMismatchNote ?? p.failed_reason_msg ?? null,
         raw_notification: p,
       }, { onConflict: "merchant_oid" });
 
