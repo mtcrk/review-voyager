@@ -50,11 +50,9 @@ export default function PreliminaryInfoForm({
         <div className="prose prose-gray dark:prose-invert max-w-none">
           <Section title="1. Hizmet Sağlayıcı Bilgileri">
             <p>
-              Unvan: [ŞİRKET UNVANI]<br />
+              Hizmet Sağlayıcı: VoyageRespond<br />
               Adres: [ADRES]<br />
-              Vergi Dairesi / No: [VERGİ DAİRESİ] / [VERGİ NO]<br />
-              MERSİS No: [MERSİS NO]<br />
-              E-posta: [support@voyagerespond.com]<br />
+              E-posta: [E-POSTA]<br />
               Telefon: [TELEFON]
             </p>
           </Section>
