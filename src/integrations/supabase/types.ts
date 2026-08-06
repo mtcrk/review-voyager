@@ -2172,9 +2172,11 @@ export type Database = {
           addon_codes: string[]
           amount: number
           business_id: string
+          canceled_at: string | null
           computed_total: number | null
           created_at: string
           currency: string
+          current_period_start: string | null
           id: string
           last_payment_at: string | null
           last_payment_status: string | null
@@ -2183,6 +2185,7 @@ export type Database = {
           plan_code: string
           plan_id: string | null
           retry_count: number
+          started_at: string | null
           status: string
           updated_at: string
         }
@@ -2190,9 +2193,11 @@ export type Database = {
           addon_codes?: string[]
           amount: number
           business_id: string
+          canceled_at?: string | null
           computed_total?: number | null
           created_at?: string
           currency?: string
+          current_period_start?: string | null
           id?: string
           last_payment_at?: string | null
           last_payment_status?: string | null
@@ -2201,6 +2206,7 @@ export type Database = {
           plan_code: string
           plan_id?: string | null
           retry_count?: number
+          started_at?: string | null
           status?: string
           updated_at?: string
         }
@@ -2208,9 +2214,11 @@ export type Database = {
           addon_codes?: string[]
           amount?: number
           business_id?: string
+          canceled_at?: string | null
           computed_total?: number | null
           created_at?: string
           currency?: string
+          current_period_start?: string | null
           id?: string
           last_payment_at?: string | null
           last_payment_status?: string | null
@@ -2219,6 +2227,7 @@ export type Database = {
           plan_code?: string
           plan_id?: string | null
           retry_count?: number
+          started_at?: string | null
           status?: string
           updated_at?: string
         }
