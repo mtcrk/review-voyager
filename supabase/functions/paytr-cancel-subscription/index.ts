@@ -39,7 +39,11 @@ Deno.serve(async (req) => {
 
     const { error: updErr } = await admin
       .from("subscription_billing")
-      .update({ status: "canceled", updated_at: new Date().toISOString() })
+      .update({
+        status: "canceled",
+        canceled_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
       .eq("business_id", business_id)
       .in("status", ["active", "past_due"]);
     if (updErr) throw updErr;
