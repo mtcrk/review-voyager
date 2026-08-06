@@ -26,6 +26,8 @@ type Subscription = {
   currency: string;
   status: string;
   next_billing_date: string | null;
+  started_at?: string | null;
+  canceled_at?: string | null;
   location_count?: number | null;
   addon_codes?: string[] | null;
   computed_total?: number | null;
@@ -98,7 +100,7 @@ export default function Billing() {
       const [subRes, payRes, cardRes] = await Promise.all([
         supabase
           .from("subscription_billing")
-          .select("id,plan_code,amount,currency,status,next_billing_date,location_count,addon_codes,computed_total")
+          .select("id,plan_code,amount,currency,status,next_billing_date,started_at,canceled_at,location_count,addon_codes,computed_total")
           .eq("business_id", activeBusiness.id)
           .order("created_at", { ascending: false })
           .limit(1)
@@ -208,6 +210,22 @@ export default function Billing() {
                     Sonraki tahsilat:{" "}
                     <span className="font-medium text-foreground">
                       {new Date(subscription.next_billing_date).toLocaleDateString("tr-TR")}
+                    </span>
+                  </div>
+                )}
+                {subscription.started_at && (
+                  <div className="text-sm text-muted-foreground">
+                    Abonelik başlangıcı:{" "}
+                    <span className="font-medium text-foreground">
+                      {new Date(subscription.started_at).toLocaleDateString("tr-TR")}
+                    </span>
+                  </div>
+                )}
+                {subscription.status === "canceled" && subscription.canceled_at && (
+                  <div className="text-sm text-muted-foreground">
+                    İptal tarihi:{" "}
+                    <span className="font-medium text-foreground">
+                      {new Date(subscription.canceled_at).toLocaleDateString("tr-TR")}
                     </span>
                   </div>
                 )}
