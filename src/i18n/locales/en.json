@@ -451,6 +451,8 @@
     "subtitle": "Get in touch with us for questions, suggestions, or support requests.",
     "email": "Email",
     "sendEmail": "Send Email",
+    "phone": "Phone",
+    "callNow": "Call Now",
     "responseTime": "Response Time",
     "responseTimeDesc": "We typically respond within 24 hours",
     "location": "Location",
