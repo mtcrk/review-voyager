@@ -1,4 +1,4 @@
- import { Mail, MapPin, Clock, ArrowLeft } from "lucide-react";
+ import { Mail, MapPin, Clock, Phone, ArrowLeft } from "lucide-react";
  import { Button } from "@/components/ui/button";
  import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
