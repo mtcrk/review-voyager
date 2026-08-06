@@ -71,32 +71,6 @@ import SEO from "@/components/seo/SEO";
               </div>
             </div>
 
-            {/* Phone Card */}
-            <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-lg mb-8">
-              <div className="flex flex-col items-center gap-4">
-                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Phone className="w-7 h-7 text-primary" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-semibold text-foreground mb-2">{t('contact.phone', 'Telefon')}</h2>
-                  <a
-                    href="tel:+905372675314"
-                    className="text-lg sm:text-2xl font-medium text-primary hover:underline transition-colors"
-                  >
-                    +90 537 267 53 14
-                  </a>
-                </div>
-                <Button
-                  size="lg"
-                  className="gradient-primary text-white mt-4"
-                  onClick={() => window.location.href = "tel:+905372675314"}
-                >
-                  <Phone className="w-5 h-5 mr-2" />
-                  {t('contact.callNow', 'Hemen Ara')}
-                </Button>
-              </div>
-            </div>
-
             {/* Additional Info */}
              <div className="grid sm:grid-cols-3 gap-6 mt-12">
                <div className="p-6 rounded-xl border border-border bg-card/50">
