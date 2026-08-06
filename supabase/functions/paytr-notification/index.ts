@@ -107,9 +107,11 @@ Deno.serve(async (req) => {
 
       const { data: existingSub } = await admin
         .from("subscription_billing")
-        .select("id")
+        .select("id,started_at")
         .eq("business_id", business_id)
         .maybeSingle();
+
+      const nowIso = new Date().toISOString();
 
       if (existingSub) {
         await admin
@@ -119,7 +121,10 @@ Deno.serve(async (req) => {
             next_billing_date: nextDate,
             retry_count: 0,
             last_payment_status: "success",
-            last_payment_at: new Date().toISOString(),
+            last_payment_at: nowIso,
+            current_period_start: nowIso,
+            canceled_at: null,
+            started_at: existingSub.started_at ?? nowIso,
             plan_code: orig_plan_code,
             amount: Number(total_amount) / 100,
             plan_id: orig_plan_id,
@@ -137,7 +142,9 @@ Deno.serve(async (req) => {
           status: "active",
           next_billing_date: nextDate,
           last_payment_status: "success",
-          last_payment_at: new Date().toISOString(),
+          last_payment_at: nowIso,
+          started_at: nowIso,
+          current_period_start: nowIso,
           plan_id: orig_plan_id,
           location_count: orig_location_count,
           computed_total: orig_computed_total ?? Number(total_amount) / 100,
