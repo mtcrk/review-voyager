@@ -28,6 +28,7 @@ type Subscription = {
   next_billing_date: string | null;
   started_at?: string | null;
   canceled_at?: string | null;
+  cancel_at_period_end?: boolean | null;
   location_count?: number | null;
   addon_codes?: string[] | null;
   computed_total?: number | null;
@@ -46,6 +47,8 @@ type PaymentLog = {
   payment_amount: number;
   status: string;
   is_recurring: boolean;
+  computed_total?: number | null;
+  error_message?: string | null;
 };
 
 const PLAN_LABEL: Record<string, string> = {
@@ -100,15 +103,16 @@ export default function Billing() {
       const [subRes, payRes, cardRes] = await Promise.all([
         supabase
           .from("subscription_billing")
-          .select("id,plan_code,amount,currency,status,next_billing_date,started_at,canceled_at,location_count,addon_codes,computed_total")
+          .select("id,plan_code,amount,currency,status,next_billing_date,started_at,canceled_at,cancel_at_period_end,location_count,addon_codes,computed_total")
           .eq("business_id", activeBusiness.id)
           .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle(),
         supabase
           .from("paytr_payment_log")
-          .select("id,created_at,payment_amount,status,is_recurring")
+          .select("id,created_at,payment_amount,status,is_recurring,computed_total,error_message")
           .eq("business_id", activeBusiness.id)
+          .in("status", ["success", "failed"])
           .order("created_at", { ascending: false })
           .limit(50),
         supabase.functions.invoke("paytr-list-cards", {
@@ -136,18 +140,25 @@ export default function Billing() {
      
   }, [bizLoading, activeBusiness?.id]);
 
-  const handleCancel = async () => {
+  const handleCancel = async (resume = false) => {
     if (!activeBusiness) return;
     setCancelLoading(true);
     try {
       const { error } = await supabase.functions.invoke("paytr-cancel-subscription", {
-        body: { business_id: activeBusiness.id },
+        body: { business_id: activeBusiness.id, ...(resume ? { resume: true } : {}) },
       });
       if (error) throw error;
-      toast({ title: "Abonelik iptal edildi", description: "Bir sonraki tahsilat yapılmayacak." });
+      toast(
+        resume
+          ? { title: "Abonelik sürdürüldü", description: "Aboneliğiniz normal şekilde yenilenecek." }
+          : {
+              title: "Abonelik iptal edildi",
+              description: "Dönem sonuna kadar kullanmaya devam edebilirsiniz.",
+            },
+      );
       await load();
     } catch (e) {
-      toast({ title: "İptal başarısız", description: (e as Error).message, variant: "destructive" });
+      toast({ title: "İşlem başarısız", description: (e as Error).message, variant: "destructive" });
     } finally {
       setCancelLoading(false);
     }
