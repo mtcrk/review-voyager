@@ -2172,6 +2172,7 @@ export type Database = {
           addon_codes: string[]
           amount: number
           business_id: string
+          cancel_at_period_end: boolean
           canceled_at: string | null
           computed_total: number | null
           created_at: string
@@ -2193,6 +2194,7 @@ export type Database = {
           addon_codes?: string[]
           amount: number
           business_id: string
+          cancel_at_period_end?: boolean
           canceled_at?: string | null
           computed_total?: number | null
           created_at?: string
@@ -2214,6 +2216,7 @@ export type Database = {
           addon_codes?: string[]
           amount?: number
           business_id?: string
+          cancel_at_period_end?: boolean
           canceled_at?: string | null
           computed_total?: number | null
           created_at?: string

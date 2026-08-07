@@ -48,10 +48,23 @@ Deno.serve(async (req) => {
   const test_mode = testRow?.value === false ? "0" : "1";
 
   const today = new Date().toISOString().slice(0, 10);
+
+  // Close out subscriptions whose canceled period has ended.
+  {
+    const { error: closeErr } = await admin
+      .from("subscription_billing")
+      .update({ status: "canceled", updated_at: new Date().toISOString() })
+      .eq("cancel_at_period_end", true)
+      .in("status", ["active", "past_due"])
+      .lt("next_billing_date", today);
+    if (closeErr) console.error("period-end close error", closeErr);
+  }
+
   const { data: due } = await admin
     .from("subscription_billing")
     .select("business_id,plan_code,amount,currency,retry_count,computed_total,location_count,addon_codes,plan_id")
     .eq("status", "active")
+    .eq("cancel_at_period_end", false)
     .lte("next_billing_date", today);
 
   const results: unknown[] = [];

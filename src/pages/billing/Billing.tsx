@@ -28,6 +28,7 @@ type Subscription = {
   next_billing_date: string | null;
   started_at?: string | null;
   canceled_at?: string | null;
+  cancel_at_period_end?: boolean | null;
   location_count?: number | null;
   addon_codes?: string[] | null;
   computed_total?: number | null;
@@ -46,6 +47,8 @@ type PaymentLog = {
   payment_amount: number;
   status: string;
   is_recurring: boolean;
+  computed_total?: number | null;
+  error_message?: string | null;
 };
 
 const PLAN_LABEL: Record<string, string> = {
@@ -100,15 +103,16 @@ export default function Billing() {
       const [subRes, payRes, cardRes] = await Promise.all([
         supabase
           .from("subscription_billing")
-          .select("id,plan_code,amount,currency,status,next_billing_date,started_at,canceled_at,location_count,addon_codes,computed_total")
+          .select("id,plan_code,amount,currency,status,next_billing_date,started_at,canceled_at,cancel_at_period_end,location_count,addon_codes,computed_total")
           .eq("business_id", activeBusiness.id)
           .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle(),
         supabase
           .from("paytr_payment_log")
-          .select("id,created_at,payment_amount,status,is_recurring")
+          .select("id,created_at,payment_amount,status,is_recurring,computed_total,error_message")
           .eq("business_id", activeBusiness.id)
+          .in("status", ["success", "failed"])
           .order("created_at", { ascending: false })
           .limit(50),
         supabase.functions.invoke("paytr-list-cards", {
@@ -136,18 +140,25 @@ export default function Billing() {
      
   }, [bizLoading, activeBusiness?.id]);
 
-  const handleCancel = async () => {
+  const handleCancel = async (resume = false) => {
     if (!activeBusiness) return;
     setCancelLoading(true);
     try {
       const { error } = await supabase.functions.invoke("paytr-cancel-subscription", {
-        body: { business_id: activeBusiness.id },
+        body: { business_id: activeBusiness.id, ...(resume ? { resume: true } : {}) },
       });
       if (error) throw error;
-      toast({ title: "Abonelik iptal edildi", description: "Bir sonraki tahsilat yapılmayacak." });
+      toast(
+        resume
+          ? { title: "Abonelik sürdürüldü", description: "Aboneliğiniz normal şekilde yenilenecek." }
+          : {
+              title: "Abonelik iptal edildi",
+              description: "Dönem sonuna kadar kullanmaya devam edebilirsiniz.",
+            },
+      );
       await load();
     } catch (e) {
-      toast({ title: "İptal başarısız", description: (e as Error).message, variant: "destructive" });
+      toast({ title: "İşlem başarısız", description: (e as Error).message, variant: "destructive" });
     } finally {
       setCancelLoading(false);
     }
@@ -185,7 +196,11 @@ export default function Billing() {
                   <span className="text-xl font-semibold">
                     {PLAN_LABEL[subscription.plan_code] ?? subscription.plan_code}
                   </span>
-                  {statusBadge(subscription.status)}
+                  {statusBadge(
+                    subscription.status === "active" && subscription.cancel_at_period_end
+                      ? "canceled"
+                      : subscription.status,
+                  )}
                 </div>
                 <div className="text-muted-foreground text-sm">
                   {Number(subscription.amount).toLocaleString("tr-TR")} {subscription.currency} / ay
@@ -205,7 +220,9 @@ export default function Billing() {
                     ))}
                   </div>
                 ) : null}
-                {subscription.next_billing_date && subscription.status === "active" && (
+                {subscription.next_billing_date &&
+                  subscription.status === "active" &&
+                  !subscription.cancel_at_period_end && (
                   <div className="text-sm text-muted-foreground">
                     Sonraki tahsilat:{" "}
                     <span className="font-medium text-foreground">
@@ -213,6 +230,17 @@ export default function Billing() {
                     </span>
                   </div>
                 )}
+                {subscription.status === "active" &&
+                  subscription.cancel_at_period_end &&
+                  subscription.next_billing_date && (
+                    <div className="text-sm text-muted-foreground">
+                      Aboneliğiniz{" "}
+                      <span className="font-medium text-foreground">
+                        {new Date(subscription.next_billing_date).toLocaleDateString("tr-TR")}
+                      </span>{" "}
+                      tarihine kadar aktif kalacak, sonrasında yenilenmeyecek.
+                    </div>
+                  )}
                 {subscription.started_at && (
                   <div className="text-sm text-muted-foreground">
                     Abonelik başlangıcı:{" "}
@@ -221,7 +249,8 @@ export default function Billing() {
                     </span>
                   </div>
                 )}
-                {subscription.status === "canceled" && subscription.canceled_at && (
+                {(subscription.status === "canceled" || subscription.cancel_at_period_end) &&
+                  subscription.canceled_at && (
                   <div className="text-sm text-muted-foreground">
                     İptal tarihi:{" "}
                     <span className="font-medium text-foreground">
@@ -234,7 +263,17 @@ export default function Billing() {
                 <Button onClick={() => navigate("/billing/checkout")}>
                   Planı Yükselt / Değiştir
                 </Button>
-                {subscription.status !== "canceled" && (
+                {subscription.status !== "canceled" && subscription.cancel_at_period_end && (
+                  <Button
+                    variant="outline"
+                    disabled={cancelLoading}
+                    onClick={() => handleCancel(true)}
+                  >
+                    {cancelLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                    Aboneliği Sürdür
+                  </Button>
+                )}
+                {subscription.status !== "canceled" && !subscription.cancel_at_period_end && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="outline">Aboneliği İptal Et</Button>
@@ -243,13 +282,15 @@ export default function Billing() {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Aboneliği iptal etmek istediğinize emin misiniz?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Aboneliğiniz iptal edilecek ve bir sonraki tahsilat alınmayacak.
-                          Erişiminiz mevcut dönemin sonuna kadar devam eder.
+                          İptal, erişiminizi hemen kesmez. Mevcut ödeme döneminin sonuna kadar
+                          hizmeti kullanmaya devam edersiniz; sonraki dönem için sizden tahsilat
+                          yapılmaz. İsterseniz dönem sonuna kadar aboneliğinizi tekrar
+                          sürdürebilirsiniz.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Vazgeç</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleCancel} disabled={cancelLoading}>
+                        <AlertDialogAction onClick={() => handleCancel(false)} disabled={cancelLoading}>
                           {cancelLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                           Evet, İptal Et
                         </AlertDialogAction>
@@ -337,12 +378,22 @@ export default function Billing() {
                         })}
                       </td>
                       <td className="py-3 pr-4 font-medium">
-                        {Number(p.payment_amount).toLocaleString("tr-TR")} TL
+                        {Number(
+                          !p.payment_amount ? (p.computed_total ?? 0) : p.payment_amount,
+                        ).toLocaleString("tr-TR")}{" "}
+                        TL
                       </td>
                       <td className="py-3 pr-4 text-muted-foreground">
                         {p.is_recurring ? "Otomatik Yenileme" : "Tek Seferlik"}
                       </td>
-                      <td className="py-3 pr-4">{paymentStatusBadge(p.status)}</td>
+                      <td className="py-3 pr-4">
+                        {paymentStatusBadge(p.status)}
+                        {p.status === "failed" && p.error_message && (
+                          <div className="text-[11px] text-muted-foreground mt-1 max-w-[220px]">
+                            {p.error_message}
+                          </div>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
