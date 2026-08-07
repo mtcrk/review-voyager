@@ -12,6 +12,9 @@ export default function BillingSuccess() {
           Aboneliğiniz kısa süre içinde aktive edilecek.
         </p>
         <Button asChild><Link to="/dashboard">Panele Dön</Link></Button>
+        <p className="text-sm text-muted-foreground mt-6 pt-4 border-t">
+          Kart ekstrenizde bu işlem PAYTR / VoyageRespond olarak görünecektir.
+        </p>
       </div>
     </div>
   );
