@@ -1,6 +1,6 @@
-// paytr-cancel-subscription: marks the active subscription_billing row as
-// canceled so the recurring cron job skips future charges. Does NOT delete
-// anything on PayTR's side.
+// paytr-cancel-subscription: flags the active subscription to stop renewing at
+// the end of the current period (access continues until next_billing_date).
+// Pass { resume: true } to undo. Does NOT delete anything on PayTR's side.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { CORS_HEADERS } from "../_shared/paytr.ts";
@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
     if (error || !claims?.claims) return json({ error: "Unauthorized" }, 401);
     const userId = claims.claims.sub as string;
 
-    const { business_id } = await req.json().catch(() => ({}));
+    const { business_id, resume } = await req.json().catch(() => ({}));
     if (!business_id) return json({ error: "business_id required" }, 400);
 
     const admin = createClient(
@@ -39,16 +39,24 @@ Deno.serve(async (req) => {
 
     const { error: updErr } = await admin
       .from("subscription_billing")
-      .update({
-        status: "canceled",
-        canceled_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
+      .update(
+        resume === true
+          ? {
+              cancel_at_period_end: false,
+              canceled_at: null,
+              updated_at: new Date().toISOString(),
+            }
+          : {
+              cancel_at_period_end: true,
+              canceled_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            },
+      )
       .eq("business_id", business_id)
       .in("status", ["active", "past_due"]);
     if (updErr) throw updErr;
 
-    return json({ ok: true });
+    return json({ ok: true, resumed: resume === true });
   } catch (e) {
     console.error("paytr-cancel-subscription error", e);
     return json({ error: (e as Error).message }, 500);
