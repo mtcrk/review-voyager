@@ -165,6 +165,9 @@ Deno.serve(async (req) => {
         "VoyageRespond aboneliğiniz başladı",
         `
           ${rows(detailRows)}
+          <p style="border-top:1px solid #E5E7EB; margin:16px 0 0 0; padding-top:16px; font-size:13px; color:#6B7280; line-height:1.5;">
+            Kart ekstrenizde bu işlem PAYTR / VoyageRespond olarak görünecektir.
+          </p>
           <div style="background:#fff; border:1px solid #eee; border-radius:12px; padding:20px; margin-top:16px; font-size:14px; color:#444; line-height:1.6;">
             <p style="margin:0 0 10px 0;">Aboneliğiniz her ay otomatik olarak yenilenir. Dilediğiniz zaman panelinizdeki <strong>Abonelik</strong> bölümünden iptal edebilirsiniz.</p>
             <p style="margin:0;">İptal etmeniz hâlinde erişiminiz içinde bulunduğunuz dönemin sonuna kadar devam eder.</p>
