@@ -69,6 +69,7 @@ Deno.serve(async (req) => {
     .select("business_id,plan_code,amount,currency,retry_count,computed_total,location_count,addon_codes,plan_id")
     .eq("status", "active")
     .eq("cancel_at_period_end", false)
+    .eq("is_test", false)
     .lte("next_billing_date", today);
 
   const results: unknown[] = [];
