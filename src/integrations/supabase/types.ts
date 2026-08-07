@@ -1409,6 +1409,7 @@ export type Database = {
           error_message: string | null
           id: string
           is_recurring: boolean | null
+          is_test: boolean
           location_count: number | null
           merchant_oid: string
           payment_amount: number | null
@@ -1426,6 +1427,7 @@ export type Database = {
           error_message?: string | null
           id?: string
           is_recurring?: boolean | null
+          is_test?: boolean
           location_count?: number | null
           merchant_oid: string
           payment_amount?: number | null
@@ -1443,6 +1445,7 @@ export type Database = {
           error_message?: string | null
           id?: string
           is_recurring?: boolean | null
+          is_test?: boolean
           location_count?: number | null
           merchant_oid?: string
           payment_amount?: number | null
@@ -2179,6 +2182,7 @@ export type Database = {
           currency: string
           current_period_start: string | null
           id: string
+          is_test: boolean
           last_payment_at: string | null
           last_payment_status: string | null
           location_count: number
@@ -2201,6 +2205,7 @@ export type Database = {
           currency?: string
           current_period_start?: string | null
           id?: string
+          is_test?: boolean
           last_payment_at?: string | null
           last_payment_status?: string | null
           location_count?: number
@@ -2223,6 +2228,7 @@ export type Database = {
           currency?: string
           current_period_start?: string | null
           id?: string
+          is_test?: boolean
           last_payment_at?: string | null
           last_payment_status?: string | null
           location_count?: number
