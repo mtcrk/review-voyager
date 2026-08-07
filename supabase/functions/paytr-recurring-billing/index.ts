@@ -23,6 +23,23 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
+  const today = new Date().toISOString().slice(0, 10);
+
+  // Close out subscriptions whose canceled period has ended. Runs before the
+  // non3d flag gate so cancellations settle even while card storage is off.
+  let closedCount = 0;
+  {
+    const { data: closed, error: closeErr } = await admin
+      .from("subscription_billing")
+      .update({ status: "canceled", updated_at: new Date().toISOString() })
+      .eq("cancel_at_period_end", true)
+      .in("status", ["active", "past_due"])
+      .lt("next_billing_date", today)
+      .select("id");
+    if (closeErr) console.error("period-end close error", closeErr);
+    closedCount = closed?.length ?? 0;
+  }
+
   const { data: flagRow } = await admin
     .from("app_settings")
     .select("value")
@@ -30,7 +47,7 @@ Deno.serve(async (req) => {
     .maybeSingle();
   const enabled = flagRow?.value === true;
   if (!enabled) {
-    return json({ skipped: true, reason: "paytr_non3d_enabled is false" });
+    return json({ skipped: true, reason: "paytr_non3d_enabled is false", closed: closedCount });
   }
 
   const merchant_id = Deno.env.get("PAYTR_MERCHANT_ID") ?? "";
@@ -46,19 +63,6 @@ Deno.serve(async (req) => {
     .eq("key", "paytr_test_mode")
     .maybeSingle();
   const test_mode = testRow?.value === false ? "0" : "1";
-
-  const today = new Date().toISOString().slice(0, 10);
-
-  // Close out subscriptions whose canceled period has ended.
-  {
-    const { error: closeErr } = await admin
-      .from("subscription_billing")
-      .update({ status: "canceled", updated_at: new Date().toISOString() })
-      .eq("cancel_at_period_end", true)
-      .in("status", ["active", "past_due"])
-      .lt("next_billing_date", today);
-    if (closeErr) console.error("period-end close error", closeErr);
-  }
 
   const { data: due } = await admin
     .from("subscription_billing")
@@ -251,7 +255,7 @@ Deno.serve(async (req) => {
     }
   }
 
-  return json({ processed: results.length, results });
+  return json({ processed: results.length, closed: closedCount, results });
 });
 
 function json(data: unknown, status = 200) {
