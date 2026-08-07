@@ -378,12 +378,22 @@ export default function Billing() {
                         })}
                       </td>
                       <td className="py-3 pr-4 font-medium">
-                        {Number(p.payment_amount).toLocaleString("tr-TR")} TL
+                        {Number(
+                          !p.payment_amount ? (p.computed_total ?? 0) : p.payment_amount,
+                        ).toLocaleString("tr-TR")}{" "}
+                        TL
                       </td>
                       <td className="py-3 pr-4 text-muted-foreground">
                         {p.is_recurring ? "Otomatik Yenileme" : "Tek Seferlik"}
                       </td>
-                      <td className="py-3 pr-4">{paymentStatusBadge(p.status)}</td>
+                      <td className="py-3 pr-4">
+                        {paymentStatusBadge(p.status)}
+                        {p.status === "failed" && p.error_message && (
+                          <div className="text-[11px] text-muted-foreground mt-1 max-w-[220px]">
+                            {p.error_message}
+                          </div>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
