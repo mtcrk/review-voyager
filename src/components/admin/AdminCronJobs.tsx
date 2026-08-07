@@ -99,6 +99,7 @@ export function AdminCronJobs() {
         .from("subscription_billing")
         .select("id", { count: "exact", head: true })
         .eq("status", "active")
+        .eq("is_test", false)
         .lt("next_billing_date", today);
       if (!error) setOverdueCount(count ?? 0);
     };
