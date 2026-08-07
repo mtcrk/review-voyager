@@ -255,7 +255,7 @@ Deno.serve(async (req) => {
     }
   }
 
-  return json({ processed: results.length, results });
+  return json({ processed: results.length, closed: closedCount, results });
 });
 
 function json(data: unknown, status = 200) {
