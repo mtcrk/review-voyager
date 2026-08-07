@@ -113,6 +113,7 @@ export default function Billing() {
           .select("id,created_at,payment_amount,status,is_recurring,computed_total,error_message")
           .eq("business_id", activeBusiness.id)
           .in("status", ["success", "failed"])
+          .eq("is_test", false)
           .order("created_at", { ascending: false })
           .limit(50),
         supabase.functions.invoke("paytr-list-cards", {
