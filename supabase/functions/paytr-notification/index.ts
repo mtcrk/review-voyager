@@ -124,6 +124,7 @@ Deno.serve(async (req) => {
             last_payment_at: nowIso,
             current_period_start: nowIso,
             canceled_at: null,
+            cancel_at_period_end: false,
             started_at: existingSub.started_at ?? nowIso,
             plan_code: orig_plan_code,
             amount: Number(total_amount) / 100,
