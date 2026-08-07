@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
 
     const { data: origLog } = await admin
       .from("paytr_payment_log")
-      .select("business_id,is_recurring,user_ip,plan_code,plan_id,location_count,computed_total,addon_codes,payment_amount,status")
+      .select("business_id,is_recurring,user_ip,plan_code,plan_id,location_count,computed_total,addon_codes,payment_amount,status,is_test")
       .eq("merchant_oid", merchant_oid)
       .maybeSingle();
 
@@ -55,6 +55,7 @@ Deno.serve(async (req) => {
     const orig_location_count = origLog?.location_count ?? 1;
     const orig_computed_total = origLog?.computed_total ?? null;
     const orig_addon_codes = origLog?.addon_codes ?? [];
+    const orig_is_test = origLog?.is_test ?? false;
 
     // Tutar doğrulaması: hash doğrulandığı için tutar güvenilir, ancak
     // beklenen ile gelen tutar arasındaki fark görünür bir iz bırakmalı.
@@ -132,6 +133,7 @@ Deno.serve(async (req) => {
             location_count: orig_location_count,
             computed_total: orig_computed_total ?? Number(total_amount) / 100,
             addon_codes: orig_addon_codes,
+            is_test: orig_is_test,
           })
           .eq("business_id", business_id);
       } else {
@@ -150,6 +152,7 @@ Deno.serve(async (req) => {
           location_count: orig_location_count,
           computed_total: orig_computed_total ?? Number(total_amount) / 100,
           addon_codes: orig_addon_codes,
+          is_test: orig_is_test,
         });
       }
 

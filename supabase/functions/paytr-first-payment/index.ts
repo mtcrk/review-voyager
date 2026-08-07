@@ -269,6 +269,7 @@ Deno.serve(async (req) => {
       location_count: safeLocationCount,
       computed_total: authoritativeAmount,
       addon_codes: validAddonCodes,
+      is_test: test_mode === "1",
     });
 
     // POST fields for https://www.paytr.com/odeme/api/get-token
