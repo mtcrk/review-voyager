@@ -196,7 +196,11 @@ export default function Billing() {
                   <span className="text-xl font-semibold">
                     {PLAN_LABEL[subscription.plan_code] ?? subscription.plan_code}
                   </span>
-                  {statusBadge(subscription.status)}
+                  {statusBadge(
+                    subscription.status === "active" && subscription.cancel_at_period_end
+                      ? "canceled"
+                      : subscription.status,
+                  )}
                 </div>
                 <div className="text-muted-foreground text-sm">
                   {Number(subscription.amount).toLocaleString("tr-TR")} {subscription.currency} / ay
@@ -216,7 +220,9 @@ export default function Billing() {
                     ))}
                   </div>
                 ) : null}
-                {subscription.next_billing_date && subscription.status === "active" && (
+                {subscription.next_billing_date &&
+                  subscription.status === "active" &&
+                  !subscription.cancel_at_period_end && (
                   <div className="text-sm text-muted-foreground">
                     Sonraki tahsilat:{" "}
                     <span className="font-medium text-foreground">
@@ -224,6 +230,17 @@ export default function Billing() {
                     </span>
                   </div>
                 )}
+                {subscription.status === "active" &&
+                  subscription.cancel_at_period_end &&
+                  subscription.next_billing_date && (
+                    <div className="text-sm text-muted-foreground">
+                      Aboneliğiniz{" "}
+                      <span className="font-medium text-foreground">
+                        {new Date(subscription.next_billing_date).toLocaleDateString("tr-TR")}
+                      </span>{" "}
+                      tarihine kadar aktif kalacak, sonrasında yenilenmeyecek.
+                    </div>
+                  )}
                 {subscription.started_at && (
                   <div className="text-sm text-muted-foreground">
                     Abonelik başlangıcı:{" "}
@@ -232,7 +249,8 @@ export default function Billing() {
                     </span>
                   </div>
                 )}
-                {subscription.status === "canceled" && subscription.canceled_at && (
+                {(subscription.status === "canceled" || subscription.cancel_at_period_end) &&
+                  subscription.canceled_at && (
                   <div className="text-sm text-muted-foreground">
                     İptal tarihi:{" "}
                     <span className="font-medium text-foreground">
@@ -245,7 +263,17 @@ export default function Billing() {
                 <Button onClick={() => navigate("/billing/checkout")}>
                   Planı Yükselt / Değiştir
                 </Button>
-                {subscription.status !== "canceled" && (
+                {subscription.status !== "canceled" && subscription.cancel_at_period_end && (
+                  <Button
+                    variant="outline"
+                    disabled={cancelLoading}
+                    onClick={() => handleCancel(true)}
+                  >
+                    {cancelLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                    Aboneliği Sürdür
+                  </Button>
+                )}
+                {subscription.status !== "canceled" && !subscription.cancel_at_period_end && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="outline">Aboneliği İptal Et</Button>
@@ -254,13 +282,15 @@ export default function Billing() {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Aboneliği iptal etmek istediğinize emin misiniz?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Aboneliğiniz iptal edilecek ve bir sonraki tahsilat alınmayacak.
-                          Erişiminiz mevcut dönemin sonuna kadar devam eder.
+                          İptal, erişiminizi hemen kesmez. Mevcut ödeme döneminin sonuna kadar
+                          hizmeti kullanmaya devam edersiniz; sonraki dönem için sizden tahsilat
+                          yapılmaz. İsterseniz dönem sonuna kadar aboneliğinizi tekrar
+                          sürdürebilirsiniz.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Vazgeç</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleCancel} disabled={cancelLoading}>
+                        <AlertDialogAction onClick={() => handleCancel(false)} disabled={cancelLoading}>
                           {cancelLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                           Evet, İptal Et
                         </AlertDialogAction>
