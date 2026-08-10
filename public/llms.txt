@@ -64,7 +64,7 @@ VoyageRespond; çok platformlu yorum toplama, 8 farklı tonda AI destekli yanıt
 
 ## Blog
 
-- [Google Yorumlarına Nasıl Yanıt Verilir? 2026 Rehberi](/blog/google-yorumlarina-nasil-yanit-verilir): Google yorumlarına profesyonel ve etkili yanıt vermenin 10 altın kuralı. Olumsuz yorumları fırsata çevirin, müşteri sadakatini artırın.
+- [Google Yorumlarına Nasıl Cevap Verilir? İşletmeler İçin Örnekli Rehber](/blog/google-yorumlarina-nasil-yanit-verilir): İşletme sahipleri için Google yorumlarına cevap yazma rehberi: olumlu ve olumsuz yorumlar için hazır cevap örnekleri, ton önerileri ve prat…
 - [AI Visibility Score Nedir? İşletmeniz Yapay Zekada Nasıl Görünüyor?](/blog/ai-gorunurluk-skoru-nedir): AI Visibility Score, işletmenizin ChatGPT, Gemini ve diğer AI asistanlarında nasıl göründüğünü ölçer. Skorunuzu nasıl artıracağınızı öğreni…
 - [Otel ve Restoran İçin Yorum Yönetimi: Kapsamlı Rehber](/blog/otel-restoran-yorum-yonetimi-rehberi): Otel ve restoran sahipleri için Google, Booking, TripAdvisor yorumlarını profesyonelce yönetme rehberi. Çok platformlu yorum stratejisi.
 - [Kötü Yorumlara Nasıl Cevap Verilir? 15 Altın Kural ve Örnekler](/blog/kotu-yorumlara-nasil-cevap-verilir): Olumsuz Google yorumlarına profesyonel cevap verme rehberi. 15 gerçek örnek ve hazır şablonlarla kötü yorumları fırsata çevirin.
@@ -93,7 +93,7 @@ VoyageRespond; çok platformlu yorum toplama, 8 farklı tonda AI destekli yanıt
 - [TikTok Yorum Yönetimi: Markalar İçin 2026 Rehberi](/blog/tiktok-yorum-yonetimi): TikTok yorumlarını yönetme rehberi. AI yanıt stratejileri, spam koruma ve viral içerik yönetimi.
 - [YouTube Yorum Yönetimi: Kanal Sahipleri İçin 2026 Rehberi](/blog/youtube-yorum-yonetimi): YouTube yorumlarını yönetme rehberi. AI yanıt stratejileri, spam filtreleme, topluluk inşası ve algoritma etkisi.
 - [Otel Yorum Yönetimi: A'dan Z'ye 2026 Rehberi](/blog/otel-yorum-yonetimi-rehberi): Otel yorum yönetimi nedir, neden kritik, Google Booking TripAdvisor yorumları nasıl yönetilir? Otel sahipleri için 2026 kapsamlı rehber.
-- [TripAdvisor Nedir, Yorumları Nasıl Yönetilir? 2026 Rehberi](/blog/tripadvisor-yorum-yonetimi-rehberi): TripAdvisor nedir, otel ve restoran için neden önemli, yorumları nasıl yönetilir? Türkiye'deki işletmeler için kapsamlı rehber.
+- [TripAdvisor Yorum Yönetimi: Cevap Verme, İtiraz ve Kaldırma Rehberi](/blog/tripadvisor-yorum-yonetimi-rehberi): TripAdvisor yorumlarına nasıl cevap verilir, bir yorum ne zaman düşer, nasıl itiraz edilir ve kaldırma süreci ne kadar sürer? Otel ve resto…
 - [Otel Karşılaştırma Sitelerinde Üst Sıralara Çıkma Rehberi](/blog/otel-karsilastirma-sitelerinde-ust-siralara-cikma): Trivago, Google Otel, Kayak gibi otel karşılaştırma sitelerinde üst sıralara çıkmanın 10 yolu. Sıralama algoritmaları ve pratik ipuçları.
 - [Airbnb Şikayet ve Yorum Yönetimi: Ev Sahipleri için Rehber](/blog/airbnb-sikayet-ve-yorum-yonetimi): Airbnb şikayetleri nasıl çözülür, olumsuz yoruma nasıl cevap verilir, Superhost olmak için 5 adım. Türkiye'deki Airbnb ev sahipleri için 20…
 - [Should I Respond to Every Google Review My Business Gets?](/blog/should-i-respond-to-every-google-review): Do you really need to reply to every Google review? An honest, practical answer for busy and multi-location businesses — including the rati…
