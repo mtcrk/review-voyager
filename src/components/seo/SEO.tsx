@@ -13,19 +13,39 @@ interface SEOProps {
 
 const SITE_URL = "https://voyagerespond.com";
 
+/**
+ * Site-wide canonical form: trailing slash.
+ * "/blog/foo" -> "/blog/foo/", "//blog//foo" -> "/blog/foo/", "/" stays "/".
+ * Query/hash are dropped from canonical URLs on purpose.
+ */
+const normalizePath = (rawPath: string) => {
+  const [pathOnly] = rawPath.split(/[?#]/);
+  const collapsed = `/${pathOnly}`.replace(/\/{2,}/g, "/");
+  if (collapsed === "/") return "/";
+  return collapsed.endsWith("/") ? collapsed : `${collapsed}/`;
+};
+
+const toCanonicalUrl = (value: string) => {
+  if (/^https?:\/\//i.test(value)) {
+    try {
+      const u = new URL(value);
+      return `${u.origin}${normalizePath(u.pathname)}`;
+    } catch {
+      return value;
+    }
+  }
+  return `${SITE_URL}${normalizePath(value)}`;
+};
+
 const SEO = ({ title, description, canonical, ogImage, ogType, noindex, jsonLd }: SEOProps) => {
   const location = useLocation();
   const isEn = location.pathname.startsWith("/en/") || location.pathname === "/en";
 
-  let url = canonical
-    ? canonical.startsWith("http")
-      ? canonical
-      : `${SITE_URL}${canonical}`
-    : undefined;
+  let url = canonical ? toCanonicalUrl(canonical) : undefined;
 
   // For English routes, self-reference the /en/ canonical instead of the Turkish root
   if (isEn) {
-    url = `${SITE_URL}${location.pathname}`;
+    url = `${SITE_URL}${normalizePath(location.pathname)}`;
   }
   const image = ogImage || `${SITE_URL}/og-image.png`;
   const ldArray = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
