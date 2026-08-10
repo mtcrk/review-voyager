@@ -2629,6 +2629,266 @@ export type Database = {
         }
         Relationships: []
       }
+      wa_conversations: {
+        Row: {
+          business_id: string
+          created_at: string
+          id: string
+          last_inbound_at: string | null
+          last_outbound_at: string | null
+          recipient_id: string
+          updated_at: string
+          window_expires_at: string | null
+          window_opened_at: string | null
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          id?: string
+          last_inbound_at?: string | null
+          last_outbound_at?: string | null
+          recipient_id: string
+          updated_at?: string
+          window_expires_at?: string | null
+          window_opened_at?: string | null
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          id?: string
+          last_inbound_at?: string | null
+          last_outbound_at?: string | null
+          recipient_id?: string
+          updated_at?: string
+          window_expires_at?: string | null
+          window_opened_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wa_conversations_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wa_conversations_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: true
+            referencedRelation: "wa_recipients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wa_messages: {
+        Row: {
+          body: string | null
+          business_id: string
+          category: string | null
+          cost_amount: number
+          cost_currency: string
+          created_at: string
+          delivered_at: string | null
+          direction: string
+          error_code: string | null
+          error_message: string | null
+          id: string
+          provider: string
+          provider_message_id: string | null
+          recipient_id: string | null
+          sent_at: string | null
+          status: string
+          template_name: string | null
+        }
+        Insert: {
+          body?: string | null
+          business_id: string
+          category?: string | null
+          cost_amount?: number
+          cost_currency?: string
+          created_at?: string
+          delivered_at?: string | null
+          direction: string
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          provider?: string
+          provider_message_id?: string | null
+          recipient_id?: string | null
+          sent_at?: string | null
+          status?: string
+          template_name?: string | null
+        }
+        Update: {
+          body?: string | null
+          business_id?: string
+          category?: string | null
+          cost_amount?: number
+          cost_currency?: string
+          created_at?: string
+          delivered_at?: string | null
+          direction?: string
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          provider?: string
+          provider_message_id?: string | null
+          recipient_id?: string | null
+          sent_at?: string | null
+          status?: string
+          template_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wa_messages_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wa_messages_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "wa_recipients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wa_pending_actions: {
+        Row: {
+          business_id: string
+          consumed_at: string | null
+          created_at: string
+          draft_reply: string
+          expires_at: string
+          id: string
+          message_id: string | null
+          recipient_id: string
+          resulting_reply: string | null
+          review_id: string
+          short_code: string
+        }
+        Insert: {
+          business_id: string
+          consumed_at?: string | null
+          created_at?: string
+          draft_reply: string
+          expires_at?: string
+          id?: string
+          message_id?: string | null
+          recipient_id: string
+          resulting_reply?: string | null
+          review_id: string
+          short_code: string
+        }
+        Update: {
+          business_id?: string
+          consumed_at?: string | null
+          created_at?: string
+          draft_reply?: string
+          expires_at?: string
+          id?: string
+          message_id?: string | null
+          recipient_id?: string
+          resulting_reply?: string | null
+          review_id?: string
+          short_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wa_pending_actions_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wa_pending_actions_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "wa_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wa_pending_actions_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "wa_recipients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wa_pending_actions_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wa_recipients: {
+        Row: {
+          business_id: string
+          created_at: string
+          display_name: string | null
+          id: string
+          is_active: boolean
+          location_id: string | null
+          opt_in_at: string | null
+          phone_e164: string
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          role: string
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          is_active?: boolean
+          location_id?: string | null
+          opt_in_at?: string | null
+          phone_e164: string
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          role?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          is_active?: boolean
+          location_id?: string | null
+          opt_in_at?: string | null
+          phone_e164?: string
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          role?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wa_recipients_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wa_recipients_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       whatsapp_channels: {
         Row: {
           business_id: string
