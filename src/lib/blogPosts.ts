@@ -38,6 +38,14 @@ export const blogPosts: BlogPost[] = [
     category: "Yorum Yönetimi",
     readTime: "8 dk",
     keywords: ["google yorumlarına yanıt", "google yorum cevaplama", "olumsuz yoruma cevap", "google yorum yönetimi"],
+    notice: {
+      title: "Müşteri olarak yorum yazmak istiyorsanız",
+      text: "Bu rehber, işletme sahiplerinin Google yorumlarına nasıl cevap yazacağını anlatır. Kendi deneyiminiz için yorum yazmak istiyorsanız işletmenin Google kartındaki \"Yorum ekle\" butonunu kullanabilirsiniz. Hazır cevap ve yorum örneklerine bakmak isterseniz aşağıdaki sayfalar yardımcı olur.",
+      links: [
+        { label: "Restoran yorum cevapları", href: "/restoran-yorum-cevaplari/" },
+        { label: "Otel yorum cevapları", href: "/otel-yorum-cevaplari/" },
+      ],
+    },
     content: `
 Google yorumlarına nasıl yanıt verilir? Google Business Profile üzerinden adım adım yanıtlama rehberi, en iyi pratikler ve örneklerle profesyonel cevap yazma teknikleri. AI destekli alternatifleri de inceleyeceğiz.
 
