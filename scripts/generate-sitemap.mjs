@@ -3,26 +3,50 @@ import { resolve } from "path";
 
 const BASE_URL = "https://voyagerespond.com";
 
-const staticRoutes = [
-  { path: "/", changefreq: "weekly", priority: "1.0", lastmod: "2026-05-14" },
-  { path: "/pricing", changefreq: "monthly", priority: "0.8", lastmod: "2026-03-10" },
-  { path: "/about", changefreq: "monthly", priority: "0.6", lastmod: "2026-03-10" },
-  { path: "/contact", changefreq: "monthly", priority: "0.6", lastmod: "2026-03-10" },
-  { path: "/demo", changefreq: "weekly", priority: "0.9", lastmod: "2026-05-14" },
-  { path: "/hub", changefreq: "weekly", priority: "0.7", lastmod: "2026-03-16" },
-  { path: "/automations/google-reviews", changefreq: "weekly", priority: "0.8", lastmod: "2026-03-16" },
-  { path: "/blog", changefreq: "weekly", priority: "0.8", lastmod: "2026-05-14" },
-  { path: "/google-yorum-cevap-ornekleri", changefreq: "monthly", priority: "0.8", lastmod: "2026-03-19" },
-  { path: "/restoran-yorum-cevaplari", changefreq: "monthly", priority: "0.8", lastmod: "2026-03-19" },
-  { path: "/otel-yorum-cevaplari", changefreq: "monthly", priority: "0.8", lastmod: "2026-03-19" },
-  { path: "/yorum-yonetim-araclari", changefreq: "monthly", priority: "0.9", lastmod: "2026-06-03" },
-  { path: "/online-itibar-yonetimi", changefreq: "monthly", priority: "0.9", lastmod: "2026-06-05" },
-  { path: "/musteri-memnuniyeti", changefreq: "monthly", priority: "0.9", lastmod: "2026-06-05" },
-  { path: "/restoran-musteri-memnuniyeti", changefreq: "monthly", priority: "0.9", lastmod: "2026-06-05" },
-  { path: "/saglik-itibar-yonetimi", changefreq: "monthly", priority: "0.9", lastmod: "2026-06-16" },
-  { path: "/dis-hekimi-yorum-yonetimi", changefreq: "monthly", priority: "0.85", lastmod: "2026-06-16" },
-  { path: "/estetik-klinik-yorum-yonetimi", changefreq: "monthly", priority: "0.85", lastmod: "2026-06-16" },
-  { path: "/zincir-restoran-yorum-yonetimi", changefreq: "monthly", priority: "0.9", lastmod: "2026-06-17" },
+// Routes that exist in PRERENDER_PUBLIC_PATHS but must stay out of the sitemap
+// (functional / auth / redirect-only pages).
+const EXCLUDED_PATHS = new Set([
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/onboarding",
+  "/hub",
+  "/pricing",
+]);
+
+// Per-path sitemap metadata. Anything missing falls back to DEFAULT_META.
+const DEFAULT_META = { changefreq: "monthly", priority: "0.7", lastmod: "2026-08-10" };
+const META = {
+  "/": { changefreq: "weekly", priority: "1.0", lastmod: "2026-05-14" },
+  "/about": { changefreq: "monthly", priority: "0.6", lastmod: "2026-03-10" },
+  "/contact": { changefreq: "monthly", priority: "0.6", lastmod: "2026-03-10" },
+  "/demo": { changefreq: "weekly", priority: "0.9", lastmod: "2026-05-14" },
+  "/blog": { changefreq: "weekly", priority: "0.8", lastmod: "2026-05-14" },
+  "/automations/google-reviews": { changefreq: "weekly", priority: "0.8", lastmod: "2026-03-16" },
+  "/automations/instagram-sales": { changefreq: "weekly", priority: "0.8", lastmod: "2026-08-10" },
+  "/automations/whatsapp": { changefreq: "weekly", priority: "0.8", lastmod: "2026-08-10" },
+  "/automations/other": { changefreq: "weekly", priority: "0.7", lastmod: "2026-08-10" },
+  "/google-yorum-cevap-ornekleri": { changefreq: "monthly", priority: "0.8", lastmod: "2026-03-19" },
+  "/restoran-yorum-cevaplari": { changefreq: "monthly", priority: "0.8", lastmod: "2026-03-19" },
+  "/otel-yorum-cevaplari": { changefreq: "monthly", priority: "0.8", lastmod: "2026-03-19" },
+  "/yorum-yonetim-araclari": { changefreq: "monthly", priority: "0.9", lastmod: "2026-06-03" },
+  "/online-itibar-yonetimi": { changefreq: "monthly", priority: "0.9", lastmod: "2026-06-05" },
+  "/musteri-memnuniyeti": { changefreq: "monthly", priority: "0.9", lastmod: "2026-06-05" },
+  "/restoran-musteri-memnuniyeti": { changefreq: "monthly", priority: "0.9", lastmod: "2026-06-05" },
+  "/saglik-itibar-yonetimi": { changefreq: "monthly", priority: "0.9", lastmod: "2026-06-16" },
+  "/dis-hekimi-yorum-yonetimi": { changefreq: "monthly", priority: "0.85", lastmod: "2026-06-16" },
+  "/estetik-klinik-yorum-yonetimi": { changefreq: "monthly", priority: "0.85", lastmod: "2026-06-16" },
+  "/zincir-restoran-yorum-yonetimi": { changefreq: "monthly", priority: "0.9", lastmod: "2026-06-17" },
+  "/privacy-policy": { changefreq: "yearly", priority: "0.3", lastmod: "2026-01-01" },
+  "/terms-of-service": { changefreq: "yearly", priority: "0.3", lastmod: "2026-01-01" },
+  "/mesafeli-satis-sozlesmesi": { changefreq: "yearly", priority: "0.3", lastmod: "2026-08-05" },
+  "/on-bilgilendirme-formu": { changefreq: "yearly", priority: "0.3", lastmod: "2026-08-05" },
+  "/iptal-iade-kosullari": { changefreq: "yearly", priority: "0.3", lastmod: "2026-08-05" },
+};
+
+// Platform landing pages are expanded from route params, so they are not part
+// of PRERENDER_PUBLIC_PATHS and stay listed here.
+const platformRoutes = [
   { path: "/platform/yorumlara-yapay-zeka-ile-cevap-yazma", changefreq: "weekly", priority: "0.9", lastmod: "2026-05-22" },
   { path: "/platform/google-yorumlari-icin-yapay-zeka", changefreq: "weekly", priority: "0.9", lastmod: "2026-05-22" },
   { path: "/platform/instagram-yorumlari-icin-yapay-zeka", changefreq: "weekly", priority: "0.9", lastmod: "2026-05-22" },
@@ -36,13 +60,21 @@ const staticRoutes = [
   { path: "/platform/yemeksepeti-yorumlari-icin-yapay-zeka", changefreq: "weekly", priority: "0.9", lastmod: "2026-05-22" },
   { path: "/platform/airbnb-yorumlari-icin-yapay-zeka", changefreq: "weekly", priority: "0.9", lastmod: "2026-05-22" },
   { path: "/platform/zomato-yorumlari-icin-yapay-zeka", changefreq: "weekly", priority: "0.9", lastmod: "2026-05-22" },
-  { path: "/privacy-policy", changefreq: "yearly", priority: "0.3", lastmod: "2026-01-01" },
-  { path: "/terms-of-service", changefreq: "yearly", priority: "0.3", lastmod: "2026-01-01" },
-  { path: "/login", changefreq: "yearly", priority: "0.2", lastmod: "2026-01-01" },
-  { path: "/register", changefreq: "yearly", priority: "0.2", lastmod: "2026-01-01" },
-  { path: "/forgot-password", changefreq: "yearly", priority: "0.2", lastmod: "2026-01-01" },
-  { path: "/onboarding", changefreq: "monthly", priority: "0.6", lastmod: "2026-05-14" },
 ];
+
+// Derive the static route list from routes.tsx so new public routes land in the
+// sitemap automatically.
+function extractPrerenderPaths() {
+  const content = readFileSync(resolve("src/routes.tsx"), "utf-8");
+  const block = content.match(/PRERENDER_PUBLIC_PATHS\s*=\s*\[([\s\S]*?)\]/);
+  if (!block) throw new Error("PRERENDER_PUBLIC_PATHS not found in src/routes.tsx");
+  const paths = [...block[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+  return paths
+    .filter((p) => !EXCLUDED_PATHS.has(p))
+    .map((p) => ({ path: p, ...(META[p] || DEFAULT_META) }));
+}
+
+const staticRoutes = [...extractPrerenderPaths(), ...platformRoutes];
 
 function extractCityHotelPages() {
   const filePath = resolve("src/lib/cityHotelData.ts");
@@ -141,24 +173,6 @@ const sitemapXml = generateSitemap(canonicalEntries);
 const outputPath = resolve("public/sitemap.xml");
 writeFileSync(outputPath, sitemapXml);
 
-// ---- public/_redirects (Cloudflare Pages) --------------------------------
-// 301 every slash-less URL to its trailing-slash canonical. Rules are exact
-// (no splats), so static files (.xml/.txt/.js/.css/.png/.svg/.ico/.json) and
-// /auth/*, /~oauth/* are never matched and can't loop.
-const redirectLines = canonicalEntries
-  .filter((e) => e.path !== "/")
-  .map((e) => `${e.path.replace(/\/$/, "")}  ${e.path}  301`);
-
-const redirectsFile = [
-  "# Generated by scripts/generate-sitemap.mjs — do not edit by hand.",
-  "# Trailing-slash canonicalization (301) + SPA fallback.",
-  ...redirectLines,
-  "",
-  "/*  /index.html  200",
-  "",
-].join("\n");
-writeFileSync(resolve("public/_redirects"), redirectsFile);
-
 console.log(
-  `sitemap.xml written (${canonicalEntries.length} entries, ${blogPosts.length} blog posts, ${cityHotelPages.length} city pages); _redirects written (${redirectLines.length} rules)`
+  `sitemap.xml written (${canonicalEntries.length} entries, ${blogPosts.length} blog posts, ${cityHotelPages.length} city pages)`
 );
