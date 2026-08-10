@@ -1,0 +1,58 @@
+DO $$
+DECLARE
+  v_user uuid := '7aee75b4-edfa-4915-b857-531821d477e5';
+  v_biz uuid[];
+BEGIN
+  SELECT array_agg(id) INTO v_biz FROM public.businesses WHERE user_id = v_user;
+  IF v_biz IS NULL THEN v_biz := ARRAY[]::uuid[]; END IF;
+
+  DELETE FROM public.ci_review_topics WHERE business_id = ANY(v_biz);
+  DELETE FROM public.ci_competitor_reviews WHERE competitor_id IN (SELECT id FROM public.ci_competitors WHERE business_id = ANY(v_biz));
+  DELETE FROM public.ci_competitors WHERE business_id = ANY(v_biz);
+  DELETE FROM public.ci_discovery_runs WHERE business_id = ANY(v_biz);
+  DELETE FROM public.ci_monday_briefs WHERE business_id = ANY(v_biz);
+  DELETE FROM public.review_analysis WHERE business_id = ANY(v_biz);
+  DELETE FROM public.reply_logs WHERE business_id = ANY(v_biz);
+  DELETE FROM public.reviews WHERE business_id = ANY(v_biz);
+  DELETE FROM public.review_request_contacts WHERE business_id = ANY(v_biz);
+  DELETE FROM public.review_request_settings WHERE business_id = ANY(v_biz);
+  DELETE FROM public.email_logs WHERE business_id = ANY(v_biz);
+  DELETE FROM public.email_campaigns WHERE business_id = ANY(v_biz);
+  DELETE FROM public.customer_contacts WHERE business_id = ANY(v_biz);
+  DELETE FROM public.chat_messages WHERE conversation_id IN (SELECT id FROM public.chat_conversations WHERE user_id = v_user OR business_id = ANY(v_biz));
+  DELETE FROM public.chat_conversations WHERE user_id = v_user OR business_id = ANY(v_biz);
+  DELETE FROM public.ai_visibility_checklist WHERE business_id = ANY(v_biz);
+  DELETE FROM public.ai_visibility_snapshots WHERE business_id = ANY(v_biz);
+  DELETE FROM public.platform_rankings WHERE business_id = ANY(v_biz);
+  DELETE FROM public.platform_ratings WHERE business_id = ANY(v_biz);
+  DELETE FROM public.performance_metrics_cache WHERE business_id = ANY(v_biz);
+  DELETE FROM public.integration_logs WHERE business_id = ANY(v_biz);
+  DELETE FROM public.business_credentials WHERE business_id = ANY(v_biz);
+  DELETE FROM public.story_kit_shares WHERE business_id = ANY(v_biz);
+  DELETE FROM public.story_kit_templates WHERE business_id = ANY(v_biz);
+  DELETE FROM public.tiktok_comment_replies WHERE business_id = ANY(v_biz);
+  DELETE FROM public.tiktok_reply_suggestions WHERE business_id = ANY(v_biz);
+  DELETE FROM public.tiktok_comments WHERE business_id = ANY(v_biz);
+  DELETE FROM public.tiktok_videos WHERE business_id = ANY(v_biz);
+  DELETE FROM public.youtube_comments WHERE business_id = ANY(v_biz);
+  DELETE FROM public.youtube_videos WHERE business_id = ANY(v_biz);
+  DELETE FROM public.social_connection_credentials WHERE social_connection_id IN (SELECT id FROM public.social_connections WHERE business_id = ANY(v_biz) OR user_id = v_user);
+  DELETE FROM public.social_connections WHERE business_id = ANY(v_biz) OR user_id = v_user;
+  DELETE FROM public.extra_requests WHERE business_id = ANY(v_biz);
+  DELETE FROM public.hotel_extras WHERE business_id = ANY(v_biz);
+  DELETE FROM public.guest_stays WHERE business_id = ANY(v_biz);
+  DELETE FROM public.conversation_windows WHERE business_id = ANY(v_biz);
+  DELETE FROM public.whatsapp_messages WHERE business_id = ANY(v_biz);
+  DELETE FROM public.whatsapp_templates WHERE business_id = ANY(v_biz);
+  DELETE FROM public.whatsapp_channels WHERE business_id = ANY(v_biz);
+  DELETE FROM public.guests WHERE business_id = ANY(v_biz);
+  DELETE FROM public.subscription_consent_log WHERE business_id = ANY(v_biz) OR user_id = v_user;
+  DELETE FROM public.subscription_billing WHERE business_id = ANY(v_biz);
+  DELETE FROM public.paytr_customer_tokens WHERE business_id = ANY(v_biz);
+  DELETE FROM public.paytr_payment_log WHERE business_id = ANY(v_biz);
+  DELETE FROM public.businesses WHERE id = ANY(v_biz);
+  DELETE FROM public.user_warnings WHERE user_id = v_user;
+  DELETE FROM public.user_first_action_notified WHERE user_id = v_user;
+  DELETE FROM public.profiles WHERE user_id = v_user;
+  DELETE FROM auth.users WHERE id = v_user;
+END $$;
