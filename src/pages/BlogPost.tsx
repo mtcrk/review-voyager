@@ -238,6 +238,21 @@ const BlogPost = () => {
           {post.description}
         </p>
 
+        {/* Optional thin info box (audience redirection) */}
+        {post.notice && (
+          <aside className="mb-10 rounded-xl border border-border bg-muted/40 px-4 py-3 sm:px-5 sm:py-4">
+            <p className="text-sm font-semibold text-foreground">{post.notice.title}</p>
+            <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{post.notice.text}</p>
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+              {post.notice.links.map((l) => (
+                <a key={l.href} href={l.href} className="text-sm font-medium text-primary hover:underline">
+                  {l.label}
+                </a>
+              ))}
+            </div>
+          </aside>
+        )}
+
         {/* Content */}
         <div
           className="prose-custom"

@@ -13,21 +13,39 @@ export interface BlogPost {
   metaTitle?: string;
   metaDescription?: string;
   updatedAt?: string;
+  /** Optional thin info box rendered above the article body. */
+  notice?: {
+    title: string;
+    text: string;
+    links: { label: string; href: string }[];
+  };
   faqs?: { question: string; answer: string }[];
 }
 
 export const blogPosts: BlogPost[] = [
   {
     slug: "google-yorumlarina-nasil-yanit-verilir",
-    title: "Google Yorumlarına Nasıl Yanıt Verilir? 2026 Rehberi",
-    description: "Google yorumlarına profesyonel ve etkili yanıt vermenin 10 altın kuralı. Olumsuz yorumları fırsata çevirin, müşteri sadakatini artırın.",
-    ogTitle: "Google Yorumlarına Nasıl Yanıt Verilir? | 2026 Rehberi",
-    ogDescription: "Olumlu ve olumsuz Google yorumlarına profesyonel yanıt verme rehberi. AI destekli ipuçları ve örnek yanıtlar.",
+    title: "Google Yorumlarına Nasıl Cevap Verilir? İşletmeler İçin Örnekli Rehber",
+    description:
+      "İşletme sahipleri için Google yorumlarına cevap yazma rehberi: olumlu ve olumsuz yorumlar için hazır cevap örnekleri, ton önerileri ve pratik kurallar.",
+    metaTitle: "Google Yorumlarına Nasıl Cevap Verilir? Örnekli Rehber",
+    metaDescription:
+      "İşletme sahipleri için Google yorumlarına cevap yazma rehberi: olumlu ve olumsuz yorumlar için hazır cevap örnekleri ve pratik kurallar.",
+    ogTitle: "Google Yorumlarına Nasıl Cevap Verilir? İşletmeler İçin Rehber",
+    ogDescription: "İşletmeler için Google yorumlarına cevap yazma rehberi: olumlu ve olumsuz yorumlar için hazır örnekler.",
     author: "VoyageRespond",
     publishedAt: "2026-03-10",
     category: "Yorum Yönetimi",
     readTime: "8 dk",
     keywords: ["google yorumlarına yanıt", "google yorum cevaplama", "olumsuz yoruma cevap", "google yorum yönetimi"],
+    notice: {
+      title: "Müşteri olarak yorum yazmak istiyorsanız",
+      text: "Bu rehber, işletme sahiplerinin Google yorumlarına nasıl cevap yazacağını anlatır. Kendi deneyiminiz için yorum yazmak istiyorsanız işletmenin Google kartındaki \"Yorum ekle\" butonunu kullanabilirsiniz. Hazır cevap ve yorum örneklerine bakmak isterseniz aşağıdaki sayfalar yardımcı olur.",
+      links: [
+        { label: "Restoran yorum cevapları", href: "/restoran-yorum-cevaplari/" },
+        { label: "Otel yorum cevapları", href: "/otel-yorum-cevaplari/" },
+      ],
+    },
     content: `
 Google yorumlarına nasıl yanıt verilir? Google Business Profile üzerinden adım adım yanıtlama rehberi, en iyi pratikler ve örneklerle profesyonel cevap yazma teknikleri. AI destekli alternatifleri de inceleyeceğiz.
 
@@ -2401,16 +2419,47 @@ Otel yorum yönetimi, bir otelin Google, Booking.com, TripAdvisor ve diğer plat
   },
   {
     slug: "tripadvisor-yorum-yonetimi-rehberi",
-    title: "TripAdvisor Nedir, Yorumları Nasıl Yönetilir? 2026 Rehberi",
+    title: "TripAdvisor Yorum Yönetimi: Cevap Verme, İtiraz ve Kaldırma Rehberi",
     description:
-      "TripAdvisor nedir, otel ve restoran için neden önemli, yorumları nasıl yönetilir? Türkiye'deki işletmeler için kapsamlı rehber.",
-    ogTitle: "TripAdvisor Yorum Yönetimi 2026 | VoyageRespond",
+      "TripAdvisor yorumlarına nasıl cevap verilir, bir yorum ne zaman düşer, nasıl itiraz edilir ve kaldırma süreci ne kadar sürer? Otel ve restoranlar için rehber.",
+    metaTitle: "TripAdvisor Yorum Yönetimi: Cevap, İtiraz ve Kaldırma",
+    metaDescription:
+      "TripAdvisor yorumlarına cevap verme, itiraz ve kaldırma süreci: bir yorum ne zaman düşer, nasıl bildirilir ve süreç ne kadar sürer?",
+    ogTitle: "TripAdvisor Yorum Yönetimi: Cevap, İtiraz ve Kaldırma",
     ogDescription: "TripAdvisor yorumlarını profesyonelce yönetin: sıralama, yanıt, şikayet ve AI ipuçları.",
     author: "VoyageRespond",
     publishedAt: "2026-06-03",
+    updatedAt: "2026-08-10",
     category: "Platform Rehberleri",
     readTime: "10 dk",
     keywords: ["tripadvisor yorum", "tripadvisor nedir", "tripadvisor yorum yönetimi", "tripadvisor sıralama"],
+    faqs: [
+      {
+        question: "TripAdvisor yorumu ne zaman düşer?",
+        answer:
+          "TripAdvisor'da yorumlar zamanla otomatik olarak düşmez veya silinmez. Bir yorum yalnızca içerik kurallarını ihlal ettiği için kaldırılır: kişisel saldırı ve hakaret, alakasız veya işletmeyle ilgisi olmayan içerik, ticari/şantaj amaçlı metin, kişisel veri paylaşımı ya da sahte veya şüpheli yorum. Eski yorumlar silinmez, sadece Popularity Index'te ağırlığı azalır ve profilde sıralamada geriye gider.",
+      },
+      {
+        question: "TripAdvisor yorumuna nasıl itiraz edilir?",
+        answer:
+          "İşletme sahibi olarak TripAdvisor Yönetim Merkezi'ne (Management Center) girip ilgili yorumun yanındaki bildirme (Report a review) bağlantısını kullanırsınız. İhlal nedenini seçip somut kanıt eklemeniz gerekir: rezervasyon veya adisyon kaydı, tarih uyuşmazlığı, yazışma ekran görüntüsü gibi. Kanıtsız bildirimler genellikle reddedilir.",
+      },
+      {
+        question: "TripAdvisor yorum kaldırma süreci ne kadar sürer?",
+        answer:
+          "İnceleme tipik olarak birkaç iş günü ile 1-2 hafta arasında sürer. Sonuç Yönetim Merkezi'ndeki e-posta adresinize bildirilir. Kararın olumsuz çıkması durumunda yorum yayında kalır; bu noktada en etkili yöntem yoruma kamuya açık, sakin ve çözüm odaklı bir yanıt yazmaktır.",
+      },
+      {
+        question: "TripAdvisor yorumlarına cevap vermek sıralamayı etkiler mi?",
+        answer:
+          "Yanıt oranı doğrudan bir Popularity Index faktörü değildir. Ancak yanıtlar potansiyel misafirlerin gördüğü güven sinyalini güçlendirir, olumsuz yorumların etkisini azaltır ve dolaylı olarak rezervasyon dönüşümünü artırır.",
+      },
+      {
+        question: "TripAdvisor yorumlarına ne kadar sürede cevap verilmeli?",
+        answer:
+          "24-48 saat içinde yanıt vermek idealdir. Yabancı misafir profili yoğun olan işletmelerde yanıtların misafirin diline uygun yazılması (özellikle İngilizce) dönüşüm açısından önemlidir.",
+      },
+    ],
     content: `
 TripAdvisor, dünya çapında **490+ milyon yoruma** sahip en büyük seyahat platformudur. Otel, restoran ve gezi yerleri için kullanıcılar deneyimlerini puanlayıp paylaşır. Türkiye'de özellikle yabancı turistler için **bir numaralı referans kaynağıdır**.
 
@@ -2450,6 +2499,27 @@ TripAdvisor yorum silme politikası **çok katıdır**. Sadece şu durumlarda si
 - Sahte yorum (kanıtlanabilir)
 
 Şikayet için "Report a review" linkini kullanın.
+
+## TripAdvisor yorumu ne zaman düşer?
+
+Kısa cevap: **yorumlar zamanla düşmez.** TripAdvisor'da bir yorumun otomatik silinme süresi yoktur; yayınlanan yorum, işletme profilinde kalıcı olarak durur. Zamanla değişen tek şey **ağırlığıdır** — Popularity Index'te son 12 aydaki yorumlar daha etkili olduğu için eski yorumlar sıralamada geriye gider, ama silinmez.
+
+### Bir yorum hangi durumlarda kaldırılır?
+
+Yorum yalnızca içerik kurallarını ihlal ettiğinde kaldırılır:
+
+- **Kurallara aykırı içerik** — küfür, ayrımcı ifadeler, yasa dışı içerik
+- **Kişisel saldırı** — çalışan veya işletme sahibine yönelik hakaret, kişisel veri paylaşımı
+- **Alakasız içerik** — deneyime dayanmayan, yanlış işletmeye yazılmış veya konuyla ilgisi olmayan yorum
+- **Sahte veya şüpheli yorum** — hiç ziyaret etmemiş kullanıcı, ticari çıkar veya şantaj amaçlı metin
+
+### İşletme nasıl itiraz eder?
+
+TripAdvisor **Yönetim Merkezi** (Management Center) üzerinden ilgili yorumun yanındaki bildirme bağlantısıyla itiraz edilir. İhlal nedenini seçip **somut kanıt** eklemek gerekir: rezervasyon veya adisyon kaydı, tarih uyuşmazlığı, misafirle yazışma ekran görüntüsü. Kanıt sunulmayan bildirimler genellikle reddedilir.
+
+### Süreç ne kadar sürer?
+
+İnceleme tipik olarak **birkaç iş günü ile 1-2 hafta** arasında tamamlanır ve sonuç Yönetim Merkezi'ndeki e-posta adresine bildirilir. İtiraz reddedilirse yorum yayında kalır — bu durumda en etkili yöntem yoruma **kamuya açık, sakin ve çözüm odaklı** bir yanıt yazmaktır; potansiyel misafirler yorumu değil, yorumu nasıl karşıladığınızı değerlendirir.
 
 ## TripAdvisor + AI ile Yorum Yönetimi
 
