@@ -45,6 +45,44 @@ const templates = [
   ]},
 ];
 
+const goodReviewChecklist = [
+  "Yemekler: sipariş ettiğiniz tabakların adı, porsiyon ve lezzet detayı",
+  "Servis: karşılama, bekleme süresi, garsonun ilgisi",
+  "Ortam: temizlik, gürültü seviyesi, oturma düzeni",
+  "Fiyat/performans: ödediğiniz tutarın karşılığını alıp almadığınız",
+  "Ziyaret zamanı: hafta içi/sonu, öğle veya akşam, kalabalık durumu",
+];
+
+const sampleGoodReviews = [
+  {
+    label: "Kahvaltı — kısa",
+    text: "Cumartesi 09:30'da serpme kahvaltıya gittik. Ev yapımı vişne reçeli ve sıcak sıcak gelen bazlama gerçekten farklıydı. Çay servisi hiç aksamadı. Fiyat kişi başı verdiğimiz tutara göre gayet makul.",
+  },
+  {
+    label: "Akşam yemeği — detaylı",
+    text: "Cuma akşamı rezervasyonsuz gittik, 10 dakika içinde bahçede masa açıldı. Başlangıçta humus ve haydari geldi, ikisi de tazeydi. Ana yemekte kuzu incik aldım; et çatalla ayrılıyordu, yanındaki köz patlıcan püresi de tam kıvamındaydı. Eşim levrek söyledi, kılçığı ayıklanmış hâlde geldi. Garsonumuz Ahmet menüyü iyi biliyordu, şarap eşleştirmesi konusunda doğru yönlendirdi. Müzik konuşmayı engellemeyecek seviyedeydi. İki kişi içecekler dâhil ortalama bir akşam yemeği bütçesine sığdı, tekrar geleceğiz.",
+  },
+  {
+    label: "Paket servis",
+    text: "Akşam 20:00'de paket sipariş verdik, 35 dakikada kapıdaydı. Pizza hâlâ sıcaktı, kutu içinde hamur yumuşamamıştı. Sos ve peynir ayrı poşetlerde gelmiş, sipariş notumuzdaki 'az acı' isteği doğru uygulanmıştı. Paketleme özenliydi, hiçbir şey dökülmedi.",
+  },
+  {
+    label: "Özel gün",
+    text: "Evlilik yıl dönümümüz için pencere kenarı masa ayırttılar. Rezervasyon sırasında söylediğimiz notu hatırlayıp tatlıyı mumla getirdiler, bu ufak jest akşamı çok güzelleştirdi. Servis boyunca masamıza gereksiz müdahale olmadı; istediğimizde hemen ilgilendiler. Sessiz ve şık bir akşam yemeği arayan çiftlere rahatlıkla öneririm.",
+  },
+];
+
+const sampleCriticalReviews = [
+  {
+    label: "Yapıcı — servis",
+    text: "Pazar öğlen 13:00'te gittik, mekân doluydu. Siparişimiz 45 dakikada geldi ve çorbalar ana yemekle aynı anda servis edildi. Yemeklerin lezzeti iyiydi ama bu bekleme süresi için önceden bilgi verilseydi daha rahat beklerdik. Yoğun saatlerde ek personel işleri toparlar diye düşünüyorum.",
+  },
+  {
+    label: "Yapıcı — fiyat/porsiyon",
+    text: "Izgara tavuk porsiyonu menüdeki fotoğrafa göre belirgin şekilde küçüktü ve yanında sadece bir kaşık pilav vardı. Tadı güzeldi, personel de ilgiliydi; ama ödenen tutara göre porsiyon dengesi biraz zayıf kaldı. Porsiyon bilgisinin menüde gram olarak yazılması seçim yapmayı kolaylaştırırdı.",
+  },
+];
+
 const RestoranYorumCevaplari = () => {
   const navigate = useNavigate();
   const [copiedIndex, setCopiedIndex] = useState<string | null>(null);
@@ -58,8 +96,8 @@ const RestoranYorumCevaplari = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Restoran Yorum Cevap Örnekleri | 30 Hazır Şablon"
-        description="Google, Yelp ve TripAdvisor restoran yorumları için 30 profesyonel cevap şablonu: yemek, servis, hijyen ve atmosfer."
+        title="Restoran Yorum Örnekleri ve İşletmeler İçin Cevap Şablonları"
+        description="Gerçek restoran yorumu örnekleri ve nasıl yazılacağı; ayrıca işletmeler için Google, Yelp ve TripAdvisor yorumlarına 30 hazır cevap şablonu."
         canonical="https://voyagerespond.com/restoran-yorum-cevaplari"
       />
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
@@ -84,16 +122,103 @@ const RestoranYorumCevaplari = () => {
             Restoranlara Özel
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Restoran Yorum Cevapları: Google ve Yelp için Hazır Yanıtlar
+            Restoran Yorum Örnekleri ve İşletmeler İçin Cevap Şablonları
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Restoranınıza gelen Google, Yelp ve TripAdvisor yorumlarına profesyonel cevap örnekleri. Yemek kalitesi, servis hızı, hijyen ve atmosfer şikayetleri için hazır yanıt şablonları.
+            İki bölüm: müşteriler için gerçekçi restoran yorumu örnekleri ve nasıl yazılacağı; işletmeler için Google, Yelp ve TripAdvisor yorumlarına hazır cevap şablonları.
           </p>
         </div>
 
+        <div className="mb-16">
+          <h2 className="text-2xl font-bold text-foreground mb-4">Restoran Yorumu Nasıl Yazılır? Örnekler</h2>
+          <p className="text-muted-foreground leading-relaxed mb-6">
+            İyi bir yorum, okuyanın karar vermesine yardım eder. Puan vermekle yetinmek yerine ne yediğinizi, servisin nasıl olduğunu ve ne zaman gittiğinizi yazın. Aşağıdaki maddeler kısa bir kontrol listesi olarak kullanılabilir.
+          </p>
+
+          <div className="rounded-xl border border-border bg-card p-5 mb-8">
+            <h3 className="font-semibold text-foreground mb-3">İyi bir restoran yorumu neleri içerir?</h3>
+            <ul className="space-y-2">
+              {goodReviewChecklist.map((item, i) => (
+                <li key={i} className="flex gap-2 text-sm text-muted-foreground">
+                  <Check className="w-4 h-4 mt-0.5 shrink-0 text-primary" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <h3 className="text-lg font-semibold text-foreground mb-4">4 örnek olumlu yorum</h3>
+          <div className="space-y-4 mb-10">
+            {sampleGoodReviews.map((item) => {
+              const key = `good-${item.label}`;
+              return (
+                <div key={key} className="rounded-xl border border-border bg-card p-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-foreground mb-2 text-sm">{item.label}</h4>
+                      <p className="text-muted-foreground text-sm leading-relaxed">{item.text}</p>
+                    </div>
+                    <button
+                      onClick={() => handleCopy(item.text, key)}
+                      className="shrink-0 p-2 rounded-lg border border-border hover:bg-muted transition-colors"
+                      title="Kopyala"
+                      aria-label={copiedIndex === key ? "Örnek kopyalandı" : "Örneği kopyala"}
+                    >
+                      {copiedIndex === key ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4 text-muted-foreground" />}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <h3 className="text-lg font-semibold text-foreground mb-4">2 örnek yapıcı eleştiri yorumu</h3>
+          <div className="space-y-4 mb-8">
+            {sampleCriticalReviews.map((item) => {
+              const key = `crit-${item.label}`;
+              return (
+                <div key={key} className="rounded-xl border border-border bg-card p-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-foreground mb-2 text-sm">{item.label}</h4>
+                      <p className="text-muted-foreground text-sm leading-relaxed">{item.text}</p>
+                    </div>
+                    <button
+                      onClick={() => handleCopy(item.text, key)}
+                      className="shrink-0 p-2 rounded-lg border border-border hover:bg-muted transition-colors"
+                      title="Kopyala"
+                      aria-label={copiedIndex === key ? "Örnek kopyalandı" : "Örneği kopyala"}
+                    >
+                      {copiedIndex === key ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4 text-muted-foreground" />}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="p-4 rounded-xl bg-muted/50 border border-border mb-8">
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              <strong className="text-foreground">Not:</strong> Yorumunuz yaşadığınız gerçek deneyime dayanmalı. Ziyaret etmediğiniz bir mekân için yorum yazmak veya karşılığında ödeme alarak yorum bırakmak Google, Yelp ve TripAdvisor kurallarına aykırıdır ve yorumun silinmesine yol açar.
+            </p>
+          </div>
+
+          <p className="text-sm text-muted-foreground">
+            Restoran sahibiyseniz ve gelen yorumlara ne yazacağınızı arıyorsanız,{" "}
+            <a href="#cevap-sablonlari" className="text-primary hover:underline font-medium">
+              işletmeler için hazır cevap şablonları bölümüne
+            </a>{" "}
+            geçebilirsiniz.
+          </p>
+        </div>
+
+        <h2 id="cevap-sablonlari" className="text-3xl font-bold text-foreground mb-8 scroll-mt-24">
+          İşletmeler İçin Hazır Cevap Şablonları
+        </h2>
+
         {templates.map((section, si) => (
           <div key={si} className="mb-12">
-            <h2 className="text-2xl font-bold text-foreground mb-6">{section.category}</h2>
+            <h3 className="text-2xl font-bold text-foreground mb-6">{section.category}</h3>
             <div className="space-y-4">
               {section.items.map((item, ii) => {
                 const key = `${si}-${ii}`;
@@ -101,7 +226,7 @@ const RestoranYorumCevaplari = () => {
                   <div key={key} className="rounded-xl border border-border bg-card p-5 hover:shadow-md transition-all">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-foreground mb-2">{item.title}</h3>
+                        <h4 className="font-semibold text-foreground mb-2">{item.title}</h4>
                         <p className="text-muted-foreground text-sm leading-relaxed">{item.text}</p>
                       </div>
                       <button
@@ -131,6 +256,8 @@ const RestoranYorumCevaplari = () => {
         <AEOSection
           pageUrl="https://voyagerespond.com/restoran-yorum-cevaplari"
           faqs={[
+            { question: "Restoran yorumu nasıl yazılır?", answer: "Ziyaret zamanınızı yazın, sipariş ettiğiniz yemeklerin adını verin, servis ve ortam hakkında somut gözlem paylaşın ve fiyat/performans değerlendirmesi ekleyin. 3-5 cümle yeterlidir; abartılı ifadeler yerine yaşadığınız deneyimi anlatın. Yorumun gerçek bir ziyarete dayanması platform kuralları gereğidir." },
+            { question: "İyi bir restoran yorumu neleri içermeli?", answer: "Yemekler (isim, porsiyon, lezzet), servis (karşılama, bekleme süresi, personel ilgisi), ortam (temizlik, gürültü, oturma düzeni), fiyat/performans ve ziyaret zamanı. Bu beş başlık, yorumu okuyan diğer müşterilerin karar vermesini sağlar." },
             { question: "Restoran yorumlarına nasıl cevap verilir?", answer: "Restoran yorumlarına kişiselleştirilmiş, samimi ve profesyonel bir tonda yanıt verin. Müşterinin adını kullanın, bahsettiği yemeğe değinin ve tekrar ziyaret için teşvik edin. VoyageRespond gibi AI destekli yorum yönetim platformları bu süreci otomatikleştirir." },
             { question: "Restoran için yorum yönetimi neden önemlidir?", answer: "Tüketicilerin %89'u restoran seçmeden önce yorumları okuyor. Yorumlara düzenli ve profesyonel yanıt veren restoranlar %35 daha fazla güven kazanıyor ve Google sıralamalarında yükseliyor." },
             { question: "AI restoran yorumlarına cevap yazabilir mi?", answer: "Evet, VoyageRespond gibi AI destekli yorum yönetim platformları her yorumu analiz ederek restoranınızın tonuna uygun, kişiselleştirilmiş yanıtlar üretir. Manuel cevap yazmaya kıyasla %90 zaman tasarrufu sağlar." },
