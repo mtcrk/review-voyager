@@ -2500,6 +2500,27 @@ TripAdvisor yorum silme politikası **çok katıdır**. Sadece şu durumlarda si
 
 Şikayet için "Report a review" linkini kullanın.
 
+## TripAdvisor yorumu ne zaman düşer?
+
+Kısa cevap: **yorumlar zamanla düşmez.** TripAdvisor'da bir yorumun otomatik silinme süresi yoktur; yayınlanan yorum, işletme profilinde kalıcı olarak durur. Zamanla değişen tek şey **ağırlığıdır** — Popularity Index'te son 12 aydaki yorumlar daha etkili olduğu için eski yorumlar sıralamada geriye gider, ama silinmez.
+
+### Bir yorum hangi durumlarda kaldırılır?
+
+Yorum yalnızca içerik kurallarını ihlal ettiğinde kaldırılır:
+
+- **Kurallara aykırı içerik** — küfür, ayrımcı ifadeler, yasa dışı içerik
+- **Kişisel saldırı** — çalışan veya işletme sahibine yönelik hakaret, kişisel veri paylaşımı
+- **Alakasız içerik** — deneyime dayanmayan, yanlış işletmeye yazılmış veya konuyla ilgisi olmayan yorum
+- **Sahte veya şüpheli yorum** — hiç ziyaret etmemiş kullanıcı, ticari çıkar veya şantaj amaçlı metin
+
+### İşletme nasıl itiraz eder?
+
+TripAdvisor **Yönetim Merkezi** (Management Center) üzerinden ilgili yorumun yanındaki bildirme bağlantısıyla itiraz edilir. İhlal nedenini seçip **somut kanıt** eklemek gerekir: rezervasyon veya adisyon kaydı, tarih uyuşmazlığı, misafirle yazışma ekran görüntüsü. Kanıt sunulmayan bildirimler genellikle reddedilir.
+
+### Süreç ne kadar sürer?
+
+İnceleme tipik olarak **birkaç iş günü ile 1-2 hafta** arasında tamamlanır ve sonuç Yönetim Merkezi'ndeki e-posta adresine bildirilir. İtiraz reddedilirse yorum yayında kalır — bu durumda en etkili yöntem yoruma **kamuya açık, sakin ve çözüm odaklı** bir yanıt yazmaktır; potansiyel misafirler yorumu değil, yorumu nasıl karşıladığınızı değerlendirir.
+
 ## TripAdvisor + AI ile Yorum Yönetimi
 
 TripAdvisor'da haftada 20+ yorum alan bir otel için manuel yanıt imkansız hale gelir. VoyageRespond gibi AI platformları:
