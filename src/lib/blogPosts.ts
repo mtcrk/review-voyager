@@ -13,6 +13,12 @@ export interface BlogPost {
   metaTitle?: string;
   metaDescription?: string;
   updatedAt?: string;
+  /** Optional thin info box rendered above the article body. */
+  notice?: {
+    title: string;
+    text: string;
+    links: { label: string; href: string }[];
+  };
   faqs?: { question: string; answer: string }[];
 }
 
