@@ -217,10 +217,24 @@ Deno.serve(async (req) => {
     if (placeIds.length > 0) {
       const { data: comps } = await admin
         .from("ci_competitors")
-        .select("id, place_id")
+        .select("id, place_id, business_id")
         .in("place_id", placeIds);
+      const bizIds = Array.from(
+        new Set((comps || []).map((c: any) => c.business_id).filter(Boolean)),
+      ) as string[];
+      const activeBiz = await filterBusinessIdsWithSubscription(supabaseUrl, serviceKey, bizIds);
+      let skippedNoSub = 0;
       for (const c of comps || []) {
-        if (c.place_id) competitorsByPlace[c.place_id] = c.id;
+        if (!c.place_id) continue;
+        // Ödeme yapmayan müşterilerin Apify verisi ASLA işlenmez
+        if (!c.business_id || !activeBiz.has(c.business_id)) {
+          skippedNoSub++;
+          continue;
+        }
+        competitorsByPlace[c.place_id] = c.id;
+      }
+      if (skippedNoSub > 0) {
+        console.log(`⛔ Skipped ${skippedNoSub} competitor(s) without active subscription`);
       }
     }
 
