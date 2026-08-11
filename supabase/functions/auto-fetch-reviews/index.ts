@@ -108,9 +108,30 @@ Deno.serve(async (req) => {
       });
     }
 
+    // 🚫 Ödeme yapmayan müşterilerin Apify işleri ASLA çalışmaz.
+    const subscribed = await filterBusinessIdsWithSubscription(
+      supabaseUrl,
+      serviceKey,
+      businesses.map((b) => b.id)
+    );
+    const skippedNoSub: string[] = [];
+    const eligibleBusinesses = businesses.filter((b) => {
+      if (subscribed.has(b.id)) return true;
+      skippedNoSub.push(b.name);
+      return false;
+    });
+    if (skippedNoSub.length) {
+      console.log(`⛔ Skipped ${skippedNoSub.length} business(es) without active subscription: ${skippedNoSub.join(", ")}`);
+    }
+    if (!eligibleBusinesses.length) {
+      return new Response(JSON.stringify({ message: "No businesses with active subscription", skipped_no_subscription: skippedNoSub }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const jobs: Array<Promise<any>> = [];
     const triggered: any[] = [];
-    for (const biz of businesses) {
+    for (const biz of eligibleBusinesses) {
       const plans = planFor(biz, allowed);
       for (const plan of plans) {
         const payload: any = { business_id: biz.id, force };
