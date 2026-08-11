@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { filterBusinessIdsWithSubscription } from "../_shared/subscription-guard.ts";
 
 // Mirror of PROVIDER_MAP in apify-fetch-reviews so competitor ingest uses
 // the same platform naming convention as the own-review pipeline.
