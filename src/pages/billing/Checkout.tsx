@@ -11,6 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import { Loader2, ShieldCheck, Hotel, UtensilsCrossed, Scissors, Stethoscope, Info, Check, Building2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
+import { FORCED_ADDON_CODES, FORCED_PLAN_SEGMENT, isForcedCheckoutEmail } from "@/lib/paywall";
 
 type Plan = {
   id: string;
@@ -117,6 +118,8 @@ export default function BillingCheckout() {
   const [legalConsent, setLegalConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [iframeToken, setIframeToken] = useState<string | null>(null);
+  // Ödeme duvarındaki hesaplar: sadece Otel planı + iki opsiyonel modül
+  const restricted = isForcedCheckoutEmail(user?.email);
 
   const planSubtotal = useMemo(() => {
     if (!plan) return 0;
@@ -174,7 +177,8 @@ export default function BillingCheckout() {
         supabase.from("addons").select("*").eq("is_active", true).order("amount"),
       ]);
       const orderedSegments: Plan["segment"][] = ["hotel", "restaurant", "salon", "clinic"];
-      const sorted = ((p ?? []) as Plan[]).sort(
+      const list = (p ?? []) as Plan[];
+      const sorted = list.sort(
         (x, y) => orderedSegments.indexOf(x.segment) - orderedSegments.indexOf(y.segment),
       );
       setPlans(sorted);
@@ -183,6 +187,21 @@ export default function BillingCheckout() {
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Kısıtlı hesaplarda plan/modül listesini daralt ve Otel planını zorunlu kıl
+  const visiblePlans = useMemo(
+    () => (restricted ? plans.filter((p) => p.segment === FORCED_PLAN_SEGMENT) : plans),
+    [plans, restricted],
+  );
+  const visibleAddons = useMemo(
+    () => (restricted ? addons.filter((a) => FORCED_ADDON_CODES.includes(a.addon_code)) : addons),
+    [addons, restricted],
+  );
+  useEffect(() => {
+    if (!restricted) return;
+    if (visiblePlans.length && plan?.segment !== FORCED_PLAN_SEGMENT) setPlan(visiblePlans[0]);
+    setSelectedAddons((prev) => prev.filter((c) => FORCED_ADDON_CODES.includes(c)));
+  }, [restricted, visiblePlans, plan]);
 
   // Load PayTR iFrameResizer script + init once iframe is rendered
   useEffect(() => {
@@ -338,7 +357,7 @@ export default function BillingCheckout() {
               İşletmenize en uygun paketi seçin. Her paket sektöre özel entegrasyonlarla gelir.
             </p>
             <div className="grid sm:grid-cols-2 gap-4">
-              {plans.map((p) => {
+              {visiblePlans.map((p) => {
                 const Icon = SEGMENT_ICON[p.segment] ?? DEFAULT_SEGMENT_ICON;
                 const active = plan?.id === p.id;
                 const meta = SEGMENT_META[p.segment] ?? DEFAULT_SEGMENT_META;
@@ -439,7 +458,7 @@ export default function BillingCheckout() {
             </Card>
           )}
 
-          {addons.length > 0 && (
+          {visibleAddons.length > 0 && (
             <section className="mt-8">
               <div className="flex items-baseline gap-3 mb-1">
                 <span className="text-xs font-semibold text-primary tracking-wider">ADIM 2</span>
@@ -450,7 +469,7 @@ export default function BillingCheckout() {
                 İhtiyacınıza göre paketinizi güçlendirin. İstediğiniz zaman ekleyip kaldırabilirsiniz.
               </p>
               <div className="grid gap-3">
-                {addons.map((a) => {
+                {visibleAddons.map((a) => {
                   const checked = selectedAddons.includes(a.addon_code);
                   const info = ADDON_META[a.addon_code];
                   return (
