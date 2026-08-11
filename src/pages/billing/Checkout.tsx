@@ -357,7 +357,7 @@ export default function BillingCheckout() {
               İşletmenize en uygun paketi seçin. Her paket sektöre özel entegrasyonlarla gelir.
             </p>
             <div className="grid sm:grid-cols-2 gap-4">
-              {plans.map((p) => {
+              {visiblePlans.map((p) => {
                 const Icon = SEGMENT_ICON[p.segment] ?? DEFAULT_SEGMENT_ICON;
                 const active = plan?.id === p.id;
                 const meta = SEGMENT_META[p.segment] ?? DEFAULT_SEGMENT_META;
@@ -458,7 +458,7 @@ export default function BillingCheckout() {
             </Card>
           )}
 
-          {addons.length > 0 && (
+          {visibleAddons.length > 0 && (
             <section className="mt-8">
               <div className="flex items-baseline gap-3 mb-1">
                 <span className="text-xs font-semibold text-primary tracking-wider">ADIM 2</span>
@@ -469,7 +469,7 @@ export default function BillingCheckout() {
                 İhtiyacınıza göre paketinizi güçlendirin. İstediğiniz zaman ekleyip kaldırabilirsiniz.
               </p>
               <div className="grid gap-3">
-                {addons.map((a) => {
+                {visibleAddons.map((a) => {
                   const checked = selectedAddons.includes(a.addon_code);
                   const info = ADDON_META[a.addon_code];
                   return (
