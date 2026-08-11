@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { filterBusinessIdsWithSubscription } from "../_shared/subscription-guard.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -99,6 +100,23 @@ Deno.serve(async (req) => {
       });
     }
 
+    // 🚫 Ödeme yapmayan müşterinin rakip Apify işi ASLA çalışmaz.
+    const bizIds = [...new Set(competitors.map((c) => c.business_id))];
+    const subscribed = await filterBusinessIdsWithSubscription(supabaseUrl, serviceKey, bizIds);
+    const blockedCompetitors = competitors.filter((c) => !subscribed.has(c.business_id));
+    const eligibleCompetitors = competitors.filter((c) => subscribed.has(c.business_id));
+    if (blockedCompetitors.length) {
+      console.log(`⛔ Skipped ${blockedCompetitors.length} competitor(s) — business has no active subscription.`);
+    }
+    if (!eligibleCompetitors.length) {
+      return new Response(JSON.stringify({
+        error: "No eligible competitors — business has no active subscription",
+        skipped_no_subscription: blockedCompetitors.length,
+      }), {
+        status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const started: Started[] = [];
     const skipped: Skipped[] = [];
     const no_place_id: { competitor_id: string; name: string }[] = [];
@@ -112,7 +130,7 @@ Deno.serve(async (req) => {
       },
     ]));
 
-    for (const c of competitors) {
+    for (const c of eligibleCompetitors) {
       if (!c.place_id) {
         no_place_id.push({ competitor_id: c.id, name: c.name });
         continue;

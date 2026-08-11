@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { hasActiveSubscription } from "../_shared/subscription-guard.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -140,6 +141,21 @@ Deno.serve(async (req) => {
         console.log(`⛔ fetch_disabled=true for business ${business_id} — skipping TripAdvisor.`);
         return new Response(
           JSON.stringify({ success: false, skipped: true, reason: "fetch_disabled", message: "Bu işletme için yorum çekme devre dışı bırakılmış." }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // 🚫 Ödeme yapmayan müşterinin Apify işi ASLA çalışmaz.
+      const sub = await hasActiveSubscription(supabaseUrl, supabaseServiceKey, business_id);
+      if (!sub.active) {
+        console.log(`⛔ No active subscription for business ${business_id} — TripAdvisor Apify blocked.`);
+        return new Response(
+          JSON.stringify({
+            success: false,
+            skipped: true,
+            reason: "no_active_subscription",
+            message: "Aktif abonelik bulunamadı. Ödeme yapılmadan Apify çalıştırılamaz.",
+          }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
