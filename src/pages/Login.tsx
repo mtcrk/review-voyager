@@ -57,7 +57,7 @@ export default function Login() {
           const { trackEvent } = await import("@/lib/analytics");
           trackEvent("login", { method: "email" });
         } catch {}
-        navigate(destFor(data.user?.email));
+        navigate(destFor(email));
       }
     } catch (err) {
       setError(t('auth.login.error'));
