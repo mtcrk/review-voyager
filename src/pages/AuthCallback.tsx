@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslation } from 'react-i18next';
 import { trackEvent } from '@/lib/analytics';
+import { isForcedCheckoutEmail } from '@/lib/paywall';
 
 export default function AuthCallback() {
   const navigate = useNavigate();
@@ -29,7 +30,9 @@ export default function AuthCallback() {
             }
           } catch {}
           setMessage(t('auth.authCallback.success'));
-          setTimeout(() => navigate('/dashboard'), 2000);
+          const email = data.session.user?.email;
+          const dest = isForcedCheckoutEmail(email) ? '/billing/checkout' : '/dashboard';
+          setTimeout(() => navigate(dest), 2000);
         } else {
           setMessage(t('auth.authCallback.noSession'));
           setTimeout(() => navigate('/login'), 2000);

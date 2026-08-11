@@ -10,12 +10,15 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import SEO from '@/components/seo/SEO';
+import { isForcedCheckoutEmail } from '@/lib/paywall';
 
 export default function Login() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirectParam = searchParams.get('redirect');
-  const redirectTo = redirectParam && redirectParam.startsWith('/') ? redirectParam : '/dashboard';
+  const defaultRedirect = redirectParam && redirectParam.startsWith('/') ? redirectParam : '/dashboard';
+  const destFor = (email?: string | null) =>
+    isForcedCheckoutEmail(email) ? '/billing/checkout' : defaultRedirect;
 
   const { user } = useAuth();
   const { t } = useTranslation();
@@ -26,9 +29,9 @@ export default function Login() {
 
   useEffect(() => {
     if (user) {
-      navigate(redirectTo);
+      navigate(destFor(user.email));
     }
-  }, [user, navigate, redirectTo]);
+  }, [user, navigate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,7 +57,7 @@ export default function Login() {
           const { trackEvent } = await import("@/lib/analytics");
           trackEvent("login", { method: "email" });
         } catch {}
-        navigate(redirectTo);
+        navigate(destFor(data.user?.email));
       }
     } catch (err) {
       setError(t('auth.login.error'));
