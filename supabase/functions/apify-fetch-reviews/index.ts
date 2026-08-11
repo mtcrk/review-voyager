@@ -268,6 +268,21 @@ Deno.serve(async (req) => {
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
+
+      // 🚫 Ödeme yapmayan müşterinin Apify işi ASLA çalışmaz.
+      const sub = await hasActiveSubscription(supabaseUrl, supabaseServiceKey, business_id);
+      if (!sub.active) {
+        console.log(`⛔ No active subscription for business ${business_id} — Apify blocked.`);
+        return new Response(
+          JSON.stringify({
+            success: false,
+            skipped: true,
+            reason: "no_active_subscription",
+            message: "Aktif abonelik bulunamadı. Ödeme yapılmadan Apify çalıştırılamaz.",
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
     }
 
     // 🧠 GÜÇLENDİRİLMİŞ smart skip: cron (service-role) çağrılarında,
