@@ -108,7 +108,9 @@ export default function Register() {
           <CardContent className="space-y-4">
             <Alert>
               <AlertDescription>
-                <strong>{email}</strong> - {t('auth.register.success')}
+                <strong>{email}</strong> adresine bir doğrulama bağlantısı gönderdik. Hesabını
+                aktifleştirmek için e-postandaki bağlantıya tıkla. Gelen kutunda görmüyorsan
+                spam/gereksiz klasörünü kontrol et.
               </AlertDescription>
             </Alert>
           </CardContent>
