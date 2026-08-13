@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LocaleSync } from "@/components/LocaleSync";
+import { PaywallGuard } from "@/components/PaywallGuard";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BusinessProvider } from "@/contexts/BusinessContext";
 import { ReviewFetchProvider } from "@/contexts/ReviewFetchContext";
@@ -27,6 +28,7 @@ export default function RootLayout() {
                 <Toaster />
                 <Sonner />
                 <LocaleSync />
+                <PaywallGuard />
                 <Outlet />
               </TooltipProvider>
             </ReviewFetchProvider>
