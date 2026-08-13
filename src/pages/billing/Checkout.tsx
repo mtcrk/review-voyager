@@ -11,7 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import { Loader2, ShieldCheck, Hotel, UtensilsCrossed, Scissors, Stethoscope, Info, Check, Building2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
-import { FORCED_ADDON_CODES, FORCED_PLAN_SEGMENT, isForcedCheckoutEmail } from "@/lib/paywall";
+import { FORCED_ADDON_CODES, getForcedPlanSegment, isForcedCheckoutEmail } from "@/lib/paywall";
 
 type Plan = {
   id: string;
@@ -120,6 +120,7 @@ export default function BillingCheckout() {
   const [iframeToken, setIframeToken] = useState<string | null>(null);
   // Ödeme duvarındaki hesaplar: sadece Otel planı + iki opsiyonel modül
   const restricted = isForcedCheckoutEmail(user?.email);
+  const forcedSegment = getForcedPlanSegment(user?.email);
 
   const planSubtotal = useMemo(() => {
     if (!plan) return 0;
@@ -190,8 +191,8 @@ export default function BillingCheckout() {
 
   // Kısıtlı hesaplarda plan/modül listesini daralt ve Otel planını zorunlu kıl
   const visiblePlans = useMemo(
-    () => (restricted ? plans.filter((p) => p.segment === FORCED_PLAN_SEGMENT) : plans),
-    [plans, restricted],
+    () => (restricted && forcedSegment ? plans.filter((p) => p.segment === forcedSegment) : plans),
+    [plans, restricted, forcedSegment],
   );
   const visibleAddons = useMemo(
     () => (restricted ? addons.filter((a) => FORCED_ADDON_CODES.includes(a.addon_code)) : addons),
@@ -199,9 +200,9 @@ export default function BillingCheckout() {
   );
   useEffect(() => {
     if (!restricted) return;
-    if (visiblePlans.length && plan?.segment !== FORCED_PLAN_SEGMENT) setPlan(visiblePlans[0]);
+    if (visiblePlans.length && plan?.segment !== forcedSegment) setPlan(visiblePlans[0]);
     setSelectedAddons((prev) => prev.filter((c) => FORCED_ADDON_CODES.includes(c)));
-  }, [restricted, visiblePlans, plan]);
+  }, [restricted, visiblePlans, plan, forcedSegment]);
 
   // Load PayTR iFrameResizer script + init once iframe is rendered
   useEffect(() => {
