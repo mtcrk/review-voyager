@@ -5,6 +5,7 @@ export const FORCED_CHECKOUT_SEGMENTS: Record<string, "hotel" | "restaurant" | "
   "starlight@voyagerespond.com": "hotel",
   "sales@inciclasshotel.com.tr": "hotel",
   "justpatron@gmail.com": "restaurant",
+  "cihan.gurani@odarama.com": "hotel",
 };
 
 export const FORCED_CHECKOUT_EMAILS = Object.keys(FORCED_CHECKOUT_SEGMENTS);
