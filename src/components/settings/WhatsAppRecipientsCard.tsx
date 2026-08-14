@@ -297,8 +297,9 @@ export function WhatsAppRecipientsCard() {
 
         <div className="mt-2 p-4 rounded-lg bg-muted/30 border border-border">
           <p className="text-sm text-muted-foreground">
-            <strong>Not:</strong> WhatsApp şablonumuz şu anda onay sürecinde. Onay tamamlanınca
-            buradaki alıcılara bildirim ve hazır cevap taslağı gönderimi otomatik başlayacak.
+            <strong>Not:</strong> Yeni eklenen her alıcıya WhatsApp'tan bir doğrulama mesajı gider.
+            Alıcı onay vermeden bildirim gönderilmez. Alıcı istediği zaman <strong>DURDUR</strong>
+            {" "}yazarak çıkabilir.
           </p>
         </div>
       </CardContent>
