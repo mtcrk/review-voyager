@@ -422,6 +422,11 @@ export default function Settings() {
           <WeeklyReportCard />
           <BrowserPushCard />
         </TabsContent>
+
+        {/* WhatsApp Notifications Tab */}
+        <TabsContent value="whatsapp" className="space-y-6">
+          <WhatsAppRecipientsCard />
+        </TabsContent>
       </Tabs>
     </div>
   );
