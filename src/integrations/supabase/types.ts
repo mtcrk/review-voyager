@@ -2956,8 +2956,11 @@ export type Database = {
           quiet_hours_end: string | null
           quiet_hours_start: string | null
           role: string
+          status: string
           timezone: string
           updated_at: string
+          verification_sent_at: string | null
+          verified_at: string | null
         }
         Insert: {
           business_id: string
@@ -2974,8 +2977,11 @@ export type Database = {
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null
           role?: string
+          status?: string
           timezone?: string
           updated_at?: string
+          verification_sent_at?: string | null
+          verified_at?: string | null
         }
         Update: {
           business_id?: string
@@ -2992,8 +2998,11 @@ export type Database = {
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null
           role?: string
+          status?: string
           timezone?: string
           updated_at?: string
+          verification_sent_at?: string | null
+          verified_at?: string | null
         }
         Relationships: [
           {

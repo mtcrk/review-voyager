@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Plus, Pencil, Trash2, MessageCircle } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, MessageCircle, Send, ShieldCheck, Clock, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useBusiness } from "@/contexts/BusinessContext";
@@ -38,6 +38,7 @@ interface Recipient {
   quiet_hours_end: string | null;
   daily_cap: number;
   is_active: boolean;
+  status: string;
 }
 
 const emptyForm = {
@@ -53,6 +54,13 @@ const emptyForm = {
 
 const E164 = /^\+[1-9]\d{7,14}$/;
 
+const STATUS_META: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive"; icon: typeof ShieldCheck }> = {
+  pending_verification: { label: "Doğrulama bekliyor", variant: "outline", icon: Clock },
+  verified: { label: "Doğrulandı", variant: "default", icon: ShieldCheck },
+  declined: { label: "Reddetti", variant: "destructive", icon: XCircle },
+  opted_out: { label: "Çıktı", variant: "destructive", icon: XCircle },
+};
+
 export function WhatsAppRecipientsCard() {
   const { activeBusiness } = useBusiness();
   const [rows, setRows] = useState<Recipient[]>([]);
@@ -61,6 +69,7 @@ export function WhatsAppRecipientsCard() {
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [verifyingId, setVerifyingId] = useState<string | null>(null);
   const [form, setForm] = useState({ ...emptyForm });
 
   const load = async () => {
@@ -68,7 +77,7 @@ export function WhatsAppRecipientsCard() {
     setLoading(true);
     const { data, error } = await supabase
       .from("wa_recipients")
-      .select("id, phone_e164, display_name, role, min_rating_threshold, quiet_hours_start, quiet_hours_end, daily_cap, is_active")
+      .select("id, phone_e164, display_name, role, min_rating_threshold, quiet_hours_start, quiet_hours_end, daily_cap, is_active, status")
       .eq("business_id", activeBusiness.id)
       .order("created_at", { ascending: true });
     if (error) toast({ title: "Hata", description: "Alıcılar yüklenemedi.", variant: "destructive" });
@@ -99,6 +108,32 @@ export function WhatsAppRecipientsCard() {
     setOpen(true);
   };
 
+  const sendVerification = async (recipientId: string, isNew = false) => {
+    setVerifyingId(recipientId);
+    const { data, error } = await supabase.functions.invoke("wa-verify-recipient", {
+      body: { recipient_id: recipientId },
+    });
+    setVerifyingId(null);
+
+    const errMessage =
+      (data as any)?.error ??
+      (error ? "Doğrulama mesajı gönderilemedi." : null);
+
+    if (errMessage) {
+      toast({
+        title: isNew ? "Alıcı eklendi, doğrulama gönderilemedi" : "Doğrulama gönderilemedi",
+        description: errMessage,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Doğrulama mesajı gönderildi",
+        description: "Alıcı WhatsApp'tan onay verdikten sonra bildirimler başlayacak.",
+      });
+    }
+    load();
+  };
+
   const save = async () => {
     if (!activeBusiness) return;
     const phone = form.phone_e164.replace(/[\s()-]/g, "");
@@ -124,9 +159,9 @@ export function WhatsAppRecipientsCard() {
       is_active: form.is_active,
     };
 
-    const { error } = editingId
-      ? await supabase.from("wa_recipients").update(payload).eq("id", editingId)
-      : await supabase.from("wa_recipients").insert(payload);
+    const { data: saved, error } = editingId
+      ? await supabase.from("wa_recipients").update(payload).eq("id", editingId).select("id").maybeSingle()
+      : await supabase.from("wa_recipients").insert(payload).select("id").maybeSingle();
 
     setSaving(false);
     if (error) {
@@ -142,6 +177,9 @@ export function WhatsAppRecipientsCard() {
     toast({ title: editingId ? "Güncellendi" : "Alıcı eklendi" });
     setOpen(false);
     load();
+    if (!editingId && saved?.id) {
+      sendVerification(saved.id, true);
+    }
   };
 
   const remove = async () => {
@@ -202,7 +240,17 @@ export function WhatsAppRecipientsCard() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <p className="font-medium text-foreground">{r.display_name || r.phone_e164}</p>
                   {r.role && <Badge variant="secondary">{r.role}</Badge>}
-                  {!r.is_active && <Badge variant="outline">Pasif</Badge>}
+                  {(() => {
+                    const meta = STATUS_META[r.status] ?? STATUS_META.pending_verification;
+                    const Icon = meta.icon;
+                    return (
+                      <Badge variant={meta.variant} className="gap-1">
+                        <Icon className="h-3 w-3" />
+                        {meta.label}
+                      </Badge>
+                    );
+                  })()}
+                  {r.status === "verified" && !r.is_active && <Badge variant="outline">Pasif</Badge>}
                 </div>
                 <p className="text-sm text-muted-foreground mt-0.5">{r.phone_e164}</p>
                 <p className="text-xs text-muted-foreground mt-1">
@@ -211,8 +259,32 @@ export function WhatsAppRecipientsCard() {
                     ? ` · sessiz saat ${r.quiet_hours_start.slice(0, 5)}–${r.quiet_hours_end.slice(0, 5)}`
                     : ""}
                 </p>
+                {r.status === "pending_verification" && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Onay gelene kadar bu numaraya bildirim gönderilmeyecek.
+                  </p>
+                )}
               </div>
-              <Switch checked={r.is_active} onCheckedChange={(v) => toggleActive(r, v)} />
+              {r.status === "pending_verification" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => sendVerification(r.id)}
+                  disabled={verifyingId === r.id}
+                >
+                  {verifyingId === r.id ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="mr-2 h-4 w-4" />
+                  )}
+                  Doğrulamayı tekrar gönder
+                </Button>
+              )}
+              <Switch
+                checked={r.is_active}
+                disabled={r.status !== "verified"}
+                onCheckedChange={(v) => toggleActive(r, v)}
+              />
               <Button variant="ghost" size="icon" onClick={() => openEdit(r)}>
                 <Pencil className="h-4 w-4" />
               </Button>
@@ -225,8 +297,9 @@ export function WhatsAppRecipientsCard() {
 
         <div className="mt-2 p-4 rounded-lg bg-muted/30 border border-border">
           <p className="text-sm text-muted-foreground">
-            <strong>Not:</strong> WhatsApp şablonumuz şu anda onay sürecinde. Onay tamamlanınca
-            buradaki alıcılara bildirim ve hazır cevap taslağı gönderimi otomatik başlayacak.
+            <strong>Not:</strong> Yeni eklenen her alıcıya WhatsApp'tan bir doğrulama mesajı gider.
+            Alıcı onay vermeden bildirim gönderilmez. Alıcı istediği zaman <strong>DURDUR</strong>
+            {" "}yazarak çıkabilir.
           </p>
         </div>
       </CardContent>

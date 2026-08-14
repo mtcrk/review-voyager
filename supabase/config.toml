@@ -71,6 +71,10 @@ project_id = "pnpuhewfoxssmbpryart"
     verify_jwt = true
   [functions.tiktok-videos]
     verify_jwt = true
+  [functions.wa-verify-recipient]
+    verify_jwt = false
+  [functions.wa-webhook]
+    verify_jwt = false
   [functions.whatsapp-send]
     verify_jwt = true
   [functions.whatsapp-status-callback]
