@@ -2879,6 +2879,7 @@ export type Database = {
           resulting_reply: string | null
           review_id: string
           short_code: string
+          status: string
         }
         Insert: {
           business_id: string
@@ -2892,6 +2893,7 @@ export type Database = {
           resulting_reply?: string | null
           review_id: string
           short_code: string
+          status?: string
         }
         Update: {
           business_id?: string
@@ -2905,6 +2907,7 @@ export type Database = {
           resulting_reply?: string | null
           review_id?: string
           short_code?: string
+          status?: string
         }
         Relationships: [
           {
@@ -2941,11 +2944,14 @@ export type Database = {
         Row: {
           business_id: string
           created_at: string
+          daily_cap: number
           display_name: string | null
           id: string
           is_active: boolean
           location_id: string | null
+          min_rating_threshold: number
           opt_in_at: string | null
+          opt_out_at: string | null
           phone_e164: string
           quiet_hours_end: string | null
           quiet_hours_start: string | null
@@ -2956,11 +2962,14 @@ export type Database = {
         Insert: {
           business_id: string
           created_at?: string
+          daily_cap?: number
           display_name?: string | null
           id?: string
           is_active?: boolean
           location_id?: string | null
+          min_rating_threshold?: number
           opt_in_at?: string | null
+          opt_out_at?: string | null
           phone_e164: string
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null
@@ -2971,11 +2980,14 @@ export type Database = {
         Update: {
           business_id?: string
           created_at?: string
+          daily_cap?: number
           display_name?: string | null
           id?: string
           is_active?: boolean
           location_id?: string | null
+          min_rating_threshold?: number
           opt_in_at?: string | null
+          opt_out_at?: string | null
           phone_e164?: string
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null

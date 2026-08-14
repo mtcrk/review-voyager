@@ -15,6 +15,7 @@ import { useNewReviews } from "@/contexts/NewReviewsContext";
 import { useState, useEffect } from "react";
 import { PasswordChangeCard } from "@/components/settings/PasswordChangeCard";
 import { BrandVoiceCard } from "@/components/settings/BrandVoiceCard";
+import { WhatsAppRecipientsCard } from "@/components/settings/WhatsAppRecipientsCard";
 import { invokeAuthedFunction } from "@/lib/invokeAuthedFunction";
 import {
   AlertDialog,
@@ -222,6 +223,7 @@ export default function Settings() {
           
           <TabsTrigger value="brand-voice">Marka Sesi</TabsTrigger>
           <TabsTrigger value="notifications">Bildirimler</TabsTrigger>
+          <TabsTrigger value="whatsapp">WhatsApp Bildirimleri</TabsTrigger>
         </TabsList>
 
         {/* Profile Tab */}
@@ -419,6 +421,11 @@ export default function Settings() {
 
           <WeeklyReportCard />
           <BrowserPushCard />
+        </TabsContent>
+
+        {/* WhatsApp Notifications Tab */}
+        <TabsContent value="whatsapp" className="space-y-6">
+          <WhatsAppRecipientsCard />
         </TabsContent>
       </Tabs>
     </div>
