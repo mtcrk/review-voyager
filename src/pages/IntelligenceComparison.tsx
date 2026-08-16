@@ -389,6 +389,117 @@ export default function IntelligenceComparison() {
       }));
   }, [ownReviews, compReviews90, competitors.length]);
 
+  // === 90d rating trend (weekly avg reputation index, own vs competitors) ===
+  const ratingTrend = useMemo(() => {
+    const buckets: Record<
+      string,
+      { week: string; ownSum: number; ownN: number; compSum: number; compN: number }
+    > = {};
+    for (let i = 12; i >= 0; i--) {
+      const d = new Date(Date.now() - i * 7 * 86400_000);
+      buckets[weekKey(d.toISOString())] = { week: weekKey(d.toISOString()), ownSum: 0, ownN: 0, compSum: 0, compN: 0 };
+    }
+    const since = isoDaysAgo(90);
+    for (const r of ownReviews) {
+      if (!r.posted_at || r.rating == null || r.posted_at < since) continue;
+      const b = buckets[weekKey(r.posted_at)];
+      if (!b) continue;
+      b.ownSum += toIndex100(Number(r.rating), normalizePlatform(r.platform) ?? "google");
+      b.ownN += 1;
+    }
+    for (const r of compReviews90) {
+      if (!r.posted_at || r.rating == null) continue;
+      const b = buckets[weekKey(r.posted_at)];
+      if (!b) continue;
+      b.compSum += toIndex100(Number(r.rating), normalizePlatform(r.platform) ?? "google");
+      b.compN += 1;
+    }
+    return Object.values(buckets)
+      .sort((a, b) => a.week.localeCompare(b.week))
+      .map((b) => ({
+        weekLabel: b.week.slice(5),
+        you: b.ownN ? Math.round((b.ownSum / b.ownN) * 10) / 10 : null,
+        competitors: b.compN ? Math.round((b.compSum / b.compN) * 10) / 10 : null,
+      }));
+  }, [ownReviews, compReviews90]);
+
+  const hasRatingTrend = ratingTrend.some((d) => d.you != null || d.competitors != null);
+
+  // === Rekabet endeksi (RPI benzeri) + sade Türkçe özet ===
+  const rpi = ownAvg != null && compAvgOfAvg ? (ownAvg / compAvgOfAvg) * 100 : null;
+  const own5 = ownAvg != null ? ownAvg / 20 : null;
+  const comp5 = compAvgOfAvg != null ? compAvgOfAvg / 20 : null;
+
+  const verdict = useMemo(() => {
+    if (rpi == null) {
+      return {
+        tone: "info" as const,
+        headline: "Karşılaştırma için veri yetersiz",
+        detail:
+          "Kendi yorumlarınız veya rakip yorumları henüz toplanmadı. Rakip Seçimi sekmesinden yorumları çekin.",
+      };
+    }
+    if (rpi >= 103)
+      return {
+        tone: "good" as const,
+        headline: "Pazarın önündesiniz",
+        detail: `Misafir puanınız çevrenizdeki rakiplerin ortalamasından %${(rpi - 100).toFixed(1)} daha iyi. Bu, fiyat ve doluluk pazarlığında elinizi güçlendirir.`,
+      };
+    if (rpi >= 98)
+      return {
+        tone: "warn" as const,
+        headline: "Pazar ortalamasındasınız",
+        detail:
+          "Rakiplerinizden belirgin şekilde ayrışmıyorsunuz. Aşağıdaki öncelik listesindeki 1-2 konuyu çözmek sizi öne çıkarır.",
+      };
+    return {
+      tone: "bad" as const,
+      headline: "Pazarın gerisindesiniz",
+      detail: `Misafir puanınız rakip ortalamasının %${(100 - rpi).toFixed(1)} altında. Önce tekrar eden şikayet konularını kapatın, fiyat artışını erteleyin.`,
+    };
+  }, [rpi]);
+
+  // En güçlü / en zayıf yön — gerçek metriklerden
+  const metricDiffs = useMemo(() => {
+    const list: { label: string; text: string; good: boolean }[] = [];
+    if (ownAvg != null && compAvgOfAvg != null) {
+      const d = ownAvg - compAvgOfAvg;
+      list.push({
+        label: "Misafir puanı",
+        text: `${(Math.abs(d) / 20).toFixed(2)} puan ${d >= 0 ? "üstünde" : "altında"} (5 üzerinden)`,
+        good: d >= 0,
+      });
+    }
+    if (ownReplyRate != null && compReplyRate != null) {
+      const d = ownReplyRate - compReplyRate;
+      list.push({
+        label: "Yorum yanıtlama",
+        text: `Rakiplerden %${Math.abs(Math.round(d))} ${d >= 0 ? "daha fazla" : "daha az"} yoruma cevap veriyorsunuz`,
+        good: d >= 0,
+      });
+    }
+    if (ownMedianResponse != null && compMedianResponse != null) {
+      const d = compMedianResponse - ownMedianResponse;
+      list.push({
+        label: "Yanıt hızı",
+        text: `Rakiplerden ${Math.abs(d).toFixed(1)} gün ${d >= 0 ? "daha hızlı" : "daha yavaş"} cevaplıyorsunuz`,
+        good: d >= 0,
+      });
+    }
+    if (compAvg30d != null) {
+      const d = own30d - compAvg30d;
+      list.push({
+        label: "Yeni yorum akışı",
+        text: `Son 30 günde ${own30d} yorum aldınız, rakip ortalaması ${compAvg30d.toFixed(1)}`,
+        good: d >= 0,
+      });
+    }
+    return list;
+  }, [ownAvg, compAvgOfAvg, ownReplyRate, compReplyRate, ownMedianResponse, compMedianResponse, own30d, compAvg30d]);
+
+  const strengths = metricDiffs.filter((m) => m.good);
+  const weaknesses = metricDiffs.filter((m) => !m.good);
+
   // === Scatter ===
   const scatterCompetitors = competitors
     .filter((c) => compIndexInfo[c.id]?.index != null && (compTotals[c.id] ?? c.review_count) != null)
