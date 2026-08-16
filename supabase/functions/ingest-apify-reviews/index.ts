@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { filterBusinessIdsWithSubscription } from "../_shared/subscription-guard.ts";
+import { extractReviewerCountry } from "../_shared/country.ts";
 
 // Mirror of PROVIDER_MAP in apify-fetch-reviews so competitor ingest uses
 // the same platform naming convention as the own-review pipeline.
@@ -265,6 +266,7 @@ Deno.serve(async (req) => {
         posted_at: n.posted_at,
         owner_reply_text: n.owner_reply_text,
         owner_reply_at: n.owner_reply_at,
+        ...extractReviewerCountry(raw, n.platform || "google"),
         raw_payload: raw,
       });
     }

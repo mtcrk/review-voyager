@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { hasActiveSubscription } from "../_shared/subscription-guard.ts";
+import { extractReviewerCountry } from "../_shared/country.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -439,18 +440,19 @@ async function insertReviews(supabase: any, items: TripAdvisorReview[], business
         approved_reply: ownerReply,
         replied_at: ownerReplyAt,
         reply_source: ownerReply ? "platform" : null,
+        ...extractReviewerCountry(item, "tripadvisor"),
       };
     });
 
   // Check existing
-  const existingMap = new Map<string, { id: string; approved_reply: string | null; reply_source: string | null }>();
+  const existingMap = new Map<string, { id: string; approved_reply: string | null; reply_source: string | null; reviewer_country: string | null }>();
   const allIds = transformed.map(r => r.google_review_id);
   const CHECK_BATCH = 200;
   for (let i = 0; i < allIds.length; i += CHECK_BATCH) {
     const batch = allIds.slice(i, i + CHECK_BATCH);
     const { data: existing } = await supabase
       .from("reviews")
-      .select("id, google_review_id, approved_reply, reply_source")
+      .select("id, google_review_id, approved_reply, reply_source, reviewer_country")
       .eq("business_id", businessId)
       .in("google_review_id", batch);
     if (existing) {
@@ -489,6 +491,21 @@ async function insertReviews(supabase: any, items: TripAdvisorReview[], business
         replied_at: r.replied_at,
         reply_source: "platform",
         status: "replied",
+      })
+      .eq("id", existing.id);
+    if (!error) updated += 1;
+  }
+
+  // Backfill reviewer country when it was missing before
+  for (const r of transformed) {
+    const existing = existingMap.get(r.google_review_id);
+    if (!existing || existing.reviewer_country || !r.reviewer_country) continue;
+    const { error } = await supabase
+      .from("reviews")
+      .update({
+        reviewer_country: r.reviewer_country,
+        reviewer_country_raw: r.reviewer_country_raw,
+        reviewer_country_source: "platform",
       })
       .eq("id", existing.id);
     if (!error) updated += 1;

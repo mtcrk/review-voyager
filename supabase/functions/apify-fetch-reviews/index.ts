@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { hasActiveSubscription } from "../_shared/subscription-guard.ts";
+import { extractReviewerCountry } from "../_shared/country.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -765,6 +766,8 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
       ownerReply = reply.text;
       ownerReplyAt = reply.date ? toSafeIsoDate(reply.date) : (ownerReply ? postedAt : null);
 
+      const country = extractReviewerCountry(item, platform);
+
       return {
         business_id: businessId,
         platform,
@@ -778,6 +781,9 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
         approved_reply: ownerReply,
         replied_at: ownerReplyAt,
         reply_source: ownerReply ? "platform" : null,
+        reviewer_country: country.reviewer_country,
+        reviewer_country_raw: country.reviewer_country_raw,
+        reviewer_country_source: country.reviewer_country_source,
       };
     });
 
@@ -790,6 +796,7 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
     status: string | null;
     rating: number | null;
     sentiment: string | null;
+    reviewer_country: string | null;
   }>();
   const allIds = transformed.map(r => r.google_review_id);
   const CHECK_BATCH = 200;
@@ -797,7 +804,7 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
     const batch = allIds.slice(i, i + CHECK_BATCH);
     const { data: existing } = await supabase
       .from("reviews")
-      .select("id, google_review_id, approved_reply, reply_source, replied_at, status, rating, sentiment")
+      .select("id, google_review_id, approved_reply, reply_source, replied_at, status, rating, sentiment, reviewer_country")
       .eq("business_id", businessId)
       .in("google_review_id", batch);
     if (existing) {
@@ -818,6 +825,12 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
     status: "replied";
   }> = [];
   const ratingUpdates: Array<{ id: string; rating: number; sentiment: string }> = [];
+  const countryUpdates: Array<{
+    id: string;
+    reviewer_country: string;
+    reviewer_country_raw: string | null;
+    reviewer_country_source: string;
+  }> = [];
 
   for (const review of transformed) {
     const existing = existingReviews.get(review.google_review_id);
@@ -825,6 +838,16 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
     if (!existing) {
       newReviews.push(review);
       continue;
+    }
+
+    // BACKFILL: ülke bilgisi eksikse ve bu run'da geldiyse doldur
+    if (!existing.reviewer_country && review.reviewer_country) {
+      countryUpdates.push({
+        id: existing.id,
+        reviewer_country: review.reviewer_country,
+        reviewer_country_raw: review.reviewer_country_raw,
+        reviewer_country_source: "platform",
+      });
     }
 
     // BACKFILL: rating ölçeği değiştiyse (eskiden /2 kaydedilmişti, şimdi ham), güncelle
@@ -897,6 +920,23 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
       .eq("id", r.id);
     if (error) {
       console.error(`Rating update error for ${r.id}:`, error.message);
+    } else {
+      updated += 1;
+    }
+  }
+
+  // Backfill reviewer country when it was missing before
+  for (const c of countryUpdates) {
+    const { error } = await supabase
+      .from("reviews")
+      .update({
+        reviewer_country: c.reviewer_country,
+        reviewer_country_raw: c.reviewer_country_raw,
+        reviewer_country_source: c.reviewer_country_source,
+      })
+      .eq("id", c.id);
+    if (error) {
+      console.error(`Country update error for ${c.id}:`, error.message);
     } else {
       updated += 1;
     }

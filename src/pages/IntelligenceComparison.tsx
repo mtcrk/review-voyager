@@ -47,6 +47,7 @@ import {
 import { IntelligenceTabs } from "@/components/intelligence/IntelligenceTabs";
 import { TopicAnalysis } from "@/components/intelligence/TopicAnalysis";
 import { ActionPack } from "@/components/intelligence/ActionPack";
+import { GuestOriginBreakdown } from "@/components/intelligence/GuestOriginBreakdown";
 
 type Competitor = {
   id: string;
@@ -774,6 +775,9 @@ export default function IntelligenceComparison() {
 
             {/* Topic Analysis */}
             {activeBusiness?.id && <TopicAnalysis businessId={activeBusiness.id} />}
+
+            {/* Ülke ve dil kırılımı */}
+            {activeBusiness?.id && <GuestOriginBreakdown businessId={activeBusiness.id} />}
           </>
         )}
       </div>
