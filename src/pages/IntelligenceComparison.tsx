@@ -638,12 +638,121 @@ export default function IntelligenceComparison() {
           </Card>
         ) : (
           <>
-            {/* Action Pack — actionable cards */}
+            {/* ===== DURUM ÖZETİ ===== */}
+            <Card className="border-primary/30">
+              <CardContent className="p-5 sm:p-6">
+                <div className="grid grid-cols-1 lg:grid-cols-[auto,1fr] gap-6">
+                  <div className="flex gap-6">
+                    <div className="text-center">
+                      <div className="text-xs text-muted-foreground mb-1">Sıralama</div>
+                      <div className="text-4xl font-semibold tabular-nums flex items-baseline justify-center gap-1">
+                        {ownRank}
+                        <span className="text-lg text-muted-foreground font-normal">
+                          /{ranked.length}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-muted-foreground mt-1">
+                        çevrenizdeki oteller
+                      </div>
+                    </div>
+                    <div className="text-center border-l pl-6">
+                      <div className="text-xs text-muted-foreground mb-1">Misafir puanınız</div>
+                      <div className="text-4xl font-semibold tabular-nums">
+                        {own5 != null ? own5.toFixed(2) : "—"}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground mt-1">
+                        5 üzerinden · rakip ort. {comp5 != null ? comp5.toFixed(2) : "—"}
+                      </div>
+                    </div>
+                    <div className="text-center border-l pl-6">
+                      <div className="text-xs text-muted-foreground mb-1">Rekabet endeksi</div>
+                      <div
+                        className={`text-4xl font-semibold tabular-nums ${
+                          rpi == null
+                            ? ""
+                            : rpi >= 103
+                              ? "text-emerald-600"
+                              : rpi >= 98
+                                ? "text-amber-600"
+                                : "text-rose-600"
+                        }`}
+                      >
+                        {rpi != null ? Math.round(rpi) : "—"}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground mt-1">
+                        100 = pazar ortalaması
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-2">
+                      {verdict.tone === "good" ? (
+                        <Trophy className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
+                      ) : verdict.tone === "bad" ? (
+                        <AlertTriangle className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
+                      ) : (
+                        <Minus className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                      )}
+                      <div>
+                        <div className="font-medium">{verdict.headline}</div>
+                        <p className="text-sm text-muted-foreground mt-0.5">{verdict.detail}</p>
+                      </div>
+                    </div>
+                    {(strengths.length > 0 || weaknesses.length > 0) && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                        <div>
+                          <div className="text-xs font-medium text-emerald-700 dark:text-emerald-400 mb-1.5">
+                            Güçlü olduğunuz yerler
+                          </div>
+                          {strengths.length === 0 ? (
+                            <p className="text-xs text-muted-foreground">Veri yok</p>
+                          ) : (
+                            <ul className="space-y-1">
+                              {strengths.slice(0, 3).map((m) => (
+                                <li key={m.label} className="flex items-start gap-1.5 text-xs">
+                                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                                  <span>
+                                    <span className="font-medium">{m.label}:</span> {m.text}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                        <div>
+                          <div className="text-xs font-medium text-rose-700 dark:text-rose-400 mb-1.5">
+                            Kaybettiğiniz yerler
+                          </div>
+                          {weaknesses.length === 0 ? (
+                            <p className="text-xs text-muted-foreground">Veri yok</p>
+                          ) : (
+                            <ul className="space-y-1">
+                              {weaknesses.slice(0, 3).map((m) => (
+                                <li key={m.label} className="flex items-start gap-1.5 text-xs">
+                                  <AlertTriangle className="h-3.5 w-3.5 text-rose-600 shrink-0 mt-0.5" />
+                                  <span>
+                                    <span className="font-medium">{m.label}:</span> {m.text}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Bu hafta ne yapmalı */}
             <ActionPack businessId={businessId} />
 
             {/* KPI cards */}
             <p className="text-xs text-muted-foreground">
-              Farklı platformların puanları (Booking 10, Google 5) tek ölçeğe normalize edilmiştir.
+              Farklı platformların puanları (Booking 10, Google 5) tek ölçeğe (0-100 itibar indeksi)
+              normalize edilmiştir. 100 = kusursuz, 80 = 4,0/5.
             </p>
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
               <KpiCard
