@@ -73,19 +73,13 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
     queryKey: ["ci_topics_pending", businessId],
     enabled: !!businessId,
     queryFn: async () => {
-      const [{ count: ownPending }, { data: comps }] = await Promise.all([
-        supabase
-          .from("reviews")
-          .select("id", { count: "exact", head: true })
-          .eq("business_id", businessId)
-          .is("topics_extracted_at", null)
-          .not("comment", "is", null),
-        supabase
-          .from("ci_competitors")
-          .select("id")
-          .eq("business_id", businessId)
-          .eq("status", "confirmed"),
-      ]);
+      // Only competitor reviews are pending for THIS button — own reviews are
+      // analyzed by the `analyze-review` deep-analysis pipeline.
+      const { data: comps } = await supabase
+        .from("ci_competitors")
+        .select("id")
+        .eq("business_id", businessId)
+        .eq("status", "confirmed");
       const compIds = (comps ?? []).map((c: any) => c.id);
       let compPending = 0;
       if (compIds.length > 0) {
@@ -97,7 +91,7 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
           .not("body", "is", null);
         compPending = count ?? 0;
       }
-      return { own: ownPending ?? 0, competitor: compPending };
+      return { competitor: compPending };
     },
   });
 
@@ -167,7 +161,7 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
 
   const totalMentions = rows.length;
   const pending = pendingQ.data;
-  const hasPending = (pending?.own ?? 0) + (pending?.competitor ?? 0) > 0;
+  const hasPending = (pending?.competitor ?? 0) > 0;
 
   async function runAnalysis() {
     setAnalyzing(true);
@@ -206,13 +200,13 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
               </CardTitle>
               <p className="text-xs text-muted-foreground mt-1">
                 {totalMentions === 0
-                  ? "Yorumlardan konu çıkarımı henüz yapılmadı."
-                  : `${totalMentions} konu bahsi · ${hasPending ? `${(pending?.own ?? 0) + (pending?.competitor ?? 0)} yeni yorum analiz bekliyor` : "Tümü güncel"}`}
+                  ? "Rakip yorumlarından konu çıkarımı henüz yapılmadı."
+                  : `${totalMentions} konu bahsi · ${hasPending ? `${pending?.competitor ?? 0} yeni rakip yorumu analiz bekliyor` : "Rakip yorumları güncel"}`}
               </p>
             </div>
             <Button size="sm" onClick={runAnalysis} disabled={analyzing || (!hasPending && totalMentions > 0)}>
               {analyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-              {totalMentions === 0 ? "Konuları Analiz Et" : "Yeniden Analiz"}
+              {totalMentions === 0 ? "Rakip Yorumlarını Analiz Et" : "Rakip Yorumlarını Yeniden Analiz Et"}
             </Button>
           </CardHeader>
         </Card>
@@ -221,8 +215,8 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
           <Card>
             <CardContent className="p-8 text-center text-sm text-muted-foreground">
               {hasPending
-                ? `Hazır: ${pending?.own ?? 0} yorumunuz ve ${pending?.competitor ?? 0} rakip yorumu analiz bekliyor. "Konuları Analiz Et" butonuna basın.`
-                : "Henüz analiz edilecek yorum yok. Önce kendi yorumlarınızı çekin ve rakip yorumlarını toplayın."}
+                ? `Hazır: ${pending?.competitor ?? 0} rakip yorumu analiz bekliyor. "Rakip Yorumlarını Analiz Et" butonuna basın.`
+                : "Henüz analiz edilecek rakip yorumu yok. Önce Rakip Seçimi sekmesinden rakip yorumlarını toplayın. Kendi yorumlarınızın konu analizi otomatik yapılır."}
             </CardContent>
           </Card>
         ) : (
