@@ -27,6 +27,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -45,6 +46,10 @@ import {
   Calendar,
   MapPin,
   Clock,
+  Trophy,
+  AlertTriangle,
+  CheckCircle2,
+  ArrowRight,
 } from "lucide-react";
 import { IntelligenceTabs } from "@/components/intelligence/IntelligenceTabs";
 import { TopicAnalysis } from "@/components/intelligence/TopicAnalysis";
