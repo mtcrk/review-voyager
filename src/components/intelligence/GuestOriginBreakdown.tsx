@@ -351,17 +351,20 @@ export function GuestOriginBreakdown({ businessId }: { businessId: string }) {
                       <div>Ülke</div>
                       <div className="text-right">Yorum</div>
                       <div className="text-right">Pay</div>
-                      <div className="text-right">Ort. puan</div>
+                      <div className="text-right">İtibar indeksi (0-100)</div>
                     </div>
                     {country.list.slice(0, 15).map((c) => (
                       <div key={c.code} className="grid grid-cols-4 px-3 py-2 border-t text-sm items-center">
                         <div className="font-medium">{c.label}</div>
                         <div className="text-right">{c.count}</div>
                         <div className="text-right">%{c.share.toFixed(1)}</div>
-                        <div className="text-right">{c.avgRating != null ? c.avgRating.toFixed(1) : "veri yok"}</div>
+                        <div className="text-right">{c.repIndex != null ? c.repIndex.toFixed(1) : "veri yok"}</div>
                       </div>
                     ))}
                   </div>
+                  <p className="text-xs text-muted-foreground">
+                    Farklı platformların puanları (Booking 10, Google 5) tek ölçeğe normalize edilmiştir.
+                  </p>
 
                   <div>
                     <div className="text-sm font-medium mb-2">Son 12 ay trendi (en çok yorum yazan 5 ülke)</div>
@@ -463,17 +466,20 @@ export function GuestOriginBreakdown({ businessId }: { businessId: string }) {
                       <div>Dil</div>
                       <div className="text-right">Yorum</div>
                       <div className="text-right">Pay</div>
-                      <div className="text-right">Ort. puan</div>
+                      <div className="text-right">İtibar indeksi (0-100)</div>
                     </div>
                     {language.list.slice(0, 15).map((l) => (
                       <div key={l.code} className="grid grid-cols-4 px-3 py-2 border-t text-sm items-center">
                         <div className="font-medium">{l.label}</div>
                         <div className="text-right">{l.count}</div>
                         <div className="text-right">%{l.share.toFixed(1)}</div>
-                        <div className="text-right">{l.avgRating != null ? l.avgRating.toFixed(1) : "veri yok"}</div>
+                        <div className="text-right">{l.repIndex != null ? l.repIndex.toFixed(1) : "veri yok"}</div>
                       </div>
                     ))}
                   </div>
+                  <p className="text-xs text-muted-foreground">
+                    Farklı platformların puanları (Booking 10, Google 5) tek ölçeğe normalize edilmiştir.
+                  </p>
 
                   <div className="h-60">
                     <ResponsiveContainer width="100%" height="100%">
