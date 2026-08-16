@@ -416,6 +416,9 @@ export type Database = {
           posted_at: string | null
           rating: number | null
           raw_payload: Json | null
+          reviewer_country: string | null
+          reviewer_country_raw: string | null
+          reviewer_country_source: string | null
           scraped_at: string
           sentiment: string | null
           title: string | null
@@ -436,6 +439,9 @@ export type Database = {
           posted_at?: string | null
           rating?: number | null
           raw_payload?: Json | null
+          reviewer_country?: string | null
+          reviewer_country_raw?: string | null
+          reviewer_country_source?: string | null
           scraped_at?: string
           sentiment?: string | null
           title?: string | null
@@ -456,6 +462,9 @@ export type Database = {
           posted_at?: string | null
           rating?: number | null
           raw_payload?: Json | null
+          reviewer_country?: string | null
+          reviewer_country_raw?: string | null
+          reviewer_country_source?: string | null
           scraped_at?: string
           sentiment?: string | null
           title?: string | null
@@ -1981,6 +1990,9 @@ export type Database = {
           rating: number
           replied_at: string | null
           reply_source: string | null
+          reviewer_country: string | null
+          reviewer_country_raw: string | null
+          reviewer_country_source: string | null
           reviewer_name: string
           sentiment: string | null
           status: string | null
@@ -2014,6 +2026,9 @@ export type Database = {
           rating: number
           replied_at?: string | null
           reply_source?: string | null
+          reviewer_country?: string | null
+          reviewer_country_raw?: string | null
+          reviewer_country_source?: string | null
           reviewer_name: string
           sentiment?: string | null
           status?: string | null
@@ -2047,6 +2062,9 @@ export type Database = {
           rating?: number
           replied_at?: string | null
           reply_source?: string | null
+          reviewer_country?: string | null
+          reviewer_country_raw?: string | null
+          reviewer_country_source?: string | null
           reviewer_name?: string
           sentiment?: string | null
           status?: string | null
