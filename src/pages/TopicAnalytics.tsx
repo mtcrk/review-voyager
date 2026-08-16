@@ -12,7 +12,7 @@ import {
   Tooltip as RTooltip,
   Legend,
 } from "recharts";
-import { ArrowDownRight, ArrowRight, ArrowUpRight, ChevronRight, Info } from "lucide-react";
+import { ArrowDownRight, ArrowRight, ArrowUpRight, ChevronRight, Info, MapPin } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -82,7 +82,7 @@ function DeltaBadge({ stat }: { stat: PeriodStat }) {
 
 export default function TopicAnalytics() {
   const { t, i18n } = useTranslation();
-  const { activeBusiness } = useBusiness();
+  const { activeBusiness, businesses, setActiveBusiness } = useBusiness();
   const businessId = activeBusiness?.id;
   const [months, setMonths] = useState(12);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -145,6 +145,34 @@ export default function TopicAnalytics() {
         <div>
           <h1 className="text-2xl font-semibold">{t("topicAnalytics.title")}</h1>
           <p className="text-sm text-muted-foreground">{t("topicAnalytics.subtitle")}</p>
+          <div className="mt-3 flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+            {businesses.length > 1 ? (
+              <Select
+                value={activeBusiness?.id}
+                onValueChange={(id) => {
+                  const b = businesses.find((x) => x.id === id);
+                  if (b) setActiveBusiness(b);
+                }}
+              >
+                <SelectTrigger className="w-full sm:w-[280px] h-9">
+                  <SelectValue placeholder="Lokasyon seçin" />
+                </SelectTrigger>
+                <SelectContent>
+                  {businesses.map((b) => (
+                    <SelectItem key={b.id} value={b.id}>
+                      {b.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <span className="text-sm font-medium">{activeBusiness?.name}</span>
+            )}
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Bu sayfadaki tüm veriler yalnızca seçili lokasyona aittir.
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <IntelligenceTabs />
