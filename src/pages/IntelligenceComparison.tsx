@@ -175,7 +175,7 @@ export default function IntelligenceComparison() {
           .eq("status", "confirmed"),
         supabase
           .from("reviews")
-          .select("platform,rating,posted_at,status,approved_reply")
+          .select("platform,rating,posted_at,status,approved_reply,replied_at")
           .eq("business_id", businessId!)
           .order("posted_at", { ascending: false })
           .limit(5000),
@@ -199,13 +199,15 @@ export default function IntelligenceComparison() {
       // For overall totals (not just 90d), also count rows per competitor
       let compTotals: Record<string, number> = {};
       let compPlatformAgg: Record<string, Record<string, { sum: number; n: number }>> = {};
+      let compAllRows: CompAllRow[] = [];
       if (compIds.length) {
         const { data: allRows } = await supabase
           .from("ci_competitor_reviews")
-          .select("competitor_id,platform,rating")
+          .select("competitor_id,platform,rating,posted_at,owner_reply_text,owner_reply_at")
           .in("competitor_id", compIds)
           .limit(50000);
-        for (const r of (allRows ?? []) as any[]) {
+        compAllRows = (allRows ?? []) as CompAllRow[];
+        for (const r of compAllRows) {
           compTotals[r.competitor_id] = (compTotals[r.competitor_id] ?? 0) + 1;
           const p = normalizePlatform(r.platform);
           if (!p || r.rating == null) continue;
@@ -221,6 +223,7 @@ export default function IntelligenceComparison() {
         compReviews90: compReviews,
         compTotals,
         compPlatformAgg,
+        compAllRows,
         ownReviews: (ownReviewsRes.data ?? []) as OwnReviewRow[],
       };
     },
@@ -231,12 +234,19 @@ export default function IntelligenceComparison() {
   const compReviews90 = dataQuery.data?.compReviews90 ?? [];
   const compTotals = dataQuery.data?.compTotals ?? {};
   const compPlatformAgg = dataQuery.data?.compPlatformAgg ?? {};
+  const compAllRows = dataQuery.data?.compAllRows ?? [];
 
   const ownName = activeBusiness?.name ?? "Siz";
 
   // === Own metrics ===
-  const ownRatings = ownReviews.map((r) => r.rating).filter((n): n is number => n != null);
-  const ownAvg = ownRatings.length ? ownRatings.reduce((a, b) => a + b, 0) / ownRatings.length : null;
+  // Ratings are normalized per platform (Booking /10, Google /5 …) then expressed
+  // as a 0–100 reputation index so every business sits on the same scale.
+  const ownIndexes = ownReviews
+    .filter((r) => r.rating != null)
+    .map((r) => toIndex100(Number(r.rating), normalizePlatform(r.platform) ?? "google"));
+  const ownAvg = ownIndexes.length
+    ? ownIndexes.reduce((a, b) => a + b, 0) / ownIndexes.length
+    : null;
   const ownTotal = ownReviews.length;
   const ownReplied = ownReviews.filter((r) => r.approved_reply || r.status === "replied").length;
   const ownReplyRate = ownTotal > 0 ? (ownReplied / ownTotal) * 100 : null;
@@ -254,10 +264,53 @@ export default function IntelligenceComparison() {
   }
 
   // === Competitor aggregate metrics ===
-  const compAvgs = competitors.map((c) => c.rating).filter((n): n is number => n != null);
-  const compAvgOfAvg = compAvgs.length ? compAvgs.reduce((a, b) => a + b, 0) / compAvgs.length : null;
+  // Per-competitor index computed from their scraped reviews (normalized per platform).
+  // Falls back to the Google Places lifetime rating when no reviews were scraped yet.
+  const compIndexInfo = useMemo(() => {
+    const agg: Record<string, { sum: number; n: number }> = {};
+    for (const r of compAllRows) {
+      if (r.rating == null) continue;
+      const p = normalizePlatform(r.platform) ?? "google";
+      agg[r.competitor_id] ??= { sum: 0, n: 0 };
+      agg[r.competitor_id].sum += toIndex100(Number(r.rating), p);
+      agg[r.competitor_id].n += 1;
+    }
+    const out: Record<string, { index: number | null; fromPlaces: boolean }> = {};
+    for (const c of competitors) {
+      const a = agg[c.id];
+      if (a && a.n > 0) out[c.id] = { index: a.sum / a.n, fromPlaces: false };
+      else if (c.rating != null) out[c.id] = { index: toIndex100(Number(c.rating), "google"), fromPlaces: true };
+      else out[c.id] = { index: null, fromPlaces: false };
+    }
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [competitors, compAllRows]);
+
+  const compIndexValues = competitors
+    .map((c) => compIndexInfo[c.id]?.index)
+    .filter((n): n is number => n != null);
+  const compAvgOfAvg = compIndexValues.length
+    ? compIndexValues.reduce((a, b) => a + b, 0) / compIndexValues.length
+    : null;
   const compTotalSum = competitors.reduce((acc, c) => acc + (compTotals[c.id] ?? c.review_count ?? 0), 0);
   const compAvgTotal = competitors.length ? compTotalSum / competitors.length : null;
+
+  // Competitor reply rate + median response time (real data from scraped replies)
+  const compRepliedCount = compAllRows.filter((r) => r.owner_reply_text).length;
+  const compReplyRate = compAllRows.length ? (compRepliedCount / compAllRows.length) * 100 : null;
+
+  const ownResponseDays = ownReviews
+    .map((r) => (r.posted_at && r.replied_at ? daysBetween(r.posted_at, r.replied_at) : null))
+    .filter((n): n is number => n != null);
+  const ownMedianResponse = median(ownResponseDays);
+  const compResponseDays = compAllRows
+    .map((r) =>
+      r.posted_at && r.owner_reply_text && r.owner_reply_at
+        ? daysBetween(r.posted_at, r.owner_reply_at)
+        : null,
+    )
+    .filter((n): n is number => n != null);
+  const compMedianResponse = median(compResponseDays);
 
   // 30d competitor avg per competitor
   const comp30dPerComp: Record<string, number> = {};
