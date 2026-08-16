@@ -526,13 +526,16 @@ export default function IntelligenceComparison() {
             <ActionPack businessId={businessId} />
 
             {/* KPI cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <p className="text-xs text-muted-foreground">
+              Farklı platformların puanları (Booking 10, Google 5) tek ölçeğe normalize edilmiştir.
+            </p>
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
               <KpiCard
-                label="Ortalama Puan"
+                label="İtibar indeksi (0-100)"
                 icon={<Star className="h-4 w-4" />}
                 ownValue={ownAvg}
                 compValue={compAvgOfAvg}
-                format={(v) => v.toFixed(2)}
+                format={(v) => v.toFixed(1)}
                 higherIsBetter
               />
               <KpiCard
@@ -547,10 +550,18 @@ export default function IntelligenceComparison() {
                 label="Yanıt Oranı"
                 icon={<Reply className="h-4 w-4" />}
                 ownValue={ownReplyRate}
-                compValue={null}
+                compValue={compReplyRate}
                 format={(v) => `${Math.round(v)}%`}
-                hint="Rakip yanıt verisi yok"
                 higherIsBetter
+              />
+              <KpiCard
+                label="Ort. yanıt süresi"
+                icon={<Clock className="h-4 w-4" />}
+                ownValue={ownMedianResponse}
+                compValue={compMedianResponse}
+                format={(v) => `${v.toFixed(1)} gün`}
+                hint={`Medyan · siz ${ownResponseDays.length}, rakip ${compResponseDays.length} yanıtlı yorum`}
+                higherIsBetter={false}
               />
               <KpiCard
                 label="Son 30 gün hacim"
