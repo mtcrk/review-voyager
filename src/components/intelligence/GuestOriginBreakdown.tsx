@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Globe, Languages, Info } from "lucide-react";
+import { normalizeRatingTo5 } from "@/lib/ratingScale";
 
 const PRIMARY = "hsl(var(--primary))";
 const MUTED = "hsl(var(--muted-foreground))";
@@ -54,6 +55,7 @@ type CompRow = {
   competitor_id: string;
   rating: number | null;
   reviewer_country: string | null;
+  platform?: string | null;
 };
 
 function monthKey(iso: string) {
@@ -62,6 +64,22 @@ function monthKey(iso: string) {
 }
 
 function lastTwelveMonths(): string[] {
+  const out: string[] = [];
+  const now = new Date();
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    out.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+  }
+  return out;
+}
+
+/** 0-5 normalize edilmiş ortalamayı 0-100 itibar indeksine çevirir. */
+function toIndex100(sum5: number, count: number): number | null {
+  if (!count) return null;
+  return Math.max(0, Math.min(100, (sum5 / count / 5) * 100));
+}
+
+function unusedLastTwelve(): string[] {
   const out: string[] = [];
   const now = new Date();
   for (let i = 11; i >= 0; i--) {
