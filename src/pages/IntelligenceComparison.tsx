@@ -798,7 +798,73 @@ export default function IntelligenceComparison() {
               />
             </div>
 
-            {/* 90d trend */}
+            <Tabs defaultValue="trend" className="space-y-4">
+              <TabsList className="w-full sm:w-auto overflow-x-auto">
+                <TabsTrigger value="trend">Trend</TabsTrigger>
+                <TabsTrigger value="rakipler">Rakipler</TabsTrigger>
+                <TabsTrigger value="konular">Konular</TabsTrigger>
+                <TabsTrigger value="misafir">Misafir profili</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="trend" className="space-y-4 mt-0">
+            {hasRatingTrend && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">Son 90 gün — Puan trendi</CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    Haftalık ortalama itibar indeksi (0-100). Yorum gelmeyen haftalar boş bırakılır.
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={ratingTrend} margin={{ top: 8, right: 16, bottom: 4, left: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis dataKey="weekLabel" tick={{ fontSize: 10, fill: MUTED }} />
+                        <YAxis domain={[40, 100]} tick={{ fontSize: 10, fill: MUTED }} />
+                        <Tooltip
+                          content={({ active, payload, label }) => {
+                            if (!active || !payload?.length) return null;
+                            return (
+                              <div className="rounded-md border bg-popover px-3 py-2 text-xs shadow-sm">
+                                <div className="font-medium mb-1">Hafta: {label}</div>
+                                {payload.map((p) => (
+                                  <div key={p.dataKey} style={{ color: p.color }}>
+                                    {p.name}: {p.value == null ? "veri yok" : p.value}
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          }}
+                        />
+                        <Legend wrapperStyle={{ fontSize: 11 }} />
+                        <Line
+                          type="monotone"
+                          dataKey="you"
+                          name={ownName}
+                          stroke={PRIMARY}
+                          strokeWidth={2.5}
+                          dot={{ r: 2 }}
+                          connectNulls
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="competitors"
+                          name="Rakip ortalaması"
+                          stroke={MUTED}
+                          strokeWidth={2}
+                          strokeDasharray="4 4"
+                          dot={false}
+                          connectNulls
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* 90d hacim trendi */}
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Son 90 gün — Yorum hacmi trendi</CardTitle>
@@ -851,6 +917,9 @@ export default function IntelligenceComparison() {
                 </div>
               </CardContent>
             </Card>
+              </TabsContent>
+
+              <TabsContent value="rakipler" className="space-y-4 mt-0">
 
             {/* Platform matrix */}
             <Card>
@@ -1106,11 +1175,16 @@ export default function IntelligenceComparison() {
               />
             </div>
 
-            {/* Topic Analysis */}
-            {activeBusiness?.id && <TopicAnalysis businessId={activeBusiness.id} />}
+              </TabsContent>
 
-            {/* Ülke ve dil kırılımı */}
-            {activeBusiness?.id && <GuestOriginBreakdown businessId={activeBusiness.id} />}
+              <TabsContent value="konular" className="space-y-4 mt-0">
+                {activeBusiness?.id && <TopicAnalysis businessId={activeBusiness.id} />}
+              </TabsContent>
+
+              <TabsContent value="misafir" className="space-y-4 mt-0">
+                {activeBusiness?.id && <GuestOriginBreakdown businessId={activeBusiness.id} />}
+              </TabsContent>
+            </Tabs>
           </>
         )}
       </div>
