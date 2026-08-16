@@ -153,7 +153,8 @@ function normalizeItem(item: any) {
     platform,
     posted_at,
     owner_reply_text: typeof owner_reply_text === "string" ? owner_reply_text.slice(0, 4000) : null,
-    owner_reply_at,
+    // Mirror own-review pipeline: when a reply exists without a date, fall back to posted_at
+    owner_reply_at: owner_reply_at ?? (owner_reply_text ? posted_at : null),
   };
 }
 
