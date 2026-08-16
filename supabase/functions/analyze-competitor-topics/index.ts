@@ -191,12 +191,6 @@ Deno.serve(async (req) => {
     }
 
     const now = new Date().toISOString();
-    if (insertedReviewIds.own.size > 0) {
-      await admin
-        .from("reviews")
-        .update({ topics_extracted_at: now })
-        .in("id", Array.from(insertedReviewIds.own));
-    }
     if (insertedReviewIds.competitor.size > 0) {
       await admin
         .from("ci_competitor_reviews")
@@ -208,7 +202,8 @@ Deno.serve(async (req) => {
       JSON.stringify({
         ok: true,
         analyzed: items.length,
-        own_analyzed: insertedReviewIds.own.size,
+        // Always 0 — own reviews are handled by `analyze-review`, not this function.
+        own_analyzed: 0,
         competitor_analyzed: insertedReviewIds.competitor.size,
         mentions: totalMentions,
       }),
