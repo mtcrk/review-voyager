@@ -275,25 +275,33 @@ Deno.serve(async (req) => {
     }
 
     let inserted = 0;
-    // Chunk upserts to avoid huge payloads
+    // Rows without an owner reply omit the reply columns entirely, so an existing
+    // reply is never overwritten with null; rows with a reply insert/backfill it.
+    const withReply = rows.filter((r) => r.owner_reply_text);
+    const withoutReply = rows
+      .filter((r) => !r.owner_reply_text)
+      .map(({ owner_reply_text: _t, owner_reply_at: _d, ...rest }) => rest);
+
     const chunkSize = 500;
-    for (let i = 0; i < rows.length; i += chunkSize) {
-      const chunk = rows.slice(i, i + chunkSize);
-      const { error, count } = await admin
-        .from("ci_competitor_reviews")
-        .upsert(chunk, { onConflict: "platform,external_id", count: "exact", ignoreDuplicates: false });
-      if (error) {
-        console.error("Upsert ci_competitor_reviews failed:", error);
-        return new Response(
-          JSON.stringify({
-            error: "Insert failed",
-            details: error.message,
-            inserted_so_far: inserted,
-          }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
+    for (const group of [withReply, withoutReply]) {
+      for (let i = 0; i < group.length; i += chunkSize) {
+        const chunk = group.slice(i, i + chunkSize);
+        const { error, count } = await admin
+          .from("ci_competitor_reviews")
+          .upsert(chunk, { onConflict: "platform,external_id", count: "exact", ignoreDuplicates: false });
+        if (error) {
+          console.error("Upsert ci_competitor_reviews failed:", error);
+          return new Response(
+            JSON.stringify({
+              error: "Insert failed",
+              details: error.message,
+              inserted_so_far: inserted,
+            }),
+            { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+        inserted += count ?? chunk.length;
       }
-      inserted += count ?? chunk.length;
     }
 
     // Mark last_scraped_at on touched competitors
