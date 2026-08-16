@@ -79,16 +79,6 @@ function toIndex100(sum5: number, count: number): number | null {
   return Math.max(0, Math.min(100, (sum5 / count / 5) * 100));
 }
 
-function unusedLastTwelve(): string[] {
-  const out: string[] = [];
-  const now = new Date();
-  for (let i = 11; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    out.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
-  }
-  return out;
-}
-
 export function GuestOriginBreakdown({ businessId }: { businessId: string }) {
   const [tab, setTab] = useState("country");
 
@@ -121,6 +111,19 @@ export function GuestOriginBreakdown({ businessId }: { businessId: string }) {
     },
   });
 
+  const totalCountQuery = useQuery({
+    queryKey: ["guest-origin-total-count", businessId],
+    enabled: Boolean(businessId),
+    queryFn: async (): Promise<number> => {
+      const { count, error } = await supabase
+        .from("reviews")
+        .select("id", { count: "exact", head: true })
+        .eq("business_id", businessId);
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+
   const compQuery = useQuery({
     queryKey: ["guest-origin-comp", businessId],
     enabled: Boolean(businessId),
@@ -128,13 +131,14 @@ export function GuestOriginBreakdown({ businessId }: { businessId: string }) {
       const { data: comps, error: cErr } = await supabase
         .from("ci_competitors")
         .select("id, name")
-        .eq("business_id", businessId);
+        .eq("business_id", businessId)
+        .eq("status", "confirmed");
       if (cErr) throw cErr;
       const ids = (comps ?? []).map((c: any) => c.id);
       if (!ids.length) return { names: {} as Record<string, string>, rows: [] as CompRow[] };
       const { data: rows, error: rErr } = await supabase
         .from("ci_competitor_reviews")
-        .select("competitor_id, rating, reviewer_country")
+        .select("competitor_id, rating, reviewer_country, platform")
         .in("competitor_id", ids)
         .limit(8000);
       if (rErr) throw rErr;
@@ -148,7 +152,7 @@ export function GuestOriginBreakdown({ businessId }: { businessId: string }) {
 
   const country = useMemo(() => {
     const known = own.filter((r) => r.reviewer_country);
-    const total = own.length;
+    const total = totalCountQuery.data ?? own.length;
     const coverage = total ? Math.round((known.length / total) * 100) : 0;
 
     const sourcePlatforms = Array.from(
@@ -160,7 +164,10 @@ export function GuestOriginBreakdown({ businessId }: { businessId: string }) {
       const code = r.reviewer_country!;
       const e = byCountry.get(code) ?? { count: 0, ratingSum: 0, ratingCount: 0 };
       e.count += 1;
-      if (typeof r.rating === "number") { e.ratingSum += r.rating; e.ratingCount += 1; }
+      if (typeof r.rating === "number") {
+        e.ratingSum += normalizeRatingTo5(r.rating, r.platform);
+        e.ratingCount += 1;
+      }
       byCountry.set(code, e);
     }
 
@@ -170,7 +177,7 @@ export function GuestOriginBreakdown({ businessId }: { businessId: string }) {
         label: countryLabel(code),
         count: e.count,
         share: known.length ? (e.count / known.length) * 100 : 0,
-        avgRating: e.ratingCount ? e.ratingSum / e.ratingCount : null,
+        repIndex: toIndex100(e.ratingSum, e.ratingCount),
       }))
       .sort((a, b) => b.count - a.count);
 
@@ -193,10 +200,12 @@ export function GuestOriginBreakdown({ businessId }: { businessId: string }) {
     const trend = months.map((m) => ({ month: m.slice(2), ...(trendMap.get(m) ?? {}) }));
 
     return { total, known: known.length, coverage, sourcePlatforms, list, domestic, foreign, trend, topCodes };
-  }, [own]);
+  }, [own, totalCountQuery.data]);
 
   const language = useMemo(() => {
-    const ratingById = new Map(own.map((r) => [r.id, r.rating] as const));
+    const ratingById = new Map(
+      own.map((r) => [r.id, { rating: r.rating, platform: r.platform }] as const),
+    );
     const rows = (langQuery.data ?? []).filter((r) => r.detected_language);
     const byLang = new Map<string, { count: number; ratingSum: number; ratingCount: number }>();
     for (const r of rows) {
@@ -204,8 +213,11 @@ export function GuestOriginBreakdown({ businessId }: { businessId: string }) {
       if (!code) continue;
       const e = byLang.get(code) ?? { count: 0, ratingSum: 0, ratingCount: 0 };
       e.count += 1;
-      const rating = ratingById.get(r.review_id);
-      if (typeof rating === "number") { e.ratingSum += rating; e.ratingCount += 1; }
+      const src = ratingById.get(r.review_id);
+      if (src && typeof src.rating === "number") {
+        e.ratingSum += normalizeRatingTo5(src.rating, src.platform);
+        e.ratingCount += 1;
+      }
       byLang.set(code, e);
     }
     const total = rows.length;
@@ -215,7 +227,7 @@ export function GuestOriginBreakdown({ businessId }: { businessId: string }) {
         label: languageLabel(code),
         count: e.count,
         share: total ? (e.count / total) * 100 : 0,
-        avgRating: e.ratingCount ? e.ratingSum / e.ratingCount : null,
+        repIndex: toIndex100(e.ratingSum, e.ratingCount),
       }))
       .sort((a, b) => b.count - a.count);
     const trCount = byLang.get("tr")?.count ?? 0;
