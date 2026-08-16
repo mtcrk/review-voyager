@@ -2,6 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { filterBusinessIdsWithSubscription } from "../_shared/subscription-guard.ts";
 import { extractReviewerCountry } from "../_shared/country.ts";
+import { extractOwnerReply } from "../_shared/owner-reply.ts";
 
 // Mirror of PROVIDER_MAP in apify-fetch-reviews so competitor ingest uses
 // the same platform naming convention as the own-review pipeline.
@@ -101,32 +102,33 @@ function normalizeItem(item: any) {
     pick(item, ["publishedAtDate", "publishedAt", "date", "createdAt", "reviewDate", "time"]),
   );
 
-  // Owner / business reply (Google, Booking, TripAdvisor variants)
-  const owner_reply_text = pick<string>(item, [
-    "responseFromOwnerText",
-    "ownerResponse.text",
-    "ownerResponse.body",
-    "ownerResponseText",
-    "ownerReply",
-    "ownerReply.text",
-    "reply.text",
-    "reply",
-    "managementResponse.text",
-    "managementResponse",
-    "hotelResponse.text",
-    "hotelResponse",
-  ]);
-  const owner_reply_at = toIsoDate(
-    pick(item, [
-      "responseFromOwnerDate",
-      "ownerResponse.date",
-      "ownerResponse.publishedAt",
-      "ownerResponseDate",
-      "reply.date",
-      "managementResponse.date",
-      "hotelResponse.date",
-    ]),
-  );
+  // Owner / business reply — shared extractor (same shapes as own-review pipeline)
+  const extracted = extractOwnerReply(item);
+  const owner_reply_text =
+    extracted.text ??
+    pick<string>(item, [
+      "ownerResponse.text",
+      "ownerResponse.body",
+      "ownerResponseText",
+      "ownerReply.text",
+      "reply.text",
+      "managementResponse.text",
+      "hotelResponse.text",
+    ]);
+  const owner_reply_at =
+    toIsoDate(extracted.date) ??
+    toIsoDate(
+      pick(item, [
+        "responseFromOwnerDate",
+        "ownerResponse.date",
+        "ownerResponse.publishedAt",
+        "ownerResponseDate",
+        "reply.date",
+        "managementResponse.date",
+        "hotelResponse.date",
+      ]),
+    ) ??
+    null;
 
   // Keep rating in NATIVE scale and clamp to that scale's max.
   let rating: number | null = null;
