@@ -22,6 +22,7 @@ import {
 } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/contexts/BusinessContext";
+import { normalizeRatingTo5 } from "@/lib/ratingScale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,7 @@ import {
   Reply,
   Calendar,
   MapPin,
+  Clock,
 } from "lucide-react";
 import { IntelligenceTabs } from "@/components/intelligence/IntelligenceTabs";
 import { TopicAnalysis } from "@/components/intelligence/TopicAnalysis";
@@ -71,18 +73,54 @@ type OwnReviewRow = {
   posted_at: string | null;
   status: string | null;
   approved_reply: string | null;
+  replied_at: string | null;
+};
+
+type CompAllRow = {
+  competitor_id: string;
+  platform: string | null;
+  rating: number | null;
+  posted_at: string | null;
+  owner_reply_text: string | null;
+  owner_reply_at: string | null;
 };
 
 const PRIMARY = "hsl(var(--primary))";
 const MUTED = "hsl(var(--muted-foreground))";
 
 const PLATFORMS: { key: string; label: string }[] = [
-  { key: "google", label: "Google" },
-  { key: "booking", label: "Booking" },
-  { key: "tripadvisor", label: "TripAdvisor" },
-  { key: "expedia", label: "Expedia" },
-  { key: "hotels", label: "Hotels.com" },
+  { key: "google", label: "Google (/5)" },
+  { key: "booking", label: "Booking (/10)" },
+  { key: "tripadvisor", label: "TripAdvisor (/5)" },
+  { key: "expedia", label: "Expedia (/10)" },
+  { key: "hotels", label: "Hotels.com (/10)" },
 ];
+
+/** Map our internal platform keys to the keys used by ratingScale.ts */
+function scaleKey(p: string | null | undefined): string {
+  if (!p) return "google";
+  if (p === "hotels") return "hotelscom";
+  return p;
+}
+
+/** 0–100 reputation index from a native-scale rating. */
+function toIndex100(rating: number, platform: string | null | undefined): number {
+  return (normalizeRatingTo5(rating, scaleKey(platform)) / 5) * 100;
+}
+
+function median(values: number[]): number | null {
+  if (!values.length) return null;
+  const s = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(s.length / 2);
+  return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+}
+
+function daysBetween(from: string, to: string): number | null {
+  const a = new Date(from).getTime();
+  const b = new Date(to).getTime();
+  if (isNaN(a) || isNaN(b) || b < a) return null;
+  return (b - a) / 86400_000;
+}
 
 function normalizePlatform(p: string | null | undefined): string | null {
   if (!p) return null;
