@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { hasActiveSubscription } from "../_shared/subscription-guard.ts";
+import { extractReviewerCountry } from "../_shared/country.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
