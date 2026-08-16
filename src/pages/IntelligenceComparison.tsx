@@ -22,6 +22,7 @@ import {
 } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/contexts/BusinessContext";
+import { normalizeRatingTo5 } from "@/lib/ratingScale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,7 @@ import {
   Reply,
   Calendar,
   MapPin,
+  Clock,
 } from "lucide-react";
 import { IntelligenceTabs } from "@/components/intelligence/IntelligenceTabs";
 import { TopicAnalysis } from "@/components/intelligence/TopicAnalysis";
@@ -71,18 +73,54 @@ type OwnReviewRow = {
   posted_at: string | null;
   status: string | null;
   approved_reply: string | null;
+  replied_at: string | null;
+};
+
+type CompAllRow = {
+  competitor_id: string;
+  platform: string | null;
+  rating: number | null;
+  posted_at: string | null;
+  owner_reply_text: string | null;
+  owner_reply_at: string | null;
 };
 
 const PRIMARY = "hsl(var(--primary))";
 const MUTED = "hsl(var(--muted-foreground))";
 
 const PLATFORMS: { key: string; label: string }[] = [
-  { key: "google", label: "Google" },
-  { key: "booking", label: "Booking" },
-  { key: "tripadvisor", label: "TripAdvisor" },
-  { key: "expedia", label: "Expedia" },
-  { key: "hotels", label: "Hotels.com" },
+  { key: "google", label: "Google (/5)" },
+  { key: "booking", label: "Booking (/10)" },
+  { key: "tripadvisor", label: "TripAdvisor (/5)" },
+  { key: "expedia", label: "Expedia (/10)" },
+  { key: "hotels", label: "Hotels.com (/10)" },
 ];
+
+/** Map our internal platform keys to the keys used by ratingScale.ts */
+function scaleKey(p: string | null | undefined): string {
+  if (!p) return "google";
+  if (p === "hotels") return "hotelscom";
+  return p;
+}
+
+/** 0–100 reputation index from a native-scale rating. */
+function toIndex100(rating: number, platform: string | null | undefined): number {
+  return (normalizeRatingTo5(rating, scaleKey(platform)) / 5) * 100;
+}
+
+function median(values: number[]): number | null {
+  if (!values.length) return null;
+  const s = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(s.length / 2);
+  return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+}
+
+function daysBetween(from: string, to: string): number | null {
+  const a = new Date(from).getTime();
+  const b = new Date(to).getTime();
+  if (isNaN(a) || isNaN(b) || b < a) return null;
+  return (b - a) / 86400_000;
+}
 
 function normalizePlatform(p: string | null | undefined): string | null {
   if (!p) return null;
@@ -137,7 +175,7 @@ export default function IntelligenceComparison() {
           .eq("status", "confirmed"),
         supabase
           .from("reviews")
-          .select("platform,rating,posted_at,status,approved_reply")
+          .select("platform,rating,posted_at,status,approved_reply,replied_at")
           .eq("business_id", businessId!)
           .order("posted_at", { ascending: false })
           .limit(5000),
@@ -161,13 +199,15 @@ export default function IntelligenceComparison() {
       // For overall totals (not just 90d), also count rows per competitor
       let compTotals: Record<string, number> = {};
       let compPlatformAgg: Record<string, Record<string, { sum: number; n: number }>> = {};
+      let compAllRows: CompAllRow[] = [];
       if (compIds.length) {
         const { data: allRows } = await supabase
           .from("ci_competitor_reviews")
-          .select("competitor_id,platform,rating")
+          .select("competitor_id,platform,rating,posted_at,owner_reply_text,owner_reply_at")
           .in("competitor_id", compIds)
           .limit(50000);
-        for (const r of (allRows ?? []) as any[]) {
+        compAllRows = (allRows ?? []) as CompAllRow[];
+        for (const r of compAllRows) {
           compTotals[r.competitor_id] = (compTotals[r.competitor_id] ?? 0) + 1;
           const p = normalizePlatform(r.platform);
           if (!p || r.rating == null) continue;
@@ -183,6 +223,7 @@ export default function IntelligenceComparison() {
         compReviews90: compReviews,
         compTotals,
         compPlatformAgg,
+        compAllRows,
         ownReviews: (ownReviewsRes.data ?? []) as OwnReviewRow[],
       };
     },
@@ -193,12 +234,19 @@ export default function IntelligenceComparison() {
   const compReviews90 = dataQuery.data?.compReviews90 ?? [];
   const compTotals = dataQuery.data?.compTotals ?? {};
   const compPlatformAgg = dataQuery.data?.compPlatformAgg ?? {};
+  const compAllRows = dataQuery.data?.compAllRows ?? [];
 
   const ownName = activeBusiness?.name ?? "Siz";
 
   // === Own metrics ===
-  const ownRatings = ownReviews.map((r) => r.rating).filter((n): n is number => n != null);
-  const ownAvg = ownRatings.length ? ownRatings.reduce((a, b) => a + b, 0) / ownRatings.length : null;
+  // Ratings are normalized per platform (Booking /10, Google /5 …) then expressed
+  // as a 0–100 reputation index so every business sits on the same scale.
+  const ownIndexes = ownReviews
+    .filter((r) => r.rating != null)
+    .map((r) => toIndex100(Number(r.rating), normalizePlatform(r.platform) ?? "google"));
+  const ownAvg = ownIndexes.length
+    ? ownIndexes.reduce((a, b) => a + b, 0) / ownIndexes.length
+    : null;
   const ownTotal = ownReviews.length;
   const ownReplied = ownReviews.filter((r) => r.approved_reply || r.status === "replied").length;
   const ownReplyRate = ownTotal > 0 ? (ownReplied / ownTotal) * 100 : null;
@@ -216,10 +264,53 @@ export default function IntelligenceComparison() {
   }
 
   // === Competitor aggregate metrics ===
-  const compAvgs = competitors.map((c) => c.rating).filter((n): n is number => n != null);
-  const compAvgOfAvg = compAvgs.length ? compAvgs.reduce((a, b) => a + b, 0) / compAvgs.length : null;
+  // Per-competitor index computed from their scraped reviews (normalized per platform).
+  // Falls back to the Google Places lifetime rating when no reviews were scraped yet.
+  const compIndexInfo = useMemo(() => {
+    const agg: Record<string, { sum: number; n: number }> = {};
+    for (const r of compAllRows) {
+      if (r.rating == null) continue;
+      const p = normalizePlatform(r.platform) ?? "google";
+      agg[r.competitor_id] ??= { sum: 0, n: 0 };
+      agg[r.competitor_id].sum += toIndex100(Number(r.rating), p);
+      agg[r.competitor_id].n += 1;
+    }
+    const out: Record<string, { index: number | null; fromPlaces: boolean }> = {};
+    for (const c of competitors) {
+      const a = agg[c.id];
+      if (a && a.n > 0) out[c.id] = { index: a.sum / a.n, fromPlaces: false };
+      else if (c.rating != null) out[c.id] = { index: toIndex100(Number(c.rating), "google"), fromPlaces: true };
+      else out[c.id] = { index: null, fromPlaces: false };
+    }
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [competitors, compAllRows]);
+
+  const compIndexValues = competitors
+    .map((c) => compIndexInfo[c.id]?.index)
+    .filter((n): n is number => n != null);
+  const compAvgOfAvg = compIndexValues.length
+    ? compIndexValues.reduce((a, b) => a + b, 0) / compIndexValues.length
+    : null;
   const compTotalSum = competitors.reduce((acc, c) => acc + (compTotals[c.id] ?? c.review_count ?? 0), 0);
   const compAvgTotal = competitors.length ? compTotalSum / competitors.length : null;
+
+  // Competitor reply rate + median response time (real data from scraped replies)
+  const compRepliedCount = compAllRows.filter((r) => r.owner_reply_text).length;
+  const compReplyRate = compAllRows.length ? (compRepliedCount / compAllRows.length) * 100 : null;
+
+  const ownResponseDays = ownReviews
+    .map((r) => (r.posted_at && r.replied_at ? daysBetween(r.posted_at, r.replied_at) : null))
+    .filter((n): n is number => n != null);
+  const ownMedianResponse = median(ownResponseDays);
+  const compResponseDays = compAllRows
+    .map((r) =>
+      r.posted_at && r.owner_reply_text && r.owner_reply_at
+        ? daysBetween(r.posted_at, r.owner_reply_at)
+        : null,
+    )
+    .filter((n): n is number => n != null);
+  const compMedianResponse = median(compResponseDays);
 
   // 30d competitor avg per competitor
   const comp30dPerComp: Record<string, number> = {};
@@ -247,7 +338,8 @@ export default function IntelligenceComparison() {
       ...competitors.map((c) => ({
         id: c.id,
         name: c.name,
-        rating: c.rating,
+        rating: compIndexInfo[c.id]?.index ?? null,
+        fromPlaces: compIndexInfo[c.id]?.fromPlaces ?? false,
         review_count: compTotals[c.id] ?? c.review_count,
         proximity_m: c.proximity_m,
         match_score: c.match_score,
@@ -257,7 +349,7 @@ export default function IntelligenceComparison() {
     rows.sort((a, b) => (b.rating ?? -1) - (a.rating ?? -1));
     return rows;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [competitors, ownAvg, ownTotal, ownName, JSON.stringify(compTotals)]);
+  }, [competitors, ownAvg, ownTotal, ownName, compIndexInfo, JSON.stringify(compTotals)]);
 
   const ownRank = ranked.findIndex((r) => r.isOwn) + 1;
 
@@ -294,10 +386,10 @@ export default function IntelligenceComparison() {
 
   // === Scatter ===
   const scatterCompetitors = competitors
-    .filter((c) => c.rating != null && (compTotals[c.id] ?? c.review_count) != null)
+    .filter((c) => compIndexInfo[c.id]?.index != null && (compTotals[c.id] ?? c.review_count) != null)
     .map((c) => ({
       x: compTotals[c.id] ?? c.review_count!,
-      y: c.rating!,
+      y: compIndexInfo[c.id]!.index!,
       name: truncate(c.name),
       fullName: c.name,
     }));
@@ -306,10 +398,9 @@ export default function IntelligenceComparison() {
       ? [{ x: ownTotal, y: ownAvg, name: truncate(ownName), fullName: ownName }]
       : [];
   const allRatings = [...scatterCompetitors.map((d) => d.y), ...scatterOwn.map((d) => d.y)];
-  const yMin = allRatings.length
-    ? Math.max(1, Math.floor(Math.min(...allRatings) * 2) / 2 - 0.2)
-    : 3;
-  const yMax = 5;
+  // 0–100 reputation index axis
+  const yMin = allRatings.length ? Math.max(0, Math.floor(Math.min(...allRatings) / 5) * 5 - 5) : 50;
+  const yMax = 100;
   const allX = [...scatterCompetitors.map((d) => d.x), ...scatterOwn.map((d) => d.x)];
   const xMax = allX.length ? Math.max(...allX) * 1.1 : 100;
   const xMid = xMax / 2;
@@ -435,13 +526,16 @@ export default function IntelligenceComparison() {
             <ActionPack businessId={businessId} />
 
             {/* KPI cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <p className="text-xs text-muted-foreground">
+              Farklı platformların puanları (Booking 10, Google 5) tek ölçeğe normalize edilmiştir.
+            </p>
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
               <KpiCard
-                label="Ortalama Puan"
+                label="İtibar indeksi (0-100)"
                 icon={<Star className="h-4 w-4" />}
                 ownValue={ownAvg}
                 compValue={compAvgOfAvg}
-                format={(v) => v.toFixed(2)}
+                format={(v) => v.toFixed(1)}
                 higherIsBetter
               />
               <KpiCard
@@ -456,10 +550,18 @@ export default function IntelligenceComparison() {
                 label="Yanıt Oranı"
                 icon={<Reply className="h-4 w-4" />}
                 ownValue={ownReplyRate}
-                compValue={null}
+                compValue={compReplyRate}
                 format={(v) => `${Math.round(v)}%`}
-                hint="Rakip yanıt verisi yok"
                 higherIsBetter
+              />
+              <KpiCard
+                label="Ort. yanıt süresi"
+                icon={<Clock className="h-4 w-4" />}
+                ownValue={ownMedianResponse}
+                compValue={compMedianResponse}
+                format={(v) => `${v.toFixed(1)} gün`}
+                hint={`Medyan · siz ${ownResponseDays.length}, rakip ${compResponseDays.length} yanıtlı yorum`}
+                higherIsBetter={false}
               />
               <KpiCard
                 label="Son 30 gün hacim"
@@ -530,7 +632,8 @@ export default function IntelligenceComparison() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Platform bazlı puan</CardTitle>
                 <p className="text-xs text-muted-foreground">
-                  Her platformdaki ortalama puan (toplanmış rakip yorumlarından).
+                  Her platformdaki ortalama puan, platformun kendi ölçeğinde gösterilir
+                  (toplanmış rakip yorumlarından) — kolon içi karşılaştırma adildir.
                 </p>
               </CardHeader>
               <CardContent className="p-0">
@@ -600,7 +703,7 @@ export default function IntelligenceComparison() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Pazar Konumu</CardTitle>
                 <p className="text-xs text-muted-foreground">
-                  Yatay: yorum sayısı · Dikey: puan
+                  Yatay: yorum sayısı · Dikey: itibar indeksi (0-100)
                 </p>
               </CardHeader>
               <CardContent>
@@ -625,11 +728,11 @@ export default function IntelligenceComparison() {
                       <YAxis
                         type="number"
                         dataKey="y"
-                        name="Puan"
+                        name="İtibar indeksi"
                         domain={[yMin, yMax]}
                         tick={{ fontSize: 11, fill: MUTED }}
                         label={{
-                          value: "Puan",
+                          value: "İtibar indeksi (0-100)",
                           angle: -90,
                           position: "insideLeft",
                           fontSize: 11,
@@ -702,7 +805,7 @@ export default function IntelligenceComparison() {
                       <tr className="text-left text-xs text-muted-foreground border-b">
                         <th className="py-2 px-4 font-medium">#</th>
                         <th className="py-2 px-4 font-medium">İşletme</th>
-                        <th className="py-2 px-4 font-medium">Puan</th>
+                        <th className="py-2 px-4 font-medium">İtibar indeksi (0-100)</th>
                         <th className="py-2 px-4 font-medium">Yorum</th>
                         <th className="py-2 px-4 font-medium">Mesafe</th>
                         <th className="py-2 px-4 font-medium">Eşleşme</th>
@@ -732,7 +835,12 @@ export default function IntelligenceComparison() {
                           <td className="py-2.5 px-4">
                             <span className="inline-flex items-center gap-1">
                               <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                              {fmtRating(r.rating)}
+                              {r.rating != null ? r.rating.toFixed(1) : "—"}
+                              {(r as any).fromPlaces && (
+                                <Badge variant="outline" className="h-5 text-[10px] ml-1">
+                                  Places puanı
+                                </Badge>
+                              )}
                             </span>
                           </td>
                           <td className="py-2.5 px-4">{fmtNum(r.review_count)}</td>
@@ -759,10 +867,10 @@ export default function IntelligenceComparison() {
             {/* Bar charts */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <BarCard
-                title="Puan karşılaştırması"
+                title="İtibar indeksi karşılaştırması (0-100)"
                 rows={ranked}
                 dataKey="rating"
-                domain={[yMin, 5]}
+                domain={[yMin, 100]}
                 formatter={(v) => v.toFixed(1)}
               />
               <BarCard
@@ -808,13 +916,20 @@ function KpiCard({
   }
   const positive = delta != null && delta > 0;
   const negative = delta != null && delta < 0;
-  const goodBad = higherIsBetter
-    ? positive
-      ? "good"
-      : negative
-        ? "bad"
-        : "neutral"
-    : "neutral";
+  const goodBad =
+    higherIsBetter === undefined
+      ? "neutral"
+      : higherIsBetter
+        ? positive
+          ? "good"
+          : negative
+            ? "bad"
+            : "neutral"
+        : negative
+          ? "good"
+          : positive
+            ? "bad"
+            : "neutral";
 
   return (
     <Card>
@@ -852,6 +967,9 @@ function KpiCard({
         ) : (
           <div className="text-xs text-muted-foreground">{hint ?? ""}</div>
         )}
+        {compValue != null && hint ? (
+          <div className="text-[11px] text-muted-foreground">{hint}</div>
+        ) : null}
       </CardContent>
     </Card>
   );

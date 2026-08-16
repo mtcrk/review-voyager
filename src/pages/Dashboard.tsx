@@ -9,11 +9,11 @@ import { useBusiness } from "@/contexts/BusinessContext";
 import { BusinessOnboarding } from "@/components/BusinessOnboarding";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 import { PriorityActions } from "@/components/dashboard/PriorityActions";
 import { TopicAnalyticsCard } from "@/components/dashboard/TopicAnalyticsCard";
-import { CompetitorComparison } from "@/components/dashboard/CompetitorComparison";
+import { Users } from "lucide-react";
 import { AIVisibilityChecker } from "@/components/landing/AIVisibilityChecker";
 import { DemoModeBanner } from "@/components/dashboard/DemoModeBanner";
 import { AllBusinessesView } from "@/components/dashboard/AllBusinessesView";
@@ -342,7 +342,29 @@ export default function Dashboard() {
               <GooglePerformanceWidget />
             </div>
             <div className="space-y-0">
-              <CompetitorComparison />
+              <Card className="shadow-card h-full flex flex-col">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <Users className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">Rakip Karşılaştırması</CardTitle>
+                      <p className="text-sm text-muted-foreground">
+                        Gerçek rakip verilerinizle yan yana karşılaştırın
+                      </p>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="flex-1 flex flex-col items-center justify-center p-6">
+                  <p className="text-muted-foreground text-center mb-4 text-sm">
+                    Puan, hacim, yanıt oranı ve konu bazlı karşılaştırma
+                  </p>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/intelligence/karsilastirma">Rakip karşılaştırmasını aç →</Link>
+                  </Button>
+                </CardContent>
+              </Card>
               {isDemoMode && <UpgradeCTA feature={t('dashboard.demo.features.competitorAnalysis', 'Rakip Analizi')} />}
             </div>
           </div>

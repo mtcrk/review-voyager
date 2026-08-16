@@ -2,6 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { filterBusinessIdsWithSubscription } from "../_shared/subscription-guard.ts";
 import { extractReviewerCountry } from "../_shared/country.ts";
+import { extractOwnerReply } from "../_shared/owner-reply.ts";
 
 // Mirror of PROVIDER_MAP in apify-fetch-reviews so competitor ingest uses
 // the same platform naming convention as the own-review pipeline.
@@ -101,32 +102,33 @@ function normalizeItem(item: any) {
     pick(item, ["publishedAtDate", "publishedAt", "date", "createdAt", "reviewDate", "time"]),
   );
 
-  // Owner / business reply (Google, Booking, TripAdvisor variants)
-  const owner_reply_text = pick<string>(item, [
-    "responseFromOwnerText",
-    "ownerResponse.text",
-    "ownerResponse.body",
-    "ownerResponseText",
-    "ownerReply",
-    "ownerReply.text",
-    "reply.text",
-    "reply",
-    "managementResponse.text",
-    "managementResponse",
-    "hotelResponse.text",
-    "hotelResponse",
-  ]);
-  const owner_reply_at = toIsoDate(
-    pick(item, [
-      "responseFromOwnerDate",
-      "ownerResponse.date",
-      "ownerResponse.publishedAt",
-      "ownerResponseDate",
-      "reply.date",
-      "managementResponse.date",
-      "hotelResponse.date",
-    ]),
-  );
+  // Owner / business reply — shared extractor (same shapes as own-review pipeline)
+  const extracted = extractOwnerReply(item);
+  const owner_reply_text =
+    extracted.text ??
+    pick<string>(item, [
+      "ownerResponse.text",
+      "ownerResponse.body",
+      "ownerResponseText",
+      "ownerReply.text",
+      "reply.text",
+      "managementResponse.text",
+      "hotelResponse.text",
+    ]);
+  const owner_reply_at =
+    toIsoDate(extracted.date) ??
+    toIsoDate(
+      pick(item, [
+        "responseFromOwnerDate",
+        "ownerResponse.date",
+        "ownerResponse.publishedAt",
+        "ownerResponseDate",
+        "reply.date",
+        "managementResponse.date",
+        "hotelResponse.date",
+      ]),
+    ) ??
+    null;
 
   // Keep rating in NATIVE scale and clamp to that scale's max.
   let rating: number | null = null;
@@ -151,7 +153,8 @@ function normalizeItem(item: any) {
     platform,
     posted_at,
     owner_reply_text: typeof owner_reply_text === "string" ? owner_reply_text.slice(0, 4000) : null,
-    owner_reply_at,
+    // Mirror own-review pipeline: when a reply exists without a date, fall back to posted_at
+    owner_reply_at: owner_reply_at ?? (owner_reply_text ? posted_at : null),
   };
 }
 
@@ -272,25 +275,33 @@ Deno.serve(async (req) => {
     }
 
     let inserted = 0;
-    // Chunk upserts to avoid huge payloads
+    // Rows without an owner reply omit the reply columns entirely, so an existing
+    // reply is never overwritten with null; rows with a reply insert/backfill it.
+    const withReply = rows.filter((r) => r.owner_reply_text);
+    const withoutReply = rows
+      .filter((r) => !r.owner_reply_text)
+      .map(({ owner_reply_text: _t, owner_reply_at: _d, ...rest }) => rest);
+
     const chunkSize = 500;
-    for (let i = 0; i < rows.length; i += chunkSize) {
-      const chunk = rows.slice(i, i + chunkSize);
-      const { error, count } = await admin
-        .from("ci_competitor_reviews")
-        .upsert(chunk, { onConflict: "platform,external_id", count: "exact", ignoreDuplicates: false });
-      if (error) {
-        console.error("Upsert ci_competitor_reviews failed:", error);
-        return new Response(
-          JSON.stringify({
-            error: "Insert failed",
-            details: error.message,
-            inserted_so_far: inserted,
-          }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
+    for (const group of [withReply, withoutReply]) {
+      for (let i = 0; i < group.length; i += chunkSize) {
+        const chunk = group.slice(i, i + chunkSize);
+        const { error, count } = await admin
+          .from("ci_competitor_reviews")
+          .upsert(chunk, { onConflict: "platform,external_id", count: "exact", ignoreDuplicates: false });
+        if (error) {
+          console.error("Upsert ci_competitor_reviews failed:", error);
+          return new Response(
+            JSON.stringify({
+              error: "Insert failed",
+              details: error.message,
+              inserted_so_far: inserted,
+            }),
+            { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+        inserted += count ?? chunk.length;
       }
-      inserted += count ?? chunk.length;
     }
 
     // Mark last_scraped_at on touched competitors

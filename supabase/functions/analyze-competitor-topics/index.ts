@@ -102,16 +102,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    // OWN reviews pending
-    const { data: ownReviews } = await admin
-      .from("reviews")
-      .select("id, comment, rating, posted_at, language")
-      .eq("business_id", business_id)
-      .is("topics_extracted_at", null)
-      .not("comment", "is", null)
-      .order("posted_at", { ascending: false, nullsFirst: false })
-      .limit(Math.floor(limit / 2));
-
+    // NOTE: Own (business) reviews are intentionally NOT processed here.
+    // Deep per-review analysis of our own reviews is exclusively `analyze-review`'s job;
+    // both jobs used to race on reviews.topics_extracted_at and corrupt own topic data.
     // COMPETITOR reviews pending (for this business's confirmed competitors)
     const { data: comps } = await admin
       .from("ci_competitors")
@@ -143,11 +136,6 @@ Deno.serve(async (req) => {
       posted_at: string | null;
     }[] = [];
     let idx = 0;
-    for (const r of ownReviews ?? []) {
-      const t = (r.comment ?? "").toString().trim();
-      if (!t) continue;
-      items.push({ idx: idx++, review_id: r.id, source: "own", competitor_id: null, text: t, language: r.language ?? null, posted_at: r.posted_at });
-    }
     for (const r of compReviews) {
       const t = `${r.title ?? ""}\n${r.body ?? ""}`.trim();
       if (!t) continue;
@@ -203,12 +191,6 @@ Deno.serve(async (req) => {
     }
 
     const now = new Date().toISOString();
-    if (insertedReviewIds.own.size > 0) {
-      await admin
-        .from("reviews")
-        .update({ topics_extracted_at: now })
-        .in("id", Array.from(insertedReviewIds.own));
-    }
     if (insertedReviewIds.competitor.size > 0) {
       await admin
         .from("ci_competitor_reviews")
@@ -220,7 +202,8 @@ Deno.serve(async (req) => {
       JSON.stringify({
         ok: true,
         analyzed: items.length,
-        own_analyzed: insertedReviewIds.own.size,
+        // Always 0 — own reviews are handled by `analyze-review`, not this function.
+        own_analyzed: 0,
         competitor_analyzed: insertedReviewIds.competitor.size,
         mentions: totalMentions,
       }),
