@@ -425,6 +425,7 @@ export function GuestOriginBreakdown({ businessId }: { businessId: string }) {
                         {competitorCompare.series.map((s) => (
                           <Badge key={s.key} variant="secondary" className="text-xs">
                             {s.label}: {s.known}/{s.total} yorumda ülke (%{s.coverage})
+                            {s.repIndex != null && <> · indeks {s.repIndex.toFixed(1)}</>}
                           </Badge>
                         ))}
                       </div>
@@ -449,6 +450,7 @@ export function GuestOriginBreakdown({ businessId }: { businessId: string }) {
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
                         Paylar, her iki tarafta da yalnızca ülkesi bilinen yorumlar üzerinden hesaplanır.
+                        İtibar indeksi (0-100) farklı platform ölçekleri normalize edilerek hesaplanır.
                       </p>
                     </div>
                   ) : (
