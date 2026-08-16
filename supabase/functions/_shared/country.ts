@@ -92,6 +92,10 @@ const NAME_TO_ISO2: Record<string, string> = {
 
 const ISO2_RE = /^[A-Za-z]{2}$/;
 
+// Ülke adıyla çakışan bölge/eyalet adları. Yalnızca metnin TAMAMI birebir
+// bu isimse eşleşir; bileşik metnin parçası olarak geldiğinde atlanır.
+const AMBIGUOUS_NAMES = new Set(["georgia"]);
+
 /** Ham ülke metnini ISO-2'ye çevirir. Eşleşme yoksa null + uyarı logu. */
 export function toIso2(raw?: string | null): string | null {
   if (!raw) return null;
@@ -104,10 +108,15 @@ export function toIso2(raw?: string | null): string | null {
   const norm = trimmed.toLowerCase().replace(/\s+/g, " ");
   if (NAME_TO_ISO2[norm]) return NAME_TO_ISO2[norm];
 
-  // "Berlin, Germany" / "Almanya - Berlin" gibi bileşik metinlerde parçaları dene
+  // "Berlin, Germany" gibi bileşik metinlerde YALNIZCA son parçayı dene
   const parts = norm.split(/[,;/|\-–·]+/).map((p) => p.trim()).filter(Boolean);
-  for (let i = parts.length - 1; i >= 0; i--) {
-    if (NAME_TO_ISO2[parts[i]]) return NAME_TO_ISO2[parts[i]];
+  if (parts.length > 1) {
+    const last = parts[parts.length - 1];
+    if (AMBIGUOUS_NAMES.has(last)) {
+      console.warn("[country] ambiguous, skipped:", raw);
+      return null;
+    }
+    if (NAME_TO_ISO2[last]) return NAME_TO_ISO2[last];
   }
 
   console.warn("[country] unmapped:", raw);
@@ -126,7 +135,6 @@ const COUNTRY_FIELDS = [
   "reviewerLocation",
   "userCountry",
   "traveler_location",
-  "location",
 ] as const;
 
 function fromValue(v: any): string | null {
