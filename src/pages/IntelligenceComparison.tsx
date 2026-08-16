@@ -910,13 +910,20 @@ function KpiCard({
   }
   const positive = delta != null && delta > 0;
   const negative = delta != null && delta < 0;
-  const goodBad = higherIsBetter
-    ? positive
-      ? "good"
-      : negative
-        ? "bad"
-        : "neutral"
-    : "neutral";
+  const goodBad =
+    higherIsBetter === undefined
+      ? "neutral"
+      : higherIsBetter
+        ? positive
+          ? "good"
+          : negative
+            ? "bad"
+            : "neutral"
+        : negative
+          ? "good"
+          : positive
+            ? "bad"
+            : "neutral";
 
   return (
     <Card>
