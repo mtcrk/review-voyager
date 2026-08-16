@@ -761,6 +761,7 @@ export default function IntelligenceComparison() {
                 ownValue={ownAvg}
                 compValue={compAvgOfAvg}
                 format={(v) => v.toFixed(1)}
+                hint={own5 != null ? `5 üzerinden ${own5.toFixed(2)}` : undefined}
                 higherIsBetter
               />
               <KpiCard
@@ -867,9 +868,10 @@ export default function IntelligenceComparison() {
             {/* 90d hacim trendi */}
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">Son 90 gün — Yorum hacmi trendi</CardTitle>
+                <CardTitle className="text-base">Son 90 gün — Yeni yorum hacmi</CardTitle>
                 <p className="text-xs text-muted-foreground">
-                  Haftalık yeni yorum sayısı. Rakipler için ortalama gösterilir.
+                  Haftalık yeni yorum sayısı. Hacim, arama sıralamasında puandan sonra en etkili
+                  faktördür. Rakipler için ortalama gösterilir.
                 </p>
               </CardHeader>
               <CardContent>
