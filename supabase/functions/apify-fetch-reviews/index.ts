@@ -924,6 +924,23 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
     }
   }
 
+  // Backfill reviewer country when it was missing before
+  for (const c of countryUpdates) {
+    const { error } = await supabase
+      .from("reviews")
+      .update({
+        reviewer_country: c.reviewer_country,
+        reviewer_country_raw: c.reviewer_country_raw,
+        reviewer_country_source: c.reviewer_country_source,
+      })
+      .eq("id", c.id);
+    if (error) {
+      console.error(`Country update error for ${c.id}:`, error.message);
+    } else {
+      updated += 1;
+    }
+  }
+
   const skipped = transformed.length - newReviews.length - replyUpdates.length;
   console.log(`Done: ${inserted} inserted, ${updated} updated, ${skipped} skipped out of ${transformed.length} total`);
   return { inserted, updated, skipped, total: transformed.length };
