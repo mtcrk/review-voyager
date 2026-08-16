@@ -237,10 +237,19 @@ export function GuestOriginBreakdown({ businessId }: { businessId: string }) {
   const competitorCompare = useMemo(() => {
     const data = compQuery.data;
     if (!data || !data.rows.length) return null;
-    const perCompetitor = new Map<string, { known: number; total: number; byCountry: Map<string, number> }>();
+    const perCompetitor = new Map<
+      string,
+      { known: number; total: number; byCountry: Map<string, number>; ratingSum: number; ratingCount: number }
+    >();
     for (const r of data.rows) {
-      const e = perCompetitor.get(r.competitor_id) ?? { known: 0, total: 0, byCountry: new Map() };
+      const e =
+        perCompetitor.get(r.competitor_id) ??
+        { known: 0, total: 0, byCountry: new Map<string, number>(), ratingSum: 0, ratingCount: 0 };
       e.total += 1;
+      if (typeof r.rating === "number") {
+        e.ratingSum += normalizeRatingTo5(r.rating, r.platform);
+        e.ratingCount += 1;
+      }
       if (r.reviewer_country) {
         e.known += 1;
         e.byCountry.set(r.reviewer_country, (e.byCountry.get(r.reviewer_country) ?? 0) + 1);
@@ -258,14 +267,31 @@ export function GuestOriginBreakdown({ businessId }: { businessId: string }) {
         .forEach(([code]) => codes.add(code));
     }
 
+    let selfSum = 0;
+    let selfCount = 0;
+    for (const r of own) {
+      if (typeof r.rating === "number") {
+        selfSum += normalizeRatingTo5(r.rating, r.platform);
+        selfCount += 1;
+      }
+    }
+
     const series = [
-      { key: "self", label: "Siz", coverage: country.coverage, known: country.known, total: country.total },
+      {
+        key: "self",
+        label: "Siz",
+        coverage: country.coverage,
+        known: country.known,
+        total: country.total,
+        repIndex: toIndex100(selfSum, selfCount),
+      },
       ...withCountry.map(([id, e]) => ({
         key: id,
         label: data.names[id] ?? "Rakip",
         coverage: e.total ? Math.round((e.known / e.total) * 100) : 0,
         known: e.known,
         total: e.total,
+        repIndex: toIndex100(e.ratingSum, e.ratingCount),
       })),
     ];
 
@@ -280,7 +306,7 @@ export function GuestOriginBreakdown({ businessId }: { businessId: string }) {
     }).sort((a, b) => b.self - a.self);
 
     return { series, chart };
-  }, [compQuery.data, country]);
+  }, [compQuery.data, country, own]);
 
   const loading = ownQuery.isLoading;
 
