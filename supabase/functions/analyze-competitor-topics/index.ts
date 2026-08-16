@@ -102,16 +102,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    // OWN reviews pending
-    const { data: ownReviews } = await admin
-      .from("reviews")
-      .select("id, comment, rating, posted_at, language")
-      .eq("business_id", business_id)
-      .is("topics_extracted_at", null)
-      .not("comment", "is", null)
-      .order("posted_at", { ascending: false, nullsFirst: false })
-      .limit(Math.floor(limit / 2));
-
+    // NOTE: Own (business) reviews are intentionally NOT processed here.
+    // Deep per-review analysis of our own reviews is exclusively `analyze-review`'s job;
+    // both jobs used to race on reviews.topics_extracted_at and corrupt own topic data.
     // COMPETITOR reviews pending (for this business's confirmed competitors)
     const { data: comps } = await admin
       .from("ci_competitors")
@@ -143,11 +136,6 @@ Deno.serve(async (req) => {
       posted_at: string | null;
     }[] = [];
     let idx = 0;
-    for (const r of ownReviews ?? []) {
-      const t = (r.comment ?? "").toString().trim();
-      if (!t) continue;
-      items.push({ idx: idx++, review_id: r.id, source: "own", competitor_id: null, text: t, language: r.language ?? null, posted_at: r.posted_at });
-    }
     for (const r of compReviews) {
       const t = `${r.title ?? ""}\n${r.body ?? ""}`.trim();
       if (!t) continue;
