@@ -702,7 +702,7 @@ export default function IntelligenceComparison() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Pazar Konumu</CardTitle>
                 <p className="text-xs text-muted-foreground">
-                  Yatay: yorum sayısı · Dikey: puan
+                  Yatay: yorum sayısı · Dikey: itibar indeksi (0-100)
                 </p>
               </CardHeader>
               <CardContent>
@@ -727,11 +727,11 @@ export default function IntelligenceComparison() {
                       <YAxis
                         type="number"
                         dataKey="y"
-                        name="Puan"
+                        name="İtibar indeksi"
                         domain={[yMin, yMax]}
                         tick={{ fontSize: 11, fill: MUTED }}
                         label={{
-                          value: "Puan",
+                          value: "İtibar indeksi (0-100)",
                           angle: -90,
                           position: "insideLeft",
                           fontSize: 11,
@@ -804,7 +804,7 @@ export default function IntelligenceComparison() {
                       <tr className="text-left text-xs text-muted-foreground border-b">
                         <th className="py-2 px-4 font-medium">#</th>
                         <th className="py-2 px-4 font-medium">İşletme</th>
-                        <th className="py-2 px-4 font-medium">Puan</th>
+                        <th className="py-2 px-4 font-medium">İtibar indeksi (0-100)</th>
                         <th className="py-2 px-4 font-medium">Yorum</th>
                         <th className="py-2 px-4 font-medium">Mesafe</th>
                         <th className="py-2 px-4 font-medium">Eşleşme</th>
@@ -834,7 +834,12 @@ export default function IntelligenceComparison() {
                           <td className="py-2.5 px-4">
                             <span className="inline-flex items-center gap-1">
                               <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                              {fmtRating(r.rating)}
+                              {r.rating != null ? r.rating.toFixed(1) : "—"}
+                              {(r as any).fromPlaces && (
+                                <Badge variant="outline" className="h-5 text-[10px] ml-1">
+                                  Places puanı
+                                </Badge>
+                              )}
                             </span>
                           </td>
                           <td className="py-2.5 px-4">{fmtNum(r.review_count)}</td>
@@ -861,10 +866,10 @@ export default function IntelligenceComparison() {
             {/* Bar charts */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <BarCard
-                title="Puan karşılaştırması"
+                title="İtibar indeksi karşılaştırması (0-100)"
                 rows={ranked}
                 dataKey="rating"
-                domain={[yMin, 5]}
+                domain={[yMin, 100]}
                 formatter={(v) => v.toFixed(1)}
               />
               <BarCard
