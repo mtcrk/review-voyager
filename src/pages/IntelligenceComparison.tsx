@@ -338,7 +338,8 @@ export default function IntelligenceComparison() {
       ...competitors.map((c) => ({
         id: c.id,
         name: c.name,
-        rating: c.rating,
+        rating: compIndexInfo[c.id]?.index ?? null,
+        fromPlaces: compIndexInfo[c.id]?.fromPlaces ?? false,
         review_count: compTotals[c.id] ?? c.review_count,
         proximity_m: c.proximity_m,
         match_score: c.match_score,
@@ -348,7 +349,7 @@ export default function IntelligenceComparison() {
     rows.sort((a, b) => (b.rating ?? -1) - (a.rating ?? -1));
     return rows;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [competitors, ownAvg, ownTotal, ownName, JSON.stringify(compTotals)]);
+  }, [competitors, ownAvg, ownTotal, ownName, compIndexInfo, JSON.stringify(compTotals)]);
 
   const ownRank = ranked.findIndex((r) => r.isOwn) + 1;
 
@@ -385,10 +386,10 @@ export default function IntelligenceComparison() {
 
   // === Scatter ===
   const scatterCompetitors = competitors
-    .filter((c) => c.rating != null && (compTotals[c.id] ?? c.review_count) != null)
+    .filter((c) => compIndexInfo[c.id]?.index != null && (compTotals[c.id] ?? c.review_count) != null)
     .map((c) => ({
       x: compTotals[c.id] ?? c.review_count!,
-      y: c.rating!,
+      y: compIndexInfo[c.id]!.index!,
       name: truncate(c.name),
       fullName: c.name,
     }));
@@ -397,10 +398,9 @@ export default function IntelligenceComparison() {
       ? [{ x: ownTotal, y: ownAvg, name: truncate(ownName), fullName: ownName }]
       : [];
   const allRatings = [...scatterCompetitors.map((d) => d.y), ...scatterOwn.map((d) => d.y)];
-  const yMin = allRatings.length
-    ? Math.max(1, Math.floor(Math.min(...allRatings) * 2) / 2 - 0.2)
-    : 3;
-  const yMax = 5;
+  // 0–100 reputation index axis
+  const yMin = allRatings.length ? Math.max(0, Math.floor(Math.min(...allRatings) / 5) * 5 - 5) : 50;
+  const yMax = 100;
   const allX = [...scatterCompetitors.map((d) => d.x), ...scatterOwn.map((d) => d.x)];
   const xMax = allX.length ? Math.max(...allX) * 1.1 : 100;
   const xMid = xMax / 2;
