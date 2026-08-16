@@ -632,7 +632,8 @@ export default function IntelligenceComparison() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Platform bazlı puan</CardTitle>
                 <p className="text-xs text-muted-foreground">
-                  Her platformdaki ortalama puan (toplanmış rakip yorumlarından).
+                  Her platformdaki ortalama puan, platformun kendi ölçeğinde gösterilir
+                  (toplanmış rakip yorumlarından) — kolon içi karşılaştırma adildir.
                 </p>
               </CardHeader>
               <CardContent className="p-0">
