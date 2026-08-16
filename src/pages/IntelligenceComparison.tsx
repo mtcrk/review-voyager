@@ -961,6 +961,9 @@ function KpiCard({
         ) : (
           <div className="text-xs text-muted-foreground">{hint ?? ""}</div>
         )}
+        {compValue != null && hint ? (
+          <div className="text-[11px] text-muted-foreground">{hint}</div>
+        ) : null}
       </CardContent>
     </Card>
   );
