@@ -27,6 +27,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -45,6 +46,10 @@ import {
   Calendar,
   MapPin,
   Clock,
+  Trophy,
+  AlertTriangle,
+  CheckCircle2,
+  ArrowRight,
 } from "lucide-react";
 import { IntelligenceTabs } from "@/components/intelligence/IntelligenceTabs";
 import { TopicAnalysis } from "@/components/intelligence/TopicAnalysis";
@@ -384,6 +389,117 @@ export default function IntelligenceComparison() {
       }));
   }, [ownReviews, compReviews90, competitors.length]);
 
+  // === 90d rating trend (weekly avg reputation index, own vs competitors) ===
+  const ratingTrend = useMemo(() => {
+    const buckets: Record<
+      string,
+      { week: string; ownSum: number; ownN: number; compSum: number; compN: number }
+    > = {};
+    for (let i = 12; i >= 0; i--) {
+      const d = new Date(Date.now() - i * 7 * 86400_000);
+      buckets[weekKey(d.toISOString())] = { week: weekKey(d.toISOString()), ownSum: 0, ownN: 0, compSum: 0, compN: 0 };
+    }
+    const since = isoDaysAgo(90);
+    for (const r of ownReviews) {
+      if (!r.posted_at || r.rating == null || r.posted_at < since) continue;
+      const b = buckets[weekKey(r.posted_at)];
+      if (!b) continue;
+      b.ownSum += toIndex100(Number(r.rating), normalizePlatform(r.platform) ?? "google");
+      b.ownN += 1;
+    }
+    for (const r of compReviews90) {
+      if (!r.posted_at || r.rating == null) continue;
+      const b = buckets[weekKey(r.posted_at)];
+      if (!b) continue;
+      b.compSum += toIndex100(Number(r.rating), normalizePlatform(r.platform) ?? "google");
+      b.compN += 1;
+    }
+    return Object.values(buckets)
+      .sort((a, b) => a.week.localeCompare(b.week))
+      .map((b) => ({
+        weekLabel: b.week.slice(5),
+        you: b.ownN ? Math.round((b.ownSum / b.ownN) * 10) / 10 : null,
+        competitors: b.compN ? Math.round((b.compSum / b.compN) * 10) / 10 : null,
+      }));
+  }, [ownReviews, compReviews90]);
+
+  const hasRatingTrend = ratingTrend.some((d) => d.you != null || d.competitors != null);
+
+  // === Rekabet endeksi (RPI benzeri) + sade Türkçe özet ===
+  const rpi = ownAvg != null && compAvgOfAvg ? (ownAvg / compAvgOfAvg) * 100 : null;
+  const own5 = ownAvg != null ? ownAvg / 20 : null;
+  const comp5 = compAvgOfAvg != null ? compAvgOfAvg / 20 : null;
+
+  const verdict = useMemo(() => {
+    if (rpi == null) {
+      return {
+        tone: "info" as const,
+        headline: "Karşılaştırma için veri yetersiz",
+        detail:
+          "Kendi yorumlarınız veya rakip yorumları henüz toplanmadı. Rakip Seçimi sekmesinden yorumları çekin.",
+      };
+    }
+    if (rpi >= 103)
+      return {
+        tone: "good" as const,
+        headline: "Pazarın önündesiniz",
+        detail: `Misafir puanınız çevrenizdeki rakiplerin ortalamasından %${(rpi - 100).toFixed(1)} daha iyi. Bu, fiyat ve doluluk pazarlığında elinizi güçlendirir.`,
+      };
+    if (rpi >= 98)
+      return {
+        tone: "warn" as const,
+        headline: "Pazar ortalamasındasınız",
+        detail:
+          "Rakiplerinizden belirgin şekilde ayrışmıyorsunuz. Aşağıdaki öncelik listesindeki 1-2 konuyu çözmek sizi öne çıkarır.",
+      };
+    return {
+      tone: "bad" as const,
+      headline: "Pazarın gerisindesiniz",
+      detail: `Misafir puanınız rakip ortalamasının %${(100 - rpi).toFixed(1)} altında. Önce tekrar eden şikayet konularını kapatın, fiyat artışını erteleyin.`,
+    };
+  }, [rpi]);
+
+  // En güçlü / en zayıf yön — gerçek metriklerden
+  const metricDiffs = useMemo(() => {
+    const list: { label: string; text: string; good: boolean }[] = [];
+    if (ownAvg != null && compAvgOfAvg != null) {
+      const d = ownAvg - compAvgOfAvg;
+      list.push({
+        label: "Misafir puanı",
+        text: `${(Math.abs(d) / 20).toFixed(2)} puan ${d >= 0 ? "üstünde" : "altında"} (5 üzerinden)`,
+        good: d >= 0,
+      });
+    }
+    if (ownReplyRate != null && compReplyRate != null) {
+      const d = ownReplyRate - compReplyRate;
+      list.push({
+        label: "Yorum yanıtlama",
+        text: `Rakiplerden %${Math.abs(Math.round(d))} ${d >= 0 ? "daha fazla" : "daha az"} yoruma cevap veriyorsunuz`,
+        good: d >= 0,
+      });
+    }
+    if (ownMedianResponse != null && compMedianResponse != null) {
+      const d = compMedianResponse - ownMedianResponse;
+      list.push({
+        label: "Yanıt hızı",
+        text: `Rakiplerden ${Math.abs(d).toFixed(1)} gün ${d >= 0 ? "daha hızlı" : "daha yavaş"} cevaplıyorsunuz`,
+        good: d >= 0,
+      });
+    }
+    if (compAvg30d != null) {
+      const d = own30d - compAvg30d;
+      list.push({
+        label: "Yeni yorum akışı",
+        text: `Son 30 günde ${own30d} yorum aldınız, rakip ortalaması ${compAvg30d.toFixed(1)}`,
+        good: d >= 0,
+      });
+    }
+    return list;
+  }, [ownAvg, compAvgOfAvg, ownReplyRate, compReplyRate, ownMedianResponse, compMedianResponse, own30d, compAvg30d]);
+
+  const strengths = metricDiffs.filter((m) => m.good);
+  const weaknesses = metricDiffs.filter((m) => !m.good);
+
   // === Scatter ===
   const scatterCompetitors = competitors
     .filter((c) => compIndexInfo[c.id]?.index != null && (compTotals[c.id] ?? c.review_count) != null)
@@ -522,12 +638,121 @@ export default function IntelligenceComparison() {
           </Card>
         ) : (
           <>
-            {/* Action Pack — actionable cards */}
+            {/* ===== DURUM ÖZETİ ===== */}
+            <Card className="border-primary/30">
+              <CardContent className="p-5 sm:p-6">
+                <div className="grid grid-cols-1 lg:grid-cols-[auto,1fr] gap-6">
+                  <div className="flex gap-6">
+                    <div className="text-center">
+                      <div className="text-xs text-muted-foreground mb-1">Sıralama</div>
+                      <div className="text-4xl font-semibold tabular-nums flex items-baseline justify-center gap-1">
+                        {ownRank}
+                        <span className="text-lg text-muted-foreground font-normal">
+                          /{ranked.length}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-muted-foreground mt-1">
+                        çevrenizdeki oteller
+                      </div>
+                    </div>
+                    <div className="text-center border-l pl-6">
+                      <div className="text-xs text-muted-foreground mb-1">Misafir puanınız</div>
+                      <div className="text-4xl font-semibold tabular-nums">
+                        {own5 != null ? own5.toFixed(2) : "—"}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground mt-1">
+                        5 üzerinden · rakip ort. {comp5 != null ? comp5.toFixed(2) : "—"}
+                      </div>
+                    </div>
+                    <div className="text-center border-l pl-6">
+                      <div className="text-xs text-muted-foreground mb-1">Rekabet endeksi</div>
+                      <div
+                        className={`text-4xl font-semibold tabular-nums ${
+                          rpi == null
+                            ? ""
+                            : rpi >= 103
+                              ? "text-emerald-600"
+                              : rpi >= 98
+                                ? "text-amber-600"
+                                : "text-rose-600"
+                        }`}
+                      >
+                        {rpi != null ? Math.round(rpi) : "—"}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground mt-1">
+                        100 = pazar ortalaması
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-2">
+                      {verdict.tone === "good" ? (
+                        <Trophy className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
+                      ) : verdict.tone === "bad" ? (
+                        <AlertTriangle className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
+                      ) : (
+                        <Minus className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                      )}
+                      <div>
+                        <div className="font-medium">{verdict.headline}</div>
+                        <p className="text-sm text-muted-foreground mt-0.5">{verdict.detail}</p>
+                      </div>
+                    </div>
+                    {(strengths.length > 0 || weaknesses.length > 0) && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                        <div>
+                          <div className="text-xs font-medium text-emerald-700 dark:text-emerald-400 mb-1.5">
+                            Güçlü olduğunuz yerler
+                          </div>
+                          {strengths.length === 0 ? (
+                            <p className="text-xs text-muted-foreground">Veri yok</p>
+                          ) : (
+                            <ul className="space-y-1">
+                              {strengths.slice(0, 3).map((m) => (
+                                <li key={m.label} className="flex items-start gap-1.5 text-xs">
+                                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                                  <span>
+                                    <span className="font-medium">{m.label}:</span> {m.text}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                        <div>
+                          <div className="text-xs font-medium text-rose-700 dark:text-rose-400 mb-1.5">
+                            Kaybettiğiniz yerler
+                          </div>
+                          {weaknesses.length === 0 ? (
+                            <p className="text-xs text-muted-foreground">Veri yok</p>
+                          ) : (
+                            <ul className="space-y-1">
+                              {weaknesses.slice(0, 3).map((m) => (
+                                <li key={m.label} className="flex items-start gap-1.5 text-xs">
+                                  <AlertTriangle className="h-3.5 w-3.5 text-rose-600 shrink-0 mt-0.5" />
+                                  <span>
+                                    <span className="font-medium">{m.label}:</span> {m.text}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Bu hafta ne yapmalı */}
             <ActionPack businessId={businessId} />
 
             {/* KPI cards */}
             <p className="text-xs text-muted-foreground">
-              Farklı platformların puanları (Booking 10, Google 5) tek ölçeğe normalize edilmiştir.
+              Farklı platformların puanları (Booking 10, Google 5) tek ölçeğe (0-100 itibar indeksi)
+              normalize edilmiştir. 100 = kusursuz, 80 = 4,0/5.
             </p>
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
               <KpiCard
@@ -536,6 +761,7 @@ export default function IntelligenceComparison() {
                 ownValue={ownAvg}
                 compValue={compAvgOfAvg}
                 format={(v) => v.toFixed(1)}
+                hint={own5 != null ? `5 üzerinden ${own5.toFixed(2)}` : undefined}
                 higherIsBetter
               />
               <KpiCard
@@ -573,12 +799,79 @@ export default function IntelligenceComparison() {
               />
             </div>
 
-            {/* 90d trend */}
+            <Tabs defaultValue="trend" className="space-y-4">
+              <TabsList className="w-full sm:w-auto overflow-x-auto">
+                <TabsTrigger value="trend">Trend</TabsTrigger>
+                <TabsTrigger value="rakipler">Rakipler</TabsTrigger>
+                <TabsTrigger value="konular">Konular</TabsTrigger>
+                <TabsTrigger value="misafir">Misafir profili</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="trend" className="space-y-4 mt-0">
+            {hasRatingTrend && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">Son 90 gün — Puan trendi</CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    Haftalık ortalama itibar indeksi (0-100). Yorum gelmeyen haftalar boş bırakılır.
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={ratingTrend} margin={{ top: 8, right: 16, bottom: 4, left: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis dataKey="weekLabel" tick={{ fontSize: 10, fill: MUTED }} />
+                        <YAxis domain={[40, 100]} tick={{ fontSize: 10, fill: MUTED }} />
+                        <Tooltip
+                          content={({ active, payload, label }) => {
+                            if (!active || !payload?.length) return null;
+                            return (
+                              <div className="rounded-md border bg-popover px-3 py-2 text-xs shadow-sm">
+                                <div className="font-medium mb-1">Hafta: {label}</div>
+                                {payload.map((p) => (
+                                  <div key={p.dataKey} style={{ color: p.color }}>
+                                    {p.name}: {p.value == null ? "veri yok" : p.value}
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          }}
+                        />
+                        <Legend wrapperStyle={{ fontSize: 11 }} />
+                        <Line
+                          type="monotone"
+                          dataKey="you"
+                          name={ownName}
+                          stroke={PRIMARY}
+                          strokeWidth={2.5}
+                          dot={{ r: 2 }}
+                          connectNulls
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="competitors"
+                          name="Rakip ortalaması"
+                          stroke={MUTED}
+                          strokeWidth={2}
+                          strokeDasharray="4 4"
+                          dot={false}
+                          connectNulls
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* 90d hacim trendi */}
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">Son 90 gün — Yorum hacmi trendi</CardTitle>
+                <CardTitle className="text-base">Son 90 gün — Yeni yorum hacmi</CardTitle>
                 <p className="text-xs text-muted-foreground">
-                  Haftalık yeni yorum sayısı. Rakipler için ortalama gösterilir.
+                  Haftalık yeni yorum sayısı. Hacim, arama sıralamasında puandan sonra en etkili
+                  faktördür. Rakipler için ortalama gösterilir.
                 </p>
               </CardHeader>
               <CardContent>
@@ -626,6 +919,9 @@ export default function IntelligenceComparison() {
                 </div>
               </CardContent>
             </Card>
+              </TabsContent>
+
+              <TabsContent value="rakipler" className="space-y-4 mt-0">
 
             {/* Platform matrix */}
             <Card>
@@ -881,11 +1177,16 @@ export default function IntelligenceComparison() {
               />
             </div>
 
-            {/* Topic Analysis */}
-            {activeBusiness?.id && <TopicAnalysis businessId={activeBusiness.id} />}
+              </TabsContent>
 
-            {/* Ülke ve dil kırılımı */}
-            {activeBusiness?.id && <GuestOriginBreakdown businessId={activeBusiness.id} />}
+              <TabsContent value="konular" className="space-y-4 mt-0">
+                {activeBusiness?.id && <TopicAnalysis businessId={activeBusiness.id} />}
+              </TabsContent>
+
+              <TabsContent value="misafir" className="space-y-4 mt-0">
+                {activeBusiness?.id && <GuestOriginBreakdown businessId={activeBusiness.id} />}
+              </TabsContent>
+            </Tabs>
           </>
         )}
       </div>
