@@ -245,6 +245,23 @@ export default function IntelligenceComparison() {
   const compPlatformAgg = dataQuery.data?.compPlatformAgg ?? {};
   const compAllRows = dataQuery.data?.compAllRows ?? [];
 
+  const qc = useQueryClient();
+  const [busyTask, setBusyTask] = useState<string | null>(null);
+
+  const pendingTopicsQuery = useQuery({
+    queryKey: ["comparison-pending-topics", businessId, competitors.length],
+    enabled: !!businessId && competitors.length > 0,
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("ci_competitor_reviews")
+        .select("id", { count: "exact", head: true })
+        .in("competitor_id", competitors.map((c) => c.id))
+        .is("topics_extracted_at", null)
+        .not("body", "is", null);
+      return count ?? 0;
+    },
+  });
+
   const ownName = activeBusiness?.name ?? "Siz";
 
   // === Own metrics ===
