@@ -1015,7 +1015,7 @@ export default function IntelligenceComparison() {
         ) : (
           <>
             {/* ===== DURUM ÖZETİ ===== */}
-            <Card className="border-primary/30">
+            <Card className="border-primary/30 print-break">
               <CardContent className="p-5 sm:p-6">
                 <div className="grid grid-cols-1 lg:grid-cols-[auto,1fr] gap-6">
                   <div className="flex gap-6">
@@ -1123,7 +1123,7 @@ export default function IntelligenceComparison() {
             </Card>
 
             {/* ===== HERO: indeks + comp-set + 12 aylık trend ===== */}
-            <Card>
+            <Card className="print-break">
               <CardContent className="p-4 sm:p-5">
                 <div className="grid grid-cols-1 lg:grid-cols-[auto,1fr] gap-6 items-center">
                   <div className="grid grid-cols-3 gap-4 sm:gap-6">
@@ -1210,7 +1210,7 @@ export default function IntelligenceComparison() {
 
             {/* Son 7 gün */}
             {weekly.hasAnything && (
-              <Card>
+              <Card className="print-break">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">Son 7 gün</CardTitle>
                   <p className="text-xs text-muted-foreground">
@@ -1337,7 +1337,7 @@ export default function IntelligenceComparison() {
             </div>
 
             <Tabs defaultValue="trend" className="space-y-4">
-              <TabsList className="w-full sm:w-auto overflow-x-auto">
+              <TabsList className="w-full sm:w-auto overflow-x-auto no-print">
                 <TabsTrigger value="trend">Trend</TabsTrigger>
                 <TabsTrigger value="rakipler">Rakipler</TabsTrigger>
                 <TabsTrigger value="konular">Konular</TabsTrigger>
@@ -1345,8 +1345,9 @@ export default function IntelligenceComparison() {
               </TabsList>
 
               <TabsContent value="trend" className="space-y-4 mt-0">
+            <h2 className="print-only hidden text-lg font-semibold mt-4">Genel Görünüm</h2>
             {hasRatingTrend && (
-              <Card>
+              <Card className="print-break">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">Son 90 gün — Puan trendi</CardTitle>
                   <p className="text-xs text-muted-foreground">
