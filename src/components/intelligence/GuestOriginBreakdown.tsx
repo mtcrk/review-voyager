@@ -464,18 +464,16 @@ export function GuestOriginBreakdown({ businessId }: { businessId: string }) {
             </TabsContent>
 
             {/* ---- Sekme B: Yorum dili ---- */}
+            )}
+
+            {hasLanguage && (
             <TabsContent value="language" className="pt-4 space-y-4">
               <div className="flex items-center gap-2">
                 <Languages className="h-4 w-4 text-muted-foreground" />
                 <h3 className="font-semibold">Yorum dili dağılımı</h3>
               </div>
 
-              {language.total === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  Henüz dil analizi yapılmış yorum yok.
-                </p>
-              ) : (
-                <>
+              <>
                   <p className="text-xs text-muted-foreground">
                     {language.total} yorumun dili analizle belirlendi.
                   </p>
