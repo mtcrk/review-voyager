@@ -1055,6 +1055,7 @@ export default function IntelligenceComparison() {
                 compValue={compAvgOfAvg}
                 format={(v) => v.toFixed(1)}
                 hint={own5 != null ? `5 üzerinden ${own5.toFixed(2)}` : undefined}
+                subHint={`${fmtNum(ownIndexes.length)} yorum üzerinden`}
                 higherIsBetter
               />
               <KpiCard
@@ -1063,6 +1064,7 @@ export default function IntelligenceComparison() {
                 ownValue={ownTotal}
                 compValue={compAvgTotal}
                 format={fmtNum}
+                subHint={`${competitors.length} rakip ortalaması ile`}
                 higherIsBetter
               />
               <KpiCard
@@ -1071,6 +1073,7 @@ export default function IntelligenceComparison() {
                 ownValue={ownReplyRate}
                 compValue={compReplyRate}
                 format={(v) => `${Math.round(v)}%`}
+                subHint={`${fmtNum(ownTotal)} yorum · rakip ${fmtNum(compAllRows.length)} yorum`}
                 higherIsBetter
               />
               <KpiCard
@@ -1159,6 +1162,7 @@ export default function IntelligenceComparison() {
             )}
 
             {/* 90d hacim trendi */}
+            {hasVolumeTrend && (
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Son 90 gün — Yeni yorum hacmi</CardTitle>
@@ -1212,11 +1216,13 @@ export default function IntelligenceComparison() {
                 </div>
               </CardContent>
             </Card>
+            )}
               </TabsContent>
 
               <TabsContent value="rakipler" className="space-y-4 mt-0">
 
             {/* Platform matrix */}
+            {hasPlatformMatrix && (
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Platform bazlı puan</CardTitle>
@@ -1286,8 +1292,10 @@ export default function IntelligenceComparison() {
                 </p>
               </CardContent>
             </Card>
+            )}
 
             {/* Positioning map */}
+            {hasScatter && (
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Pazar Konumu</CardTitle>
@@ -1377,6 +1385,7 @@ export default function IntelligenceComparison() {
                 </div>
               </CardContent>
             </Card>
+            )}
 
             {/* Ranking table */}
             <Card>
@@ -1455,19 +1464,23 @@ export default function IntelligenceComparison() {
 
             {/* Bar charts */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <BarCard
-                title="İtibar indeksi karşılaştırması (0-100)"
-                rows={ranked}
-                dataKey="rating"
-                domain={[yMin, 100]}
-                formatter={(v) => v.toFixed(1)}
-              />
-              <BarCard
-                title="Yorum hacmi"
-                rows={ranked}
-                dataKey="review_count"
-                formatter={(v) => fmtNum(v)}
-              />
+              {hasIndexBars && (
+                <BarCard
+                  title="İtibar indeksi karşılaştırması (0-100)"
+                  rows={ranked}
+                  dataKey="rating"
+                  domain={[yMin, 100]}
+                  formatter={(v) => v.toFixed(1)}
+                />
+              )}
+              {hasVolumeBars && (
+                <BarCard
+                  title="Yorum hacmi"
+                  rows={ranked}
+                  dataKey="review_count"
+                  formatter={(v) => fmtNum(v)}
+                />
+              )}
             </div>
 
               </TabsContent>
