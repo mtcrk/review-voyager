@@ -1741,6 +1741,60 @@ export default function IntelligenceComparison() {
   );
 }
 
+function WeekRow({
+  label,
+  current,
+  previous,
+  format,
+  higherIsBetter,
+  basis,
+  minSample,
+  note,
+}: {
+  label: string;
+  current: number | null;
+  previous: number | null;
+  format: (v: number) => string;
+  higherIsBetter: boolean;
+  basis: string;
+  minSample?: number;
+  note?: string;
+}) {
+  const delta = current != null && previous != null ? current - previous : null;
+  const good = delta != null && (higherIsBetter ? delta > 0 : delta < 0);
+  const bad = delta != null && (higherIsBetter ? delta < 0 : delta > 0);
+  return (
+    <div className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0">
+      <div className="min-w-0">
+        <div className="text-sm font-medium">{label}</div>
+        <div className="text-[11px] text-muted-foreground mt-0.5">
+          {basis}
+          {note ? ` · ${note}` : ""}
+        </div>
+      </div>
+      <div className="text-right shrink-0">
+        <div className="text-lg font-semibold tabular-nums">
+          {current != null ? format(current) : "—"}
+        </div>
+        {delta != null ? (
+          <div
+            className={`text-xs tabular-nums ${good ? "text-emerald-600" : bad ? "text-red-600" : "text-muted-foreground"}`}
+          >
+            {delta > 0 ? "+" : ""}
+            {format(Math.abs(delta) === Math.abs(delta) ? delta : delta)} vs geçen hafta
+          </div>
+        ) : (
+          <div className="text-[11px] text-muted-foreground">
+            {current == null && minSample
+              ? `yeterli veri yok (min ${minSample} yorum)`
+              : "kıyas için önceki hafta verisi yok"}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function KpiCard({
   label,
   icon,
