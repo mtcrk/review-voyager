@@ -488,6 +488,14 @@ export default function IntelligenceComparison() {
   }, [ownReviews, compAllRows]);
 
   const hasMonthlyTrend = monthlyTrend.some((d) => d.you != null || d.competitors != null);
+  // Axis floor derived from the data so low-index hotels stay inside the chart.
+  const monthlyTrendMin = (() => {
+    const vals = monthlyTrend
+      .flatMap((d) => [d.you, d.competitors])
+      .filter((n): n is number => n != null);
+    if (vals.length === 0) return 0;
+    return Math.max(0, Math.floor((Math.min(...vals) - 5) / 5) * 5);
+  })();
   const compBest = compIndexValues.length ? Math.max(...compIndexValues) : null;
   const compBestName = useMemo(() => {
     if (compBest == null) return null;
