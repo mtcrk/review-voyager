@@ -371,7 +371,7 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
 
   if (totalMentions === 0) {
     return (
-      <Card>
+      <Card className="print-break">
         <CardContent className="p-8 text-center space-y-3">
           <Sparkles className="h-7 w-7 mx-auto text-muted-foreground" />
           <p className="text-sm text-muted-foreground max-w-md mx-auto">
@@ -397,7 +397,7 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
   return (
     <div className="space-y-4">
       {/* ===== Departman özeti ===== */}
-      <Card>
+      <Card className="print-break">
         <CardHeader className="pb-3 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 space-y-0">
           <div>
             <CardTitle className="text-base">Departman kırılımı</CardTitle>
@@ -486,7 +486,7 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
       )}
 
       {/* ===== Konu tablosu ===== */}
-      <Card>
+      <Card className="print-break">
         <CardHeader className="pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 space-y-0">
           <div>
             <CardTitle className="text-base">Konu bazlı karşılaştırma</CardTitle>

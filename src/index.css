@@ -207,6 +207,59 @@ All colors MUST be HSL.
   display: none;
 }
 @media print {
+  /* Force a light theme on paper, regardless of dark mode */
+  :root,
+  html,
+  body,
+  .dark,
+  .dark :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 28%;
+    --border: 0 0% 80%;
+    --input: 0 0% 80%;
+    color-scheme: light;
+  }
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .text-muted-foreground,
+  .text-foreground {
+    color: #333 !important;
+  }
+  h1, h2, h3, h4, h5, h6,
+  th, strong, .font-semibold, .font-medium {
+    color: #000 !important;
+  }
+  [class*="bg-card"],
+  [class*="bg-background"],
+  [class*="bg-popover"],
+  [class*="bg-muted"],
+  [class*="bg-secondary"] {
+    background: #fff !important;
+  }
+  [class*="border"] {
+    border-color: #ccc !important;
+  }
+  /* Print every tab panel, not just the active one */
+  [role="tabpanel"],
+  [role="tabpanel"][hidden],
+  [role="tabpanel"][data-state="inactive"] {
+    display: block !important;
+    visibility: visible !important;
+  }
+  [role="tablist"] {
+    display: none !important;
+  }
   .no-print,
   [data-sidebar],
   header nav {
@@ -220,6 +273,7 @@ All colors MUST be HSL.
   }
   .print-break {
     break-inside: avoid;
+    page-break-inside: avoid;
   }
   @page {
     margin: 14mm;
