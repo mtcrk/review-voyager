@@ -600,12 +600,13 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
                         {open && (
                           <tr className="border-b last:border-0 bg-muted/30">
                             <td colSpan={8} className="px-4 py-3">
-                              {r.competitors.length === 0 ? (
-                                <p className="text-xs text-muted-foreground">
-                                  Bu konuda rakip bahsi yok.
-                                </p>
-                              ) : (
-                                <div className="space-y-1.5">
+                              <div className="space-y-4">
+                                {r.competitors.length === 0 ? (
+                                  <p className="text-xs text-muted-foreground">
+                                    Bu konuda rakip bahsi yok.
+                                  </p>
+                                ) : (
+                                  <div className="space-y-1.5">
                                   <div className="text-xs font-medium">
                                     {topicName(r.topic)} — rakip bazlı kırılım
                                   </div>
@@ -629,8 +630,55 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
                                       </span>
                                     </div>
                                   ))}
-                                </div>
-                              )}
+                                  </div>
+                                )}
+
+                                {(r.ownQuotes.length > 0 || r.compQuotes.length > 0) && (
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {r.ownQuotes.length > 0 && (
+                                      <div className="space-y-1.5">
+                                        <div className="text-xs font-medium">
+                                          Sizin yorumlarınızdan
+                                        </div>
+                                        {r.ownQuotes.map((q, i) => (
+                                          <div
+                                            key={`own-${i}`}
+                                            className="rounded-md border bg-background px-2.5 py-2"
+                                          >
+                                            <p className="text-xs leading-relaxed">
+                                              “{q.excerpt.slice(0, 200)}”
+                                            </p>
+                                            <div className="text-[10px] text-muted-foreground mt-1 tabular-nums">
+                                              {sentimentToIndex100(q.sentiment).toFixed(0)}/100
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                    {r.compQuotes.length > 0 && (
+                                      <div className="space-y-1.5">
+                                        <div className="text-xs font-medium">
+                                          Rakip yorumlarından
+                                        </div>
+                                        {r.compQuotes.map((q, i) => (
+                                          <div
+                                            key={`comp-${i}`}
+                                            className="rounded-md border bg-background px-2.5 py-2"
+                                          >
+                                            <p className="text-xs leading-relaxed">
+                                              “{q.excerpt.slice(0, 200)}”
+                                            </p>
+                                            <div className="text-[10px] text-muted-foreground mt-1 tabular-nums">
+                                              {q.competitor_id ? `${compNames[q.competitor_id] ?? "Rakip"} · ` : ""}
+                                              {sentimentToIndex100(q.sentiment).toFixed(0)}/100
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         )}
