@@ -1029,7 +1029,7 @@ export default function IntelligenceComparison() {
                         <ResponsiveContainer width="100%" height="100%">
                           <LineChart data={monthlyTrend} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
                             <XAxis dataKey="month" tick={{ fontSize: 9, fill: MUTED }} interval={1} />
-                            <YAxis domain={[40, 100]} hide />
+                            <YAxis domain={[monthlyTrendMin, 100]} hide />
                             <Tooltip
                               content={({ active, payload, label }) => {
                                 if (!active || !payload?.length) return null;
