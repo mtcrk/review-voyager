@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -510,9 +510,8 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
                   filteredRows.map((r) => {
                     const open = openTopic === r.topic.id;
                     return (
-                      <>
+                      <Fragment key={r.topic.id}>
                         <tr
-                          key={r.topic.id}
                           className="border-b last:border-0 cursor-pointer hover:bg-muted/40"
                           onClick={() => setOpenTopic(open ? null : r.topic.id)}
                         >
@@ -575,7 +574,7 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
                           </td>
                         </tr>
                         {open && (
-                          <tr key={`${r.topic.id}-detail`} className="border-b last:border-0 bg-muted/30">
+                          <tr className="border-b last:border-0 bg-muted/30">
                             <td colSpan={8} className="px-4 py-3">
                               {r.competitors.length === 0 ? (
                                 <p className="text-xs text-muted-foreground">
@@ -611,7 +610,7 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
                             </td>
                           </tr>
                         )}
-                      </>
+                      </Fragment>
                     );
                   })
                 )}
