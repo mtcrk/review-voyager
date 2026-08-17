@@ -1208,6 +1208,70 @@ export default function IntelligenceComparison() {
               </CardContent>
             </Card>
 
+            {/* Son 7 gün */}
+            {weekly.hasAnything && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">Son 7 gün</CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    {weekly.range} · önceki 7 günle karşılaştırma
+                  </p>
+                </CardHeader>
+                <CardContent className="pt-0 divide-y">
+                  {(weekly.ownIdxThis != null || weekly.ownN > 0) && (
+                    <WeekRow
+                      label="İtibar indeksiniz"
+                      current={weekly.ownIdxThis}
+                      previous={weekly.ownIdxPrev}
+                      format={(v) => v.toFixed(1)}
+                      higherIsBetter
+                      basis={`bu hafta ${weekly.ownN} yorum · geçen hafta ${weekly.ownPrevN} yorum`}
+                      minSample={weekly.minSample}
+                    />
+                  )}
+                  <WeekRow
+                    label="Yorum hacminiz"
+                    current={weekly.ownN}
+                    previous={weekly.ownPrevN}
+                    format={(v) => fmtNum(v)!}
+                    higherIsBetter
+                    basis="son 7 gün / önceki 7 gün"
+                  />
+                  {(weekly.compIdxThis != null || weekly.compN > 0) && (
+                    <WeekRow
+                      label="Comp-set indeksi"
+                      current={weekly.compIdxThis}
+                      previous={weekly.compIdxPrev}
+                      format={(v) => v.toFixed(1)}
+                      higherIsBetter={false}
+                      basis={`bu hafta ${weekly.compN} rakip yorumu · geçen hafta ${weekly.compPrevN}`}
+                      minSample={weekly.minSample}
+                      note={
+                        weekly.compIdxThis != null && weekly.compIdxPrev != null
+                          ? weekly.compIdxThis - weekly.compIdxPrev >= 1
+                            ? "rakipler yükseliyor"
+                            : weekly.compIdxThis - weekly.compIdxPrev <= -1
+                              ? "rakipler geriliyor"
+                              : "rakipler sabit"
+                          : undefined
+                      }
+                    />
+                  )}
+                  {weekly.ownN > 0 && (
+                    <WeekRow
+                      label="Yanıt oranınız"
+                      current={weekly.replyRate}
+                      previous={null}
+                      format={(v) => `${Math.round(v)}%`}
+                      higherIsBetter
+                      basis={`bu haftanın ${weekly.ownN} yorumu üzerinden`}
+                      minSample={weekly.minSample}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Bu hafta ne yapmalı */}
             <ActionPack businessId={businessId} />
 
