@@ -1079,7 +1079,11 @@ export default function IntelligenceComparison() {
                 ownValue={ownReplyRate}
                 compValue={compReplyRate}
                 format={(v) => `${Math.round(v)}%`}
-                subHint={`${fmtNum(ownTotal)} yorum · rakip ${fmtNum(compAllRows.length)} yorum`}
+                subHint={
+                  compReplyDataMissing
+                    ? "Rakip yanıt verisi henüz toplanmadı"
+                    : `${fmtNum(ownTotal)} yorum · rakip ${fmtNum(compAllRows.length)} yorum`
+                }
                 higherIsBetter
               />
               <KpiCard
@@ -1088,7 +1092,11 @@ export default function IntelligenceComparison() {
                 ownValue={ownMedianResponse}
                 compValue={compMedianResponse}
                 format={(v) => `${v.toFixed(1)} gün`}
-                hint={`Medyan · siz ${ownResponseDays.length}, rakip ${compResponseDays.length} yanıtlı yorum`}
+                hint={
+                  compReplyDataMissing
+                    ? "Rakip yanıt verisi henüz toplanmadı"
+                    : `Medyan · siz ${ownResponseDays.length}, rakip ${compResponseDays.length} yanıtlı yorum`
+                }
                 higherIsBetter={false}
               />
               <KpiCard
