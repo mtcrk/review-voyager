@@ -1588,7 +1588,10 @@ function KpiCard({
             <span className="text-muted-foreground">vs rakip ort. ({format(compValue)})</span>
           </div>
         ) : (
-          <div className="text-xs text-muted-foreground">{hint ?? ""}</div>
+          <div className="text-xs text-muted-foreground">
+            <span className="font-medium">rakip verisi yok</span>
+            {hint ? ` · ${hint}` : ""}
+          </div>
         )}
         {compValue != null && hint ? (
           <div className="text-[11px] text-muted-foreground">{hint}</div>
