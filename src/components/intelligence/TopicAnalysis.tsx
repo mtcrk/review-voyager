@@ -245,6 +245,14 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
           }))
           .map((c) => ({ ...c, delta: own != null ? own - c.index : null }))
           .sort((a2, b2) => b2.index - a2.index);
+        // Evidence: worst own quotes (what guests complain about) and the
+        // competitors' best quotes (what they get praised for).
+        const ownQuotes = [...a.ownQuotes]
+          .sort((q1, q2) => q1.sentiment - q2.sentiment)
+          .slice(0, MAX_QUOTES);
+        const compQuotes = [...a.compQuotes]
+          .sort((q1, q2) => q2.sentiment - q1.sentiment)
+          .slice(0, MAX_QUOTES);
         return {
           topic: t,
           dept: departmentOf(t.id),
@@ -256,6 +264,8 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
           delta,
           trend,
           competitors,
+          ownQuotes,
+          compQuotes,
         };
       })
       .filter((x): x is NonNullable<typeof x> => x != null);
