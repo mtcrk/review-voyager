@@ -1,7 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ResponsiveContainer,
   ScatterChart,
@@ -23,6 +23,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { normalizeRatingTo5 } from "@/lib/ratingScale";
+import { toast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,8 @@ import {
   AlertTriangle,
   CheckCircle2,
   ArrowRight,
+  Loader2,
+  ListChecks,
 } from "lucide-react";
 import { IntelligenceTabs } from "@/components/intelligence/IntelligenceTabs";
 import { TopicAnalysis } from "@/components/intelligence/TopicAnalysis";
@@ -79,6 +82,7 @@ type OwnReviewRow = {
   status: string | null;
   approved_reply: string | null;
   replied_at: string | null;
+  reviewer_country: string | null;
 };
 
 type CompAllRow = {
