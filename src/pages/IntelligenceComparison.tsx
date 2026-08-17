@@ -53,8 +53,11 @@ import {
   ArrowRight,
   Loader2,
   ListChecks,
+  Printer,
+  Download,
 } from "lucide-react";
 import { IntelligenceTabs } from "@/components/intelligence/IntelligenceTabs";
+import { buildTopicCsv, downloadCsv, type CsvTopicRow } from "@/lib/topicCsv";
 import { TopicAnalysis } from "@/components/intelligence/TopicAnalysis";
 import { ActionPack } from "@/components/intelligence/ActionPack";
 import { GuestOriginBreakdown } from "@/components/intelligence/GuestOriginBreakdown";
