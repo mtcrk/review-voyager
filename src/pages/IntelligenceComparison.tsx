@@ -804,15 +804,51 @@ export default function IntelligenceComparison() {
         <title>Pazar Karşılaştırması · VoyageRespond</title>
       </Helmet>
       <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-6">
-        <IntelligenceTabs />
+        <div className="print-only hidden mb-4">
+          <div className="text-xl font-semibold">{ownName}</div>
+          <div className="text-base">Rakip Analizi Raporu</div>
+          <div className="text-xs">
+            Rapor tarihi:{" "}
+            {new Intl.DateTimeFormat("tr-TR", { dateStyle: "long" }).format(new Date())}
+          </div>
+          {competitors.length > 0 && (
+            <div className="text-xs mt-1">
+              Comp-set: {competitors.map((c) => c.name).join(", ")}
+            </div>
+          )}
+        </div>
+
+        <div className="no-print">
+          <IntelligenceTabs />
+        </div>
 
         <div>
-          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
-            Pazar Karşılaştırması
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Otelinizin rakipleriniz arasındaki konumu, platform bazlı performans ve 90 günlük trend.
-          </p>
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
+                Pazar Karşılaştırması
+              </h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                Otelinizin rakipleriniz arasındaki konumu, platform bazlı performans ve 90 günlük
+                trend.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 no-print shrink-0">
+              <Button size="sm" variant="outline" onClick={() => window.print()}>
+                <Printer className="h-4 w-4" />
+                Raporu yazdır
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={exportTopicCsv}
+                disabled={!canExportCsv}
+              >
+                <Download className="h-4 w-4" />
+                Konu tablosu (CSV)
+              </Button>
+            </div>
+          </div>
           {businesses.length > 1 && (
             <div className="mt-3 flex items-center gap-2">
               <MapPin className="h-4 w-4 text-muted-foreground" />
