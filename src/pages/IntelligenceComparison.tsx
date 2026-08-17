@@ -184,7 +184,7 @@ export default function IntelligenceComparison() {
           .eq("status", "confirmed"),
         supabase
           .from("reviews")
-          .select("platform,rating,posted_at,status,approved_reply,replied_at")
+          .select("platform,rating,posted_at,status,approved_reply,replied_at,reviewer_country")
           .eq("business_id", businessId!)
           .order("posted_at", { ascending: false })
           .limit(5000),
