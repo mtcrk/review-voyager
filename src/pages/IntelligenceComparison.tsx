@@ -53,8 +53,11 @@ import {
   ArrowRight,
   Loader2,
   ListChecks,
+  Printer,
+  Download,
 } from "lucide-react";
 import { IntelligenceTabs } from "@/components/intelligence/IntelligenceTabs";
+import { buildTopicCsv, downloadCsv, type CsvTopicRow } from "@/lib/topicCsv";
 import { TopicAnalysis } from "@/components/intelligence/TopicAnalysis";
 import { ActionPack } from "@/components/intelligence/ActionPack";
 import { GuestOriginBreakdown } from "@/components/intelligence/GuestOriginBreakdown";
@@ -263,6 +266,95 @@ export default function IntelligenceComparison() {
   });
 
   const ownName = activeBusiness?.name ?? "Siz";
+
+  // === "Son 7 gün" — last 7 days vs the 7 days before, from data already loaded ===
+  const weekly = useMemo(() => {
+    const now = Date.now();
+    const d7 = new Date(now - 7 * 86400_000).toISOString();
+    const d14 = new Date(now - 14 * 86400_000).toISOString();
+    const MIN = 3;
+
+    const avgIndex = (rows: { rating: number | null; platform: string | null }[]) => {
+      const vals = rows
+        .filter((r) => r.rating != null)
+        .map((r) => toIndex100(Number(r.rating), normalizePlatform(r.platform) ?? "google"));
+      return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+    };
+
+    const ownThis = ownReviews.filter((r) => r.posted_at && r.posted_at >= d7);
+    const ownPrev = ownReviews.filter(
+      (r) => r.posted_at && r.posted_at >= d14 && r.posted_at < d7,
+    );
+    const compThis = compAllRows.filter((r) => r.posted_at && r.posted_at >= d7);
+    const compPrev = compAllRows.filter(
+      (r) => r.posted_at && r.posted_at >= d14 && r.posted_at < d7,
+    );
+
+    const ownIdxThis = ownThis.length >= MIN ? avgIndex(ownThis) : null;
+    const ownIdxPrev = ownPrev.length >= MIN ? avgIndex(ownPrev) : null;
+    const compIdxThis = compThis.length >= MIN ? avgIndex(compThis) : null;
+    const compIdxPrev = compPrev.length >= MIN ? avgIndex(compPrev) : null;
+    const repliedThis = ownThis.filter((r) => r.approved_reply || r.status === "replied").length;
+
+    const fmtDate = (iso: string) =>
+      new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long" }).format(new Date(iso));
+
+    return {
+      range: `${fmtDate(d7)} – ${fmtDate(new Date(now).toISOString())}`,
+      ownIdxThis,
+      ownIdxPrev,
+      ownN: ownThis.length,
+      ownPrevN: ownPrev.length,
+      compIdxThis,
+      compIdxPrev,
+      compN: compThis.length,
+      compPrevN: compPrev.length,
+      replyRate: ownThis.length >= MIN ? (repliedThis / ownThis.length) * 100 : null,
+      minSample: MIN,
+      hasAnything:
+        ownThis.length > 0 || ownPrev.length > 0 || compThis.length > 0 || compPrev.length > 0,
+    };
+  }, [ownReviews, compAllRows]);
+
+  // === CSV export of the topic table (same query keys as TopicAnalysis → cached) ===
+  const csvTopicsQuery = useQuery({
+    queryKey: ["ci_topics_all"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("ci_topics")
+        .select("id, category, display_name, applies_to_verticals");
+      return ((data ?? []) as any[]).filter(
+        (t) => Array.isArray(t.applies_to_verticals) && t.applies_to_verticals.includes("hotel"),
+      );
+    },
+  });
+
+  const csvRowsQuery = useQuery({
+    queryKey: ["ci_review_topics", businessId],
+    enabled: !!businessId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ci_review_topics")
+        .select("topic_id, review_source, competitor_id, sentiment, excerpt, review_posted_at")
+        .eq("business_id", businessId!);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const canExportCsv = (csvRowsQuery.data?.length ?? 0) > 0;
+
+  function exportTopicCsv() {
+    const names: Record<string, string> = {};
+    for (const t of (csvTopicsQuery.data ?? []) as any[]) {
+      names[t.id] = t.display_name?.tr ?? t.display_name?.en ?? t.id;
+    }
+    const csv = buildTopicCsv((csvRowsQuery.data ?? []) as CsvTopicRow[], names);
+    downloadCsv(
+      `konu-analizi-${(activeBusiness?.name ?? "rapor").replace(/\s+/g, "-").toLowerCase()}.csv`,
+      csv,
+    );
+  }
 
   // === Own metrics ===
   // Ratings are normalized per platform (Booking /10, Google /5 …) then expressed
@@ -712,15 +804,51 @@ export default function IntelligenceComparison() {
         <title>Pazar Karşılaştırması · VoyageRespond</title>
       </Helmet>
       <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-6">
-        <IntelligenceTabs />
+        <div className="print-only hidden mb-4">
+          <div className="text-xl font-semibold">{ownName}</div>
+          <div className="text-base">Rakip Analizi Raporu</div>
+          <div className="text-xs">
+            Rapor tarihi:{" "}
+            {new Intl.DateTimeFormat("tr-TR", { dateStyle: "long" }).format(new Date())}
+          </div>
+          {competitors.length > 0 && (
+            <div className="text-xs mt-1">
+              Comp-set: {competitors.map((c) => c.name).join(", ")}
+            </div>
+          )}
+        </div>
+
+        <div className="no-print">
+          <IntelligenceTabs />
+        </div>
 
         <div>
-          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
-            Pazar Karşılaştırması
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Otelinizin rakipleriniz arasındaki konumu, platform bazlı performans ve 90 günlük trend.
-          </p>
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
+                Pazar Karşılaştırması
+              </h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                Otelinizin rakipleriniz arasındaki konumu, platform bazlı performans ve 90 günlük
+                trend.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 no-print shrink-0">
+              <Button size="sm" variant="outline" onClick={() => window.print()}>
+                <Printer className="h-4 w-4" />
+                Raporu yazdır
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={exportTopicCsv}
+                disabled={!canExportCsv}
+              >
+                <Download className="h-4 w-4" />
+                Konu tablosu (CSV)
+              </Button>
+            </div>
+          </div>
           {businesses.length > 1 && (
             <div className="mt-3 flex items-center gap-2">
               <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -753,7 +881,7 @@ export default function IntelligenceComparison() {
         </div>
 
         {!loading && readiness.length > 0 && (
-          <Card className="border-amber-500/40 bg-amber-500/5">
+          <Card className="border-amber-500/40 bg-amber-500/5 no-print">
             <CardContent className="p-4 space-y-2">
               <div className="flex items-center gap-2 text-sm font-medium">
                 <ListChecks className="h-4 w-4 text-amber-600" />
@@ -1079,6 +1207,70 @@ export default function IntelligenceComparison() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Son 7 gün */}
+            {weekly.hasAnything && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">Son 7 gün</CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    {weekly.range} · önceki 7 günle karşılaştırma
+                  </p>
+                </CardHeader>
+                <CardContent className="pt-0 divide-y">
+                  {(weekly.ownIdxThis != null || weekly.ownN > 0) && (
+                    <WeekRow
+                      label="İtibar indeksiniz"
+                      current={weekly.ownIdxThis}
+                      previous={weekly.ownIdxPrev}
+                      format={(v) => v.toFixed(1)}
+                      higherIsBetter
+                      basis={`bu hafta ${weekly.ownN} yorum · geçen hafta ${weekly.ownPrevN} yorum`}
+                      minSample={weekly.minSample}
+                    />
+                  )}
+                  <WeekRow
+                    label="Yorum hacminiz"
+                    current={weekly.ownN}
+                    previous={weekly.ownPrevN}
+                    format={(v) => fmtNum(v)!}
+                    higherIsBetter
+                    basis="son 7 gün / önceki 7 gün"
+                  />
+                  {(weekly.compIdxThis != null || weekly.compN > 0) && (
+                    <WeekRow
+                      label="Comp-set indeksi"
+                      current={weekly.compIdxThis}
+                      previous={weekly.compIdxPrev}
+                      format={(v) => v.toFixed(1)}
+                      higherIsBetter={false}
+                      basis={`bu hafta ${weekly.compN} rakip yorumu · geçen hafta ${weekly.compPrevN}`}
+                      minSample={weekly.minSample}
+                      note={
+                        weekly.compIdxThis != null && weekly.compIdxPrev != null
+                          ? weekly.compIdxThis - weekly.compIdxPrev >= 1
+                            ? "rakipler yükseliyor"
+                            : weekly.compIdxThis - weekly.compIdxPrev <= -1
+                              ? "rakipler geriliyor"
+                              : "rakipler sabit"
+                          : undefined
+                      }
+                    />
+                  )}
+                  {weekly.ownN > 0 && (
+                    <WeekRow
+                      label="Yanıt oranınız"
+                      current={weekly.replyRate}
+                      previous={null}
+                      format={(v) => `${Math.round(v)}%`}
+                      higherIsBetter
+                      basis={`bu haftanın ${weekly.ownN} yorumu üzerinden`}
+                      minSample={weekly.minSample}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Bu hafta ne yapmalı */}
             <ActionPack businessId={businessId} />
@@ -1546,6 +1738,60 @@ export default function IntelligenceComparison() {
         )}
       </div>
     </>
+  );
+}
+
+function WeekRow({
+  label,
+  current,
+  previous,
+  format,
+  higherIsBetter,
+  basis,
+  minSample,
+  note,
+}: {
+  label: string;
+  current: number | null;
+  previous: number | null;
+  format: (v: number) => string;
+  higherIsBetter: boolean;
+  basis: string;
+  minSample?: number;
+  note?: string;
+}) {
+  const delta = current != null && previous != null ? current - previous : null;
+  const good = delta != null && (higherIsBetter ? delta > 0 : delta < 0);
+  const bad = delta != null && (higherIsBetter ? delta < 0 : delta > 0);
+  return (
+    <div className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0">
+      <div className="min-w-0">
+        <div className="text-sm font-medium">{label}</div>
+        <div className="text-[11px] text-muted-foreground mt-0.5">
+          {basis}
+          {note ? ` · ${note}` : ""}
+        </div>
+      </div>
+      <div className="text-right shrink-0">
+        <div className="text-lg font-semibold tabular-nums">
+          {current != null ? format(current) : "—"}
+        </div>
+        {delta != null ? (
+          <div
+            className={`text-xs tabular-nums ${good ? "text-emerald-600" : bad ? "text-red-600" : "text-muted-foreground"}`}
+          >
+            {delta > 0 ? "+" : ""}
+            {format(delta)} vs geçen hafta
+          </div>
+        ) : (
+          <div className="text-[11px] text-muted-foreground">
+            {current == null && minSample
+              ? `yeterli veri yok (min ${minSample} yorum)`
+              : "kıyas için önceki hafta verisi yok"}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 

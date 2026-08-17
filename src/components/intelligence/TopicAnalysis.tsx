@@ -47,6 +47,9 @@ type TopicRow = {
 };
 
 const MIN_MENTIONS = 3;
+const MAX_QUOTES = 5;
+
+type Quote = { excerpt: string; sentiment: number; competitor_id: string | null };
 
 function topicName(t: Topic) {
   return t.display_name?.tr ?? t.display_name?.en ?? t.id;
@@ -163,6 +166,8 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
       prevSum: number;
       prevN: number;
       byComp: Map<string, { count: number; sum: number }>;
+      ownQuotes: Quote[];
+      compQuotes: Quote[];
     };
     const map = new Map<string, Agg>();
     for (const r of rows) {
@@ -178,10 +183,16 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
           prevSum: 0,
           prevN: 0,
           byComp: new Map(),
+          ownQuotes: [],
+          compQuotes: [],
         } as Agg);
+      const excerpt = (r.excerpt ?? "").trim();
       if (r.review_source === "own") {
         e.ownCount++;
         e.ownSum += r.sentiment;
+        if (excerpt) {
+          e.ownQuotes.push({ excerpt, sentiment: r.sentiment, competitor_id: null });
+        }
         if (r.review_posted_at) {
           if (r.review_posted_at >= since90) {
             e.recentSum += r.sentiment;
@@ -194,6 +205,9 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
       } else {
         e.compCount++;
         e.compSum += r.sentiment;
+        if (excerpt) {
+          e.compQuotes.push({ excerpt, sentiment: r.sentiment, competitor_id: r.competitor_id });
+        }
         if (r.competitor_id) {
           const c = e.byComp.get(r.competitor_id) ?? { count: 0, sum: 0 };
           c.count++;
@@ -231,6 +245,14 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
           }))
           .map((c) => ({ ...c, delta: own != null ? own - c.index : null }))
           .sort((a2, b2) => b2.index - a2.index);
+        // Evidence: worst own quotes (what guests complain about) and the
+        // competitors' best quotes (what they get praised for).
+        const ownQuotes = [...a.ownQuotes]
+          .sort((q1, q2) => q1.sentiment - q2.sentiment)
+          .slice(0, MAX_QUOTES);
+        const compQuotes = [...a.compQuotes]
+          .sort((q1, q2) => q2.sentiment - q1.sentiment)
+          .slice(0, MAX_QUOTES);
         return {
           topic: t,
           dept: departmentOf(t.id),
@@ -242,6 +264,8 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
           delta,
           trend,
           competitors,
+          ownQuotes,
+          compQuotes,
         };
       })
       .filter((x): x is NonNullable<typeof x> => x != null);
@@ -576,12 +600,13 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
                         {open && (
                           <tr className="border-b last:border-0 bg-muted/30">
                             <td colSpan={8} className="px-4 py-3">
-                              {r.competitors.length === 0 ? (
-                                <p className="text-xs text-muted-foreground">
-                                  Bu konuda rakip bahsi yok.
-                                </p>
-                              ) : (
-                                <div className="space-y-1.5">
+                              <div className="space-y-4">
+                                {r.competitors.length === 0 ? (
+                                  <p className="text-xs text-muted-foreground">
+                                    Bu konuda rakip bahsi yok.
+                                  </p>
+                                ) : (
+                                  <div className="space-y-1.5">
                                   <div className="text-xs font-medium">
                                     {topicName(r.topic)} — rakip bazlı kırılım
                                   </div>
@@ -605,8 +630,55 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
                                       </span>
                                     </div>
                                   ))}
-                                </div>
-                              )}
+                                  </div>
+                                )}
+
+                                {(r.ownQuotes.length > 0 || r.compQuotes.length > 0) && (
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {r.ownQuotes.length > 0 && (
+                                      <div className="space-y-1.5">
+                                        <div className="text-xs font-medium">
+                                          Sizin yorumlarınızdan
+                                        </div>
+                                        {r.ownQuotes.map((q, i) => (
+                                          <div
+                                            key={`own-${i}`}
+                                            className="rounded-md border bg-background px-2.5 py-2"
+                                          >
+                                            <p className="text-xs leading-relaxed">
+                                              “{q.excerpt.slice(0, 200)}”
+                                            </p>
+                                            <div className="text-[10px] text-muted-foreground mt-1 tabular-nums">
+                                              {sentimentToIndex100(q.sentiment).toFixed(0)}/100
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                    {r.compQuotes.length > 0 && (
+                                      <div className="space-y-1.5">
+                                        <div className="text-xs font-medium">
+                                          Rakip yorumlarından
+                                        </div>
+                                        {r.compQuotes.map((q, i) => (
+                                          <div
+                                            key={`comp-${i}`}
+                                            className="rounded-md border bg-background px-2.5 py-2"
+                                          >
+                                            <p className="text-xs leading-relaxed">
+                                              “{q.excerpt.slice(0, 200)}”
+                                            </p>
+                                            <div className="text-[10px] text-muted-foreground mt-1 tabular-nums">
+                                              {q.competitor_id ? `${compNames[q.competitor_id] ?? "Rakip"} · ` : ""}
+                                              {sentimentToIndex100(q.sentiment).toFixed(0)}/100
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         )}
