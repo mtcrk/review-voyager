@@ -1508,6 +1508,7 @@ function KpiCard({
   format,
   higherIsBetter,
   hint,
+  subHint,
 }: {
   label: string;
   icon: React.ReactNode;
@@ -1516,6 +1517,7 @@ function KpiCard({
   format: (v: number) => string;
   higherIsBetter?: boolean;
   hint?: string;
+  subHint?: string;
 }) {
   let delta: number | null = null;
   if (ownValue != null && compValue != null && compValue !== 0) {
@@ -1577,6 +1579,7 @@ function KpiCard({
         {compValue != null && hint ? (
           <div className="text-[11px] text-muted-foreground">{hint}</div>
         ) : null}
+        {subHint ? <div className="text-[11px] text-muted-foreground">{subHint}</div> : null}
       </CardContent>
     </Card>
   );
