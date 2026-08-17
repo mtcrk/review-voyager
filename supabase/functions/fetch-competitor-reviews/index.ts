@@ -145,7 +145,7 @@ Deno.serve(async (req) => {
         providers: ["booking", "tripadvisor", "expedia", "hotels"],
         maxReviewsPerQuery: 40,
         scrapeReviewPictures: false,
-        scrapeReviewResponses: false,
+        scrapeReviewResponses: true,
         proxyConfiguration: {
           useApifyProxy: true,
           apifyProxyGroups: ["RESIDENTIAL"],

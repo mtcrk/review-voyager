@@ -323,7 +323,13 @@ export default function IntelligenceComparison() {
 
   // Competitor reply rate + median response time (real data from scraped replies)
   const compRepliedCount = compAllRows.filter((r) => r.owner_reply_text).length;
-  const compReplyRate = compAllRows.length ? (compRepliedCount / compAllRows.length) * 100 : null;
+  // If not a single competitor reply was ever scraped, the data simply was not
+  // collected — reporting 0% would falsely claim competitors never reply.
+  const compReplyDataMissing = compRepliedCount === 0;
+  const compReplyRate =
+    compAllRows.length && !compReplyDataMissing
+      ? (compRepliedCount / compAllRows.length) * 100
+      : null;
 
   const ownResponseDays = ownReviews
     .map((r) => (r.posted_at && r.replied_at ? daysBetween(r.posted_at, r.replied_at) : null))
@@ -336,7 +342,7 @@ export default function IntelligenceComparison() {
         : null,
     )
     .filter((n): n is number => n != null);
-  const compMedianResponse = median(compResponseDays);
+  const compMedianResponse = compReplyDataMissing ? null : median(compResponseDays);
 
   // 30d competitor avg per competitor
   const comp30dPerComp: Record<string, number> = {};
@@ -481,7 +487,22 @@ export default function IntelligenceComparison() {
     });
   }, [ownReviews, compAllRows]);
 
+  const ratingTrendMin = (() => {
+    const vals = ratingTrend
+      .flatMap((d) => [d.you, d.competitors])
+      .filter((n): n is number => n != null);
+    if (vals.length === 0) return 0;
+    return Math.max(0, Math.floor((Math.min(...vals) - 5) / 5) * 5);
+  })();
   const hasMonthlyTrend = monthlyTrend.some((d) => d.you != null || d.competitors != null);
+  // Axis floor derived from the data so low-index hotels stay inside the chart.
+  const monthlyTrendMin = (() => {
+    const vals = monthlyTrend
+      .flatMap((d) => [d.you, d.competitors])
+      .filter((n): n is number => n != null);
+    if (vals.length === 0) return 0;
+    return Math.max(0, Math.floor((Math.min(...vals) - 5) / 5) * 5);
+  })();
   const compBest = compIndexValues.length ? Math.max(...compIndexValues) : null;
   const compBestName = useMemo(() => {
     if (compBest == null) return null;
@@ -757,9 +778,9 @@ export default function IntelligenceComparison() {
                       disabled={busyTask !== null}
                       onClick={() =>
                         runTask("fetch", async () => {
-                          const { error } = await supabase.functions.invoke(
+                          const { data, error } = await supabase.functions.invoke(
                             "fetch-competitor-reviews",
-                            { body: { business_id: businessId } },
+                            { body: { business_id: businessId, force: true } },
                           );
                           if (error) {
                             toast({
@@ -769,9 +790,29 @@ export default function IntelligenceComparison() {
                             });
                             return;
                           }
+                          const res = (data ?? {}) as {
+                            started?: unknown[];
+                            skipped?: unknown[];
+                            no_place_id?: unknown[];
+                          };
+                          const started = res.started?.length ?? 0;
+                          const skipped = res.skipped?.length ?? 0;
+                          const missing = res.no_place_id?.length ?? 0;
+                          const parts = [
+                            started > 0 ? `${started} rakip için toplama başladı` : null,
+                            skipped > 0 ? `${skipped} rakip atlandı` : null,
+                            missing > 0 ? `${missing} rakipte place_id yok` : null,
+                          ].filter(Boolean) as string[];
                           toast({
-                            title: "Rakip yorumları toplanıyor",
-                            description: "İşlem arka planda sürüyor, birkaç dakika içinde tamamlanır.",
+                            title:
+                              started > 0
+                                ? "Rakip yorumları toplanıyor"
+                                : "Toplama başlatılamadı",
+                            description:
+                              parts.length > 0
+                                ? parts.join(" · ")
+                                : "İşlenecek rakip bulunamadı.",
+                            variant: started > 0 ? "default" : "destructive",
                           });
                           qc.invalidateQueries({ queryKey: ["comparison-v2", businessId] });
                         })
@@ -995,7 +1036,7 @@ export default function IntelligenceComparison() {
                         <ResponsiveContainer width="100%" height="100%">
                           <LineChart data={monthlyTrend} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
                             <XAxis dataKey="month" tick={{ fontSize: 9, fill: MUTED }} interval={1} />
-                            <YAxis domain={[40, 100]} hide />
+                            <YAxis domain={[monthlyTrendMin, 100]} hide />
                             <Tooltip
                               content={({ active, payload, label }) => {
                                 if (!active || !payload?.length) return null;
@@ -1073,7 +1114,11 @@ export default function IntelligenceComparison() {
                 ownValue={ownReplyRate}
                 compValue={compReplyRate}
                 format={(v) => `${Math.round(v)}%`}
-                subHint={`${fmtNum(ownTotal)} yorum · rakip ${fmtNum(compAllRows.length)} yorum`}
+                subHint={
+                  compReplyDataMissing
+                    ? "Rakip yanıt verisi henüz toplanmadı"
+                    : `${fmtNum(ownTotal)} yorum · rakip ${fmtNum(compAllRows.length)} yorum`
+                }
                 higherIsBetter
               />
               <KpiCard
@@ -1082,7 +1127,11 @@ export default function IntelligenceComparison() {
                 ownValue={ownMedianResponse}
                 compValue={compMedianResponse}
                 format={(v) => `${v.toFixed(1)} gün`}
-                hint={`Medyan · siz ${ownResponseDays.length}, rakip ${compResponseDays.length} yanıtlı yorum`}
+                hint={
+                  compReplyDataMissing
+                    ? "Rakip yanıt verisi henüz toplanmadı"
+                    : `Medyan · siz ${ownResponseDays.length}, rakip ${compResponseDays.length} yanıtlı yorum`
+                }
                 higherIsBetter={false}
               />
               <KpiCard
@@ -1118,7 +1167,7 @@ export default function IntelligenceComparison() {
                       <LineChart data={ratingTrend} margin={{ top: 8, right: 16, bottom: 4, left: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                         <XAxis dataKey="weekLabel" tick={{ fontSize: 10, fill: MUTED }} />
-                        <YAxis domain={[40, 100]} tick={{ fontSize: 10, fill: MUTED }} />
+                        <YAxis domain={[ratingTrendMin, 100]} tick={{ fontSize: 10, fill: MUTED }} />
                         <Tooltip
                           content={({ active, payload, label }) => {
                             if (!active || !payload?.length) return null;
@@ -1574,7 +1623,10 @@ function KpiCard({
             <span className="text-muted-foreground">vs rakip ort. ({format(compValue)})</span>
           </div>
         ) : (
-          <div className="text-xs text-muted-foreground">{hint ?? ""}</div>
+          <div className="text-xs text-muted-foreground">
+            <span className="font-medium">rakip verisi yok</span>
+            {hint ? ` · ${hint}` : ""}
+          </div>
         )}
         {compValue != null && hint ? (
           <div className="text-[11px] text-muted-foreground">{hint}</div>
