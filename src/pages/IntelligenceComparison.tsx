@@ -725,6 +725,96 @@ export default function IntelligenceComparison() {
           )}
         </div>
 
+        {!loading && readiness.length > 0 && (
+          <Card className="border-amber-500/40 bg-amber-500/5">
+            <CardContent className="p-4 space-y-2">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <ListChecks className="h-4 w-4 text-amber-600" />
+                Veri hazırlığı
+              </div>
+              {readiness.map((item) => (
+                <div
+                  key={item.key}
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm"
+                >
+                  <span className="text-muted-foreground">{item.text}</span>
+                  {item.action?.kind === "link" && (
+                    <Button asChild size="sm" variant="outline" className="shrink-0">
+                      <Link to="/intelligence">{item.action.label}</Link>
+                    </Button>
+                  )}
+                  {item.action?.kind === "fetch" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="shrink-0"
+                      disabled={busyTask !== null}
+                      onClick={() =>
+                        runTask("fetch", async () => {
+                          const { error } = await supabase.functions.invoke(
+                            "fetch-competitor-reviews",
+                            { body: { business_id: businessId } },
+                          );
+                          if (error) {
+                            toast({
+                              title: "Başlatılamadı",
+                              description: error.message,
+                              variant: "destructive",
+                            });
+                            return;
+                          }
+                          toast({
+                            title: "Rakip yorumları toplanıyor",
+                            description: "İşlem arka planda sürüyor, birkaç dakika içinde tamamlanır.",
+                          });
+                          qc.invalidateQueries({ queryKey: ["comparison-v2", businessId] });
+                        })
+                      }
+                    >
+                      {busyTask === "fetch" ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : null}
+                      {item.action.label}
+                    </Button>
+                  )}
+                  {item.action?.kind === "topics" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="shrink-0"
+                      disabled={busyTask !== null}
+                      onClick={() =>
+                        runTask("topics", async () => {
+                          const { error } = await supabase.functions.invoke(
+                            "analyze-competitor-topics",
+                            { body: { business_id: businessId, limit: 80 } },
+                          );
+                          if (error) {
+                            toast({
+                              title: "Analiz başarısız",
+                              description: error.message,
+                              variant: "destructive",
+                            });
+                            return;
+                          }
+                          toast({ title: "Konu analizi tamamlandı" });
+                          qc.invalidateQueries({ queryKey: ["ci_review_topics", businessId] });
+                          qc.invalidateQueries({ queryKey: ["comparison-pending-topics"] });
+                        })
+                      }
+                    >
+                      {busyTask === "topics" ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : null}
+                      {item.action.label}
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
         {loading ? (
           <div className="space-y-4">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
