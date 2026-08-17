@@ -763,9 +763,9 @@ export default function IntelligenceComparison() {
                       disabled={busyTask !== null}
                       onClick={() =>
                         runTask("fetch", async () => {
-                          const { error } = await supabase.functions.invoke(
+                          const { data, error } = await supabase.functions.invoke(
                             "fetch-competitor-reviews",
-                            { body: { business_id: businessId } },
+                            { body: { business_id: businessId, force: true } },
                           );
                           if (error) {
                             toast({
@@ -775,9 +775,29 @@ export default function IntelligenceComparison() {
                             });
                             return;
                           }
+                          const res = (data ?? {}) as {
+                            started?: unknown[];
+                            skipped?: unknown[];
+                            no_place_id?: unknown[];
+                          };
+                          const started = res.started?.length ?? 0;
+                          const skipped = res.skipped?.length ?? 0;
+                          const missing = res.no_place_id?.length ?? 0;
+                          const parts = [
+                            started > 0 ? `${started} rakip için toplama başladı` : null,
+                            skipped > 0 ? `${skipped} rakip atlandı` : null,
+                            missing > 0 ? `${missing} rakipte place_id yok` : null,
+                          ].filter(Boolean) as string[];
                           toast({
-                            title: "Rakip yorumları toplanıyor",
-                            description: "İşlem arka planda sürüyor, birkaç dakika içinde tamamlanır.",
+                            title:
+                              started > 0
+                                ? "Rakip yorumları toplanıyor"
+                                : "Toplama başlatılamadı",
+                            description:
+                              parts.length > 0
+                                ? parts.join(" · ")
+                                : "İşlenecek rakip bulunamadı.",
+                            variant: started > 0 ? "default" : "destructive",
                           });
                           qc.invalidateQueries({ queryKey: ["comparison-v2", businessId] });
                         })
