@@ -80,7 +80,7 @@ function toIndex100(sum5: number, count: number): number | null {
 }
 
 export function GuestOriginBreakdown({ businessId }: { businessId: string }) {
-  const [tab, setTab] = useState("country");
+  const [tab, setTab] = useState<string | null>(null);
 
   const ownQuery = useQuery({
     queryKey: ["guest-origin-own", businessId],
@@ -309,6 +309,12 @@ export function GuestOriginBreakdown({ businessId }: { businessId: string }) {
   }, [compQuery.data, country, own]);
 
   const loading = ownQuery.isLoading;
+  const hasCountry = country.known > 0;
+  const hasLanguage = language.total > 0;
+  const activeTab = tab ?? (hasCountry ? "country" : "language");
+
+  // Veri yoksa kartı hiç basma — boş "veri yok" kartı demoda sayfayı yarım gösteriyor.
+  if (!loading && !hasCountry && !hasLanguage) return null;
 
   return (
     <Card className="shadow-card">
@@ -327,27 +333,22 @@ export function GuestOriginBreakdown({ businessId }: { businessId: string }) {
             <Skeleton className="h-48 w-full" />
           </div>
         ) : (
-          <Tabs value={tab} onValueChange={setTab}>
+          <Tabs value={activeTab} onValueChange={setTab}>
             <TabsList>
-              <TabsTrigger value="country">Ülke</TabsTrigger>
-              <TabsTrigger value="language">Yorum dili</TabsTrigger>
+              {hasCountry && <TabsTrigger value="country">Ülke</TabsTrigger>}
+              {hasLanguage && <TabsTrigger value="language">Yorum dili</TabsTrigger>}
             </TabsList>
 
             {/* ---- Sekme A: Ülke ---- */}
+            {hasCountry && (
             <TabsContent value="country" className="pt-4 space-y-6">
               <div>
                 <h3 className="font-semibold">Yorum yazanların ülke dağılımı</h3>
-                {country.known === 0 ? (
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Henüz ülke bilgisi olan yorum yok. Booking veya TripAdvisor yorumları çekildiğinde burası dolacak.
-                  </p>
-                ) : (
-                  <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                     {country.total} yorumun {country.known}'ında ülke bilgisi var (%{country.coverage})
                     {country.sourcePlatforms.length > 0 && <> · Kaynak: {country.sourcePlatforms.join(", ")}.</>}{" "}
                     Google ve Yandex ülke bilgisi vermiyor.
-                  </p>
-                )}
+                </p>
               </div>
 
               {country.known > 0 && (
