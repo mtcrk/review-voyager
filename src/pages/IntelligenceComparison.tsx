@@ -1344,7 +1344,7 @@ export default function IntelligenceComparison() {
                 <TabsTrigger value="misafir">Misafir profili</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="trend" className="space-y-4 mt-0">
+              <TabsContent value="trend" forceMount className="space-y-4 mt-0">
             <h2 className="print-only hidden text-lg font-semibold mt-4">Genel Görünüm</h2>
             {hasRatingTrend && (
               <Card className="print-break">
@@ -1461,7 +1461,7 @@ export default function IntelligenceComparison() {
             )}
               </TabsContent>
 
-              <TabsContent value="rakipler" className="space-y-4 mt-0">
+              <TabsContent value="rakipler" forceMount className="space-y-4 mt-0">
             <h2 className="print-only hidden text-lg font-semibold mt-4">Rakipler</h2>
 
             {/* Platform matrix */}
@@ -1728,12 +1728,12 @@ export default function IntelligenceComparison() {
 
               </TabsContent>
 
-              <TabsContent value="konular" className="space-y-4 mt-0">
+              <TabsContent value="konular" forceMount className="space-y-4 mt-0">
                 <h2 className="print-only hidden text-lg font-semibold mt-4">Konu Analizi</h2>
                 {activeBusiness?.id && <TopicAnalysis businessId={activeBusiness.id} />}
               </TabsContent>
 
-              <TabsContent value="misafir" className="space-y-4 mt-0">
+              <TabsContent value="misafir" forceMount className="space-y-4 mt-0">
                 <h2 className="print-only hidden text-lg font-semibold mt-4">Misafir Profili</h2>
                 {activeBusiness?.id && <GuestOriginBreakdown businessId={activeBusiness.id} />}
               </TabsContent>
