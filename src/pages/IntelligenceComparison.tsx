@@ -267,6 +267,95 @@ export default function IntelligenceComparison() {
 
   const ownName = activeBusiness?.name ?? "Siz";
 
+  // === "Son 7 gün" — last 7 days vs the 7 days before, from data already loaded ===
+  const weekly = useMemo(() => {
+    const now = Date.now();
+    const d7 = new Date(now - 7 * 86400_000).toISOString();
+    const d14 = new Date(now - 14 * 86400_000).toISOString();
+    const MIN = 3;
+
+    const avgIndex = (rows: { rating: number | null; platform: string | null }[]) => {
+      const vals = rows
+        .filter((r) => r.rating != null)
+        .map((r) => toIndex100(Number(r.rating), normalizePlatform(r.platform) ?? "google"));
+      return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+    };
+
+    const ownThis = ownReviews.filter((r) => r.posted_at && r.posted_at >= d7);
+    const ownPrev = ownReviews.filter(
+      (r) => r.posted_at && r.posted_at >= d14 && r.posted_at < d7,
+    );
+    const compThis = compAllRows.filter((r) => r.posted_at && r.posted_at >= d7);
+    const compPrev = compAllRows.filter(
+      (r) => r.posted_at && r.posted_at >= d14 && r.posted_at < d7,
+    );
+
+    const ownIdxThis = ownThis.length >= MIN ? avgIndex(ownThis) : null;
+    const ownIdxPrev = ownPrev.length >= MIN ? avgIndex(ownPrev) : null;
+    const compIdxThis = compThis.length >= MIN ? avgIndex(compThis) : null;
+    const compIdxPrev = compPrev.length >= MIN ? avgIndex(compPrev) : null;
+    const repliedThis = ownThis.filter((r) => r.approved_reply || r.status === "replied").length;
+
+    const fmtDate = (iso: string) =>
+      new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long" }).format(new Date(iso));
+
+    return {
+      range: `${fmtDate(d7)} – ${fmtDate(new Date(now).toISOString())}`,
+      ownIdxThis,
+      ownIdxPrev,
+      ownN: ownThis.length,
+      ownPrevN: ownPrev.length,
+      compIdxThis,
+      compIdxPrev,
+      compN: compThis.length,
+      compPrevN: compPrev.length,
+      replyRate: ownThis.length >= MIN ? (repliedThis / ownThis.length) * 100 : null,
+      minSample: MIN,
+      hasAnything:
+        ownThis.length > 0 || ownPrev.length > 0 || compThis.length > 0 || compPrev.length > 0,
+    };
+  }, [ownReviews, compAllRows]);
+
+  // === CSV export of the topic table (same query keys as TopicAnalysis → cached) ===
+  const csvTopicsQuery = useQuery({
+    queryKey: ["ci_topics_all"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("ci_topics")
+        .select("id, category, display_name, applies_to_verticals");
+      return ((data ?? []) as any[]).filter(
+        (t) => Array.isArray(t.applies_to_verticals) && t.applies_to_verticals.includes("hotel"),
+      );
+    },
+  });
+
+  const csvRowsQuery = useQuery({
+    queryKey: ["ci_review_topics", businessId],
+    enabled: !!businessId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ci_review_topics")
+        .select("topic_id, review_source, competitor_id, sentiment, excerpt, review_posted_at")
+        .eq("business_id", businessId!);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const canExportCsv = (csvRowsQuery.data?.length ?? 0) > 0;
+
+  function exportTopicCsv() {
+    const names: Record<string, string> = {};
+    for (const t of (csvTopicsQuery.data ?? []) as any[]) {
+      names[t.id] = t.display_name?.tr ?? t.display_name?.en ?? t.id;
+    }
+    const csv = buildTopicCsv((csvRowsQuery.data ?? []) as CsvTopicRow[], names);
+    downloadCsv(
+      `konu-analizi-${(activeBusiness?.name ?? "rapor").replace(/\s+/g, "-").toLowerCase()}.csv`,
+      csv,
+    );
+  }
+
   // === Own metrics ===
   // Ratings are normalized per platform (Booking /10, Google /5 …) then expressed
   // as a 0–100 reputation index so every business sits on the same scale.
