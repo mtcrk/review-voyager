@@ -317,7 +317,7 @@ export function GuestOriginBreakdown({ businessId }: { businessId: string }) {
   if (!loading && !hasCountry && !hasLanguage) return null;
 
   return (
-    <Card className="shadow-card">
+    <Card className="shadow-card print-break">
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
           <div className="p-2 rounded-lg bg-primary/10">
