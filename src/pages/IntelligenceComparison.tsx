@@ -1781,7 +1781,7 @@ function WeekRow({
             className={`text-xs tabular-nums ${good ? "text-emerald-600" : bad ? "text-red-600" : "text-muted-foreground"}`}
           >
             {delta > 0 ? "+" : ""}
-            {format(Math.abs(delta) === Math.abs(delta) ? delta : delta)} vs geçen hafta
+            {format(delta)} vs geçen hafta
           </div>
         ) : (
           <div className="text-[11px] text-muted-foreground">
