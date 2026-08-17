@@ -462,10 +462,9 @@ export function GuestOriginBreakdown({ businessId }: { businessId: string }) {
                 </>
               )}
             </TabsContent>
-
-            {/* ---- Sekme B: Yorum dili ---- */}
             )}
 
+            {/* ---- Sekme B: Yorum dili ---- */}
             {hasLanguage && (
             <TabsContent value="language" className="pt-4 space-y-4">
               <div className="flex items-center gap-2">
@@ -517,10 +516,9 @@ export function GuestOriginBreakdown({ businessId }: { businessId: string }) {
                         <Tooltip />
                         <Bar dataKey="count" name="Yorum" fill={PRIMARY} radius={[4, 4, 0, 0]} />
                       </BarChart>
-                    </ResponsiveContainer>
+                     </ResponsiveContainer>
                   </div>
-                </>
-              )}
+              </>
 
               <div className="flex gap-2 rounded-lg border bg-muted/40 p-3 text-xs text-muted-foreground">
                 <Info className="h-4 w-4 shrink-0" style={{ color: MUTED }} />
@@ -530,6 +528,7 @@ export function GuestOriginBreakdown({ businessId }: { businessId: string }) {
                 </span>
               </div>
             </TabsContent>
+            )}
           </Tabs>
         )}
       </CardContent>
