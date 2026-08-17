@@ -659,6 +659,12 @@ export default function IntelligenceComparison() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [competitors, ownName, JSON.stringify(ownPlatformAgg), JSON.stringify(compPlatformAgg)]);
 
+  const hasPlatformMatrix = platformMatrix.some((r) => r.cells.some((c) => c.avg != null));
+  const hasVolumeTrend = trendData.some((d) => d.you > 0 || d._compCount > 0);
+  const hasScatter = scatterCompetitors.length + scatterOwn.length > 0;
+  const hasIndexBars = ranked.some((r) => r.rating != null);
+  const hasVolumeBars = ranked.some((r) => r.review_count != null);
+
   if (businessLoading) {
     return (
       <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-6">
