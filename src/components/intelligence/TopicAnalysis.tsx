@@ -47,6 +47,9 @@ type TopicRow = {
 };
 
 const MIN_MENTIONS = 3;
+const MAX_QUOTES = 5;
+
+type Quote = { excerpt: string; sentiment: number; competitor_id: string | null };
 
 function topicName(t: Topic) {
   return t.display_name?.tr ?? t.display_name?.en ?? t.id;
@@ -163,6 +166,8 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
       prevSum: number;
       prevN: number;
       byComp: Map<string, { count: number; sum: number }>;
+      ownQuotes: Quote[];
+      compQuotes: Quote[];
     };
     const map = new Map<string, Agg>();
     for (const r of rows) {
@@ -178,10 +183,16 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
           prevSum: 0,
           prevN: 0,
           byComp: new Map(),
+          ownQuotes: [],
+          compQuotes: [],
         } as Agg);
+      const excerpt = (r.excerpt ?? "").trim();
       if (r.review_source === "own") {
         e.ownCount++;
         e.ownSum += r.sentiment;
+        if (excerpt) {
+          e.ownQuotes.push({ excerpt, sentiment: r.sentiment, competitor_id: null });
+        }
         if (r.review_posted_at) {
           if (r.review_posted_at >= since90) {
             e.recentSum += r.sentiment;
@@ -194,6 +205,9 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
       } else {
         e.compCount++;
         e.compSum += r.sentiment;
+        if (excerpt) {
+          e.compQuotes.push({ excerpt, sentiment: r.sentiment, competitor_id: r.competitor_id });
+        }
         if (r.competitor_id) {
           const c = e.byComp.get(r.competitor_id) ?? { count: 0, sum: 0 };
           c.count++;
