@@ -1405,7 +1405,7 @@ export default function IntelligenceComparison() {
 
             {/* 90d hacim trendi */}
             {hasVolumeTrend && (
-            <Card>
+            <Card className="print-break">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Son 90 gün — Yeni yorum hacmi</CardTitle>
                 <p className="text-xs text-muted-foreground">
@@ -1462,10 +1462,11 @@ export default function IntelligenceComparison() {
               </TabsContent>
 
               <TabsContent value="rakipler" className="space-y-4 mt-0">
+            <h2 className="print-only hidden text-lg font-semibold mt-4">Rakipler</h2>
 
             {/* Platform matrix */}
             {hasPlatformMatrix && (
-            <Card>
+            <Card className="print-break">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Platform bazlı puan</CardTitle>
                 <p className="text-xs text-muted-foreground">
@@ -1538,7 +1539,7 @@ export default function IntelligenceComparison() {
 
             {/* Positioning map */}
             {hasScatter && (
-            <Card>
+            <Card className="print-break">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Pazar Konumu</CardTitle>
                 <p className="text-xs text-muted-foreground">
@@ -1630,7 +1631,7 @@ export default function IntelligenceComparison() {
             )}
 
             {/* Ranking table */}
-            <Card>
+            <Card className="print-break">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Sıralama</CardTitle>
                 <p className="text-xs text-muted-foreground">
@@ -1728,10 +1729,12 @@ export default function IntelligenceComparison() {
               </TabsContent>
 
               <TabsContent value="konular" className="space-y-4 mt-0">
+                <h2 className="print-only hidden text-lg font-semibold mt-4">Konu Analizi</h2>
                 {activeBusiness?.id && <TopicAnalysis businessId={activeBusiness.id} />}
               </TabsContent>
 
               <TabsContent value="misafir" className="space-y-4 mt-0">
+                <h2 className="print-only hidden text-lg font-semibold mt-4">Misafir Profili</h2>
                 {activeBusiness?.id && <GuestOriginBreakdown businessId={activeBusiness.id} />}
               </TabsContent>
             </Tabs>
