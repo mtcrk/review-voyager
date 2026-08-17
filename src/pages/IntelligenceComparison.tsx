@@ -947,6 +947,92 @@ export default function IntelligenceComparison() {
               </CardContent>
             </Card>
 
+            {/* ===== HERO: indeks + comp-set + 12 aylık trend ===== */}
+            <Card>
+              <CardContent className="p-4 sm:p-5">
+                <div className="grid grid-cols-1 lg:grid-cols-[auto,1fr] gap-6 items-center">
+                  <div className="grid grid-cols-3 gap-4 sm:gap-6">
+                    <div>
+                      <div className="text-[11px] text-muted-foreground">İtibar indeksiniz</div>
+                      <div className="text-3xl font-semibold tabular-nums">
+                        {ownAvg != null ? ownAvg.toFixed(1) : "—"}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground">
+                        {fmtNum(ownIndexes.length)} yorum üzerinden
+                      </div>
+                    </div>
+                    <div className="border-l pl-4 sm:pl-6">
+                      <div className="text-[11px] text-muted-foreground">Comp-set ortalaması</div>
+                      <div className="text-3xl font-semibold tabular-nums text-muted-foreground">
+                        {compAvgOfAvg != null ? compAvgOfAvg.toFixed(1) : "—"}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground">
+                        {competitors.length} rakip üzerinden
+                      </div>
+                    </div>
+                    <div className="border-l pl-4 sm:pl-6">
+                      <div className="text-[11px] text-muted-foreground">Comp-set en iyisi</div>
+                      <div className="text-3xl font-semibold tabular-nums">
+                        {compBest != null ? compBest.toFixed(1) : "—"}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground truncate max-w-[140px]">
+                        {compBestName ?? "veri yok"}
+                      </div>
+                    </div>
+                  </div>
+                  {hasMonthlyTrend && (
+                    <div>
+                      <div className="text-[11px] text-muted-foreground mb-1">
+                        Son 12 ay — itibar indeksi (0-100)
+                      </div>
+                      <div className="h-24 w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={monthlyTrend} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
+                            <XAxis dataKey="month" tick={{ fontSize: 9, fill: MUTED }} interval={1} />
+                            <YAxis domain={[40, 100]} hide />
+                            <Tooltip
+                              content={({ active, payload, label }) => {
+                                if (!active || !payload?.length) return null;
+                                return (
+                                  <div className="rounded-md border bg-popover px-3 py-2 text-xs shadow-sm">
+                                    <div className="font-medium mb-1">{label}</div>
+                                    {payload.map((p) => (
+                                      <div key={p.dataKey} style={{ color: p.color }}>
+                                        {p.name}: {p.value == null ? "veri yok" : p.value}
+                                      </div>
+                                    ))}
+                                  </div>
+                                );
+                              }}
+                            />
+                            <Line
+                              type="monotone"
+                              dataKey="you"
+                              name={ownName}
+                              stroke={PRIMARY}
+                              strokeWidth={2}
+                              dot={false}
+                              connectNulls
+                            />
+                            <Line
+                              type="monotone"
+                              dataKey="competitors"
+                              name="Comp-set"
+                              stroke={MUTED}
+                              strokeWidth={1.5}
+                              strokeDasharray="4 4"
+                              dot={false}
+                              connectNulls
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Bu hafta ne yapmalı */}
             <ActionPack businessId={businessId} />
 
