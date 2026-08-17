@@ -1840,7 +1840,7 @@ function KpiCard({
             : "neutral";
 
   return (
-    <Card>
+    <Card className="print-break">
       <CardContent className="p-4 space-y-1.5">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           {icon}
@@ -1909,7 +1909,7 @@ function BarCard({
       isOwn: r.isOwn,
     }));
   return (
-    <Card>
+    <Card className="print-break">
       <CardHeader className="pb-3">
         <CardTitle className="text-base">{title}</CardTitle>
       </CardHeader>
