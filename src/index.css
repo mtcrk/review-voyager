@@ -201,3 +201,27 @@ All colors MUST be HSL.
     }
   }
 }
+
+/* Printable report styles (Rakip Analizi) */
+.print-only {
+  display: none;
+}
+@media print {
+  .no-print,
+  [data-sidebar],
+  header nav {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  body {
+    background: #fff;
+  }
+  .print-break {
+    break-inside: avoid;
+  }
+  @page {
+    margin: 14mm;
+  }
+}
