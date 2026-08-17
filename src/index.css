@@ -206,6 +206,13 @@ All colors MUST be HSL.
 .print-only {
   display: none;
 }
+@media screen {
+  /* forceMount keeps inactive tab panels in the DOM — keep them hidden on screen */
+  [role="tabpanel"][hidden],
+  [role="tabpanel"][data-state="inactive"] {
+    display: none !important;
+  }
+}
 @media print {
   /* Force a light theme on paper, regardless of dark mode */
   :root,
@@ -225,6 +232,11 @@ All colors MUST be HSL.
     --muted-foreground: 0 0% 28%;
     --border: 0 0% 80%;
     --input: 0 0% 80%;
+    --primary: 255 75% 55%;
+    --primary-foreground: 0 0% 100%;
+    --accent: 215 85% 45%;
+    --accent-foreground: 0 0% 100%;
+    --ring: 255 75% 55%;
     color-scheme: light;
   }
   html,
@@ -262,6 +274,8 @@ All colors MUST be HSL.
   }
   .no-print,
   [data-sidebar],
+  [data-sidebar-wrapper],
+  aside,
   header nav {
     display: none !important;
   }
