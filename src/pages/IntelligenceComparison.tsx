@@ -446,6 +446,96 @@ export default function IntelligenceComparison() {
 
   const hasRatingTrend = ratingTrend.some((d) => d.you != null || d.competitors != null);
 
+  // === 12 aylık itibar indeksi trendi (hero satırı) ===
+  const monthlyTrend = useMemo(() => {
+    const keys: string[] = [];
+    const now = new Date();
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      keys.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+    }
+    const buckets: Record<string, { ownSum: number; ownN: number; compSum: number; compN: number }> = {};
+    for (const k of keys) buckets[k] = { ownSum: 0, ownN: 0, compSum: 0, compN: 0 };
+    const mk = (iso: string) => iso.slice(0, 7);
+    for (const r of ownReviews) {
+      if (!r.posted_at || r.rating == null) continue;
+      const b = buckets[mk(r.posted_at)];
+      if (!b) continue;
+      b.ownSum += toIndex100(Number(r.rating), normalizePlatform(r.platform) ?? "google");
+      b.ownN += 1;
+    }
+    for (const r of compAllRows) {
+      if (!r.posted_at || r.rating == null) continue;
+      const b = buckets[mk(r.posted_at)];
+      if (!b) continue;
+      b.compSum += toIndex100(Number(r.rating), normalizePlatform(r.platform) ?? "google");
+      b.compN += 1;
+    }
+    return keys.map((k) => {
+      const b = buckets[k];
+      return {
+        month: k.slice(2),
+        you: b.ownN ? Math.round((b.ownSum / b.ownN) * 10) / 10 : null,
+        competitors: b.compN ? Math.round((b.compSum / b.compN) * 10) / 10 : null,
+      };
+    });
+  }, [ownReviews, compAllRows]);
+
+  const hasMonthlyTrend = monthlyTrend.some((d) => d.you != null || d.competitors != null);
+  const compBest = compIndexValues.length ? Math.max(...compIndexValues) : null;
+  const compBestName = useMemo(() => {
+    if (compBest == null) return null;
+    const hit = competitors.find((c) => compIndexInfo[c.id]?.index === compBest);
+    return hit?.name ?? null;
+  }, [compBest, competitors, compIndexInfo]);
+
+  const ownCountryCount = ownReviews.filter((r) => r.reviewer_country).length;
+
+  async function runTask(key: string, fn: () => Promise<void>) {
+    setBusyTask(key);
+    try {
+      await fn();
+    } finally {
+      setBusyTask(null);
+    }
+  }
+
+  const readiness = useMemo(() => {
+    const items: { key: string; text: string; action?: { label: string; kind: string } }[] = [];
+    if (competitors.length === 0) {
+      items.push({
+        key: "no-comp",
+        text: "Rakip seçilmedi",
+        action: { label: "Rakip Seçimine git", kind: "link" },
+      });
+      return items;
+    }
+    const withoutReviews = competitors.filter((c) => (compTotals[c.id] ?? 0) === 0).length;
+    if (withoutReviews > 0) {
+      items.push({
+        key: "no-comp-reviews",
+        text: `Rakip yorumları çekilmedi (${withoutReviews} rakip)`,
+        action: { label: "Yorumları çek", kind: "fetch" },
+      });
+    }
+    const pendingTopics = pendingTopicsQuery.data ?? 0;
+    if (pendingTopics > 0) {
+      items.push({
+        key: "pending-topics",
+        text: `Rakip yorumlarının konu analizi yapılmadı (${pendingTopics} yorum bekliyor)`,
+        action: { label: "Analizi başlat", kind: "topics" },
+      });
+    }
+    if (ownCountryCount === 0) {
+      items.push({
+        key: "no-country",
+        text: "Ülke bilgisi olan yorum yok — misafir ülke kırılımı için Booking veya TripAdvisor yorumlarının çekilmesi gerekiyor.",
+      });
+    }
+    return items;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [competitors, JSON.stringify(compTotals), pendingTopicsQuery.data, ownCountryCount]);
+
   // === Rekabet endeksi (RPI benzeri) + sade Türkçe özet ===
   const rpi = ownAvg != null && compAvgOfAvg ? (ownAvg / compAvgOfAvg) * 100 : null;
   const own5 = ownAvg != null ? ownAvg / 20 : null;
