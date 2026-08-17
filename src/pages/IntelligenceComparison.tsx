@@ -1167,7 +1167,7 @@ export default function IntelligenceComparison() {
                       <LineChart data={ratingTrend} margin={{ top: 8, right: 16, bottom: 4, left: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                         <XAxis dataKey="weekLabel" tick={{ fontSize: 10, fill: MUTED }} />
-                        <YAxis domain={[40, 100]} tick={{ fontSize: 10, fill: MUTED }} />
+                        <YAxis domain={[ratingTrendMin, 100]} tick={{ fontSize: 10, fill: MUTED }} />
                         <Tooltip
                           content={({ active, payload, label }) => {
                             if (!active || !payload?.length) return null;
