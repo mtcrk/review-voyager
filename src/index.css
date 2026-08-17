@@ -207,14 +207,13 @@ All colors MUST be HSL.
   display: none;
 }
 @media screen {
-  /* forceMount keeps inactive tab panels in the DOM — keep them hidden on screen */
+  /* forceMount panelleri DOM'da tutuyor — ekranda gizli kalsınlar */
   [role="tabpanel"][hidden],
   [role="tabpanel"][data-state="inactive"] {
     display: none !important;
   }
 }
 @media print {
-  /* Force a light theme on paper, regardless of dark mode */
   :root,
   html,
   body,
@@ -262,7 +261,6 @@ All colors MUST be HSL.
   [class*="border"] {
     border-color: #ccc !important;
   }
-  /* Print every tab panel, not just the active one */
   [role="tabpanel"],
   [role="tabpanel"][hidden],
   [role="tabpanel"][data-state="inactive"] {
@@ -281,9 +279,6 @@ All colors MUST be HSL.
   }
   .print-only {
     display: block !important;
-  }
-  body {
-    background: #fff;
   }
   .print-break {
     break-inside: avoid;
