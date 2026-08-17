@@ -1814,24 +1814,6 @@ function KpiCard({
   hint?: string;
   subHint?: string;
 }) {
-  label,
-  icon,
-  ownValue,
-  compValue,
-  format,
-  higherIsBetter,
-  hint,
-  subHint,
-}: {
-  label: string;
-  icon: React.ReactNode;
-  ownValue: number | null;
-  compValue: number | null;
-  format: (v: number) => string;
-  higherIsBetter?: boolean;
-  hint?: string;
-  subHint?: string;
-}) {
   let delta: number | null = null;
   if (ownValue != null && compValue != null && compValue !== 0) {
     delta = ownValue - compValue;
