@@ -1,7 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ResponsiveContainer,
   ScatterChart,
@@ -23,6 +23,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { normalizeRatingTo5 } from "@/lib/ratingScale";
+import { toast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,8 @@ import {
   AlertTriangle,
   CheckCircle2,
   ArrowRight,
+  Loader2,
+  ListChecks,
 } from "lucide-react";
 import { IntelligenceTabs } from "@/components/intelligence/IntelligenceTabs";
 import { TopicAnalysis } from "@/components/intelligence/TopicAnalysis";
@@ -79,6 +82,7 @@ type OwnReviewRow = {
   status: string | null;
   approved_reply: string | null;
   replied_at: string | null;
+  reviewer_country: string | null;
 };
 
 type CompAllRow = {
@@ -180,7 +184,7 @@ export default function IntelligenceComparison() {
           .eq("status", "confirmed"),
         supabase
           .from("reviews")
-          .select("platform,rating,posted_at,status,approved_reply,replied_at")
+          .select("platform,rating,posted_at,status,approved_reply,replied_at,reviewer_country")
           .eq("business_id", businessId!)
           .order("posted_at", { ascending: false })
           .limit(5000),
@@ -240,6 +244,23 @@ export default function IntelligenceComparison() {
   const compTotals = dataQuery.data?.compTotals ?? {};
   const compPlatformAgg = dataQuery.data?.compPlatformAgg ?? {};
   const compAllRows = dataQuery.data?.compAllRows ?? [];
+
+  const qc = useQueryClient();
+  const [busyTask, setBusyTask] = useState<string | null>(null);
+
+  const pendingTopicsQuery = useQuery({
+    queryKey: ["comparison-pending-topics", businessId, competitors.length],
+    enabled: !!businessId && competitors.length > 0,
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("ci_competitor_reviews")
+        .select("id", { count: "exact", head: true })
+        .in("competitor_id", competitors.map((c) => c.id))
+        .is("topics_extracted_at", null)
+        .not("body", "is", null);
+      return count ?? 0;
+    },
+  });
 
   const ownName = activeBusiness?.name ?? "Siz";
 
@@ -425,6 +446,96 @@ export default function IntelligenceComparison() {
 
   const hasRatingTrend = ratingTrend.some((d) => d.you != null || d.competitors != null);
 
+  // === 12 aylık itibar indeksi trendi (hero satırı) ===
+  const monthlyTrend = useMemo(() => {
+    const keys: string[] = [];
+    const now = new Date();
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      keys.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+    }
+    const buckets: Record<string, { ownSum: number; ownN: number; compSum: number; compN: number }> = {};
+    for (const k of keys) buckets[k] = { ownSum: 0, ownN: 0, compSum: 0, compN: 0 };
+    const mk = (iso: string) => iso.slice(0, 7);
+    for (const r of ownReviews) {
+      if (!r.posted_at || r.rating == null) continue;
+      const b = buckets[mk(r.posted_at)];
+      if (!b) continue;
+      b.ownSum += toIndex100(Number(r.rating), normalizePlatform(r.platform) ?? "google");
+      b.ownN += 1;
+    }
+    for (const r of compAllRows) {
+      if (!r.posted_at || r.rating == null) continue;
+      const b = buckets[mk(r.posted_at)];
+      if (!b) continue;
+      b.compSum += toIndex100(Number(r.rating), normalizePlatform(r.platform) ?? "google");
+      b.compN += 1;
+    }
+    return keys.map((k) => {
+      const b = buckets[k];
+      return {
+        month: k.slice(2),
+        you: b.ownN ? Math.round((b.ownSum / b.ownN) * 10) / 10 : null,
+        competitors: b.compN ? Math.round((b.compSum / b.compN) * 10) / 10 : null,
+      };
+    });
+  }, [ownReviews, compAllRows]);
+
+  const hasMonthlyTrend = monthlyTrend.some((d) => d.you != null || d.competitors != null);
+  const compBest = compIndexValues.length ? Math.max(...compIndexValues) : null;
+  const compBestName = useMemo(() => {
+    if (compBest == null) return null;
+    const hit = competitors.find((c) => compIndexInfo[c.id]?.index === compBest);
+    return hit?.name ?? null;
+  }, [compBest, competitors, compIndexInfo]);
+
+  const ownCountryCount = ownReviews.filter((r) => r.reviewer_country).length;
+
+  async function runTask(key: string, fn: () => Promise<void>) {
+    setBusyTask(key);
+    try {
+      await fn();
+    } finally {
+      setBusyTask(null);
+    }
+  }
+
+  const readiness = useMemo(() => {
+    const items: { key: string; text: string; action?: { label: string; kind: string } }[] = [];
+    if (competitors.length === 0) {
+      items.push({
+        key: "no-comp",
+        text: "Rakip seçilmedi",
+        action: { label: "Rakip Seçimine git", kind: "link" },
+      });
+      return items;
+    }
+    const withoutReviews = competitors.filter((c) => (compTotals[c.id] ?? 0) === 0).length;
+    if (withoutReviews > 0) {
+      items.push({
+        key: "no-comp-reviews",
+        text: `Rakip yorumları çekilmedi (${withoutReviews} rakip)`,
+        action: { label: "Yorumları çek", kind: "fetch" },
+      });
+    }
+    const pendingTopics = pendingTopicsQuery.data ?? 0;
+    if (pendingTopics > 0) {
+      items.push({
+        key: "pending-topics",
+        text: `Rakip yorumlarının konu analizi yapılmadı (${pendingTopics} yorum bekliyor)`,
+        action: { label: "Analizi başlat", kind: "topics" },
+      });
+    }
+    if (ownCountryCount === 0) {
+      items.push({
+        key: "no-country",
+        text: "Ülke bilgisi olan yorum yok — misafir ülke kırılımı için Booking veya TripAdvisor yorumlarının çekilmesi gerekiyor.",
+      });
+    }
+    return items;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [competitors, JSON.stringify(compTotals), pendingTopicsQuery.data, ownCountryCount]);
+
   // === Rekabet endeksi (RPI benzeri) + sade Türkçe özet ===
   const rpi = ownAvg != null && compAvgOfAvg ? (ownAvg / compAvgOfAvg) * 100 : null;
   const own5 = ownAvg != null ? ownAvg / 20 : null;
@@ -548,6 +659,12 @@ export default function IntelligenceComparison() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [competitors, ownName, JSON.stringify(ownPlatformAgg), JSON.stringify(compPlatformAgg)]);
 
+  const hasPlatformMatrix = platformMatrix.some((r) => r.cells.some((c) => c.avg != null));
+  const hasVolumeTrend = trendData.some((d) => d.you > 0 || d._compCount > 0);
+  const hasScatter = scatterCompetitors.length + scatterOwn.length > 0;
+  const hasIndexBars = ranked.some((r) => r.rating != null);
+  const hasVolumeBars = ranked.some((r) => r.review_count != null);
+
   if (businessLoading) {
     return (
       <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-6">
@@ -613,6 +730,96 @@ export default function IntelligenceComparison() {
             </div>
           )}
         </div>
+
+        {!loading && readiness.length > 0 && (
+          <Card className="border-amber-500/40 bg-amber-500/5">
+            <CardContent className="p-4 space-y-2">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <ListChecks className="h-4 w-4 text-amber-600" />
+                Veri hazırlığı
+              </div>
+              {readiness.map((item) => (
+                <div
+                  key={item.key}
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm"
+                >
+                  <span className="text-muted-foreground">{item.text}</span>
+                  {item.action?.kind === "link" && (
+                    <Button asChild size="sm" variant="outline" className="shrink-0">
+                      <Link to="/intelligence">{item.action.label}</Link>
+                    </Button>
+                  )}
+                  {item.action?.kind === "fetch" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="shrink-0"
+                      disabled={busyTask !== null}
+                      onClick={() =>
+                        runTask("fetch", async () => {
+                          const { error } = await supabase.functions.invoke(
+                            "fetch-competitor-reviews",
+                            { body: { business_id: businessId } },
+                          );
+                          if (error) {
+                            toast({
+                              title: "Başlatılamadı",
+                              description: error.message,
+                              variant: "destructive",
+                            });
+                            return;
+                          }
+                          toast({
+                            title: "Rakip yorumları toplanıyor",
+                            description: "İşlem arka planda sürüyor, birkaç dakika içinde tamamlanır.",
+                          });
+                          qc.invalidateQueries({ queryKey: ["comparison-v2", businessId] });
+                        })
+                      }
+                    >
+                      {busyTask === "fetch" ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : null}
+                      {item.action.label}
+                    </Button>
+                  )}
+                  {item.action?.kind === "topics" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="shrink-0"
+                      disabled={busyTask !== null}
+                      onClick={() =>
+                        runTask("topics", async () => {
+                          const { error } = await supabase.functions.invoke(
+                            "analyze-competitor-topics",
+                            { body: { business_id: businessId, limit: 80 } },
+                          );
+                          if (error) {
+                            toast({
+                              title: "Analiz başarısız",
+                              description: error.message,
+                              variant: "destructive",
+                            });
+                            return;
+                          }
+                          toast({ title: "Konu analizi tamamlandı" });
+                          qc.invalidateQueries({ queryKey: ["ci_review_topics", businessId] });
+                          qc.invalidateQueries({ queryKey: ["comparison-pending-topics"] });
+                        })
+                      }
+                    >
+                      {busyTask === "topics" ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : null}
+                      {item.action.label}
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
         {loading ? (
           <div className="space-y-4">
@@ -746,6 +953,92 @@ export default function IntelligenceComparison() {
               </CardContent>
             </Card>
 
+            {/* ===== HERO: indeks + comp-set + 12 aylık trend ===== */}
+            <Card>
+              <CardContent className="p-4 sm:p-5">
+                <div className="grid grid-cols-1 lg:grid-cols-[auto,1fr] gap-6 items-center">
+                  <div className="grid grid-cols-3 gap-4 sm:gap-6">
+                    <div>
+                      <div className="text-[11px] text-muted-foreground">İtibar indeksiniz</div>
+                      <div className="text-3xl font-semibold tabular-nums">
+                        {ownAvg != null ? ownAvg.toFixed(1) : "—"}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground">
+                        {fmtNum(ownIndexes.length)} yorum üzerinden
+                      </div>
+                    </div>
+                    <div className="border-l pl-4 sm:pl-6">
+                      <div className="text-[11px] text-muted-foreground">Comp-set ortalaması</div>
+                      <div className="text-3xl font-semibold tabular-nums text-muted-foreground">
+                        {compAvgOfAvg != null ? compAvgOfAvg.toFixed(1) : "—"}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground">
+                        {competitors.length} rakip üzerinden
+                      </div>
+                    </div>
+                    <div className="border-l pl-4 sm:pl-6">
+                      <div className="text-[11px] text-muted-foreground">Comp-set en iyisi</div>
+                      <div className="text-3xl font-semibold tabular-nums">
+                        {compBest != null ? compBest.toFixed(1) : "—"}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground truncate max-w-[140px]">
+                        {compBestName ?? "veri yok"}
+                      </div>
+                    </div>
+                  </div>
+                  {hasMonthlyTrend && (
+                    <div>
+                      <div className="text-[11px] text-muted-foreground mb-1">
+                        Son 12 ay — itibar indeksi (0-100)
+                      </div>
+                      <div className="h-24 w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={monthlyTrend} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
+                            <XAxis dataKey="month" tick={{ fontSize: 9, fill: MUTED }} interval={1} />
+                            <YAxis domain={[40, 100]} hide />
+                            <Tooltip
+                              content={({ active, payload, label }) => {
+                                if (!active || !payload?.length) return null;
+                                return (
+                                  <div className="rounded-md border bg-popover px-3 py-2 text-xs shadow-sm">
+                                    <div className="font-medium mb-1">{label}</div>
+                                    {payload.map((p) => (
+                                      <div key={p.dataKey} style={{ color: p.color }}>
+                                        {p.name}: {p.value == null ? "veri yok" : p.value}
+                                      </div>
+                                    ))}
+                                  </div>
+                                );
+                              }}
+                            />
+                            <Line
+                              type="monotone"
+                              dataKey="you"
+                              name={ownName}
+                              stroke={PRIMARY}
+                              strokeWidth={2}
+                              dot={false}
+                              connectNulls
+                            />
+                            <Line
+                              type="monotone"
+                              dataKey="competitors"
+                              name="Comp-set"
+                              stroke={MUTED}
+                              strokeWidth={1.5}
+                              strokeDasharray="4 4"
+                              dot={false}
+                              connectNulls
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Bu hafta ne yapmalı */}
             <ActionPack businessId={businessId} />
 
@@ -762,6 +1055,7 @@ export default function IntelligenceComparison() {
                 compValue={compAvgOfAvg}
                 format={(v) => v.toFixed(1)}
                 hint={own5 != null ? `5 üzerinden ${own5.toFixed(2)}` : undefined}
+                subHint={`${fmtNum(ownIndexes.length)} yorum üzerinden`}
                 higherIsBetter
               />
               <KpiCard
@@ -770,6 +1064,7 @@ export default function IntelligenceComparison() {
                 ownValue={ownTotal}
                 compValue={compAvgTotal}
                 format={fmtNum}
+                subHint={`${competitors.length} rakip ortalaması ile`}
                 higherIsBetter
               />
               <KpiCard
@@ -778,6 +1073,7 @@ export default function IntelligenceComparison() {
                 ownValue={ownReplyRate}
                 compValue={compReplyRate}
                 format={(v) => `${Math.round(v)}%`}
+                subHint={`${fmtNum(ownTotal)} yorum · rakip ${fmtNum(compAllRows.length)} yorum`}
                 higherIsBetter
               />
               <KpiCard
@@ -866,6 +1162,7 @@ export default function IntelligenceComparison() {
             )}
 
             {/* 90d hacim trendi */}
+            {hasVolumeTrend && (
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Son 90 gün — Yeni yorum hacmi</CardTitle>
@@ -919,11 +1216,13 @@ export default function IntelligenceComparison() {
                 </div>
               </CardContent>
             </Card>
+            )}
               </TabsContent>
 
               <TabsContent value="rakipler" className="space-y-4 mt-0">
 
             {/* Platform matrix */}
+            {hasPlatformMatrix && (
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Platform bazlı puan</CardTitle>
@@ -993,8 +1292,10 @@ export default function IntelligenceComparison() {
                 </p>
               </CardContent>
             </Card>
+            )}
 
             {/* Positioning map */}
+            {hasScatter && (
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Pazar Konumu</CardTitle>
@@ -1084,6 +1385,7 @@ export default function IntelligenceComparison() {
                 </div>
               </CardContent>
             </Card>
+            )}
 
             {/* Ranking table */}
             <Card>
@@ -1162,19 +1464,23 @@ export default function IntelligenceComparison() {
 
             {/* Bar charts */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <BarCard
-                title="İtibar indeksi karşılaştırması (0-100)"
-                rows={ranked}
-                dataKey="rating"
-                domain={[yMin, 100]}
-                formatter={(v) => v.toFixed(1)}
-              />
-              <BarCard
-                title="Yorum hacmi"
-                rows={ranked}
-                dataKey="review_count"
-                formatter={(v) => fmtNum(v)}
-              />
+              {hasIndexBars && (
+                <BarCard
+                  title="İtibar indeksi karşılaştırması (0-100)"
+                  rows={ranked}
+                  dataKey="rating"
+                  domain={[yMin, 100]}
+                  formatter={(v) => v.toFixed(1)}
+                />
+              )}
+              {hasVolumeBars && (
+                <BarCard
+                  title="Yorum hacmi"
+                  rows={ranked}
+                  dataKey="review_count"
+                  formatter={(v) => fmtNum(v)}
+                />
+              )}
             </div>
 
               </TabsContent>
@@ -1202,6 +1508,7 @@ function KpiCard({
   format,
   higherIsBetter,
   hint,
+  subHint,
 }: {
   label: string;
   icon: React.ReactNode;
@@ -1210,6 +1517,7 @@ function KpiCard({
   format: (v: number) => string;
   higherIsBetter?: boolean;
   hint?: string;
+  subHint?: string;
 }) {
   let delta: number | null = null;
   if (ownValue != null && compValue != null && compValue !== 0) {
@@ -1271,6 +1579,7 @@ function KpiCard({
         {compValue != null && hint ? (
           <div className="text-[11px] text-muted-foreground">{hint}</div>
         ) : null}
+        {subHint ? <div className="text-[11px] text-muted-foreground">{subHint}</div> : null}
       </CardContent>
     </Card>
   );
