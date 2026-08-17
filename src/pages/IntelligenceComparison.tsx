@@ -323,7 +323,13 @@ export default function IntelligenceComparison() {
 
   // Competitor reply rate + median response time (real data from scraped replies)
   const compRepliedCount = compAllRows.filter((r) => r.owner_reply_text).length;
-  const compReplyRate = compAllRows.length ? (compRepliedCount / compAllRows.length) * 100 : null;
+  // If not a single competitor reply was ever scraped, the data simply was not
+  // collected — reporting 0% would falsely claim competitors never reply.
+  const compReplyDataMissing = compRepliedCount === 0;
+  const compReplyRate =
+    compAllRows.length && !compReplyDataMissing
+      ? (compRepliedCount / compAllRows.length) * 100
+      : null;
 
   const ownResponseDays = ownReviews
     .map((r) => (r.posted_at && r.replied_at ? daysBetween(r.posted_at, r.replied_at) : null))
@@ -336,7 +342,7 @@ export default function IntelligenceComparison() {
         : null,
     )
     .filter((n): n is number => n != null);
-  const compMedianResponse = median(compResponseDays);
+  const compMedianResponse = compReplyDataMissing ? null : median(compResponseDays);
 
   // 30d competitor avg per competitor
   const comp30dPerComp: Record<string, number> = {};
