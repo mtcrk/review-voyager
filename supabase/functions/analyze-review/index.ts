@@ -567,6 +567,23 @@ Deno.serve(async (req) => {
         if (updErr) throw updErr;
 
         processed++;
+
+        // WhatsApp bildirimi — ana akışı bozmasın, sadece logla.
+        try {
+          const waRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/wa-notify`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+            },
+            body: JSON.stringify({ review_id: r.id }),
+          });
+          if (!waRes.ok) {
+            console.error("wa-notify call failed", waRes.status, await waRes.text());
+          }
+        } catch (waErr) {
+          console.error("wa-notify call error:", waErr instanceof Error ? waErr.message : waErr);
+        }
       } catch (e) {
         errors++;
         const message = serializeError(e);
