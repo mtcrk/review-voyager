@@ -155,8 +155,6 @@ Deno.serve(async (req) => {
     else if (payload === "optin_no") decision = "decline";
     else if (text === "durdur" || text === "stop") decision = "stop";
 
-    // TODO (Faz 2): approve / edit / skip buton aksiyonlarını burada işle.
-
     if (decision === "accept") {
       await admin
         .from("wa_recipients")
@@ -184,6 +182,90 @@ Deno.serve(async (req) => {
         to: from,
         body: "Anlaşıldı, bu numaraya bildirim göndermeyeceğiz.",
       });
+      return ok({ ok: true, decision });
+    }
+
+    // ---- Faz 2: approve / edit / skip + serbest metin ile düzenlenmiş cevap ----
+    const reply = (body: string) =>
+      sendFreeform({
+        businessId: recipient.business_id,
+        recipientId: recipient.id,
+        to: from,
+        body,
+      });
+
+    // Latest actionable pending action; expire stale ones first.
+    let action: any = null;
+    {
+      const { data: rows } = await admin
+        .from("wa_pending_actions")
+        .select("id, review_id, draft_reply, status, expires_at")
+        .eq("recipient_id", recipient.id)
+        .in("status", ["pending", "editing"])
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      for (const row of rows ?? []) {
+        if (new Date((row as any).expires_at).getTime() < now.getTime()) {
+          await admin.from("wa_pending_actions").update({ status: "expired" }).eq("id", (row as any).id);
+          continue;
+        }
+        action = row;
+        break;
+      }
+    }
+
+    const buttonAction =
+      payload === "approve" || payload === "edit" || payload === "skip" ? payload : null;
+
+    if (!action) {
+      if (buttonAction) {
+        await reply("Bu bildirimin süresi doldu veya cevabı zaten işlendi. Yeni yorumlarda tekrar görüşürüz.");
+        return ok({ ok: true, action: "expired" });
+      }
+      return ok({ ok: true, decision });
+    }
+
+    async function finishPublish(text: string) {
+      const result = await publishReply(admin, action.review_id, text);
+      if (!result.ok) {
+        await reply(`${result.message}`);
+        return false;
+      }
+      await admin
+        .from("wa_pending_actions")
+        .update({ status: "approved", consumed_at: now.toISOString(), resulting_reply: text })
+        .eq("id", action.id);
+      await reply(result.message);
+      return true;
+    }
+
+    if (buttonAction === "approve") {
+      const published = await finishPublish(action.draft_reply);
+      return ok({ ok: true, action: "approve", published });
+    }
+
+    if (buttonAction === "edit") {
+      await admin.from("wa_pending_actions").update({ status: "editing" }).eq("id", action.id);
+      await reply("Düzenlemek için aşağıdaki metni kopyalayıp değiştirerek gönderin:");
+      await reply(action.draft_reply);
+      return ok({ ok: true, action: "edit" });
+    }
+
+    if (buttonAction === "skip") {
+      await admin
+        .from("wa_pending_actions")
+        .update({ status: "skipped", consumed_at: now.toISOString() })
+        .eq("id", action.id);
+      await reply("Tamam, bu yorumu atladık.");
+      return ok({ ok: true, action: "skip" });
+    }
+
+    // Free-form text while editing → treat as the edited reply.
+    if (action.status === "editing" && (msg.body ?? "").trim().length > 0) {
+      const edited = (msg.body ?? "").trim();
+      const published = await finishPublish(edited);
+      return ok({ ok: true, action: "edited", published });
     }
 
     return ok({ ok: true, decision });
