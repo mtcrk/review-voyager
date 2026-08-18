@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTranslation } from "react-i18next";
 import { ReviewAnalysisPanel } from "@/components/reviews/ReviewAnalysisPanel";
+import { WhatsAppActionStatus } from "@/components/reviews/WhatsAppActionStatus";
 
 type ToneOption = "Friendly" | "Professional" | "Formal";
 const toneMap: Record<ToneOption, string> = {
@@ -388,6 +389,9 @@ const ReviewDetailPage = () => {
                 text={review.text || ""}
                 analysisStatus={(review as any).analysis_status}
               />
+              <div className="mt-4">
+                <WhatsAppActionStatus reviewId={review.id} />
+              </div>
             </CardContent>
           </Card>
 
