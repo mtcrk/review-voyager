@@ -167,6 +167,7 @@ Deno.serve(async (req) => {
         body:
           "Teşekkürler. Bundan sonra yeni yorumları buradan ileteceğiz. Çıkmak için istediğiniz zaman DURDUR yazabilirsiniz.",
       });
+      return ok({ ok: true, decision });
     } else if (decision === "decline" || decision === "stop") {
       await admin
         .from("wa_recipients")
