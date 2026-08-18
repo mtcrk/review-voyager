@@ -550,6 +550,21 @@ export function AppSidebar() {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
+                  asChild
+                  isActive={location.pathname === "/settings"}
+                  tooltip="Ayarlar"
+                >
+                  <NavLink
+                    to="/settings"
+                    className="flex items-center gap-3 transition-smooth"
+                  >
+                    <Settings className="h-5 w-5" />
+                    <span>Ayarlar</span>
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
                   tooltip="Çıkış Yap"
                 >
                   <button
