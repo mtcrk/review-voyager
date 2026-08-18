@@ -91,7 +91,6 @@ const commonItems = [
   { title: "Sosyal Medya Analizi", url: "/social-analytics", icon: Sparkles },
   { title: "Google Performance", url: "/performance", icon: TrendingUp },
   { title: "Rapor Oluştur", url: "/report", icon: FileText },
-  { title: "Ayarlar", url: "/settings", icon: Settings },
 ];
 
 const locationItems = [
