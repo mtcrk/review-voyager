@@ -15,13 +15,11 @@ function ok(body: unknown = { ok: true }) {
 }
 
 /** Twilio signature: base64(HMAC-SHA1(authToken, url + sorted(key+value)...)) */
-async function validTwilioSignature(
-  signature: string,
+async function twilioSignatureFor(
   url: string,
   params: Record<string, string>,
-): Promise<boolean> {
-  const token = Deno.env.get("TWILIO_AUTH_TOKEN");
-  if (!token || !signature) return false;
+  token: string,
+): Promise<string> {
   const data =
     url +
     Object.keys(params)
@@ -36,11 +34,34 @@ async function validTwilioSignature(
     ["sign"],
   );
   const mac = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(data));
-  const expected = btoa(String.fromCharCode(...new Uint8Array(mac)));
-  if (expected.length !== signature.length) return false;
+  return btoa(String.fromCharCode(...new Uint8Array(mac)));
+}
+
+function safeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
   let diff = 0;
-  for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ signature.charCodeAt(i);
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return diff === 0;
+}
+
+/**
+ * Supabase edge functions run behind a proxy, so req.url does not match the URL
+ * Twilio signed. Try the configured public URL first (WA_WEBHOOK_URL secret),
+ * then proxy-header-derived and raw variants.
+ */
+async function validTwilioSignature(
+  signature: string,
+  candidates: string[],
+  params: Record<string, string>,
+): Promise<{ valid: boolean; matched: string | null; tried: string[] }> {
+  const token = Deno.env.get("TWILIO_AUTH_TOKEN");
+  const unique = [...new Set(candidates.filter(Boolean))];
+  if (!token || !signature) return { valid: false, matched: null, tried: unique };
+  for (const url of unique) {
+    const expected = await twilioSignatureFor(url, params, token);
+    if (safeEqual(expected, signature)) return { valid: true, matched: url, tried: unique };
+  }
+  return { valid: false, matched: null, tried: unique };
 }
 
 function normalizeText(v: string): string {
@@ -75,18 +96,31 @@ Deno.serve(async (req) => {
       params = await clone.json().catch(() => ({}));
     }
 
-    const publicUrl = req.headers.get("X-Forwarded-Proto")
-      ? `${req.headers.get("X-Forwarded-Proto")}://${req.headers.get("host")}${new URL(req.url).pathname}${new URL(req.url).search}`
-      : req.url;
+    const parsed = new URL(req.url);
+    const proto = req.headers.get("X-Forwarded-Proto") ?? "https";
+    const host = req.headers.get("X-Forwarded-Host") ?? req.headers.get("host") ?? parsed.host;
+    const configured = Deno.env.get("WA_WEBHOOK_URL") ?? "";
+    const derived = `${proto}://${host}${parsed.pathname}${parsed.search}`;
+    const candidates = [
+      configured && parsed.search ? `${configured}${parsed.search}` : configured,
+      configured,
+      derived,
+      `${proto}://${host}${parsed.pathname}`,
+      req.url,
+    ];
 
-    const valid = await validTwilioSignature(signature, publicUrl, params);
+    const { valid, matched, tried } = await validTwilioSignature(signature, candidates, params);
     if (!valid) {
-      console.warn("wa-webhook: invalid Twilio signature");
+      console.warn(
+        "wa-webhook: invalid Twilio signature",
+        JSON.stringify({ derived, configured, tried, hasSignature: Boolean(signature) }),
+      );
       return new Response(JSON.stringify({ error: "Forbidden" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    console.log("wa-webhook: signature validated with URL", matched);
 
     const msg = await parseWebhook(req);
     if (!msg) return ok({ ok: true, ignored: true });
