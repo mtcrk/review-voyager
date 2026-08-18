@@ -223,7 +223,6 @@ export default function Settings() {
           
           <TabsTrigger value="brand-voice">Marka Sesi</TabsTrigger>
           <TabsTrigger value="notifications">Bildirimler</TabsTrigger>
-          <TabsTrigger value="whatsapp">WhatsApp Bildirimleri</TabsTrigger>
         </TabsList>
 
         {/* Profile Tab */}
@@ -419,13 +418,10 @@ export default function Settings() {
             </CardContent>
           </Card>
 
+          <WhatsAppRecipientsCard />
+
           <WeeklyReportCard />
           <BrowserPushCard />
-        </TabsContent>
-
-        {/* WhatsApp Notifications Tab */}
-        <TabsContent value="whatsapp" className="space-y-6">
-          <WhatsAppRecipientsCard />
         </TabsContent>
       </Tabs>
     </div>
