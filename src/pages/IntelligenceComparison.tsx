@@ -774,6 +774,10 @@ export default function IntelligenceComparison() {
         isOwn: false,
         cells: PLATFORMS.map((p) => {
           const agg = compPlatformAgg[c.id]?.[p.key];
+          // Google: prefer the official Place rating/count over the scraped sample
+          if (p.key === "google" && c.rating != null) {
+            return { platform: p.key, avg: c.rating, n: c.review_count ?? agg?.n ?? 0 };
+          }
           return { platform: p.key, avg: agg && agg.n ? agg.sum / agg.n : null, n: agg?.n ?? 0 };
         }),
       })),
