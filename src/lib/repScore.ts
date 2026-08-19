@@ -32,6 +32,25 @@ export interface ReviewData {
 
 const SUPPORTED_PLATFORMS = ['google', 'booking', 'tripadvisor', 'expedia', 'hotelscom'];
 
+/** Bileşen tavanları — puanlar asla tavanı geçmemeli. */
+export const COMPONENT_MAX: Record<keyof RepScoreBreakdown, number> = {
+  reviewSentiment: 250,
+  reviewVolume: 150,
+  reviewSpread: 100,
+  reviewRecency: 150,
+  reviewResponse: 200,
+  reviewQuality: 100,
+  aiVisibility: 50,
+};
+
+const clampComponent = (key: keyof RepScoreBreakdown, value: number) =>
+  Math.max(0, Math.min(Math.round(value), COMPONENT_MAX[key]));
+
+/** Bileşen yüzdesi — tavana göre, en fazla %100. */
+export function componentPercentage(key: keyof RepScoreBreakdown, value: number): number {
+  return Math.min(100, Math.round((clampComponent(key, value) / COMPONENT_MAX[key]) * 100));
+}
+
 export function calculateRepScore(reviews: ReviewData[]): RepScoreResult {
   if (reviews.length === 0) {
     const emptyBreakdown: RepScoreBreakdown = {
@@ -47,13 +66,13 @@ export function calculateRepScore(reviews: ReviewData[]): RepScoreResult {
   }
 
   const breakdown: RepScoreBreakdown = {
-    reviewSentiment: calcSentiment(reviews),
-    reviewVolume: calcVolume(reviews),
-    reviewSpread: calcSpread(reviews),
-    reviewRecency: calcRecency(reviews),
-    reviewResponse: calcResponse(reviews),
-    reviewQuality: calcQuality(reviews),
-    aiVisibility: calcAIVisibility(reviews),
+    reviewSentiment: clampComponent('reviewSentiment', calcSentiment(reviews)),
+    reviewVolume: clampComponent('reviewVolume', calcVolume(reviews)),
+    reviewSpread: clampComponent('reviewSpread', calcSpread(reviews)),
+    reviewRecency: clampComponent('reviewRecency', calcRecency(reviews)),
+    reviewResponse: clampComponent('reviewResponse', calcResponse(reviews)),
+    reviewQuality: clampComponent('reviewQuality', calcQuality(reviews)),
+    aiVisibility: clampComponent('aiVisibility', calcAIVisibility(reviews)),
   };
 
   const totalScore = Math.round(
@@ -69,9 +88,9 @@ export function calculateRepScore(reviews: ReviewData[]): RepScoreResult {
   return { totalScore, breakdown, ...getGrade(totalScore) };
 }
 
-// 1. Review Sentiment (0-250): Ortalama puan / 5 × 250
+// 1. Review Sentiment (0-250): 5'lik ölçeğe normalize edilmiş ortalama puan / 5 × 250
 function calcSentiment(reviews: ReviewData[]): number {
-  const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+  const avg = averageRating5(reviews);
   return Math.round((avg / 5) * 250);
 }
 
@@ -129,8 +148,7 @@ function calcAIVisibility(reviews: ReviewData[]): number {
   const analyzedCount = reviews.filter(r => r.sentiment).length;
   if (analyzedCount === 0) return 25; // Analiz yoksa orta puan
   const positiveRatio = positiveCount / analyzedCount;
-  const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
-  const ratingScore = avgRating / 5;
+  const ratingScore = averageRating5(reviews) / 5;
   return Math.round(((positiveRatio * 0.6 + ratingScore * 0.4)) * 50);
 }
 

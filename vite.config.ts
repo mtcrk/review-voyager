@@ -32,6 +32,38 @@ const PUBLIC_PATHS = [
   "/automations/other",
 ];
 
+// Protected app routes prerendered as a loading shell (see PRERENDER_APP_SHELL_PATHS
+// in src/routes.tsx). Without these files, direct URL entry / F5 falls back to the
+// prerendered landing HTML and hydration mismatches (React #418/#423) occur.
+const APP_SHELL_PATHS = [
+  "/dashboard",
+  "/reviews",
+  "/inbox",
+  "/locations",
+  "/locations/platform-ratings",
+  "/statistics",
+  "/report",
+  "/chat",
+  "/settings",
+  "/email",
+  "/performance",
+  "/rep-score",
+  "/google-accounts",
+  "/billing",
+  "/billing/checkout",
+  "/youtube",
+  "/social-analytics",
+  "/intelligence",
+  "/intelligence/karsilastirma",
+  "/konu-analizi",
+  "/ai-visibility",
+  "/story-kit",
+  "/channels/tiktok",
+  "/tiktok-inbox",
+  "/tiktok-review-kit",
+  "/tiktok-dm",
+];
+
 // https://vitejs.dev/config/
 // `ssgOptions` is consumed by vite-react-ssg and isn't part of Vite's UserConfig,
 // so we cast through `any` to keep TS happy without losing the rest of the config.
@@ -74,8 +106,9 @@ export default defineConfig(({ mode, isSsrBuild, command }) => {
       // eslint-disable-next-line no-console
       console.log("[ssg] includedRoutes input:", paths);
       const norm = (p: string) => (p.startsWith("/") ? p : `/${p}`);
-      const publicSet = new Set(PUBLIC_PATHS);
-      const result = new Set<string>(PUBLIC_PATHS);
+      const allowed = [...PUBLIC_PATHS, ...APP_SHELL_PATHS];
+      const publicSet = new Set(allowed);
+      const result = new Set<string>(allowed);
       for (const raw of paths) {
         const p = norm(raw);
         if (
