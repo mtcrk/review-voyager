@@ -661,7 +661,7 @@ export default function BillingCheckout() {
               />
               <label htmlFor="legal-consent" className="text-sm leading-relaxed cursor-pointer">
                 <a
-                  href="/mesafeli-satis-sozlesmesi"
+                  href="/mesafeli-satis-sozlesmesi/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline text-primary hover:opacity-80"
@@ -670,7 +670,7 @@ export default function BillingCheckout() {
                 </a>
                 'ni ve{" "}
                 <a
-                  href="/on-bilgilendirme-formu"
+                  href="/on-bilgilendirme-formu/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline text-primary hover:opacity-80"
@@ -683,7 +683,7 @@ export default function BillingCheckout() {
             <p className="text-xs text-muted-foreground px-1">
               Abonelik iptali ve iade koşulları için{" "}
               <a
-                href="/iptal-iade-kosullari"
+                href="/iptal-iade-kosullari/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline hover:text-foreground"

@@ -83,7 +83,7 @@ const OnlineItibarYonetimi = () => {
                   Google, Booking, TripAdvisor ve sosyal medyadaki müşteri yorumlarını toplama, AI ile yanıtlama, duygu analizi yapma ve operasyonel iyileştirmeye dönüştürme.
                 </p>
                 <p className="text-sm text-muted-foreground mb-3">
-                  <strong className="text-foreground">Kim yapar:</strong> Yorum yönetim platformları — <a href="/yorum-yonetim-araclari" className="text-primary hover:underline">VoyageRespond, Jetyorum, Esinix</a> gibi yazılım firmaları.
+                  <strong className="text-foreground">Kim yapar:</strong> Yorum yönetim platformları — <a href="/yorum-yonetim-araclari/" className="text-primary hover:underline">VoyageRespond, Jetyorum, Esinix</a> gibi yazılım firmaları.
                 </p>
                 <p className="text-sm text-muted-foreground">
                   <strong className="text-foreground">Ne zaman gerekir:</strong> <em>Her hafta</em>. Otel, restoran, çoklu lokasyon işletmeleri için sürekli ve operasyonel bir süreç.
@@ -156,10 +156,10 @@ const OnlineItibarYonetimi = () => {
 
           <h2 className="text-2xl font-bold mt-12 mb-4">Online İtibar Yönetimi Araçları</h2>
           <p className="text-muted-foreground leading-relaxed">
-            Yorum yönetimi tarafında piyasada birçok platform var: Yotpo, Birdeye, Podium, TrustYou, ReviewPro, Jetyorum, Esinix, MARA Solutions ve VoyageRespond. Her birinin güçlü olduğu sektör ve coğrafya farklı. Detaylı karşılaştırma için → <a href="/yorum-yonetim-araclari" className="text-primary hover:underline">En İyi Yorum Yönetim Araçları 2026: 12 Platform Karşılaştırması</a>.
+            Yorum yönetimi tarafında piyasada birçok platform var: Yotpo, Birdeye, Podium, TrustYou, ReviewPro, Jetyorum, Esinix, MARA Solutions ve VoyageRespond. Her birinin güçlü olduğu sektör ve coğrafya farklı. Detaylı karşılaştırma için → <a href="/yorum-yonetim-araclari/" className="text-primary hover:underline">En İyi Yorum Yönetim Araçları 2026: 12 Platform Karşılaştırması</a>.
           </p>
           <p className="text-muted-foreground leading-relaxed mt-3">
-            Google özelinde nasıl yönetileceğini adım adım öğrenmek isterseniz → <a href="/blog/google-yorumlarim-nasil-yonetilir" className="text-primary hover:underline">Google Yorumlarım Nasıl Yönetilir?</a> rehberi iyi bir başlangıç. Restoran sahibiyseniz → <a href="/restoran-yorum-cevaplari" className="text-primary hover:underline">Restoran Yorum Cevapları</a>, otelciyseniz → <a href="/platform/google-yorumlari-icin-yapay-zeka" className="text-primary hover:underline">Google yorumları için yapay zeka</a> sayfası daha uygulamaya yönelik.
+            Google özelinde nasıl yönetileceğini adım adım öğrenmek isterseniz → <a href="/blog/google-yorumlarim-nasil-yonetilir/" className="text-primary hover:underline">Google Yorumlarım Nasıl Yönetilir?</a> rehberi iyi bir başlangıç. Restoran sahibiyseniz → <a href="/restoran-yorum-cevaplari/" className="text-primary hover:underline">Restoran Yorum Cevapları</a>, otelciyseniz → <a href="/platform/google-yorumlari-icin-yapay-zeka/" className="text-primary hover:underline">Google yorumları için yapay zeka</a> sayfası daha uygulamaya yönelik.
           </p>
 
           <h2 className="text-2xl font-bold mt-12 mb-4">Kriz Anında İtibar Yönetimi</h2>

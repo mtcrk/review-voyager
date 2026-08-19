@@ -102,7 +102,7 @@ const SaglikItibarYonetimi = () => {
             <li><strong>Ekşi Sözlük</strong> — markalı arama yapan herkes ilk sayfada görür</li>
           </ul>
           <p className="text-muted-foreground mt-4">
-            6-7 farklı kanalı elle takip etmek haftada 2-3 saat alır. Hub bir araç ihtiyacını ortaya çıkarır — bkz. <a href="/yorum-yonetim-araclari" className="text-primary hover:underline">Yorum yönetim araçları karşılaştırması</a>.
+            6-7 farklı kanalı elle takip etmek haftada 2-3 saat alır. Hub bir araç ihtiyacını ortaya çıkarır — bkz. <a href="/yorum-yonetim-araclari/" className="text-primary hover:underline">Yorum yönetim araçları karşılaştırması</a>.
           </p>
 
           <h2 className="text-2xl font-bold mt-12 mb-4">Yasal Çerçeve: KVKK + 1219 + TTB</h2>
@@ -153,22 +153,22 @@ const SaglikItibarYonetimi = () => {
           <p className="text-muted-foreground mb-4">Her sağlık branşının yorum yönetiminde farklı dinamikleri var. Aşağıdaki spoke rehberleri ilgili alanınız için detaylı pratiği veriyor:</p>
 
           <div className="grid sm:grid-cols-2 gap-4 my-6">
-            <a href="/blog/doktor-yorumlari-nasil-yonetilir" className="block p-5 rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-md transition-all">
+            <a href="/blog/doktor-yorumlari-nasil-yonetilir/" className="block p-5 rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-md transition-all">
               <FileText className="w-5 h-5 text-primary mb-2" />
               <h3 className="font-semibold text-foreground mb-1">Doktor Yorumları Nasıl Yönetilir?</h3>
               <p className="text-sm text-muted-foreground">Hekimler için KVKK uyumlu yanıt çerçevesi, sahte yorumla mücadele ve AI destekli yanıt akışı.</p>
             </a>
-            <a href="/dis-hekimi-yorum-yonetimi" className="block p-5 rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-md transition-all">
+            <a href="/dis-hekimi-yorum-yonetimi/" className="block p-5 rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-md transition-all">
               <Stethoscope className="w-5 h-5 text-primary mb-2" />
               <h3 className="font-semibold text-foreground mb-1">Diş Hekimi & Diş Kliniği Yorum Yönetimi</h3>
               <p className="text-sm text-muted-foreground">Google, Doktorsitesi ve Doktortakvimi'nde diş hekimi için pratik yönetim rehberi.</p>
             </a>
-            <a href="/estetik-klinik-yorum-yonetimi" className="block p-5 rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-md transition-all">
+            <a href="/estetik-klinik-yorum-yonetimi/" className="block p-5 rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-md transition-all">
               <Activity className="w-5 h-5 text-primary mb-2" />
               <h3 className="font-semibold text-foreground mb-1">Estetik Klinik & Güzellik Merkezi Yorum Yönetimi</h3>
               <p className="text-sm text-muted-foreground">Estetik ve güzellik merkezlerinin yüksek hassasiyetli yorum yönetimi rehberi.</p>
             </a>
-            <a href="/blog/sahte-saglik-yorumu-sikayet" className="block p-5 rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-md transition-all">
+            <a href="/blog/sahte-saglik-yorumu-sikayet/" className="block p-5 rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-md transition-all">
               <ShieldCheck className="w-5 h-5 text-primary mb-2" />
               <h3 className="font-semibold text-foreground mb-1">Sahte Sağlık Yorumu Nasıl Şikayet Edilir?</h3>
               <p className="text-sm text-muted-foreground">Google + 5651 m.9 + savcılık — sahte yoruma karşı yasal yol haritası.</p>

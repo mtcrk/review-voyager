@@ -94,7 +94,7 @@ const DisHekimiYorumYonetimi = () => {
             Yanıtta <strong>kanal tedavisi, implant, ortodonti, beyazlatma</strong> gibi prosedür adlarını doğrulamayın — KVKK md. 6 ihlali. "Geri bildiriminiz için teşekkür ederiz, detaylı görüşme için lütfen kliniğimize 0XXX'dan ulaşın" kuralı diş hekimliğinde de değişmez.
           </p>
           <p className="text-muted-foreground mt-3">
-            Detaylı KVKK çerçevesi için: <a href="/blog/doktor-yorumlari-nasil-yonetilir" className="text-primary hover:underline">Doktor yorumları nasıl yönetilir rehberi</a>.
+            Detaylı KVKK çerçevesi için: <a href="/blog/doktor-yorumlari-nasil-yonetilir/" className="text-primary hover:underline">Doktor yorumları nasıl yönetilir rehberi</a>.
           </p>
 
           <h2 className="text-2xl font-bold mt-12 mb-4">Diş Hekimi için Hazır Yanıt Şablonları</h2>
@@ -132,7 +132,7 @@ const DisHekimiYorumYonetimi = () => {
             <div className="flex items-start gap-3">
               <ShieldCheck className="w-5 h-5 text-amber-700 mt-0.5 shrink-0" />
               <div className="text-sm text-amber-900">
-                <strong>Dürüstlük notu:</strong> VoyageRespond yorum silme servisi değildir — yorum yönetim aracıdır. Sahte yorumla mücadele için <a href="/blog/sahte-saglik-yorumu-sikayet" className="underline">resmi yasal süreç rehberini</a> okuyun.
+                <strong>Dürüstlük notu:</strong> VoyageRespond yorum silme servisi değildir — yorum yönetim aracıdır. Sahte yorumla mücadele için <a href="/blog/sahte-saglik-yorumu-sikayet/" className="underline">resmi yasal süreç rehberini</a> okuyun.
               </div>
             </div>
           </div>

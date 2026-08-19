@@ -145,9 +145,9 @@ const ZincirRestoranYorumYonetimi = () => {
             VoyageRespond bu kanalların hepsinden yorumları çeker (Google için doğrudan API, Yemeksepeti ve Getir için resmi entegrasyon yoluyla); şube bazında ayrıştırır ve tek inbox'ta gösterir. Detaylı kanal-spesifik rehberler:
           </p>
           <ul className="space-y-2 text-muted-foreground mt-4">
-            <li>→ <a href="/blog/yemeksepeti-yorum-cevaplama-rehberi" className="text-primary hover:underline">Yemeksepeti Yorum Cevaplama Rehberi 2026</a></li>
-            <li>→ <a href="/blog/getir-yemek-yorum-yonetimi" className="text-primary hover:underline">Getir Yemek Yorum Yönetimi: Restoranlar için Rehber</a></li>
-            <li>→ <a href="/blog/restoran-google-yorum-puani-yukseltme" className="text-primary hover:underline">Restoran Google Yorum Puanı Nasıl Yükseltilir?</a></li>
+            <li>→ <a href="/blog/yemeksepeti-yorum-cevaplama-rehberi/" className="text-primary hover:underline">Yemeksepeti Yorum Cevaplama Rehberi 2026</a></li>
+            <li>→ <a href="/blog/getir-yemek-yorum-yonetimi/" className="text-primary hover:underline">Getir Yemek Yorum Yönetimi: Restoranlar için Rehber</a></li>
+            <li>→ <a href="/blog/restoran-google-yorum-puani-yukseltme/" className="text-primary hover:underline">Restoran Google Yorum Puanı Nasıl Yükseltilir?</a></li>
           </ul>
 
           <h2 className="text-2xl font-bold mt-12 mb-4">Operasyonel Akış: 10 Şubeli Zincir İçin Örnek</h2>
@@ -193,10 +193,10 @@ const ZincirRestoranYorumYonetimi = () => {
 
           <h2 className="text-2xl font-bold mt-12 mb-4">İlgili İçerikler</h2>
           <ul className="space-y-2 text-muted-foreground">
-            <li>→ <a href="/yorum-yonetim-araclari" className="text-primary hover:underline">Yorum Yönetim Araçları Karşılaştırması</a></li>
-            <li>→ <a href="/restoran-yorum-cevaplari" className="text-primary hover:underline">Restoran Yorum Cevap Şablonları</a></li>
-            <li>→ <a href="/restoran-musteri-memnuniyeti" className="text-primary hover:underline">Restoran Müşteri Memnuniyeti</a></li>
-            <li>→ <a href="/platform/google-yorumlari-icin-yapay-zeka" className="text-primary hover:underline">Google Yorumları için Yapay Zeka</a></li>
+            <li>→ <a href="/yorum-yonetim-araclari/" className="text-primary hover:underline">Yorum Yönetim Araçları Karşılaştırması</a></li>
+            <li>→ <a href="/restoran-yorum-cevaplari/" className="text-primary hover:underline">Restoran Yorum Cevap Şablonları</a></li>
+            <li>→ <a href="/restoran-musteri-memnuniyeti/" className="text-primary hover:underline">Restoran Müşteri Memnuniyeti</a></li>
+            <li>→ <a href="/platform/google-yorumlari-icin-yapay-zeka/" className="text-primary hover:underline">Google Yorumları için Yapay Zeka</a></li>
           </ul>
         </article>
 
@@ -232,12 +232,12 @@ const ZincirRestoranYorumYonetimi = () => {
         <div className="mt-12 p-6 rounded-xl bg-muted/50 border border-border">
           <h3 className="font-semibold text-foreground mb-4">İlgili Rehberler</h3>
           <ul className="space-y-2">
-            <li><a href="/blog/yemeksepeti-yorum-cevaplama-rehberi" className="text-primary hover:underline text-sm">Yemeksepeti Yorum Cevaplama Rehberi 2026 →</a></li>
-            <li><a href="/blog/getir-yemek-yorum-yonetimi" className="text-primary hover:underline text-sm">Getir Yemek Yorum Yönetimi →</a></li>
-            <li><a href="/blog/restoran-google-yorum-puani-yukseltme" className="text-primary hover:underline text-sm">Restoran Google Yorum Puanı Nasıl Yükseltilir? →</a></li>
-            <li><a href="/restoran-musteri-memnuniyeti" className="text-primary hover:underline text-sm">Restoran Müşteri Memnuniyeti →</a></li>
-            <li><a href="/restoran-yorum-cevaplari" className="text-primary hover:underline text-sm">Restoran Yorum Cevap Şablonları →</a></li>
-            <li><a href="/yorum-yonetim-araclari" className="text-primary hover:underline text-sm">Yorum Yönetim Araçları →</a></li>
+            <li><a href="/blog/yemeksepeti-yorum-cevaplama-rehberi/" className="text-primary hover:underline text-sm">Yemeksepeti Yorum Cevaplama Rehberi 2026 →</a></li>
+            <li><a href="/blog/getir-yemek-yorum-yonetimi/" className="text-primary hover:underline text-sm">Getir Yemek Yorum Yönetimi →</a></li>
+            <li><a href="/blog/restoran-google-yorum-puani-yukseltme/" className="text-primary hover:underline text-sm">Restoran Google Yorum Puanı Nasıl Yükseltilir? →</a></li>
+            <li><a href="/restoran-musteri-memnuniyeti/" className="text-primary hover:underline text-sm">Restoran Müşteri Memnuniyeti →</a></li>
+            <li><a href="/restoran-yorum-cevaplari/" className="text-primary hover:underline text-sm">Restoran Yorum Cevap Şablonları →</a></li>
+            <li><a href="/yorum-yonetim-araclari/" className="text-primary hover:underline text-sm">Yorum Yönetim Araçları →</a></li>
           </ul>
         </div>
       </section>

@@ -103,12 +103,12 @@ const EstetikKlinikYorumYonetimi = () => {
           </blockquote>
 
           <p className="text-muted-foreground mt-3">
-            Tüm yanıtlarda <strong>prosedür adı (rinoplasti, botoks, lazer, dolgu) doğrulanmaz, sonuç vaadi verilmez, indirim / kampanya yer almaz</strong>. Detaylı çerçeve: <a href="/blog/doktor-yorumlari-nasil-yonetilir" className="text-primary hover:underline">Doktor yorumları nasıl yönetilir rehberi</a>.
+            Tüm yanıtlarda <strong>prosedür adı (rinoplasti, botoks, lazer, dolgu) doğrulanmaz, sonuç vaadi verilmez, indirim / kampanya yer almaz</strong>. Detaylı çerçeve: <a href="/blog/doktor-yorumlari-nasil-yonetilir/" className="text-primary hover:underline">Doktor yorumları nasıl yönetilir rehberi</a>.
           </p>
 
           <h2 className="text-2xl font-bold mt-12 mb-4">Sahte Yorumla Mücadele</h2>
           <p className="text-muted-foreground">
-            Estetik sektörü, rakip kaynaklı sahte yoruma en sık maruz kalan alanlardan biri. Yapılacak yasal süreç: Google Business Profile şikayeti → Google Legal Removal formu → 5651 m.9 ile Sulh Ceza Hâkimliği başvurusu → gerekirse TCK 125/267 savcılık. Tüm adımlar: <a href="/blog/sahte-saglik-yorumu-sikayet" className="text-primary hover:underline">Sahte sağlık yorumu şikayet rehberi</a>.
+            Estetik sektörü, rakip kaynaklı sahte yoruma en sık maruz kalan alanlardan biri. Yapılacak yasal süreç: Google Business Profile şikayeti → Google Legal Removal formu → 5651 m.9 ile Sulh Ceza Hâkimliği başvurusu → gerekirse TCK 125/267 savcılık. Tüm adımlar: <a href="/blog/sahte-saglik-yorumu-sikayet/" className="text-primary hover:underline">Sahte sağlık yorumu şikayet rehberi</a>.
           </p>
 
           <div className="my-8 p-5 rounded-xl border border-amber-300/40 bg-amber-50/50">

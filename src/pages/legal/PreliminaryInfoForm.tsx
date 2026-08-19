@@ -106,7 +106,7 @@ export default function PreliminaryInfoForm({
               Abonelik, panel üzerinden her zaman iptal edilebilir. İptal hâlinde içinde bulunulan
               abonelik döneminin sonuna kadar hizmete erişim devam eder ve sonraki dönem için
               tahsilat yapılmaz. Ayrıntılar için{" "}
-              <a href="/iptal-iade-kosullari" className="underline">İptal &amp; İade Koşulları</a>{" "}
+              <a href="/iptal-iade-kosullari/" className="underline">İptal &amp; İade Koşulları</a>{" "}
               sayfasına bakınız.
             </p>
           </Section>
