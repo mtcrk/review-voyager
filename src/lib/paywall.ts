@@ -2,7 +2,6 @@
 // Bu hesaplar için Checkout'ta sadece Otel planı ve iki opsiyonel modül gösterilir.
 /** E-posta → zorunlu plan segmenti */
 export const FORCED_CHECKOUT_SEGMENTS: Record<string, "hotel" | "restaurant" | "salon" | "clinic"> = {
-  "starlight@voyagerespond.com": "hotel",
   "sales@inciclasshotel.com.tr": "hotel",
   "justpatron@gmail.com": "restaurant",
   "cihan.gurani@odarama.com": "hotel",
