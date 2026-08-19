@@ -36,7 +36,6 @@ export default function RepScore() {
   const components = (Object.entries(score.breakdown) as [keyof RepScoreBreakdown, number][])
     .map(([key, value]) => ({
       key,
-      value,
       ...COMPONENT_INFO[key],
       value: Math.min(value, COMPONENT_INFO[key].maxScore),
       percentage: componentPercentage(key, value),
