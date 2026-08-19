@@ -716,7 +716,7 @@ export default function IntelligenceComparison() {
       const d = compMedianResponse - ownMedianResponse;
       list.push({
         label: "Yanıt hızı",
-        text: `Rakiplerden ${Math.abs(d).toFixed(1)} gün ${d >= 0 ? "daha hızlı" : "daha yavaş"} cevaplıyorsunuz`,
+        text: `Rakiplerden ${fmtResponseDays(Math.abs(d))} ${d >= 0 ? "daha hızlı" : "daha yavaş"} cevaplıyorsunuz`,
         good: d >= 0,
       });
     }
@@ -1568,6 +1568,7 @@ export default function IntelligenceComparison() {
                         name="Yorum"
                         domain={[0, xMax]}
                         tick={{ fontSize: 11, fill: MUTED }}
+                        tickFormatter={(v: number) => fmtNum(v)}
                         label={{
                           value: "Yorum sayısı",
                           position: "insideBottom",
