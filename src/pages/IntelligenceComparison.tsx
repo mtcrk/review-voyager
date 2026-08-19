@@ -774,6 +774,10 @@ export default function IntelligenceComparison() {
         isOwn: false,
         cells: PLATFORMS.map((p) => {
           const agg = compPlatformAgg[c.id]?.[p.key];
+          // Google: prefer the official Place rating/count over the scraped sample
+          if (p.key === "google" && c.rating != null) {
+            return { platform: p.key, avg: c.rating, n: c.review_count ?? agg?.n ?? 0 };
+          }
           return { platform: p.key, avg: agg && agg.n ? agg.sum / agg.n : null, n: agg?.n ?? 0 };
         }),
       })),
@@ -1481,8 +1485,9 @@ export default function IntelligenceComparison() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Platform bazlı puan</CardTitle>
                 <p className="text-xs text-muted-foreground">
-                  Her platformdaki ortalama puan, platformun kendi ölçeğinde gösterilir
-                  (toplanmış rakip yorumlarından) — kolon içi karşılaştırma adildir.
+                  Her platformdaki ortalama puan, platformun kendi ölçeğinde gösterilir.
+                  Google kolonu rakiplerin resmî Google puanı ve toplam yorum sayısıdır;
+                  diğer kolonlar toplanan yorumların ortalamasıdır.
                 </p>
               </CardHeader>
               <CardContent className="p-0">
