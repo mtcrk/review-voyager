@@ -1,5 +1,6 @@
-import { Navigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { usePaywall } from "@/hooks/usePaywall";
+import { PaywallNotice } from "@/components/PaywallNotice";
 
 /**
  * Global paywall guard: forces certain accounts to the checkout page
@@ -25,5 +26,5 @@ export function PaywallGuard() {
   if (!mustPay) return null;
   if (ALLOWED.some((p) => location.pathname.startsWith(p))) return null;
 
-  return <Navigate to="/billing/checkout" replace />;
+  return <PaywallNotice overlay />;
 }
