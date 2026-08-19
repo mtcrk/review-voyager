@@ -212,3 +212,38 @@ export const PRERENDER_PUBLIC_PATHS = [
   "/automations/whatsapp",
   "/automations/other",
 ];
+
+// Protected app routes. These are prerendered as an *app shell* (ProtectedRoute
+// renders only a loading spinner while the session is resolving, which is
+// exactly what the client renders on first paint). Prerendering them prevents
+// the SPA fallback from serving the prerendered marketing page HTML on direct
+// URL entry / F5, which caused React #418/#423 hydration mismatches and the
+// landing page appearing instead of the app.
+export const PRERENDER_APP_SHELL_PATHS = [
+  "/dashboard",
+  "/reviews",
+  "/inbox",
+  "/locations",
+  "/locations/platform-ratings",
+  "/statistics",
+  "/report",
+  "/chat",
+  "/settings",
+  "/email",
+  "/performance",
+  "/rep-score",
+  "/google-accounts",
+  "/billing",
+  "/billing/checkout",
+  "/youtube",
+  "/social-analytics",
+  "/intelligence",
+  "/intelligence/karsilastirma",
+  "/konu-analizi",
+  "/ai-visibility",
+  "/story-kit",
+  "/channels/tiktok",
+  "/tiktok-inbox",
+  "/tiktok-review-kit",
+  "/tiktok-dm",
+];

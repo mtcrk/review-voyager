@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
+import { averageRating5 } from "@/lib/ratingScale";
 import {
   TrendingUp,
   TrendingDown,
@@ -58,7 +59,7 @@ export function ActionPack({ businessId }: { businessId: string }) {
           .eq("status", "confirmed"),
         supabase
           .from("reviews")
-          .select("rating,status,approved_reply,posted_at,replied_at")
+          .select("rating,platform,status,approved_reply,posted_at,replied_at")
           .eq("business_id", businessId)
           .order("posted_at", { ascending: false })
           .limit(1000),
@@ -115,8 +116,11 @@ export function ActionPack({ businessId }: { businessId: string }) {
   const { biz, comps, ownReviews, topics, compReviews, topicRows } = data;
 
   // ===== Card 1: Pricing & Positioning =====
-  const ownRatings = ownReviews.map((r) => r.rating).filter((n) => n != null) as number[];
-  const ownAvg = ownRatings.length ? ownRatings.reduce((a, b) => a + b, 0) / ownRatings.length : null;
+  // Rakip puanları Google'ın 5'lik ölçeğinde. Kendi puanımız çok platformlu
+  // (Booking 10, Hotels.com 10, TripAdvisor 5...) olduğu için önce 5'lik ölçeğe
+  // normalize ediyoruz — aksi halde kıyas ters yön veriyor.
+  const ownRatedReviews = ownReviews.filter((r) => r.rating != null) as { rating: number; platform: string | null }[];
+  const ownAvg = ownRatedReviews.length ? averageRating5(ownRatedReviews) : null;
 
   // Peer set: same segment OR same star (loose match for thin data)
   const peers = comps.filter((c: any) => {
@@ -147,17 +151,18 @@ export function ActionPack({ businessId }: { businessId: string }) {
       title: "Daha fazla veri gerekli",
       detail: "Kendi yorumlarınızı bağlayın ve segment + yıldız bilgisini girin.",
     };
+  } else if (ownAvg < peerAvg) {
+    // Normalize edilmiş kıyasta emsalin altındaysak fiyat artışı ASLA önerilmez.
+    priceVerdict = {
+      tone: "bad",
+      title: "Fiyatı sabit tutun",
+      detail: `Puanınız (${ownAvg.toFixed(2)}) emsal ortalamasının (${peerAvg.toFixed(2)}) altında — aynı 5'lik ölçekte. Önce tekrar eden şikayet konularını kapatın, fiyat artışını erteleyin.`,
+    };
   } else if (ownAvg >= peerAvg + 0.2 && (ownPriceEur == null || peerPriceEur == null || ownPriceEur <= peerPriceEur)) {
     priceVerdict = {
       tone: "good",
       title: "Fiyatı yukarı çekme fırsatı",
       detail: `Puanınız emsalin ${(ownAvg - peerAvg).toFixed(1)} üzerinde. %5-10 fiyat artışını test edin.`,
-    };
-  } else if (ownAvg <= peerAvg - 0.2) {
-    priceVerdict = {
-      tone: "bad",
-      title: "Fiyatı sabit tutun",
-      detail: "Puan emsalin altında. Önce operasyonel sorunları çözmeden fiyat artışı riskli.",
     };
   } else if (ownPriceEur != null && peerPriceEur != null && ownPriceEur > peerPriceEur * 1.1) {
     priceVerdict = {
@@ -261,11 +266,11 @@ export function ActionPack({ businessId }: { businessId: string }) {
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Puanınız</span>
+            <span className="text-muted-foreground">Puanınız (5 üzerinden)</span>
             <span className="font-semibold">{ownAvg != null ? ownAvg.toFixed(2) : "—"}</span>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Emsal ortalama</span>
+            <span className="text-muted-foreground">Emsal ortalama (5 üzerinden)</span>
             <span className="font-semibold">{peerAvg != null ? peerAvg.toFixed(2) : "—"}</span>
           </div>
           {(ownPriceEur != null || peerPriceEur != null) && (

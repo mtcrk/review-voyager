@@ -5,7 +5,7 @@ import { Trophy, TrendingUp, TrendingDown, Info, MapPin } from "lucide-react";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { calculateRepScore, COMPONENT_INFO, RepScoreBreakdown, ReviewData } from "@/lib/repScore";
+import { calculateRepScore, COMPONENT_INFO, componentPercentage, RepScoreBreakdown, ReviewData } from "@/lib/repScore";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function RepScore() {
@@ -36,9 +36,9 @@ export default function RepScore() {
   const components = (Object.entries(score.breakdown) as [keyof RepScoreBreakdown, number][])
     .map(([key, value]) => ({
       key,
-      value,
       ...COMPONENT_INFO[key],
-      percentage: Math.round((value / COMPONENT_INFO[key].maxScore) * 100),
+      value: Math.min(value, COMPONENT_INFO[key].maxScore),
+      percentage: componentPercentage(key, value),
     }))
     .sort((a, b) => b.percentage - a.percentage);
 

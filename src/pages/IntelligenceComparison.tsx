@@ -153,6 +153,13 @@ function fmtRating(n: number | null | undefined) {
   if (n == null) return "—";
   return n.toFixed(1);
 }
+/** Yanıt süresi — 1 günün altında saat, üstünde gün olarak. ActionPack ile aynı dil. */
+function fmtResponseDays(v: number) {
+  const hours = v * 24;
+  if (hours < 1) return "<1 sa";
+  if (hours < 48) return `${Math.round(hours)} sa`;
+  return `${Math.round(v)} gün`;
+}
 function truncate(s: string, n = 18) {
   return s.length > n ? s.slice(0, n - 1) + "…" : s;
 }
@@ -442,10 +449,13 @@ export default function IntelligenceComparison() {
     if (!r.posted_at || r.posted_at < since30) continue;
     comp30dPerComp[r.competitor_id] = (comp30dPerComp[r.competitor_id] ?? 0) + 1;
   }
+  // Rakip tarafında hiç toplanmış yorum yoksa "0" bir değer değil, veri eksikliğidir.
+  const compVolumeDataMissing = compReviews90.length === 0;
   const comp30dValues = competitors.map((c) => comp30dPerComp[c.id] ?? 0);
-  const compAvg30d = comp30dValues.length
-    ? comp30dValues.reduce((a, b) => a + b, 0) / comp30dValues.length
-    : null;
+  const compAvg30d =
+    compVolumeDataMissing || comp30dValues.length === 0
+      ? null
+      : comp30dValues.reduce((a, b) => a + b, 0) / comp30dValues.length;
 
   // === Ranking ===
   const ranked = useMemo(() => {
@@ -706,7 +716,7 @@ export default function IntelligenceComparison() {
       const d = compMedianResponse - ownMedianResponse;
       list.push({
         label: "Yanıt hızı",
-        text: `Rakiplerden ${Math.abs(d).toFixed(1)} gün ${d >= 0 ? "daha hızlı" : "daha yavaş"} cevaplıyorsunuz`,
+        text: `Rakiplerden ${fmtResponseDays(Math.abs(d))} ${d >= 0 ? "daha hızlı" : "daha yavaş"} cevaplıyorsunuz`,
         good: d >= 0,
       });
     }
@@ -742,7 +752,7 @@ export default function IntelligenceComparison() {
   const yMin = allRatings.length ? Math.max(0, Math.floor(Math.min(...allRatings) / 5) * 5 - 5) : 50;
   const yMax = 100;
   const allX = [...scatterCompetitors.map((d) => d.x), ...scatterOwn.map((d) => d.x)];
-  const xMax = allX.length ? Math.max(...allX) * 1.1 : 100;
+  const xMax = allX.length ? Math.ceil(Math.max(...allX) * 1.1) : 100;
   const xMid = xMax / 2;
   const yMid = (yMin + yMax) / 2;
 
@@ -1314,11 +1324,11 @@ export default function IntelligenceComparison() {
                 higherIsBetter
               />
               <KpiCard
-                label="Ort. yanıt süresi"
+                label="Medyan yanıt süresi"
                 icon={<Clock className="h-4 w-4" />}
                 ownValue={ownMedianResponse}
                 compValue={compMedianResponse}
-                format={(v) => `${v.toFixed(1)} gün`}
+                format={fmtResponseDays}
                 hint={
                   compReplyDataMissing
                     ? "Rakip yanıt verisi henüz toplanmadı"
@@ -1332,6 +1342,7 @@ export default function IntelligenceComparison() {
                 ownValue={own30d}
                 compValue={compAvg30d}
                 format={fmtNum}
+                hint={compVolumeDataMissing ? "Rakip yorumları henüz toplanmadı" : undefined}
                 higherIsBetter
               />
             </div>
@@ -1557,6 +1568,7 @@ export default function IntelligenceComparison() {
                         name="Yorum"
                         domain={[0, xMax]}
                         tick={{ fontSize: 11, fill: MUTED }}
+                        tickFormatter={(v: number) => fmtNum(v)}
                         label={{
                           value: "Yorum sayısı",
                           position: "insideBottom",
@@ -1819,7 +1831,7 @@ function KpiCard({
   subHint?: string;
 }) {
   let delta: number | null = null;
-  if (ownValue != null && compValue != null && compValue !== 0) {
+  if (ownValue != null && compValue != null) {
     delta = ownValue - compValue;
   }
   const positive = delta != null && delta > 0;

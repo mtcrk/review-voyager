@@ -1,6 +1,6 @@
 import "./ssr-shims";
 import { ViteReactSSG } from "vite-react-ssg";
-import { routes, PRERENDER_PUBLIC_PATHS } from "./routes";
+import { routes, PRERENDER_PUBLIC_PATHS, PRERENDER_APP_SHELL_PATHS } from "./routes";
 import "./index.css";
 import "./i18n/config";
 
@@ -13,8 +13,9 @@ export const createRoot = ViteReactSSG({ routes });
 // have no params left so they survive.
 export function includedRoutes(paths: string[]): string[] {
   const norm = (p: string) => (p.startsWith("/") ? p : `/${p}`);
-  const publicSet = new Set(PRERENDER_PUBLIC_PATHS);
-  const out = new Set<string>(PRERENDER_PUBLIC_PATHS);
+  const allowed = [...PRERENDER_PUBLIC_PATHS, ...PRERENDER_APP_SHELL_PATHS];
+  const publicSet = new Set(allowed);
+  const out = new Set<string>(allowed);
   for (const raw of paths) {
     const p = norm(raw);
     if (publicSet.has(p)) out.add(p);

@@ -138,10 +138,22 @@ async function callAi(model: string, systemPrompt: string, userPrompt: string, m
 // out the reply comes back as a truncated fragment. Retry with a bigger budget.
 async function callAiSafe(model: string, systemPrompt: string, userPrompt: string, maxTokens: number, apiKey: string) {
   let out = await callAi(model, systemPrompt, userPrompt, maxTokens, apiKey);
-  if (out.length < 60) {
+  if (out.length < 60 || !looksComplete(out)) {
     out = await callAi(model, systemPrompt, userPrompt, maxTokens * 3, apiKey);
   }
+  if (out.length < 60 || !looksComplete(out)) {
+    const retry = await callAi(model, systemPrompt, userPrompt, maxTokens * 5, apiKey);
+    if (retry.length >= 60 && looksComplete(retry)) out = retry;
+    else if (retry.length > out.length) out = retry;
+  }
   return out;
+}
+
+// Yarım kalmış yanıtı yakala: cümle sonu noktalama yoksa taslak kesilmiş demektir.
+function looksComplete(text: string): boolean {
+  const t = (text || "").trim();
+  if (t.length < 40) return false;
+  return /[.!?…"'”’)\]]$/.test(t);
 }
 
 async function runQa(draft: string, params: {
@@ -578,7 +590,8 @@ Return ONLY the reply text.`;
           topic_ids: analysis?.topics.map((t) => t.topic_id) ?? [],
           main_concern_topic_id: analysis?.worstTopic?.topic_id ?? null,
           flags: analysis?.flags ?? null,
-          requires_human_review: requiresHumanReview,
+          truncated: !looksComplete(draft),
+          requires_human_review: requiresHumanReview || !looksComplete(draft),
         },
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
