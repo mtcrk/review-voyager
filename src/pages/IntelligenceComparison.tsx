@@ -1324,11 +1324,11 @@ export default function IntelligenceComparison() {
                 higherIsBetter
               />
               <KpiCard
-                label="Ort. yanıt süresi"
+                label="Medyan yanıt süresi"
                 icon={<Clock className="h-4 w-4" />}
                 ownValue={ownMedianResponse}
                 compValue={compMedianResponse}
-                format={(v) => `${v.toFixed(1)} gün`}
+                format={fmtResponseDays}
                 hint={
                   compReplyDataMissing
                     ? "Rakip yanıt verisi henüz toplanmadı"
@@ -1342,6 +1342,7 @@ export default function IntelligenceComparison() {
                 ownValue={own30d}
                 compValue={compAvg30d}
                 format={fmtNum}
+                hint={compVolumeDataMissing ? "Rakip yorumları henüz toplanmadı" : undefined}
                 higherIsBetter
               />
             </div>
@@ -1829,7 +1830,7 @@ function KpiCard({
   subHint?: string;
 }) {
   let delta: number | null = null;
-  if (ownValue != null && compValue != null && compValue !== 0) {
+  if (ownValue != null && compValue != null) {
     delta = ownValue - compValue;
   }
   const positive = delta != null && delta > 0;
