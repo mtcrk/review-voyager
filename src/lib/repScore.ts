@@ -1,5 +1,6 @@
 // Rep Score — VoyageRespond İtibar Puanı (0-1000)
 // 7 bileşenden oluşan ağırlıklı skor
+import { averageRating5 } from "@/lib/ratingScale";
 
 export interface RepScoreBreakdown {
   reviewSentiment: number;    // 0-250: Ortalama yıldız puanı
