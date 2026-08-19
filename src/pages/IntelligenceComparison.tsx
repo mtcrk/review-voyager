@@ -442,10 +442,13 @@ export default function IntelligenceComparison() {
     if (!r.posted_at || r.posted_at < since30) continue;
     comp30dPerComp[r.competitor_id] = (comp30dPerComp[r.competitor_id] ?? 0) + 1;
   }
+  // Rakip tarafında hiç toplanmış yorum yoksa "0" bir değer değil, veri eksikliğidir.
+  const compVolumeDataMissing = compReviews90.length === 0;
   const comp30dValues = competitors.map((c) => comp30dPerComp[c.id] ?? 0);
-  const compAvg30d = comp30dValues.length
-    ? comp30dValues.reduce((a, b) => a + b, 0) / comp30dValues.length
-    : null;
+  const compAvg30d =
+    compVolumeDataMissing || comp30dValues.length === 0
+      ? null
+      : comp30dValues.reduce((a, b) => a + b, 0) / comp30dValues.length;
 
   // === Ranking ===
   const ranked = useMemo(() => {
@@ -742,7 +745,7 @@ export default function IntelligenceComparison() {
   const yMin = allRatings.length ? Math.max(0, Math.floor(Math.min(...allRatings) / 5) * 5 - 5) : 50;
   const yMax = 100;
   const allX = [...scatterCompetitors.map((d) => d.x), ...scatterOwn.map((d) => d.x)];
-  const xMax = allX.length ? Math.max(...allX) * 1.1 : 100;
+  const xMax = allX.length ? Math.ceil(Math.max(...allX) * 1.1) : 100;
   const xMid = xMax / 2;
   const yMid = (yMin + yMax) / 2;
 
