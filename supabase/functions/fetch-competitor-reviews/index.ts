@@ -8,7 +8,8 @@ const corsHeaders = {
 };
 
 const APIFY_BASE = "https://api.apify.com/v2";
-const ACTOR_ID = "tri_angle~hotel-review-aggregator";
+// Rakip yorumları yalnızca Google Maps'ten çekilir (place_id ile birebir eşleşir).
+const ACTOR_ID = "compass~google-maps-reviews-scraper";
 const SMART_SKIP_HOURS = 24 * 7; // 7 days
 
 type Started = { competitor_id: string; name: string; run_id: string; place_id: string };
@@ -141,16 +142,12 @@ Deno.serve(async (req) => {
       }
 
       const input = {
-        startIds: [c.place_id],
-        providers: ["booking", "tripadvisor", "expedia", "hotels"],
-        maxReviewsPerQuery: 40,
-        scrapeReviewPictures: false,
-        scrapeReviewResponses: true,
-        proxyConfiguration: {
-          useApifyProxy: true,
-          apifyProxyGroups: ["RESIDENTIAL"],
-          apifyProxyCountry: "TR",
-        },
+        placeIds: [c.place_id],
+        maxReviews: 40,
+        reviewsSort: "newest",
+        language: "tr",
+        personalData: true,
+        proxyConfiguration: { useApifyProxy: true },
       };
 
       try {
