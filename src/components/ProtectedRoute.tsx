@@ -1,8 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePaywall } from '@/hooks/usePaywall';
-import { PAYWALL_ALLOWED_PATHS } from '@/lib/paywall';
-import { PaywallNotice } from '@/components/PaywallNotice';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -12,7 +10,7 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
   const location = useLocation();
   const { user, role, loading } = useAuth();
-  const { mustPay, loading: paywallLoading } = usePaywall();
+  const { loading: paywallLoading } = usePaywall();
 
   if (loading || paywallLoading) {
     return (
@@ -27,10 +25,9 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
     return <Navigate to={`/login?redirect=${redirect}`} replace />;
   }
 
-  // Ödeme duvarı: sert yönlendirme yerine bilgilendirme ekranı gösterilir.
-  if (mustPay && !PAYWALL_ALLOWED_PATHS.some((p) => location.pathname.startsWith(p))) {
-    return <PaywallNotice />;
-  }
+  // Ödeme duvarı artık global PaywallGuard tarafından kapatılabilir
+  // bir modal olarak yönetiliyor — burada sayfayı engellemiyoruz,
+  // kullanıcı modalı kapatıp sayfayı kullanmaya devam edebilir.
 
   if (requireAdmin && role !== 'admin') {
     return <Navigate to="/dashboard" replace />;
@@ -38,4 +35,3 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
 
   return <>{children}</>;
 }
-
