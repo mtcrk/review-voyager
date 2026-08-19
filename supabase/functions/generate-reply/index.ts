@@ -590,7 +590,8 @@ Return ONLY the reply text.`;
           topic_ids: analysis?.topics.map((t) => t.topic_id) ?? [],
           main_concern_topic_id: analysis?.worstTopic?.topic_id ?? null,
           flags: analysis?.flags ?? null,
-          requires_human_review: requiresHumanReview,
+          truncated: !looksComplete(draft),
+          requires_human_review: requiresHumanReview || !looksComplete(draft),
         },
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
