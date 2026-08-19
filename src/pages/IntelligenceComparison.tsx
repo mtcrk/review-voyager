@@ -153,6 +153,13 @@ function fmtRating(n: number | null | undefined) {
   if (n == null) return "—";
   return n.toFixed(1);
 }
+/** Yanıt süresi — 1 günün altında saat, üstünde gün olarak. ActionPack ile aynı dil. */
+function fmtResponseDays(v: number) {
+  const hours = v * 24;
+  if (hours < 1) return "<1 sa";
+  if (hours < 48) return `${Math.round(hours)} sa`;
+  return `${Math.round(v)} gün`;
+}
 function truncate(s: string, n = 18) {
   return s.length > n ? s.slice(0, n - 1) + "…" : s;
 }
