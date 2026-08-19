@@ -90,7 +90,7 @@ const MusteriMemnuniyeti = () => {
           </p>
 
           <p className="text-muted-foreground mt-4">
-            Detaylı anket örnekleri → <a href="/blog/musteri-memnuniyet-anketi-ornekleri" className="text-primary hover:underline">20 hazır soru ve 5 şablon</a>.
+            Detaylı anket örnekleri → <a href="/blog/musteri-memnuniyet-anketi-ornekleri/" className="text-primary hover:underline">20 hazır soru ve 5 şablon</a>.
           </p>
 
           <h2 className="text-2xl font-bold mt-12 mb-4">Müşteri Memnuniyetini Artırmanın 8 Adımı</h2>
@@ -107,12 +107,12 @@ const MusteriMemnuniyeti = () => {
 
           <h2 className="text-2xl font-bold mt-12 mb-4">Müşteri Memnuniyeti ve Online Yorumlar</h2>
           <p className="text-muted-foreground leading-relaxed">
-            Memnuniyet anketi, sorunu <strong>müşteri Google yoruma yazmadan önce</strong> yakalamanın en hızlı yoludur. Aksi halde olumsuz deneyim Google'a sızar ve ortalama yıldızınızı düşürür. Memnun müşterilerin Google'a yönlendirilmesi, eleştirenlerin <em>önce</em> sizinle iletişim kurması — bu akış <a href="/online-itibar-yonetimi" className="text-primary hover:underline">online itibar yönetimi</a>nin kalbidir.
+            Memnuniyet anketi, sorunu <strong>müşteri Google yoruma yazmadan önce</strong> yakalamanın en hızlı yoludur. Aksi halde olumsuz deneyim Google'a sızar ve ortalama yıldızınızı düşürür. Memnun müşterilerin Google'a yönlendirilmesi, eleştirenlerin <em>önce</em> sizinle iletişim kurması — bu akış <a href="/online-itibar-yonetimi/" className="text-primary hover:underline">online itibar yönetimi</a>nin kalbidir.
           </p>
 
           <h2 className="text-2xl font-bold mt-12 mb-4">Sektörel Farklılıklar</h2>
           <ul className="space-y-2 text-muted-foreground">
-            <li><strong>Restoran:</strong> Yemek + servis + atmosfer + fiyat — 4 boyutu ayrı ölç. <a href="/restoran-musteri-memnuniyeti" className="text-primary hover:underline">Detay rehber</a>.</li>
+            <li><strong>Restoran:</strong> Yemek + servis + atmosfer + fiyat — 4 boyutu ayrı ölç. <a href="/restoran-musteri-memnuniyeti/" className="text-primary hover:underline">Detay rehber</a>.</li>
             <li><strong>Otel:</strong> Oda temizliği, check-in/out süresi, kahvaltı, konum ana metrikler.</li>
             <li><strong>E-ticaret:</strong> Ürün açıklaması-gerçek eşleşmesi, teslimat süresi, iade kolaylığı.</li>
             <li><strong>B2B hizmet:</strong> CES en kritik. "İşi halletmek ne kadar kolaydı?"</li>

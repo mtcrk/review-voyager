@@ -80,7 +80,7 @@ const RestoranMusteriMemnuniyeti = () => {
             <li><strong>Google yorum analizi.</strong> Mevcut yorumlardan duygu kategorisi çıkarın (yemek/servis/atmosfer/fiyat).</li>
           </ol>
           <p className="text-muted-foreground mt-4">
-            5 hazır anket şablonu için → <a href="/blog/musteri-memnuniyet-anketi-ornekleri" className="text-primary hover:underline">Müşteri Memnuniyet Anketi Örnekleri</a>.
+            5 hazır anket şablonu için → <a href="/blog/musteri-memnuniyet-anketi-ornekleri/" className="text-primary hover:underline">Müşteri Memnuniyet Anketi Örnekleri</a>.
           </p>
 
           <h2 className="text-2xl font-bold mt-12 mb-4">Restoran Müşteri Memnuniyetini Artıran 7 Pratik</h2>
