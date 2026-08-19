@@ -2,6 +2,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePaywall } from '@/hooks/usePaywall';
 import { PAYWALL_ALLOWED_PATHS } from '@/lib/paywall';
+import { PaywallNotice } from '@/components/PaywallNotice';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -26,9 +27,9 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
     return <Navigate to={`/login?redirect=${redirect}`} replace />;
   }
 
-  // Ödeme duvarı: aboneliği olmayan belirli hesaplar sadece ödeme sayfasını görebilir.
+  // Ödeme duvarı: sert yönlendirme yerine bilgilendirme ekranı gösterilir.
   if (mustPay && !PAYWALL_ALLOWED_PATHS.some((p) => location.pathname.startsWith(p))) {
-    return <Navigate to="/billing/checkout" replace />;
+    return <PaywallNotice />;
   }
 
   if (requireAdmin && role !== 'admin') {
