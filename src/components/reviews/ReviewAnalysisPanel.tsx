@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, LifeBuoy, RefreshCw, Undo2, ShieldAlert, Sparkles, Loader2 } from "lucide-react";
@@ -21,6 +21,8 @@ interface ReviewAnalysisPanelProps {
   text: string;
   analysisStatus?: string | null;
   className?: string;
+  /** Analiz sayfalarından "Yoruma git" ile gelindiğinde vurgulanacak konu. */
+  focusTopicId?: string | null;
 }
 
 const toneChip = (tone: "positive" | "negative" | "neutral") =>
@@ -35,12 +37,20 @@ export function ReviewAnalysisPanel({
   text,
   analysisStatus,
   className,
+  focusTopicId,
 }: ReviewAnalysisPanelProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { data, isLoading } = useSingleReviewAnalysis(reviewId);
   const { topicsById, labels, labelOf } = useCiTopics();
   const [running, setRunning] = useState(false);
+
+  // Konu vurgusu varsa analiz bölümünü görünür alana getir.
+  useEffect(() => {
+    if (!focusTopicId || isLoading) return;
+    const el = document.getElementById("review-analysis");
+    el?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [focusTopicId, isLoading]);
 
   const analysis = data?.analysis ?? null;
   const highlights = useMemo(
@@ -57,12 +67,17 @@ export function ReviewAnalysisPanel({
   const chips = useMemo(() => {
     const rows = data?.topics ?? [];
     return [...rows].sort((a, b) => {
+      // Vurgulanan konu her zaman başta.
+      if (focusTopicId) {
+        if (a.topic_id === focusTopicId) return -1;
+        if (b.topic_id === focusTopicId) return 1;
+      }
       const da = topicsById[a.topic_id]?.is_decision_driver ? 1 : 0;
       const db = topicsById[b.topic_id]?.is_decision_driver ? 1 : 0;
       if (da !== db) return db - da;
       return Math.abs(b.sentiment) - Math.abs(a.sentiment);
     });
-  }, [data?.topics, topicsById]);
+  }, [data?.topics, topicsById, focusTopicId]);
 
   const handleRetry = async () => {
     const { error } = await supabase
@@ -245,7 +260,11 @@ export function ReviewAnalysisPanel({
                 <Badge
                   key={`${c.topic_id}`}
                   variant="outline"
-                  className={cn("font-medium", toneChip(sentimentTone(Number(c.sentiment ?? 0))))}
+                  className={cn(
+                    "font-medium",
+                    toneChip(sentimentTone(Number(c.sentiment ?? 0))),
+                    c.topic_id === focusTopicId && "ring-2 ring-primary ring-offset-1",
+                  )}
                 >
                   {labelOf(c.topic_id)}
                 </Badge>
