@@ -168,6 +168,8 @@ type CompareRow = {
   /** null = yeterli veri yok */
   delta: number | null;
   thin: boolean;
+  /** kıyas döneminde hiç analiz edilmiş veri yok */
+  noPrev?: boolean;
 };
 
 function buildRows(
@@ -175,6 +177,7 @@ function buildRows(
   prevAgg: Map<string, Agg>,
   keys: string[],
   labelOf: (k: string) => string,
+  prevEmpty = false,
 ): CompareRow[] {
   const rows = keys.map((key) => {
     const c = curAgg.get(key);
@@ -193,8 +196,18 @@ function buildRows(
       prevN,
       delta: eligible && cur != null && prev != null ? cur - prev : null,
       thin: eligible && (curN < THIN_MENTIONS || prevN < THIN_MENTIONS),
+      noPrev: prevEmpty,
     };
   });
+  // Kıyas dönemi tamamen boşsa: bu dönem skoruna göre (en düşük üstte).
+  if (prevEmpty) {
+    return rows.sort((a, b) => {
+      if (a.cur == null && b.cur == null) return b.curN - a.curN;
+      if (a.cur == null) return 1;
+      if (b.cur == null) return -1;
+      return a.cur - b.cur;
+    });
+  }
   // Değişime göre: en çok gerileyen en üstte. Eşiği geçmeyenler en sonda.
   return rows.sort((a, b) => {
     if (a.delta == null && b.delta == null) return b.curN - a.curN;
@@ -206,6 +219,9 @@ function buildRows(
 
 function DeltaCell({ row }: { row: CompareRow }) {
   if (row.delta == null) {
+    if (row.noPrev) {
+      return <span className="text-xs text-muted-foreground">kıyas verisi yok</span>;
+    }
     return <span className="text-xs text-muted-foreground">yeterli veri yok</span>;
   }
   const d = row.delta;
@@ -285,7 +301,13 @@ export default function TopicAnalytics() {
   const deptRows = useMemo(() => {
     const c = aggregate(curRows, (r) => departmentOf(r.topic_id));
     const p = aggregate(prevRows, (r) => departmentOf(r.topic_id));
-    return buildRows(c, p, [...DEPARTMENTS], (k) => DEPARTMENT_LABELS[k as DepartmentKey]);
+    return buildRows(
+      c,
+      p,
+      [...DEPARTMENTS],
+      (k) => DEPARTMENT_LABELS[k as DepartmentKey],
+      prevRows.length === 0,
+    );
   }, [curRows, prevRows]);
 
   const summary = useMemo(() => {
@@ -308,7 +330,7 @@ export default function TopicAnalytics() {
     const c = aggregate(curRows.filter(inDept), (r) => r.topic_id);
     const p = aggregate(prevRows.filter(inDept), (r) => r.topic_id);
     const keys = Array.from(new Set([...c.keys(), ...p.keys()]));
-    return buildRows(c, p, keys, labelOf);
+    return buildRows(c, p, keys, labelOf, prevRows.length === 0);
   }, [openDept, curRows, prevRows, labelOf]);
 
   const quotes = useMemo(() => {
@@ -342,8 +364,8 @@ export default function TopicAnalytics() {
       ? Math.round((prevCov.data.analyzed / prevCov.data.total) * 100)
       : null;
 
-  const noData = !loading && curRows.length === 0 && prevRows.length === 0;
-  const emptyPeriod = !loading && (curRows.length === 0 || prevRows.length === 0);
+  const noData = !loading && curRows.length === 0;
+  const prevEmpty = !loading && curRows.length > 0 && prevRows.length === 0;
 
   function exportCsv() {
     const cell = (v: string | number) => {
