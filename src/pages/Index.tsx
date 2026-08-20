@@ -138,7 +138,6 @@ const Index = () => {
             <div className="md:hidden border-t border-border py-4 space-y-1">
               {[
                 { label: t('indexPage.nav.features'), action: () => { document.getElementById("features")?.scrollIntoView({ behavior: "smooth" }); setMobileMenuOpen(false); } },
-                { label: t('indexPage.nav.pricing'), action: () => { document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" }); setMobileMenuOpen(false); } },
                 { label: t('indexPage.nav.blog'), action: () => { navigate("/blog"); setMobileMenuOpen(false); } },
                 { label: t('indexPage.nav.contact'), action: () => { navigate("/contact"); setMobileMenuOpen(false); } },
                 { label: user ? t('indexPage.nav.dashboard') : t('indexPage.nav.login'), action: () => { navigate(user ? "/dashboard" : "/login"); setMobileMenuOpen(false); } },
