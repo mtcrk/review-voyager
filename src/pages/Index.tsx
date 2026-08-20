@@ -509,6 +509,7 @@ const Index = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* ─── FOOTER ─── */}
       <footer className="border-t border-border bg-card/50">
