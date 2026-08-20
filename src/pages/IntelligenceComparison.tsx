@@ -168,6 +168,9 @@ function isoDaysAgo(d: number) {
   return new Date(Date.now() - d * 86400_000).toISOString();
 }
 
+/** Ortak kıyas penceresinin alt sınırı — bundan kısa pencerelerde kıyas gürültüye döner. */
+const COMPARE_MIN_DAYS = 14;
+
 function weekKey(iso: string) {
   const d = new Date(iso);
   const day = d.getUTCDay();
@@ -217,7 +220,6 @@ export default function IntelligenceComparison() {
       }
       // For overall totals (not just 90d), also count rows per competitor
       let compTotals: Record<string, number> = {};
-      let compPlatformAgg: Record<string, Record<string, { sum: number; n: number }>> = {};
       let compAllRows: CompAllRow[] = [];
       if (compIds.length) {
         const { data: allRows } = await supabase
@@ -228,12 +230,6 @@ export default function IntelligenceComparison() {
         compAllRows = (allRows ?? []) as CompAllRow[];
         for (const r of compAllRows) {
           compTotals[r.competitor_id] = (compTotals[r.competitor_id] ?? 0) + 1;
-          const p = normalizePlatform(r.platform);
-          if (!p || r.rating == null) continue;
-          compPlatformAgg[r.competitor_id] ??= {};
-          compPlatformAgg[r.competitor_id][p] ??= { sum: 0, n: 0 };
-          compPlatformAgg[r.competitor_id][p].sum += Number(r.rating);
-          compPlatformAgg[r.competitor_id][p].n += 1;
         }
       }
 
@@ -241,7 +237,6 @@ export default function IntelligenceComparison() {
         competitors,
         compReviews90: compReviews,
         compTotals,
-        compPlatformAgg,
         compAllRows,
         ownReviews: (ownReviewsRes.data ?? []) as OwnReviewRow[],
       };
@@ -252,8 +247,72 @@ export default function IntelligenceComparison() {
   const ownReviews = dataQuery.data?.ownReviews ?? [];
   const compReviews90 = dataQuery.data?.compReviews90 ?? [];
   const compTotals = dataQuery.data?.compTotals ?? {};
-  const compPlatformAgg = dataQuery.data?.compPlatformAgg ?? {};
   const compAllRows = dataQuery.data?.compAllRows ?? [];
+
+  // ===== ORTAK KIYAS PENCERESİ =====
+  // Rakip örneklemi actor tarafından "en yeni N yorum" olarak alınır; bu yüzden
+  // her rakibin kapsadığı tarih aralığı farklıdır. Kıyasın anlamlı olması için
+  // pencereyi EN KISITLAYICI rakip belirler (en yeni "ilk yorum" tarihi).
+  const compWindow = useMemo(() => {
+    const earliestByComp = new Map<string, string>();
+    for (const r of compAllRows) {
+      if (!r.posted_at) continue;
+      const cur = earliestByComp.get(r.competitor_id);
+      if (!cur || r.posted_at < cur) earliestByComp.set(r.competitor_id, r.posted_at);
+    }
+    const now = Date.now();
+    const minStart = now - COMPARE_MIN_DAYS * 86400_000;
+    const starts = Array.from(earliestByComp.values())
+      .map((d) => new Date(d).getTime())
+      .filter((t) => !isNaN(t));
+    if (starts.length === 0) {
+      return {
+        startIso: new Date(minStart).toISOString(),
+        days: COMPARE_MIN_DAYS,
+        padded: true,
+        hasCompData: false,
+      };
+    }
+    const narrowest = Math.max(...starts); // en kısıtlayıcı rakip
+    const padded = narrowest > minStart; // 14 günden kısa → 14 güne tamamla
+    const start = padded ? minStart : narrowest;
+    return {
+      startIso: new Date(start).toISOString(),
+      days: Math.max(1, Math.round((now - start) / 86400_000)),
+      padded,
+      hasCompData: true,
+    };
+  }, [compAllRows]);
+
+  /** Kıyasa giren rakip yorumları — yalnızca ortak pencere. */
+  const compWin = useMemo(
+    () => compAllRows.filter((r) => r.posted_at && r.posted_at >= compWindow.startIso),
+    [compAllRows, compWindow.startIso],
+  );
+  /** Kıyasa giren kendi yorumlarımız — aynı pencere. Mutlak sayılar etkilenmez. */
+  const ownWin = useMemo(
+    () => ownReviews.filter((r) => r.posted_at && r.posted_at >= compWindow.startIso),
+    [ownReviews, compWindow.startIso],
+  );
+  const windowLabel = useMemo(() => {
+    const fmt = (d: Date) =>
+      new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "short" }).format(d);
+    return `${fmt(new Date(compWindow.startIso))} – ${fmt(new Date())}`;
+  }, [compWindow.startIso]);
+
+  // Platform kırılımı da pencereye göre — kıyas tablosu.
+  const compPlatformAgg = useMemo(() => {
+    const agg: Record<string, Record<string, { sum: number; n: number }>> = {};
+    for (const r of compWin) {
+      const p = normalizePlatform(r.platform);
+      if (!p || r.rating == null) continue;
+      agg[r.competitor_id] ??= {};
+      agg[r.competitor_id][p] ??= { sum: 0, n: 0 };
+      agg[r.competitor_id][p].sum += Number(r.rating);
+      agg[r.competitor_id][p].n += 1;
+    }
+    return agg;
+  }, [compWin]);
 
   const qc = useQueryClient();
   const [busyTask, setBusyTask] = useState<string | null>(null);
@@ -366,21 +425,30 @@ export default function IntelligenceComparison() {
   // === Own metrics ===
   // Ratings are normalized per platform (Booking /10, Google /5 …) then expressed
   // as a 0–100 reputation index so every business sits on the same scale.
-  const ownIndexes = ownReviews
+  // KIYASA giren tüm değerler ortak pencereden (ownWin) hesaplanır.
+  const ownIndexes = ownWin
     .filter((r) => r.rating != null)
     .map((r) => toIndex100(Number(r.rating), normalizePlatform(r.platform) ?? "google"));
   const ownAvg = ownIndexes.length
     ? ownIndexes.reduce((a, b) => a + b, 0) / ownIndexes.length
     : null;
+  // Mutlak arşiv göstergesi — pencereden etkilenmez.
   const ownTotal = ownReviews.length;
-  const ownReplied = ownReviews.filter((r) => r.approved_reply || r.status === "replied").length;
-  const ownReplyRate = ownTotal > 0 ? (ownReplied / ownTotal) * 100 : null;
+  const ownWinTotal = ownWin.length;
+  const ownReplied = ownWin.filter((r) => r.approved_reply || r.status === "replied").length;
+  const ownReplyRate = ownWinTotal > 0 ? (ownReplied / ownWinTotal) * 100 : null;
   const since30 = isoDaysAgo(30);
-  const own30d = ownReviews.filter((r) => r.posted_at && r.posted_at >= since30).length;
+  // Hacim kıyası pencere ile 30 günün kesişiminde yapılır.
+  const volumeSince = since30 > compWindow.startIso ? since30 : compWindow.startIso;
+  const volumeDays = Math.max(
+    1,
+    Math.round((Date.now() - new Date(volumeSince).getTime()) / 86400_000),
+  );
+  const own30d = ownReviews.filter((r) => r.posted_at && r.posted_at >= volumeSince).length;
 
   // Own platform averages (normalize Google rating: own scale is 1-5 already)
   const ownPlatformAgg: Record<string, { sum: number; n: number }> = {};
-  for (const r of ownReviews) {
+  for (const r of ownWin) {
     const p = normalizePlatform(r.platform) ?? "google"; // own reviews default to google
     if (r.rating == null) continue;
     ownPlatformAgg[p] ??= { sum: 0, n: 0 };
@@ -393,7 +461,7 @@ export default function IntelligenceComparison() {
   // Falls back to the Google Places lifetime rating when no reviews were scraped yet.
   const compIndexInfo = useMemo(() => {
     const agg: Record<string, { sum: number; n: number }> = {};
-    for (const r of compAllRows) {
+    for (const r of compWin) {
       if (r.rating == null) continue;
       const p = normalizePlatform(r.platform) ?? "google";
       agg[r.competitor_id] ??= { sum: 0, n: 0 };
@@ -409,7 +477,7 @@ export default function IntelligenceComparison() {
     }
     return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [competitors, compAllRows]);
+  }, [competitors, compWin]);
 
   const compIndexValues = competitors
     .map((c) => compIndexInfo[c.id]?.index)
@@ -419,22 +487,30 @@ export default function IntelligenceComparison() {
     : null;
   const compTotalSum = competitors.reduce((acc, c) => acc + (compTotals[c.id] ?? c.review_count ?? 0), 0);
   const compAvgTotal = competitors.length ? compTotalSum / competitors.length : null;
+  // Pencere içi hacim kıyası için rakip ortalaması (mutlak arşiv değil).
+  const compWinPerComp: Record<string, number> = {};
+  for (const r of compWin) {
+    compWinPerComp[r.competitor_id] = (compWinPerComp[r.competitor_id] ?? 0) + 1;
+  }
+  const compAvgWinTotal = competitors.length
+    ? competitors.reduce((acc, c) => acc + (compWinPerComp[c.id] ?? 0), 0) / competitors.length
+    : null;
 
   // Competitor reply rate + median response time (real data from scraped replies)
-  const compRepliedCount = compAllRows.filter((r) => r.owner_reply_text).length;
+  const compRepliedCount = compWin.filter((r) => r.owner_reply_text).length;
   // If not a single competitor reply was ever scraped, the data simply was not
   // collected — reporting 0% would falsely claim competitors never reply.
   const compReplyDataMissing = compRepliedCount === 0;
   const compReplyRate =
-    compAllRows.length && !compReplyDataMissing
-      ? (compRepliedCount / compAllRows.length) * 100
+    compWin.length && !compReplyDataMissing
+      ? (compRepliedCount / compWin.length) * 100
       : null;
 
-  const ownResponseDays = ownReviews
+  const ownResponseDays = ownWin
     .map((r) => (r.posted_at && r.replied_at ? daysBetween(r.posted_at, r.replied_at) : null))
     .filter((n): n is number => n != null);
   const ownMedianResponse = median(ownResponseDays);
-  const compResponseDays = compAllRows
+  const compResponseDays = compWin
     .map((r) =>
       r.posted_at && r.owner_reply_text && r.owner_reply_at
         ? daysBetween(r.posted_at, r.owner_reply_at)
@@ -443,14 +519,14 @@ export default function IntelligenceComparison() {
     .filter((n): n is number => n != null);
   const compMedianResponse = compReplyDataMissing ? null : median(compResponseDays);
 
-  // 30d competitor avg per competitor
+  // Hacim kıyası — pencere ∩ 30 gün, her iki tarafta aynı aralık.
   const comp30dPerComp: Record<string, number> = {};
-  for (const r of compReviews90) {
-    if (!r.posted_at || r.posted_at < since30) continue;
+  for (const r of compWin) {
+    if (!r.posted_at || r.posted_at < volumeSince) continue;
     comp30dPerComp[r.competitor_id] = (comp30dPerComp[r.competitor_id] ?? 0) + 1;
   }
   // Rakip tarafında hiç toplanmış yorum yoksa "0" bir değer değil, veri eksikliğidir.
-  const compVolumeDataMissing = compReviews90.length === 0;
+  const compVolumeDataMissing = compWin.length === 0;
   const comp30dValues = competitors.map((c) => comp30dPerComp[c.id] ?? 0);
   const compAvg30d =
     compVolumeDataMissing || comp30dValues.length === 0
@@ -628,39 +704,26 @@ export default function IntelligenceComparison() {
 
   const ownCountryCount = ownReviews.filter((r) => r.reviewer_country).length;
 
-  // === Kıyas künyesi — tarih aralığı + her iki tarafın yorum sayısı ===
+  // === Kıyas künyesi — ORTAK pencere + her iki tarafın pencere içi yorum sayısı ===
   const provenance = useMemo(() => {
-    const ownDates = ownReviews.map((r) => r.posted_at).filter((d): d is string => !!d);
-    const compDates = compAllRows.map((r) => r.posted_at).filter((d): d is string => !!d);
-    const ownPlatforms = new Set(
-      ownReviews.map((r) => normalizePlatform(r.platform) ?? "google"),
-    );
-    const compPlatforms = new Set(
-      compAllRows.map((r) => normalizePlatform(r.platform) ?? "google"),
-    );
-    const all = [...ownDates, ...compDates].sort();
-    const fmt = (iso: string) =>
-      new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "short" }).format(new Date(iso));
-    const compSorted = [...compDates].sort();
-    const compSpanDays =
-      compSorted.length > 1
-        ? (new Date(compSorted[compSorted.length - 1]).getTime() -
-            new Date(compSorted[0]).getTime()) /
-          86400_000
-        : 0;
+    const ownPlatforms = new Set(ownWin.map((r) => normalizePlatform(r.platform) ?? "google"));
+    const compPlatforms = new Set(compWin.map((r) => normalizePlatform(r.platform) ?? "google"));
     const labelOf = (k: string) =>
       PLATFORMS.find((p) => p.key === k)?.label.split(" ")[0] ?? k;
     return {
-      hasAny: all.length > 0,
-      range: all.length ? `${fmt(all[0])} – ${fmt(all[all.length - 1])}` : null,
-      ownCount: ownReviews.length,
+      hasAny: ownWin.length > 0 || compWin.length > 0,
+      range: windowLabel,
+      days: compWindow.days,
+      ownCount: ownWin.length,
       ownPlatformCount: ownPlatforms.size,
-      compCount: compAllRows.length,
+      compCount: compWin.length,
       compPlatformLabels: Array.from(compPlatforms).map(labelOf).join(", "),
-      compNarrowWindow: compDates.length > 0 && compSpanDays < 7,
-      compFirstDate: compSorted.length ? compSorted[0] : null,
+      // Rakip örneklemi 14 günden kısa bir aralığı kapsıyorsa pencere yapay olarak
+      // 14 güne tamamlandı — kıyas sınırlı.
+      compNarrowWindow: compWindow.hasCompData && compWindow.padded,
+      ownThin: ownWin.length < 10,
     };
-  }, [ownReviews, compAllRows]);
+  }, [ownWin, compWin, compWindow, windowLabel]);
 
   async function runTask(key: string, fn: () => Promise<void>) {
     setBusyTask(key);
@@ -772,12 +835,12 @@ export default function IntelligenceComparison() {
       const d = own30d - compAvg30d;
       list.push({
         label: "Yeni yorum akışı",
-        text: `Son 30 günde ${own30d} yorum aldınız, rakip ortalaması ${compAvg30d.toFixed(1)}`,
+        text: `Son ${volumeDays} günde ${own30d} yorum aldınız, rakip ortalaması ${compAvg30d.toFixed(1)}`,
         good: d >= 0,
       });
     }
     return list;
-  }, [ownAvg, compAvgOfAvg, ownReplyRate, compReplyRate, ownMedianResponse, compMedianResponse, own30d, compAvg30d]);
+  }, [ownAvg, compAvgOfAvg, ownReplyRate, compReplyRate, ownMedianResponse, compMedianResponse, own30d, compAvg30d, volumeDays]);
 
   const strengths = metricDiffs.filter((m) => m.good);
   const weaknesses = metricDiffs.filter((m) => !m.good);
@@ -943,8 +1006,9 @@ export default function IntelligenceComparison() {
               {provenance.hasAny && (
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                   <span>
-                    Kıyas: {provenance.range} · siz {fmtNum(provenance.ownCount)} yorum (
-                    {provenance.ownPlatformCount} platform) · rakipler{" "}
+                    Kıyas penceresi: {provenance.range} ({provenance.days} gün) · siz{" "}
+                    {fmtNum(provenance.ownCount)} yorum ({provenance.ownPlatformCount} platform) ·
+                    rakipler{" "}
                     {fmtNum(provenance.compCount)} yorum
                     {provenance.compPlatformLabels ? ` (${provenance.compPlatformLabels})` : ""}
                   </span>
@@ -955,6 +1019,15 @@ export default function IntelligenceComparison() {
                     >
                       <AlertTriangle className="h-3 w-3 mr-1" />
                       Rakip verisi dar bir tarih aralığından — kıyas sınırlı
+                    </Badge>
+                  )}
+                  {provenance.ownThin && (
+                    <Badge
+                      variant="outline"
+                      className="h-5 text-[10px] border-amber-500/40 text-amber-700 dark:text-amber-300"
+                    >
+                      <AlertTriangle className="h-3 w-3 mr-1" />
+                      Kendi tarafınızda az veri ({provenance.ownCount} yorum)
                     </Badge>
                   )}
                 </div>
@@ -1216,7 +1289,7 @@ export default function IntelligenceComparison() {
                         {ownAvg != null ? ownAvg.toFixed(1) : "—"}
                       </div>
                       <div className="text-[11px] text-muted-foreground">
-                        {fmtNum(ownIndexes.length)} yorum üzerinden
+                        {fmtNum(ownIndexes.length)} yorum · kıyas penceresi
                       </div>
                     </div>
                     <div className="border-l pl-4 sm:pl-6">
@@ -1225,7 +1298,7 @@ export default function IntelligenceComparison() {
                         {compAvgOfAvg != null ? compAvgOfAvg.toFixed(1) : "—"}
                       </div>
                       <div className="text-[11px] text-muted-foreground">
-                        {competitors.length} rakip · toplanan tüm yorumlar
+                        {competitors.length} rakip · {windowLabel} ({compWindow.days} gün)
                       </div>
                     </div>
                     <div className="border-l pl-4 sm:pl-6">
@@ -1361,7 +1434,8 @@ export default function IntelligenceComparison() {
             {/* KPI cards */}
             <p className="text-xs text-muted-foreground">
               Farklı platformların puanları (Booking 10, Google 5) tek ölçeğe (0-100 itibar indeksi)
-              normalize edilmiştir. 100 = kusursuz, 80 = 4,0/5.
+              normalize edilmiştir. 100 = kusursuz, 80 = 4,0/5. Rakiple kıyaslanan tüm değerler
+              ortak kıyas penceresinden ({windowLabel}, {compWindow.days} gün) hesaplanır.
             </p>
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
               <KpiCard
@@ -1371,16 +1445,18 @@ export default function IntelligenceComparison() {
                 compValue={compAvgOfAvg}
                 format={(v) => v.toFixed(1)}
                 hint={own5 != null ? `5 üzerinden ${own5.toFixed(2)}` : undefined}
-                subHint={`${fmtNum(ownIndexes.length)} yorum üzerinden`}
+                subHint={`${fmtNum(ownIndexes.length)} yorum · kıyas penceresi`}
                 higherIsBetter
               />
               <KpiCard
                 label="Toplam Yorum"
                 icon={<MessageSquare className="h-4 w-4" />}
                 ownValue={ownTotal}
-                compValue={compAvgTotal}
+                compareOwnValue={ownWinTotal}
+                compValue={compAvgWinTotal}
                 format={fmtNum}
-                subHint={`${competitors.length} rakip ortalaması ile`}
+                hint={`Tüm arşiv · kıyas penceresinde siz ${fmtNum(ownWinTotal)} yorum`}
+                subHint={`${competitors.length} rakip ortalaması · pencere içi`}
                 higherIsBetter
               />
               <KpiCard
@@ -1392,7 +1468,7 @@ export default function IntelligenceComparison() {
                 subHint={
                   compReplyDataMissing
                     ? "Rakip yanıt verisi henüz toplanmadı"
-                    : `${fmtNum(ownTotal)} yorum · rakip ${fmtNum(compAllRows.length)} yorum`
+                    : `pencere içi ${fmtNum(ownWinTotal)} yorum · rakip ${fmtNum(compWin.length)} yorum`
                 }
                 higherIsBetter
               />
@@ -1410,12 +1486,16 @@ export default function IntelligenceComparison() {
                 higherIsBetter={false}
               />
               <KpiCard
-                label="Son 30 gün hacim"
+                label={`Son ${volumeDays} gün hacim`}
                 icon={<Calendar className="h-4 w-4" />}
                 ownValue={own30d}
                 compValue={compAvg30d}
                 format={fmtNum}
-                hint={compVolumeDataMissing ? "Rakip yorumları henüz toplanmadı" : undefined}
+                hint={
+                  compVolumeDataMissing
+                    ? "Rakip yorumları henüz toplanmadı"
+                    : "Kıyas penceresi ile aynı aralık"
+                }
                 higherIsBetter
               />
             </div>
@@ -1561,7 +1641,8 @@ export default function IntelligenceComparison() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Platform bazlı puan</CardTitle>
                 <p className="text-xs text-muted-foreground">
-                  Her platformdaki ortalama puan, platformun kendi ölçeğinde gösterilir.
+                  Her platformdaki ortalama puan, platformun kendi ölçeğinde ve ortak kıyas
+                  penceresinde ({windowLabel}) gösterilir.
                   Google kolonu rakiplerin resmî Google puanı ve toplam yorum sayısıdır;
                   diğer kolonlar toplanan yorumların ortalamasıdır.
                 </p>
@@ -1736,6 +1817,10 @@ export default function IntelligenceComparison() {
                   Pazarda <span className="font-medium text-foreground">{ownRank}.</span> sıradasınız
                   ({ranked.length} işletme arasında)
                 </p>
+                <p className="text-[11px] text-muted-foreground">
+                  İtibar indeksi ortak kıyas penceresinden ({windowLabel}, {compWindow.days} gün)
+                  hesaplanır; "Yorum" kolonu toplanan tüm yorumları gösterir.
+                </p>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="overflow-x-auto">
@@ -1828,7 +1913,13 @@ export default function IntelligenceComparison() {
 
               <TabsContent value="konular" forceMount className="space-y-4 mt-0">
                 <h2 className="print-only hidden text-lg font-semibold mt-4">Konu Analizi</h2>
-                {activeBusiness?.id && <TopicAnalysis businessId={activeBusiness.id} />}
+                {activeBusiness?.id && (
+                  <TopicAnalysis
+                    businessId={activeBusiness.id}
+                    windowStart={compWindow.startIso}
+                    windowLabel={`${windowLabel} (${compWindow.days} gün)`}
+                  />
+                )}
               </TabsContent>
 
               <TabsContent value="misafir" forceMount className="space-y-4 mt-0">
@@ -1901,6 +1992,7 @@ function KpiCard({
   label,
   icon,
   ownValue,
+  compareOwnValue,
   compValue,
   format,
   higherIsBetter,
@@ -1910,6 +2002,8 @@ function KpiCard({
   label: string;
   icon: React.ReactNode;
   ownValue: number | null;
+  /** Delta hesabında kullanılacak kendi değerimiz (ör. pencere içi hacim). */
+  compareOwnValue?: number | null;
   compValue: number | null;
   format: (v: number) => string;
   higherIsBetter?: boolean;
@@ -1917,8 +2011,9 @@ function KpiCard({
   subHint?: string;
 }) {
   let delta: number | null = null;
-  if (ownValue != null && compValue != null) {
-    delta = ownValue - compValue;
+  const ownForCompare = compareOwnValue !== undefined ? compareOwnValue : ownValue;
+  if (ownForCompare != null && compValue != null) {
+    delta = ownForCompare - compValue;
   }
   const positive = delta != null && delta > 0;
   const negative = delta != null && delta < 0;

@@ -83,7 +83,20 @@ function normalizeItem(item: any) {
     ]) || null;
 
   const ratingRaw = pick<number | string>(item, ["reviewRating", "rating", "stars", "score", "ratingValue"]);
-  const bodyRaw = pick<string>(item, ["reviewText", "text", "comment", "body", "review", "content"]);
+  // ÖNEMLİ: actor `language` parametresiyle çalıştığında çeviri `textTranslated`
+  // alanına, ORİJİNAL metin ise `text`/`originalText` alanına gelir. Dil kırılımı ve
+  // duygu analizi bozulmasın diye her zaman ORİJİNAL metni saklıyoruz; `textTranslated`
+  // yalnızca başka hiçbir metin yoksa devreye girer.
+  const bodyRaw = pick<string>(item, [
+    "originalText",
+    "reviewText",
+    "text",
+    "comment",
+    "body",
+    "review",
+    "content",
+    "textTranslated",
+  ]);
   const title = pick<string>(item, ["reviewTitle", "title", "headline"]);
   const body = title && bodyRaw ? `${title}\n\n${bodyRaw}` : (bodyRaw || title || null);
   const author_name = pick<string>(item, [
@@ -94,7 +107,15 @@ function normalizeItem(item: any) {
     "user.name",
     "userName",
   ]);
-  const language = pick<string>(item, ["language", "lang", "originalLanguage", "detectedLanguage"]);
+  // `language` alanı bazı actor'lerde İSTENEN dili taşır (hep "tr"), yorumun dilini
+  // değil. Bu yüzden önce gerçek orijinal dil alanlarına bakılır.
+  const language = pick<string>(item, [
+    "originalLanguage",
+    "detectedLanguage",
+    "reviewLanguage",
+    "language",
+    "lang",
+  ]);
   const providerRaw =
     pick<string>(item, ["provider", "platform", "source", "site"]) || "google";
   const platform = normalizePlatform(providerRaw);
