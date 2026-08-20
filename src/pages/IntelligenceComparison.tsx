@@ -921,10 +921,31 @@ export default function IntelligenceComparison() {
             </div>
           )}
           {!loading && !isEmpty && (
-            <div className="text-xs text-muted-foreground mt-2">
-              {competitors.length} rakiple karşılaştırılıyor ·{" "}
-              <span className="font-medium text-foreground">{ownRank}.</span> sıradasınız
-            </div>
+            <>
+              <div className="text-xs text-muted-foreground mt-2">
+                {competitors.length} rakiple karşılaştırılıyor ·{" "}
+                <span className="font-medium text-foreground">{ownRank}.</span> sıradasınız
+              </div>
+              {provenance.hasAny && (
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                  <span>
+                    Kıyas: {provenance.range} · siz {fmtNum(provenance.ownCount)} yorum (
+                    {provenance.ownPlatformCount} platform) · rakipler{" "}
+                    {fmtNum(provenance.compCount)} yorum
+                    {provenance.compPlatformLabels ? ` (${provenance.compPlatformLabels})` : ""}
+                  </span>
+                  {provenance.compNarrowWindow && (
+                    <Badge
+                      variant="outline"
+                      className="h-5 text-[10px] border-amber-500/40 text-amber-700 dark:text-amber-300"
+                    >
+                      <AlertTriangle className="h-3 w-3 mr-1" />
+                      Rakip verisi dar bir tarih aralığından — kıyas sınırlı
+                    </Badge>
+                  )}
+                </div>
+              )}
+            </>
           )}
         </div>
 
