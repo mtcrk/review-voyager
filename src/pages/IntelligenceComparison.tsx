@@ -1225,7 +1225,7 @@ export default function IntelligenceComparison() {
                         {compAvgOfAvg != null ? compAvgOfAvg.toFixed(1) : "—"}
                       </div>
                       <div className="text-[11px] text-muted-foreground">
-                        {competitors.length} rakip üzerinden
+                        {competitors.length} rakip · toplanan tüm yorumlar
                       </div>
                     </div>
                     <div className="border-l pl-4 sm:pl-6">
