@@ -87,6 +87,7 @@ Deno.serve(async (req) => {
       ? new Set(platformsParam.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean))
       : undefined;
     const force = Boolean(body?.force || body?.manual);
+    const maxReviews = Number(body?.max_reviews) || undefined;
     const businessIdFilter: string | undefined = body?.business_id;
     console.log("Allowed platforms:", allowed ? [...allowed].join(",") : "ALL");
 
@@ -135,6 +136,7 @@ Deno.serve(async (req) => {
       const plans = planFor(biz, allowed);
       for (const plan of plans) {
         const payload: any = { business_id: biz.id, force };
+        if (maxReviews) payload.max_reviews = maxReviews;
         if (plan.functionName === "apify-fetch-reviews") payload.platform = plan.platform;
 
         jobs.push((async () => {
