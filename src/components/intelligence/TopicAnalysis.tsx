@@ -473,13 +473,34 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
                     <td
                       className={`py-2.5 px-4 text-right tabular-nums font-medium ${deltaClass(d.delta)}`}
                     >
-                      {fmtDelta(d.delta)}
+                      {d.delta == null ? (
+                        <span className="text-[11px] font-normal text-muted-foreground">
+                          yeterli rakip verisi yok
+                        </span>
+                      ) : (
+                        <span className={d.thinComp ? "opacity-50" : undefined}>
+                          {fmtDelta(d.delta)}
+                          {d.thinComp && (
+                            <Badge
+                              variant="outline"
+                              className="ml-1.5 h-4 text-[9px] font-normal align-middle"
+                            >
+                              az veri
+                            </Badge>
+                          )}
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+          <p className="text-[11px] text-muted-foreground px-4 py-3 border-t">
+            Departman skorları yorum metinlerinin duygu analizinden, itibar indeksi ise yıldız
+            puanlarından hesaplanır; ikisi farklı şeyleri ölçer. Rakip tarafında{" "}
+            {MIN_COMP_MENTIONS} bahisin altındaki departmanlarda fark gösterilmez.
+          </p>
         </CardContent>
       </Card>
 
