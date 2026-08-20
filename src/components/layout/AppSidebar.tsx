@@ -38,7 +38,7 @@ import {
   LayoutGrid,
   Sparkles,
   Swords,
-  Wallet,
+  
   Radar,
   Tags,
 } from "lucide-react";
