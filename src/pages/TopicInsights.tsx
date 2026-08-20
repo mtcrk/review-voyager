@@ -116,28 +116,11 @@ function useOwnTopics(businessId: string | undefined, range: Range) {
   const from = range.start.toISOString();
   const to = range.end.toISOString();
   return useQuery({
-    queryKey: ["topic_insights_rows", businessId, from, to],
+    queryKey: ["topic_insights_rows_v2", businessId, from, to],
     enabled: !!businessId,
     staleTime: 1000 * 60 * 5,
-    queryFn: async (): Promise<Row[]> => {
-      const { data, error } = await supabase
-        .from("ci_review_topics")
-        .select("review_id, topic_id, sentiment, excerpt, review_posted_at")
-        .eq("business_id", businessId!)
-        .eq("review_source", "own")
-        .is("competitor_id", null)
-        .gte("review_posted_at", from)
-        .lte("review_posted_at", to)
-        .limit(8000);
-      if (error) throw error;
-      return (data ?? []).map((r: any) => ({
-        review_id: r.review_id,
-        topic_id: r.topic_id,
-        sentiment: Number(r.sentiment),
-        excerpt: r.excerpt,
-        review_posted_at: r.review_posted_at,
-      }));
-    },
+    // Tarih filtresi yorumun posted_at değerinden gelir (bkz. ownTopicRows.ts).
+    queryFn: (): Promise<Row[]> => fetchOwnTopicRows(businessId!, from, to),
   });
 }
 
