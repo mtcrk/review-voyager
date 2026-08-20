@@ -148,8 +148,13 @@ Deno.serve(async (req) => {
         maxReviews,
         maxReviewsPerQuery: maxReviews,
         reviewsSort: "newest",
-        // Örneklemi tarihe yaymak için son 2 yıla bakılır (actor destekliyorsa).
+        // DİKKAT: bu parametre yalnızca bir ALT SINIR koyar (24 aydan eski yorumları
+        // alma). Örneklemi tarihe YAYMAZ — `reviewsSort: "newest"` + tavan nedeniyle
+        // örneklem her zaman EN YENİ N yorumdan oluşur. Bu yüzden kıyaslar UI tarafında
+        // ortak bir tarih penceresine indirgenir (IntelligenceComparison → compWindow).
         reviewsStartDate: "24 months",
+        // Actor çeviriyi `textTranslated`a, orijinali `text`e koyar; ingest orijinali
+        // saklar. Çeviri yalnızca ek bilgi olarak gelir, veriyi bozmaz.
         language: "tr",
         personalData: true,
         proxyConfiguration: { useApifyProxy: true },
