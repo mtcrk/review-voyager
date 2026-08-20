@@ -27,30 +27,43 @@ function topicLabel(t: Topic | undefined) {
   return t.display_name?.tr ?? t.display_name?.en ?? t.id;
 }
 
-function median(values: number[]) {
-  if (values.length === 0) return null;
-  const sorted = [...values].sort((a, b) => a - b);
-  const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+/** Gün cinsinden medyan yanıt süresi (kaynak: sayfanın ortak kıyas penceresi). */
+function fmtDays(d: number | null | undefined) {
+  if (d == null) return "—";
+  if (d < 1) return `${Math.round(d * 24)} sa`;
+  return `${d.toFixed(1)} gün`;
 }
 
-function hoursBetween(a: string, b: string) {
-  return (new Date(b).getTime() - new Date(a).getTime()) / 3_600_000;
-}
-
-function fmtHours(h: number | null) {
-  if (h == null) return "—";
-  if (h < 1) return "<1 sa";
-  if (h < 48) return `${Math.round(h)} sa`;
-  return `${Math.round(h / 24)} gün`;
-}
-
-export function ActionPack({ businessId }: { businessId: string }) {
+/**
+ * Tüm kıyas metrikleri ortak kıyas penceresinden hesaplanır ve prop olarak gelir.
+ * ActionPack hiçbir yeniden hesaplama yapmaz; prop yoksa ilgili kartı göstermez.
+ */
+export function ActionPack({
+  businessId,
+  ownAvg,
+  compAvgOfAvg,
+  ownReplyRate,
+  compReplyRate,
+  ownMedianResponse,
+  compMedianResponse,
+}: {
+  businessId: string;
+  /** 0-100 itibar indeksi */
+  ownAvg?: number | null;
+  /** 0-100 itibar indeksi */
+  compAvgOfAvg?: number | null;
+  ownReplyRate?: number | null;
+  compReplyRate?: number | null;
+  /** gün */
+  ownMedianResponse?: number | null;
+  /** gün */
+  compMedianResponse?: number | null;
+}) {
   const q = useQuery({
     queryKey: ["action-pack", businessId],
     enabled: !!businessId,
     queryFn: async () => {
-      const [{ data: biz }, { data: comps }, { data: ownReviews }, { data: topics }] = await Promise.all([
+      const [{ data: biz }, { data: comps }, { data: topics }] = await Promise.all([
         supabase
           .from("businesses")
           .select("id,name,star_rating,segment,price_tier,price_estimate_eur" as any)
@@ -62,43 +75,26 @@ export function ActionPack({ businessId }: { businessId: string }) {
           .eq("business_id", businessId)
           .eq("status", "confirmed"),
         supabase
-          .from("reviews")
-          .select("rating,platform,status,approved_reply,posted_at,replied_at")
-          .eq("business_id", businessId)
-          .order("posted_at", { ascending: false })
-          .limit(1000),
-        supabase
           .from("ci_topics")
           .select("id,display_name,applies_to_verticals"),
       ]);
 
       const compIds = (comps ?? []).map((c: any) => c.id);
-      let compReviews: any[] = [];
       let topicRows: any[] = [];
       if (compIds.length > 0) {
-        const [crRes, trRes] = await Promise.all([
-          supabase
-            .from("ci_competitor_reviews")
-            .select("competitor_id,platform,rating,posted_at,owner_reply_text,owner_reply_at" as any)
-            .in("competitor_id", compIds)
-            .limit(20000),
-          supabase
-            .from("ci_review_topics")
-            .select("topic_id,review_source,sentiment,competitor_id")
-            .eq("business_id", businessId),
-        ]);
-        compReviews = (crRes.data ?? []) as any[];
+        const trRes = await supabase
+          .from("ci_review_topics")
+          .select("topic_id,review_source,sentiment,competitor_id")
+          .eq("business_id", businessId);
         topicRows = (trRes.data ?? []) as any[];
       }
 
       return {
         biz: biz as any,
         comps: (comps ?? []) as any[],
-        ownReviews: (ownReviews ?? []) as any[],
         topics: ((topics ?? []) as any[]).filter((t) =>
           Array.isArray(t.applies_to_verticals) && t.applies_to_verticals.includes("hotel"),
         ) as Topic[],
-        compReviews,
         topicRows,
       };
     },
@@ -117,37 +113,12 @@ export function ActionPack({ businessId }: { businessId: string }) {
   const data = q.data;
   if (!data || data.comps.length === 0) return null;
 
-  const { biz, comps, ownReviews, topics, compReviews, topicRows } = data;
+  const { biz, comps, topics, topicRows } = data;
 
   // ===== Card 1: Pricing & Positioning =====
-  // Rakip puanları Google'ın 5'lik ölçeğinde. Kendi puanımız çok platformlu
-  // (Booking 10, Hotels.com 10, TripAdvisor 5...) olduğu için önce 5'lik ölçeğe
-  // normalize ediyoruz — aksi halde kıyas ters yön veriyor.
-  const ownRatedReviews = ownReviews.filter((r) => r.rating != null) as { rating: number; platform: string | null }[];
-  const ownAvg = ownRatedReviews.length ? averageRating5(ownRatedReviews) : null;
-
-  // Peer set: same segment OR same star (loose match for thin data)
-  const peers = comps.filter((c: any) => {
-    if (biz?.segment && c.segment) return c.segment === biz.segment;
-    if (biz?.star_rating != null && c.star_rating != null)
-      return Math.abs(Number(biz.star_rating) - Number(c.star_rating)) < 0.6;
-    return true;
-  });
-  const peerSet = peers.length > 0 ? peers : comps;
-  // Emsal ortalaması, hero satırıyla AYNI kaynaktan gelir: toplanan rakip
-  // yorumlarının platform ölçeğine göre normalize edilmiş ortalaması.
-  const peerIds = new Set(peerSet.map((c: any) => c.id));
-  const peerReviewRows = compReviews.filter(
-    (r: any) => peerIds.has(r.competitor_id) && r.rating != null,
-  ) as { rating: number; platform?: string | null }[];
-  const peerAvg = peerReviewRows.length >= MIN_COMP_MENTIONS
-    ? averageRating5(peerReviewRows)
-    : null;
-  const peerIsSubset = peerSet.length !== comps.length;
-  const peerPriceTiers = peerSet.map((c: any) => c.price_tier).filter((n: any) => n != null);
-  const peerPriceTier = peerPriceTiers.length
-    ? peerPriceTiers.reduce((a: number, b: number) => a + b, 0) / peerPriceTiers.length
-    : null;
+  // Puanlar tek kaynaktan gelir: sayfanın ortak kıyas penceresi (0-100 indeks).
+  const showPriceCard = ownAvg !== undefined && compAvgOfAvg !== undefined;
+  const peerSet = comps;
   const peerPriceEur = (() => {
     const arr = peerSet.map((c: any) => c.price_estimate_eur).filter((n: any) => n != null);
     return arr.length ? arr.reduce((a: number, b: number) => Number(a) + Number(b), 0) / arr.length : null;
@@ -155,24 +126,24 @@ export function ActionPack({ businessId }: { businessId: string }) {
   const ownPriceEur = biz?.price_estimate_eur != null ? Number(biz.price_estimate_eur) : null;
 
   let priceVerdict: { tone: "good" | "warn" | "bad" | "info"; title: string; detail: string };
-  if (ownAvg == null || peerAvg == null) {
+  if (ownAvg == null || compAvgOfAvg == null) {
     priceVerdict = {
       tone: "info",
       title: "Daha fazla veri gerekli",
       detail: `Kıyas için kendi yorumlarınız ve emsal rakiplerden en az ${MIN_COMP_MENTIONS} toplanmış yorum gerekiyor.`,
     };
-  } else if (ownAvg < peerAvg) {
+  } else if (ownAvg < compAvgOfAvg) {
     // Normalize edilmiş kıyasta emsalin altındaysak fiyat artışı ASLA önerilmez.
     priceVerdict = {
       tone: "bad",
       title: "Fiyatı sabit tutun",
-      detail: `Puanınız (${ownAvg.toFixed(2)}) emsal ortalamasının (${peerAvg.toFixed(2)}) altında — aynı 5'lik ölçekte. Önce tekrar eden şikayet konularını kapatın, fiyat artışını erteleyin.`,
+      detail: `İtibar indeksiniz (${ownAvg.toFixed(1)}) emsal ortalamasının (${compAvgOfAvg.toFixed(1)}) altında — aynı 0-100 ölçeğinde. Önce tekrar eden şikayet konularını kapatın, fiyat artışını erteleyin.`,
     };
-  } else if (ownAvg >= peerAvg + 0.2 && (ownPriceEur == null || peerPriceEur == null || ownPriceEur <= peerPriceEur)) {
+  } else if (ownAvg >= compAvgOfAvg + 4 && (ownPriceEur == null || peerPriceEur == null || ownPriceEur <= peerPriceEur)) {
     priceVerdict = {
       tone: "good",
       title: "Fiyatı yukarı çekme fırsatı",
-      detail: `Puanınız emsalin ${(ownAvg - peerAvg).toFixed(1)} üzerinde. %5-10 fiyat artışını test edin.`,
+      detail: `İtibar indeksiniz emsalin ${(ownAvg - compAvgOfAvg).toFixed(1)} puan üzerinde. %5-10 fiyat artışını test edin.`,
     };
   } else if (ownPriceEur != null && peerPriceEur != null && ownPriceEur > peerPriceEur * 1.1) {
     priceVerdict = {
