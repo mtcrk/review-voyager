@@ -1,0 +1,2 @@
+INSERT INTO public.subscription_billing (business_id, plan_code, amount, currency, status, next_billing_date, started_at, current_period_start, is_test)
+VALUES ('d3eb8612-c6b9-4fb8-acde-7759ec07b2f5', 'hotel', 0, 'TRY', 'trialing', (now() + interval '90 days')::date, now(), now(), false);
