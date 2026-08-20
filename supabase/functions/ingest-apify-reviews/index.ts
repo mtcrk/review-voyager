@@ -267,6 +267,10 @@ Deno.serve(async (req) => {
     const rows: any[] = [];
     let skippedNoCompetitor = 0;
     let skippedNoId = 0;
+    if (allItems.length > 0) {
+      // Actor çıktısındaki metin/dil alanlarını doğrulamak için (orijinal metin var mı?)
+      console.log("[competitor-review] text fields:", Object.keys(allItems[0]));
+    }
     for (const raw of allItems) {
       const n = normalizeItem(raw);
       if (!n.place_id || !competitorsByPlace[n.place_id]) {
