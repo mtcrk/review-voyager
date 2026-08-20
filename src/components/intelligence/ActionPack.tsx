@@ -271,6 +271,9 @@ export function ActionPack({ businessId }: { businessId: string }) {
           </CardTitle>
           <p className="text-xs text-muted-foreground">
             {peerSet.length} emsal rakiple karşılaştırma
+            {peerIsSubset
+              ? ` · emsal = comp-set içinden aynı segment/yıldız (${comps.length} rakibin ${peerSet.length}'i)`
+              : " · emsal = comp-set'in tamamı"}
           </p>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -279,7 +282,9 @@ export function ActionPack({ businessId }: { businessId: string }) {
             <span className="font-semibold">{ownAvg != null ? ownAvg.toFixed(2) : "—"}</span>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Emsal ortalama (5 üzerinden)</span>
+            <span className="text-muted-foreground">
+              Emsal ortalama (toplanan yorumlardan, 5 üzerinden)
+            </span>
             <span className="font-semibold">{peerAvg != null ? peerAvg.toFixed(2) : "—"}</span>
           </div>
           {(ownPriceEur != null || peerPriceEur != null) && (
