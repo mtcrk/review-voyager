@@ -509,11 +509,18 @@ export default function IntelligenceComparison() {
       if (buckets[wk]) buckets[wk]._compCount += 1;
     }
     const compN = Math.max(1, competitors.length);
+    // Rakip verisi ilk toplanmadan önceki haftalarda "0" bir ölçüm değil,
+    // veri yokluğudur — çizgi o haftalarda hiç çizilmez.
+    const compDates = compReviews90.map((r) => r.posted_at).filter((d): d is string => !!d).sort();
+    const compFirstWeek = compDates.length ? weekKey(compDates[0]) : null;
     return Object.values(buckets)
       .sort((a, b) => a.week.localeCompare(b.week))
       .map((b) => ({
         ...b,
-        competitorsAvg: Math.round((b._compCount / compN) * 10) / 10,
+        competitorsAvg:
+          compFirstWeek && b.week >= compFirstWeek
+            ? Math.round((b._compCount / compN) * 10) / 10
+            : null,
         weekLabel: b.week.slice(5), // MM-DD
       }));
   }, [ownReviews, compReviews90, competitors.length]);
@@ -543,12 +550,19 @@ export default function IntelligenceComparison() {
       b.compSum += toIndex100(Number(r.rating), normalizePlatform(r.platform) ?? "google");
       b.compN += 1;
     }
+    const compDates = compReviews90.map((r) => r.posted_at).filter((d): d is string => !!d).sort();
+    const compFirstWeek = compDates.length ? weekKey(compDates[0]) : null;
+    const MIN_WEEK_COMP = 3;
     return Object.values(buckets)
       .sort((a, b) => a.week.localeCompare(b.week))
       .map((b) => ({
         weekLabel: b.week.slice(5),
         you: b.ownN ? Math.round((b.ownSum / b.ownN) * 10) / 10 : null,
-        competitors: b.compN ? Math.round((b.compSum / b.compN) * 10) / 10 : null,
+        // 3'ten az yoruma dayanan hafta bir pazar hareketi değildir — çizilmez.
+        competitors:
+          compFirstWeek && b.week >= compFirstWeek && b.compN >= MIN_WEEK_COMP
+            ? Math.round((b.compSum / b.compN) * 10) / 10
+            : null,
       }));
   }, [ownReviews, compReviews90]);
 
@@ -613,6 +627,40 @@ export default function IntelligenceComparison() {
   }, [compBest, competitors, compIndexInfo]);
 
   const ownCountryCount = ownReviews.filter((r) => r.reviewer_country).length;
+
+  // === Kıyas künyesi — tarih aralığı + her iki tarafın yorum sayısı ===
+  const provenance = useMemo(() => {
+    const ownDates = ownReviews.map((r) => r.posted_at).filter((d): d is string => !!d);
+    const compDates = compAllRows.map((r) => r.posted_at).filter((d): d is string => !!d);
+    const ownPlatforms = new Set(
+      ownReviews.map((r) => normalizePlatform(r.platform) ?? "google"),
+    );
+    const compPlatforms = new Set(
+      compAllRows.map((r) => normalizePlatform(r.platform) ?? "google"),
+    );
+    const all = [...ownDates, ...compDates].sort();
+    const fmt = (iso: string) =>
+      new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "short" }).format(new Date(iso));
+    const compSorted = [...compDates].sort();
+    const compSpanDays =
+      compSorted.length > 1
+        ? (new Date(compSorted[compSorted.length - 1]).getTime() -
+            new Date(compSorted[0]).getTime()) /
+          86400_000
+        : 0;
+    const labelOf = (k: string) =>
+      PLATFORMS.find((p) => p.key === k)?.label.split(" ")[0] ?? k;
+    return {
+      hasAny: all.length > 0,
+      range: all.length ? `${fmt(all[0])} – ${fmt(all[all.length - 1])}` : null,
+      ownCount: ownReviews.length,
+      ownPlatformCount: ownPlatforms.size,
+      compCount: compAllRows.length,
+      compPlatformLabels: Array.from(compPlatforms).map(labelOf).join(", "),
+      compNarrowWindow: compDates.length > 0 && compSpanDays < 7,
+      compFirstDate: compSorted.length ? compSorted[0] : null,
+    };
+  }, [ownReviews, compAllRows]);
 
   async function runTask(key: string, fn: () => Promise<void>) {
     setBusyTask(key);
@@ -887,10 +935,31 @@ export default function IntelligenceComparison() {
             </div>
           )}
           {!loading && !isEmpty && (
-            <div className="text-xs text-muted-foreground mt-2">
-              {competitors.length} rakiple karşılaştırılıyor ·{" "}
-              <span className="font-medium text-foreground">{ownRank}.</span> sıradasınız
-            </div>
+            <>
+              <div className="text-xs text-muted-foreground mt-2">
+                {competitors.length} rakiple karşılaştırılıyor ·{" "}
+                <span className="font-medium text-foreground">{ownRank}.</span> sıradasınız
+              </div>
+              {provenance.hasAny && (
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                  <span>
+                    Kıyas: {provenance.range} · siz {fmtNum(provenance.ownCount)} yorum (
+                    {provenance.ownPlatformCount} platform) · rakipler{" "}
+                    {fmtNum(provenance.compCount)} yorum
+                    {provenance.compPlatformLabels ? ` (${provenance.compPlatformLabels})` : ""}
+                  </span>
+                  {provenance.compNarrowWindow && (
+                    <Badge
+                      variant="outline"
+                      className="h-5 text-[10px] border-amber-500/40 text-amber-700 dark:text-amber-300"
+                    >
+                      <AlertTriangle className="h-3 w-3 mr-1" />
+                      Rakip verisi dar bir tarih aralığından — kıyas sınırlı
+                    </Badge>
+                  )}
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -1156,7 +1225,7 @@ export default function IntelligenceComparison() {
                         {compAvgOfAvg != null ? compAvgOfAvg.toFixed(1) : "—"}
                       </div>
                       <div className="text-[11px] text-muted-foreground">
-                        {competitors.length} rakip üzerinden
+                        {competitors.length} rakip · toplanan tüm yorumlar
                       </div>
                     </div>
                     <div className="border-l pl-4 sm:pl-6">
@@ -1253,7 +1322,7 @@ export default function IntelligenceComparison() {
                   />
                   {(weekly.compIdxThis != null || weekly.compN > 0) && (
                     <WeekRow
-                      label="Comp-set indeksi"
+                      label="Comp-set indeksi (bu hafta)"
                       current={weekly.compIdxThis}
                       previous={weekly.compIdxPrev}
                       format={(v) => v.toFixed(1)}
@@ -1408,12 +1477,15 @@ export default function IntelligenceComparison() {
                           stroke={MUTED}
                           strokeWidth={2}
                           strokeDasharray="4 4"
-                          dot={false}
-                          connectNulls
+                          dot={{ r: 2 }}
                         />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
+                  <p className="text-[11px] text-muted-foreground mt-2">
+                    Rakip çizgisi yalnızca veri toplanan haftaları gösterir; haftalık 3 yorumun
+                    altındaki noktalar çizilmez.
+                  </p>
                 </CardContent>
               </Card>
             )}
@@ -1466,11 +1538,15 @@ export default function IntelligenceComparison() {
                         stroke={MUTED}
                         strokeWidth={2}
                         strokeDasharray="4 4"
-                        dot={false}
+                        dot={{ r: 2 }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
+                <p className="text-[11px] text-muted-foreground mt-2">
+                  Rakip çizgisi yalnızca veri toplanan haftaları gösterir — boş haftalar "yorum
+                  gelmedi" değil, "veri toplanmadı" anlamına gelir.
+                </p>
               </CardContent>
             </Card>
             )}
@@ -1559,7 +1635,7 @@ export default function IntelligenceComparison() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Pazar Konumu</CardTitle>
                 <p className="text-xs text-muted-foreground">
-                  Yatay: yorum sayısı · Dikey: itibar indeksi (0-100)
+                  Yatay: toplanan yorum sayısı · Dikey: itibar indeksi (0-100)
                 </p>
               </CardHeader>
               <CardContent>
@@ -1575,7 +1651,7 @@ export default function IntelligenceComparison() {
                         tick={{ fontSize: 11, fill: MUTED }}
                         tickFormatter={(v: number) => fmtNum(v)}
                         label={{
-                          value: "Yorum sayısı",
+                          value: "Toplanan yorum sayısı",
                           position: "insideBottom",
                           offset: -15,
                           fontSize: 11,
@@ -1643,6 +1719,11 @@ export default function IntelligenceComparison() {
                   <span>↘ Hacimli ama riskli</span>
                   <span>↙ Zayıf</span>
                 </div>
+                <p className="text-[11px] text-muted-foreground mt-2">
+                  Yatay eksen, platformlardaki toplam yorum sayısı değil, bu sistemde toplanan
+                  yorum sayısıdır. Rakiplerden örneklem toplandığı için hacim kıyası yanıltıcı
+                  olabilir.
+                </p>
               </CardContent>
             </Card>
             )}
@@ -1872,11 +1953,13 @@ function KpiCard({
               goodBad === "good" ? (
                 <span className="inline-flex items-center gap-0.5 text-emerald-600 font-medium">
                   <TrendingUp className="h-3 w-3" />
+                  {delta > 0 ? "+" : "−"}
                   {format(Math.abs(delta))}
                 </span>
               ) : goodBad === "bad" ? (
                 <span className="inline-flex items-center gap-0.5 text-rose-600 font-medium">
                   <TrendingDown className="h-3 w-3" />
+                  {delta > 0 ? "+" : "−"}
                   {format(Math.abs(delta))}
                 </span>
               ) : (

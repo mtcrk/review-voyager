@@ -84,7 +84,7 @@ export function CompetitorReviewsDrawer({
         <SheetHeader>
           <SheetTitle className="text-base">{competitorName}</SheetTitle>
           <SheetDescription>
-            Toplanan {totalCount} yorum · en yeni 200 tanesi gösteriliyor
+            Toplanan {totalCount} yorum · en yeni {rows.length} tanesi gösteriliyor
           </SheetDescription>
         </SheetHeader>
 
@@ -138,9 +138,23 @@ export function CompetitorReviewsDrawer({
                   <span className="text-muted-foreground">{fmtDate(r.posted_at)}</span>
                 </div>
                 {r.title && <div className="font-medium text-sm">{r.title}</div>}
-                {r.body && (
-                  <p className="text-sm text-foreground/80 whitespace-pre-wrap">{r.body}</p>
-                )}
+                {(() => {
+                  const body = (r.body ?? "").trim();
+                  // Bazı kayıtlarda metin yerine otel adı geliyor — bu metin sayılmaz.
+                  const isRealText =
+                    body.length > 0 &&
+                    body.toLowerCase() !== competitorName.trim().toLowerCase();
+                  if (!isRealText) {
+                    return (
+                      <p className="text-xs text-muted-foreground italic">
+                        Metin içermeyen puan
+                      </p>
+                    );
+                  }
+                  return (
+                    <p className="text-sm text-foreground/80 whitespace-pre-wrap">{body}</p>
+                  );
+                })()}
               </div>
             ))
           )}

@@ -47,6 +47,10 @@ type TopicRow = {
 };
 
 const MIN_MENTIONS = 3;
+/** Rakip tarafında bu eşiğin altındaki bahislerde "Fark" savunulamaz. */
+const MIN_COMP_MENTIONS = 5;
+/** Bu aralıkta fark gösterilir ama "az veri" olarak işaretlenir. */
+const THIN_COMP_MENTIONS = 10;
 const MAX_QUOTES = 5;
 
 type Quote = { excerpt: string; sentiment: number; competitor_id: string | null };
@@ -232,7 +236,9 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
         if (mentions === 0) return null;
         const own = a.ownCount ? sentimentToIndex100(a.ownSum / a.ownCount) : null;
         const comp = a.compCount ? sentimentToIndex100(a.compSum / a.compCount) : null;
-        const delta = own != null && comp != null ? own - comp : null;
+        const compReliable = a.compCount >= MIN_COMP_MENTIONS;
+        const delta = own != null && comp != null && compReliable ? own - comp : null;
+        const thinComp = compReliable && a.compCount < THIN_COMP_MENTIONS;
         const recent = a.recentN >= 2 ? sentimentToIndex100(a.recentSum / a.recentN) : null;
         const prev = a.prevN >= 2 ? sentimentToIndex100(a.prevSum / a.prevN) : null;
         const trend = recent != null && prev != null ? recent - prev : null;
@@ -262,6 +268,8 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
           own,
           comp,
           delta,
+          compReliable,
+          thinComp,
           trend,
           competitors,
           ownQuotes,
@@ -273,9 +281,11 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
     const visible = out.filter((r) => r.mentions >= MIN_MENTIONS);
     const hidden = out.length - visible.length;
     visible.sort((a, b) => {
-      const av = a.delta ?? 999;
-      const bv = b.delta ?? 999;
-      return av - bv;
+      // Fark hesaplanamayan (yeterli rakip verisi olmayan) satırlar sıralamaya girmez.
+      if (a.delta == null && b.delta == null) return b.mentions - a.mentions;
+      if (a.delta == null) return 1;
+      if (b.delta == null) return -1;
+      return a.delta - b.delta;
     });
     return { visible, hidden, totalTopics: out.length };
   }, [topics, perTopic, compNames]);
@@ -314,11 +324,18 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
         compN: e.compN,
         own,
         comp,
-        delta: own != null && comp != null ? own - comp : null,
+        delta:
+          own != null && comp != null && e.compN >= MIN_COMP_MENTIONS ? own - comp : null,
+        thinComp: e.compN >= MIN_COMP_MENTIONS && e.compN < THIN_COMP_MENTIONS,
       };
     })
       .filter((x): x is NonNullable<typeof x> => x != null)
-      .sort((a, b) => (a.delta ?? 999) - (b.delta ?? 999));
+      .sort((a, b) => {
+        if (a.delta == null && b.delta == null) return b.mentions - a.mentions;
+        if (a.delta == null) return 1;
+        if (b.delta == null) return -1;
+        return a.delta - b.delta;
+      });
   }, [rows]);
 
   const availableDepts = useMemo(
@@ -456,13 +473,34 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
                     <td
                       className={`py-2.5 px-4 text-right tabular-nums font-medium ${deltaClass(d.delta)}`}
                     >
-                      {fmtDelta(d.delta)}
+                      {d.delta == null ? (
+                        <span className="text-[11px] font-normal text-muted-foreground">
+                          yeterli rakip verisi yok
+                        </span>
+                      ) : (
+                        <span className={d.thinComp ? "opacity-50" : undefined}>
+                          {fmtDelta(d.delta)}
+                          {d.thinComp && (
+                            <Badge
+                              variant="outline"
+                              className="ml-1.5 h-4 text-[9px] font-normal align-middle"
+                            >
+                              az veri
+                            </Badge>
+                          )}
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+          <p className="text-[11px] text-muted-foreground px-4 py-3 border-t">
+            Departman skorları yorum metinlerinin duygu analizinden, itibar indeksi ise yıldız
+            puanlarından hesaplanır; ikisi farklı şeyleri ölçer. Rakip tarafında{" "}
+            {MIN_COMP_MENTIONS} bahisin altındaki departmanlarda fark gösterilmez.
+          </p>
         </CardContent>
       </Card>
 
@@ -482,6 +520,9 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
                 .join(" · ")}
             </span>
           </div>
+          <p className="text-[11px] text-muted-foreground mt-1">
+            Yalnızca rakip tarafında en az {MIN_COMP_MENTIONS} bahis bulunan konular listelenir.
+          </p>
         </div>
       )}
 
@@ -491,7 +532,9 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
           <div>
             <CardTitle className="text-base">Konu bazlı karşılaştırma</CardTitle>
             <p className="text-xs text-muted-foreground mt-1">
-              Farka göre sıralı, en kötü üstte. Satıra tıklayarak rakip bazlı kırılımı görün.
+              Farka göre sıralı, en kötü üstte. Rakip tarafında {MIN_COMP_MENTIONS} bahisin
+              altındaki konularda fark hesaplanmaz ve sıralamaya girmez. Satıra tıklayarak rakip
+              bazlı kırılımı görün.
             </p>
           </div>
           <Select value={dept} onValueChange={(v) => setDept(v as any)}>
@@ -575,7 +618,23 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
                           <td
                             className={`py-2.5 px-3 text-right tabular-nums font-medium ${deltaClass(r.delta)}`}
                           >
-                            {fmtDelta(r.delta)}
+                            {r.delta == null ? (
+                              <span className="text-[11px] font-normal text-muted-foreground">
+                                yeterli rakip verisi yok
+                              </span>
+                            ) : (
+                              <span className={r.thinComp ? "opacity-50" : undefined}>
+                                {fmtDelta(r.delta)}
+                                {r.thinComp && (
+                                  <Badge
+                                    variant="outline"
+                                    className="ml-1.5 h-4 text-[9px] font-normal align-middle"
+                                  >
+                                    az veri
+                                  </Badge>
+                                )}
+                              </span>
+                            )}
                           </td>
                           <td className="py-2.5 px-4 text-right">
                             {r.trend == null ? (

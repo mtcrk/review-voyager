@@ -6,6 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
 import { averageRating5 } from "@/lib/ratingScale";
+import { sentimentToIndex100 } from "@/lib/topicDepartments";
+
+/** Rakip tarafında bu eşiğin altındaki bahislerde kıyas savunulamaz. */
+const MIN_COMP_MENTIONS = 5;
 import {
   TrendingUp,
   TrendingDown,
@@ -75,7 +79,7 @@ export function ActionPack({ businessId }: { businessId: string }) {
         const [crRes, trRes] = await Promise.all([
           supabase
             .from("ci_competitor_reviews")
-            .select("competitor_id,rating,posted_at,owner_reply_text,owner_reply_at" as any)
+            .select("competitor_id,platform,rating,posted_at,owner_reply_text,owner_reply_at" as any)
             .in("competitor_id", compIds)
             .limit(20000),
           supabase
@@ -130,10 +134,16 @@ export function ActionPack({ businessId }: { businessId: string }) {
     return true;
   });
   const peerSet = peers.length > 0 ? peers : comps;
-  const peerRatings = peerSet.map((c: any) => c.rating).filter((n: any) => n != null);
-  const peerAvg = peerRatings.length
-    ? peerRatings.reduce((a: number, b: number) => a + b, 0) / peerRatings.length
+  // Emsal ortalaması, hero satırıyla AYNI kaynaktan gelir: toplanan rakip
+  // yorumlarının platform ölçeğine göre normalize edilmiş ortalaması.
+  const peerIds = new Set(peerSet.map((c: any) => c.id));
+  const peerReviewRows = compReviews.filter(
+    (r: any) => peerIds.has(r.competitor_id) && r.rating != null,
+  ) as { rating: number; platform?: string | null }[];
+  const peerAvg = peerReviewRows.length >= MIN_COMP_MENTIONS
+    ? averageRating5(peerReviewRows)
     : null;
+  const peerIsSubset = peerSet.length !== comps.length;
   const peerPriceTiers = peerSet.map((c: any) => c.price_tier).filter((n: any) => n != null);
   const peerPriceTier = peerPriceTiers.length
     ? peerPriceTiers.reduce((a: number, b: number) => a + b, 0) / peerPriceTiers.length
@@ -149,7 +159,7 @@ export function ActionPack({ businessId }: { businessId: string }) {
     priceVerdict = {
       tone: "info",
       title: "Daha fazla veri gerekli",
-      detail: "Kendi yorumlarınızı bağlayın ve segment + yıldız bilgisini girin.",
+      detail: `Kıyas için kendi yorumlarınız ve emsal rakiplerden en az ${MIN_COMP_MENTIONS} toplanmış yorum gerekiyor.`,
     };
   } else if (ownAvg < peerAvg) {
     // Normalize edilmiş kıyasta emsalin altındaysak fiyat artışı ASLA önerilmez.
@@ -179,29 +189,46 @@ export function ActionPack({ businessId }: { businessId: string }) {
   }
 
   // ===== Card 2: Operational Priority =====
-  const ownTopicStats = new Map<string, { neg: number; pos: number; total: number }>();
-  const compTopicStats = new Map<string, { neg: number; pos: number; total: number; sentSum: number }>();
+  type TStat = { neg: number; pos: number; total: number; sentSum: number };
+  const ownTopicStats = new Map<string, TStat>();
+  const compTopicStats = new Map<string, TStat>();
   for (const r of topicRows) {
     const target = r.review_source === "own" ? ownTopicStats : compTopicStats;
-    const e = target.get(r.topic_id) ?? { neg: 0, pos: 0, total: 0, sentSum: 0 } as any;
+    const e: TStat = target.get(r.topic_id) ?? { neg: 0, pos: 0, total: 0, sentSum: 0 };
     e.total += 1;
-    e.sentSum = (e.sentSum ?? 0) + Number(r.sentiment);
+    e.sentSum += Number(r.sentiment);
     if (Number(r.sentiment) <= -0.2) e.neg += 1;
     else if (Number(r.sentiment) >= 0.2) e.pos += 1;
     target.set(r.topic_id, e);
   }
-  const opsList = topics
+  // Konular sekmesindeki "Fark" sütunuyla aynı mantık: rakibin bizden önde
+  // olduğu ve minimum örneklem eşiğini geçen konular önceliklidir.
+  const gapList = topics
     .map((t) => {
-      const o = ownTopicStats.get(t.id) ?? { neg: 0, pos: 0, total: 0 };
-      const c = compTopicStats.get(t.id) ?? { neg: 0, pos: 0, total: 0, sentSum: 0 };
-      const compAvg = c.total > 0 ? (c.sentSum ?? 0) / c.total : 0;
-      let priority = o.neg * 2 + c.neg * 1 - o.pos * 0.5;
-      if (compAvg > 0.1 && o.neg > 0) priority *= 1.5; // rival is good, you are not
-      return { topic: t, ownNeg: o.neg, compNeg: c.neg, compAvg, priority };
+      const o = ownTopicStats.get(t.id);
+      const c = compTopicStats.get(t.id);
+      if (!o || o.total === 0 || !c || c.total < MIN_COMP_MENTIONS) return null;
+      const ownIdx = sentimentToIndex100(o.sentSum / o.total);
+      const compIdx = sentimentToIndex100(c.sentSum / c.total);
+      const delta = ownIdx - compIdx;
+      if (delta >= -2) return null;
+      return { topic: t, ownIdx, compIdx, delta, ownN: o.total, compN: c.total };
     })
-    .filter((x) => x.priority > 0)
-    .sort((a, b) => b.priority - a.priority)
+    .filter((x): x is NonNullable<typeof x> => x != null)
+    .sort((a, b) => a.delta - b.delta)
     .slice(0, 3);
+
+  const ownComplaintList = topics
+    .map((t) => {
+      const o = ownTopicStats.get(t.id);
+      if (!o || o.neg === 0) return null;
+      return { topic: t, ownNeg: o.neg, ownN: o.total };
+    })
+    .filter((x): x is NonNullable<typeof x> => x != null)
+    .sort((a, b) => b.ownNeg - a.ownNeg)
+    .slice(0, 3);
+
+  const opsMode: "gap" | "own" = gapList.length > 0 ? "gap" : "own";
 
   // ===== Card 3: Reply Benchmark =====
   const ownTotal = ownReviews.length;
@@ -262,6 +289,9 @@ export function ActionPack({ businessId }: { businessId: string }) {
           </CardTitle>
           <p className="text-xs text-muted-foreground">
             {peerSet.length} emsal rakiple karşılaştırma
+            {peerIsSubset
+              ? ` · emsal = comp-set içinden aynı segment/yıldız (${comps.length} rakibin ${peerSet.length}'i)`
+              : " · emsal = comp-set'in tamamı"}
           </p>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -270,7 +300,9 @@ export function ActionPack({ businessId }: { businessId: string }) {
             <span className="font-semibold">{ownAvg != null ? ownAvg.toFixed(2) : "—"}</span>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Emsal ortalama (5 üzerinden)</span>
+            <span className="text-muted-foreground">
+              Emsal ortalama (toplanan yorumlardan, 5 üzerinden)
+            </span>
             <span className="font-semibold">{peerAvg != null ? peerAvg.toFixed(2) : "—"}</span>
           </div>
           {(ownPriceEur != null || peerPriceEur != null) && (
@@ -304,19 +336,22 @@ export function ActionPack({ businessId }: { businessId: string }) {
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm flex items-center gap-2">
-            <Wrench className="h-4 w-4 text-primary" /> Bu Hafta Önceliğin
+            <Wrench className="h-4 w-4 text-primary" />{" "}
+            {opsMode === "gap" ? "Bu Hafta Önceliğin" : "Sizde en çok şikayet edilen konular"}
           </CardTitle>
           <p className="text-xs text-muted-foreground">
-            Şikayet sıklığı + rakip kıyaslamasına göre sıralandı
+            {opsMode === "gap"
+              ? `Rakibin sizden önde olduğu konular (Konular sekmesindeki "Fark" sütunu, en az ${MIN_COMP_MENTIONS} rakip bahsi)`
+              : "Yeterli rakip verisi yok — sadece kendi şikayet sıklığınıza göre sıralandı"}
           </p>
         </CardHeader>
         <CardContent className="space-y-2">
-          {opsList.length === 0 ? (
+          {opsMode === "own" && ownComplaintList.length === 0 ? (
             <p className="text-xs text-muted-foreground py-4 text-center">
               Belirgin operasyonel öncelik yok. Konuları analiz edin.
             </p>
-          ) : (
-            opsList.map((row, idx) => (
+          ) : opsMode === "gap" ? (
+            gapList.map((row, idx) => (
               <div key={row.topic.id} className="flex items-start gap-2 py-1.5 border-b last:border-b-0">
                 <div className="flex-shrink-0 h-6 w-6 rounded-full bg-primary/10 text-primary text-xs font-semibold flex items-center justify-center">
                   {idx + 1}
@@ -324,14 +359,25 @@ export function ActionPack({ businessId }: { businessId: string }) {
                 <div className="flex-1 min-w-0">
                   <div className="font-medium text-sm truncate">{topicLabel(row.topic)}</div>
                   <div className="text-xs text-muted-foreground">
-                    {row.ownNeg > 0 && <>Sizde {row.ownNeg} şikayet</>}
-                    {row.ownNeg > 0 && row.compNeg > 0 && " · "}
-                    {row.compNeg > 0 && <>rakipte {row.compNeg}</>}
-                    {row.compAvg > 0.1 && (
-                      <span className="text-rose-600 dark:text-rose-400">
-                        {" · "}rakip bu konuda iyi
-                      </span>
-                    )}
+                    Siz {row.ownIdx.toFixed(1)} / rakip {row.compIdx.toFixed(1)}{" "}
+                    <span className="text-rose-600 dark:text-rose-400">
+                      (−{Math.abs(row.delta).toFixed(1)})
+                    </span>
+                    {" · "}rakipte {row.compN} bahis
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            ownComplaintList.map((row, idx) => (
+              <div key={row.topic.id} className="flex items-start gap-2 py-1.5 border-b last:border-b-0">
+                <div className="flex-shrink-0 h-6 w-6 rounded-full bg-primary/10 text-primary text-xs font-semibold flex items-center justify-center">
+                  {idx + 1}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-sm truncate">{topicLabel(row.topic)}</div>
+                  <div className="text-xs text-muted-foreground">
+                    Sizde {row.ownNeg} şikayet · {row.ownN} bahis üzerinden
                   </div>
                 </div>
               </div>
