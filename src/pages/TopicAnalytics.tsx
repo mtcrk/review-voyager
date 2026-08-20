@@ -6,6 +6,7 @@
 import { Fragment, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 import { addMonths, format, startOfWeek, startOfMonth, startOfYear, subDays, subMonths, subYears, differenceInCalendarDays } from "date-fns";
 import { tr as trLocale } from "date-fns/locale";
 import {
@@ -37,6 +38,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useCiTopics } from "@/hooks/useReviewAnalysis";
 import { QuoteColumns, type EvidenceQuote } from "@/components/intelligence/QuoteColumns";
+import { fetchOwnTopicRows } from "@/lib/ownTopicRows";
 import { CompareBars, TrendLine, type CompareBarDatum } from "@/components/intelligence/TopicCharts";
 import {
   DEPARTMENTS,
@@ -96,28 +98,11 @@ function useOwnTopics(businessId: string | undefined, range: Range) {
   const from = range.start.toISOString();
   const to = range.end.toISOString();
   return useQuery({
-    queryKey: ["period_own_topics", businessId, from, to],
+    queryKey: ["period_own_topics_v2", businessId, from, to],
     enabled: !!businessId,
     staleTime: 1000 * 60 * 5,
-    queryFn: async (): Promise<TopicRow[]> => {
-      const { data, error } = await supabase
-        .from("ci_review_topics")
-        .select("review_id, topic_id, sentiment, excerpt, review_posted_at")
-        .eq("business_id", businessId!)
-        .eq("review_source", "own")
-        .is("competitor_id", null)
-        .gte("review_posted_at", from)
-        .lte("review_posted_at", to)
-        .limit(8000);
-      if (error) throw error;
-      return (data ?? []).map((r: any) => ({
-        review_id: r.review_id,
-        topic_id: r.topic_id,
-        sentiment: Number(r.sentiment),
-        excerpt: r.excerpt,
-        review_posted_at: r.review_posted_at,
-      }));
-    },
+    // Tarih filtresi yorumun posted_at değerinden gelir (bkz. ownTopicRows.ts).
+    queryFn: (): Promise<TopicRow[]> => fetchOwnTopicRows(businessId!, from, to),
   });
 }
 
@@ -284,11 +269,27 @@ export default function TopicAnalytics() {
   const businessId = activeBusiness?.id;
   const { labelOf } = useCiTopics();
 
-  const [preset, setPreset] = useState<PeriodPreset>("month");
-  const [compareMode, setCompareMode] = useState<CompareMode>("prev");
   const [custom, setCustom] = useState<Range>({ start: subDays(new Date(), 30), end: new Date() });
-  const [openDept, setOpenDept] = useState<DepartmentKey | null>(null);
-  const [openTopic, setOpenTopic] = useState<string | null>(null);
+
+  // Seçili dönem / kıyas / departman / konu URL'de tutulur ki geri tuşu durumu korusun.
+  const [params, setParams] = useSearchParams();
+  const preset = (params.get("range") as PeriodPreset) || "month";
+  const compareMode = (params.get("cmp") as CompareMode) || "prev";
+  const openDept = (params.get("dept") as DepartmentKey | null) || null;
+  const openTopic = params.get("topic");
+
+  const patchParams = (patch: Record<string, string | null>) => {
+    const next = new URLSearchParams(params);
+    for (const [k, v] of Object.entries(patch)) {
+      if (v == null) next.delete(k);
+      else next.set(k, v);
+    }
+    setParams(next, { replace: false });
+  };
+  const setPreset = (v: PeriodPreset) => patchParams({ range: v });
+  const setCompareMode = (v: CompareMode) => patchParams({ cmp: v });
+  const setOpenDept = (v: DepartmentKey | null) => patchParams({ dept: v, topic: null });
+  const setOpenTopic = (v: string | null) => patchParams({ topic: v });
 
   const cur = useMemo(() => currentRange(preset, custom), [preset, custom]);
   const prev = useMemo(() => compareRange(cur, compareMode), [cur, compareMode]);

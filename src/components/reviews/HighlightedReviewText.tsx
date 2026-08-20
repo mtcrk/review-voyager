@@ -16,6 +16,8 @@ interface HighlightedReviewTextProps {
   highlights: ReviewHighlight[];
   /** topic_id -> localized display name */
   topicLabels?: Record<string, string>;
+  /** Analiz sayfasından gelinen konu — o konuya ait parçalar öne çıkarılır. */
+  focusTopicId?: string | null;
   className?: string;
 }
 
@@ -74,10 +76,12 @@ function MarkedSpan({
   children,
   span,
   label,
+  focused,
 }: {
   children: string;
   span: ResolvedSpan;
   label?: string;
+  focused?: boolean;
 }) {
   // Controlled so a tap (touch) opens the tooltip too, not just hover/focus.
   const [open, setOpen] = useState(false);
@@ -89,6 +93,7 @@ function MarkedSpan({
       className={cn(
         "rounded-sm px-0.5 py-px underline decoration-dotted underline-offset-2 cursor-help",
         polarityClass(String(span.polarity)),
+        focused && "font-semibold ring-2 ring-primary ring-offset-1 decoration-solid",
       )}
     >
       {children}
@@ -112,6 +117,7 @@ export function HighlightedReviewText({
   text,
   highlights,
   topicLabels = {},
+  focusTopicId,
   className,
 }: HighlightedReviewTextProps) {
   const spans = useMemo(() => resolveSpans(text ?? "", highlights ?? []), [text, highlights]);
@@ -130,6 +136,7 @@ export function HighlightedReviewText({
           key={`m-${i}`}
           span={span}
           label={span.topic_id ? topicLabels[span.topic_id] : undefined}
+          focused={!!focusTopicId && span.topic_id === focusTopicId}
         >
           {src.slice(span.start, span.end)}
         </MarkedSpan>,
@@ -141,7 +148,7 @@ export function HighlightedReviewText({
       parts.push(<Fragment key="p-last">{src.slice(cursor)}</Fragment>);
     }
     return parts;
-  }, [spans, text, topicLabels]);
+  }, [spans, text, topicLabels, focusTopicId]);
 
   return (
     <p className={cn("text-sm leading-relaxed text-foreground whitespace-pre-wrap", className)}>

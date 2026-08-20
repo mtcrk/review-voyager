@@ -124,6 +124,29 @@ export function TopicAnalysis({
     },
   });
 
+  // Kendi bahislerimizin tarihi yorumun posted_at değerinden alınır — bahis
+  // tablosundaki tarih boş ya da tutarsız olabiliyor.
+  const ownDatesQ = useQuery({
+    queryKey: ["own_review_dates", businessId],
+    enabled: !!businessId,
+    queryFn: async () => {
+      const map: Record<string, string> = {};
+      for (let page = 0; page < 20; page++) {
+        const { data, error } = await supabase
+          .from("reviews")
+          .select("id, posted_at")
+          .eq("business_id", businessId)
+          .order("posted_at", { ascending: false })
+          .range(page * 1000, page * 1000 + 999);
+        if (error) throw error;
+        const rows = (data ?? []) as any[];
+        for (const r of rows) if (r.posted_at) map[r.id] = r.posted_at;
+        if (rows.length < 1000) break;
+      }
+      return map;
+    },
+  });
+
   const competitorsQ = useQuery({
     queryKey: ["ci_competitor_names", businessId],
     enabled: !!businessId,
@@ -164,7 +187,16 @@ export function TopicAnalysis({
   });
 
   const topics = topicsQ.data ?? [];
-  const allRows = rowsQ.data ?? [];
+  const ownDates = ownDatesQ.data ?? {};
+  const allRows = useMemo(
+    () =>
+      (rowsQ.data ?? []).map((r) =>
+        r.review_source === "own"
+          ? { ...r, review_posted_at: ownDates[r.review_id] ?? r.review_posted_at }
+          : r,
+      ),
+    [rowsQ.data, ownDates],
+  );
   // Kıyas ortak pencerede yapılır — tarihi olmayan bahisler kıyasa girmez.
   const rows = useMemo(
     () =>
@@ -279,7 +311,12 @@ export function TopicAnalysis({
             count: c.count,
             index: sentimentToIndex100(c.sum / c.count),
           }))
-          .map((c) => ({ ...c, delta: own != null ? own - c.index : null }))
+          // Eşik rakip bazında da uygulanır: tek bir yorumdan "fark" iddiası çıkmaz.
+          .map((c) => ({
+            ...c,
+            delta: own != null && c.count >= MIN_COMP_MENTIONS ? own - c.index : null,
+            thin: c.count >= MIN_COMP_MENTIONS && c.count < THIN_COMP_MENTIONS,
+          }))
           .sort((a2, b2) => b2.index - a2.index);
         // Evidence: worst own quotes (what guests complain about) and the
         // competitors' best quotes (what they get praised for).
@@ -412,7 +449,7 @@ export function TopicAnalysis({
     qc.invalidateQueries({ queryKey: ["ci_topics_pending", businessId] });
   }
 
-  if (topicsQ.isLoading || rowsQ.isLoading) {
+  if (topicsQ.isLoading || rowsQ.isLoading || ownDatesQ.isLoading) {
     return <Skeleton className="h-64 w-full" />;
   }
 
@@ -713,12 +750,21 @@ export function TopicAnalysis({
                                           {c.count} bahis
                                         </span>
                                         <span>{c.index.toFixed(1)}</span>
-                                        <Badge
-                                          variant="outline"
-                                          className={`h-5 ${deltaClass(c.delta)}`}
-                                        >
-                                          {fmtDelta(c.delta)}
-                                        </Badge>
+                                        {c.delta == null ? (
+                                          <span className="text-[10px] text-muted-foreground">
+                                            yeterli veri yok
+                                          </span>
+                                        ) : (
+                                          <Badge
+                                            variant="outline"
+                                            className={`h-5 ${deltaClass(c.delta)} ${c.thin ? "opacity-50" : ""}`}
+                                          >
+                                            {fmtDelta(c.delta)}
+                                            {c.thin && (
+                                              <span className="ml-1 text-[9px] font-normal">az veri</span>
+                                            )}
+                                          </Badge>
+                                        )}
                                       </span>
                                     </div>
                                   ))}
