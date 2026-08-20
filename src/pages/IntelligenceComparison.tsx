@@ -1635,7 +1635,7 @@ export default function IntelligenceComparison() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Pazar Konumu</CardTitle>
                 <p className="text-xs text-muted-foreground">
-                  Yatay: yorum sayısı · Dikey: itibar indeksi (0-100)
+                  Yatay: toplanan yorum sayısı · Dikey: itibar indeksi (0-100)
                 </p>
               </CardHeader>
               <CardContent>
@@ -1651,7 +1651,7 @@ export default function IntelligenceComparison() {
                         tick={{ fontSize: 11, fill: MUTED }}
                         tickFormatter={(v: number) => fmtNum(v)}
                         label={{
-                          value: "Yorum sayısı",
+                          value: "Toplanan yorum sayısı",
                           position: "insideBottom",
                           offset: -15,
                           fontSize: 11,
@@ -1719,6 +1719,11 @@ export default function IntelligenceComparison() {
                   <span>↘ Hacimli ama riskli</span>
                   <span>↙ Zayıf</span>
                 </div>
+                <p className="text-[11px] text-muted-foreground mt-2">
+                  Yatay eksen, platformlardaki toplam yorum sayısı değil, bu sistemde toplanan
+                  yorum sayısıdır. Rakiplerden örneklem toplandığı için hacim kıyası yanıltıcı
+                  olabilir.
+                </p>
               </CardContent>
             </Card>
             )}
