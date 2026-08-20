@@ -201,26 +201,12 @@ export function ActionPack({
 
   const opsMode: "gap" | "own" = gapList.length > 0 ? "gap" : "own";
 
-  // ===== Card 3: Reply Benchmark =====
-  const ownTotal = ownReviews.length;
-  const ownReplied = ownReviews.filter((r) => r.approved_reply || r.status === "replied");
-  const ownReplyRate = ownTotal > 0 ? (ownReplied.length / ownTotal) * 100 : 0;
-  const ownReplyTimes = ownReplied
-    .filter((r) => r.posted_at && r.replied_at)
-    .map((r) => hoursBetween(r.posted_at, r.replied_at!));
-  const ownMedianReply = median(ownReplyTimes);
-
-  const compTotal = compReviews.length;
-  const compRepliedRows = compReviews.filter((r: any) => r.owner_reply_text);
-  const compReplyRate = compTotal > 0 ? (compRepliedRows.length / compTotal) * 100 : null;
-  const compReplyTimes = compRepliedRows
-    .filter((r: any) => r.posted_at && r.owner_reply_at)
-    .map((r: any) => hoursBetween(r.posted_at, r.owner_reply_at!));
-  const compMedianReply = median(compReplyTimes);
-
-  const unansweredCount = ownReviews.filter(
-    (r) => !r.approved_reply && r.status !== "replied",
-  ).length;
+  // ===== Card 3: Reply Benchmark — değerler prop olarak gelir =====
+  const showReplyCard =
+    ownReplyRate !== undefined &&
+    compReplyRate !== undefined &&
+    ownMedianResponse !== undefined &&
+    compMedianResponse !== undefined;
 
   function rateTone(own: number | null, comp: number | null, higherBetter = true) {
     if (own == null || comp == null) return "info" as const;
@@ -231,10 +217,10 @@ export function ActionPack({
     if (bad) return "bad" as const;
     return "warn" as const;
   }
-  const rateBadge = rateTone(ownReplyRate, compReplyRate, true);
+  const rateBadge = rateTone(ownReplyRate ?? null, compReplyRate ?? null, true);
   const timeBadge = rateTone(
-    ownMedianReply == null ? null : -ownMedianReply,
-    compMedianReply == null ? null : -compMedianReply,
+    ownMedianResponse == null ? null : -ownMedianResponse,
+    compMedianResponse == null ? null : -compMedianResponse,
     true,
   );
 
