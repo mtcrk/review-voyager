@@ -558,21 +558,6 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  isActive={location.pathname.startsWith("/billing")}
-                  tooltip="Abonelik"
-                >
-                  <NavLink
-                    to="/billing"
-                    className="flex items-center gap-3 transition-smooth"
-                  >
-                    <Wallet className="h-5 w-5" />
-                    <span>Abonelik</span>
-                  </NavLink>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
                   isActive={location.pathname === "/settings"}
                   tooltip="Ayarlar"
                 >
