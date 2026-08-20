@@ -39,6 +39,7 @@ type Topic = {
 };
 
 type TopicRow = {
+  review_id: string;
   topic_id: string;
   review_source: "own" | "competitor";
   competitor_id: string | null;
@@ -54,7 +55,13 @@ const MIN_COMP_MENTIONS = 5;
 const THIN_COMP_MENTIONS = 10;
 const MAX_QUOTES = 5;
 
-type Quote = { excerpt: string; sentiment: number; competitor_id: string | null };
+type Quote = {
+  excerpt: string;
+  sentiment: number;
+  competitor_id: string | null;
+  /** Yalnızca kendi yorumlarımızda dolu — "Yoruma git" bağlantısı için. */
+  review_id?: string | null;
+};
 
 function topicName(t: Topic) {
   return t.display_name?.tr ?? t.display_name?.en ?? t.id;
@@ -110,7 +117,7 @@ export function TopicAnalysis({
     queryFn: async () => {
       const { data, error } = await supabase
         .from("ci_review_topics")
-        .select("topic_id, review_source, competitor_id, sentiment, excerpt, review_posted_at")
+        .select("review_id, topic_id, review_source, competitor_id, sentiment, excerpt, review_posted_at")
         .eq("business_id", businessId);
       if (error) throw error;
       return (data ?? []) as TopicRow[];
@@ -213,7 +220,12 @@ export function TopicAnalysis({
         e.ownCount++;
         e.ownSum += r.sentiment;
         if (excerpt) {
-          e.ownQuotes.push({ excerpt, sentiment: r.sentiment, competitor_id: null });
+          e.ownQuotes.push({
+            excerpt,
+            sentiment: r.sentiment,
+            competitor_id: null,
+            review_id: r.review_id,
+          });
         }
         if (r.review_posted_at) {
           if (r.review_posted_at >= since90) {
@@ -719,6 +731,8 @@ export function TopicAnalysis({
                                   left={r.ownQuotes.map((q) => ({
                                     excerpt: q.excerpt,
                                     sentiment: q.sentiment,
+                                    reviewId: q.review_id ?? null,
+                                    topicId: r.id,
                                   }))}
                                   right={r.compQuotes.map((q) => ({
                                     excerpt: q.excerpt,
