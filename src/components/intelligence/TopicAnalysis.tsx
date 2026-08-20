@@ -613,7 +613,23 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
                           <td
                             className={`py-2.5 px-3 text-right tabular-nums font-medium ${deltaClass(r.delta)}`}
                           >
-                            {fmtDelta(r.delta)}
+                            {r.delta == null ? (
+                              <span className="text-[11px] font-normal text-muted-foreground">
+                                yeterli rakip verisi yok
+                              </span>
+                            ) : (
+                              <span className={r.thinComp ? "opacity-50" : undefined}>
+                                {fmtDelta(r.delta)}
+                                {r.thinComp && (
+                                  <Badge
+                                    variant="outline"
+                                    className="ml-1.5 h-4 text-[9px] font-normal align-middle"
+                                  >
+                                    az veri
+                                  </Badge>
+                                )}
+                              </span>
+                            )}
                           </td>
                           <td className="py-2.5 px-4 text-right">
                             {r.trend == null ? (
