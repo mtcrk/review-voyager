@@ -145,9 +145,8 @@ Deno.serve(async (req) => {
 
       const input = {
         placeIds: [c.place_id],
-        // Savunulabilir bir örneklem için derinliği yükseltiyoruz (40 → 300).
-        maxReviews: 300,
-        maxReviewsPerQuery: 300,
+        maxReviews,
+        maxReviewsPerQuery: maxReviews,
         reviewsSort: "newest",
         // Örneklemi tarihe yaymak için son 2 yıla bakılır (actor destekliyorsa).
         reviewsStartDate: "24 months",
