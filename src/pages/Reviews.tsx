@@ -1172,11 +1172,22 @@ export default function Reviews() {
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
               <Download className="h-6 w-6 text-primary" />
             </div>
-            <h3 className="text-lg font-semibold text-foreground">Google Yorumlarınızı Çekin</h3>
+            <h3 className="text-lg font-semibold text-foreground">
+              {googleFetchEmpty ? "Google kaydında yorum bulunamadı" : "Google Yorumlarınızı Çekin"}
+            </h3>
             <p className="text-sm text-muted-foreground">
-              Google Business hesabınız bağlı. Yorumlarınızı API üzerinden otomatik çekebilirsiniz.
+              {googleFetchEmpty
+                ? "Bağlı Google kaydında yorum bulunamadı. Google Business Profile bağlantınız otelin doğru kaydına bağlı olmayabilir veya kayıt doğrulanmamış olabilir."
+                : "Google Business hesabınız bağlı. Yorumlarınızı API üzerinden otomatik çekebilirsiniz."}
             </p>
+            {googleFetchEmpty && (
+              <Link to="/google-hesaplari" className="inline-block text-sm font-medium text-primary underline">
+                Google bağlantısını kontrol et
+              </Link>
+            )}
             <Button
+              variant={googleFetchEmpty ? "outline" : "default"}
+              className={googleFetchEmpty ? "text-muted-foreground" : undefined}
               onClick={async () => {
                 if (!targetBusiness) return;
                 setIsFetchingBooking(true);
@@ -1189,10 +1200,21 @@ export default function Reviews() {
                   if (result?.error) {
                     toast({ title: "Hata", description: result.error, variant: "destructive" });
                   } else {
-                    toast({
-                      title: "Google Yorumları Çekildi! 🎉",
-                      description: `${result.inserted || 0} yorum eklendi.`,
-                    });
+                    const inserted = result?.inserted || 0;
+                    const total = (result?.total ?? result?.fetched ?? inserted + (result?.skipped || 0)) || 0;
+                    if (inserted === 0 && total === 0) {
+                      setGoogleFetchEmpty(true);
+                      toast({
+                        title: "Google kaydında yorum bulunamadı",
+                        description: "Bağlantınız otelin doğru Google kaydına bağlı olmayabilir veya kayıt doğrulanmamış olabilir.",
+                      });
+                    } else {
+                      setGoogleFetchEmpty(false);
+                      toast({
+                        title: "Google Yorumları Çekildi! 🎉",
+                        description: `${inserted} yorum eklendi.`,
+                      });
+                    }
                     refetch();
                   }
                 } catch (err: any) {
