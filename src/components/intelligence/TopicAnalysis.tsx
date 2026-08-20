@@ -750,12 +750,21 @@ export function TopicAnalysis({
                                           {c.count} bahis
                                         </span>
                                         <span>{c.index.toFixed(1)}</span>
-                                        <Badge
-                                          variant="outline"
-                                          className={`h-5 ${deltaClass(c.delta)}`}
-                                        >
-                                          {fmtDelta(c.delta)}
-                                        </Badge>
+                                        {c.delta == null ? (
+                                          <span className="text-[10px] text-muted-foreground">
+                                            yeterli veri yok
+                                          </span>
+                                        ) : (
+                                          <Badge
+                                            variant="outline"
+                                            className={`h-5 ${deltaClass(c.delta)} ${c.thin ? "opacity-50" : ""}`}
+                                          >
+                                            {fmtDelta(c.delta)}
+                                            {c.thin && (
+                                              <span className="ml-1 text-[9px] font-normal">az veri</span>
+                                            )}
+                                          </Badge>
+                                        )}
                                       </span>
                                     </div>
                                   ))}
