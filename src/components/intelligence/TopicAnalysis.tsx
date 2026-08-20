@@ -76,7 +76,16 @@ function isoDaysAgo(days: number) {
   return new Date(Date.now() - days * 86400_000).toISOString();
 }
 
-export function TopicAnalysis({ businessId }: { businessId: string }) {
+export function TopicAnalysis({
+  businessId,
+  windowStart,
+  windowLabel,
+}: {
+  businessId: string;
+  /** Ortak kıyas penceresinin başlangıcı (ISO). Kıyas bu aralıkta yapılır. */
+  windowStart?: string;
+  windowLabel?: string;
+}) {
   const [analyzing, setAnalyzing] = useState(false);
   const [dept, setDept] = useState<"all" | DepartmentKey>("all");
   const [openTopic, setOpenTopic] = useState<string | null>(null);
@@ -147,7 +156,15 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
   });
 
   const topics = topicsQ.data ?? [];
-  const rows = rowsQ.data ?? [];
+  const allRows = rowsQ.data ?? [];
+  // Kıyas ortak pencerede yapılır — tarihi olmayan bahisler kıyasa girmez.
+  const rows = useMemo(
+    () =>
+      windowStart
+        ? allRows.filter((r) => r.review_posted_at && r.review_posted_at >= windowStart)
+        : allRows,
+    [allRows, windowStart],
+  );
   const compNames = competitorsQ.data ?? {};
 
   const nameById = useMemo(() => {
@@ -392,7 +409,9 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
         <CardContent className="p-8 text-center space-y-3">
           <Sparkles className="h-7 w-7 mx-auto text-muted-foreground" />
           <p className="text-sm text-muted-foreground max-w-md mx-auto">
-            {hasPending
+            {allRows.length > 0
+              ? `Kıyas penceresinde (${windowLabel ?? "ortak aralık"}) konu bahsi yok — pencere dışındaki ${allRows.length} bahis kıyasa girmez.`
+              : hasPending
               ? `${pending?.competitor ?? 0} rakip yorumu konu analizi bekliyor.`
               : "Henüz analiz edilecek rakip yorumu yok. Önce Rakip Seçimi sekmesinden rakip yorumlarını toplayın."}
           </p>
@@ -420,7 +439,8 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
             <CardTitle className="text-base">Departman kırılımı</CardTitle>
             <p className="text-xs text-muted-foreground mt-1">
               Hangi departmanda rakiplerinizin gerisindesiniz? Tüm skorlar 0-100 ölçeğinde
-              (İtibar indeksiyle aynı). {totalMentions} konu bahsi üzerinden.
+              (İtibar indeksiyle aynı). {totalMentions} konu bahsi üzerinden
+              {windowLabel ? ` · kıyas penceresi: ${windowLabel}` : ""}.
             </p>
           </div>
           {hasPending && (

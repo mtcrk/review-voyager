@@ -83,7 +83,20 @@ function normalizeItem(item: any) {
     ]) || null;
 
   const ratingRaw = pick<number | string>(item, ["reviewRating", "rating", "stars", "score", "ratingValue"]);
-  const bodyRaw = pick<string>(item, ["reviewText", "text", "comment", "body", "review", "content"]);
+  // ÖNEMLİ: actor `language` parametresiyle çalıştığında çeviri `textTranslated`
+  // alanına, ORİJİNAL metin ise `text`/`originalText` alanına gelir. Dil kırılımı ve
+  // duygu analizi bozulmasın diye her zaman ORİJİNAL metni saklıyoruz; `textTranslated`
+  // yalnızca başka hiçbir metin yoksa devreye girer.
+  const bodyRaw = pick<string>(item, [
+    "originalText",
+    "reviewText",
+    "text",
+    "comment",
+    "body",
+    "review",
+    "content",
+    "textTranslated",
+  ]);
   const title = pick<string>(item, ["reviewTitle", "title", "headline"]);
   const body = title && bodyRaw ? `${title}\n\n${bodyRaw}` : (bodyRaw || title || null);
   const author_name = pick<string>(item, [
@@ -94,7 +107,15 @@ function normalizeItem(item: any) {
     "user.name",
     "userName",
   ]);
-  const language = pick<string>(item, ["language", "lang", "originalLanguage", "detectedLanguage"]);
+  // `language` alanı bazı actor'lerde İSTENEN dili taşır (hep "tr"), yorumun dilini
+  // değil. Bu yüzden önce gerçek orijinal dil alanlarına bakılır.
+  const language = pick<string>(item, [
+    "originalLanguage",
+    "detectedLanguage",
+    "reviewLanguage",
+    "language",
+    "lang",
+  ]);
   const providerRaw =
     pick<string>(item, ["provider", "platform", "source", "site"]) || "google";
   const platform = normalizePlatform(providerRaw);
@@ -246,6 +267,10 @@ Deno.serve(async (req) => {
     const rows: any[] = [];
     let skippedNoCompetitor = 0;
     let skippedNoId = 0;
+    if (allItems.length > 0) {
+      // Actor çıktısındaki metin/dil alanlarını doğrulamak için (orijinal metin var mı?)
+      console.log("[competitor-review] text fields:", Object.keys(allItems[0]));
+    }
     for (const raw of allItems) {
       const n = normalizeItem(raw);
       if (!n.place_id || !competitorsByPlace[n.place_id]) {
