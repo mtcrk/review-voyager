@@ -1,8 +1,14 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { filterBusinessIdsWithSubscription } from "../_shared/subscription-guard.ts";
 
 const LOVABLE_API_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-2.5-flash";
+/** Hard ceiling of reviews processed per invocation (credit-cost safety belt). */
+const MAX_PER_RUN = (() => {
+  const raw = Number(Deno.env.get("EXTRACT_TOPICS_MAX_PER_RUN") ?? 50);
+  return Number.isFinite(raw) && raw > 0 ? Math.min(Math.floor(raw), 200) : 50;
+})();
 
 async function callLLM(apiKey: string, taxonomy: { id: string; label: string; category: string }[], review: { text: string; language?: string | null; rating?: number | null }) {
   const taxonomyList = taxonomy.map((t) => `- ${t.id} (${t.category}): ${t.label}`).join("\n");
@@ -46,10 +52,11 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const { review_source = "competitor", limit = 20 } = (await req.json().catch(() => ({}))) as {
+    const { review_source = "competitor", limit: rawLimit = 20 } = (await req.json().catch(() => ({}))) as {
       review_source?: "own" | "competitor";
       limit?: number;
     };
+    const limit = Math.max(1, Math.min(Number(rawLimit) || 20, MAX_PER_RUN));
     if (!["own", "competitor"].includes(review_source)) {
       return new Response(JSON.stringify({ error: "review_source must be 'own' or 'competitor'" }), {
         status: 400,
@@ -171,7 +178,19 @@ Deno.serve(async (req) => {
     let mentionsInserted = 0;
     let errors = 0;
 
-    for (const job of jobs) {
+    // Yalnızca aktif aboneliği olan işletmeler için AI kredisi harcanır.
+    const eligible = await filterBusinessIdsWithSubscription(
+      supabaseUrl,
+      serviceKey,
+      Array.from(new Set(jobs.map((j) => j.business_id).filter(Boolean))),
+    );
+    const eligibleJobs = jobs.filter((j) => eligible.has(j.business_id)).slice(0, limit);
+    const skippedNoSub = jobs.length - eligibleJobs.length;
+    if (skippedNoSub > 0) {
+      console.log(`extract-topics: skipped ${skippedNoSub} reviews (no active subscription)`);
+    }
+
+    for (const job of eligibleJobs) {
       try {
         const mentions = await callLLM(lovableKey, taxonomyForPrompt, {
           text: job.text,
@@ -235,7 +254,8 @@ Deno.serve(async (req) => {
       JSON.stringify({
         ok: true,
         review_source,
-        considered: jobs.length,
+        considered: eligibleJobs.length,
+        skipped_no_subscription: skippedNoSub,
         processed,
         mentions_inserted: mentionsInserted,
         errors,

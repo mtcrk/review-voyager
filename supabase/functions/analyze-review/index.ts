@@ -1,10 +1,18 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { filterBusinessIdsWithSubscription } from "../_shared/subscription-guard.ts";
 
 const LOVABLE_API_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-2.5-flash";
 const PROMPT_VERSION = 1;
 const MAX_ATTEMPTS = 3;
+/** Hard ceiling of reviews processed per invocation (credit-cost safety belt). */
+const MAX_PER_RUN = (() => {
+  const raw = Number(Deno.env.get("ANALYZE_MAX_PER_RUN") ?? 50);
+  return Number.isFinite(raw) && raw > 0 ? Math.min(Math.floor(raw), 200) : 50;
+})();
+/** Only reviews posted within this window may trigger a WhatsApp notification. */
+const WA_NOTIFY_MAX_AGE_HOURS = 48;
 /** Backfill window: only reviews newer than this are analyzed by the batch job. */
 const WINDOW_MONTHS = 6;
 const windowCutoffISO = () => {
@@ -287,7 +295,7 @@ Deno.serve(async (req) => {
       review_id?: string;
     };
 
-    const limit = clamp(Number(body.limit ?? 25) || 25, 1, 100);
+    const limit = clamp(Number(body.limit ?? 25) || 25, 1, MAX_PER_RUN);
     const businessId = body.business_id;
     const singleReviewId = body.review_id ? String(body.review_id) : null;
 
@@ -341,6 +349,9 @@ Deno.serve(async (req) => {
     } else {
       // ---- claim a batch using the indexed status column.
       // Only the last WINDOW_MONTHS are analyzed; older rows sit in 'deferred'.
+      // Over-fetch, then keep only businesses with an active subscription.
+      // Non-subscribed businesses' rows stay 'pending' (never marked failed).
+      const candidateLimit = Math.min(limit * 10, 1000);
       let q = admin
         .from("reviews")
         .select("id, business_id, platform, rating, text, posted_at, analysis_attempts")
@@ -349,12 +360,29 @@ Deno.serve(async (req) => {
         .not("text", "is", null)
         .gt("posted_at", windowCutoffISO())
         .order("posted_at", { ascending: false })
-        .limit(limit);
+        .limit(candidateLimit);
       if (businessId) q = q.eq("business_id", businessId);
 
       const { data, error: selErr } = await q;
       if (selErr) throw selErr;
-      reviews = data ?? [];
+      const candidates = data ?? [];
+      const candidateBizIds = Array.from(
+        new Set(candidates.map((r: any) => r.business_id).filter(Boolean)),
+      );
+      const eligible = await filterBusinessIdsWithSubscription(
+        supabaseUrl,
+        serviceKey,
+        candidateBizIds,
+      );
+      const skippedNoSub = candidates.filter((r: any) => !eligible.has(r.business_id)).length;
+      if (skippedNoSub > 0) {
+        console.log(
+          `analyze-review: skipped ${skippedNoSub} queued reviews (no active subscription)`,
+        );
+      }
+      reviews = candidates
+        .filter((r: any) => eligible.has(r.business_id))
+        .slice(0, limit);
     }
 
     const considered = reviews?.length ?? 0;
@@ -569,7 +597,15 @@ Deno.serve(async (req) => {
         processed++;
 
         // WhatsApp bildirimi — ana akışı bozmasın, sadece logla.
-        try {
+        // Sadece son 48 saatte gelmiş yorumlar bildirim üretir; birikmiş eski
+        // yorumlar analiz edilir ama bildirim yağmuru oluşturmaz.
+        const postedAtMs = r.posted_at ? new Date(r.posted_at).getTime() : NaN;
+        const isFresh =
+          Number.isFinite(postedAtMs) &&
+          Date.now() - postedAtMs <= WA_NOTIFY_MAX_AGE_HOURS * 3600 * 1000;
+        if (!isFresh) {
+          console.log(`wa-notify skipped (stale review ${r.id}, posted_at=${r.posted_at})`);
+        } else try {
           const waRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/wa-notify`, {
             method: "POST",
             headers: {
