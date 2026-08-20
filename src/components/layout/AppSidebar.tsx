@@ -442,6 +442,44 @@ export function AppSidebar() {
           </SidebarGroup>
         </Collapsible>
 
+        {/* Analiz — tek grup */}
+        <Collapsible defaultOpen className="group/analiz">
+          <SidebarGroup>
+            {open && (
+              <CollapsibleTrigger asChild>
+                <SidebarGroupLabel className="text-xs text-muted-foreground px-3 cursor-pointer hover:text-foreground transition-colors">
+                  Analiz
+                  <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/analiz:rotate-180" />
+                </SidebarGroupLabel>
+              </CollapsibleTrigger>
+            )}
+            <CollapsibleContent>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {[
+                    { title: "Rakip Analizi", url: "/intelligence", icon: Swords },
+                    { title: "Konu Analizi", url: "/konu-analizi", icon: Tags },
+                    { title: "Dönem Analizi", url: "/donem-analizi", icon: BarChart3 },
+                  ].map((item) => (
+                    <SidebarMenuItem key={item.url}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={location.pathname === item.url}
+                        tooltip={item.title}
+                      >
+                        <NavLink to={item.url} className="flex items-center gap-3 transition-smooth">
+                          <item.icon className="h-5 w-5" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
+
         {/* Automation */}
         <SidebarGroup>
           {open && (
@@ -451,21 +489,6 @@ export function AppSidebar() {
           )}
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={location.pathname === "/intelligence"}
-                  tooltip="Rakip Analizi"
-                >
-                  <NavLink
-                    to="/intelligence"
-                    className="flex items-center gap-3 transition-smooth"
-                  >
-                    <Swords className="h-5 w-5" />
-                    <span>Rakip Analizi</span>
-                  </NavLink>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
