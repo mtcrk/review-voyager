@@ -13,8 +13,7 @@ export function allowlistEmails(): string[] {
   const raw = Deno.env.get("ANALYSIS_ALLOWLIST_EMAILS") ?? "";
   return Array.from(
     new Set(
-      raw
-        .split(",")
+      [...raw.split(","), ...EXTRA_ALLOWED_EMAILS]
         .map((e) => e.trim().toLowerCase())
         .filter((e) => e.length > 0),
     ),
