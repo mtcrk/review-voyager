@@ -732,7 +732,7 @@ export function TopicAnalysis({
                                     excerpt: q.excerpt,
                                     sentiment: q.sentiment,
                                     reviewId: q.review_id ?? null,
-                                    topicId: r.id,
+                                    topicId: r.topic.id,
                                   }))}
                                   right={r.compQuotes.map((q) => ({
                                     excerpt: q.excerpt,
