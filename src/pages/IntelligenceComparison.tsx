@@ -1538,11 +1538,15 @@ export default function IntelligenceComparison() {
                         stroke={MUTED}
                         strokeWidth={2}
                         strokeDasharray="4 4"
-                        dot={false}
+                        dot={{ r: 2 }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
+                <p className="text-[11px] text-muted-foreground mt-2">
+                  Rakip çizgisi yalnızca veri toplanan haftaları gösterir — boş haftalar "yorum
+                  gelmedi" değil, "veri toplanmadı" anlamına gelir.
+                </p>
               </CardContent>
             </Card>
             )}
