@@ -449,7 +449,7 @@ export function TopicAnalysis({
     qc.invalidateQueries({ queryKey: ["ci_topics_pending", businessId] });
   }
 
-  if (topicsQ.isLoading || rowsQ.isLoading) {
+  if (topicsQ.isLoading || rowsQ.isLoading || ownDatesQ.isLoading) {
     return <Skeleton className="h-64 w-full" />;
   }
 
