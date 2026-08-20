@@ -614,6 +614,40 @@ export default function IntelligenceComparison() {
 
   const ownCountryCount = ownReviews.filter((r) => r.reviewer_country).length;
 
+  // === Kıyas künyesi — tarih aralığı + her iki tarafın yorum sayısı ===
+  const provenance = useMemo(() => {
+    const ownDates = ownReviews.map((r) => r.posted_at).filter((d): d is string => !!d);
+    const compDates = compAllRows.map((r) => r.posted_at).filter((d): d is string => !!d);
+    const ownPlatforms = new Set(
+      ownReviews.map((r) => normalizePlatform(r.platform) ?? "google"),
+    );
+    const compPlatforms = new Set(
+      compAllRows.map((r) => normalizePlatform(r.platform) ?? "google"),
+    );
+    const all = [...ownDates, ...compDates].sort();
+    const fmt = (iso: string) =>
+      new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "short" }).format(new Date(iso));
+    const compSorted = [...compDates].sort();
+    const compSpanDays =
+      compSorted.length > 1
+        ? (new Date(compSorted[compSorted.length - 1]).getTime() -
+            new Date(compSorted[0]).getTime()) /
+          86400_000
+        : 0;
+    const labelOf = (k: string) =>
+      PLATFORMS.find((p) => p.key === k)?.label.split(" ")[0] ?? k;
+    return {
+      hasAny: all.length > 0,
+      range: all.length ? `${fmt(all[0])} – ${fmt(all[all.length - 1])}` : null,
+      ownCount: ownReviews.length,
+      ownPlatformCount: ownPlatforms.size,
+      compCount: compAllRows.length,
+      compPlatformLabels: Array.from(compPlatforms).map(labelOf).join(", "),
+      compNarrowWindow: compDates.length > 0 && compSpanDays < 7,
+      compFirstDate: compSorted.length ? compSorted[0] : null,
+    };
+  }, [ownReviews, compAllRows]);
+
   async function runTask(key: string, fn: () => Promise<void>) {
     setBusyTask(key);
     try {
