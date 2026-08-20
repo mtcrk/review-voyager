@@ -573,6 +573,20 @@ export default function TopicAnalytics() {
           </CardContent>
         </Card>
       ) : (
+        <>
+        {chartData.length > 0 && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Departman karşılaştırması</CardTitle>
+              <p className="text-xs text-muted-foreground">
+                Kıyas dönem (gri) ile bu dönem yan yana · 0-100 ölçeği
+              </p>
+            </CardHeader>
+            <CardContent>
+              <CompareBars data={chartData} />
+            </CardContent>
+          </Card>
+        )}
         <Card>
           <CardHeader className="space-y-2">
             <CardTitle className="text-base">
@@ -650,21 +664,49 @@ export default function TopicAnalytics() {
                                     </p>
                                   ) : (
                                     topicRowsOfDept.map((tr2) => (
-                                      <div
-                                        key={tr2.key}
-                                        className="flex items-center justify-between gap-3 border-b border-border/50 py-1 text-xs last:border-0"
-                                      >
-                                        <span className="truncate font-medium">{tr2.label}</span>
-                                        <span className="flex shrink-0 items-center gap-3 tabular-nums">
-                                          <span className="text-muted-foreground">
-                                            {tr2.curN} / {tr2.prevN} bahis
+                                      <div key={tr2.key} className="border-b border-border/50 last:border-0">
+                                        <button
+                                          type="button"
+                                          className="flex w-full items-center justify-between gap-3 py-1 text-left text-xs hover:bg-muted/40"
+                                          onClick={() =>
+                                            setOpenTopic(openTopic === tr2.key ? null : tr2.key)
+                                          }
+                                        >
+                                          <span className="inline-flex min-w-0 items-center gap-1 font-medium">
+                                            {openTopic === tr2.key ? (
+                                              <ChevronDown className="h-3 w-3 shrink-0 text-muted-foreground" />
+                                            ) : (
+                                              <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground" />
+                                            )}
+                                            <span className="truncate">{tr2.label}</span>
                                           </span>
-                                          <span>{tr2.cur == null ? "—" : tr2.cur.toFixed(1)}</span>
-                                          <span className="text-muted-foreground">
-                                            {tr2.prev == null ? "—" : tr2.prev.toFixed(1)}
+                                          <span className="flex shrink-0 items-center gap-3 tabular-nums">
+                                            <span className="text-muted-foreground">
+                                              {tr2.curN} / {tr2.prevN} bahis
+                                            </span>
+                                            <span>{tr2.cur == null ? "—" : tr2.cur.toFixed(1)}</span>
+                                            <span className="text-muted-foreground">
+                                              {tr2.prev == null ? "—" : tr2.prev.toFixed(1)}
+                                            </span>
+                                            <DeltaCell row={tr2} />
                                           </span>
-                                          <DeltaCell row={tr2} />
-                                        </span>
+                                        </button>
+                                        {openTopic === tr2.key && (
+                                          <div className="pb-3 pt-2">
+                                            <p className="mb-1 text-[11px] text-muted-foreground">
+                                              {tr2.label} — aylık gidişat (kıyas dönem + bu dönem, kesikli
+                                              çizgi bu dönemin başı)
+                                            </p>
+                                            <TrendLine
+                                              data={topicTrend}
+                                              boundaryLabel={boundaryLabel}
+                                              height={180}
+                                            />
+                                            <p className="text-[11px] text-muted-foreground">
+                                              Ayda 3'ten az bahis olan aylar gösterilmez.
+                                            </p>
+                                          </div>
+                                        )}
                                       </div>
                                     ))
                                   )}
@@ -693,6 +735,7 @@ export default function TopicAnalytics() {
             </p>
           </CardContent>
         </Card>
+        </>
       )}
     </div>
   );
