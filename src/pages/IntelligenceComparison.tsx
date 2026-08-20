@@ -1429,7 +1429,15 @@ export default function IntelligenceComparison() {
             )}
 
             {/* Bu hafta ne yapmalı */}
-            <ActionPack businessId={businessId} />
+            <ActionPack
+              businessId={businessId}
+              ownAvg={ownAvg}
+              compAvgOfAvg={compAvgOfAvg}
+              ownReplyRate={ownReplyRate}
+              compReplyRate={compReplyRate}
+              ownMedianResponse={ownMedianResponse}
+              compMedianResponse={compMedianResponse}
+            />
 
             {/* KPI cards */}
             <p className="text-xs text-muted-foreground">
