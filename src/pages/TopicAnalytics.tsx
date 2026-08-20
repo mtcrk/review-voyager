@@ -6,7 +6,7 @@
 import { Fragment, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
-import { format, startOfWeek, startOfMonth, startOfYear, subDays, subMonths, subYears, differenceInCalendarDays } from "date-fns";
+import { addMonths, format, startOfWeek, startOfMonth, startOfYear, subDays, subMonths, subYears, differenceInCalendarDays } from "date-fns";
 import { tr as trLocale } from "date-fns/locale";
 import {
   ArrowDownRight,
@@ -37,6 +37,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useCiTopics } from "@/hooks/useReviewAnalysis";
 import { QuoteColumns, type EvidenceQuote } from "@/components/intelligence/QuoteColumns";
+import { CompareBars, TrendLine, type CompareBarDatum } from "@/components/intelligence/TopicCharts";
 import {
   DEPARTMENTS,
   DEPARTMENT_LABELS,
@@ -56,6 +57,7 @@ type PeriodPreset = "week" | "month" | "quarter" | "year" | "custom";
 type CompareMode = "prev" | "yoy";
 
 type TopicRow = {
+  review_id: string;
   topic_id: string;
   sentiment: number;
   excerpt: string | null;
@@ -100,7 +102,7 @@ function useOwnTopics(businessId: string | undefined, range: Range) {
     queryFn: async (): Promise<TopicRow[]> => {
       const { data, error } = await supabase
         .from("ci_review_topics")
-        .select("topic_id, sentiment, excerpt, review_posted_at")
+        .select("review_id, topic_id, sentiment, excerpt, review_posted_at")
         .eq("business_id", businessId!)
         .eq("review_source", "own")
         .is("competitor_id", null)
@@ -109,6 +111,7 @@ function useOwnTopics(businessId: string | undefined, range: Range) {
         .limit(8000);
       if (error) throw error;
       return (data ?? []).map((r: any) => ({
+        review_id: r.review_id,
         topic_id: r.topic_id,
         sentiment: Number(r.sentiment),
         excerpt: r.excerpt,
