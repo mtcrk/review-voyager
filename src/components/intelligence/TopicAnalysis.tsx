@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
+import { QuoteColumns } from "@/components/intelligence/QuoteColumns";
 import {
   Loader2,
   Sparkles,
