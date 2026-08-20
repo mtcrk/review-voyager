@@ -2000,6 +2000,7 @@ export type Database = {
           summary: string | null
           text: string | null
           topics_extracted_at: string | null
+          updated_at: string
         }
         Insert: {
           analysis_attempts?: number
@@ -2036,6 +2037,7 @@ export type Database = {
           summary?: string | null
           text?: string | null
           topics_extracted_at?: string | null
+          updated_at?: string
         }
         Update: {
           analysis_attempts?: number
@@ -2072,6 +2074,7 @@ export type Database = {
           summary?: string | null
           text?: string | null
           topics_extracted_at?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
