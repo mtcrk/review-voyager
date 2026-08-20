@@ -239,28 +239,26 @@ export function ActionPack({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
       {/* CARD 1 - Pricing */}
+      {showPriceCard && (
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm flex items-center gap-2">
             <DollarSign className="h-4 w-4 text-primary" /> Fiyat & Pozisyon
           </CardTitle>
           <p className="text-xs text-muted-foreground">
-            {peerSet.length} emsal rakiple karşılaştırma
-            {peerIsSubset
-              ? ` · emsal = comp-set içinden aynı segment/yıldız (${comps.length} rakibin ${peerSet.length}'i)`
-              : " · emsal = comp-set'in tamamı"}
+            {peerSet.length} rakiple karşılaştırma · ortak kıyas penceresi
           </p>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Puanınız (5 üzerinden)</span>
-            <span className="font-semibold">{ownAvg != null ? ownAvg.toFixed(2) : "—"}</span>
+            <span className="text-muted-foreground">İtibar indeksiniz (0-100)</span>
+            <span className="font-semibold">{ownAvg != null ? ownAvg.toFixed(1) : "—"}</span>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">
-              Emsal ortalama (toplanan yorumlardan, 5 üzerinden)
+            <span className="text-muted-foreground">Rakip ortalaması (0-100)</span>
+            <span className="font-semibold">
+              {compAvgOfAvg != null ? compAvgOfAvg.toFixed(1) : "—"}
             </span>
-            <span className="font-semibold">{peerAvg != null ? peerAvg.toFixed(2) : "—"}</span>
           </div>
           {(ownPriceEur != null || peerPriceEur != null) && (
             <div className="flex items-center justify-between text-sm">
@@ -288,6 +286,7 @@ export function ActionPack({
           )}
         </CardContent>
       </Card>
+      )}
 
       {/* CARD 2 - Operational */}
       <Card>
