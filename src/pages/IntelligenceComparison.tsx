@@ -1322,7 +1322,7 @@ export default function IntelligenceComparison() {
                   />
                   {(weekly.compIdxThis != null || weekly.compN > 0) && (
                     <WeekRow
-                      label="Comp-set indeksi"
+                      label="Comp-set indeksi (bu hafta)"
                       current={weekly.compIdxThis}
                       previous={weekly.compIdxPrev}
                       format={(v) => v.toFixed(1)}
