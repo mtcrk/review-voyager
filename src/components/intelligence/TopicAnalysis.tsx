@@ -324,11 +324,18 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
         compN: e.compN,
         own,
         comp,
-        delta: own != null && comp != null ? own - comp : null,
+        delta:
+          own != null && comp != null && e.compN >= MIN_COMP_MENTIONS ? own - comp : null,
+        thinComp: e.compN >= MIN_COMP_MENTIONS && e.compN < THIN_COMP_MENTIONS,
       };
     })
       .filter((x): x is NonNullable<typeof x> => x != null)
-      .sort((a, b) => (a.delta ?? 999) - (b.delta ?? 999));
+      .sort((a, b) => {
+        if (a.delta == null && b.delta == null) return b.mentions - a.mentions;
+        if (a.delta == null) return 1;
+        if (b.delta == null) return -1;
+        return a.delta - b.delta;
+      });
   }, [rows]);
 
   const availableDepts = useMemo(
