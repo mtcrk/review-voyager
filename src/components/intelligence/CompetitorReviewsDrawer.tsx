@@ -84,7 +84,7 @@ export function CompetitorReviewsDrawer({
         <SheetHeader>
           <SheetTitle className="text-base">{competitorName}</SheetTitle>
           <SheetDescription>
-            Toplanan {totalCount} yorum · en yeni 200 tanesi gösteriliyor
+            Toplanan {totalCount} yorum · en yeni {rows.length} tanesi gösteriliyor
           </SheetDescription>
         </SheetHeader>
 
