@@ -124,6 +124,29 @@ export function TopicAnalysis({
     },
   });
 
+  // Kendi bahislerimizin tarihi yorumun posted_at değerinden alınır — bahis
+  // tablosundaki tarih boş ya da tutarsız olabiliyor.
+  const ownDatesQ = useQuery({
+    queryKey: ["own_review_dates", businessId],
+    enabled: !!businessId,
+    queryFn: async () => {
+      const map: Record<string, string> = {};
+      for (let page = 0; page < 20; page++) {
+        const { data, error } = await supabase
+          .from("reviews")
+          .select("id, posted_at")
+          .eq("business_id", businessId)
+          .order("posted_at", { ascending: false })
+          .range(page * 1000, page * 1000 + 999);
+        if (error) throw error;
+        const rows = (data ?? []) as any[];
+        for (const r of rows) if (r.posted_at) map[r.id] = r.posted_at;
+        if (rows.length < 1000) break;
+      }
+      return map;
+    },
+  });
+
   const competitorsQ = useQuery({
     queryKey: ["ci_competitor_names", businessId],
     enabled: !!businessId,
@@ -164,7 +187,16 @@ export function TopicAnalysis({
   });
 
   const topics = topicsQ.data ?? [];
-  const allRows = rowsQ.data ?? [];
+  const ownDates = ownDatesQ.data ?? {};
+  const allRows = useMemo(
+    () =>
+      (rowsQ.data ?? []).map((r) =>
+        r.review_source === "own"
+          ? { ...r, review_posted_at: ownDates[r.review_id] ?? r.review_posted_at }
+          : r,
+      ),
+    [rowsQ.data, ownDates],
+  );
   // Kıyas ortak pencerede yapılır — tarihi olmayan bahisler kıyasa girmez.
   const rows = useMemo(
     () =>
