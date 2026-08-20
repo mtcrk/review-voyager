@@ -47,6 +47,10 @@ type TopicRow = {
 };
 
 const MIN_MENTIONS = 3;
+/** Rakip tarafında bu eşiğin altındaki bahislerde "Fark" savunulamaz. */
+const MIN_COMP_MENTIONS = 5;
+/** Bu aralıkta fark gösterilir ama "az veri" olarak işaretlenir. */
+const THIN_COMP_MENTIONS = 10;
 const MAX_QUOTES = 5;
 
 type Quote = { excerpt: string; sentiment: number; competitor_id: string | null };
@@ -232,7 +236,9 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
         if (mentions === 0) return null;
         const own = a.ownCount ? sentimentToIndex100(a.ownSum / a.ownCount) : null;
         const comp = a.compCount ? sentimentToIndex100(a.compSum / a.compCount) : null;
-        const delta = own != null && comp != null ? own - comp : null;
+        const compReliable = a.compCount >= MIN_COMP_MENTIONS;
+        const delta = own != null && comp != null && compReliable ? own - comp : null;
+        const thinComp = compReliable && a.compCount < THIN_COMP_MENTIONS;
         const recent = a.recentN >= 2 ? sentimentToIndex100(a.recentSum / a.recentN) : null;
         const prev = a.prevN >= 2 ? sentimentToIndex100(a.prevSum / a.prevN) : null;
         const trend = recent != null && prev != null ? recent - prev : null;
@@ -262,6 +268,8 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
           own,
           comp,
           delta,
+          compReliable,
+          thinComp,
           trend,
           competitors,
           ownQuotes,
@@ -273,9 +281,11 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
     const visible = out.filter((r) => r.mentions >= MIN_MENTIONS);
     const hidden = out.length - visible.length;
     visible.sort((a, b) => {
-      const av = a.delta ?? 999;
-      const bv = b.delta ?? 999;
-      return av - bv;
+      // Fark hesaplanamayan (yeterli rakip verisi olmayan) satırlar sıralamaya girmez.
+      if (a.delta == null && b.delta == null) return b.mentions - a.mentions;
+      if (a.delta == null) return 1;
+      if (b.delta == null) return -1;
+      return a.delta - b.delta;
     });
     return { visible, hidden, totalTopics: out.length };
   }, [topics, perTopic, compNames]);
