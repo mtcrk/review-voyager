@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
-import { filterBusinessIdsWithSubscription } from "../_shared/subscription-guard.ts";
+import { resolveAllowlistBusinessIds } from "../_shared/analysis-allowlist.ts";
 
 const LOVABLE_API_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-2.5-flash";
@@ -349,13 +349,29 @@ Deno.serve(async (req) => {
     } else {
       // ---- claim a batch using the indexed status column.
       // Only the last WINDOW_MONTHS are analyzed; older rows sit in 'deferred'.
-      // Over-fetch, then keep only businesses with an active subscription.
-      // Non-subscribed businesses' rows stay 'pending' (never marked failed).
+      // Gate = explicit email allowlist (ANALYSIS_ALLOWLIST_EMAILS). It OVERRIDES
+      // any subscription check. Rows outside the allowlist are left untouched in
+      // 'pending' — never failed, never deferred, attempts never incremented.
+      const { emails, matchedEmails, businessIds: allowed } =
+        await resolveAllowlistBusinessIds(supabaseUrl, serviceKey);
+      if (emails.length === 0) {
+        console.log("[analyze-review] allowlist boş — çıkılıyor");
+        return json({ ok: true, considered: 0, processed: 0, reason: "allowlist_empty" });
+      }
+      if (allowed.size === 0) {
+        console.log(
+          `[analyze-review] allowlist: 0 işletme (eşleşen hesap: ${matchedEmails.join(", ") || "yok"}) — çıkılıyor`,
+        );
+        return json({ ok: true, considered: 0, processed: 0, reason: "allowlist_no_business" });
+      }
+
+      const allowedIds = Array.from(allowed);
       const candidateLimit = Math.min(limit * 10, 1000);
       let q = admin
         .from("reviews")
         .select("id, business_id, platform, rating, text, posted_at, analysis_attempts")
         .in("analysis_status", ["pending", "failed"])
+        .in("business_id", allowedIds)
         .lt("analysis_attempts", MAX_ATTEMPTS)
         .not("text", "is", null)
         .gt("posted_at", windowCutoffISO())
@@ -366,23 +382,10 @@ Deno.serve(async (req) => {
       const { data, error: selErr } = await q;
       if (selErr) throw selErr;
       const candidates = data ?? [];
-      const candidateBizIds = Array.from(
-        new Set(candidates.map((r: any) => r.business_id).filter(Boolean)),
+      console.log(
+        `[analyze-review] allowlist: ${allowed.size} işletme, ${candidates.length} pending (hesaplar: ${matchedEmails.join(", ")})`,
       );
-      const eligible = await filterBusinessIdsWithSubscription(
-        supabaseUrl,
-        serviceKey,
-        candidateBizIds,
-      );
-      const skippedNoSub = candidates.filter((r: any) => !eligible.has(r.business_id)).length;
-      if (skippedNoSub > 0) {
-        console.log(
-          `analyze-review: skipped ${skippedNoSub} queued reviews (no active subscription)`,
-        );
-      }
-      reviews = candidates
-        .filter((r: any) => eligible.has(r.business_id))
-        .slice(0, limit);
+      reviews = candidates.slice(0, limit);
     }
 
     const considered = reviews?.length ?? 0;
