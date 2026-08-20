@@ -44,6 +44,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useCiTopics } from "@/hooks/useReviewAnalysis";
 import { QuoteColumns, type EvidenceQuote } from "@/components/intelligence/QuoteColumns";
+import { fetchOwnTopicRows } from "@/lib/ownTopicRows";
 import { MentionBars, ScoreBars, TrendLine } from "@/components/intelligence/TopicCharts";
 import {
   DEPARTMENT_LABELS,
