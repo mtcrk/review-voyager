@@ -38,7 +38,6 @@ import {
   LayoutGrid,
   Sparkles,
   Swords,
-  Wallet,
   Radar,
   Tags,
 } from "lucide-react";
@@ -555,21 +554,6 @@ export function AppSidebar() {
         <SidebarGroup className="mt-auto">
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={location.pathname.startsWith("/billing")}
-                  tooltip="Abonelik"
-                >
-                  <NavLink
-                    to="/billing"
-                    className="flex items-center gap-3 transition-smooth"
-                  >
-                    <Wallet className="h-5 w-5" />
-                    <span>Abonelik</span>
-                  </NavLink>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
