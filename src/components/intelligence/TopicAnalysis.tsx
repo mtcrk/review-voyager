@@ -529,7 +529,9 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
           <div>
             <CardTitle className="text-base">Konu bazlı karşılaştırma</CardTitle>
             <p className="text-xs text-muted-foreground mt-1">
-              Farka göre sıralı, en kötü üstte. Satıra tıklayarak rakip bazlı kırılımı görün.
+              Farka göre sıralı, en kötü üstte. Rakip tarafında {MIN_COMP_MENTIONS} bahisin
+              altındaki konularda fark hesaplanmaz ve sıralamaya girmez. Satıra tıklayarak rakip
+              bazlı kırılımı görün.
             </p>
           </div>
           <Select value={dept} onValueChange={(v) => setDept(v as any)}>
