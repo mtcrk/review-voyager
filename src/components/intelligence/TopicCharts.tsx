@@ -27,8 +27,16 @@ export type ScoreBarDatum = { key: string; label: string; score: number; mention
 
 /** Yatay tek bar: departman/konu skorları. */
 export function ScoreBars({ data }: { data: ScoreBarDatum[] }) {
+  if (!data.length) {
+    return (
+      <div className="h-[280px] w-full flex items-center justify-center text-sm text-muted-foreground">
+        Grafik için yeterli veri yok
+      </div>
+    );
+  }
   return (
-    <ResponsiveContainer width="100%" height={Math.max(200, data.length * 34)}>
+    <div className={`w-full min-w-0 ${data.length > 7 ? "h-[360px]" : "h-[280px]"}`}>
+    <ResponsiveContainer width="100%" height="100%">
       <BarChart data={data} layout="vertical" margin={{ left: 8, right: 24, top: 4, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" horizontal={false} />
         <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 11 }} />
@@ -46,6 +54,7 @@ export function ScoreBars({ data }: { data: ScoreBarDatum[] }) {
         </Bar>
       </BarChart>
     </ResponsiveContainer>
+    </div>
   );
 }
 
@@ -60,8 +69,16 @@ export type CompareBarDatum = {
 
 /** Yatay gruplu bar: kıyas dönem vs bu dönem. */
 export function CompareBars({ data }: { data: CompareBarDatum[] }) {
+  if (!data.length) {
+    return (
+      <div className="h-[280px] w-full flex items-center justify-center text-sm text-muted-foreground">
+        Grafik için yeterli veri yok
+      </div>
+    );
+  }
   return (
-    <ResponsiveContainer width="100%" height={Math.max(220, data.length * 46)}>
+    <div className={`w-full min-w-0 ${data.length > 5 ? "h-[360px]" : "h-[280px]"}`}>
+    <ResponsiveContainer width="100%" height="100%">
       <BarChart data={data} layout="vertical" margin={{ left: 8, right: 24, top: 4, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" horizontal={false} />
         <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 11 }} />
@@ -91,6 +108,7 @@ export function CompareBars({ data }: { data: CompareBarDatum[] }) {
         </Bar>
       </BarChart>
     </ResponsiveContainer>
+    </div>
   );
 }
 
@@ -146,15 +164,24 @@ export function TrendLine({
 
 /** Bahis hacmi bar grafiği (skor grafiğinin altında ikincil bilgi). */
 export function MentionBars({ data }: { data: TrendPoint[] }) {
+  if (!data.length) {
+    return (
+      <div className="h-[140px] w-full flex items-center justify-center text-sm text-muted-foreground">
+        Grafik için yeterli veri yok
+      </div>
+    );
+  }
   return (
-    <ResponsiveContainer width="100%" height={140}>
+    <div className="w-full min-w-0 h-[140px]">
+    <ResponsiveContainer width="100%" height="100%">
       <BarChart data={data} margin={{ left: 0, right: 12, top: 4, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} />
         <XAxis dataKey="label" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
-        <YAxis width={34} tick={{ fontSize: 10 }} allowDecimals={false} />
+        <YAxis width={34} domain={[0, "dataMax"]} tick={{ fontSize: 10 }} allowDecimals={false} />
         <RTooltip formatter={(v: any) => [`${v} bahis`, "Bahis"]} />
         <Bar dataKey="mentions" fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
+    </div>
   );
 }
