@@ -5,7 +5,7 @@
  */
 import { Fragment, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   addMonths,
@@ -248,10 +248,25 @@ export default function TopicInsights() {
   const businessId = activeBusiness?.id;
   const { labelOf } = useCiTopics();
 
-  const [preset, setPreset] = useState<Preset>("12");
   const [custom, setCustom] = useState<Range>({ start: subMonths(new Date(), 3), end: new Date() });
-  const [openDept, setOpenDept] = useState<DepartmentKey | null>(null);
-  const [topicId, setTopicId] = useState<string | null>(null);
+
+  // Seçili dönem / departman / konu URL'de tutulur ki geri tuşu durumu korusun.
+  const [params, setParams] = useSearchParams();
+  const preset = (params.get("range") as Preset) || "12";
+  const openDept = (params.get("dept") as DepartmentKey | null) || null;
+  const topicId = params.get("topic");
+
+  const patchParams = (patch: Record<string, string | null>) => {
+    const next = new URLSearchParams(params);
+    for (const [k, v] of Object.entries(patch)) {
+      if (v == null) next.delete(k);
+      else next.set(k, v);
+    }
+    setParams(next, { replace: false });
+  };
+  const setPreset = (v: Preset) => patchParams({ range: v });
+  const setOpenDept = (v: DepartmentKey | null) => patchParams({ dept: v, topic: null });
+  const setTopicId = (v: string | null) => patchParams({ topic: v });
 
   const range = useMemo<Range>(
     () => (preset === "custom" ? custom : { start: subMonths(new Date(), Number(preset)), end: new Date() }),
