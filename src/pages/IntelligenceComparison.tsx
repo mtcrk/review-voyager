@@ -1477,12 +1477,15 @@ export default function IntelligenceComparison() {
                           stroke={MUTED}
                           strokeWidth={2}
                           strokeDasharray="4 4"
-                          dot={false}
-                          connectNulls
+                          dot={{ r: 2 }}
                         />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
+                  <p className="text-[11px] text-muted-foreground mt-2">
+                    Rakip çizgisi yalnızca veri toplanan haftaları gösterir; haftalık 3 yorumun
+                    altındaki noktalar çizilmez.
+                  </p>
                 </CardContent>
               </Card>
             )}
