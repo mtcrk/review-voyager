@@ -84,7 +84,7 @@ const commonItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Tüm Yorumlar", url: "/inbox", icon: Inbox, highlight: true },
   { title: "Yorumlar", url: "/reviews", icon: MessageSquare },
-  { title: "Konu Analizi", url: "/konu-analizi", icon: Tags },
+  { title: "Dönemsel Analiz", url: "/konu-analizi", icon: Tags },
   { title: "Rep Score", url: "/rep-score", icon: Trophy },
   { title: "Google Hesapları", url: "/google-accounts", icon: Star },
   { title: "İstatistikler", url: "/statistics", icon: BarChart3 },
