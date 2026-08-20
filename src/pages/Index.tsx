@@ -447,7 +447,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* ─── PRICING / EARLY ACCESS ─── */}
+      {/* ─── PRICING / EARLY ACCESS (geçici olarak gizlendi) ─── */}
+      {false && (
       <section id="pricing" className="relative py-20 md:py-28 overflow-hidden bg-background">
         {/* Ambient purple glow */}
         <div
