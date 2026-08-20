@@ -89,12 +89,6 @@ const Index = () => {
                 {t('indexPage.nav.features')}
               </button>
               <button
-                onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })}
-                className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
-              >
-                {t('indexPage.nav.pricing')}
-              </button>
-              <button
                 onClick={() => navigate("/blog")}
                 className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
               >
@@ -144,7 +138,6 @@ const Index = () => {
             <div className="md:hidden border-t border-border py-4 space-y-1">
               {[
                 { label: t('indexPage.nav.features'), action: () => { document.getElementById("features")?.scrollIntoView({ behavior: "smooth" }); setMobileMenuOpen(false); } },
-                { label: t('indexPage.nav.pricing'), action: () => { document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" }); setMobileMenuOpen(false); } },
                 { label: t('indexPage.nav.blog'), action: () => { navigate("/blog"); setMobileMenuOpen(false); } },
                 { label: t('indexPage.nav.contact'), action: () => { navigate("/contact"); setMobileMenuOpen(false); } },
                 { label: user ? t('indexPage.nav.dashboard') : t('indexPage.nav.login'), action: () => { navigate(user ? "/dashboard" : "/login"); setMobileMenuOpen(false); } },
@@ -454,7 +447,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* ─── PRICING / EARLY ACCESS ─── */}
+      {/* ─── PRICING / EARLY ACCESS (geçici olarak gizlendi) ─── */}
+      {false && (
       <section id="pricing" className="relative py-20 md:py-28 overflow-hidden bg-background">
         {/* Ambient purple glow */}
         <div
@@ -515,6 +509,7 @@ const Index = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* ─── FOOTER ─── */}
       <footer className="border-t border-border bg-card/50">
