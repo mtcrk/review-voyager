@@ -188,29 +188,46 @@ export function ActionPack({ businessId }: { businessId: string }) {
   }
 
   // ===== Card 2: Operational Priority =====
-  const ownTopicStats = new Map<string, { neg: number; pos: number; total: number }>();
-  const compTopicStats = new Map<string, { neg: number; pos: number; total: number; sentSum: number }>();
+  type TStat = { neg: number; pos: number; total: number; sentSum: number };
+  const ownTopicStats = new Map<string, TStat>();
+  const compTopicStats = new Map<string, TStat>();
   for (const r of topicRows) {
     const target = r.review_source === "own" ? ownTopicStats : compTopicStats;
-    const e = target.get(r.topic_id) ?? { neg: 0, pos: 0, total: 0, sentSum: 0 } as any;
+    const e: TStat = target.get(r.topic_id) ?? { neg: 0, pos: 0, total: 0, sentSum: 0 };
     e.total += 1;
-    e.sentSum = (e.sentSum ?? 0) + Number(r.sentiment);
+    e.sentSum += Number(r.sentiment);
     if (Number(r.sentiment) <= -0.2) e.neg += 1;
     else if (Number(r.sentiment) >= 0.2) e.pos += 1;
     target.set(r.topic_id, e);
   }
-  const opsList = topics
+  // Konular sekmesindeki "Fark" sütunuyla aynı mantık: rakibin bizden önde
+  // olduğu ve minimum örneklem eşiğini geçen konular önceliklidir.
+  const gapList = topics
     .map((t) => {
-      const o = ownTopicStats.get(t.id) ?? { neg: 0, pos: 0, total: 0 };
-      const c = compTopicStats.get(t.id) ?? { neg: 0, pos: 0, total: 0, sentSum: 0 };
-      const compAvg = c.total > 0 ? (c.sentSum ?? 0) / c.total : 0;
-      let priority = o.neg * 2 + c.neg * 1 - o.pos * 0.5;
-      if (compAvg > 0.1 && o.neg > 0) priority *= 1.5; // rival is good, you are not
-      return { topic: t, ownNeg: o.neg, compNeg: c.neg, compAvg, priority };
+      const o = ownTopicStats.get(t.id);
+      const c = compTopicStats.get(t.id);
+      if (!o || o.total === 0 || !c || c.total < MIN_COMP_MENTIONS) return null;
+      const ownIdx = sentimentToIndex100(o.sentSum / o.total);
+      const compIdx = sentimentToIndex100(c.sentSum / c.total);
+      const delta = ownIdx - compIdx;
+      if (delta >= -2) return null;
+      return { topic: t, ownIdx, compIdx, delta, ownN: o.total, compN: c.total };
     })
-    .filter((x) => x.priority > 0)
-    .sort((a, b) => b.priority - a.priority)
+    .filter((x): x is NonNullable<typeof x> => x != null)
+    .sort((a, b) => a.delta - b.delta)
     .slice(0, 3);
+
+  const ownComplaintList = topics
+    .map((t) => {
+      const o = ownTopicStats.get(t.id);
+      if (!o || o.neg === 0) return null;
+      return { topic: t, ownNeg: o.neg, ownN: o.total };
+    })
+    .filter((x): x is NonNullable<typeof x> => x != null)
+    .sort((a, b) => b.ownNeg - a.ownNeg)
+    .slice(0, 3);
+
+  const opsMode: "gap" | "own" = gapList.length > 0 ? "gap" : "own";
 
   // ===== Card 3: Reply Benchmark =====
   const ownTotal = ownReviews.length;
