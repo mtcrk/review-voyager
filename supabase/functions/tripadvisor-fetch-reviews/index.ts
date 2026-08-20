@@ -121,7 +121,8 @@ Deno.serve(async (req) => {
       }
     }
 
-    const { business_id, run_id, force = false } = await req.json();
+    const { business_id, run_id, force = false, max_reviews } = await req.json();
+    const maxReviews = Math.min(500, Math.max(20, Number(max_reviews) || 20));
 
     if (!business_id) {
       return new Response(
@@ -347,7 +348,7 @@ Deno.serve(async (req) => {
 
     const actorInput = {
       startUrls: [{ url: tripAdvisorUrl }],
-      maxItemsPerQuery: 20,
+      maxItemsPerQuery: maxReviews,
       scrapeReviewerInfo: true,
     };
 
