@@ -75,7 +75,9 @@ Deno.serve(async (req) => {
 
     let body: any = {};
     try { body = await req.json(); } catch {}
-    const { competitor_id, business_id, force } = body || {};
+    const { competitor_id, business_id, force, max_reviews } = body || {};
+    // Çağrı başına override; verilmezse savunulabilir örneklem için 300.
+    const maxReviews = Math.max(1, Math.min(1000, Number(max_reviews) || 300));
 
     if (!competitor_id && !business_id) {
       return new Response(JSON.stringify({ error: "competitor_id or business_id required" }), {
