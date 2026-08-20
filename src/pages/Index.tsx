@@ -89,12 +89,6 @@ const Index = () => {
                 {t('indexPage.nav.features')}
               </button>
               <button
-                onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })}
-                className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
-              >
-                {t('indexPage.nav.pricing')}
-              </button>
-              <button
                 onClick={() => navigate("/blog")}
                 className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
               >
