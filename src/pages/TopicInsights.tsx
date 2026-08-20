@@ -7,34 +7,30 @@ import { Fragment, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { format, subMonths } from "date-fns";
+import {
+  differenceInCalendarDays,
+  format,
+  startOfWeek,
+  subMonths,
+} from "date-fns";
 import { tr as trLocale } from "date-fns/locale";
 import {
   ArrowDownRight,
   ArrowRight,
   ArrowUpRight,
+  Calendar as CalendarIcon,
   ChevronDown,
   ChevronRight,
   Download,
   ExternalLink,
   MapPin,
 } from "lucide-react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip as RTooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -46,6 +42,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useCiTopics } from "@/hooks/useReviewAnalysis";
 import { QuoteColumns, type EvidenceQuote } from "@/components/intelligence/QuoteColumns";
+import { MentionBars, ScoreBars, TrendLine } from "@/components/intelligence/TopicCharts";
 import {
   DEPARTMENT_LABELS,
   departmentOf,
