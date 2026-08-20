@@ -2092,15 +2092,15 @@ function BarCard({
   title: string;
   rows: Array<{ name: string; rating: number | null; review_count: number | null; isOwn: boolean }>;
   dataKey: "rating" | "review_count";
-  domain?: [number, number];
+  domain: [number, number] | [number, "dataMax"];
   formatter: (v: number) => string;
 }) {
   const data = rows
-    .filter((r) => r[dataKey] != null)
+    .filter((r) => r[dataKey] != null && Number.isFinite(Number(r[dataKey])))
     .map((r) => ({
       name: truncate(r.name, 14),
       fullName: r.name,
-      value: r[dataKey] as number,
+      value: Number(r[dataKey]),
       isOwn: r.isOwn,
     }));
   return (
@@ -2108,12 +2108,22 @@ function BarCard({
       <CardHeader className="pb-3">
         <CardTitle className="text-base">{title}</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="h-64 w-full">
+      <CardContent className="min-w-0">
+        {data.length === 0 ? (
+          <div className="h-64 w-full flex items-center justify-center text-sm text-muted-foreground">
+            Grafik için yeterli veri yok
+          </div>
+        ) : (
+        <div className="h-64 w-full min-w-0">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} layout="vertical" margin={{ top: 4, right: 24, bottom: 4, left: 8 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
-              <XAxis type="number" domain={domain} tick={{ fontSize: 10, fill: MUTED }} />
+              <XAxis
+                type="number"
+                domain={domain as any}
+                allowDataOverflow={false}
+                tick={{ fontSize: 10, fill: MUTED }}
+              />
               <YAxis
                 type="category"
                 dataKey="name"
@@ -2141,6 +2151,7 @@ function BarCard({
             </BarChart>
           </ResponsiveContainer>
         </div>
+        )}
       </CardContent>
     </Card>
   );
