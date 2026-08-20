@@ -159,7 +159,7 @@ export function ActionPack({ businessId }: { businessId: string }) {
     priceVerdict = {
       tone: "info",
       title: "Daha fazla veri gerekli",
-      detail: "Kendi yorumlarınızı bağlayın ve segment + yıldız bilgisini girin.",
+      detail: `Kıyas için kendi yorumlarınız ve emsal rakiplerden en az ${MIN_COMP_MENTIONS} toplanmış yorum gerekiyor.`,
     };
   } else if (ownAvg < peerAvg) {
     // Normalize edilmiş kıyasta emsalin altındaysak fiyat artışı ASLA önerilmez.
