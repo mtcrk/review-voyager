@@ -179,7 +179,12 @@ export function ReviewAnalysisPanel({
       <div className="space-y-5">
         {/* Highlighted text */}
         <div className="space-y-1.5">
-          <HighlightedReviewText text={text} highlights={highlights} topicLabels={labels} />
+          <HighlightedReviewText
+            text={text}
+            highlights={highlights}
+            topicLabels={labels}
+            focusTopicId={focusTopicId}
+          />
           {highlights.length > 0 && (
             <p className="text-xs text-muted-foreground">{t("analysis.highlightsHint")}</p>
           )}
@@ -263,7 +268,8 @@ export function ReviewAnalysisPanel({
                   className={cn(
                     "font-medium",
                     toneChip(sentimentTone(Number(c.sentiment ?? 0))),
-                    c.topic_id === focusTopicId && "ring-2 ring-primary ring-offset-1",
+                    c.topic_id === focusTopicId &&
+                      "font-bold border-primary ring-2 ring-primary ring-offset-1",
                   )}
                 >
                   {labelOf(c.topic_id)}
