@@ -1,5 +1,5 @@
 /**
- * Dönemsel Analiz — departman gidişatı iki dönem arasında karşılaştırılır.
+ * Dönem Analizi — departman gidişatı iki dönem arasında karşılaştırılır.
  * Yalnızca KENDİ yorumlarımız (review_source = 'own'). Rakip kıyası
  * /intelligence/karsilastirma sayfasının işi.
  */
@@ -389,13 +389,13 @@ export default function TopicAnalytics() {
         ].join(";"),
       ),
     ];
-    downloadCsv(`donemsel-analiz-${format(cur.start, "yyyyMMdd")}-${format(cur.end, "yyyyMMdd")}.csv`, lines.join("\r\n"));
+    downloadCsv(`donem-analizi-${format(cur.start, "yyyyMMdd")}-${format(cur.end, "yyyyMMdd")}.csv`, lines.join("\r\n"));
   }
 
   return (
     <div className="space-y-6">
       <Helmet>
-        <title>Dönemsel Analiz | VoyageRespond</title>
+        <title>Dönem Analizi | VoyageRespond</title>
         <meta
           name="description"
           content="Departmanların bir önceki döneme göre gidişatını, konu kırılımını ve misafir alıntılarını karşılaştırın."
@@ -404,7 +404,7 @@ export default function TopicAnalytics() {
 
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Dönemsel Analiz</h1>
+          <h1 className="text-2xl font-semibold">Dönem Analizi</h1>
           <p className="text-sm text-muted-foreground">
             {fmtRange(cur)} · kıyas: {fmtRange(prev)}
           </p>

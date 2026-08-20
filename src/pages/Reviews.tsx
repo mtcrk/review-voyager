@@ -111,16 +111,18 @@ export default function Reviews() {
   const [ratingFilter, setRatingFilter] = useState<RatingFilter>("all");
   const [sortOption, setSortOption] = useState<SortOption>("newest");
   const [chipFilter, setChipFilter] = useState<ChipSelection>(null);
-  const [topicFilter, setTopicFilter] = useState<string>("all");
+  const [topicFilter, setTopicFilter] = useState<string>(searchParams.get("topic") || "all");
   const [attentionFilter, setAttentionFilter] = useState<"all" | "needed">("all");
   // Sync platformFilter with URL changes (sidebar navigation)
   useEffect(() => {
     const newPlatform = searchParams.get("platform") as PlatformFilter | null;
     const newSentiment = searchParams.get("sentiment") as SentimentFilter | null;
     const newStatus = searchParams.get("status") as StatusFilter | null;
+    const newTopic = searchParams.get("topic");
     setPlatformFilter(newPlatform || "all");
     if (newSentiment) setSentimentFilter(newSentiment);
     if (newStatus) setStatusFilter(newStatus);
+    if (newTopic) setTopicFilter(newTopic);
     setCurrentPage(1);
   }, [searchParams]);
 

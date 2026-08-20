@@ -167,7 +167,8 @@ export const routes: RouteRecord[] = [
       { path: "intelligence", lazy: lazyProtectedLayout(() => import("./pages/Intelligence")) },
       { path: "intelligence/karsilastirma", lazy: lazyProtectedLayout(() => import("./pages/IntelligenceComparison")) },
       { path: "intelligence/konu-analizi", Component: () => <Navigate to="/konu-analizi" replace /> },
-      { path: "konu-analizi", lazy: lazyProtectedLayout(() => import("./pages/TopicAnalytics")) },
+      { path: "konu-analizi", lazy: lazyProtectedLayout(() => import("./pages/TopicInsights")) },
+      { path: "donem-analizi", lazy: lazyProtectedLayout(() => import("./pages/TopicAnalytics")) },
       { path: "ai-visibility", lazy: lazyProtectedLayout(() => import("./pages/AIVisibility")) },
 
       // ---------- /en/* runtime redirect (no SSG) ----------
@@ -240,6 +241,7 @@ export const PRERENDER_APP_SHELL_PATHS = [
   "/intelligence",
   "/intelligence/karsilastirma",
   "/konu-analizi",
+  "/donem-analizi",
   "/ai-visibility",
   "/story-kit",
   "/channels/tiktok",
