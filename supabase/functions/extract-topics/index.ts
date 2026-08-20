@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
-import { filterBusinessIdsWithSubscription } from "../_shared/subscription-guard.ts";
+import { resolveAllowlistBusinessIds } from "../_shared/analysis-allowlist.ts";
 
 const LOVABLE_API_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-2.5-flash";
@@ -178,17 +178,21 @@ Deno.serve(async (req) => {
     let mentionsInserted = 0;
     let errors = 0;
 
-    // Yalnızca aktif aboneliği olan işletmeler için AI kredisi harcanır.
-    const eligible = await filterBusinessIdsWithSubscription(
-      supabaseUrl,
-      serviceKey,
-      Array.from(new Set(jobs.map((j) => j.business_id).filter(Boolean))),
-    );
-    const eligibleJobs = jobs.filter((j) => eligible.has(j.business_id)).slice(0, limit);
-    const skippedNoSub = jobs.length - eligibleJobs.length;
-    if (skippedNoSub > 0) {
-      console.log(`extract-topics: skipped ${skippedNoSub} reviews (no active subscription)`);
+    // Kapı = açık izin listesi (ANALYSIS_ALLOWLIST_EMAILS). Abonelik kontrolünü ezer.
+    // Liste boşsa hiçbir şey işlenmez; liste dışı kayıtlara dokunulmaz.
+    const { emails, matchedEmails, businessIds: allowed } =
+      await resolveAllowlistBusinessIds(supabaseUrl, serviceKey);
+    if (emails.length === 0) {
+      console.log("[extract-topics] allowlist boş — çıkılıyor");
+      return new Response(
+        JSON.stringify({ ok: true, processed: 0, reason: "allowlist_empty" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
+    const eligibleJobs = jobs.filter((j) => allowed.has(j.business_id)).slice(0, limit);
+    console.log(
+      `[extract-topics] allowlist: ${allowed.size} işletme, ${eligibleJobs.length} pending (hesaplar: ${matchedEmails.join(", ") || "yok"})`,
+    );
 
     for (const job of eligibleJobs) {
       try {
