@@ -15,6 +15,8 @@ export type CsvTopicRow = {
 };
 
 const MIN_MENTIONS = 3;
+/** Rakip tarafında bu sayının altındaki bahislerde fark hesaplanmaz. */
+const MIN_COMP_MENTIONS = 5;
 
 function cell(v: string | number | null) {
   if (v == null) return "";
@@ -56,9 +58,12 @@ export function buildTopicCsv(
         topicId,
         mentions,
         share: total ? (mentions / total) * 100 : 0,
+        ownN: e.ownN,
+        compN: e.compN,
         own,
         comp,
-        delta: own != null && comp != null ? own - comp : null,
+        delta:
+          own != null && comp != null && e.compN >= MIN_COMP_MENTIONS ? own - comp : null,
       };
     })
     .filter((r) => r.mentions >= MIN_MENTIONS)
@@ -69,6 +74,8 @@ export function buildTopicCsv(
     "Departman",
     "Bahis",
     "Pay (%)",
+    "Sizin bahis",
+    "Rakip bahis",
     "Siz",
     "Rakip ort.",
     "Fark",
@@ -81,9 +88,11 @@ export function buildTopicCsv(
         cell(DEPARTMENT_LABELS[departmentOf(r.topicId)]),
         cell(r.mentions),
         cell(r.share.toFixed(1).replace(".", ",")),
+        cell(r.ownN),
+        cell(r.compN),
         cell(num(r.own)),
         cell(num(r.comp)),
-        cell(num(r.delta)),
+        cell(r.delta == null ? "yeterli rakip verisi yok" : num(r.delta)),
       ].join(";"),
     );
   }
