@@ -509,11 +509,18 @@ export default function IntelligenceComparison() {
       if (buckets[wk]) buckets[wk]._compCount += 1;
     }
     const compN = Math.max(1, competitors.length);
+    // Rakip verisi ilk toplanmadan önceki haftalarda "0" bir ölçüm değil,
+    // veri yokluğudur — çizgi o haftalarda hiç çizilmez.
+    const compDates = compReviews90.map((r) => r.posted_at).filter((d): d is string => !!d).sort();
+    const compFirstWeek = compDates.length ? weekKey(compDates[0]) : null;
     return Object.values(buckets)
       .sort((a, b) => a.week.localeCompare(b.week))
       .map((b) => ({
         ...b,
-        competitorsAvg: Math.round((b._compCount / compN) * 10) / 10,
+        competitorsAvg:
+          compFirstWeek && b.week >= compFirstWeek
+            ? Math.round((b._compCount / compN) * 10) / 10
+            : null,
         weekLabel: b.week.slice(5), // MM-DD
       }));
   }, [ownReviews, compReviews90, competitors.length]);
@@ -543,12 +550,19 @@ export default function IntelligenceComparison() {
       b.compSum += toIndex100(Number(r.rating), normalizePlatform(r.platform) ?? "google");
       b.compN += 1;
     }
+    const compDates = compReviews90.map((r) => r.posted_at).filter((d): d is string => !!d).sort();
+    const compFirstWeek = compDates.length ? weekKey(compDates[0]) : null;
+    const MIN_WEEK_COMP = 3;
     return Object.values(buckets)
       .sort((a, b) => a.week.localeCompare(b.week))
       .map((b) => ({
         weekLabel: b.week.slice(5),
         you: b.ownN ? Math.round((b.ownSum / b.ownN) * 10) / 10 : null,
-        competitors: b.compN ? Math.round((b.compSum / b.compN) * 10) / 10 : null,
+        // 3'ten az yoruma dayanan hafta bir pazar hareketi değildir — çizilmez.
+        competitors:
+          compFirstWeek && b.week >= compFirstWeek && b.compN >= MIN_WEEK_COMP
+            ? Math.round((b.compSum / b.compN) * 10) / 10
+            : null,
       }));
   }, [ownReviews, compReviews90]);
 
