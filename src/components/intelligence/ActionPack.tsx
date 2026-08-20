@@ -336,19 +336,22 @@ export function ActionPack({ businessId }: { businessId: string }) {
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm flex items-center gap-2">
-            <Wrench className="h-4 w-4 text-primary" /> Bu Hafta Önceliğin
+            <Wrench className="h-4 w-4 text-primary" />{" "}
+            {opsMode === "gap" ? "Bu Hafta Önceliğin" : "Sizde en çok şikayet edilen konular"}
           </CardTitle>
           <p className="text-xs text-muted-foreground">
-            Şikayet sıklığı + rakip kıyaslamasına göre sıralandı
+            {opsMode === "gap"
+              ? `Rakibin sizden önde olduğu konular (Konular sekmesindeki "Fark" sütunu, en az ${MIN_COMP_MENTIONS} rakip bahsi)`
+              : "Yeterli rakip verisi yok — sadece kendi şikayet sıklığınıza göre sıralandı"}
           </p>
         </CardHeader>
         <CardContent className="space-y-2">
-          {opsList.length === 0 ? (
+          {opsMode === "own" && ownComplaintList.length === 0 ? (
             <p className="text-xs text-muted-foreground py-4 text-center">
               Belirgin operasyonel öncelik yok. Konuları analiz edin.
             </p>
-          ) : (
-            opsList.map((row, idx) => (
+          ) : opsMode === "gap" ? (
+            gapList.map((row, idx) => (
               <div key={row.topic.id} className="flex items-start gap-2 py-1.5 border-b last:border-b-0">
                 <div className="flex-shrink-0 h-6 w-6 rounded-full bg-primary/10 text-primary text-xs font-semibold flex items-center justify-center">
                   {idx + 1}
@@ -356,14 +359,25 @@ export function ActionPack({ businessId }: { businessId: string }) {
                 <div className="flex-1 min-w-0">
                   <div className="font-medium text-sm truncate">{topicLabel(row.topic)}</div>
                   <div className="text-xs text-muted-foreground">
-                    {row.ownNeg > 0 && <>Sizde {row.ownNeg} şikayet</>}
-                    {row.ownNeg > 0 && row.compNeg > 0 && " · "}
-                    {row.compNeg > 0 && <>rakipte {row.compNeg}</>}
-                    {row.compAvg > 0.1 && (
-                      <span className="text-rose-600 dark:text-rose-400">
-                        {" · "}rakip bu konuda iyi
-                      </span>
-                    )}
+                    Siz {row.ownIdx.toFixed(1)} / rakip {row.compIdx.toFixed(1)}{" "}
+                    <span className="text-rose-600 dark:text-rose-400">
+                      (−{Math.abs(row.delta).toFixed(1)})
+                    </span>
+                    {" · "}rakipte {row.compN} bahis
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            ownComplaintList.map((row, idx) => (
+              <div key={row.topic.id} className="flex items-start gap-2 py-1.5 border-b last:border-b-0">
+                <div className="flex-shrink-0 h-6 w-6 rounded-full bg-primary/10 text-primary text-xs font-semibold flex items-center justify-center">
+                  {idx + 1}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-sm truncate">{topicLabel(row.topic)}</div>
+                  <div className="text-xs text-muted-foreground">
+                    Sizde {row.ownNeg} şikayet · {row.ownN} bahis üzerinden
                   </div>
                 </div>
               </div>
