@@ -1953,11 +1953,13 @@ function KpiCard({
               goodBad === "good" ? (
                 <span className="inline-flex items-center gap-0.5 text-emerald-600 font-medium">
                   <TrendingUp className="h-3 w-3" />
+                  {delta > 0 ? "+" : "−"}
                   {format(Math.abs(delta))}
                 </span>
               ) : goodBad === "bad" ? (
                 <span className="inline-flex items-center gap-0.5 text-rose-600 font-medium">
                   <TrendingDown className="h-3 w-3" />
+                  {delta > 0 ? "+" : "−"}
                   {format(Math.abs(delta))}
                 </span>
               ) : (
