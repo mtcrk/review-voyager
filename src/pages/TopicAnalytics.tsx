@@ -288,6 +288,7 @@ export default function TopicAnalytics() {
   const [compareMode, setCompareMode] = useState<CompareMode>("prev");
   const [custom, setCustom] = useState<Range>({ start: subDays(new Date(), 30), end: new Date() });
   const [openDept, setOpenDept] = useState<DepartmentKey | null>(null);
+  const [openTopic, setOpenTopic] = useState<string | null>(null);
 
   const cur = useMemo(() => currentRange(preset, custom), [preset, custom]);
   const prev = useMemo(() => compareRange(cur, compareMode), [cur, compareMode]);
@@ -346,6 +347,8 @@ export default function TopicAnalytics() {
       excerpt: (r.excerpt as string).trim(),
       sentiment: r.sentiment,
       meta: format(new Date(r.review_posted_at), "d MMM yyyy", { locale: trLocale }),
+      reviewId: r.review_id,
+      topicId: r.topic_id,
     });
     // Gerileyen departmanda: kıyas döneminden en olumlu, bu dönemden en olumsuz.
     // İyileşende tersi.
@@ -369,6 +372,65 @@ export default function TopicAnalytics() {
 
   const noData = !loading && curRows.length === 0;
   const prevEmpty = !loading && curRows.length > 0 && prevRows.length === 0;
+
+  /** Departman karşılaştırma grafiği: iki dönemde de skoru olan departmanlar. */
+  const chartData = useMemo<CompareBarDatum[]>(
+    () =>
+      deptRows
+        .filter((r) => r.curN > 0 || r.prevN > 0)
+        .map((r) => ({
+          key: r.key,
+          label: r.label,
+          cur: Number((r.cur ?? 0).toFixed(1)),
+          prev: Number((r.prev ?? 0).toFixed(1)),
+          curN: r.curN,
+          prevN: r.prevN,
+        })),
+    [deptRows],
+  );
+
+  /** Kıyas dönemin başından bu dönemin sonuna kadar aylık eksen. */
+  const monthAxis = useMemo(() => {
+    const out: string[] = [];
+    const first = prev.start < cur.start ? prev.start : cur.start;
+    let m = new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth(), 1));
+    const last = new Date(Date.UTC(cur.end.getUTCFullYear(), cur.end.getUTCMonth(), 1));
+    while (m <= last && out.length < 40) {
+      out.push(m.toISOString().slice(0, 7));
+      m = addMonths(m, 1);
+    }
+    return out;
+  }, [prev.start, cur.start, cur.end]);
+
+  const monthLabel = (key: string) =>
+    format(new Date(`${key}-01T00:00:00Z`), "MMM yy", { locale: trLocale });
+
+  /** Açılan konunun iki dönemi kapsayan aylık gidişatı. */
+  const topicTrend = useMemo(() => {
+    if (!openTopic) return [];
+    const all = [...prevRows, ...curRows].filter((r) => r.topic_id === openTopic);
+    const byMonth = new Map<string, TopicRow[]>();
+    for (const r of all) {
+      const k = r.review_posted_at.slice(0, 7);
+      const list = byMonth.get(k);
+      if (list) list.push(r);
+      else byMonth.set(k, [r]);
+    }
+    return monthAxis.map((k) => {
+      const list = byMonth.get(k) ?? [];
+      return {
+        bucket: k,
+        label: monthLabel(k),
+        mentions: list.length,
+        score:
+          list.length >= 3
+            ? Number(sentimentToIndex100(list.reduce((s, r) => s + r.sentiment, 0) / list.length).toFixed(1))
+            : null,
+      };
+    });
+  }, [openTopic, prevRows, curRows, monthAxis]);
+
+  const boundaryLabel = monthLabel(cur.start.toISOString().slice(0, 7));
 
   function exportCsv() {
     const cell = (v: string | number) => {
