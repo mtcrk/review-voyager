@@ -483,7 +483,7 @@ export default function TopicAnalytics() {
         </p>
       )}
 
-      {!loading && prevCovPct !== null && prevCovPct < 50 && (
+      {!loading && !prevEmpty && prevCovPct !== null && prevCovPct < 50 && (
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
@@ -495,15 +495,11 @@ export default function TopicAnalytics() {
 
       {loading ? (
         <Skeleton className="h-80 w-full rounded-xl" />
-      ) : noData || emptyPeriod ? (
+      ) : noData ? (
         <Card>
           <CardContent className="space-y-2 py-12 text-center">
             <p className="text-sm text-muted-foreground">
-              {noData
-                ? "Seçilen iki dönemde analiz edilmiş yorum yok."
-                : curRows.length === 0
-                  ? "Bu dönemde analiz edilmiş yorum yok."
-                  : "Kıyas döneminde analiz edilmiş yorum yok; karşılaştırma yapılamıyor."}
+              Bu dönemde analiz edilmiş yorum yok.
             </p>
             <p className="text-xs text-muted-foreground">
               Konu analizi yalnızca son 6 ayı kapsar — daha eski dönemlerde konu verisi bulunmaz.
@@ -514,8 +510,16 @@ export default function TopicAnalytics() {
       ) : (
         <Card>
           <CardHeader className="space-y-2">
-            <CardTitle className="text-base">Departman gidişatı — değişime göre sıralı</CardTitle>
-            {summary ? (
+            <CardTitle className="text-base">
+              {prevEmpty
+                ? "Departman gidişatı — bu dönem skoruna göre sıralı"
+                : "Departman gidişatı — değişime göre sıralı"}
+            </CardTitle>
+            {prevEmpty ? (
+              <p className="text-sm text-muted-foreground">
+                Kıyas döneminde analiz edilmiş yorum yok — yalnızca bu dönemin skorları gösteriliyor.
+              </p>
+            ) : summary ? (
               <p className="text-sm text-muted-foreground">{summary}</p>
             ) : (
               <p className="text-sm text-muted-foreground">
