@@ -37,6 +37,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useCiTopics } from "@/hooks/useReviewAnalysis";
 import { QuoteColumns, type EvidenceQuote } from "@/components/intelligence/QuoteColumns";
+import { fetchOwnTopicRows } from "@/lib/ownTopicRows";
 import { CompareBars, TrendLine, type CompareBarDatum } from "@/components/intelligence/TopicCharts";
 import {
   DEPARTMENTS,
@@ -96,28 +97,11 @@ function useOwnTopics(businessId: string | undefined, range: Range) {
   const from = range.start.toISOString();
   const to = range.end.toISOString();
   return useQuery({
-    queryKey: ["period_own_topics", businessId, from, to],
+    queryKey: ["period_own_topics_v2", businessId, from, to],
     enabled: !!businessId,
     staleTime: 1000 * 60 * 5,
-    queryFn: async (): Promise<TopicRow[]> => {
-      const { data, error } = await supabase
-        .from("ci_review_topics")
-        .select("review_id, topic_id, sentiment, excerpt, review_posted_at")
-        .eq("business_id", businessId!)
-        .eq("review_source", "own")
-        .is("competitor_id", null)
-        .gte("review_posted_at", from)
-        .lte("review_posted_at", to)
-        .limit(8000);
-      if (error) throw error;
-      return (data ?? []).map((r: any) => ({
-        review_id: r.review_id,
-        topic_id: r.topic_id,
-        sentiment: Number(r.sentiment),
-        excerpt: r.excerpt,
-        review_posted_at: r.review_posted_at,
-      }));
-    },
+    // Tarih filtresi yorumun posted_at değerinden gelir (bkz. ownTopicRows.ts).
+    queryFn: (): Promise<TopicRow[]> => fetchOwnTopicRows(businessId!, from, to),
   });
 }
 
