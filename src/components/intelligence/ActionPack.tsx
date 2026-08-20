@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
 import { averageRating5 } from "@/lib/ratingScale";
+
+/** Rakip tarafında bu eşiğin altındaki bahislerde kıyas savunulamaz. */
+const MIN_COMP_MENTIONS = 5;
 import {
   TrendingUp,
   TrendingDown,
@@ -130,10 +133,16 @@ export function ActionPack({ businessId }: { businessId: string }) {
     return true;
   });
   const peerSet = peers.length > 0 ? peers : comps;
-  const peerRatings = peerSet.map((c: any) => c.rating).filter((n: any) => n != null);
-  const peerAvg = peerRatings.length
-    ? peerRatings.reduce((a: number, b: number) => a + b, 0) / peerRatings.length
+  // Emsal ortalaması, hero satırıyla AYNI kaynaktan gelir: toplanan rakip
+  // yorumlarının platform ölçeğine göre normalize edilmiş ortalaması.
+  const peerIds = new Set(peerSet.map((c: any) => c.id));
+  const peerReviewRows = compReviews.filter(
+    (r: any) => peerIds.has(r.competitor_id) && r.rating != null,
+  ) as { rating: number; platform?: string | null }[];
+  const peerAvg = peerReviewRows.length >= MIN_COMP_MENTIONS
+    ? averageRating5(peerReviewRows)
     : null;
+  const peerIsSubset = peerSet.length !== comps.length;
   const peerPriceTiers = peerSet.map((c: any) => c.price_tier).filter((n: any) => n != null);
   const peerPriceTier = peerPriceTiers.length
     ? peerPriceTiers.reduce((a: number, b: number) => a + b, 0) / peerPriceTiers.length
