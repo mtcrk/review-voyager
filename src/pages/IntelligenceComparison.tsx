@@ -1889,13 +1889,13 @@ export default function IntelligenceComparison() {
             </Card>
 
             {/* Bar charts */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
               {hasIndexBars && (
                 <BarCard
                   title="İtibar indeksi karşılaştırması (0-100)"
                   rows={ranked}
                   dataKey="rating"
-                  domain={[yMin, 100]}
+                  domain={[0, 100]}
                   formatter={(v) => v.toFixed(1)}
                 />
               )}
@@ -1904,6 +1904,7 @@ export default function IntelligenceComparison() {
                   title="Yorum hacmi"
                   rows={ranked}
                   dataKey="review_count"
+                  domain={[0, "dataMax"]}
                   formatter={(v) => fmtNum(v)}
                 />
               )}
