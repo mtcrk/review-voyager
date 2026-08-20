@@ -343,13 +343,14 @@ export function ActionPack({
       </Card>
 
       {/* CARD 3 - Reply Benchmark */}
+      {showReplyCard && (
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm flex items-center gap-2">
             <MessageCircle className="h-4 w-4 text-primary" /> Yanıt Performansı
           </CardTitle>
           <p className="text-xs text-muted-foreground">
-            Rakip yanıtları toplanan platformlardan ölçülür
+            Ortak kıyas penceresindeki değerler
           </p>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -357,7 +358,9 @@ export function ActionPack({
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Yanıt oranı</span>
               <div className="flex items-center gap-2">
-                <span className="font-semibold">{Math.round(ownReplyRate)}%</span>
+                <span className="font-semibold">
+                  {ownReplyRate != null ? `${Math.round(ownReplyRate)}%` : "—"}
+                </span>
                 <span className="text-xs text-muted-foreground">/ {compReplyRate != null ? `${Math.round(compReplyRate)}%` : "—"}</span>
                 <Badge variant="outline" className={`${toneClass(rateBadge)} text-[10px] h-5`}>
                   <ToneIcon t={rateBadge} />
@@ -367,21 +370,19 @@ export function ActionPack({
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Medyan yanıt süresi</span>
               <div className="flex items-center gap-2">
-                <span className="font-semibold">{fmtHours(ownMedianReply)}</span>
-                <span className="text-xs text-muted-foreground">/ {fmtHours(compMedianReply)}</span>
+                <span className="font-semibold">{fmtDays(ownMedianResponse)}</span>
+                <span className="text-xs text-muted-foreground">/ {fmtDays(compMedianResponse)}</span>
                 <Badge variant="outline" className={`${toneClass(timeBadge)} text-[10px] h-5`}>
                   <ToneIcon t={timeBadge} />
                 </Badge>
               </div>
             </div>
           </div>
-          {unansweredCount > 0 && (
-            <Button asChild size="sm" variant="outline" className="w-full">
-              <Link to="/reviews?status=unanswered">
-                Cevapsız {unansweredCount} yoruma git <ArrowRight className="h-3 w-3 ml-1" />
-              </Link>
-            </Button>
-          )}
+          <Button asChild size="sm" variant="outline" className="w-full">
+            <Link to="/reviews?status=unanswered">
+              Cevapsız yorumlara git <ArrowRight className="h-3 w-3 ml-1" />
+            </Link>
+          </Button>
           {compReplyRate == null && (
             <p className="text-[11px] text-muted-foreground">
               Rakip yanıt verisi henüz toplanmadı. Yorumlar tekrar çekildiğinde dolacak.
@@ -389,6 +390,7 @@ export function ActionPack({
           )}
         </CardContent>
       </Card>
+      )}
     </div>
   );
 }
