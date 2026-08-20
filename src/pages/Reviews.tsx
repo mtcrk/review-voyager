@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -127,6 +127,7 @@ export default function Reviews() {
   const sortField: SortField = sortOption === "name_az" ? "reviewer_name" : sortOption?.includes("rating") ? "rating" : "posted_at";
   const sortOrder: SortOrder = sortOption === "oldest" || sortOption === "rating_low" || sortOption === "name_az" ? "asc" : "desc";
   const [isFetchingBooking, setIsFetchingBooking] = useState(false);
+  const [googleFetchEmpty, setGoogleFetchEmpty] = useState(false);
   const [isAutoDiscovering, setIsAutoDiscovering] = useState(false);
   
   // Inline platform setup
