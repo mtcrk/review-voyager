@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Star, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,6 +33,9 @@ const languageOptions: { value: string; label: string }[] = [
 const ReviewDetailPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  // Konu/Dönem/Rakip analizinden "Yoruma git" ile gelindiğinde vurgulanacak konu.
+  const focusTopic = searchParams.get("topic");
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedTone, setSelectedTone] = useState<ToneOption>("Friendly");
@@ -379,7 +382,7 @@ const ReviewDetailPage = () => {
           </Card>
 
           {/* AI Insights Card */}
-          <Card className="rounded-xl shadow-sm border">
+          <Card id="review-analysis" className="rounded-xl shadow-sm border">
             <CardHeader>
               <CardTitle className="text-lg">{t("analysis.title")}</CardTitle>
             </CardHeader>
@@ -388,6 +391,7 @@ const ReviewDetailPage = () => {
                 reviewId={review.id}
                 text={review.text || ""}
                 analysisStatus={(review as any).analysis_status}
+                focusTopicId={focusTopic}
               />
               <div className="mt-4">
                 <WhatsAppActionStatus reviewId={review.id} />
