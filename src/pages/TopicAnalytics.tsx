@@ -268,11 +268,27 @@ export default function TopicAnalytics() {
   const businessId = activeBusiness?.id;
   const { labelOf } = useCiTopics();
 
-  const [preset, setPreset] = useState<PeriodPreset>("month");
-  const [compareMode, setCompareMode] = useState<CompareMode>("prev");
   const [custom, setCustom] = useState<Range>({ start: subDays(new Date(), 30), end: new Date() });
-  const [openDept, setOpenDept] = useState<DepartmentKey | null>(null);
-  const [openTopic, setOpenTopic] = useState<string | null>(null);
+
+  // Seçili dönem / kıyas / departman / konu URL'de tutulur ki geri tuşu durumu korusun.
+  const [params, setParams] = useSearchParams();
+  const preset = (params.get("range") as PeriodPreset) || "month";
+  const compareMode = (params.get("cmp") as CompareMode) || "prev";
+  const openDept = (params.get("dept") as DepartmentKey | null) || null;
+  const openTopic = params.get("topic");
+
+  const patchParams = (patch: Record<string, string | null>) => {
+    const next = new URLSearchParams(params);
+    for (const [k, v] of Object.entries(patch)) {
+      if (v == null) next.delete(k);
+      else next.set(k, v);
+    }
+    setParams(next, { replace: false });
+  };
+  const setPreset = (v: PeriodPreset) => patchParams({ range: v });
+  const setCompareMode = (v: CompareMode) => patchParams({ cmp: v });
+  const setOpenDept = (v: DepartmentKey | null) => patchParams({ dept: v, topic: null });
+  const setOpenTopic = (v: string | null) => patchParams({ topic: v });
 
   const cur = useMemo(() => currentRange(preset, custom), [preset, custom]);
   const prev = useMemo(() => compareRange(cur, compareMode), [cur, compareMode]);
