@@ -1181,7 +1181,7 @@ export default function Reviews() {
                 : "Google Business hesabınız bağlı. Yorumlarınızı API üzerinden otomatik çekebilirsiniz."}
             </p>
             {googleFetchEmpty && (
-              <Link to="/google-hesaplari" className="inline-block text-sm font-medium text-primary underline">
+              <Link to="/google-accounts" className="inline-block text-sm font-medium text-primary underline">
                 Google bağlantısını kontrol et
               </Link>
             )}
