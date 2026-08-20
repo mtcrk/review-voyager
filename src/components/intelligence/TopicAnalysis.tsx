@@ -311,7 +311,12 @@ export function TopicAnalysis({
             count: c.count,
             index: sentimentToIndex100(c.sum / c.count),
           }))
-          .map((c) => ({ ...c, delta: own != null ? own - c.index : null }))
+          // Eşik rakip bazında da uygulanır: tek bir yorumdan "fark" iddiası çıkmaz.
+          .map((c) => ({
+            ...c,
+            delta: own != null && c.count >= MIN_COMP_MENTIONS ? own - c.index : null,
+            thin: c.count >= MIN_COMP_MENTIONS && c.count < THIN_COMP_MENTIONS,
+          }))
           .sort((a2, b2) => b2.index - a2.index);
         // Evidence: worst own quotes (what guests complain about) and the
         // competitors' best quotes (what they get praised for).
