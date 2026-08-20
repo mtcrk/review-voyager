@@ -520,6 +520,9 @@ export function TopicAnalysis({ businessId }: { businessId: string }) {
                 .join(" · ")}
             </span>
           </div>
+          <p className="text-[11px] text-muted-foreground mt-1">
+            Yalnızca rakip tarafında en az {MIN_COMP_MENTIONS} bahis bulunan konular listelenir.
+          </p>
         </div>
       )}
 
