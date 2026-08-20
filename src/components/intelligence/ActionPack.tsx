@@ -75,7 +75,7 @@ export function ActionPack({ businessId }: { businessId: string }) {
         const [crRes, trRes] = await Promise.all([
           supabase
             .from("ci_competitor_reviews")
-            .select("competitor_id,rating,posted_at,owner_reply_text,owner_reply_at" as any)
+            .select("competitor_id,platform,rating,posted_at,owner_reply_text,owner_reply_at" as any)
             .in("competitor_id", compIds)
             .limit(20000),
           supabase
