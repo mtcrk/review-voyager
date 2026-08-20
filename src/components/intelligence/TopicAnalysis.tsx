@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
+import { QuoteColumns } from "@/components/intelligence/QuoteColumns";
 import {
   Loader2,
   Sparkles,
@@ -712,51 +713,21 @@ export function TopicAnalysis({
                                   </div>
                                 )}
 
-                                {(r.ownQuotes.length > 0 || r.compQuotes.length > 0) && (
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {r.ownQuotes.length > 0 && (
-                                      <div className="space-y-1.5">
-                                        <div className="text-xs font-medium">
-                                          Sizin yorumlarınızdan
-                                        </div>
-                                        {r.ownQuotes.map((q, i) => (
-                                          <div
-                                            key={`own-${i}`}
-                                            className="rounded-md border bg-background px-2.5 py-2"
-                                          >
-                                            <p className="text-xs leading-relaxed">
-                                              “{q.excerpt.slice(0, 200)}”
-                                            </p>
-                                            <div className="text-[10px] text-muted-foreground mt-1 tabular-nums">
-                                              {sentimentToIndex100(q.sentiment).toFixed(0)}/100
-                                            </div>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    )}
-                                    {r.compQuotes.length > 0 && (
-                                      <div className="space-y-1.5">
-                                        <div className="text-xs font-medium">
-                                          Rakip yorumlarından
-                                        </div>
-                                        {r.compQuotes.map((q, i) => (
-                                          <div
-                                            key={`comp-${i}`}
-                                            className="rounded-md border bg-background px-2.5 py-2"
-                                          >
-                                            <p className="text-xs leading-relaxed">
-                                              “{q.excerpt.slice(0, 200)}”
-                                            </p>
-                                            <div className="text-[10px] text-muted-foreground mt-1 tabular-nums">
-                                              {q.competitor_id ? `${compNames[q.competitor_id] ?? "Rakip"} · ` : ""}
-                                              {sentimentToIndex100(q.sentiment).toFixed(0)}/100
-                                            </div>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
+                                <QuoteColumns
+                                  leftTitle="Sizin yorumlarınızdan"
+                                  rightTitle="Rakip yorumlarından"
+                                  left={r.ownQuotes.map((q) => ({
+                                    excerpt: q.excerpt,
+                                    sentiment: q.sentiment,
+                                  }))}
+                                  right={r.compQuotes.map((q) => ({
+                                    excerpt: q.excerpt,
+                                    sentiment: q.sentiment,
+                                    meta: q.competitor_id
+                                      ? (compNames[q.competitor_id] ?? "Rakip")
+                                      : null,
+                                  }))}
+                                />
                               </div>
                             </td>
                           </tr>

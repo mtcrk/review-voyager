@@ -1,24 +1,31 @@
-import { useMemo, useState } from "react";
+/**
+ * Dönemsel Analiz — departman gidişatı iki dönem arasında karşılaştırılır.
+ * Yalnızca KENDİ yorumlarımız (review_source = 'own'). Rakip kıyası
+ * /intelligence/karsilastirma sayfasının işi.
+ */
+import { Fragment, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
+import { format, startOfWeek, startOfMonth, startOfYear, subDays, subMonths, subYears, differenceInCalendarDays } from "date-fns";
+import { tr as trLocale } from "date-fns/locale";
 import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RTooltip,
-  Legend,
-} from "recharts";
-import { ArrowDownRight, ArrowRight, ArrowUpRight, ChevronRight, Info, MapPin } from "lucide-react";
+  ArrowDownRight,
+  ArrowRight,
+  ArrowUpRight,
+  Calendar as CalendarIcon,
+  ChevronDown,
+  ChevronRight,
+  Download,
+  Info,
+  MapPin,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -26,127 +33,361 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/contexts/BusinessContext";
-import { IntelligenceTabs } from "@/components/intelligence/IntelligenceTabs";
 import { useCiTopics } from "@/hooks/useReviewAnalysis";
+import { QuoteColumns, type EvidenceQuote } from "@/components/intelligence/QuoteColumns";
 import {
-  buildSeries,
-  useAnalysisCoverage,
-  useTopicExcerpts,
-  useTopicMonthly,
-  useTopicStats,
-  type PeriodStat,
-} from "@/hooks/useTopicAnalytics";
+  DEPARTMENTS,
+  DEPARTMENT_LABELS,
+  departmentOf,
+  sentimentToIndex100,
+  type DepartmentKey,
+} from "@/lib/topicDepartments";
+import { downloadCsv } from "@/lib/topicCsv";
 import { cn } from "@/lib/utils";
 
-const SERIES_COLORS = [
-  "hsl(var(--primary))",
-  "hsl(var(--success))",
-  "hsl(var(--warning))",
-  "hsl(var(--destructive))",
-  "hsl(var(--muted-foreground))",
-  "hsl(var(--accent-foreground))",
-];
+/** İki dönemden birinde bu sayının altındaki bahislerde değişim hesaplanmaz. */
+const MIN_MENTIONS = 5;
+/** 5-9 arası bahis: gösterilir ama "az veri" rozetiyle soluklaştırılır. */
+const THIN_MENTIONS = 10;
 
-function toneClass(score: number) {
-  if (score <= -0.15) return "text-destructive";
-  if (score >= 0.15) return "text-success";
-  return "text-muted-foreground";
+type PeriodPreset = "week" | "month" | "quarter" | "year" | "custom";
+type CompareMode = "prev" | "yoy";
+
+type TopicRow = {
+  topic_id: string;
+  sentiment: number;
+  excerpt: string | null;
+  review_posted_at: string;
+};
+
+type Range = { start: Date; end: Date };
+
+function fmtDay(d: Date) {
+  return format(d, "d MMM yyyy", { locale: trLocale });
 }
 
-function DeltaBadge({ stat }: { stat: PeriodStat }) {
-  const { t } = useTranslation();
-  if (stat.prevMentions === 0) {
-    return (
-      <Badge variant="outline" className="text-xs text-muted-foreground">
-        {t("topicAnalytics.noBaseline")}
-      </Badge>
-    );
+function fmtRange(r: Range) {
+  return `${format(r.start, "d MMM", { locale: trLocale })} – ${fmtDay(r.end)}`;
+}
+
+function currentRange(preset: PeriodPreset, custom: Range): Range {
+  const now = new Date();
+  if (preset === "week") return { start: startOfWeek(now, { weekStartsOn: 1 }), end: now };
+  if (preset === "month") return { start: startOfMonth(now), end: now };
+  if (preset === "quarter") return { start: subMonths(now, 3), end: now };
+  if (preset === "year") return { start: startOfYear(now), end: now };
+  return custom;
+}
+
+function compareRange(cur: Range, mode: CompareMode): Range {
+  if (mode === "yoy") {
+    return { start: subYears(cur.start, 1), end: subYears(cur.end, 1) };
   }
-  const d = stat.sentimentDelta;
-  const Icon = d > 0.05 ? ArrowUpRight : d < -0.05 ? ArrowDownRight : ArrowRight;
-  const cls = d > 0.05 ? "text-success" : d < -0.05 ? "text-destructive" : "text-muted-foreground";
+  const days = Math.max(1, differenceInCalendarDays(cur.end, cur.start) + 1);
+  const end = subDays(cur.start, 1);
+  return { start: subDays(end, days - 1), end };
+}
+
+function useOwnTopics(businessId: string | undefined, range: Range) {
+  const from = range.start.toISOString();
+  const to = range.end.toISOString();
+  return useQuery({
+    queryKey: ["period_own_topics", businessId, from, to],
+    enabled: !!businessId,
+    staleTime: 1000 * 60 * 5,
+    queryFn: async (): Promise<TopicRow[]> => {
+      const { data, error } = await supabase
+        .from("ci_review_topics")
+        .select("topic_id, sentiment, excerpt, review_posted_at")
+        .eq("business_id", businessId!)
+        .eq("review_source", "own")
+        .is("competitor_id", null)
+        .gte("review_posted_at", from)
+        .lte("review_posted_at", to)
+        .limit(8000);
+      if (error) throw error;
+      return (data ?? []).map((r: any) => ({
+        topic_id: r.topic_id,
+        sentiment: Number(r.sentiment),
+        excerpt: r.excerpt,
+        review_posted_at: r.review_posted_at,
+      }));
+    },
+  });
+}
+
+type Coverage = { total: number; analyzed: number };
+
+function useCoverage(businessId: string | undefined, range: Range) {
+  const from = range.start.toISOString();
+  const to = range.end.toISOString();
+  return useQuery({
+    queryKey: ["period_coverage", businessId, from, to],
+    enabled: !!businessId,
+    staleTime: 1000 * 60 * 5,
+    queryFn: async (): Promise<Coverage> => {
+      const { data, error } = await supabase
+        .from("reviews")
+        .select("analysis_status")
+        .eq("business_id", businessId!)
+        .gte("posted_at", from)
+        .lte("posted_at", to)
+        .limit(8000);
+      if (error) throw error;
+      const rows = data ?? [];
+      return {
+        total: rows.length,
+        analyzed: rows.filter((r: any) => r.analysis_status === "done").length,
+      };
+    },
+  });
+}
+
+type Agg = { sum: number; n: number };
+function aggregate(rows: TopicRow[], keyOf: (r: TopicRow) => string) {
+  const m = new Map<string, Agg>();
+  for (const r of rows) {
+    const k = keyOf(r);
+    const e = m.get(k) ?? { sum: 0, n: 0 };
+    e.sum += r.sentiment;
+    e.n++;
+    m.set(k, e);
+  }
+  return m;
+}
+
+type CompareRow = {
+  key: string;
+  label: string;
+  cur: number | null;
+  prev: number | null;
+  curN: number;
+  prevN: number;
+  /** null = yeterli veri yok */
+  delta: number | null;
+  thin: boolean;
+};
+
+function buildRows(
+  curAgg: Map<string, Agg>,
+  prevAgg: Map<string, Agg>,
+  keys: string[],
+  labelOf: (k: string) => string,
+): CompareRow[] {
+  const rows = keys.map((key) => {
+    const c = curAgg.get(key);
+    const p = prevAgg.get(key);
+    const curN = c?.n ?? 0;
+    const prevN = p?.n ?? 0;
+    const cur = c && c.n ? sentimentToIndex100(c.sum / c.n) : null;
+    const prev = p && p.n ? sentimentToIndex100(p.sum / p.n) : null;
+    const eligible = curN >= MIN_MENTIONS && prevN >= MIN_MENTIONS;
+    return {
+      key,
+      label: labelOf(key),
+      cur,
+      prev,
+      curN,
+      prevN,
+      delta: eligible && cur != null && prev != null ? cur - prev : null,
+      thin: eligible && (curN < THIN_MENTIONS || prevN < THIN_MENTIONS),
+    };
+  });
+  // Değişime göre: en çok gerileyen en üstte. Eşiği geçmeyenler en sonda.
+  return rows.sort((a, b) => {
+    if (a.delta == null && b.delta == null) return b.curN - a.curN;
+    if (a.delta == null) return 1;
+    if (b.delta == null) return -1;
+    return a.delta - b.delta;
+  });
+}
+
+function DeltaCell({ row }: { row: CompareRow }) {
+  if (row.delta == null) {
+    return <span className="text-xs text-muted-foreground">yeterli veri yok</span>;
+  }
+  const d = row.delta;
+  const Icon = d > 1 ? ArrowUpRight : d < -1 ? ArrowDownRight : ArrowRight;
+  const cls = d > 1 ? "text-success" : d < -1 ? "text-destructive" : "text-muted-foreground";
   return (
-    <span className={cn("inline-flex items-center gap-1 text-xs font-medium", cls)}>
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 text-sm font-semibold tabular-nums",
+        cls,
+        row.thin && "opacity-60",
+      )}
+    >
       <Icon className="h-3.5 w-3.5" />
       {d > 0 ? "+" : ""}
-      {d.toFixed(2)}
-      {stat.lowConfidence && (
-        <Badge variant="outline" className="ml-1 text-[10px] text-muted-foreground">
-          {t("topicAnalytics.lowConfidence")}
+      {d.toFixed(1)}
+      {row.thin && (
+        <Badge variant="outline" className="ml-1 h-4 px-1 text-[10px] text-muted-foreground">
+          az veri
         </Badge>
       )}
     </span>
   );
 }
 
+function scoreCell(v: number | null, n: number) {
+  return (
+    <span className={cn("tabular-nums", n === 0 && "text-muted-foreground")}>
+      {v == null ? "—" : v.toFixed(1)}
+    </span>
+  );
+}
+
+function DatePick({ date, onChange }: { date: Date; onChange: (d: Date) => void }) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" className="h-9 justify-start text-xs font-normal">
+          <CalendarIcon className="mr-1.5 h-3 w-3" />
+          {fmtDay(date)}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <Calendar
+          mode="single"
+          selected={date}
+          onSelect={(d) => d && onChange(d)}
+          className="p-3 pointer-events-auto"
+        />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 export default function TopicAnalytics() {
-  const { t, i18n } = useTranslation();
   const { activeBusiness, businesses, setActiveBusiness } = useBusiness();
   const businessId = activeBusiness?.id;
-  const [months, setMonths] = useState(12);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
-  const [plotted, setPlotted] = useState<string[]>([]);
-
-  const { data: rows, isLoading } = useTopicMonthly(businessId, months);
-  const { data: coverage } = useAnalysisCoverage(businessId);
   const { labelOf } = useCiTopics();
-  const stats = useTopicStats(rows, months);
-  const { data: excerpts, isLoading: excerptsLoading } = useTopicExcerpts(
-    businessId,
-    selectedTopic ?? undefined,
-  );
 
-  const categoryLabel = (c: string) =>
-    t(`topicAnalytics.categories.${c}`, { defaultValue: c });
+  const [preset, setPreset] = useState<PeriodPreset>("month");
+  const [compareMode, setCompareMode] = useState<CompareMode>("prev");
+  const [custom, setCustom] = useState<Range>({ start: subDays(new Date(), 30), end: new Date() });
+  const [openDept, setOpenDept] = useState<DepartmentKey | null>(null);
 
-  const activeSeriesKeys = useMemo(() => {
-    if (plotted.length > 0) return plotted;
-    return stats.categoryStats.slice(0, 4).map((c) => c.key);
-  }, [plotted, stats.categoryStats]);
+  const cur = useMemo(() => currentRange(preset, custom), [preset, custom]);
+  const prev = useMemo(() => compareRange(cur, compareMode), [cur, compareMode]);
 
-  const chartData = useMemo(
-    () => buildSeries(rows, stats.axis, "category", activeSeriesKeys),
-    [rows, stats.axis, activeSeriesKeys],
-  );
+  const curQ = useOwnTopics(businessId, cur);
+  const prevQ = useOwnTopics(businessId, prev);
+  const curCov = useCoverage(businessId, cur);
+  const prevCov = useCoverage(businessId, prev);
 
-  const topicsOfCategory = useMemo(
-    () =>
-      selectedCategory
-        ? stats.topicStats.filter((s) => s.category === selectedCategory && s.mentions > 0)
-        : [],
-    [stats.topicStats, selectedCategory],
-  );
+  const curRows = curQ.data ?? [];
+  const prevRows = prevQ.data ?? [];
+  const loading = curQ.isLoading || prevQ.isLoading;
 
-  // Coverage is measured against the analysed window (last 6 months), not the
-  // whole history — older reviews are intentionally 'deferred', not missing.
-  const coveragePct = coverage && coverage.window_total_reviews
-    ? Math.round((coverage.window_analyzed_reviews / coverage.window_total_reviews) * 100)
-    : null;
+  const deptRows = useMemo(() => {
+    const c = aggregate(curRows, (r) => departmentOf(r.topic_id));
+    const p = aggregate(prevRows, (r) => departmentOf(r.topic_id));
+    return buildRows(c, p, [...DEPARTMENTS], (k) => DEPARTMENT_LABELS[k as DepartmentKey]);
+  }, [curRows, prevRows]);
 
-  const monthFmt = (m: string) =>
-    new Date(m).toLocaleDateString(i18n.language, { month: "short", year: "2-digit" });
+  const summary = useMemo(() => {
+    const eligible = deptRows.filter((r) => r.delta != null);
+    const decliners = eligible.filter((r) => (r.delta as number) < -1).slice(0, 2);
+    const improvers = [...eligible]
+      .filter((r) => (r.delta as number) > 1)
+      .sort((a, b) => (b.delta as number) - (a.delta as number))
+      .slice(0, 2);
+    const parts = [
+      ...decliners.map((r) => `${r.label} ${Math.abs(r.delta as number).toFixed(0)} puan geriledi`),
+      ...improvers.map((r) => `${r.label} ${(r.delta as number).toFixed(0)} puan iyileşti`),
+    ];
+    return parts.join(" · ");
+  }, [deptRows]);
 
-  const toggleSeries = (key: string) =>
-    setPlotted((prev) => {
-      const base = prev.length ? prev : stats.categoryStats.slice(0, 4).map((c) => c.key);
-      return base.includes(key) ? base.filter((k) => k !== key) : [...base, key];
+  const topicRowsOfDept = useMemo(() => {
+    if (!openDept) return [];
+    const inDept = (r: TopicRow) => departmentOf(r.topic_id) === openDept;
+    const c = aggregate(curRows.filter(inDept), (r) => r.topic_id);
+    const p = aggregate(prevRows.filter(inDept), (r) => r.topic_id);
+    const keys = Array.from(new Set([...c.keys(), ...p.keys()]));
+    return buildRows(c, p, keys, labelOf);
+  }, [openDept, curRows, prevRows, labelOf]);
+
+  const quotes = useMemo(() => {
+    if (!openDept) return { left: [] as EvidenceQuote[], right: [] as EvidenceQuote[] };
+    const row = deptRows.find((r) => r.key === openDept);
+    const declining = (row?.delta ?? 0) <= 0;
+    const inDept = (r: TopicRow) =>
+      departmentOf(r.topic_id) === openDept && (r.excerpt ?? "").trim().length > 0;
+    const toQuote = (r: TopicRow): EvidenceQuote => ({
+      excerpt: (r.excerpt as string).trim(),
+      sentiment: r.sentiment,
+      meta: format(new Date(r.review_posted_at), "d MMM yyyy", { locale: trLocale }),
     });
+    // Gerileyen departmanda: kıyas döneminden en olumlu, bu dönemden en olumsuz.
+    // İyileşende tersi.
+    const left = prevRows
+      .filter(inDept)
+      .sort((a, b) => (declining ? b.sentiment - a.sentiment : a.sentiment - b.sentiment))
+      .slice(0, 5)
+      .map(toQuote);
+    const right = curRows
+      .filter(inDept)
+      .sort((a, b) => (declining ? a.sentiment - b.sentiment : b.sentiment - a.sentiment))
+      .slice(0, 5)
+      .map(toQuote);
+    return { left, right };
+  }, [openDept, curRows, prevRows, deptRows]);
+
+  const prevCovPct =
+    prevCov.data && prevCov.data.total > 0
+      ? Math.round((prevCov.data.analyzed / prevCov.data.total) * 100)
+      : null;
+
+  const noData = !loading && curRows.length === 0 && prevRows.length === 0;
+  const emptyPeriod = !loading && (curRows.length === 0 || prevRows.length === 0);
+
+  function exportCsv() {
+    const cell = (v: string | number) => {
+      const s = String(v).replace(/"/g, '""');
+      return /[;\n"]/.test(s) ? `"${s}"` : s;
+    };
+    const num = (v: number | null) => (v == null ? "veri yok" : v.toFixed(1).replace(".", ","));
+    const lines = [
+      `Dönem;${fmtRange(cur)}`,
+      `Kıyas dönem;${fmtRange(prev)}`,
+      "",
+      "Departman;Bu dönem (0-100);Kıyas dönem (0-100);Değişim;Bu dönem bahis;Kıyas bahis",
+      ...deptRows.map((r) =>
+        [
+          cell(r.label),
+          num(r.cur),
+          num(r.prev),
+          r.delta == null ? "yeterli veri yok" : num(r.delta),
+          r.curN,
+          r.prevN,
+        ].join(";"),
+      ),
+    ];
+    downloadCsv(`donemsel-analiz-${format(cur.start, "yyyyMMdd")}-${format(cur.end, "yyyyMMdd")}.csv`, lines.join("\r\n"));
+  }
 
   return (
     <div className="space-y-6">
       <Helmet>
-        <title>{t("topicAnalytics.metaTitle")}</title>
-        <meta name="description" content={t("topicAnalytics.metaDescription")} />
+        <title>Dönemsel Analiz | VoyageRespond</title>
+        <meta
+          name="description"
+          content="Departmanların bir önceki döneme göre gidişatını, konu kırılımını ve misafir alıntılarını karşılaştırın."
+        />
       </Helmet>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">{t("topicAnalytics.title")}</h1>
-          <p className="text-sm text-muted-foreground">{t("topicAnalytics.subtitle")}</p>
+          <h1 className="text-2xl font-semibold">Dönemsel Analiz</h1>
+          <p className="text-sm text-muted-foreground">
+            {fmtRange(cur)} · kıyas: {fmtRange(prev)}
+          </p>
           <div className="mt-3 flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+            <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" />
             {businesses.length > 1 ? (
               <Select
                 value={activeBusiness?.id}
@@ -155,7 +396,7 @@ export default function TopicAnalytics() {
                   if (b) setActiveBusiness(b);
                 }}
               >
-                <SelectTrigger className="w-full sm:w-[280px] h-9">
+                <SelectTrigger className="h-9 w-full sm:w-[280px]">
                   <SelectValue placeholder="Lokasyon seçin" />
                 </SelectTrigger>
                 <SelectContent>
@@ -171,284 +412,196 @@ export default function TopicAnalytics() {
             )}
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            Bu sayfadaki tüm veriler yalnızca seçili lokasyona aittir.
+            Bu sayfa yalnızca kendi yorumlarınızı gösterir. Rakip kıyası için Karşılaştırma sayfasını kullanın.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <IntelligenceTabs />
-          <Select value={String(months)} onValueChange={(v) => setMonths(Number(v))}>
-            <SelectTrigger className="w-[130px]">
+
+        <div className="flex flex-wrap items-center gap-2">
+          <Select value={preset} onValueChange={(v) => setPreset(v as PeriodPreset)}>
+            <SelectTrigger className="h-9 w-[150px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="6">{t("topicAnalytics.window", { count: 6 })}</SelectItem>
-              <SelectItem value="12">{t("topicAnalytics.window", { count: 12 })}</SelectItem>
-              <SelectItem value="24">{t("topicAnalytics.window", { count: 24 })}</SelectItem>
+              <SelectItem value="week">Bu hafta</SelectItem>
+              <SelectItem value="month">Bu ay</SelectItem>
+              <SelectItem value="quarter">Son 3 ay</SelectItem>
+              <SelectItem value="year">Bu yıl</SelectItem>
+              <SelectItem value="custom">Özel aralık</SelectItem>
             </SelectContent>
           </Select>
+          <Select value={compareMode} onValueChange={(v) => setCompareMode(v as CompareMode)}>
+            <SelectTrigger className="h-9 w-[210px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="prev">Önceki eşdeğer dönem</SelectItem>
+              <SelectItem value="yoy">Geçen yılın aynı dönemi</SelectItem>
+            </SelectContent>
+          </Select>
+          {preset === "custom" && (
+            <div className="flex items-center gap-1">
+              <DatePick date={custom.start} onChange={(d) => setCustom((p) => ({ ...p, start: d }))} />
+              <span className="text-xs text-muted-foreground">–</span>
+              <DatePick date={custom.end} onChange={(d) => setCustom((p) => ({ ...p, end: d }))} />
+            </div>
+          )}
+          <Button variant="outline" size="sm" className="h-9" onClick={exportCsv} disabled={loading || noData}>
+            <Download className="mr-1.5 h-3.5 w-3.5" />
+            CSV
+          </Button>
         </div>
       </div>
 
-      {/* Coverage note */}
-      {coverage && coveragePct !== null && coveragePct < 100 && (
+      {/* Kapsam dürüstlüğü */}
+      {!loading && curCov.data && prevCov.data && (
+        <p className="text-xs text-muted-foreground">
+          Bu dönem: {curCov.data.total} yorumun {curCov.data.analyzed}'i analiz edildi · Kıyas dönem:{" "}
+          {prevCov.data.total} yorumun {prevCov.data.analyzed}'i analiz edildi
+          {prevCovPct !== null ? ` (%${prevCovPct})` : ""}
+        </p>
+      )}
+
+      {!loading && prevCovPct !== null && prevCovPct < 50 && (
         <Alert>
           <Info className="h-4 w-4" />
-          <AlertDescription className="space-y-2">
-            <span>
-              {t("topicAnalytics.coverage", {
-                pct: coveragePct,
-                analyzed: coverage.window_analyzed_reviews,
-                total: coverage.window_total_reviews,
-                months: coverage.window_months,
-              })}
-            </span>
-            <Progress value={coveragePct} className="h-1.5" />
-            {coverage.deferred_reviews > 0 && (
-              <span className="block text-xs text-muted-foreground">
-                {t("topicAnalytics.deferredNote", { count: coverage.deferred_reviews })}
-              </span>
-            )}
+          <AlertDescription>
+            Kıyas dönemindeki yorumların çoğu analiz edilmemiş; değişim değerleri eksik veriye dayanıyor.
+            Toplu konu analizi yalnızca son 6 ayı kapsar.
           </AlertDescription>
         </Alert>
       )}
 
-      {isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <Skeleton key={i} className="h-28 rounded-xl" />
-          ))}
-        </div>
-      ) : stats.categoryStats.length === 0 ? (
+      {loading ? (
+        <Skeleton className="h-80 w-full rounded-xl" />
+      ) : noData || emptyPeriod ? (
         <Card>
-          <CardContent className="py-12 text-center text-sm text-muted-foreground">
-            {t("topicAnalytics.empty")}
+          <CardContent className="space-y-2 py-12 text-center">
+            <p className="text-sm text-muted-foreground">
+              {noData
+                ? "Seçilen iki dönemde analiz edilmiş yorum yok."
+                : curRows.length === 0
+                  ? "Bu dönemde analiz edilmiş yorum yok."
+                  : "Kıyas döneminde analiz edilmiş yorum yok; karşılaştırma yapılamıyor."}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Konu analizi yalnızca son 6 ayı kapsar — daha eski dönemlerde konu verisi bulunmaz.
+              Daha yakın bir dönem veya "Önceki eşdeğer dönem" kıyasını deneyin.
+            </p>
           </CardContent>
         </Card>
       ) : (
-        <>
-          {/* Category rollup */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {stats.categoryStats.map((c) => (
-              <button
-                key={c.key}
-                type="button"
-                onClick={() => {
-                  setSelectedCategory(c.key);
-                  setSelectedTopic(null);
-                }}
-                className={cn(
-                  "text-left rounded-xl border bg-card p-4 transition-colors hover:bg-muted/40",
-                  selectedCategory === c.key && "border-primary/40 bg-primary/5",
-                )}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{categoryLabel(c.key)}</span>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <div className={cn("mt-2 text-2xl font-semibold", toneClass(c.avgSentiment))}>
-                  {c.avgSentiment.toFixed(2)}
-                </div>
-                <div className="mt-1 flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">
-                    {t("topicAnalytics.mentions", { count: c.mentions })}
-                  </span>
-                  <DeltaBadge stat={c} />
-                </div>
-              </button>
-            ))}
-          </div>
+        <Card>
+          <CardHeader className="space-y-2">
+            <CardTitle className="text-base">Departman gidişatı — değişime göre sıralı</CardTitle>
+            {summary ? (
+              <p className="text-sm text-muted-foreground">{summary}</p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Eşiği geçen ({MIN_MENTIONS} bahis) departmanlarda anlamlı bir değişim yok.
+              </p>
+            )}
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b bg-muted/40 text-xs text-muted-foreground">
+                    <th className="px-4 py-2 text-left font-medium">Departman</th>
+                    <th className="px-3 py-2 text-right font-medium">Bu dönem</th>
+                    <th className="px-3 py-2 text-right font-medium">Kıyas dönem</th>
+                    <th className="px-3 py-2 text-right font-medium">Değişim</th>
+                    <th className="px-3 py-2 text-right font-medium">Bu dönem bahis</th>
+                    <th className="px-4 py-2 text-right font-medium">Kıyas bahis</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {deptRows.map((r) => {
+                    const open = openDept === r.key;
+                    return (
+                      <Fragment key={r.key}>
+                        <tr
+                          className="cursor-pointer border-b transition-colors hover:bg-muted/30"
+                          onClick={() => setOpenDept(open ? null : (r.key as DepartmentKey))}
+                        >
+                          <td className="px-4 py-2.5 font-medium">
+                            <span className="inline-flex items-center gap-1.5">
+                              {open ? (
+                                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                              ) : (
+                                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                              )}
+                              {r.label}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2.5 text-right">{scoreCell(r.cur, r.curN)}</td>
+                          <td className="px-3 py-2.5 text-right">{scoreCell(r.prev, r.prevN)}</td>
+                          <td className="px-3 py-2.5 text-right">
+                            <DeltaCell row={r} />
+                          </td>
+                          <td className="px-3 py-2.5 text-right tabular-nums text-muted-foreground">
+                            {r.curN}
+                          </td>
+                          <td className="px-4 py-2.5 text-right tabular-nums text-muted-foreground">
+                            {r.prevN}
+                          </td>
+                        </tr>
+                        {open && (
+                          <tr className="border-b bg-muted/20">
+                            <td colSpan={6} className="px-4 py-4">
+                              <div className="space-y-4">
+                                <div>
+                                  <div className="mb-1.5 text-xs font-medium">
+                                    {r.label} — konu kırılımı
+                                  </div>
+                                  {topicRowsOfDept.length === 0 ? (
+                                    <p className="text-xs text-muted-foreground">
+                                      Bu departmanda iki dönemde de konu bahsi yok.
+                                    </p>
+                                  ) : (
+                                    topicRowsOfDept.map((tr2) => (
+                                      <div
+                                        key={tr2.key}
+                                        className="flex items-center justify-between gap-3 border-b border-border/50 py-1 text-xs last:border-0"
+                                      >
+                                        <span className="truncate font-medium">{tr2.label}</span>
+                                        <span className="flex shrink-0 items-center gap-3 tabular-nums">
+                                          <span className="text-muted-foreground">
+                                            {tr2.curN} / {tr2.prevN} bahis
+                                          </span>
+                                          <span>{tr2.cur == null ? "—" : tr2.cur.toFixed(1)}</span>
+                                          <span className="text-muted-foreground">
+                                            {tr2.prev == null ? "—" : tr2.prev.toFixed(1)}
+                                          </span>
+                                          <DeltaCell row={tr2} />
+                                        </span>
+                                      </div>
+                                    ))
+                                  )}
+                                </div>
 
-          {/* Trend chart */}
-          <Card>
-            <CardHeader className="space-y-3">
-              <CardTitle className="text-base">
-                {t("topicAnalytics.trendTitle", { count: months })}
-              </CardTitle>
-              <div className="flex flex-wrap gap-2">
-                {stats.categoryStats.map((c) => {
-                  const active = activeSeriesKeys.includes(c.key);
-                  return (
-                    <button
-                      key={c.key}
-                      type="button"
-                      onClick={() => toggleSeries(c.key)}
-                      className={cn(
-                        "rounded-full border px-3 py-1 text-xs transition-colors",
-                        active
-                          ? "border-primary/30 bg-primary/10 text-primary"
-                          : "text-muted-foreground hover:bg-muted",
-                      )}
-                    >
-                      {categoryLabel(c.key)}
-                    </button>
-                  );
-                })}
-              </div>
-            </CardHeader>
-            <CardContent className="h-[320px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis
-                    dataKey="month"
-                    tickFormatter={monthFmt}
-                    stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
-                  />
-                  <YAxis
-                    domain={[-1, 1]}
-                    stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
-                  />
-                  <RTooltip
-                    labelFormatter={(v) => monthFmt(String(v))}
-                    formatter={(value: any, name: any) => [value, categoryLabel(String(name))]}
-                    contentStyle={{
-                      background: "hsl(var(--popover))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: 8,
-                      color: "hsl(var(--popover-foreground))",
-                    }}
-                  />
-                  <Legend formatter={(v) => categoryLabel(String(v))} />
-                  {activeSeriesKeys.map((k, i) => (
-                    <Line
-                      key={k}
-                      type="monotone"
-                      dataKey={k}
-                      stroke={SERIES_COLORS[i % SERIES_COLORS.length]}
-                      strokeWidth={2}
-                      dot={false}
-                      connectNulls
-                    />
-                  ))}
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Drill-down */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">
-                  {selectedCategory
-                    ? t("topicAnalytics.topicsIn", { category: categoryLabel(selectedCategory) })
-                    : t("topicAnalytics.pickCategory")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {!selectedCategory && (
-                  <p className="text-sm text-muted-foreground">
-                    {t("topicAnalytics.pickCategoryHint")}
-                  </p>
-                )}
-                {topicsOfCategory.map((s) => (
-                  <button
-                    key={s.key}
-                    type="button"
-                    onClick={() => setSelectedTopic(s.key)}
-                    className={cn(
-                      "flex w-full items-center justify-between rounded-lg border p-3 text-left transition-colors hover:bg-muted/40",
-                      selectedTopic === s.key && "border-primary/40 bg-primary/5",
-                    )}
-                  >
-                    <div className="min-w-0">
-                      <div className="truncate text-sm font-medium">{labelOf(s.key)}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {t("topicAnalytics.mentions", { count: s.mentions })} ·{" "}
-                        {t("topicAnalytics.negativeShare", {
-                          pct: Math.round(s.negativeShare * 100),
-                        })}
-                      </div>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-2">
-                      <span className={cn("text-sm font-semibold", toneClass(s.avgSentiment))}>
-                        {s.avgSentiment.toFixed(2)}
-                      </span>
-                      <DeltaBadge stat={s} />
-                    </div>
-                  </button>
-                ))}
-
-                {selectedTopic && (
-                  <div className="mt-4 space-y-2 border-t pt-4">
-                    <h4 className="text-sm font-semibold">
-                      {t("topicAnalytics.examples", { topic: labelOf(selectedTopic) })}
-                    </h4>
-                    {excerptsLoading && <Skeleton className="h-16 rounded-lg" />}
-                    {!excerptsLoading && (excerpts ?? []).length === 0 && (
-                      <p className="text-sm text-muted-foreground">
-                        {t("topicAnalytics.noExamples")}
-                      </p>
-                    )}
-                    {(excerpts ?? []).map((e: any, i: number) => (
-                      <div key={i} className="rounded-lg border bg-muted/30 p-3">
-                        <p className="text-sm italic">"{e.excerpt}"</p>
-                        <div className="mt-2 flex items-center justify-between text-xs">
-                          <span className={toneClass(Number(e.sentiment))}>
-                            {Number(e.sentiment).toFixed(2)}
-                          </span>
-                          <Button asChild variant="link" size="sm" className="h-auto p-0 text-xs">
-                            <Link to={`/reviews/${e.review_id}`}>
-                              {t("topicAnalytics.openReview")}
-                            </Link>
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Priority panel */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">{t("topicAnalytics.priorityTitle")}</CardTitle>
-                <p className="text-xs text-muted-foreground">
-                  {t("topicAnalytics.priorityFormula")}
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {stats.priority.slice(0, 8).map((p) => (
-                  <div key={p.key} className="rounded-lg border p-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="min-w-0">
-                        <span className="text-sm font-medium">{labelOf(p.key)}</span>
-                        {p.isDecisionDriver && (
-                          <Badge variant="outline" className="ml-2 text-[10px]">
-                            {t("topicAnalytics.driver")}
-                          </Badge>
+                                <QuoteColumns
+                                  leftTitle="Kıyas dönemde ne yazmışlar"
+                                  rightTitle="Bu dönemde ne yazıyorlar"
+                                  left={quotes.left}
+                                  right={quotes.right}
+                                />
+                              </div>
+                            </td>
+                          </tr>
                         )}
-                        {p.lowConfidence && (
-                          <Badge variant="outline" className="ml-2 text-[10px] text-muted-foreground">
-                            {t("topicAnalytics.lowConfidence")}
-                          </Badge>
-                        )}
-                      </div>
-                      <span className="shrink-0 text-sm font-semibold">
-                        {(p.score * 100).toFixed(0)}
-                      </span>
-                    </div>
-                    <div className="mt-2 grid grid-cols-3 gap-2 text-xs text-muted-foreground">
-                      <span>
-                        {t("topicAnalytics.volume")}: {(p.volume * 100).toFixed(0)}%
-                      </span>
-                      <span>
-                        {t("topicAnalytics.negativity")}: {(p.negativity * 100).toFixed(0)}%
-                      </span>
-                      <span>
-                        {t("topicAnalytics.driverWeight")}: {p.driver ? "1.0" : "0.0"}
-                      </span>
-                    </div>
-                    <Progress value={p.score * 100} className="mt-2 h-1.5" />
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
-        </>
+                      </Fragment>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <p className="border-t px-4 py-3 text-[11px] text-muted-foreground">
+              Skorlar 0-100 ölçeğindedir. İki dönemden birinde {MIN_MENTIONS} bahisin altındaki
+              departmanlarda değişim hesaplanmaz ve sıralamaya girmez; {MIN_MENTIONS}-{THIN_MENTIONS - 1}
+              {" "}bahis "az veri" olarak işaretlenir.
+            </p>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
