@@ -245,7 +245,8 @@ Deno.serve(async (req) => {
       }
     }
 
-    const { business_id, platform = "all", run_id, force = false } = await req.json();
+    const { business_id, platform = "all", run_id, force = false, max_reviews } = await req.json();
+    const maxReviews = Math.min(500, Math.max(20, Number(max_reviews) || 20));
 
     if (!business_id) {
       return new Response(
@@ -390,11 +391,11 @@ Deno.serve(async (req) => {
       }
 
       const cappedItems = platform === "booking"
-        ? items.slice(0, 1000)
-        : (platform === "hotelscom" || platform === "expedia" || platform === "tripcom" || platform === "yandex")
-          ? items.slice(0, 200)
+        ? items.slice(0, Math.max(1000, maxReviews))
+        : (platform === "hotelscom" || platform === "expedia" || platform === "tripcom" || platform === "yandex" || platform === "google")
+          ? items.slice(0, Math.max(200, maxReviews))
           : items;
-      const forcedPlatform = (platform === "hotelscom" || platform === "expedia" || platform === "trustpilot" || platform === "tripcom" || platform === "booking" || platform === "yandex") ? platform : undefined;
+      const forcedPlatform = (platform === "hotelscom" || platform === "expedia" || platform === "trustpilot" || platform === "tripcom" || platform === "booking" || platform === "yandex" || platform === "google") ? platform : undefined;
       const result = await insertReviews(supabase, cappedItems, business_id, forcedPlatform);
 
       await logSuccess(supabase, business_id, platform, items.length, result.inserted, result.updated, result.skipped);
