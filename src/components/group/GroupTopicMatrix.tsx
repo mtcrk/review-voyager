@@ -350,6 +350,7 @@ function QuotesSheet({
   const total = quotes[0]?.total_count ? Number(quotes[0].total_count) : 0;
   const positives = quotes.filter((q) => Number(q.sentiment) > 0.15);
   const negatives = quotes.filter((q) => Number(q.sentiment) < -0.15);
+  const neutrals = quotes.filter((q) => Number(q.sentiment) >= -0.15 && Number(q.sentiment) <= 0.15);
 
   return (
     <Sheet
@@ -378,10 +379,20 @@ function QuotesSheet({
           <div className="mt-4 space-y-6">
             <p className="text-xs text-muted-foreground">
               {total} bahis · {page * PAGE_SIZE + 1}-{page * PAGE_SIZE + quotes.length} arası gösteriliyor
+              {" · "}
+              {positives.length} olumlu, {negatives.length} olumsuz, {neutrals.length} nötr
             </p>
 
             <QuoteGroup title="Olumlu" quotes={positives} topicId={selection!.topicId} topicLabel={topicLabel} />
             <QuoteGroup title="Olumsuz" quotes={negatives} topicId={selection!.topicId} topicLabel={topicLabel} />
+            <QuoteGroup
+              title="Nötr"
+              quotes={neutrals}
+              topicId={selection!.topicId}
+              topicLabel={topicLabel}
+              collapsible
+            />
+
 
             <div className="flex items-center justify-between border-t pt-3">
               <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
