@@ -1,13 +1,24 @@
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, LifeBuoy, RefreshCw, Undo2, ShieldAlert, Sparkles, Loader2 } from "lucide-react";
+import {
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
+  LifeBuoy,
+  RefreshCw,
+  Undo2,
+  ShieldAlert,
+  Sparkles,
+  Loader2,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { countMatches } from "@/lib/textMatch";
 import { HighlightedReviewText } from "@/components/reviews/HighlightedReviewText";
 import {
   useCiTopics,
@@ -283,8 +294,17 @@ export function ReviewAnalysisPanel({
             highlights={highlights}
             topicLabels={labels}
             focusTopicId={focusTopicId}
+            activeTerms={activeTerms}
+            activeMatchIndex={matchIndex}
+            activeTone={activeTone}
+            sentencesOnly={sentencesOnly}
           />
-          {highlights.length > 0 && (
+          {active && sentencesOnly && (
+            <p className="text-xs text-muted-foreground">
+              Yalnızca eşleşen cümleler gösteriliyor. Tümünü görmek için geçişi kapat.
+            </p>
+          )}
+          {highlights.length > 0 && !active && (
             <p className="text-xs text-muted-foreground">{t("analysis.highlightsHint")}</p>
           )}
         </div>
@@ -359,21 +379,39 @@ export function ReviewAnalysisPanel({
         {chips.length > 0 && (
           <div>
             <h4 className="text-sm font-semibold mb-2">{t("analysis.topics")}</h4>
-            <div className="flex flex-wrap gap-2">
-              {chips.map((c) => (
-                <Badge
-                  key={`${c.topic_id}`}
-                  variant="outline"
-                  className={cn(
-                    "font-medium",
-                    toneChip(sentimentTone(Number(c.sentiment ?? 0))),
-                    c.topic_id === focusTopicId &&
-                      "font-bold border-primary ring-2 ring-primary ring-offset-1",
-                  )}
-                >
-                  {labelOf(c.topic_id)}
-                </Badge>
-              ))}
+            <div className="flex flex-wrap items-center gap-2">
+              {chips.map((c) => {
+                const count = topicMatchCounts[c.topic_id] ?? 0;
+                const isActive = active?.kind === "topic" && active.key === c.topic_id;
+                return (
+                  <Fragment key={c.topic_id}>
+                    <Badge
+                      asChild
+                      variant="outline"
+                      className={cn(
+                        "font-medium",
+                        toneChip(sentimentTone(Number(c.sentiment ?? 0))),
+                        count === 0 && "opacity-50",
+                        isActive && "border-primary ring-2 ring-primary ring-offset-1 font-bold",
+                        !isActive &&
+                          c.topic_id === focusTopicId &&
+                          "font-bold border-primary ring-2 ring-primary ring-offset-1",
+                      )}
+                    >
+                      <button
+                        type="button"
+                        disabled={count === 0}
+                        onClick={() => toggleActive("topic", c.topic_id)}
+                        className={count === 0 ? "cursor-default" : "cursor-pointer"}
+                        title={count === 0 ? "Bu konu metinde bulunamadı" : "Metinde göster"}
+                      >
+                        {labelOf(c.topic_id)}
+                      </button>
+                    </Badge>
+                    {isActive && navControls}
+                  </Fragment>
+                );
+              })}
             </div>
           </div>
         )}
@@ -382,24 +420,36 @@ export function ReviewAnalysisPanel({
         {keywords.length > 0 && (
           <div>
             <h4 className="text-sm font-semibold mb-2">{t("analysis.keywords")}</h4>
-            <div className="flex flex-wrap gap-1.5">
-              {keywords.map((k, i) => (
-                <span
-                  key={`${k.term}-${i}`}
-                  className={cn(
-                    "text-xs rounded-full border px-2 py-0.5",
-                    toneChip(
-                      k.polarity === "positive"
-                        ? "positive"
-                        : k.polarity === "negative"
-                          ? "negative"
-                          : "neutral",
-                    ),
-                  )}
-                >
-                  {k.term}
-                </span>
-              ))}
+            <div className="flex flex-wrap items-center gap-1.5">
+              {keywords.map((k, i) => {
+                const count = keywordMatchCounts[k.term] ?? 0;
+                const isActive = active?.kind === "keyword" && active.key === k.term;
+                return (
+                  <Fragment key={`${k.term}-${i}`}>
+                    <button
+                      type="button"
+                      disabled={count === 0}
+                      onClick={() => toggleActive("keyword", k.term)}
+                      title={count === 0 ? "Bu kelime metinde bulunamadı" : "Metinde göster"}
+                      className={cn(
+                        "text-xs rounded-full border px-2 py-0.5",
+                        toneChip(
+                          k.polarity === "positive"
+                            ? "positive"
+                            : k.polarity === "negative"
+                              ? "negative"
+                              : "neutral",
+                        ),
+                        count === 0 ? "opacity-50 cursor-default" : "cursor-pointer",
+                        isActive && "border-primary ring-2 ring-primary ring-offset-1 font-semibold",
+                      )}
+                    >
+                      {k.term}
+                    </button>
+                    {isActive && navControls}
+                  </Fragment>
+                );
+              })}
             </div>
           </div>
         )}
