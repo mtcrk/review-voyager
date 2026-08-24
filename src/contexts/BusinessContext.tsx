@@ -32,8 +32,17 @@ export const useBusiness = () => {
 export function BusinessProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const [businesses, setBusinesses] = useState<Business[]>([]);
-  const [activeBusiness, setActiveBusiness] = useState<Business | null>(null);
+  const [activeBusiness, setActiveBusinessState] = useState<Business | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Seçim oturum boyunca korunur (sessionStorage).
+  const setActiveBusiness = (business: Business) => {
+    setActiveBusinessState(business);
+    try {
+      sessionStorage.setItem('vr_active_business_id', business.id);
+    } catch {}
+  };
+
 
   const fetchBusinesses = async () => {
     if (!user) {
