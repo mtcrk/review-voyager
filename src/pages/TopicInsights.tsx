@@ -584,26 +584,32 @@ export default function TopicInsights() {
                               <TrendCell trend={d.trend} />
                             </td>
                           </tr>
-                          {isOpen && deptTopics.visible.length > 0 && (
+                          {isOpen && (
                             <tr className="border-b bg-muted/20">
                               <td colSpan={5} className="px-4 py-3">
-                                <div className="flex flex-wrap gap-1.5">
-                                  {deptTopics.visible.map((t) => (
-                                    <Button
-                                      key={t.key}
-                                      size="sm"
-                                      variant={topicId === t.key ? "default" : "outline"}
-                                      className="h-7 text-xs"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setTopicId(topicId === t.key ? null : t.key);
-                                      }}
-                                    >
-                                      {t.label} · {t.score.toFixed(0)} · {t.mentions} bahis
-                                    </Button>
-                                  ))}
-
-                                </div>
+                                {deptTopics.visible.length > 0 ? (
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {deptTopics.visible.map((t) => (
+                                      <Button
+                                        key={t.key}
+                                        size="sm"
+                                        variant={topicId === t.key ? "default" : "outline"}
+                                        className="h-7 text-xs"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setTopicId(topicId === t.key ? null : t.key);
+                                        }}
+                                      >
+                                        {t.label} · {t.score.toFixed(0)} · {t.mentions} bahis
+                                      </Button>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <p className="text-xs text-muted-foreground">
+                                    Bu departmanda en az {MIN_MENTIONS} bahis alan konu yok — kırılım
+                                    gösterilemiyor.
+                                  </p>
+                                )}
                                 {deptTopics.hidden > 0 && (
                                   <p className="mt-2 text-xs text-muted-foreground">
                                     {deptTopics.hidden} konu az bahis nedeniyle gizlendi.
@@ -612,6 +618,7 @@ export default function TopicInsights() {
                               </td>
                             </tr>
                           )}
+
                         </Fragment>
                       );
                     })}
