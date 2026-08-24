@@ -5,7 +5,9 @@ import { subDays } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PerformanceDateFilter } from "@/components/performance/PerformanceDateFilter";
+import { GroupTopicMatrix } from "@/components/group/GroupTopicMatrix";
 import { useAdminGroup, useGroupSummary, type GroupPropertyRow } from "@/hooks/useBusinessGroup";
 import { useBusiness } from "@/contexts/BusinessContext";
 
@@ -23,6 +25,7 @@ export default function GroupOverview() {
   const [range, setRange] = useState<{ from: Date; to: Date }>({ from: subDays(new Date(), 30), to: new Date() });
   const [sortKey, setSortKey] = useState<SortKey>("review_count");
   const [sortDesc, setSortDesc] = useState(true);
+  const [tab, setTab] = useState("overview");
 
   const { data: rows = [], isLoading } = useGroupSummary(group?.groupId, range.from, range.to);
 
