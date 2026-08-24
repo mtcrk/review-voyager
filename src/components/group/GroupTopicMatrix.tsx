@@ -1,5 +1,6 @@
 import { Fragment, useMemo, useState } from "react";
-import { ChevronDown, ChevronRight, Loader2, TrendingDown, TrendingUp, Info } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ChevronDown, ChevronRight, Loader2, TrendingDown, TrendingUp, Info, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import { tr as trLocale } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
@@ -451,9 +452,18 @@ function QuoteGroup({
         const highlights = Array.isArray(q.highlights) ? q.highlights : [];
         return (
           <div key={`${q.review_id}-${title}`} className="rounded-lg border p-3">
-            <div className="mb-1.5 flex items-center gap-2 text-[11px] text-muted-foreground">
-              <span>{format(new Date(q.posted_at), "d MMM yyyy", { locale: trLocale })}</span>
-              {q.platform && <Badge variant="outline" className="text-[10px] font-normal">{q.platform}</Badge>}
+            <div className="mb-1.5 flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <span>{format(new Date(q.posted_at), "d MMM yyyy", { locale: trLocale })}</span>
+                {q.platform && <Badge variant="outline" className="text-[10px] font-normal">{q.platform}</Badge>}
+              </div>
+              <Link
+                to={`/reviews/${q.review_id}?topic=${encodeURIComponent(topicId)}&analysis=1`}
+                className="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium text-primary hover:underline"
+              >
+                Yoruma git
+                <ExternalLink className="h-3 w-3" />
+              </Link>
             </div>
             <HighlightedReviewText
               text={text}
@@ -463,6 +473,7 @@ function QuoteGroup({
             />
           </div>
         );
+
       })}
     </div>
   );
