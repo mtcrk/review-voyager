@@ -1,6 +1,7 @@
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { findMatches, sentenceRanges, type TextMatch } from "@/lib/textMatch";
 
 export type ReviewHighlight = {
   quote: string;
@@ -19,6 +20,16 @@ interface HighlightedReviewTextProps {
   /** Analiz sayfasından gelinen konu — o konuya ait parçalar öne çıkarılır. */
   focusTopicId?: string | null;
   className?: string;
+  /** Aktif rozetin metinde aranacak parçaları (excerpt / anahtar kelime). */
+  activeTerms?: string[];
+  /** Aktif eşleşmenin sırası (0 tabanlı). */
+  activeMatchIndex?: number;
+  /** Bulunan eşleşme sayısı üst bileşene bildirilir. */
+  onMatchesFound?: (count: number) => void;
+  /** Aktif eşleşmenin rengi. */
+  activeTone?: "positive" | "negative" | "neutral";
+  /** Yalnızca eşleşmeyi içeren cümleleri göster. */
+  sentencesOnly?: boolean;
 }
 
 type ResolvedSpan = ReviewHighlight & { start: number; end: number };
@@ -72,6 +83,12 @@ const polarityClass = (polarity: string) => {
   return "bg-muted text-foreground decoration-muted-foreground/60";
 };
 
+const activeClass = (tone: "positive" | "negative" | "neutral") => {
+  if (tone === "positive") return "bg-success/30 ring-1 ring-success/60";
+  if (tone === "negative") return "bg-destructive/30 ring-1 ring-destructive/60";
+  return "bg-primary/20 ring-1 ring-primary/50";
+};
+
 function MarkedSpan({
   children,
   span,
@@ -113,45 +130,149 @@ function MarkedSpan({
   );
 }
 
+/** Aktif eşleşmelerle çakışmayan temel vurgular korunur. */
+function overlaps(a: TextMatch, b: TextMatch) {
+  return a.start < b.end && b.start < a.end;
+}
+
+function mergeRanges(ranges: TextMatch[]): TextMatch[] {
+  const sorted = [...ranges].sort((a, b) => a.start - b.start);
+  const out: TextMatch[] = [];
+  for (const r of sorted) {
+    const last = out[out.length - 1];
+    if (last && r.start <= last.end) last.end = Math.max(last.end, r.end);
+    else out.push({ ...r });
+  }
+  return out;
+}
+
 export function HighlightedReviewText({
   text,
   highlights,
   topicLabels = {},
   focusTopicId,
   className,
+  activeTerms,
+  activeMatchIndex = 0,
+  onMatchesFound,
+  activeTone = "neutral",
+  sentencesOnly = false,
 }: HighlightedReviewTextProps) {
-  const spans = useMemo(() => resolveSpans(text ?? "", highlights ?? []), [text, highlights]);
+  const src = text ?? "";
+  const containerRef = useRef<HTMLParagraphElement>(null);
+
+  const spans = useMemo(() => resolveSpans(src, highlights ?? []), [src, highlights]);
+
+  const termsKey = (activeTerms ?? []).join("␟");
+  const matches = useMemo(
+    () => (activeTerms && activeTerms.length ? findMatches(src, activeTerms) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [src, termsKey],
+  );
+
+  useEffect(() => {
+    onMatchesFound?.(matches.length);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matches.length, termsKey]);
+
+  /** Görünür aralıklar — "sadece ilgili cümleler" modu. */
+  const visible = useMemo<TextMatch[]>(() => {
+    if (!sentencesOnly || matches.length === 0) return [{ start: 0, end: src.length }];
+    const sentences = sentenceRanges(src);
+    const keep = sentences.filter((s) => matches.some((m) => overlaps(s, m)));
+    return keep.length ? mergeRanges(keep) : [{ start: 0, end: src.length }];
+  }, [sentencesOnly, matches, src]);
 
   const nodes = useMemo(() => {
-    const src = text ?? "";
-    const parts: React.ReactNode[] = [];
-    let cursor = 0;
+    const dim = matches.length > 0;
+    // Aktif eşleşmeler öncelikli; çakışan temel vurgular gizlenir.
+    type Piece = { start: number; end: number; base?: ResolvedSpan; activeIdx?: number };
+    const pieces: Piece[] = [
+      ...matches.map((m, i) => ({ start: m.start, end: m.end, activeIdx: i })),
+      ...spans
+        .filter((s) => !matches.some((m) => overlaps(s, m)))
+        .map((s) => ({ start: s.start, end: s.end, base: s })),
+    ].sort((a, b) => a.start - b.start);
 
-    spans.forEach((span, i) => {
-      if (span.start > cursor) {
-        parts.push(<Fragment key={`p-${i}`}>{src.slice(cursor, span.start)}</Fragment>);
+    const out: React.ReactNode[] = [];
+
+    visible.forEach((range, ri) => {
+      if (ri > 0) {
+        out.push(
+          <span key={`gap-${ri}`} className="mx-1 select-none text-muted-foreground">
+            …
+          </span>,
+        );
       }
-      parts.push(
-        <MarkedSpan
-          key={`m-${i}`}
-          span={span}
-          label={span.topic_id ? topicLabels[span.topic_id] : undefined}
-          focused={!!focusTopicId && span.topic_id === focusTopicId}
-        >
-          {src.slice(span.start, span.end)}
-        </MarkedSpan>,
-      );
-      cursor = span.end;
+      let cursor = range.start;
+      for (const p of pieces) {
+        if (p.end <= range.start || p.start >= range.end) continue;
+        const s = Math.max(p.start, range.start);
+        const e = Math.min(p.end, range.end);
+        if (s > cursor) {
+          out.push(
+            <span key={`t-${ri}-${cursor}`} className={dim ? "opacity-40" : undefined}>
+              {src.slice(cursor, s)}
+            </span>,
+          );
+        }
+        if (p.activeIdx != null) {
+          out.push(
+            <mark
+              key={`a-${ri}-${s}`}
+              data-active-idx={p.activeIdx}
+              className={cn(
+                "rounded-sm px-0.5 py-px font-semibold text-foreground transition-colors",
+                activeClass(activeTone),
+              )}
+            >
+              {src.slice(s, e)}
+            </mark>,
+          );
+        } else if (p.base) {
+          out.push(
+            <span key={`b-${ri}-${s}`} className={dim ? "opacity-40" : undefined}>
+              <MarkedSpan
+                span={p.base}
+                label={p.base.topic_id ? topicLabels[p.base.topic_id] : undefined}
+                focused={!dim && !!focusTopicId && p.base.topic_id === focusTopicId}
+              >
+                {src.slice(s, e)}
+              </MarkedSpan>
+            </span>,
+          );
+        }
+        cursor = e;
+      }
+      if (cursor < range.end) {
+        out.push(
+          <span key={`t-end-${ri}`} className={dim ? "opacity-40" : undefined}>
+            {src.slice(cursor, range.end)}
+          </span>,
+        );
+      }
     });
 
-    if (cursor < src.length) {
-      parts.push(<Fragment key="p-last">{src.slice(cursor)}</Fragment>);
-    }
-    return parts;
-  }, [spans, text, topicLabels, focusTopicId]);
+    return out;
+  }, [spans, matches, visible, src, topicLabels, focusTopicId, activeTone]);
+
+  /** Aktif eşleşmeye yumuşak kaydırma + 1 sn vurgu parlaması. */
+  useEffect(() => {
+    if (matches.length === 0) return;
+    const idx = Math.min(Math.max(activeMatchIndex, 0), matches.length - 1);
+    const el = containerRef.current?.querySelector<HTMLElement>(`[data-active-idx="${idx}"]`);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    el.classList.add("hl-flash");
+    const timer = window.setTimeout(() => el.classList.remove("hl-flash"), 1000);
+    return () => window.clearTimeout(timer);
+  }, [activeMatchIndex, matches.length, termsKey, sentencesOnly]);
 
   return (
-    <p className={cn("text-sm leading-relaxed text-foreground whitespace-pre-wrap", className)}>
+    <p
+      ref={containerRef}
+      className={cn("text-sm leading-relaxed text-foreground whitespace-pre-wrap", className)}
+    >
       {nodes}
     </p>
   );

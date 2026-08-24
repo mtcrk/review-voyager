@@ -30,6 +30,8 @@ export type ReviewTopicRow = {
   topic_id: string;
   sentiment: number;
   confidence: number;
+  /** Yorum metninden birebir alınan parça — rozet tıklanınca metinde aranır. */
+  excerpt?: string | null;
 };
 
 export type CiTopic = {
@@ -170,7 +172,7 @@ export function useSingleReviewAnalysis(reviewId?: string) {
           .maybeSingle(),
         supabase
           .from("ci_review_topics")
-          .select("review_id, topic_id, sentiment, confidence")
+          .select("review_id, topic_id, sentiment, confidence, excerpt")
           .eq("review_source", "own")
           .eq("review_id", reviewId!),
       ]);
