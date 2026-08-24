@@ -556,10 +556,12 @@ export default function TopicInsights() {
                               "cursor-pointer border-b transition-colors hover:bg-muted/50",
                               isOpen && "bg-muted/40",
                             )}
-                            onClick={() => {
-                              setOpenDept(isOpen ? null : (d.key as DepartmentKey));
-                              setTopicId(null);
-                            }}
+                            onClick={() =>
+                              // Tek patch: dept ve topic aynı anda güncellenir.
+                              // İki ayrı çağrı stale params ile birbirini eziyordu.
+                              setOpenDept(isOpen ? null : (d.key as DepartmentKey))
+                            }
+
                           >
                             <td className="px-4 py-2">
                               <span className="inline-flex items-center gap-1.5">
@@ -592,11 +594,15 @@ export default function TopicInsights() {
                                       size="sm"
                                       variant={topicId === t.key ? "default" : "outline"}
                                       className="h-7 text-xs"
-                                      onClick={() => setTopicId(t.key)}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setTopicId(topicId === t.key ? null : t.key);
+                                      }}
                                     >
                                       {t.label} · {t.score.toFixed(0)} · {t.mentions} bahis
                                     </Button>
                                   ))}
+
                                 </div>
                                 {deptTopics.hidden > 0 && (
                                   <p className="mt-2 text-xs text-muted-foreground">
