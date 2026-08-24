@@ -145,84 +145,98 @@ export default function GroupOverview() {
         />
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <SummaryCard icon={<Building2 className="h-4 w-4" />} label="Tesis" value={String(totals.properties)} />
-        <SummaryCard icon={<MessageSquare className="h-4 w-4" />} label="Yorum (dönem)" value={totals.totalReviews.toLocaleString("tr-TR")} />
-        <SummaryCard icon={<Star className="h-4 w-4" />} label="Ağırlıklı ortalama puan" value={totals.avgRating ? totals.avgRating.toFixed(2) : "—"} />
-        <SummaryCard icon={<Percent className="h-4 w-4" />} label="Yanıt oranı" value={`${totals.replyRate}%`} />
-      </div>
+      <Tabs value={tab} onValueChange={setTab}>
+        <TabsList>
+          <TabsTrigger value="overview">Genel Bakış</TabsTrigger>
+          <TabsTrigger value="topics">Konu Kıyası</TabsTrigger>
+        </TabsList>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Tesis karşılaştırması</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0 sm:p-0">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-16">
-              <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            </div>
-          ) : sorted.length === 0 ? (
-            <p className="text-sm text-muted-foreground px-6 py-10 text-center">
-              Bu gruba bağlı tesis bulunamadı.
-            </p>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <SortHead label="Tesis" k="business_name" />
-                    <SortHead label="Yorum" k="review_count" className="text-right" />
-                    <SortHead label="Ort. puan" k="avg_rating" />
-                    <SortHead label="Yanıt oranı" k="reply_rate" />
-                    <SortHead label="Ort. yanıt süresi" k="avg_reply_hours" />
-                    <SortHead label="Puan değişimi" k="delta" />
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sorted.map((r) => {
-                    const d = delta(r);
-                    const low = (r.review_count ?? 0) < MIN_SAMPLE;
-                    return (
-                      <TableRow key={r.business_id} className="cursor-pointer" onClick={() => goToProperty(r.business_id)}>
-                        <TableCell className="font-medium text-primary hover:underline">{r.business_name}</TableCell>
-                        <TableCell>{(r.review_count ?? 0).toLocaleString("tr-TR")}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <span>{r.avg_rating != null ? Number(r.avg_rating).toFixed(2) : "—"}</span>
-                            {low && (
-                              <Badge variant="outline" className="text-[10px] font-normal">
-                                yetersiz örneklem
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>{r.reply_rate != null ? `${Number(r.reply_rate).toFixed(1)}%` : "—"}</TableCell>
-                        <TableCell>
-                          {r.avg_reply_hours != null ? `${Number(r.avg_reply_hours).toFixed(1)} sa` : "—"}
-                        </TableCell>
-                        <TableCell>
-                          {d == null ? (
-                            <span className="text-muted-foreground">—</span>
-                          ) : (
-                            <span className={d > 0 ? "text-emerald-600" : d < 0 ? "text-destructive" : "text-muted-foreground"}>
-                              {d > 0 ? "+" : ""}
-                              {d.toFixed(2)}
-                            </span>
-                          )}
-                        </TableCell>
+        <TabsContent value="overview" className="mt-6 space-y-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <SummaryCard icon={<Building2 className="h-4 w-4" />} label="Tesis" value={String(totals.properties)} />
+            <SummaryCard icon={<MessageSquare className="h-4 w-4" />} label="Yorum (dönem)" value={totals.totalReviews.toLocaleString("tr-TR")} />
+            <SummaryCard icon={<Star className="h-4 w-4" />} label="Ağırlıklı ortalama puan" value={totals.avgRating ? totals.avgRating.toFixed(2) : "—"} />
+            <SummaryCard icon={<Percent className="h-4 w-4" />} label="Yanıt oranı" value={`${totals.replyRate}%`} />
+          </div>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Tesis karşılaştırması</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0 sm:p-0">
+              {isLoading ? (
+                <div className="flex items-center justify-center py-16">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                </div>
+              ) : sorted.length === 0 ? (
+                <p className="text-sm text-muted-foreground px-6 py-10 text-center">
+                  Bu gruba bağlı tesis bulunamadı.
+                </p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <SortHead label="Tesis" k="business_name" />
+                        <SortHead label="Yorum" k="review_count" className="text-right" />
+                        <SortHead label="Ort. puan" k="avg_rating" />
+                        <SortHead label="Yanıt oranı" k="reply_rate" />
+                        <SortHead label="Ort. yanıt süresi" k="avg_reply_hours" />
+                        <SortHead label="Puan değişimi" k="delta" />
                       </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                    </TableHeader>
+                    <TableBody>
+                      {sorted.map((r) => {
+                        const d = delta(r);
+                        const low = (r.review_count ?? 0) < MIN_SAMPLE;
+                        return (
+                          <TableRow key={r.business_id} className="cursor-pointer" onClick={() => goToProperty(r.business_id)}>
+                            <TableCell className="font-medium text-primary hover:underline">{r.business_name}</TableCell>
+                            <TableCell>{(r.review_count ?? 0).toLocaleString("tr-TR")}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <span>{r.avg_rating != null ? Number(r.avg_rating).toFixed(2) : "—"}</span>
+                                {low && (
+                                  <Badge variant="outline" className="text-[10px] font-normal">
+                                    yetersiz örneklem
+                                  </Badge>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>{r.reply_rate != null ? `${Number(r.reply_rate).toFixed(1)}%` : "—"}</TableCell>
+                            <TableCell>
+                              {r.avg_reply_hours != null ? `${Number(r.avg_reply_hours).toFixed(1)} sa` : "—"}
+                            </TableCell>
+                            <TableCell>
+                              {d == null ? (
+                                <span className="text-muted-foreground">—</span>
+                              ) : (
+                                <span className={d > 0 ? "text-emerald-600" : d < 0 ? "text-destructive" : "text-muted-foreground"}>
+                                  {d > 0 ? "+" : ""}
+                                  {d.toFixed(2)}
+                                </span>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="topics" className="mt-6">
+          <GroupTopicMatrix groupId={group.groupId} from={range.from} to={range.to} />
+        </TabsContent>
+      </Tabs>
 
     </div>
   );
 }
+
 
 function SummaryCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
