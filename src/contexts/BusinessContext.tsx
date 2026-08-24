@@ -47,7 +47,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   const fetchBusinesses = async () => {
     if (!user) {
       setBusinesses([]);
-      setActiveBusiness(null);
+      setActiveBusinessState(null);
       setLoading(false);
       return;
     }
