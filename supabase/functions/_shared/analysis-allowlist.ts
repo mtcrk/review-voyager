@@ -12,6 +12,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 // Code-level additions to ANALYSIS_ALLOWLIST_EMAILS (union with the env var).
 const EXTRA_ALLOWED_EMAILS = [
   "gozdemersin@almira.com.tr",
+  "esra@titanic.com",
 ];
 
 export function allowlistEmails(): string[] {
