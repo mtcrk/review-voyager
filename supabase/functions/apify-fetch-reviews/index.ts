@@ -17,6 +17,7 @@ const EXPEDIA_ACTOR_ID = "shahidirfan~expedia-reviews-scraper";
 const TRIPCOM_ACTOR_ID = "shahidirfan~trip-com-hotel-reviews-scraper";
 const BOOKING_ACTOR_ID = "voyager~booking-reviews-scraper";
 const YANDEX_ACTOR_ID = "zen-studio~yandex-maps-reviews-scraper";
+const GOOGLE_ACTOR_ID = "compass~google-maps-reviews-scraper";
 
 // Map Apify provider names to our platform names
 const PROVIDER_MAP: Record<string, string> = {
@@ -507,7 +508,7 @@ Deno.serve(async (req) => {
       }
       actorInput = {
         startUrl: expediaUrl,
-        results_wanted: 20,
+        results_wanted: maxReviews,
         max_pages: 100,
       };
       console.log(`Using shahidirfan/expedia-reviews-scraper for: ${expediaUrl}`);
@@ -522,7 +523,7 @@ Deno.serve(async (req) => {
       actorId = TRIPCOM_ACTOR_ID;
       actorInput = {
         hotelId: parseInt(business.tripcom_hotel_id, 10),
-        results_wanted: 20,
+        results_wanted: maxReviews,
       };
       console.log(`Using Trip.com scraper for hotel ID: ${business.tripcom_hotel_id}`);
     } else if (platform === "yandex") {
@@ -536,7 +537,7 @@ Deno.serve(async (req) => {
       actorInput = {
         startUrls: [{ url: `https://yandex.com/maps/org/${business.yandex_org_id}/reviews/` }],
         businessIds: [String(business.yandex_org_id)],
-        maxReviewsPerPlace: 50,
+        maxReviewsPerPlace: maxReviews,
         reviewSort: "newest",
         language: "tr",
       };
@@ -565,16 +566,16 @@ Deno.serve(async (req) => {
       // voyager~booking-reviews-scraper supports several limit fields; set them all to be safe
       actorInput = {
         startUrls: [{ url: bookingUrl }],
-        maxReviewsPerHotel: 50,
-        maxReviews: 50,
-        maxItems: 50,
+        maxReviewsPerHotel: maxReviews,
+        maxReviews: maxReviews,
+        maxItems: maxReviews,
       };
       console.log(`Using dedicated Booking scraper for: ${bookingUrl}`);
     } else {
       // Use the general hotel-review-aggregator
       const providers = PLATFORM_TO_APIFY_PROVIDER[platform] || [];
       actorInput = {
-        maxReviewsPerQuery: 20,
+        maxReviewsPerQuery: maxReviews,
         scrapeReviewPictures: false,
         scrapeReviewResponses: true,
       };
