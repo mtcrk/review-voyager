@@ -385,29 +385,24 @@ export function ReviewAnalysisPanel({
                 const isActive = active?.kind === "topic" && active.key === c.topic_id;
                 return (
                   <Fragment key={c.topic_id}>
-                    <Badge
-                      asChild
-                      variant="outline"
+                    <button
+                      type="button"
+                      disabled={count === 0}
+                      onClick={() => toggleActive("topic", c.topic_id)}
+                      title={count === 0 ? "Bu konu metinde bulunamadı" : "Metinde göster"}
                       className={cn(
+                        badgeVariants({ variant: "outline" }),
                         "font-medium",
                         toneChip(sentimentTone(Number(c.sentiment ?? 0))),
-                        count === 0 && "opacity-50",
+                        count === 0 ? "opacity-50 cursor-default" : "cursor-pointer",
                         isActive && "border-primary ring-2 ring-primary ring-offset-1 font-bold",
                         !isActive &&
                           c.topic_id === focusTopicId &&
                           "font-bold border-primary ring-2 ring-primary ring-offset-1",
                       )}
                     >
-                      <button
-                        type="button"
-                        disabled={count === 0}
-                        onClick={() => toggleActive("topic", c.topic_id)}
-                        className={count === 0 ? "cursor-default" : "cursor-pointer"}
-                        title={count === 0 ? "Bu konu metinde bulunamadı" : "Metinde göster"}
-                      >
-                        {labelOf(c.topic_id)}
-                      </button>
-                    </Badge>
+                      {labelOf(c.topic_id)}
+                    </button>
                     {isActive && navControls}
                   </Fragment>
                 );
