@@ -3533,6 +3533,42 @@ export type Database = {
           review_count: number
         }[]
       }
+      group_topic_matrix: {
+        Args: { _from: string; _group_id: string; _to: string }
+        Returns: {
+          business_id: string
+          business_name: string
+          category: string
+          is_decision_driver: boolean
+          negative_mentions: number
+          positive_mentions: number
+          positive_rate: number
+          topic_id: string
+          total_mentions: number
+        }[]
+      }
+      group_topic_quotes: {
+        Args: {
+          _business_id: string
+          _from: string
+          _group_id: string
+          _limit?: number
+          _offset?: number
+          _to: string
+          _topic_id: string
+        }
+        Returns: {
+          excerpt: string
+          highlights: Json
+          platform: string
+          posted_at: string
+          rating: number
+          review_id: string
+          review_text: string
+          sentiment: number
+          total_count: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
