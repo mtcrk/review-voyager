@@ -419,19 +419,34 @@ function QuoteGroup({
   quotes,
   topicId,
   topicLabel,
+  collapsible = false,
 }: {
   title: string;
   quotes: { review_id: string; excerpt: string | null; posted_at: string; platform: string | null; review_text: string | null; highlights: any }[];
   topicId: string;
   topicLabel: string;
+  collapsible?: boolean;
 }) {
+  const [expanded, setExpanded] = useState(!collapsible);
   if (quotes.length === 0) return null;
   return (
     <div className="space-y-3">
-      <h4 className="text-sm font-semibold">
-        {title} <span className="text-muted-foreground font-normal">({quotes.length})</span>
-      </h4>
-      {quotes.map((q) => {
+      {collapsible ? (
+        <button
+          type="button"
+          onClick={() => setExpanded((e) => !e)}
+          className="flex w-full items-center gap-1.5 text-sm font-semibold"
+        >
+          {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          {title} <span className="text-muted-foreground font-normal">({quotes.length})</span>
+        </button>
+      ) : (
+        <h4 className="text-sm font-semibold">
+          {title} <span className="text-muted-foreground font-normal">({quotes.length})</span>
+        </h4>
+      )}
+      {expanded && quotes.map((q) => {
+
         const text = q.review_text || q.excerpt || "";
         const highlights = Array.isArray(q.highlights) ? q.highlights : [];
         return (
