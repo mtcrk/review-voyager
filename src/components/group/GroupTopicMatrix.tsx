@@ -1,5 +1,6 @@
 import { Fragment, useMemo, useState } from "react";
-import { ChevronDown, ChevronRight, Loader2, TrendingDown, TrendingUp, Info } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ChevronDown, ChevronRight, Loader2, TrendingDown, TrendingUp, Info, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import { tr as trLocale } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
