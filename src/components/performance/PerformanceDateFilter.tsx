@@ -5,20 +5,23 @@ import { CalendarIcon } from "lucide-react";
 import { format, subDays } from "date-fns";
 import { tr } from "date-fns/locale";
 
-const PRESETS = [
+const DEFAULT_PRESETS = [
   { label: "7 Gün", days: 7 },
   { label: "30 Gün", days: 30 },
   { label: "90 Gün", days: 90 },
   { label: "6 Ay", days: 180 },
-] as const;
+];
 
 interface Props {
   range: { from: Date; to: Date };
   onRangeChange: (range: { from: Date; to: Date }) => void;
+  presets?: { label: string; days: number }[];
 }
 
-export function PerformanceDateFilter({ range, onRangeChange }: Props) {
+export function PerformanceDateFilter({ range, onRangeChange, presets: presetsProp }: Props) {
+  const PRESETS = presetsProp ?? DEFAULT_PRESETS;
   const activeDays = Math.round((range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24));
+
 
   return (
     <div className="flex flex-wrap items-center gap-2">
