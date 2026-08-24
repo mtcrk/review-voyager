@@ -288,3 +288,19 @@ All colors MUST be HSL.
     margin: 14mm;
   }
 }
+
+/* Rozet tıklanınca aktif eşleşmenin 1 saniyelik vurgu parlaması */
+@keyframes hl-flash {
+  0% {
+    background-color: hsl(var(--primary) / 0.55);
+    box-shadow: 0 0 0 4px hsl(var(--primary) / 0.25);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.hl-flash {
+  animation: hl-flash 1s ease-out;
+}

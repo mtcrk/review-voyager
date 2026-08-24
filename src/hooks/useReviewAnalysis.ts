@@ -30,6 +30,8 @@ export type ReviewTopicRow = {
   topic_id: string;
   sentiment: number;
   confidence: number;
+  /** Yorum metninden birebir alınan parça — rozet tıklanınca metinde aranır. */
+  excerpt?: string | null;
 };
 
 export type CiTopic = {
