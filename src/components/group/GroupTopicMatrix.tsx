@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { ChevronDown, ChevronRight, Loader2, TrendingDown, TrendingUp, Info } from "lucide-react";
 import { format } from "date-fns";
 import { tr as trLocale } from "date-fns/locale";
@@ -205,8 +205,8 @@ export function GroupTopicMatrix({ groupId, from, to }: Props) {
                   const isOpen = open.has(d);
                   const topics = model.byDept.get(d) ?? [];
                   return (
-                    <>
-                      <tr key={`d-${d}`} className="border-b bg-muted/20">
+                    <Fragment key={`dept-${d}`}>
+                      <tr className="border-b bg-muted/20">
                         <td
                           className="sticky left-0 z-10 bg-muted/20 px-4 py-2 cursor-pointer"
                           onClick={() => toggleDept(d)}
@@ -253,7 +253,7 @@ export function GroupTopicMatrix({ groupId, from, to }: Props) {
                             </tr>
                           );
                         })}
-                    </>
+                    </Fragment>
                   );
                 })}
               </tbody>
@@ -421,7 +421,7 @@ function QuoteGroup({
         {title} <span className="text-muted-foreground font-normal">({quotes.length})</span>
       </h4>
       {quotes.map((q) => {
-        const text = q.excerpt || q.review_text || "";
+        const text = q.review_text || q.excerpt || "";
         const highlights = Array.isArray(q.highlights) ? q.highlights : [];
         return (
           <div key={`${q.review_id}-${title}`} className="rounded-lg border p-3">
