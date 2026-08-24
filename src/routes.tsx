@@ -141,6 +141,7 @@ export const routes: RouteRecord[] = [
       { path: "tiktok-dm", lazy: lazyProtected(() => import("./pages/TikTokDMInbox")) },
       { path: "share/:businessSlug", lazy: lazyDefault(() => import("./pages/StoryKit")) },
       { path: "story-kit", lazy: lazyProtected(() => import("./pages/StoryKitSettings")) },
+      { path: "group", lazy: lazyProtectedLayout(() => import("./pages/GroupOverview")) },
       { path: "locations", lazy: lazyProtectedLayout(() => import("./pages/Locations")) },
       { path: "locations/platform-ratings", lazy: lazyProtectedLayout(() => import("./pages/PlatformRatings")) },
       { path: "locations/platform-ratings/:id", lazy: lazyProtectedLayout(() => import("./pages/PlatformRatingDetail")) },

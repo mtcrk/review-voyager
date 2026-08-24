@@ -64,6 +64,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
+import { useAdminGroup } from "@/hooks/useBusinessGroup";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useNewReviews } from "@/contexts/NewReviewsContext";
 import logo from "@/assets/logo.png";
@@ -91,6 +92,8 @@ const commonItems = [
   { title: "Rapor Oluştur", url: "/report", icon: FileText },
 ];
 
+const groupItem = { title: "Grup", url: "/group", icon: Building2 };
+
 const locationItems = [
   { title: "Tüm Lokasyonlar", url: "/locations", icon: Building2 },
   { title: "Platform Puanları", url: "/locations/platform-ratings", icon: LayoutGrid },
@@ -101,6 +104,7 @@ export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { activeBusiness } = useBusiness();
+  const { data: adminGroup } = useAdminGroup();
   const { unreadCount, markAllRead } = useNewReviews();
   
   const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null);
@@ -341,7 +345,7 @@ export function AppSidebar() {
             <CollapsibleContent>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {locationItems.map((item) => {
+                  {(adminGroup ? [groupItem, ...locationItems] : locationItems).map((item) => {
                     const isActive = location.pathname === item.url;
                     return (
                       <SidebarMenuItem key={item.title}>
