@@ -79,6 +79,105 @@ export function ReviewAnalysisPanel({
     });
   }, [data?.topics, topicsById, focusTopicId]);
 
+  // ---- Tıklanabilir rozetler: metinde konum bulma ----
+  const [active, setActive] = useState<{ kind: "topic" | "keyword"; key: string } | null>(null);
+  const [matchIndex, setMatchIndex] = useState(0);
+  const [sentencesOnly, setSentencesOnly] = useState(false);
+
+  /** Bir konu rozetinin metinde aranacak parçaları: excerpt + o konunun vurguları. */
+  const termsForTopic = useMemo(
+    () => (topicId: string) => {
+      const row = (data?.topics ?? []).find((r) => r.topic_id === topicId);
+      const fromHighlights = highlights
+        .filter((h) => h?.topic_id === topicId && typeof h?.quote === "string")
+        .map((h) => h.quote as string);
+      return [row?.excerpt ?? "", ...fromHighlights].filter(Boolean) as string[];
+    },
+    [data?.topics, highlights],
+  );
+
+  const topicMatchCounts = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const c of chips) map[c.topic_id] = countMatches(text, termsForTopic(c.topic_id));
+    return map;
+  }, [chips, text, termsForTopic]);
+
+  const keywordMatchCounts = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const k of keywords) map[k.term] = countMatches(text, [k.term]);
+    return map;
+  }, [keywords, text]);
+
+  const activeTerms = useMemo(() => {
+    if (!active) return undefined;
+    return active.kind === "topic" ? termsForTopic(active.key) : [active.key];
+  }, [active, termsForTopic]);
+
+  const activeCount = active
+    ? active.kind === "topic"
+      ? topicMatchCounts[active.key] ?? 0
+      : keywordMatchCounts[active.key] ?? 0
+    : 0;
+
+  const activeTone: "positive" | "negative" | "neutral" = useMemo(() => {
+    if (!active) return "neutral";
+    if (active.kind === "topic") {
+      const row = (data?.topics ?? []).find((r) => r.topic_id === active.key);
+      return sentimentTone(Number(row?.sentiment ?? 0));
+    }
+    const k = keywords.find((x) => x.term === active.key);
+    return k?.polarity === "positive" ? "positive" : k?.polarity === "negative" ? "negative" : "neutral";
+  }, [active, data?.topics, keywords]);
+
+  const toggleActive = (kind: "topic" | "keyword", key: string) => {
+    setMatchIndex(0);
+    setSentencesOnly(false);
+    setActive((prev) => (prev && prev.kind === kind && prev.key === key ? null : { kind, key }));
+  };
+
+  const step = (delta: number) => {
+    if (activeCount === 0) return;
+    setMatchIndex((i) => (i + delta + activeCount) % activeCount);
+  };
+
+  const navControls = (
+    <span className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/5 px-1.5 py-0.5 text-xs">
+      {activeCount > 1 && (
+        <>
+          <button
+            type="button"
+            aria-label="Önceki eşleşme"
+            onClick={() => step(-1)}
+            className="rounded p-0.5 hover:bg-primary/10"
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />
+          </button>
+          <span className="tabular-nums font-medium">
+            {matchIndex + 1}/{activeCount}
+          </span>
+          <button
+            type="button"
+            aria-label="Sonraki eşleşme"
+            onClick={() => step(1)}
+            className="rounded p-0.5 hover:bg-primary/10"
+          >
+            <ChevronRight className="h-3.5 w-3.5" />
+          </button>
+        </>
+      )}
+      <button
+        type="button"
+        onClick={() => setSentencesOnly((v) => !v)}
+        className={cn(
+          "ml-0.5 rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors",
+          sentencesOnly ? "bg-primary text-primary-foreground" : "hover:bg-primary/10",
+        )}
+      >
+        Sadece ilgili cümleler
+      </button>
+    </span>
+  );
+
   const handleRetry = async () => {
     const { error } = await supabase
       .from("reviews")
