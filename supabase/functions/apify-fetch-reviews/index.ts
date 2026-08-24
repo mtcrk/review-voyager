@@ -17,6 +17,7 @@ const EXPEDIA_ACTOR_ID = "shahidirfan~expedia-reviews-scraper";
 const TRIPCOM_ACTOR_ID = "shahidirfan~trip-com-hotel-reviews-scraper";
 const BOOKING_ACTOR_ID = "voyager~booking-reviews-scraper";
 const YANDEX_ACTOR_ID = "zen-studio~yandex-maps-reviews-scraper";
+const GOOGLE_ACTOR_ID = "compass~google-maps-reviews-scraper";
 
 // Map Apify provider names to our platform names
 const PROVIDER_MAP: Record<string, string> = {
@@ -245,7 +246,8 @@ Deno.serve(async (req) => {
       }
     }
 
-    const { business_id, platform = "all", run_id, force = false } = await req.json();
+    const { business_id, platform = "all", run_id, force = false, max_reviews } = await req.json();
+    const maxReviews = Math.min(500, Math.max(20, Number(max_reviews) || 20));
 
     if (!business_id) {
       return new Response(
@@ -390,11 +392,11 @@ Deno.serve(async (req) => {
       }
 
       const cappedItems = platform === "booking"
-        ? items.slice(0, 1000)
-        : (platform === "hotelscom" || platform === "expedia" || platform === "tripcom" || platform === "yandex")
-          ? items.slice(0, 200)
+        ? items.slice(0, Math.max(1000, maxReviews))
+        : (platform === "hotelscom" || platform === "expedia" || platform === "tripcom" || platform === "yandex" || platform === "google")
+          ? items.slice(0, Math.max(200, maxReviews))
           : items;
-      const forcedPlatform = (platform === "hotelscom" || platform === "expedia" || platform === "trustpilot" || platform === "tripcom" || platform === "booking" || platform === "yandex") ? platform : undefined;
+      const forcedPlatform = (platform === "hotelscom" || platform === "expedia" || platform === "trustpilot" || platform === "tripcom" || platform === "booking" || platform === "yandex" || platform === "google") ? platform : undefined;
       const result = await insertReviews(supabase, cappedItems, business_id, forcedPlatform);
 
       await logSuccess(supabase, business_id, platform, items.length, result.inserted, result.updated, result.skipped);
@@ -466,14 +468,31 @@ Deno.serve(async (req) => {
     let actorId = ACTOR_ID;
     let actorInput: any;
 
+    // Dedicated Google Maps reviews scraper
+    if (platform === "google") {
+      if (!business.place_id) {
+        return new Response(
+          JSON.stringify({ error: "Google place_id bulunamadı. Lütfen önce Google işletme bağlantısını ekleyin." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      actorId = GOOGLE_ACTOR_ID;
+      actorInput = {
+        placeIds: [business.place_id],
+        maxReviews,
+        reviewsSort: "newest",
+        language: "tr",
+        personalData: true,
+      };
+      console.log(`Using Google Maps reviews scraper for place: ${business.place_id}`);
     // Use dedicated Hotels.com scraper when platform is hotelscom and URL is available
-    if (platform === "hotelscom" && business.hotelscom_url) {
+    } else if (platform === "hotelscom" && business.hotelscom_url) {
       actorId = HOTELSCOM_ACTOR_ID;
       const hotelId = business.hotelscom_url.replace(/\D/g, ""); // Extract numeric ID
       actorInput = {
         startUrls: [`https://www.hotels.com/ho${hotelId}/`],
-        maxItems: 20,
-        maxReviewsPerHotel: 20,
+        maxItems: maxReviews,
+        maxReviewsPerHotel: maxReviews,
         sortBy: "newest_first",
       };
       console.log(`Using dedicated Hotels.com scraper for hotel ID: ${hotelId}`);
@@ -489,7 +508,7 @@ Deno.serve(async (req) => {
       }
       actorInput = {
         startUrl: expediaUrl,
-        results_wanted: 20,
+        results_wanted: maxReviews,
         max_pages: 100,
       };
       console.log(`Using shahidirfan/expedia-reviews-scraper for: ${expediaUrl}`);
@@ -504,7 +523,7 @@ Deno.serve(async (req) => {
       actorId = TRIPCOM_ACTOR_ID;
       actorInput = {
         hotelId: parseInt(business.tripcom_hotel_id, 10),
-        results_wanted: 20,
+        results_wanted: maxReviews,
       };
       console.log(`Using Trip.com scraper for hotel ID: ${business.tripcom_hotel_id}`);
     } else if (platform === "yandex") {
@@ -518,7 +537,7 @@ Deno.serve(async (req) => {
       actorInput = {
         startUrls: [{ url: `https://yandex.com/maps/org/${business.yandex_org_id}/reviews/` }],
         businessIds: [String(business.yandex_org_id)],
-        maxReviewsPerPlace: 50,
+        maxReviewsPerPlace: maxReviews,
         reviewSort: "newest",
         language: "tr",
       };
@@ -547,16 +566,16 @@ Deno.serve(async (req) => {
       // voyager~booking-reviews-scraper supports several limit fields; set them all to be safe
       actorInput = {
         startUrls: [{ url: bookingUrl }],
-        maxReviewsPerHotel: 50,
-        maxReviews: 50,
-        maxItems: 50,
+        maxReviewsPerHotel: maxReviews,
+        maxReviews: maxReviews,
+        maxItems: maxReviews,
       };
       console.log(`Using dedicated Booking scraper for: ${bookingUrl}`);
     } else {
       // Use the general hotel-review-aggregator
       const providers = PLATFORM_TO_APIFY_PROVIDER[platform] || [];
       actorInput = {
-        maxReviewsPerQuery: 20,
+        maxReviewsPerQuery: maxReviews,
         scrapeReviewPictures: false,
         scrapeReviewResponses: true,
       };
@@ -706,6 +725,13 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
         reviewerName = item.traveler_name || item.userName || item.authorName || "Anonymous";
         postedAt = toSafeIsoDate(item.published_date || item.submissionTime || item.reviewDate || item.date);
         reviewId = item.review_id || item.id || item.reviewId || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      } else if (forcedPlatform === "google") {
+        // compass/google-maps-reviews-scraper — rating 1-5
+        rating = Math.min(5, Math.max(1, Math.round(Number(item.stars ?? item.rating ?? 3))));
+        text = item.text || item.textTranslated || item.reviewText || "";
+        reviewerName = item.name || item.reviewerName || item.authorName || "Anonymous";
+        postedAt = toSafeIsoDate(item.publishedAtDate || item.publishAt || item.reviewDate);
+        reviewId = item.reviewId ? String(item.reviewId) : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       } else if (isTrustpilotFormat) {
         rating = Math.min(5, Math.max(1, Math.round(Number(item.rating || item.stars || 3))));
         text = item.text || item.reviewText || "";
