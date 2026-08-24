@@ -467,14 +467,31 @@ Deno.serve(async (req) => {
     let actorId = ACTOR_ID;
     let actorInput: any;
 
+    // Dedicated Google Maps reviews scraper
+    if (platform === "google") {
+      if (!business.place_id) {
+        return new Response(
+          JSON.stringify({ error: "Google place_id bulunamadı. Lütfen önce Google işletme bağlantısını ekleyin." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      actorId = GOOGLE_ACTOR_ID;
+      actorInput = {
+        placeIds: [business.place_id],
+        maxReviews,
+        reviewsSort: "newest",
+        language: "tr",
+        personalData: true,
+      };
+      console.log(`Using Google Maps reviews scraper for place: ${business.place_id}`);
     // Use dedicated Hotels.com scraper when platform is hotelscom and URL is available
-    if (platform === "hotelscom" && business.hotelscom_url) {
+    } else if (platform === "hotelscom" && business.hotelscom_url) {
       actorId = HOTELSCOM_ACTOR_ID;
       const hotelId = business.hotelscom_url.replace(/\D/g, ""); // Extract numeric ID
       actorInput = {
         startUrls: [`https://www.hotels.com/ho${hotelId}/`],
-        maxItems: 20,
-        maxReviewsPerHotel: 20,
+        maxItems: maxReviews,
+        maxReviewsPerHotel: maxReviews,
         sortBy: "newest_first",
       };
       console.log(`Using dedicated Hotels.com scraper for hotel ID: ${hotelId}`);
