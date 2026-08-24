@@ -707,6 +707,13 @@ async function insertReviews(supabase: any, items: any[], businessId: string, fo
         reviewerName = item.traveler_name || item.userName || item.authorName || "Anonymous";
         postedAt = toSafeIsoDate(item.published_date || item.submissionTime || item.reviewDate || item.date);
         reviewId = item.review_id || item.id || item.reviewId || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      } else if (forcedPlatform === "google") {
+        // compass/google-maps-reviews-scraper — rating 1-5
+        rating = Math.min(5, Math.max(1, Math.round(Number(item.stars ?? item.rating ?? 3))));
+        text = item.text || item.textTranslated || item.reviewText || "";
+        reviewerName = item.name || item.reviewerName || item.authorName || "Anonymous";
+        postedAt = toSafeIsoDate(item.publishedAtDate || item.publishAt || item.reviewDate);
+        reviewId = item.reviewId ? String(item.reviewId) : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       } else if (isTrustpilotFormat) {
         rating = Math.min(5, Math.max(1, Math.round(Number(item.rating || item.stars || 3))));
         text = item.text || item.reviewText || "";
