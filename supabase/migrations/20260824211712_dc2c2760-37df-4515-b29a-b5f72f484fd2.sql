@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.profiles_guard_role() FROM PUBLIC, anon, authenticated;
