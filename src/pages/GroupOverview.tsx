@@ -1,8 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Building2, Loader2, ArrowUp, ArrowDown, ArrowUpDown, Star, MessageSquare, Percent } from "lucide-react";
-import { subDays, subMonths } from "date-fns";
-import { Button } from "@/components/ui/button";
+import { subDays } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -135,7 +134,15 @@ export default function GroupOverview() {
           </h1>
           <p className="text-sm text-muted-foreground mt-1">Grubunuzdaki tüm tesislerin performansı tek ekranda</p>
         </div>
-        <PerformanceDateFilter range={range} onRangeChange={setRange} />
+        <PerformanceDateFilter
+          range={range}
+          onRangeChange={setRange}
+          presets={[
+            { label: "30 Gün", days: 30 },
+            { label: "90 Gün", days: 90 },
+            { label: "12 Ay", days: 365 },
+          ]}
+        />
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -213,11 +220,6 @@ export default function GroupOverview() {
         </CardContent>
       </Card>
 
-      <div className="flex flex-wrap gap-2">
-        <Button variant="outline" size="sm" onClick={() => setRange({ from: subMonths(new Date(), 12), to: new Date() })}>
-          12 Ay
-        </Button>
-      </div>
     </div>
   );
 }
