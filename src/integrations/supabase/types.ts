@@ -224,6 +224,75 @@ export type Database = {
           },
         ]
       }
+      business_group_members: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          group_id: string
+          id: string
+          role: Database["public"]["Enums"]["business_group_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          group_id: string
+          id?: string
+          role?: Database["public"]["Enums"]["business_group_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          group_id?: string
+          id?: string
+          role?: Database["public"]["Enums"]["business_group_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_group_members_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "business_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_groups: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          owner_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_user_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       businesses: {
         Row: {
           booking_hotel_id: string | null
@@ -235,6 +304,7 @@ export type Database = {
           google_account_id: string | null
           google_connected: boolean | null
           google_location_id: string | null
+          group_id: string | null
           hotelscom_url: string | null
           id: string
           language: string | null
@@ -268,6 +338,7 @@ export type Database = {
           google_account_id?: string | null
           google_connected?: boolean | null
           google_location_id?: string | null
+          group_id?: string | null
           hotelscom_url?: string | null
           id?: string
           language?: string | null
@@ -301,6 +372,7 @@ export type Database = {
           google_account_id?: string | null
           google_connected?: boolean | null
           google_location_id?: string | null
+          group_id?: string | null
           hotelscom_url?: string | null
           id?: string
           language?: string | null
@@ -325,6 +397,13 @@ export type Database = {
           yandex_org_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "businesses_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "business_groups"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "businesses_parent_business_id_fkey"
             columns: ["parent_business_id"]
@@ -3426,6 +3505,7 @@ export type Database = {
           schedule: string
         }[]
       }
+      can_view_business: { Args: { _business_id: string }; Returns: boolean }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -3440,11 +3520,28 @@ export type Database = {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      group_property_summary: {
+        Args: { _from: string; _group_id: string; _to: string }
+        Returns: {
+          avg_rating: number
+          avg_reply_hours: number
+          business_id: string
+          business_name: string
+          prev_avg_rating: number
+          prev_review_count: number
+          reply_rate: number
+          review_count: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_group_admin: {
+        Args: { _group_id: string; _user_id: string }
         Returns: boolean
       }
       move_to_dlq: {
@@ -3456,6 +3553,7 @@ export type Database = {
         }
         Returns: number
       }
+      my_admin_group_ids: { Args: never; Returns: string[] }
       own_analysis_coverage: {
         Args: { _business_id: string }
         Returns: {
@@ -3495,6 +3593,7 @@ export type Database = {
     }
     Enums: {
       app_role: "owner" | "admin" | "staff"
+      business_group_role: "group_admin" | "property_user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3623,6 +3722,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["owner", "admin", "staff"],
+      business_group_role: ["group_admin", "property_user"],
     },
   },
 } as const
