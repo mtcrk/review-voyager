@@ -594,11 +594,15 @@ export default function TopicInsights() {
                                       size="sm"
                                       variant={topicId === t.key ? "default" : "outline"}
                                       className="h-7 text-xs"
-                                      onClick={() => setTopicId(t.key)}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setTopicId(topicId === t.key ? null : t.key);
+                                      }}
                                     >
                                       {t.label} · {t.score.toFixed(0)} · {t.mentions} bahis
                                     </Button>
                                   ))}
+
                                 </div>
                                 {deptTopics.hidden > 0 && (
                                   <p className="mt-2 text-xs text-muted-foreground">
