@@ -9,7 +9,10 @@ interface SEOProps {
   ogType?: string;
   noindex?: boolean;
   jsonLd?: Record<string, any> | Record<string, any>[];
+  /** Reciprocal hreflang links (include an x-default entry). */
+  alternates?: { hrefLang: string; href: string }[];
 }
+
 
 const SITE_URL = "https://voyagerespond.com";
 
@@ -37,7 +40,7 @@ const toCanonicalUrl = (value: string) => {
   return `${SITE_URL}${normalizePath(value)}`;
 };
 
-const SEO = ({ title, description, canonical, ogImage, ogType, noindex, jsonLd }: SEOProps) => {
+const SEO = ({ title, description, canonical, ogImage, ogType, noindex, jsonLd, alternates }: SEOProps) => {
   const location = useLocation();
   const isEn = location.pathname.startsWith("/en/") || location.pathname === "/en";
 
@@ -55,6 +58,9 @@ const SEO = ({ title, description, canonical, ogImage, ogType, noindex, jsonLd }
       <title>{title}</title>
       <meta name="description" content={description} />
       {url && <link rel="canonical" href={url} />}
+      {(alternates ?? []).map((a) => (
+        <link key={a.hrefLang} rel="alternate" hrefLang={a.hrefLang} href={a.href} />
+      ))}
       <meta
         name="robots"
         content={
