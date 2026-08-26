@@ -137,7 +137,7 @@ function section(title, items) {
 }
 
 const platform = [...platformPages(), ...platformEnPages()];
-const cities = cityPages();
+const cities = [...cityPages(), ...cityEnPages()];
 const blog = blogPages();
 const geo = geoPages();
 
