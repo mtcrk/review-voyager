@@ -30,6 +30,11 @@ const ZincirRestoranYorumYonetimi = () => {
         title="Zincir Restoranlar için Çoklu Lokasyon Yorum Yönetimi"
         description="Çok şubeli restoran zincirleri için Google, Yemeksepeti ve Getir Yemek yorumlarını tek panelden yönetin. Şube karşılaştırması, marka tutarlılığı ve AI yanıt rehberi."
         canonical="https://voyagerespond.com/zincir-restoran-yorum-yonetimi/"
+        alternates={[
+          { hrefLang: "tr", href: "https://voyagerespond.com/zincir-restoran-yorum-yonetimi/" },
+          { hrefLang: "en", href: "https://voyagerespond.com/multi-location-restaurant-review-management/" },
+          { hrefLang: "x-default", href: "https://voyagerespond.com/multi-location-restaurant-review-management/" },
+        ]}
         jsonLd={articleJsonLd}
       />
 

@@ -39,12 +39,24 @@ const hubGuides = [
 
 // --- GEO / AI-visibility pages (TR + EN pairs) ---
 function geoPages() {
-  const c = read("src/lib/geoPages.ts");
+  const c = read("src/lib/geoPages.ts") + read("src/lib/geoPagesEn.ts");
   const re = /slug:\s*"([^"]+)",\s*\n\s*lang:\s*"(tr|en)",[\s\S]*?title:\s*"([^"]+)",\s*\n\s*description:\s*\n?\s*"([^"]+)"/g;
   const out = [];
   let m;
   while ((m = re.exec(c)) !== null) {
     out.push([`/${m[1]}`, m[3].replace(/ \| VoyageRespond$/, ""), shorten(m[4])]);
+  }
+  return out;
+}
+
+// --- English platform landing pages (rendered by GeoLanding) ---
+function platformEnPages() {
+  const c = read("src/lib/geoPlatformEn.ts");
+  const re = /slug:\s*"(ai-[^"]+)",\s*\n\s*tr:[\s\S]*?title:\s*\n?\s*"([^"]+)",\s*\n\s*description:\s*\n?\s*"([^"]+)"/g;
+  const out = [];
+  let m;
+  while ((m = re.exec(c)) !== null) {
+    out.push([`/platform/${m[1]}`, m[2].replace(/ \| VoyageRespond$/, ""), shorten(m[3])]);
   }
   return out;
 }
@@ -108,7 +120,7 @@ function section(title, items) {
   return `## ${title}\n\n${lines.join("\n")}\n`;
 }
 
-const platform = platformPages();
+const platform = [...platformPages(), ...platformEnPages()];
 const cities = cityPages();
 const blog = blogPages();
 const geo = geoPages();

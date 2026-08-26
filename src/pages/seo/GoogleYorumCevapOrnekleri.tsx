@@ -55,6 +55,11 @@ const GoogleYorumCevapOrnekleri = () => {
         title="Google Yorum Cevap Örnekleri | 25 Hazır Şablon"
         description="Olumlu, olumsuz ve nötr Google yorumları için 25 profesyonel, kopyala-yapıştır cevap şablonu. Restoran, otel ve hizmet sektörü için."
         canonical="https://voyagerespond.com/google-yorum-cevap-ornekleri"
+        alternates={[
+          { hrefLang: "tr", href: "https://voyagerespond.com/google-yorum-cevap-ornekleri/" },
+          { hrefLang: "en", href: "https://voyagerespond.com/google-review-response-examples/" },
+          { hrefLang: "x-default", href: "https://voyagerespond.com/google-review-response-examples/" },
+        ]}
       />
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
         <div className="container mx-auto px-6">
