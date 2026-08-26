@@ -28,6 +28,19 @@ VoyageRespond; çok platformlu yorum toplama, 8 farklı tonda AI destekli yanıt
 - [Estetik Klinik Yorum Yönetimi](/estetik-klinik-yorum-yonetimi): Estetik klinik ve güzellik merkezleri için hassas branş yorum yönetimi rehberi.
 - [Zincir Restoran Yorum Yönetimi](/zincir-restoran-yorum-yonetimi): Çok şubeli restoran zincirleri için Google + Yemeksepeti + Getir çoklu lokasyon yorum yönetimi hub'ı.
 
+## GEO / AI Görünürlük Sayfaları
+
+- [Google Yorum Yönetimi Nedir, Nasıl Yapılır?](/google-yorum-yonetimi): Google yorum yönetimi nedir, nasıl yapılır? Google İşletme Profili yorumlarını tek panelden takip etme, cevaplama ve raporlama adımları.
+- [Google Review Management: How It Works](/google-review-management): What Google review management is and how to do it: monitor, reply to and analyse Google Business Profile reviews from a single dashboard.
+- [Yapay Zekâ ile Yorum Cevaplama Nasıl Yapılır?](/yapay-zeka-yorum-cevaplama): Yapay zekâ ile yorum cevaplama nedir, nasıl çalışır? Yorumun dilinde yanıt, geçmiş cevaplardan öğrenen marka sesi ve yayın öncesi insan ona…
+- [AI Review Response: How Automated Replies Work](/ai-review-response): How AI review response works: replies in the reviewer's own language, a brand-voice profile learned from past replies, and human approval b…
+- [Google İşletme Profili Optimizasyonu Rehberi](/google-isletme-profili-optimizasyonu): Google İşletme Profili optimizasyonu nedir, eksiksiz bir profil neleri içerir ve yerel aramada neden fark yaratır? Adım adım rehber.
+- [Google Business Profile Optimization Guide](/google-business-profile-optimization): What Google Business Profile optimization is, what a complete profile contains, why it affects local discovery, and how to keep it current.
+- [Yapay Zekâda Görünürlük (GEO) Nedir, Nasıl Ölçülür?](/ai-gorunurluk): Yapay zekâda görünürlük (GEO) nedir? ChatGPT, Gemini ve Perplexity işletmenizi öneriyor mu? İşletme adınızla ücretsiz kontrol edin.
+- [AI Visibility (GEO): Is Your Business Cited?](/ai-search-visibility): What AI visibility and GEO mean, why AI assistants now answer questions that used to go to search, and how to check whether your business a…
+- [İşletme Yorum Yönetimi: Kapsamlı Rehber](/isletme-yorum-yonetimi): İşletme yorum yönetimi nedir? Google yorumları, AI yanıt üretimi, işletme profili optimizasyonu ve yapay zekâda görünürlük rehberlerine tek…
+- [Business Review Management: Complete Guide](/business-review-management): What business review management is, and guides to Google reviews, AI review response, Business Profile optimization and AI visibility in on…
+
 ## Platform Sayfaları
 
 - [Google Yorumları için AI](/platform/google-yorumlari-icin-yapay-zeka): Google işletme yorumlarına yapay zeka ile saniyeler içinde marka uyumlu cevap yazın. Otomatik moderasyon, çoklu lokasyon ve duygu analizi t…
@@ -119,4 +132,4 @@ VoyageRespond; çok platformlu yorum toplama, 8 farklı tonda AI destekli yanıt
 - [Gizlilik Politikası](/privacy-policy): Veri işleme ve gizlilik koşulları.
 - [Kullanım Koşulları](/terms-of-service): Hizmet kullanım şartları ve sorumluluklar.
 
-<!-- generated 2026-08-26 — 97 pages -->
+<!-- generated 2026-08-26 — 107 pages -->

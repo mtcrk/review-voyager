@@ -37,6 +37,18 @@ const hubGuides = [
   ["/zincir-restoran-yorum-yonetimi", "Zincir Restoran Yorum Yönetimi", "Çok şubeli restoran zincirleri için Google + Yemeksepeti + Getir çoklu lokasyon yorum yönetimi hub'ı."],
 ];
 
+// --- GEO / AI-visibility pages (TR + EN pairs) ---
+function geoPages() {
+  const c = read("src/lib/geoPages.ts");
+  const re = /slug:\s*"([^"]+)",\s*\n\s*lang:\s*"(tr|en)",[\s\S]*?title:\s*"([^"]+)",\s*\n\s*description:\s*\n?\s*"([^"]+)"/g;
+  const out = [];
+  let m;
+  while ((m = re.exec(c)) !== null) {
+    out.push([`/${m[1]}`, m[3].replace(/ \| VoyageRespond$/, ""), shorten(m[4])]);
+  }
+  return out;
+}
+
 // --- Dynamic: platform landing pages ---
 function platformPages() {
   const c = read("src/lib/platformLandingData.ts");
@@ -99,6 +111,7 @@ function section(title, items) {
 const platform = platformPages();
 const cities = cityPages();
 const blog = blogPages();
+const geo = geoPages();
 
 const optional = [
   ["/privacy-policy", "Gizlilik Politikası", "Veri işleme ve gizlilik koşulları."],
@@ -116,16 +129,17 @@ VoyageRespond; çok platformlu yorum toplama, 8 farklı tonda AI destekli yanıt
 const body = [
   section("Pages", corePages),
   section("Hub Sayfaları", hubGuides),
+  section("GEO / AI Görünürlük Sayfaları", geo),
   section("Platform Sayfaları", platform),
   section("Lokasyon Sayfaları", cities),
   section("Blog", blog),
   section("Optional", optional),
 ].join("\n");
 
-const total = corePages.length + hubGuides.length + platform.length + cities.length + blog.length + optional.length;
+const total = corePages.length + hubGuides.length + geo.length + platform.length + cities.length + blog.length + optional.length;
 const out = header + body + `\n<!-- generated ${new Date().toISOString().slice(0, 10)} — ${total} pages -->\n`;
 
 writeFileSync(resolve("public/llms.txt"), out, "utf-8");
 console.log(
-  `llms.txt written (${total} pages: ${corePages.length} core, ${hubGuides.length} hub, ${platform.length} platform, ${cities.length} city, ${blog.length} blog)`
+  `llms.txt written (${total} pages: ${corePages.length} core, ${hubGuides.length} hub, ${geo.length} geo, ${platform.length} platform, ${cities.length} city, ${blog.length} blog)`
 );
