@@ -365,6 +365,11 @@ const YorumYonetimAraclari = () => {
         title="En İyi Yorum Yönetim Araçları 2026: 12 Platform Karşılaştırması"
         description="VoyageRespond, Jetyorum, Esinix, MARA, TrustYou, ReviewPro, Birdeye, Podium dahil 12 yorum yönetim platformunun fiyat, AI özellikleri ve sektör karşılaştırması."
         canonical="https://voyagerespond.com/yorum-yonetim-araclari"
+        alternates={[
+          { hrefLang: "tr", href: "https://voyagerespond.com/yorum-yonetim-araclari/" },
+          { hrefLang: "en", href: "https://voyagerespond.com/review-management-software/" },
+          { hrefLang: "x-default", href: "https://voyagerespond.com/review-management-software/" },
+        ]}
         jsonLd={jsonLd}
       />
 

@@ -6,6 +6,11 @@
  * (x-default -> the English page).
  */
 
+import { geoPagesEn } from "./geoPagesEn";
+import { geoPlatformEn } from "./geoPlatformEn";
+import { geoVerticalsEn } from "./geoVerticalsEn";
+import { geoCityEn } from "./geoCityEn";
+
 export interface GeoStep {
   title: string;
   body: string;
@@ -19,6 +24,11 @@ export interface GeoFaq {
 export interface GeoFact {
   value: string;
   label: string;
+}
+
+export interface GeoExampleGroup {
+  category: string;
+  items: { title: string; text: string }[];
 }
 
 export interface GeoPage {
@@ -46,6 +56,9 @@ export interface GeoPage {
   ctaBody: string;
   /** Renders the AI Visibility Checker inline above the CTA. */
   showChecker?: boolean;
+  /** Copy-and-paste response templates, rendered above the FAQ. */
+  examplesHeading?: string;
+  examples?: GeoExampleGroup[];
   /** Hub pages link out to the other pages. */
   links?: { slug: string; title: string; body: string }[];
 }
@@ -792,7 +805,16 @@ export const geoPages: GeoPage[] = [
   },
 ];
 
-export const geoPageBySlug = (slug: string): GeoPage | undefined =>
-  geoPages.find((p) => p.slug === slug);
+/** Every GEO page: the original TR/EN pairs plus the English adaptations. */
+export const allGeoPages: GeoPage[] = [
+  ...geoPages,
+  ...geoPagesEn,
+  ...geoPlatformEn,
+  ...geoVerticalsEn,
+  ...geoCityEn,
+];
 
-export const geoSlugs = (): string[] => geoPages.map((p) => p.slug);
+export const geoPageBySlug = (slug: string): GeoPage | undefined =>
+  allGeoPages.find((p) => p.slug === slug);
+
+export const geoSlugs = (): string[] => allGeoPages.map((p) => p.slug);

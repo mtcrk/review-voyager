@@ -25,6 +25,11 @@ const EstetikKlinikYorumYonetimi = () => {
       <SEO
         title="Estetik Klinik & Güzellik Merkezi Yorum Yönetimi Rehberi"
         description="Estetik klinik, güzellik merkezi ve medikal estetik için KVKK ve 1219'a uygun yorum yönetimi rehberi. Hassas branşa özel yanıt akışı + AI desteği."
+        alternates={[
+          { hrefLang: "tr", href: "https://voyagerespond.com/estetik-klinik-yorum-yonetimi/" },
+          { hrefLang: "en", href: "https://voyagerespond.com/aesthetic-clinic-review-management/" },
+          { hrefLang: "x-default", href: "https://voyagerespond.com/aesthetic-clinic-review-management/" },
+        ]}
         canonical="https://voyagerespond.com/estetik-klinik-yorum-yonetimi/"
         jsonLd={articleSchema}
       />

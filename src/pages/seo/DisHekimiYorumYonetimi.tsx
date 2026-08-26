@@ -25,6 +25,11 @@ const DisHekimiYorumYonetimi = () => {
       <SEO
         title="Diş Hekimi & Diş Kliniği Yorum Yönetimi | Google, Doktorsitesi"
         description="Diş hekimi ve klinikleri için Google, Doktorsitesi ve Doktortakvimi yorumlarının KVKK uyumlu yönetimi. Pratik rehber + AI destekli yanıt akışı."
+        alternates={[
+          { hrefLang: "tr", href: "https://voyagerespond.com/dis-hekimi-yorum-yonetimi/" },
+          { hrefLang: "en", href: "https://voyagerespond.com/dental-practice-review-management/" },
+          { hrefLang: "x-default", href: "https://voyagerespond.com/dental-practice-review-management/" },
+        ]}
         canonical="https://voyagerespond.com/dis-hekimi-yorum-yonetimi/"
         jsonLd={articleSchema}
       />

@@ -3,6 +3,7 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import AEOSection from "@/components/seo/AEOSection";
 import SEO from "@/components/seo/SEO";
+import { platformSlugPairs } from "@/lib/geoPlatformEn";
 import {
   getPlatformLandingPage,
   getPlatformLandingSlugs,
@@ -21,6 +22,16 @@ const PlatformLanding = () => {
 
   const pageUrl = `${SITE_URL}/platform/${data.slug}`;
 
+  // English counterpart lives at /platform/<en-slug> and is rendered by GeoLanding.
+  const enSlug = platformSlugPairs[data.slug];
+  const alternates = enSlug
+    ? [
+        { hrefLang: "tr", href: `${SITE_URL}/platform/${data.slug}/` },
+        { hrefLang: "en", href: `${SITE_URL}/platform/${enSlug}/` },
+        { hrefLang: "x-default", href: `${SITE_URL}/platform/${enSlug}/` },
+      ]
+    : undefined;
+
   const related = data.relatedSlugs
     .map((s) => platformLandingPages.find((p) => p.slug === s))
     .filter(Boolean) as typeof platformLandingPages;
@@ -31,6 +42,7 @@ const PlatformLanding = () => {
         title={data.metaTitle}
         description={data.metaDescription}
         canonical={pageUrl}
+        alternates={alternates}
         ogType="article"
         jsonLd={{
           "@context": "https://schema.org",

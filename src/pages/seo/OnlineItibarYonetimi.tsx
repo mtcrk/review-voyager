@@ -13,6 +13,11 @@ const OnlineItibarYonetimi = () => {
         title="Online İtibar Yönetimi Nedir? 2026 Rehberi | VoyageRespond"
         description="Online itibar yönetimi nedir, nasıl yapılır, hangi araçlar kullanılır? Google, Booking, TripAdvisor için AI destekli dijital itibar yönetimi rehberi."
         canonical="https://voyagerespond.com/online-itibar-yonetimi"
+        alternates={[
+          { hrefLang: "tr", href: "https://voyagerespond.com/online-itibar-yonetimi/" },
+          { hrefLang: "en", href: "https://voyagerespond.com/online-reputation-management/" },
+          { hrefLang: "x-default", href: "https://voyagerespond.com/online-reputation-management/" },
+        ]}
       />
 
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">

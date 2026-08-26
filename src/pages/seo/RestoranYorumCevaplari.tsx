@@ -99,6 +99,11 @@ const RestoranYorumCevaplari = () => {
         title="Restoran Yorum Örnekleri ve İşletmeler İçin Cevap Şablonları"
         description="Gerçek restoran yorumu örnekleri ve nasıl yazılacağı; ayrıca işletmeler için Google, Yelp ve TripAdvisor yorumlarına 30 hazır cevap şablonu."
         canonical="https://voyagerespond.com/restoran-yorum-cevaplari"
+        alternates={[
+          { hrefLang: "tr", href: "https://voyagerespond.com/restoran-yorum-cevaplari/" },
+          { hrefLang: "en", href: "https://voyagerespond.com/restaurant-review-response-examples/" },
+          { hrefLang: "x-default", href: "https://voyagerespond.com/restaurant-review-response-examples/" },
+        ]}
       />
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
         <div className="container mx-auto px-6">

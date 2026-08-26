@@ -66,6 +66,11 @@ const OtelYorumCevaplari = () => {
         title="Otel Yorum Cevap Örnekleri | 30 Hazır Şablon"
         description="Google, Booking ve TripAdvisor otel yorumları için 30 profesyonel cevap şablonu: memnuniyet, şikayet ve oda sorunları."
         canonical="https://voyagerespond.com/otel-yorum-cevaplari"
+        alternates={[
+          { hrefLang: "tr", href: "https://voyagerespond.com/otel-yorum-cevaplari/" },
+          { hrefLang: "en", href: "https://voyagerespond.com/hotel-review-response-examples/" },
+          { hrefLang: "x-default", href: "https://voyagerespond.com/hotel-review-response-examples/" },
+        ]}
       />
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
         <div className="container mx-auto px-6">

@@ -48,7 +48,6 @@ const GeoLanding = () => {
   if (!page) return null;
 
   const isTr = page.lang === "tr";
-  const altPage = geoPageBySlug(page.alt);
   const enSlug = isTr ? page.alt : page.slug;
   const trSlug = isTr ? page.slug : page.alt;
 
@@ -93,11 +92,10 @@ const GeoLanding = () => {
               </span>
             </button>
             <div className="flex items-center gap-4">
-              {altPage && (
-                <Link to={`/${altPage.slug}/`} className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-foreground">
-                  {t.otherLang}
-                </Link>
-              )}
+              <Link to={`/${isTr ? enSlug : trSlug}/`} className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-foreground">
+                {t.otherLang}
+              </Link>
+
               <button onClick={() => navigate("/demo")} className="px-4 py-2 rounded-md text-sm font-medium text-white" style={{ backgroundColor: "#7A5AF8" }}>
                 {t.tryFree}
               </button>
@@ -179,7 +177,32 @@ const GeoLanding = () => {
           </div>
         </section>
 
+        {/* Response templates */}
+        {page.examples && (
+          <section className="container mx-auto px-4 sm:px-6 py-8 max-w-4xl">
+            <h2 className="text-2xl font-bold text-foreground mb-6">
+              {page.examplesHeading || (isTr ? "Örnekler" : "Examples")}
+            </h2>
+            <div className="space-y-8">
+              {page.examples.map((group) => (
+                <div key={group.category}>
+                  <h3 className="text-lg font-semibold text-foreground mb-4">{group.category}</h3>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {group.items.map((item) => (
+                      <div key={item.title} className="rounded-xl border border-border bg-card p-5">
+                        <div className="font-medium text-foreground mb-2 text-sm">{item.title}</div>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{item.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Hub links */}
+
         {page.links && (
           <section className="container mx-auto px-4 sm:px-6 py-8 max-w-4xl">
             <h2 className="text-2xl font-bold text-foreground mb-6">{t.guides}</h2>

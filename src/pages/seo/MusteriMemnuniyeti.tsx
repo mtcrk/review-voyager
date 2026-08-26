@@ -12,6 +12,11 @@ const MusteriMemnuniyeti = () => {
       <SEO
         title="Müşteri Memnuniyeti Nedir? Nasıl Ölçülür ve Artırılır? | 2026"
         description="Müşteri memnuniyeti nedir, neden önemlidir, NPS/CSAT/CES ile nasıl ölçülür? İşletmeler için uygulanabilir 8 adımlı memnuniyet artırma rehberi."
+        alternates={[
+          { hrefLang: "tr", href: "https://voyagerespond.com/musteri-memnuniyeti/" },
+          { hrefLang: "en", href: "https://voyagerespond.com/customer-satisfaction-management/" },
+          { hrefLang: "x-default", href: "https://voyagerespond.com/customer-satisfaction-management/" },
+        ]}
         canonical="https://voyagerespond.com/musteri-memnuniyeti"
       />
 
