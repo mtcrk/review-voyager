@@ -44,6 +44,11 @@ const SehirOtelYorumYonetimi = () => {
         title={city.seoTitle}
         description={city.seoDescription}
         canonical={`/otel-yorum-yonetimi/${city.slug}`}
+        alternates={[
+          { hrefLang: "tr", href: `https://voyagerespond.com/otel-yorum-yonetimi/${city.slug}/` },
+          { hrefLang: "en", href: `https://voyagerespond.com/hotel-review-management/${city.slug}/` },
+          { hrefLang: "x-default", href: `https://voyagerespond.com/hotel-review-management/${city.slug}/` },
+        ]}
         jsonLd={jsonLd}
       />
 

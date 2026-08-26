@@ -29,6 +29,11 @@ const SaglikItibarYonetimi = () => {
       <SEO
         title="Sağlık Kuruluşları için İtibar & Yorum Yönetimi | Klinik, Doktor, Hastane"
         description="Klinik, doktor, hastane ve estetik merkezler için KVKK ve 1219 sayılı kanuna uygun online itibar & yorum yönetimi. Pratik rehber + AI destekli yanıt akışı."
+        alternates={[
+          { hrefLang: "tr", href: "https://voyagerespond.com/saglik-itibar-yonetimi/" },
+          { hrefLang: "en", href: "https://voyagerespond.com/healthcare-reputation-management/" },
+          { hrefLang: "x-default", href: "https://voyagerespond.com/healthcare-reputation-management/" },
+        ]}
         canonical="https://voyagerespond.com/saglik-itibar-yonetimi/"
         jsonLd={articleSchema}
       />

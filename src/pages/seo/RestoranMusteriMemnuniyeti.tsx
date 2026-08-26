@@ -12,6 +12,11 @@ const RestoranMusteriMemnuniyeti = () => {
       <SEO
         title="Restoran Müşteri Memnuniyeti: Ölçüm, Anket, Yorum Yönetimi 2026"
         description="Restoran müşteri memnuniyeti nasıl ölçülür ve artırılır? 4 boyutta ölçüm (yemek, servis, atmosfer, fiyat), anket örnekleri ve Google yorum stratejisi."
+        alternates={[
+          { hrefLang: "tr", href: "https://voyagerespond.com/restoran-musteri-memnuniyeti/" },
+          { hrefLang: "en", href: "https://voyagerespond.com/restaurant-customer-satisfaction/" },
+          { hrefLang: "x-default", href: "https://voyagerespond.com/restaurant-customer-satisfaction/" },
+        ]}
         canonical="https://voyagerespond.com/restoran-musteri-memnuniyeti"
       />
 
