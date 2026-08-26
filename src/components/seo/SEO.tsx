@@ -9,7 +9,10 @@ interface SEOProps {
   ogType?: string;
   noindex?: boolean;
   jsonLd?: Record<string, any> | Record<string, any>[];
+  /** Reciprocal hreflang links (include an x-default entry). */
+  alternates?: { hrefLang: string; href: string }[];
 }
+
 
 const SITE_URL = "https://voyagerespond.com";
 
