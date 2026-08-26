@@ -8,6 +8,8 @@
 
 import { geoPagesEn } from "./geoPagesEn";
 import { geoPlatformEn } from "./geoPlatformEn";
+import { geoVerticalsEn } from "./geoVerticalsEn";
+import { geoCityEn } from "./geoCityEn";
 
 export interface GeoStep {
   title: string;
@@ -804,7 +806,13 @@ export const geoPages: GeoPage[] = [
 ];
 
 /** Every GEO page: the original TR/EN pairs plus the English adaptations. */
-export const allGeoPages: GeoPage[] = [...geoPages, ...geoPagesEn, ...geoPlatformEn];
+export const allGeoPages: GeoPage[] = [
+  ...geoPages,
+  ...geoPagesEn,
+  ...geoPlatformEn,
+  ...geoVerticalsEn,
+  ...geoCityEn,
+];
 
 export const geoPageBySlug = (slug: string): GeoPage | undefined =>
   allGeoPages.find((p) => p.slug === slug);
