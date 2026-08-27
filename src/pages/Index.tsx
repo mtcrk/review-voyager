@@ -539,6 +539,27 @@ const Index = () => {
               <li><Link to="/blog/kotu-yorumlara-nasil-cevap-verilir" className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Kötü Yorumlara Nasıl Cevap Verilir? →</Link></li>
             </ul>
           </div>
+          <div className="max-w-4xl mx-auto mt-4 p-6 rounded-xl bg-background border border-border">
+            <h2 className="text-base font-semibold text-foreground mb-4">English</h2>
+            <ul className="grid sm:grid-cols-2 gap-2">
+              {[
+                ["/review-management-software/", "Review Management Software"],
+                ["/online-reputation-management/", "Online Reputation Management"],
+                ["/hotel-review-response-examples/", "Hotel Review Response Examples"],
+                ["/google-review-management/", "Google Review Management"],
+                ["/ai-review-response/", "AI Review Response"],
+                ["/business-review-management/", "Business Review Management"],
+                ["/google-business-profile-optimization/", "Google Business Profile Optimization"],
+                ["/ai-search-visibility/", "AI Search Visibility"],
+              ].map(([to, label]) => (
+                <li key={to}>
+                  <Link to={to} className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">
+                    {label} →
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
         <div className="container mx-auto px-4 sm:px-6 py-10">
           <div className="grid sm:grid-cols-3 gap-8 mb-8">
