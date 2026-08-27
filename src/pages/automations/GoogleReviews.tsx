@@ -396,11 +396,11 @@ const GoogleReviews = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>© 2024 VoyageRespond</span>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/blog")} className="hover:text-foreground">Blog</button>
+            <Link to="/blog" className="hover:text-foreground">Blog</Link>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/privacy-policy")} className="hover:text-foreground">Gizlilik Politikası</button>
+            <Link to="/privacy-policy" className="hover:text-foreground">Gizlilik Politikası</Link>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/terms-of-service")} className="hover:text-foreground">Kullanım Koşulları</button>
+            <Link to="/terms-of-service" className="hover:text-foreground">Kullanım Koşulları</Link>
           </div>
         </div>
       </footer>
