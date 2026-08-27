@@ -507,13 +507,15 @@ const Index = () => {
                 {/* CTA */}
                 <div className="pt-4">
                   <Button
+                    asChild
                     size="lg"
-                    onClick={() => navigate("/register")}
                     className="gradient-primary text-white text-base px-10 py-6 hover:scale-[1.02] transition-all duration-200 group w-full sm:w-auto"
                     style={{ boxShadow: "0 10px 40px -10px rgba(122,90,248,0.55)" }}
                   >
-                    {t('indexPage.pricingSection.cta')}
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
+                    <Link to="/register">
+                      {t('indexPage.pricingSection.cta')}
+                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
+                    </Link>
                   </Button>
                 </div>
               </div>
