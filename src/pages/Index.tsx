@@ -10,7 +10,6 @@ import SEO from "@/components/seo/SEO";
 import { HeroReviewCarousel } from "@/components/landing/HeroReviewCarousel";
 
 const Index = () => {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const { t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
