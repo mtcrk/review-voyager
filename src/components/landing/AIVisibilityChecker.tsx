@@ -9,7 +9,8 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation as useRouterLocation } from "react-router-dom";
+import { isEnglishPath } from "@/lib/geoPages";
 import { EmailGateModal } from "@/components/EmailGateModal";
 import { trackEvent } from "@/lib/analytics";
 
@@ -83,7 +84,13 @@ function isEmailUnlocked(): boolean {
 }
 
 export function AIVisibilityChecker() {
-  const { t } = useTranslation();
+  const { i18n } = useTranslation();
+  const { pathname } = useRouterLocation();
+  // Resolve the page language from the route so prerendered English pages
+  // render English copy without depending on a client-side effect.
+  const lng: "tr" | "en" = isEnglishPath(pathname) ? "en" : "tr";
+  const t = (key: string, opts?: Record<string, unknown>) =>
+    i18n.t(key, { lng, ...(opts || {}) }) as string;
   const navigate = useNavigate();
   const [businessName, setBusinessName] = useState("");
   const [location, setLocation] = useState("");
