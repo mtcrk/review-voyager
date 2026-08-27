@@ -818,3 +818,15 @@ export const geoPageBySlug = (slug: string): GeoPage | undefined =>
   allGeoPages.find((p) => p.slug === slug);
 
 export const geoSlugs = (): string[] => allGeoPages.map((p) => p.slug);
+
+/** Slugs (no leading slash) of every English GEO page — used for locale detection. */
+export const geoEnglishSlugs: Set<string> = new Set(
+  allGeoPages.filter((p) => p.lang === "en").map((p) => p.slug)
+);
+
+/** True when the given pathname is one of the English public pages. */
+export const isEnglishPath = (pathname: string): boolean => {
+  if (pathname === "/en" || pathname.startsWith("/en/")) return true;
+  const slug = pathname.replace(/^\/+/, "").replace(/\/+$/, "");
+  return geoEnglishSlugs.has(slug);
+};
