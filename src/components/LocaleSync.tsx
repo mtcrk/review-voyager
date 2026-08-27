@@ -1,11 +1,12 @@
 import { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { isEnglishPath } from "@/lib/geoPages";
 
 /**
- * Keeps i18n language in sync with the URL.
- * - /en/...  -> EN
- * - /...     -> TR (default)
+ * Keeps the i18n language in sync with the URL.
+ * - /en/... and root-level English pages -> EN
+ * - everything else -> TR (default)
  *
  * Mounted once inside <BrowserRouter>.
  */
@@ -14,13 +15,10 @@ export function LocaleSync() {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    const isEn = pathname === "/en" || pathname.startsWith("/en/");
-    const target = isEn ? "en" : "tr";
+    // Note: the <html lang> attribute is owned by SEO.tsx (Helmet) — do not set it here.
+    const target = isEnglishPath(pathname) ? "en" : "tr";
     if (i18n.language !== target) {
       i18n.changeLanguage(target);
-    }
-    if (typeof document !== "undefined") {
-      document.documentElement.lang = target;
     }
   }, [pathname, i18n]);
 

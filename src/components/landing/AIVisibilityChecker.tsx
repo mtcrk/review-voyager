@@ -9,7 +9,8 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation as useRouterLocation } from "react-router-dom";
+import { isEnglishPath } from "@/lib/geoPages";
 import { EmailGateModal } from "@/components/EmailGateModal";
 import { trackEvent } from "@/lib/analytics";
 
@@ -62,10 +63,10 @@ const ENGINE_LABELS: Record<EngineName, string> = {
 };
 
 const STAGES = [
-  { key: "google", label: "Google'da işletmeniz aranıyor…", icon: Search },
-  { key: "competitors", label: "Bölgedeki rakipler taranıyor…", icon: Users },
-  { key: "ai", label: "AI asistana canlı soruluyor…", icon: Bot },
-  { key: "score", label: "Skor hesaplanıyor…", icon: BarChart3 },
+  { key: "google", i18nKey: "landing.checker.stageGoogle", icon: Search },
+  { key: "competitors", i18nKey: "landing.checker.stageCompetitors", icon: Users },
+  { key: "ai", i18nKey: "landing.checker.stageAi", icon: Bot },
+  { key: "score", i18nKey: "landing.checker.stageScore", icon: BarChart3 },
 ];
 
 function getUsageCount(): number {
@@ -83,7 +84,13 @@ function isEmailUnlocked(): boolean {
 }
 
 export function AIVisibilityChecker() {
-  const { t } = useTranslation();
+  const { i18n } = useTranslation();
+  const { pathname } = useRouterLocation();
+  // Resolve the page language from the route so prerendered English pages
+  // render English copy without depending on a client-side effect.
+  const lng: "tr" | "en" = isEnglishPath(pathname) ? "en" : "tr";
+  const t = (key: string, opts?: Record<string, unknown>) =>
+    i18n.t(key, { lng, ...(opts || {}) }) as string;
   const navigate = useNavigate();
   const [businessName, setBusinessName] = useState("");
   const [location, setLocation] = useState("");
@@ -138,7 +145,7 @@ export function AIVisibilityChecker() {
   const handleAnalyze = async () => {
     if (limitReached) return;
     if (!businessName.trim()) {
-      toast.error("Lütfen işletme adı girin");
+      toast.error(t("landing.checker.enterName"));
       return;
     }
     trackEvent("ai_checker_started", { hasLocation: !!location.trim() });
@@ -156,7 +163,7 @@ export function AIVisibilityChecker() {
       const { data, error } = await supabase.functions.invoke("ai-visibility-demo", {
         body: { businessName: businessName.trim(), location: location.trim() || undefined },
       });
-      if (error) throw new Error(error.message || "Analiz başarısız");
+      if (error) throw new Error(error.message || t("landing.checker.analysisFailed"));
       if (data?.error) throw new Error(data.error);
 
       const parsed = data as AnalysisResult;
@@ -176,7 +183,7 @@ export function AIVisibilityChecker() {
       }
     } catch (err) {
       console.error("Analysis error:", err);
-      toast.error(err instanceof Error ? err.message : "Bir hata oluştu");
+      toast.error(err instanceof Error ? err.message : t("landing.checker.genericError"));
     } finally {
       stageTimers.forEach((id) => clearTimeout(id));
       setLoading(false);
@@ -224,13 +231,13 @@ export function AIVisibilityChecker() {
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4">
             <Sparkles className="w-4 h-4" />
-            Ücretsiz · Gerçek veri
+            {t("landing.checker.badge")}
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
-            AI Sizi Öneriyor mu? <span className="text-primary">Şimdi Ölçelim.</span>
+            {t("landing.checker.title")} <span className="text-primary">{t("landing.checker.titleAccent")}</span>
           </h2>
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-            Google'dan gerçek verinizi çekiyoruz, sonra AI asistana canlı soruyoruz: sizi öneriyor mu, yoksa rakipleri mi?
+            {t("landing.checker.subtitle")}
           </p>
         </div>
 
@@ -241,12 +248,12 @@ export function AIVisibilityChecker() {
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 mb-4">
                 <Lock className="w-7 h-7 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Deneme hakkınız doldu</h3>
+              <h3 className="text-xl font-semibold mb-2">{t("landing.checker.limitTitle")}</h3>
               <p className="text-muted-foreground mb-5 max-w-md mx-auto">
-                E-postanızı bırakın, +3 ölçüm hakkı ve detaylı rakip verilerini açalım.
+                {t("landing.checker.limitBody")}
               </p>
               <Button size="lg" className="gradient-primary text-white" onClick={() => setGateOpen(true)}>
-                E-posta ile devam et <ArrowRight className="w-5 h-5 ml-2" />
+                {t("landing.checker.limitCta")} <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </div>
           ) : limitReached ? (
@@ -254,10 +261,10 @@ export function AIVisibilityChecker() {
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 mb-4">
                 <Lock className="w-7 h-7 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Deneme limitine ulaştınız</h3>
-              <p className="text-muted-foreground mb-5">Sınırsız analiz için ücretsiz hesap oluşturun.</p>
+              <h3 className="text-xl font-semibold mb-2">{t("landing.checker.limitAuthTitle")}</h3>
+              <p className="text-muted-foreground mb-5">{t("landing.checker.limitAuthBody")}</p>
               <Button size="lg" className="gradient-primary text-white" onClick={() => navigate("/register")}>
-                Ücretsiz Kayıt Ol <ArrowRight className="w-5 h-5 ml-2" />
+                {t("landing.checker.limitAuthCta")} <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </div>
           ) : (
@@ -266,7 +273,7 @@ export function AIVisibilityChecker() {
                 <div className="flex-1">
                   <Input
                     type="text"
-                    placeholder="İşletme adınız (örn: Cafe Botanica)"
+                    placeholder={t("landing.checker.namePlaceholder")}
                     value={businessName}
                     onChange={(e) => setBusinessName(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
@@ -280,7 +287,7 @@ export function AIVisibilityChecker() {
                     <Input
                       ref={locRef}
                       type="text"
-                      placeholder="Konum (opsiyonel)"
+                      placeholder={t("landing.checker.locationPlaceholder")}
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
@@ -316,18 +323,18 @@ export function AIVisibilityChecker() {
                 className="h-14 px-8 text-base sm:text-lg gradient-primary text-white w-full sm:w-auto sm:self-end"
               >
                 {loading ? (
-                  <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Analiz Ediliyor…</>
+                  <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> {t("landing.checker.analyzing")}</>
                 ) : (
-                  <><Eye className="w-5 h-5 mr-2" /> Şimdi Ölç</>
+                  <><Eye className="w-5 h-5 mr-2" /> {t("landing.checker.measureNow")}</>
                 )}
               </Button>
               <p className="text-xs text-muted-foreground text-center">
                 {isAuthed ? (
-                  <>Sınırsız kullanım aktif · üye hesabınızla giriş yaptınız</>
+                  <>{t("landing.checker.unlimitedActive")}</>
                 ) : (
                   <>
-                    Kalan hak: <span className="font-medium text-foreground">{remainingTries}</span>
-                    {" · "}Sınırsız için <button onClick={() => navigate("/register")} className="text-primary hover:underline">kayıt olun</button>
+                    {t("landing.checker.remaining")} <span className="font-medium text-foreground">{remainingTries}</span>
+                    {" · "}{t("landing.checker.unlimitedFor")} <button onClick={() => navigate("/register")} className="text-primary hover:underline">{t("landing.checker.signUp")}</button>
                   </>
                 )}
               </p>
@@ -348,7 +355,7 @@ export function AIVisibilityChecker() {
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${done ? "bg-green-100 text-green-600" : active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
                       {done ? <CheckCircle2 className="w-5 h-5" /> : active ? <Loader2 className="w-4 h-4 animate-spin" /> : <Icon className="w-4 h-4" />}
                     </div>
-                    <span className={`text-sm ${active ? "text-foreground font-medium" : "text-muted-foreground"}`}>{s.label}</span>
+                    <span className={`text-sm ${active ? "text-foreground font-medium" : "text-muted-foreground"}`}>{t(s.i18nKey)}</span>
                   </div>
                 );
               })}
@@ -364,16 +371,16 @@ export function AIVisibilityChecker() {
                 <AlertCircle className="w-6 h-6 text-amber-600" />
               </div>
               <div className="flex-1">
-                <h3 className="text-xl font-bold mb-2">Google'da işletmenizi bulamadık</h3>
+                <h3 className="text-xl font-bold mb-2">{t("landing.checker.notFoundTitle")}</h3>
                 <p className="text-muted-foreground mb-4">
-                  {result.message || "Bu başlı başına bir görünürlük problemi. Google Business Profile'ınız eksik olabilir ya da adınız farklı yazılıyor olabilir."}
+                  {result.message || t("landing.checker.notFoundBody")}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Button className="gradient-primary text-white" onClick={() => navigate("/demo")}>
-                    Nasıl düzeltilir, göster <ArrowRight className="w-4 h-4 ml-2" />
+                    {t("landing.checker.notFoundCta")} <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                   <Button variant="outline" onClick={() => { setResult(null); setBusinessName(""); }}>
-                    Farklı isimle dene
+                    {t("landing.checker.tryDifferent")}
                   </Button>
                 </div>
               </div>
@@ -387,7 +394,7 @@ export function AIVisibilityChecker() {
             <div className={`rounded-2xl p-6 sm:p-8 border-2 ${result.aiCheck.status === "unavailable" ? "border-amber-300 bg-amber-50/50" : result.aiCheck.mentioned ? "border-green-300 bg-green-50/50" : "border-red-300 bg-red-50/40"}`}>
               <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground mb-3">
                 <Bot className="w-4 h-4" />
-                <span>AI'a az önce soruldu · Gemini 2.5 · canlı</span>
+                <span>{t("landing.checker.askedNow")}</span>
               </div>
               <div className="text-sm text-muted-foreground italic mb-4">
                 "{result.aiCheck.query}"
@@ -398,10 +405,10 @@ export function AIVisibilityChecker() {
                     <AlertCircle className="w-10 h-10 text-amber-600 flex-shrink-0" />
                     <div>
                       <div className="text-2xl sm:text-3xl font-bold text-amber-800 mb-1">
-                        AI ölçümü şu an yapılamadı
+                        {t("landing.checker.aiUnavailableTitle")}
                       </div>
                       <p className="text-amber-700">
-                        Skorunuz diğer sinyaller (Google puanı, yorum hacmi, GBP varlığı) üzerinden hesaplandı. AI görünürlüğü birazdan tekrar denenebilir.
+                        {t("landing.checker.aiUnavailableBody")}
                       </p>
                     </div>
                   </>
@@ -410,10 +417,10 @@ export function AIVisibilityChecker() {
                     <CheckCircle2 className="w-10 h-10 text-green-600 flex-shrink-0" />
                     <div>
                       <div className="text-2xl sm:text-3xl font-bold text-green-800 mb-1">
-                        {result.business.name} önerildi ✓
+                        {result.business.name} {t("landing.checker.recommendedSuffix")}
                       </div>
                       <p className="text-green-700">
-                        AI, {result.business.sector.toLowerCase()} önerileri arasında sizi listeledi.
+                        {t("landing.checker.recommendedBody", { sector: result.business.sector.toLowerCase() })}
                       </p>
                     </div>
                   </>
@@ -422,12 +429,12 @@ export function AIVisibilityChecker() {
                     <XCircle className="w-10 h-10 text-red-600 flex-shrink-0" />
                     <div>
                       <div className="text-2xl sm:text-3xl font-bold text-red-800 mb-1">
-                        {result.business.name} önerilmedi
+                        {result.business.name} {t("landing.checker.notRecommendedSuffix")}
                       </div>
                       <p className="text-red-700">
                         {result.aiCheck.mentionedCompetitors.length > 0
-                          ? <>AI yerine şu rakipleri önerdi: <span className="font-medium">{result.aiCheck.mentionedCompetitors.join(", ")}</span></>
-                          : "AI, bu bölgede sizi öneri listesine dahil etmedi."}
+                          ? <>{t("landing.checker.competitorsInstead")} <span className="font-medium">{result.aiCheck.mentionedCompetitors.join(", ")}</span></>
+                          : t("landing.checker.notIncluded")}
                       </p>
                     </div>
                   </>
@@ -441,7 +448,7 @@ export function AIVisibilityChecker() {
                 return (
                   <div className="mt-4 space-y-2">
                     <p className="text-xs font-medium text-muted-foreground">
-                      Ölçülen {measured.length} motorun {mentioned.length}'inde önerildiniz
+                      {t("landing.checker.enginesMeasured", { measured: measured.length, mentioned: mentioned.length })}
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {visible.map((c) => {
@@ -463,7 +470,7 @@ export function AIVisibilityChecker() {
                             )}
                             {label}
                             {c.engine === "chatgpt" && c.grounded === false && (
-                              <span className="ml-1 text-[10px] opacity-70">(web'siz)</span>
+                              <span className="ml-1 text-[10px] opacity-70">{t("landing.checker.noWeb")}</span>
                             )}
                           </span>
                         );
@@ -471,7 +478,7 @@ export function AIVisibilityChecker() {
                     </div>
                     {visible.some((c) => c.engine === "perplexity" && c.citations && c.citations.length > 0) && (
                       <p className="text-xs text-muted-foreground">
-                        <span className="font-medium text-foreground">Perplexity kaynakları:</span>{" "}
+                        <span className="font-medium text-foreground">{t("landing.checker.perplexitySources")}</span>{" "}
                         {visible.find((c) => c.engine === "perplexity")?.citations?.join(", ")}
                       </p>
                     )}
@@ -479,22 +486,22 @@ export function AIVisibilityChecker() {
                 );
               })()}
               <p className="text-xs text-muted-foreground mt-4 italic">
-                AI cevapları zamanla değişebilir; bu anlık bir ölçümdür.
+                {t("landing.checker.aiDisclaimer")}
               </p>
             </div>
 
             {/* Score + Business info */}
             <div className="grid md:grid-cols-3 gap-4">
               <div className={`rounded-2xl p-6 border ${scoreBg(result.score.total)} ring-4 ${scoreRing(result.score.total)}`}>
-                <div className="text-xs text-muted-foreground mb-1">AI Visibility Skoru</div>
+                <div className="text-xs text-muted-foreground mb-1">{t("landing.checker.scoreLabel")}</div>
                 <div className={`text-5xl font-bold ${scoreColor(result.score.total)}`}>
                   {result.score.total}<span className="text-2xl text-muted-foreground">/100</span>
                 </div>
-                <div className="text-xs text-muted-foreground mt-2">Deterministik formül</div>
+                <div className="text-xs text-muted-foreground mt-2">{t("landing.checker.deterministic")}</div>
               </div>
               <div className="rounded-2xl p-6 border bg-card md:col-span-2">
                 <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground mb-2">
-                  <MapPin className="w-3.5 h-3.5" /> Google verisi · canlı
+                  <MapPin className="w-3.5 h-3.5" /> {t("landing.checker.googleDataLive")}
                 </div>
                 <div className="font-semibold text-lg mb-1">{result.business.name}</div>
                 <div className="text-sm text-muted-foreground mb-3">{result.business.address}</div>
@@ -503,7 +510,7 @@ export function AIVisibilityChecker() {
                     <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                     <span className="font-medium">{result.business.rating || "—"}</span>
                   </div>
-                  <div className="text-muted-foreground">{result.business.reviewCount} yorum</div>
+                  <div className="text-muted-foreground">{result.business.reviewCount} {t("landing.checker.reviews")}</div>
                   <div className="text-muted-foreground">· {result.business.sector}</div>
                 </div>
               </div>
@@ -522,7 +529,7 @@ export function AIVisibilityChecker() {
                 {/* Score breakdown */}
                 <div className="bg-card border rounded-2xl p-6 mb-6">
                   <h4 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-primary" /> Skor Kırılımı
+                    <BarChart3 className="w-5 h-5 text-primary" /> {t("landing.checker.scoreBreakdown")}
                   </h4>
                   <div className="space-y-3">
                     {Object.values(result.score.breakdown).map((b, i) => (
@@ -546,7 +553,7 @@ export function AIVisibilityChecker() {
                 {result.competitors && result.competitors.length > 0 && (
                   <div className="bg-card border rounded-2xl p-6 mb-6">
                     <h4 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                      <Trophy className="w-5 h-5 text-primary" /> Bölgedeki Rakipleriniz
+                      <Trophy className="w-5 h-5 text-primary" /> {t("landing.checker.competitorsHeading")}
                     </h4>
                     <div className="space-y-2">
                       {result.competitors.map((c, i) => (
@@ -560,7 +567,7 @@ export function AIVisibilityChecker() {
                               <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                               <span className="font-medium">{c.rating}</span>
                             </div>
-                            <span className="text-muted-foreground">{c.reviewCount} yorum</span>
+                            <span className="text-muted-foreground">{c.reviewCount} {t("landing.checker.reviews")}</span>
                           </div>
                         </div>
                       ))}
@@ -572,7 +579,7 @@ export function AIVisibilityChecker() {
                 {result.improvements && result.improvements.length > 0 && (
                   <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6">
                     <h4 className="font-semibold text-lg mb-4 flex items-center gap-2 text-amber-900">
-                      <TrendingUp className="w-5 h-5" /> Somut İyileştirmeler
+                      <TrendingUp className="w-5 h-5" /> {t("landing.checker.improvements")}
                     </h4>
                     <ul className="space-y-2">
                       {result.improvements.map((imp, i) => (
@@ -590,12 +597,12 @@ export function AIVisibilityChecker() {
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="bg-card border-2 border-primary/30 rounded-2xl p-6 sm:p-8 shadow-xl max-w-md text-center">
                     <Lock className="w-8 h-8 text-primary mx-auto mb-3" />
-                    <h4 className="font-bold text-lg mb-2">Detayları görmek için e-posta bırakın</h4>
+                    <h4 className="font-bold text-lg mb-2">{t("landing.checker.gateTitle")}</h4>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Skor kırılımı, rakip tablosu ve size özel iyileştirme önerileri açılır. +3 ölçüm hakkı hediye.
+                      {t("landing.checker.gateBody")}
                     </p>
                     <Button className="gradient-primary text-white w-full" onClick={() => setGateOpen(true)}>
-                      Detayları Aç <ArrowRight className="w-4 h-4 ml-2" />
+                      {t("landing.checker.gateCta")} <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
                   </div>
                 </div>
@@ -605,7 +612,7 @@ export function AIVisibilityChecker() {
             {/* CTA */}
             <div className="text-center pt-4">
               <Button size="lg" className="gradient-primary text-white px-8" onClick={() => navigate("/demo")}>
-                Bunu düzeltmemi ister misin? Demoyu gör <ArrowRight className="w-5 h-5 ml-2" />
+                {t("landing.checker.finalCta")} <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </div>
           </div>
