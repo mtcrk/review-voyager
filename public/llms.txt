@@ -7,12 +7,10 @@ VoyageRespond; çok platformlu yorum toplama, 8 farklı tonda AI destekli yanıt
 ## Pages
 
 - [Ana Sayfa](/): Ürün özeti, özellikler ve 3 ay ücretsiz deneme.
-- [Fiyatlandırma](/pricing): Plan seçenekleri ve fiyat bilgileri.
 - [Hakkımızda](/about): Şirket, misyon ve ekip bilgileri.
 - [İletişim](/contact): Demo talebi ve iletişim formu.
 - [Demo](/demo): Etkileşimli AI yanıt demosu — yorumdan saniyeler içinde marka uyumlu cevap üretimi.
 - [Blog](/blog): Yorum yönetimi, AI görünürlük ve dijital itibar rehberleri.
-- [Otomasyon Hub](/hub): Bağlı kanallarınıza göre kişiselleştirilmiş otomasyon merkezi.
 
 ## Hub Sayfaları
 
@@ -171,4 +169,4 @@ VoyageRespond; çok platformlu yorum toplama, 8 farklı tonda AI destekli yanıt
 - [Gizlilik Politikası](/privacy-policy): Veri işleme ve gizlilik koşulları.
 - [Kullanım Koşulları](/terms-of-service): Hizmet kullanım şartları ve sorumluluklar.
 
-<!-- generated 2026-08-27 — 146 pages -->
+<!-- generated 2026-08-27 — 144 pages -->
