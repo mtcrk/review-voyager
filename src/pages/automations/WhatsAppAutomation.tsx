@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Phone, ArrowRight, Check, Lock, Bell, MessageSquare, Zap, Users } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 
 const WhatsAppAutomation = () => {
-  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
@@ -46,8 +45,8 @@ const WhatsAppAutomation = () => {
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
         <div className="container mx-auto px-6">
           <div className="flex h-16 items-center justify-between">
-            <button
-              onClick={() => navigate("/")}
+            <Link
+              to="/"
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <img src={voyageRespondLogo} alt="VoyageRespond" className="h-7 w-7" />
@@ -55,13 +54,13 @@ const WhatsAppAutomation = () => {
                 <span className="font-normal">Voyage</span>
                 <span className="font-semibold">Respond</span>
               </span>
-            </button>
+            </Link>
             <div className="flex items-center gap-4">
-              <Button variant="ghost" onClick={() => navigate("/hub")}>
-                Automation Hub
+              <Button variant="ghost" asChild>
+                <Link to="/hub">Automation Hub</Link>
               </Button>
-              <Button className="gradient-primary text-white" onClick={() => navigate("/demo")}>
-                Get Started
+              <Button className="gradient-primary text-white" asChild>
+                <Link to="/demo">Get Started</Link>
               </Button>
             </div>
           </div>
@@ -158,12 +157,14 @@ const WhatsAppAutomation = () => {
             Check out our available automations for Instagram and Google Reviews.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button onClick={() => navigate("/automations/instagram-sales")}>
-              Instagram Automation
-              <ArrowRight className="w-4 h-4 ml-2" />
+            <Button asChild>
+              <Link to="/automations/instagram-sales">
+                Instagram Automation
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Link>
             </Button>
-            <Button variant="outline" onClick={() => navigate("/automations/google-reviews")}>
-              Google Reviews
+            <Button variant="outline" asChild>
+              <Link to="/automations/google-reviews">Google Reviews</Link>
             </Button>
           </div>
         </div>
@@ -175,13 +176,13 @@ const WhatsAppAutomation = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>© 2024 VoyageRespond</span>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/privacy-policy")} className="hover:text-foreground">
+            <Link to="/privacy-policy" className="hover:text-foreground">
               Privacy Policy
-            </button>
+            </Link>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/terms-of-service")} className="hover:text-foreground">
+            <Link to="/terms-of-service" className="hover:text-foreground">
               Terms of Service
-            </button>
+            </Link>
           </div>
         </div>
       </footer>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Check,
@@ -17,7 +17,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import SEO from "@/components/seo/SEO";
 
 const Pricing = () => {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
 
@@ -148,8 +147,8 @@ const Pricing = () => {
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between">
-            <button
-              onClick={() => navigate("/")}
+            <Link
+              to="/"
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <img src={voyageRespondLogo} alt="VoyageRespond" className="h-7 w-7" />
@@ -157,18 +156,18 @@ const Pricing = () => {
                 <span className="font-normal">Voyage</span>
                 <span className="font-semibold">Respond</span>
               </span>
-            </button>
+            </Link>
             <div className="flex items-center gap-4">
-              <Button variant="ghost" onClick={() => navigate("/hub")}>
-                Automation Hub
+              <Button variant="ghost" asChild>
+                <Link to="/hub">Automation Hub</Link>
               </Button>
               {user ? (
-                <Button variant="ghost" onClick={() => navigate("/dashboard")}>
-                  Dashboard
+                <Button variant="ghost" asChild>
+                  <Link to="/dashboard">Dashboard</Link>
                 </Button>
               ) : (
-                <Button className="gradient-primary text-white" onClick={() => navigate("/demo")}>
-                  Get Started
+                <Button className="gradient-primary text-white" asChild>
+                  <Link to="/demo">Get Started</Link>
                 </Button>
               )}
             </div>
@@ -255,9 +254,9 @@ const Pricing = () => {
                   plan.highlighted ? "gradient-primary text-white" : ""
                 }`}
                 variant={plan.highlighted ? "default" : "outline"}
-                onClick={() => navigate("/demo")}
+                asChild
               >
-                {plan.cta}
+                <Link to="/demo">{plan.cta}</Link>
               </Button>
 
               <div className="space-y-3">
@@ -319,16 +318,15 @@ const Pricing = () => {
                   </div>
                 ))}
               </div>
-              <Button
-                variant="outline"
-                className="w-full"
-                disabled={addon.status === "coming-soon"}
-                onClick={() => navigate("/demo")}
-              >
-                {addon.status === "coming-soon"
-                  ? "Coming Soon"
-                  : "Add to Plan"}
-              </Button>
+              {addon.status === "coming-soon" ? (
+                <Button variant="outline" className="w-full" disabled>
+                  Coming Soon
+                </Button>
+              ) : (
+                <Button variant="outline" className="w-full" asChild>
+                  <Link to="/demo">Add to Plan</Link>
+                </Button>
+              )}
             </div>
           ))}
         </div>
@@ -347,10 +345,12 @@ const Pricing = () => {
           <Button
             size="lg"
             className="gradient-primary text-white"
-            onClick={() => navigate("/demo")}
+            asChild
           >
-            Start Free Trial
-            <ArrowRight className="w-5 h-5 ml-2" />
+            <Link to="/demo">
+              Start Free Trial
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Link>
           </Button>
         </div>
       </section>
@@ -361,13 +361,13 @@ const Pricing = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>© 2024 VoyageRespond</span>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/privacy-policy")} className="hover:text-foreground">
+            <Link to="/privacy-policy" className="hover:text-foreground">
               Privacy Policy
-            </button>
+            </Link>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/terms-of-service")} className="hover:text-foreground">
+            <Link to="/terms-of-service" className="hover:text-foreground">
               Terms of Service
-            </button>
+            </Link>
           </div>
         </div>
       </footer>

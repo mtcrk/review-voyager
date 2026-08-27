@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ArrowRight, Check, Star, MessageSquare, Eye, TrendingUp, Sparkles, Zap, Target, Shield, Globe, Menu, X, Building2, UtensilsCrossed, Hotel, Stethoscope, Store, Dumbbell, Scissors } from "lucide-react";
 import { useState } from "react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
@@ -10,7 +10,6 @@ import SEO from "@/components/seo/SEO";
 import { HeroReviewCarousel } from "@/components/landing/HeroReviewCarousel";
 
 const Index = () => {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const { t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -65,8 +64,8 @@ const Index = () => {
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
-            <button
-              onClick={() => navigate("/")}
+            <Link
+              to="/"
               className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
             >
               <img
@@ -78,44 +77,44 @@ const Index = () => {
                 <span className="font-normal">Voyage</span>
                 <span className="font-semibold">Respond</span>
               </span>
-            </button>
+            </Link>
 
             {/* Center Nav */}
             <div className="hidden md:flex items-center gap-8">
-              <button
-                onClick={() => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })}
+              <a
+                href="#features"
                 className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
               >
                 {t('indexPage.nav.features')}
-              </button>
-              <button
-                onClick={() => navigate("/blog")}
+              </a>
+              <Link
+                to="/blog"
                 className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
               >
                 {t('indexPage.nav.blog')}
-              </button>
-              <button
-                onClick={() => navigate("/contact")}
+              </Link>
+              <Link
+                to="/contact"
                 className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
               >
                 {t('indexPage.nav.contact')}
-              </button>
+              </Link>
             </div>
 
             {/* Right Side */}
             <div className="hidden md:flex items-center gap-3">
               <LanguageSwitcher />
-              <button
-                onClick={() => navigate(user ? "/dashboard" : "/login")}
+              <Link
+                to={user ? "/dashboard" : "/login"}
                 className="text-sm font-medium transition-colors px-3 py-2 text-muted-foreground hover:text-foreground"
               >
                 {user ? t('indexPage.nav.dashboard') : t('indexPage.nav.login')}
-              </button>
+              </Link>
               <Button
-                onClick={() => navigate("/demo")}
+                asChild
                 className="gradient-primary text-white text-sm px-5 py-2 h-9 hover:shadow-lg transition-all duration-200"
               >
-                {t('indexPage.nav.startFree')}
+                <Link to="/demo">{t('indexPage.nav.startFree')}</Link>
               </Button>
             </div>
 
@@ -137,25 +136,36 @@ const Index = () => {
           {mobileMenuOpen && (
             <div className="md:hidden border-t border-border py-4 space-y-1">
               {[
-                { label: t('indexPage.nav.features'), action: () => { document.getElementById("features")?.scrollIntoView({ behavior: "smooth" }); setMobileMenuOpen(false); } },
-                { label: t('indexPage.nav.blog'), action: () => { navigate("/blog"); setMobileMenuOpen(false); } },
-                { label: t('indexPage.nav.contact'), action: () => { navigate("/contact"); setMobileMenuOpen(false); } },
-                { label: user ? t('indexPage.nav.dashboard') : t('indexPage.nav.login'), action: () => { navigate(user ? "/dashboard" : "/login"); setMobileMenuOpen(false); } },
-              ].map((item) => (
-                <button
-                  key={item.label}
-                  onClick={item.action}
-                  className="block w-full text-left px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
-                >
-                  {item.label}
-                </button>
-              ))}
+                { label: t('indexPage.nav.features'), href: "#features" },
+                { label: t('indexPage.nav.blog'), to: "/blog" },
+                { label: t('indexPage.nav.contact'), to: "/contact" },
+                { label: user ? t('indexPage.nav.dashboard') : t('indexPage.nav.login'), to: user ? "/dashboard" : "/login" },
+              ].map((item) =>
+                item.to ? (
+                  <Link
+                    key={item.label}
+                    to={item.to}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block w-full text-left px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                ) : (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block w-full text-left px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
+                  >
+                    {item.label}
+                  </a>
+                )
+              )}
               <div className="px-4 pt-2">
-                <Button
-                  onClick={() => { navigate("/demo"); setMobileMenuOpen(false); }}
-                  className="w-full gradient-primary text-white"
-                >
-                  {t('indexPage.nav.startFree')}
+                <Button asChild className="w-full gradient-primary text-white">
+                  <Link to="/demo" onClick={() => setMobileMenuOpen(false)}>
+                    {t('indexPage.nav.startFree')}
+                  </Link>
                 </Button>
               </div>
             </div>
@@ -231,20 +241,22 @@ const Index = () => {
             {/* CTA Row */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <Button
+                asChild
                 size="lg"
-                onClick={() => navigate("/demo")}
                 className="gradient-primary text-white text-base px-8 py-6 w-full sm:w-auto hover:scale-[1.02] transition-all duration-200 group"
                 style={{ boxShadow: "0 10px 40px -10px rgba(122,90,248,0.55)" }}
               >
-                Ücretsiz Kaydolun
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
+                <Link to="/demo">
+                  Ücretsiz Kaydolun
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
               </Button>
               <Button
+                asChild
                 size="lg"
-                onClick={() => navigate("/demo")}
                 className="text-base px-8 py-6 w-full sm:w-auto bg-transparent border border-border text-foreground hover:bg-muted hover:border-border/80 transition-all duration-200"
               >
-                {t('indexPage.hero.ctaSecondary')}
+                <Link to="/demo">{t('indexPage.hero.ctaSecondary')}</Link>
               </Button>
             </div>
 
@@ -495,13 +507,15 @@ const Index = () => {
                 {/* CTA */}
                 <div className="pt-4">
                   <Button
+                    asChild
                     size="lg"
-                    onClick={() => navigate("/register")}
                     className="gradient-primary text-white text-base px-10 py-6 hover:scale-[1.02] transition-all duration-200 group w-full sm:w-auto"
                     style={{ boxShadow: "0 10px 40px -10px rgba(122,90,248,0.55)" }}
                   >
-                    {t('indexPage.pricingSection.cta')}
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
+                    <Link to="/register">
+                      {t('indexPage.pricingSection.cta')}
+                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
+                    </Link>
                   </Button>
                 </div>
               </div>
@@ -517,12 +531,33 @@ const Index = () => {
           <div className="max-w-4xl mx-auto p-6 rounded-xl bg-background border border-border">
             <h2 className="text-base font-semibold text-foreground mb-4">Popüler Rehberler</h2>
             <ul className="grid sm:grid-cols-2 gap-2">
-              <li><button onClick={() => navigate("/google-yorum-cevap-ornekleri")} className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Google Yorum Cevap Örnekleri (25 Şablon) →</button></li>
-              <li><button onClick={() => navigate("/otel-yorum-cevaplari")} className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Otel Yorum Cevapları →</button></li>
-              <li><button onClick={() => navigate("/restoran-yorum-cevaplari")} className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Restoran Yorum Cevapları →</button></li>
-              <li><button onClick={() => navigate("/blog/google-yorumlarina-nasil-yanit-verilir")} className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Google Yorumlarına Nasıl Yanıt Verilir? →</button></li>
-              <li><button onClick={() => navigate("/blog/ai-gorunurluk-skoru-nedir")} className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">AI Görünürlük Skoru Nedir? →</button></li>
-              <li><button onClick={() => navigate("/blog/kotu-yorumlara-nasil-cevap-verilir")} className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Kötü Yorumlara Nasıl Cevap Verilir? →</button></li>
+              <li><Link to="/google-yorum-cevap-ornekleri" className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Google Yorum Cevap Örnekleri (25 Şablon) →</Link></li>
+              <li><Link to="/otel-yorum-cevaplari" className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Otel Yorum Cevapları →</Link></li>
+              <li><Link to="/restoran-yorum-cevaplari" className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Restoran Yorum Cevapları →</Link></li>
+              <li><Link to="/blog/google-yorumlarina-nasil-yanit-verilir" className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Google Yorumlarına Nasıl Yanıt Verilir? →</Link></li>
+              <li><Link to="/blog/ai-gorunurluk-skoru-nedir" className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">AI Görünürlük Skoru Nedir? →</Link></li>
+              <li><Link to="/blog/kotu-yorumlara-nasil-cevap-verilir" className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Kötü Yorumlara Nasıl Cevap Verilir? →</Link></li>
+            </ul>
+          </div>
+          <div className="max-w-4xl mx-auto mt-4 p-6 rounded-xl bg-background border border-border">
+            <h2 className="text-base font-semibold text-foreground mb-4">English</h2>
+            <ul className="grid sm:grid-cols-2 gap-2">
+              {[
+                ["/review-management-software/", "Review Management Software"],
+                ["/online-reputation-management/", "Online Reputation Management"],
+                ["/hotel-review-response-examples/", "Hotel Review Response Examples"],
+                ["/google-review-management/", "Google Review Management"],
+                ["/ai-review-response/", "AI Review Response"],
+                ["/business-review-management/", "Business Review Management"],
+                ["/google-business-profile-optimization/", "Google Business Profile Optimization"],
+                ["/ai-search-visibility/", "AI Search Visibility"],
+              ].map(([to, label]) => (
+                <li key={to}>
+                  <Link to={to} className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">
+                    {label} →
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
@@ -552,10 +587,10 @@ const Index = () => {
             <div>
               <h4 className="font-medium text-foreground text-sm mb-3">{t('indexPage.footerSection.links')}</h4>
               <div className="space-y-2">
-                <button onClick={() => navigate("/about")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.about')}</button>
-                <button onClick={() => navigate("/blog")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.blog')}</button>
-                <button onClick={() => navigate("/contact")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.contact')}</button>
-                <button onClick={() => navigate("/hub")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.hub')}</button>
+                <Link to="/about" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.about')}</Link>
+                <Link to="/blog" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.blog')}</Link>
+                <Link to="/contact" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.contact')}</Link>
+                <Link to="/hub" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.hub')}</Link>
               </div>
             </div>
 
@@ -563,11 +598,11 @@ const Index = () => {
             <div>
               <h4 className="font-medium text-foreground text-sm mb-3">{t('indexPage.footerSection.legal')}</h4>
               <div className="space-y-2">
-                <button onClick={() => navigate("/privacy-policy")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.privacy')}</button>
-                <button onClick={() => navigate("/terms-of-service")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.terms')}</button>
-                <button onClick={() => navigate("/mesafeli-satis-sozlesmesi")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Mesafeli Satış Sözleşmesi</button>
-                <button onClick={() => navigate("/on-bilgilendirme-formu")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Ön Bilgilendirme Formu</button>
-                <button onClick={() => navigate("/iptal-iade-kosullari")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">İptal &amp; İade Koşulları</button>
+                <Link to="/privacy-policy" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.privacy')}</Link>
+                <Link to="/terms-of-service" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.terms')}</Link>
+                <Link to="/mesafeli-satis-sozlesmesi" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Mesafeli Satış Sözleşmesi</Link>
+                <Link to="/on-bilgilendirme-formu" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Ön Bilgilendirme Formu</Link>
+                <Link to="/iptal-iade-kosullari" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">İptal &amp; İade Koşulları</Link>
                 <p className="text-sm text-muted-foreground pt-1">support@voyagerespond.com</p>
               </div>
             </div>

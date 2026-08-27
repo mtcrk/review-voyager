@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,7 +17,6 @@ import {
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 
 const GoogleReviews = () => {
-  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
@@ -108,8 +107,8 @@ const GoogleReviews = () => {
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
         <div className="container mx-auto px-6">
           <div className="flex h-16 items-center justify-between">
-            <button
-              onClick={() => navigate("/")}
+            <Link
+              to="/"
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <img src={voyageRespondLogo} alt="VoyageRespond" className="h-7 w-7" />
@@ -117,21 +116,21 @@ const GoogleReviews = () => {
                 <span className="font-normal">Voyage</span>
                 <span className="font-semibold">Respond</span>
               </span>
-            </button>
+            </Link>
             <div className="flex items-center gap-4">
-              <button onClick={() => navigate("/blog")} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden md:block">
+              <Link to="/blog" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden md:block">
                 Blog
-              </button>
-              <button onClick={() => navigate("/hub")} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden md:block">
+              </Link>
+              <Link to="/hub" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden md:block">
                 Hub
-              </button>
-              <button
-                onClick={() => navigate("/demo")}
-                className="px-5 py-2.5 rounded-md text-sm font-medium text-white transition-all shadow-sm hover:shadow-md"
+              </Link>
+              <Link
+                to="/demo"
+                className="px-5 py-2.5 rounded-md text-sm font-medium text-white transition-all shadow-sm hover:shadow-md inline-block"
                 style={{ backgroundColor: "#7A5AF8" }}
               >
                 Ücretsiz Başla
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -384,9 +383,9 @@ const GoogleReviews = () => {
             </form>
           )}
           <div className="mt-6">
-            <button onClick={() => navigate("/blog")} className="text-sm text-primary hover:underline">
+            <Link to="/blog" className="text-sm text-primary hover:underline">
               Blog yazılarımızı okuyun →
-            </button>
+            </Link>
           </div>
         </div>
       </section>
@@ -397,11 +396,11 @@ const GoogleReviews = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>© 2024 VoyageRespond</span>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/blog")} className="hover:text-foreground">Blog</button>
+            <Link to="/blog" className="hover:text-foreground">Blog</Link>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/privacy-policy")} className="hover:text-foreground">Gizlilik Politikası</button>
+            <Link to="/privacy-policy" className="hover:text-foreground">Gizlilik Politikası</Link>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/terms-of-service")} className="hover:text-foreground">Kullanım Koşulları</button>
+            <Link to="/terms-of-service" className="hover:text-foreground">Kullanım Koşulları</Link>
           </div>
         </div>
       </footer>

@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import AEOSection from "@/components/seo/AEOSection";
@@ -14,7 +14,6 @@ import NotFound from "@/pages/NotFound";
 const SITE_URL = "https://voyagerespond.com";
 
 const PlatformLanding = () => {
-  const navigate = useNavigate();
   const { slug } = useParams<{ slug: string }>();
   const data = slug ? getPlatformLandingPage(slug) : undefined;
 
@@ -63,8 +62,7 @@ const PlatformLanding = () => {
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
         <div className="container mx-auto px-6">
           <div className="flex h-16 items-center justify-between">
-            <button
-              onClick={() => navigate("/")}
+            <Link to="/"
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <img src={voyageRespondLogo} alt="VoyageRespond" className="h-7 w-7" />
@@ -72,21 +70,19 @@ const PlatformLanding = () => {
                 <span className="font-normal">Voyage</span>
                 <span className="font-semibold">Respond</span>
               </span>
-            </button>
+            </Link>
             <div className="flex items-center gap-4">
-              <button
-                onClick={() => navigate("/blog")}
+              <Link to="/blog"
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
                 Blog
-              </button>
-              <button
-                onClick={() => navigate("/demo")}
+              </Link>
+              <Link to="/demo"
                 className="px-4 py-2 rounded-md text-sm font-medium text-white transition-all"
                 style={{ backgroundColor: "#7A5AF8" }}
               >
                 3 Ay Ücretsiz Dene
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -107,14 +103,13 @@ const PlatformLanding = () => {
           </p>
 
           <div className="mt-6 flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={() => navigate("/demo")}
+            <Link to="/demo"
               className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-white text-sm font-medium transition-all hover:shadow-lg"
               style={{ backgroundColor: "#7A5AF8" }}
             >
               Ücretsiz Başla
               <ArrowRight className="w-4 h-4" />
-            </button>
+            </Link>
             <p className="text-xs text-muted-foreground self-center">
               Kredi kartı gerekmez · İlk 3 ay ücretsiz
             </p>
@@ -189,14 +184,13 @@ const PlatformLanding = () => {
             VoyageRespond ile yorumlarınızı tek panelden, marka sesinde ve saniyeler
             içinde yanıtlayın. İlk 3 ay ücretsiz.
           </p>
-          <button
-            onClick={() => navigate("/demo")}
+          <Link to="/demo"
             className="inline-flex items-center gap-2 px-7 py-3 rounded-md text-white font-medium transition-all hover:shadow-lg"
             style={{ backgroundColor: "#7A5AF8" }}
           >
             Şimdi Ücretsiz Başla
             <ArrowRight className="w-4 h-4" />
-          </button>
+          </Link>
         </div>
 
         {/* FAQ + AEO */}
@@ -211,29 +205,26 @@ const PlatformLanding = () => {
             <ul className="space-y-2">
               {related.map((r) => (
                 <li key={r.slug}>
-                  <button
-                    onClick={() => navigate(`/platform/${r.slug}`)}
+                  <Link to={`/platform/${r.slug}`}
                     className="text-primary hover:underline text-sm text-left"
                   >
                     {r.emoji} {r.metaTitle} →
-                  </button>
+                  </Link>
                 </li>
               ))}
               <li>
-                <button
-                  onClick={() => navigate("/otel-yorum-cevaplari")}
+                <Link to="/otel-yorum-cevaplari"
                   className="text-primary hover:underline text-sm text-left"
                 >
                   🏨 Otel Yorum Cevapları (30 Şablon) →
-                </button>
+                </Link>
               </li>
               <li>
-                <button
-                  onClick={() => navigate("/google-yorum-cevap-ornekleri")}
+                <Link to="/google-yorum-cevap-ornekleri"
                   className="text-primary hover:underline text-sm text-left"
                 >
                   ⭐ Google Yorum Cevap Örnekleri (25 Şablon) →
-                </button>
+                </Link>
               </li>
             </ul>
           </aside>
@@ -245,13 +236,13 @@ const PlatformLanding = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>© 2026 VoyageRespond</span>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/privacy-policy")} className="hover:text-foreground">
+            <Link to="/privacy-policy" className="hover:text-foreground">
               Gizlilik Politikası
-            </button>
+            </Link>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/terms-of-service")} className="hover:text-foreground">
+            <Link to="/terms-of-service" className="hover:text-foreground">
               Kullanım Koşulları
-            </button>
+            </Link>
           </div>
         </div>
       </footer>

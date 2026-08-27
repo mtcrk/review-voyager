@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   MessageSquare,
@@ -12,7 +12,6 @@ import {
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 
 const InstagramSales = () => {
-  const navigate = useNavigate();
 
   const useCases = [
     {
@@ -50,8 +49,8 @@ const InstagramSales = () => {
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
         <div className="container mx-auto px-6">
           <div className="flex h-16 items-center justify-between">
-            <button
-              onClick={() => navigate("/")}
+            <Link
+              to="/"
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <img src={voyageRespondLogo} alt="VoyageRespond" className="h-7 w-7" />
@@ -59,13 +58,13 @@ const InstagramSales = () => {
                 <span className="font-normal">Voyage</span>
                 <span className="font-semibold">Respond</span>
               </span>
-            </button>
+            </Link>
             <div className="flex items-center gap-4">
-              <Button variant="ghost" onClick={() => navigate("/hub")}>
-                Automation Hub
+              <Button variant="ghost" asChild>
+                <Link to="/hub">Automation Hub</Link>
               </Button>
-              <Button className="gradient-primary text-white" onClick={() => navigate("/demo")}>
-                Get Started
+              <Button className="gradient-primary text-white" asChild>
+                <Link to="/demo">Get Started</Link>
               </Button>
             </div>
           </div>
@@ -94,13 +93,15 @@ const InstagramSales = () => {
             <Button
               size="lg"
               className="gradient-primary text-white px-8"
-              onClick={() => navigate("/demo")}
+              asChild
             >
-              Start Free Trial
-              <ArrowRight className="w-5 h-5 ml-2" />
+              <Link to="/demo">
+                Start Free Trial
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Link>
             </Button>
-            <Button size="lg" variant="outline" onClick={() => navigate("/hub")}>
-              View All Automations
+            <Button size="lg" variant="outline" asChild>
+              <Link to="/hub">View All Automations</Link>
             </Button>
           </div>
         </div>
@@ -228,10 +229,12 @@ const InstagramSales = () => {
           <Button
             size="lg"
             className="gradient-primary text-white px-8"
-            onClick={() => navigate("/demo")}
+            asChild
           >
-            Get Started Free
-            <ArrowRight className="w-5 h-5 ml-2" />
+            <Link to="/demo">
+              Get Started Free
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Link>
           </Button>
         </div>
       </section>
@@ -242,13 +245,13 @@ const InstagramSales = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>© 2024 VoyageRespond</span>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/privacy-policy")} className="hover:text-foreground">
+            <Link to="/privacy-policy" className="hover:text-foreground">
               Privacy Policy
-            </button>
+            </Link>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/terms-of-service")} className="hover:text-foreground">
+            <Link to="/terms-of-service" className="hover:text-foreground">
               Terms of Service
-            </button>
+            </Link>
           </div>
         </div>
       </footer>

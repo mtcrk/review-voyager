@@ -1,11 +1,10 @@
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ArrowRight, Stethoscope, ShieldCheck, Bot, Activity, Users, AlertTriangle, FileText } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import AEOSection from "@/components/seo/AEOSection";
 import SEO from "@/components/seo/SEO";
 
 const SaglikItibarYonetimi = () => {
-  const navigate = useNavigate();
 
   const articleSchema = {
     "@context": "https://schema.org",
@@ -41,17 +40,17 @@ const SaglikItibarYonetimi = () => {
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between">
-            <button onClick={() => navigate("/")} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <img src={voyageRespondLogo} alt="VoyageRespond" className="h-7 w-7" />
               <span className="text-lg" style={{ color: "#1F2937" }}>
                 <span className="font-normal">Voyage</span><span className="font-semibold">Respond</span>
               </span>
-            </button>
+            </Link>
             <div className="flex items-center gap-4">
-              <button onClick={() => navigate("/blog")} className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-foreground">Blog</button>
-              <button onClick={() => navigate("/demo")} className="px-4 py-2 rounded-md text-sm font-medium text-white" style={{ backgroundColor: "#7A5AF8" }}>
+              <Link to="/blog" className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-foreground">Blog</Link>
+              <Link to="/demo" className="px-4 py-2 rounded-md text-sm font-medium text-white" style={{ backgroundColor: "#7A5AF8" }}>
                 Ücretsiz Dene
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -215,9 +214,9 @@ const SaglikItibarYonetimi = () => {
           <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
             KVKK ve 1219'a uygun yanıt akışı, çoklu kanal tek panel, AI duygu analizi. Ücretsiz başlayın, kart bilgisi gerekmez.
           </p>
-          <button onClick={() => navigate("/demo")} className="px-8 py-3 rounded-md text-white font-medium hover:shadow-lg min-h-[48px]" style={{ backgroundColor: "#7A5AF8" }}>
+          <Link to="/demo" className="px-8 py-3 rounded-md text-white font-medium hover:shadow-lg min-h-[48px]" style={{ backgroundColor: "#7A5AF8" }}>
             Ücretsiz Başla <ArrowRight className="w-4 h-4 inline ml-1" />
-          </button>
+          </Link>
         </div>
 
         <AEOSection
@@ -235,13 +234,13 @@ const SaglikItibarYonetimi = () => {
         <div className="mt-12 p-6 rounded-xl bg-muted/50 border border-border">
           <h3 className="font-semibold text-foreground mb-4">İlgili Rehberler</h3>
           <ul className="space-y-2">
-            <li><button onClick={() => navigate("/blog/doktor-yorumlari-nasil-yonetilir")} className="text-primary hover:underline text-sm">Doktor Yorumları Nasıl Yönetilir? →</button></li>
-            <li><button onClick={() => navigate("/dis-hekimi-yorum-yonetimi")} className="text-primary hover:underline text-sm">Diş Hekimi & Diş Kliniği Yorum Yönetimi →</button></li>
-            <li><button onClick={() => navigate("/estetik-klinik-yorum-yonetimi")} className="text-primary hover:underline text-sm">Estetik Klinik Yorum Yönetimi →</button></li>
-            <li><button onClick={() => navigate("/blog/sahte-saglik-yorumu-sikayet")} className="text-primary hover:underline text-sm">Sahte Sağlık Yorumu Şikayet Rehberi →</button></li>
-            <li><button onClick={() => navigate("/yorum-yonetim-araclari")} className="text-primary hover:underline text-sm">Yorum Yönetim Araçları Karşılaştırması →</button></li>
-            <li><button onClick={() => navigate("/online-itibar-yonetimi")} className="text-primary hover:underline text-sm">Online İtibar Yönetimi (Genel) →</button></li>
-            <li><button onClick={() => navigate("/platform/google-yorumlari-icin-yapay-zeka")} className="text-primary hover:underline text-sm">Google Yorumları için Yapay Zeka →</button></li>
+            <li><Link to="/blog/doktor-yorumlari-nasil-yonetilir" className="text-primary hover:underline text-sm">Doktor Yorumları Nasıl Yönetilir? →</Link></li>
+            <li><Link to="/dis-hekimi-yorum-yonetimi" className="text-primary hover:underline text-sm">Diş Hekimi & Diş Kliniği Yorum Yönetimi →</Link></li>
+            <li><Link to="/estetik-klinik-yorum-yonetimi" className="text-primary hover:underline text-sm">Estetik Klinik Yorum Yönetimi →</Link></li>
+            <li><Link to="/blog/sahte-saglik-yorumu-sikayet" className="text-primary hover:underline text-sm">Sahte Sağlık Yorumu Şikayet Rehberi →</Link></li>
+            <li><Link to="/yorum-yonetim-araclari" className="text-primary hover:underline text-sm">Yorum Yönetim Araçları Karşılaştırması →</Link></li>
+            <li><Link to="/online-itibar-yonetimi" className="text-primary hover:underline text-sm">Online İtibar Yönetimi (Genel) →</Link></li>
+            <li><Link to="/platform/google-yorumlari-icin-yapay-zeka" className="text-primary hover:underline text-sm">Google Yorumları için Yapay Zeka →</Link></li>
           </ul>
         </div>
       </section>
@@ -251,9 +250,9 @@ const SaglikItibarYonetimi = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>© 2026 VoyageRespond</span>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/privacy-policy")} className="hover:text-foreground">Gizlilik Politikası</button>
+            <Link to="/privacy-policy" className="hover:text-foreground">Gizlilik Politikası</Link>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/terms-of-service")} className="hover:text-foreground">Kullanım Koşulları</button>
+            <Link to="/terms-of-service" className="hover:text-foreground">Kullanım Koşulları</Link>
           </div>
         </div>
       </footer>

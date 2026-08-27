@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Check, Sparkles } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import SEO from "@/components/seo/SEO";
@@ -40,7 +40,6 @@ const faqLd = (page: GeoPage) => ({
 });
 
 const GeoLanding = () => {
-  const navigate = useNavigate();
   const location = useLocation();
   const slug = location.pathname.replace(/^\/+|\/+$/g, "");
   const page = geoPageBySlug(slug);
@@ -85,20 +84,20 @@ const GeoLanding = () => {
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between">
-            <button onClick={() => navigate("/")} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <img src={voyageRespondLogo} alt="VoyageRespond" className="h-7 w-7" />
               <span className="text-lg" style={{ color: "#1F2937" }}>
                 <span className="font-normal">Voyage</span><span className="font-semibold">Respond</span>
               </span>
-            </button>
+            </Link>
             <div className="flex items-center gap-4">
               <Link to={`/${isTr ? enSlug : trSlug}/`} className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-foreground">
                 {t.otherLang}
               </Link>
 
-              <button onClick={() => navigate("/demo")} className="px-4 py-2 rounded-md text-sm font-medium text-white" style={{ backgroundColor: "#7A5AF8" }}>
+              <Link to="/demo" className="px-4 py-2 rounded-md text-sm font-medium text-white" style={{ backgroundColor: "#7A5AF8" }}>
                 {t.tryFree}
-              </button>
+              </Link>
             </div>
           </div>
         </div>

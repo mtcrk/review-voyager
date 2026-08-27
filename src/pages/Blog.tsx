@@ -1,12 +1,10 @@
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ArrowRight, Clock, Tag } from "lucide-react";
 import { blogPosts } from "@/lib/blogPosts";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import SEO from "@/components/seo/SEO";
 
 const Blog = () => {
-  const navigate = useNavigate();
-
   return (
     <div className="min-h-screen bg-background">
       <SEO
@@ -18,8 +16,8 @@ const Blog = () => {
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between">
-            <button
-              onClick={() => navigate("/")}
+            <Link
+              to="/"
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <img src={voyageRespondLogo} alt="VoyageRespond" className="h-7 w-7" />
@@ -27,18 +25,18 @@ const Blog = () => {
                 <span className="font-normal">Voyage</span>
                 <span className="font-semibold">Respond</span>
               </span>
-            </button>
+            </Link>
             <div className="flex items-center gap-4">
-              <button onClick={() => navigate("/")} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                 Ana Sayfa
-              </button>
-              <button
-                onClick={() => navigate("/demo")}
+              </Link>
+              <Link
+                to="/demo"
                 className="px-4 py-2 rounded-md text-sm font-medium text-white transition-all"
                 style={{ backgroundColor: "#7A5AF8" }}
               >
                 Ücretsiz Dene
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -58,10 +56,10 @@ const Blog = () => {
       <section className="container mx-auto px-4 sm:px-6 pb-20">
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
           {blogPosts.map((post) => (
-            <article
+            <Link
               key={post.slug}
-              onClick={() => navigate(`/blog/${post.slug}`)}
-              className="group cursor-pointer rounded-2xl border border-border bg-card overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+              to={`/blog/${post.slug}`}
+              className="group block cursor-pointer rounded-2xl border border-border bg-card overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             >
               {/* Category Banner */}
               <div className="h-2 w-full" style={{ background: "linear-gradient(90deg, #7A5AF8, #3B82F6)" }} />
@@ -99,7 +97,7 @@ const Blog = () => {
                   </span>
                 </div>
               </div>
-            </article>
+            </Link>
           ))}
         </div>
       </section>
@@ -113,13 +111,13 @@ const Blog = () => {
           <p className="text-muted-foreground mb-6">
             3 ay ücretsiz, tüm özellikler dahil.
           </p>
-          <button
-            onClick={() => navigate("/demo")}
-            className="px-8 py-3 rounded-md text-white font-medium transition-all hover:shadow-lg min-h-[48px]"
+          <Link
+            to="/demo"
+            className="inline-block px-8 py-3 rounded-md text-white font-medium transition-all hover:shadow-lg min-h-[48px]"
             style={{ backgroundColor: "#7A5AF8" }}
           >
             Ücretsiz Dene
-          </button>
+          </Link>
         </div>
       </section>
 
@@ -129,9 +127,9 @@ const Blog = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>© 2024 VoyageRespond</span>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/privacy-policy")} className="hover:text-foreground">Gizlilik Politikası</button>
+            <Link to="/privacy-policy" className="hover:text-foreground">Gizlilik Politikası</Link>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/terms-of-service")} className="hover:text-foreground">Kullanım Koşulları</button>
+            <Link to="/terms-of-service" className="hover:text-foreground">Kullanım Koşulları</Link>
           </div>
         </div>
       </footer>

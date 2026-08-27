@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -317,10 +317,12 @@ const Hub = () => {
         <Button
           size="sm"
           className="gradient-primary text-white"
-          onClick={() => navigate(automation.link!)}
+          asChild
         >
-          Open
-          <ArrowRight className="w-4 h-4 ml-1" />
+          <Link to={automation.link!}>
+            Open
+            <ArrowRight className="w-4 h-4 ml-1" />
+          </Link>
         </Button>
       );
     }
@@ -369,8 +371,8 @@ const Hub = () => {
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between">
-            <button
-              onClick={() => navigate("/")}
+            <Link
+              to="/"
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <img src={voyageRespondLogo} alt="VoyageRespond" className="h-7 w-7" />
@@ -378,19 +380,19 @@ const Hub = () => {
                 <span className="font-normal">Voyage</span>
                 <span className="font-semibold">Respond</span>
               </span>
-            </button>
+            </Link>
             <div className="flex items-center gap-4">
               {user ? (
-                <Button variant="ghost" onClick={() => navigate("/dashboard")}>
-                  Dashboard
+                <Button variant="ghost" asChild>
+                  <Link to="/dashboard">Dashboard</Link>
                 </Button>
               ) : (
                 <>
-                  <Button variant="ghost" onClick={() => navigate("/login")}>
-                    Login
+                  <Button variant="ghost" asChild>
+                    <Link to="/login">Login</Link>
                   </Button>
-                  <Button className="gradient-primary text-white" onClick={() => navigate("/register")}>
-                    Get Started
+                  <Button className="gradient-primary text-white" asChild>
+                    <Link to="/register">Get Started</Link>
                   </Button>
                 </>
               )}
@@ -436,11 +438,11 @@ const Hub = () => {
               🚀 Bu otomasyonları kullanmaya başlamak için hesap oluşturun — 3 ay ücretsiz!
             </p>
             <div className="flex gap-3">
-              <Button variant="outline" onClick={() => navigate("/login")}>
-                Giriş Yap
+              <Button variant="outline" asChild>
+                <Link to="/login">Giriş Yap</Link>
               </Button>
-              <Button className="gradient-primary text-white" onClick={() => navigate("/register")}>
-                3 Ay Ücretsiz Dene
+              <Button className="gradient-primary text-white" asChild>
+                <Link to="/register">3 Ay Ücretsiz Dene</Link>
               </Button>
             </div>
           </div>

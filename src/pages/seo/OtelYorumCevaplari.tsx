@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ArrowRight, Copy, Check, Hotel } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { useState } from "react";
@@ -51,7 +51,6 @@ const templates = [
 ];
 
 const OtelYorumCevaplari = () => {
-  const navigate = useNavigate();
   const [copiedIndex, setCopiedIndex] = useState<string | null>(null);
 
   const handleCopy = (text: string, key: string) => {
@@ -75,13 +74,13 @@ const OtelYorumCevaplari = () => {
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
         <div className="container mx-auto px-6">
           <div className="flex h-16 items-center justify-between">
-            <button onClick={() => navigate("/")} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <img src={voyageRespondLogo} alt="VoyageRespond" className="h-7 w-7" />
               <span className="text-lg" style={{ color: "#1F2937" }}><span className="font-normal">Voyage</span><span className="font-semibold">Respond</span></span>
-            </button>
+            </Link>
             <div className="flex items-center gap-4">
-              <button onClick={() => navigate("/blog")} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Blog</button>
-              <button onClick={() => navigate("/demo")} className="px-4 py-2 rounded-md text-sm font-medium text-white transition-all" style={{ backgroundColor: "#7A5AF8" }}>Ücretsiz Dene</button>
+              <Link to="/blog" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Blog</Link>
+              <Link to="/demo" className="px-4 py-2 rounded-md text-sm font-medium text-white transition-all" style={{ backgroundColor: "#7A5AF8" }}>Ücretsiz Dene</Link>
             </div>
           </div>
         </div>
@@ -133,9 +132,9 @@ const OtelYorumCevaplari = () => {
         <div className="my-16 text-center p-10 rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/5 via-background to-background">
           <h2 className="text-2xl font-bold text-foreground mb-3">Yorumlara manuel cevap vermek yerine otomatik yönetmek ister misiniz?</h2>
           <p className="text-muted-foreground mb-6">VoyageRespond, Google, Booking ve TripAdvisor yorumlarınızı tek panelden AI ile yönetir.</p>
-          <button onClick={() => navigate("/demo")} className="px-8 py-3 rounded-md text-white font-medium transition-all hover:shadow-lg" style={{ backgroundColor: "#7A5AF8" }}>
+          <Link to="/demo" className="px-8 py-3 rounded-md text-white font-medium transition-all hover:shadow-lg" style={{ backgroundColor: "#7A5AF8" }}>
             3 Ay Ücretsiz Deneyin <ArrowRight className="w-4 h-4 inline ml-1" />
-          </button>
+          </Link>
         </div>
 
         <AEOSection
@@ -151,10 +150,10 @@ const OtelYorumCevaplari = () => {
         <div className="mt-12 p-6 rounded-xl bg-muted/50 border border-border">
           <h3 className="font-semibold text-foreground mb-4">İlgili Sayfalar</h3>
           <ul className="space-y-2">
-            <li><button onClick={() => navigate("/google-yorum-cevap-ornekleri")} className="text-primary hover:underline text-sm">Google Yorum Cevap Örnekleri (25 Şablon) →</button></li>
-            <li><button onClick={() => navigate("/restoran-yorum-cevaplari")} className="text-primary hover:underline text-sm">Restoran Yorum Cevapları (30 Şablon) →</button></li>
-            <li><button onClick={() => navigate("/blog/google-yorum-cevap-araclari-2026")} className="text-primary hover:underline text-sm">En İyi Yorum Yönetim Araçları (2026) →</button></li>
-            <li><button onClick={() => navigate("/blog/otel-restoran-yorum-yonetimi-rehberi")} className="text-primary hover:underline text-sm">Otel ve Restoran Yorum Yönetimi Rehberi →</button></li>
+            <li><Link to="/google-yorum-cevap-ornekleri" className="text-primary hover:underline text-sm">Google Yorum Cevap Örnekleri (25 Şablon) →</Link></li>
+            <li><Link to="/restoran-yorum-cevaplari" className="text-primary hover:underline text-sm">Restoran Yorum Cevapları (30 Şablon) →</Link></li>
+            <li><Link to="/blog/google-yorum-cevap-araclari-2026" className="text-primary hover:underline text-sm">En İyi Yorum Yönetim Araçları (2026) →</Link></li>
+            <li><Link to="/blog/otel-restoran-yorum-yonetimi-rehberi" className="text-primary hover:underline text-sm">Otel ve Restoran Yorum Yönetimi Rehberi →</Link></li>
           </ul>
         </div>
       </section>
@@ -164,9 +163,9 @@ const OtelYorumCevaplari = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>© 2026 VoyageRespond</span>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/privacy-policy")} className="hover:text-foreground">Gizlilik Politikası</button>
+            <Link to="/privacy-policy" className="hover:text-foreground">Gizlilik Politikası</Link>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/terms-of-service")} className="hover:text-foreground">Kullanım Koşulları</button>
+            <Link to="/terms-of-service" className="hover:text-foreground">Kullanım Koşulları</Link>
           </div>
         </div>
       </footer>

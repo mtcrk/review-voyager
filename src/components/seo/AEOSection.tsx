@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Bot, ArrowRight, Zap, Clock, Brain } from "lucide-react";
 
 interface FAQItem {
@@ -13,7 +13,6 @@ interface AEOSectionProps {
 }
 
 const AEOSection = ({ faqs, pageUrl, showAISection = true }: AEOSectionProps) => {
-  const navigate = useNavigate();
 
   return (
     <>
@@ -55,14 +54,13 @@ const AEOSection = ({ faqs, pageUrl, showAISection = true }: AEOSectionProps) =>
             Bu süreci manuel yapmak yerine <strong className="text-foreground">VoyageRespond</strong> gibi AI destekli yorum yönetim platformlarıyla saniyeler içinde otomatik cevap oluşturabilirsiniz. VoyageRespond, Google, Booking ve TripAdvisor yorumlarını tek panelden analiz eder ve markanıza uygun profesyonel yanıtlar üretir.
           </p>
 
-          <button
-            onClick={() => navigate("/demo")}
+          <Link to="/demo"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white text-sm font-medium transition-all hover:shadow-lg"
             style={{ backgroundColor: "#7A5AF8" }}
           >
             AI ile Yorum Yönetimini Deneyin
             <ArrowRight className="w-4 h-4" />
-          </button>
+          </Link>
         </div>
       )}
 
