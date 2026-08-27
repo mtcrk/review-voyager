@@ -527,12 +527,12 @@ const Index = () => {
           <div className="max-w-4xl mx-auto p-6 rounded-xl bg-background border border-border">
             <h2 className="text-base font-semibold text-foreground mb-4">Popüler Rehberler</h2>
             <ul className="grid sm:grid-cols-2 gap-2">
-              <li><button onClick={() => navigate("/google-yorum-cevap-ornekleri")} className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Google Yorum Cevap Örnekleri (25 Şablon) →</button></li>
-              <li><button onClick={() => navigate("/otel-yorum-cevaplari")} className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Otel Yorum Cevapları →</button></li>
-              <li><button onClick={() => navigate("/restoran-yorum-cevaplari")} className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Restoran Yorum Cevapları →</button></li>
-              <li><button onClick={() => navigate("/blog/google-yorumlarina-nasil-yanit-verilir")} className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Google Yorumlarına Nasıl Yanıt Verilir? →</button></li>
-              <li><button onClick={() => navigate("/blog/ai-gorunurluk-skoru-nedir")} className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">AI Görünürlük Skoru Nedir? →</button></li>
-              <li><button onClick={() => navigate("/blog/kotu-yorumlara-nasil-cevap-verilir")} className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Kötü Yorumlara Nasıl Cevap Verilir? →</button></li>
+              <li><Link to="/google-yorum-cevap-ornekleri" className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Google Yorum Cevap Örnekleri (25 Şablon) →</Link></li>
+              <li><Link to="/otel-yorum-cevaplari" className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Otel Yorum Cevapları →</Link></li>
+              <li><Link to="/restoran-yorum-cevaplari" className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Restoran Yorum Cevapları →</Link></li>
+              <li><Link to="/blog/google-yorumlarina-nasil-yanit-verilir" className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Google Yorumlarına Nasıl Yanıt Verilir? →</Link></li>
+              <li><Link to="/blog/ai-gorunurluk-skoru-nedir" className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">AI Görünürlük Skoru Nedir? →</Link></li>
+              <li><Link to="/blog/kotu-yorumlara-nasil-cevap-verilir" className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Kötü Yorumlara Nasıl Cevap Verilir? →</Link></li>
             </ul>
           </div>
         </div>
@@ -562,10 +562,10 @@ const Index = () => {
             <div>
               <h4 className="font-medium text-foreground text-sm mb-3">{t('indexPage.footerSection.links')}</h4>
               <div className="space-y-2">
-                <button onClick={() => navigate("/about")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.about')}</button>
-                <button onClick={() => navigate("/blog")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.blog')}</button>
-                <button onClick={() => navigate("/contact")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.contact')}</button>
-                <button onClick={() => navigate("/hub")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.hub')}</button>
+                <Link to="/about" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.about')}</Link>
+                <Link to="/blog" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.blog')}</Link>
+                <Link to="/contact" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.contact')}</Link>
+                <Link to="/hub" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.hub')}</Link>
               </div>
             </div>
 
@@ -573,11 +573,11 @@ const Index = () => {
             <div>
               <h4 className="font-medium text-foreground text-sm mb-3">{t('indexPage.footerSection.legal')}</h4>
               <div className="space-y-2">
-                <button onClick={() => navigate("/privacy-policy")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.privacy')}</button>
-                <button onClick={() => navigate("/terms-of-service")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.terms')}</button>
-                <button onClick={() => navigate("/mesafeli-satis-sozlesmesi")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Mesafeli Satış Sözleşmesi</button>
-                <button onClick={() => navigate("/on-bilgilendirme-formu")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Ön Bilgilendirme Formu</button>
-                <button onClick={() => navigate("/iptal-iade-kosullari")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">İptal &amp; İade Koşulları</button>
+                <Link to="/privacy-policy" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.privacy')}</Link>
+                <Link to="/terms-of-service" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.terms')}</Link>
+                <Link to="/mesafeli-satis-sozlesmesi" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Mesafeli Satış Sözleşmesi</Link>
+                <Link to="/on-bilgilendirme-formu" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Ön Bilgilendirme Formu</Link>
+                <Link to="/iptal-iade-kosullari" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">İptal &amp; İade Koşulları</Link>
                 <p className="text-sm text-muted-foreground pt-1">support@voyagerespond.com</p>
               </div>
             </div>
