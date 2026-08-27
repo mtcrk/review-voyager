@@ -89,7 +89,7 @@ const SEO = ({ title, description, canonical, ogImage, ogType, noindex, jsonLd, 
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:type" content={ogType || "website"} />
-      <meta property="og:locale" content="tr_TR" />
+      <meta property="og:locale" content={ogLocale} />
       <meta property="og:site_name" content="VoyageRespond" />
 
       <meta name="twitter:card" content="summary_large_image" />
