@@ -15,7 +15,7 @@ function shorten(s, max = 140) {
 // --- Static hub pages (curated descriptions) ---
 const corePages = [
   ["/", "Ana Sayfa", "Ürün özeti, özellikler ve 3 ay ücretsiz deneme."],
-  ["/pricing", "Fiyatlandırma", "Plan seçenekleri ve fiyat bilgileri."],
+  ["/about", "Hakkımızda", "Şirket, misyon ve ekip bilgileri."],
   ["/about", "Hakkımızda", "Şirket, misyon ve ekip bilgileri."],
   ["/contact", "İletişim", "Demo talebi ve iletişim formu."],
   ["/demo", "Demo", "Etkileşimli AI yanıt demosu — yorumdan saniyeler içinde marka uyumlu cevap üretimi."],
