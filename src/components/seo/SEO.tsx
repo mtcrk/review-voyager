@@ -42,21 +42,31 @@ const toCanonicalUrl = (value: string) => {
   return `${SITE_URL}${normalizePath(value)}`;
 };
 
-const SEO = ({ title, description, canonical, ogImage, ogType, noindex, jsonLd, alternates }: SEOProps) => {
+const SEO = ({ title, description, canonical, ogImage, ogType, noindex, jsonLd, alternates, locale }: SEOProps) => {
   const location = useLocation();
-  const isEn = location.pathname.startsWith("/en/") || location.pathname === "/en";
+  const isEnPath = location.pathname.startsWith("/en/") || location.pathname === "/en";
 
   let url = canonical ? toCanonicalUrl(canonical) : undefined;
 
   // For English routes, self-reference the /en/ canonical instead of the Turkish root
-  if (isEn) {
+  if (isEnPath) {
     url = `${SITE_URL}${normalizePath(location.pathname)}`;
   }
   const image = ogImage || `${SITE_URL}/og-image.png`;
   const ldArray = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
 
+  // Derive language: explicit prop > /en/ prefix > matching hreflang alternate > tr
+  const selfUrl = url ?? `${SITE_URL}${normalizePath(location.pathname)}`;
+  const matchAlt = (lang: string) =>
+    (alternates ?? []).some(
+      (a) => a.hrefLang.toLowerCase() === lang && toCanonicalUrl(a.href) === selfUrl
+    );
+  const resolvedLocale: "tr" | "en" =
+    locale ?? (isEnPath || matchAlt("en") ? "en" : matchAlt("tr") ? "tr" : "tr");
+  const ogLocale = resolvedLocale === "en" ? "en_US" : "tr_TR";
+
   return (
-    <Helmet>
+    <Helmet htmlAttributes={{ lang: resolvedLocale }}>
       <title>{title}</title>
       <meta name="description" content={description} />
       {url && <link rel="canonical" href={url} />}
