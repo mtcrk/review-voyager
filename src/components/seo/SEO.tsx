@@ -11,6 +11,8 @@ interface SEOProps {
   jsonLd?: Record<string, any> | Record<string, any>[];
   /** Reciprocal hreflang links (include an x-default entry). */
   alternates?: { hrefLang: string; href: string }[];
+  /** Explicit language override; otherwise derived from alternates/path. */
+  locale?: "tr" | "en";
 }
 
 
