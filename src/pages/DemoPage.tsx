@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Star, Sparkles, Copy, Check, RotateCcw, ArrowRight, Menu, X, Shield, Users, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -155,18 +155,18 @@ export default function DemoPage() {
       <nav className="sticky top-0 z-50 border-b border-border/60 backdrop-blur-xl bg-background/80">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between">
-            <button onClick={() => navigate("/")} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+            <Link to="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
               <img src={voyageRespondLogo} alt="VoyageRespond" className="h-7 w-7" />
               <span className="text-base tracking-tight text-foreground">
                 <span className="font-normal">Voyage</span>
                 <span className="font-semibold">Respond</span>
               </span>
-            </button>
+            </Link>
 
             <div className="hidden md:flex items-center gap-4">
               <LanguageSwitcher />
-              <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
-                Ana Sayfa
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/">Ana Sayfa</Link>
               </Button>
               <Button
                 size="sm"
@@ -190,8 +190,8 @@ export default function DemoPage() {
 
           {mobileMenuOpen && (
             <div className="md:hidden pb-4 space-y-2">
-              <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => { navigate("/"); setMobileMenuOpen(false); }}>
-                Ana Sayfa
+              <Button variant="ghost" size="sm" className="w-full justify-start" asChild>
+                <Link to="/" onClick={() => setMobileMenuOpen(false)}>Ana Sayfa</Link>
               </Button>
               <Button size="sm" className="w-full bg-primary text-primary-foreground" onClick={() => { handleCTAClick("header_free_trial"); setMobileMenuOpen(false); }}>
                 {user ? "Dashboard" : "Ücretsiz Başla"}

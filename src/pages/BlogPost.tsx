@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Clock, Tag, Share2, List } from "lucide-react";
 import { getBlogPost, blogPosts } from "@/lib/blogPosts";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
@@ -7,7 +7,6 @@ import AEOSection from "@/components/seo/AEOSection";
 import SEO from "@/components/seo/SEO";
 
 const BlogPost = () => {
-  const navigate = useNavigate();
   const { slug } = useParams<{ slug: string }>();
   const post = slug ? getBlogPost(slug) : undefined;
 
@@ -53,9 +52,9 @@ const BlogPost = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
           <h1 className="text-2xl font-bold">Yazı bulunamadı</h1>
-          <button onClick={() => navigate("/blog")} className="text-primary hover:underline">
+          <Link to="/blog" className="text-primary hover:underline">
             Blog'a dön
-          </button>
+          </Link>
         </div>
       </div>
     );
@@ -171,8 +170,8 @@ const BlogPost = () => {
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white/95">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between">
-            <button
-              onClick={() => navigate("/")}
+            <Link
+              to="/"
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <img src={voyageRespondLogo} alt="VoyageRespond" className="h-7 w-7" />
@@ -180,18 +179,18 @@ const BlogPost = () => {
                 <span className="font-normal">Voyage</span>
                 <span className="font-semibold">Respond</span>
               </span>
-            </button>
+            </Link>
             <div className="flex items-center gap-4">
-              <button onClick={() => navigate("/blog")} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              <Link to="/blog" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                 Blog
-              </button>
-              <button
-                onClick={() => navigate("/demo")}
-                className="px-4 py-2 rounded-md text-sm font-medium text-white transition-all"
+              </Link>
+              <Link
+                to="/demo"
+                className="px-4 py-2 rounded-md text-sm font-medium text-white transition-all inline-block"
                 style={{ backgroundColor: "#7A5AF8" }}
               >
                 Ücretsiz Dene
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -202,13 +201,13 @@ const BlogPost = () => {
         <div className="mx-auto max-w-3xl xl:max-w-6xl xl:grid xl:grid-cols-[1fr_240px] xl:gap-12">
           <article className="min-w-0">
         {/* Back */}
-        <button
-          onClick={() => navigate("/blog")}
+        <Link
+          to="/blog"
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
           Blog'a Dön
-        </button>
+        </Link>
 
         {/* Meta */}
         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-6">
@@ -269,13 +268,13 @@ const BlogPost = () => {
               Google, Booking ve TripAdvisor yorumlarına yapay zeka ile saniyeler içinde cevap ver.
             </p>
           </div>
-          <button
-            onClick={() => navigate("/demo")}
-            className="px-6 py-3 rounded-md text-white font-medium transition-all hover:shadow-lg whitespace-nowrap min-h-[48px]"
+          <Link
+            to="/demo"
+            className="px-6 py-3 rounded-md text-white font-medium transition-all hover:shadow-lg whitespace-nowrap min-h-[48px] inline-block"
             style={{ backgroundColor: "#7A5AF8" }}
           >
             Ücretsiz Dene →
-          </button>
+          </Link>
         </div>
 
         {/* AEO Section + FAQ */}
@@ -348,17 +347,17 @@ const BlogPost = () => {
           <h2 className="text-2xl font-bold text-foreground mb-6">Diğer Yazılar</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {otherPosts.map((p) => (
-              <article
+              <Link
                 key={p.slug}
-                onClick={() => navigate(`/blog/${p.slug}`)}
-                className="cursor-pointer rounded-xl border border-border bg-card p-5 hover:shadow-lg transition-all group"
+                to={`/blog/${p.slug}`}
+                className="block cursor-pointer rounded-xl border border-border bg-card p-5 hover:shadow-lg transition-all group"
               >
                 <span className="text-xs text-primary font-medium">{p.category}</span>
                 <h3 className="text-lg font-semibold text-foreground mt-2 group-hover:text-primary transition-colors">
                   {p.title}
                 </h3>
                 <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{p.description}</p>
-              </article>
+              </Link>
             ))}
           </div>
         </section>
@@ -371,13 +370,13 @@ const BlogPost = () => {
             Yapay zeka ile yorum yönetimine başlayın
           </h2>
           <p className="text-muted-foreground mb-6">3 ay ücretsiz, tüm özellikler dahil.</p>
-          <button
-            onClick={() => navigate("/demo")}
-            className="px-8 py-3 rounded-md text-white font-medium transition-all hover:shadow-lg"
+          <Link
+            to="/demo"
+            className="px-8 py-3 rounded-md text-white font-medium transition-all hover:shadow-lg inline-block"
             style={{ backgroundColor: "#7A5AF8" }}
           >
             Ücretsiz Dene
-          </button>
+          </Link>
         </div>
       </section>
 
@@ -387,9 +386,9 @@ const BlogPost = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>© 2024 VoyageRespond</span>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/privacy-policy")} className="hover:text-foreground">Gizlilik Politikası</button>
+            <Link to="/privacy-policy" className="hover:text-foreground">Gizlilik Politikası</Link>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/terms-of-service")} className="hover:text-foreground">Kullanım Koşulları</button>
+            <Link to="/terms-of-service" className="hover:text-foreground">Kullanım Koşulları</Link>
           </div>
         </div>
       </footer>

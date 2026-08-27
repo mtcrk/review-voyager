@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -8,7 +8,6 @@ import { Building2, Target, Users, Sparkles, ArrowRight } from "lucide-react";
 import SEO from "@/components/seo/SEO";
 
 export default function About() {
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const { user } = useAuth();
 
@@ -23,8 +22,8 @@ export default function About() {
       <nav className="sticky top-0 z-50 border-b backdrop-blur-lg bg-white" style={{ borderBottomColor: '#E2E8F0' }}>
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex h-20 items-center justify-between">
-            <button
-              onClick={() => navigate("/")}
+            <Link
+              to="/"
               className="flex items-center gap-2 pl-3 pt-1 hover:opacity-80 transition-opacity"
             >
               <img src={voyageRespondLogo} alt="VoyageRespond" className="h-7 w-7" />
@@ -32,22 +31,22 @@ export default function About() {
                 <span className="font-normal">Voyage</span>
                 <span className="font-semibold">Respond</span>
               </span>
-            </button>
+            </Link>
             <div className="hidden md:flex items-center gap-8">
-              <button onClick={() => navigate("/")} className="text-base font-medium text-foreground hover:text-primary transition-colors">
+              <Link to="/" className="text-base font-medium text-foreground hover:text-primary transition-colors">
                 {t('nav.home', 'Ana Sayfa')}
-              </button>
-              <button onClick={() => navigate("/#pricing")} className="text-base font-medium text-foreground hover:text-primary transition-colors">
+              </Link>
+              <Link to="/#pricing" className="text-base font-medium text-foreground hover:text-primary transition-colors">
                 {t('landing.earlyAccess.badge', 'Erken Erişim')}
-              </button>
-              <button onClick={() => navigate("/contact")} className="text-base font-medium text-foreground hover:text-primary transition-colors">
+              </Link>
+              <Link to="/contact" className="text-base font-medium text-foreground hover:text-primary transition-colors">
                 {t('nav.contact', 'İletişim')}
-              </button>
+              </Link>
             </div>
             <div className="flex items-center gap-3">
               <LanguageSwitcher />
-              <Button onClick={() => navigate(user ? "/dashboard" : "/demo")} className="gradient-primary text-white">
-                {t('nav.getStarted')}
+              <Button asChild className="gradient-primary text-white">
+                <Link to={user ? "/dashboard" : "/demo"}>{t('nav.getStarted')}</Link>
               </Button>
             </div>
           </div>
@@ -160,12 +159,14 @@ export default function About() {
             {t('about.cta.subtitle', 'AI Visibility Score\'unuzu ücretsiz öğrenin ve dijital görünürlüğünüzü artırın.')}
           </p>
           <Button
+            asChild
             size="lg"
-            onClick={() => navigate("/demo")}
             className="gradient-primary text-white shadow-lg text-base sm:text-lg px-8 sm:px-10 py-6 w-full sm:w-auto min-h-[48px] hover:shadow-2xl transition-all duration-300 hover:scale-105"
           >
-            {t('landing.heroCta', 'See Your AI Visibility Score')}
-            <ArrowRight className="w-5 h-5 ml-2" />
+            <Link to="/demo">
+              {t('landing.heroCta', 'See Your AI Visibility Score')}
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Link>
           </Button>
         </div>
       </section>
@@ -186,10 +187,10 @@ export default function About() {
             <div>
               <h4 className="font-semibold text-foreground mb-3">{t('footer.quickLinks', 'Hızlı Bağlantılar')}</h4>
               <div className="space-y-2">
-                <button onClick={() => navigate("/")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('nav.home', 'Ana Sayfa')}</button>
-                <button onClick={() => navigate("/#pricing")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing.earlyAccess.badge', 'Erken Erişim')}</button>
-                <button onClick={() => navigate("/contact")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('nav.contact', 'İletişim')}</button>
-                <button onClick={() => navigate("/about")} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('about.badge', 'Hakkımızda')}</button>
+                <Link to="/" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('nav.home', 'Ana Sayfa')}</Link>
+                <Link to="/#pricing" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing.earlyAccess.badge', 'Erken Erişim')}</Link>
+                <Link to="/contact" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('nav.contact', 'İletişim')}</Link>
+                <Link to="/about" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('about.badge', 'Hakkımızda')}</Link>
               </div>
             </div>
             <div>
@@ -205,9 +206,9 @@ export default function About() {
           <div className="border-t border-border pt-6 flex flex-col md:flex-row items-center justify-center gap-6 text-sm text-muted-foreground">
             <span>{t('footer.copyright')}</span>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/privacy-policy")} className="hover:text-foreground transition-colors">{t('footer.privacy')}</button>
+            <Link to="/privacy-policy" className="hover:text-foreground transition-colors">{t('footer.privacy')}</Link>
             <span className="hidden md:block">•</span>
-            <button onClick={() => navigate("/terms-of-service")} className="hover:text-foreground transition-colors">{t('footer.terms')}</button>
+            <Link to="/terms-of-service" className="hover:text-foreground transition-colors">{t('footer.terms')}</Link>
           </div>
         </div>
       </footer>
