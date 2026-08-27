@@ -64,8 +64,8 @@ const Index = () => {
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
-            <button
-              onClick={() => navigate("/")}
+            <Link
+              to="/"
               className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
             >
               <img
@@ -77,44 +77,44 @@ const Index = () => {
                 <span className="font-normal">Voyage</span>
                 <span className="font-semibold">Respond</span>
               </span>
-            </button>
+            </Link>
 
             {/* Center Nav */}
             <div className="hidden md:flex items-center gap-8">
-              <button
-                onClick={() => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })}
+              <a
+                href="#features"
                 className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
               >
                 {t('indexPage.nav.features')}
-              </button>
-              <button
-                onClick={() => navigate("/blog")}
+              </a>
+              <Link
+                to="/blog"
                 className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
               >
                 {t('indexPage.nav.blog')}
-              </button>
-              <button
-                onClick={() => navigate("/contact")}
+              </Link>
+              <Link
+                to="/contact"
                 className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
               >
                 {t('indexPage.nav.contact')}
-              </button>
+              </Link>
             </div>
 
             {/* Right Side */}
             <div className="hidden md:flex items-center gap-3">
               <LanguageSwitcher />
-              <button
-                onClick={() => navigate(user ? "/dashboard" : "/login")}
+              <Link
+                to={user ? "/dashboard" : "/login"}
                 className="text-sm font-medium transition-colors px-3 py-2 text-muted-foreground hover:text-foreground"
               >
                 {user ? t('indexPage.nav.dashboard') : t('indexPage.nav.login')}
-              </button>
+              </Link>
               <Button
-                onClick={() => navigate("/demo")}
+                asChild
                 className="gradient-primary text-white text-sm px-5 py-2 h-9 hover:shadow-lg transition-all duration-200"
               >
-                {t('indexPage.nav.startFree')}
+                <Link to="/demo">{t('indexPage.nav.startFree')}</Link>
               </Button>
             </div>
 
@@ -136,25 +136,36 @@ const Index = () => {
           {mobileMenuOpen && (
             <div className="md:hidden border-t border-border py-4 space-y-1">
               {[
-                { label: t('indexPage.nav.features'), action: () => { document.getElementById("features")?.scrollIntoView({ behavior: "smooth" }); setMobileMenuOpen(false); } },
-                { label: t('indexPage.nav.blog'), action: () => { navigate("/blog"); setMobileMenuOpen(false); } },
-                { label: t('indexPage.nav.contact'), action: () => { navigate("/contact"); setMobileMenuOpen(false); } },
-                { label: user ? t('indexPage.nav.dashboard') : t('indexPage.nav.login'), action: () => { navigate(user ? "/dashboard" : "/login"); setMobileMenuOpen(false); } },
-              ].map((item) => (
-                <button
-                  key={item.label}
-                  onClick={item.action}
-                  className="block w-full text-left px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
-                >
-                  {item.label}
-                </button>
-              ))}
+                { label: t('indexPage.nav.features'), href: "#features" },
+                { label: t('indexPage.nav.blog'), to: "/blog" },
+                { label: t('indexPage.nav.contact'), to: "/contact" },
+                { label: user ? t('indexPage.nav.dashboard') : t('indexPage.nav.login'), to: user ? "/dashboard" : "/login" },
+              ].map((item) =>
+                item.to ? (
+                  <Link
+                    key={item.label}
+                    to={item.to}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block w-full text-left px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                ) : (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block w-full text-left px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
+                  >
+                    {item.label}
+                  </a>
+                )
+              )}
               <div className="px-4 pt-2">
-                <Button
-                  onClick={() => { navigate("/demo"); setMobileMenuOpen(false); }}
-                  className="w-full gradient-primary text-white"
-                >
-                  {t('indexPage.nav.startFree')}
+                <Button asChild className="w-full gradient-primary text-white">
+                  <Link to="/demo" onClick={() => setMobileMenuOpen(false)}>
+                    {t('indexPage.nav.startFree')}
+                  </Link>
                 </Button>
               </div>
             </div>
