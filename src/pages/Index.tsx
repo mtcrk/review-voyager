@@ -241,20 +241,22 @@ const Index = () => {
             {/* CTA Row */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <Button
+                asChild
                 size="lg"
-                onClick={() => navigate("/demo")}
                 className="gradient-primary text-white text-base px-8 py-6 w-full sm:w-auto hover:scale-[1.02] transition-all duration-200 group"
                 style={{ boxShadow: "0 10px 40px -10px rgba(122,90,248,0.55)" }}
               >
-                Ücretsiz Kaydolun
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
+                <Link to="/demo">
+                  Ücretsiz Kaydolun
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
               </Button>
               <Button
+                asChild
                 size="lg"
-                onClick={() => navigate("/demo")}
                 className="text-base px-8 py-6 w-full sm:w-auto bg-transparent border border-border text-foreground hover:bg-muted hover:border-border/80 transition-all duration-200"
               >
-                {t('indexPage.hero.ctaSecondary')}
+                <Link to="/demo">{t('indexPage.hero.ctaSecondary')}</Link>
               </Button>
             </div>
 
