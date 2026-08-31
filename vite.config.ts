@@ -18,6 +18,7 @@ const PUBLIC_PATHS = [
   "/contact",
   "/demo",
   "/about",
+  "/rapor",
   "/blog",
   "/google-yorum-cevap-ornekleri",
   "/restoran-yorum-cevaplari",

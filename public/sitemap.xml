@@ -847,6 +847,12 @@
     <priority>0.3</priority>
   </url>
   <url>
+    <loc>https://voyagerespond.com/rapor/</loc>
+    <lastmod>2026-08-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://voyagerespond.com/restaurant-customer-satisfaction/</loc>
     <lastmod>2026-08-10</lastmod>
     <changefreq>monthly</changefreq>

@@ -101,6 +101,7 @@ export const routes: RouteRecord[] = [
       { path: "contact", lazy: lazyDefault(() => import("./pages/Contact")) },
       { path: "demo", lazy: lazyDefault(() => import("./pages/DemoPage")) },
       { path: "about", lazy: lazyDefault(() => import("./pages/About")) },
+      { path: "rapor", lazy: lazyDefault(() => import("./pages/RaporIndir")) },
       { path: "blog", lazy: lazyDefault(() => import("./pages/Blog")) },
       {
         path: "blog/:slug",
@@ -238,6 +239,7 @@ export const PRERENDER_PUBLIC_PATHS = [
   "/contact",
   "/demo",
   "/about",
+  "/rapor",
   "/blog",
   "/google-yorum-cevap-ornekleri",
   "/restoran-yorum-cevaplari",
