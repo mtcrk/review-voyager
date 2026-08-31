@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import SEO from "@/components/seo/SEO";
 import { Button } from "@/components/ui/button";
+import { trackEvent } from "@/lib/analytics";
 import { Download, FileText, Check, ArrowRight } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 
@@ -24,10 +25,7 @@ const RaporIndir = () => {
     if (triggered.current) return;
     triggered.current = true;
     const source = params.get("src") || params.get("utm_source") || "direct";
-    window.gtag?.("event", "lead_magnet_download", {
-      report: "itibar-fiyat-gucu",
-      source,
-    });
+    trackEvent("lead_magnet_download", { report: "itibar-fiyat-gucu", source });
     const timer = window.setTimeout(() => {
       const a = document.createElement("a");
       a.href = PDF_PATH;
