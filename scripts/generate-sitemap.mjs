@@ -78,12 +78,12 @@ const platformRoutes = [
   { path: "/platform/zomato-yorumlari-icin-yapay-zeka", changefreq: "weekly", priority: "0.9", lastmod: "2026-05-22" },
 ];
 
-// Derive the static route list from routes.tsx so new public routes land in the
+// Derive the static route list from src/prerenderPaths.ts so new public routes land in the
 // sitemap automatically.
 function extractPrerenderPaths() {
-  const content = readFileSync(resolve("src/routes.tsx"), "utf-8");
+  const content = readFileSync(resolve("src/prerenderPaths.ts"), "utf-8");
   const block = content.match(/PRERENDER_PUBLIC_PATHS\s*=\s*\[([\s\S]*?)\]/);
-  if (!block) throw new Error("PRERENDER_PUBLIC_PATHS not found in src/routes.tsx");
+  if (!block) throw new Error("PRERENDER_PUBLIC_PATHS not found in src/prerenderPaths.ts");
   const paths = [...block[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
   return paths
     .filter((p) => !EXCLUDED_PATHS.has(p))
