@@ -2,4 +2,8 @@
 /en/*      /  301
 /pricing   /  301
 /pricing/* /  301
+/restoran-yorum-cevaplari  /restoran-yorum-cevaplari/  301
+/otel-yorum-cevaplari      /otel-yorum-cevaplari/      301
+/yorum-yonetim-araclari    /yorum-yonetim-araclari/    301
+
 /*  /index.html  200
