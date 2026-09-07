@@ -41,14 +41,25 @@ const SEO = ({ title, description, canonical, ogImage, ogType, noindex, jsonLd, 
     locale ?? (isEnPath || matchAlt("en") ? "en" : matchAlt("tr") ? "tr" : "tr");
   const ogLocale = resolvedLocale === "en" ? "en_US" : "tr_TR";
 
+  // hreflang: explicit prop wins; otherwise derive tr / en / x-default from the
+  // TR<->EN page-pair map. Skipped for noindex pages. All hrefs canonicalized.
+  const resolvedAlternates = (
+    alternates && alternates.length > 0
+      ? alternates
+      : noindex
+        ? []
+        : hreflangFor(location.pathname)
+  ).map((a) => ({ hrefLang: a.hrefLang, href: toCanonicalUrl(a.href) }));
+
   return (
     <Helmet htmlAttributes={{ lang: resolvedLocale }}>
       <title>{title}</title>
       <meta name="description" content={description} />
       {url && <link rel="canonical" href={url} />}
-      {(alternates ?? []).map((a) => (
+      {resolvedAlternates.map((a) => (
         <link key={a.hrefLang} rel="alternate" hrefLang={a.hrefLang} href={a.href} />
       ))}
+
       <meta
         name="robots"
         content={
