@@ -72,12 +72,12 @@ const PlatformLanding = () => {
               </span>
             </Link>
             <div className="flex items-center gap-4">
-              <Link to="/blog"
+              <Link to="/blog/"
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
                 Blog
               </Link>
-              <Link to="/demo"
+              <Link to="/demo/"
                 className="px-4 py-2 rounded-md text-sm font-medium text-white transition-all"
                 style={{ backgroundColor: "#7A5AF8" }}
               >
@@ -103,7 +103,7 @@ const PlatformLanding = () => {
           </p>
 
           <div className="mt-6 flex flex-col sm:flex-row gap-3">
-            <Link to="/demo"
+            <Link to="/demo/"
               className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-white text-sm font-medium transition-all hover:shadow-lg"
               style={{ backgroundColor: "#7A5AF8" }}
             >
@@ -184,7 +184,7 @@ const PlatformLanding = () => {
             VoyageRespond ile yorumlarınızı tek panelden, marka sesinde ve saniyeler
             içinde yanıtlayın. İlk 3 ay ücretsiz.
           </p>
-          <Link to="/demo"
+          <Link to="/demo/"
             className="inline-flex items-center gap-2 px-7 py-3 rounded-md text-white font-medium transition-all hover:shadow-lg"
             style={{ backgroundColor: "#7A5AF8" }}
           >
@@ -213,14 +213,14 @@ const PlatformLanding = () => {
                 </li>
               ))}
               <li>
-                <Link to="/otel-yorum-cevaplari"
+                <Link to="/otel-yorum-cevaplari/"
                   className="text-primary hover:underline text-sm text-left"
                 >
                   🏨 Otel Yorum Cevapları (30 Şablon) →
                 </Link>
               </li>
               <li>
-                <Link to="/google-yorum-cevap-ornekleri"
+                <Link to="/google-yorum-cevap-ornekleri/"
                   className="text-primary hover:underline text-sm text-left"
                 >
                   ⭐ Google Yorum Cevap Örnekleri (25 Şablon) →
@@ -236,11 +236,11 @@ const PlatformLanding = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>© 2026 VoyageRespond</span>
             <span className="hidden md:block">•</span>
-            <Link to="/privacy-policy" className="hover:text-foreground">
+            <Link to="/privacy-policy/" className="hover:text-foreground">
               Gizlilik Politikası
             </Link>
             <span className="hidden md:block">•</span>
-            <Link to="/terms-of-service" className="hover:text-foreground">
+            <Link to="/terms-of-service/" className="hover:text-foreground">
               Kullanım Koşulları
             </Link>
           </div>

@@ -379,7 +379,7 @@ const YorumYonetimAraclari = () => {
             <img src={voyageRespondLogo} alt="VoyageRespond" className="h-8 w-8" />
             <span className="font-semibold">VoyageRespond</span>
           </Link>
-          <Link to="/demo" className="text-sm bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:opacity-90">
+          <Link to="/demo/" className="text-sm bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:opacity-90">
             Demo İste
           </Link>
         </div>
@@ -494,10 +494,10 @@ const YorumYonetimAraclari = () => {
             VoyageRespond'u kendi yorumlarınızla 15 dakikada deneyin. Hangi aracın size uyduğuna verilerle karar verin — bir komisyona veya satış konuşmasına gerek yok.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link to="/demo" className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90">
+            <Link to="/demo/" className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90">
               Demo İste <ArrowRight className="w-4 h-4" />
             </Link>
-            <Link to="/online-itibar-yonetimi" className="inline-flex items-center justify-center gap-2 border px-6 py-3 rounded-lg font-semibold hover:bg-muted">
+            <Link to="/online-itibar-yonetimi/" className="inline-flex items-center justify-center gap-2 border px-6 py-3 rounded-lg font-semibold hover:bg-muted">
               Önce Pillar Rehberi
             </Link>
           </div>

@@ -29,8 +29,8 @@ const OnlineItibarYonetimi = () => {
               </span>
             </Link>
             <div className="flex items-center gap-4">
-              <Link to="/blog" className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-foreground">Blog</Link>
-              <Link to="/yorum-yonetim-araclari" className="px-4 py-2 rounded-md text-sm font-medium text-white" style={{ backgroundColor: "#7A5AF8" }}>
+              <Link to="/blog/" className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-foreground">Blog</Link>
+              <Link to="/yorum-yonetim-araclari/" className="px-4 py-2 rounded-md text-sm font-medium text-white" style={{ backgroundColor: "#7A5AF8" }}>
                 Yorum Yönetim Rehberi
               </Link>
             </div>
@@ -195,13 +195,13 @@ const OnlineItibarYonetimi = () => {
             Bu sayfa "online itibar yönetimi"nin <strong>ne olduğunu</strong> anlatıyor. <strong>Nasıl yapılacağını</strong> ve hangi araçların ne işe yaradığını uygulamalı olarak görmek isterseniz, kapsamlı yorum yönetimi içeriklerimize geçin:
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
-            <Link to="/yorum-yonetim-araclari" className="px-5 py-3 rounded-md text-white font-medium hover:shadow-lg min-h-[48px] text-sm" style={{ backgroundColor: "#7A5AF8" }}>
+            <Link to="/yorum-yonetim-araclari/" className="px-5 py-3 rounded-md text-white font-medium hover:shadow-lg min-h-[48px] text-sm" style={{ backgroundColor: "#7A5AF8" }}>
               12 Platform Karşılaştırması <ArrowRight className="w-4 h-4 inline ml-1" />
             </Link>
-            <Link to="/blog/google-yorumlarim-nasil-yonetilir" className="px-5 py-3 rounded-md font-medium border border-border hover:bg-muted min-h-[48px] text-sm">
+            <Link to="/blog/google-yorumlarim-nasil-yonetilir/" className="px-5 py-3 rounded-md font-medium border border-border hover:bg-muted min-h-[48px] text-sm">
               Google Yorumlarım Nasıl Yönetilir?
             </Link>
-            <Link to="/restoran-yorum-cevaplari" className="px-5 py-3 rounded-md font-medium border border-border hover:bg-muted min-h-[48px] text-sm">
+            <Link to="/restoran-yorum-cevaplari/" className="px-5 py-3 rounded-md font-medium border border-border hover:bg-muted min-h-[48px] text-sm">
               Restoran Yorum Cevapları
             </Link>
           </div>
@@ -221,10 +221,10 @@ const OnlineItibarYonetimi = () => {
         <div className="mt-12 p-6 rounded-xl bg-muted/50 border border-border">
           <h3 className="font-semibold text-foreground mb-4">İlgili Rehberler</h3>
           <ul className="space-y-2">
-            <li><Link to="/musteri-memnuniyeti" className="text-primary hover:underline text-sm">Müşteri Memnuniyeti Nedir? →</Link></li>
-            <li><Link to="/restoran-musteri-memnuniyeti" className="text-primary hover:underline text-sm">Restoran Müşteri Memnuniyeti Rehberi →</Link></li>
-            <li><Link to="/yorum-yonetim-araclari" className="text-primary hover:underline text-sm">Yorum Yönetim Araçları Karşılaştırması →</Link></li>
-            <li><Link to="/blog/google-yorumlarim-nasil-yonetilir" className="text-primary hover:underline text-sm">Google Yorumlarım Nasıl Yönetilir? →</Link></li>
+            <li><Link to="/musteri-memnuniyeti/" className="text-primary hover:underline text-sm">Müşteri Memnuniyeti Nedir? →</Link></li>
+            <li><Link to="/restoran-musteri-memnuniyeti/" className="text-primary hover:underline text-sm">Restoran Müşteri Memnuniyeti Rehberi →</Link></li>
+            <li><Link to="/yorum-yonetim-araclari/" className="text-primary hover:underline text-sm">Yorum Yönetim Araçları Karşılaştırması →</Link></li>
+            <li><Link to="/blog/google-yorumlarim-nasil-yonetilir/" className="text-primary hover:underline text-sm">Google Yorumlarım Nasıl Yönetilir? →</Link></li>
           </ul>
         </div>
       </section>
@@ -234,9 +234,9 @@ const OnlineItibarYonetimi = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>© 2026 VoyageRespond</span>
             <span className="hidden md:block">•</span>
-            <Link to="/privacy-policy" className="hover:text-foreground">Gizlilik Politikası</Link>
+            <Link to="/privacy-policy/" className="hover:text-foreground">Gizlilik Politikası</Link>
             <span className="hidden md:block">•</span>
-            <Link to="/terms-of-service" className="hover:text-foreground">Kullanım Koşulları</Link>
+            <Link to="/terms-of-service/" className="hover:text-foreground">Kullanım Koşulları</Link>
           </div>
         </div>
       </footer>

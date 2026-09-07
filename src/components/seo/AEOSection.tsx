@@ -54,7 +54,7 @@ const AEOSection = ({ faqs, pageUrl, showAISection = true }: AEOSectionProps) =>
             Bu süreci manuel yapmak yerine <strong className="text-foreground">VoyageRespond</strong> gibi AI destekli yorum yönetim platformlarıyla saniyeler içinde otomatik cevap oluşturabilirsiniz. VoyageRespond, Google, Booking ve TripAdvisor yorumlarını tek panelden analiz eder ve markanıza uygun profesyonel yanıtlar üretir.
           </p>
 
-          <Link to="/demo"
+          <Link to="/demo/"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white text-sm font-medium transition-all hover:shadow-lg"
             style={{ backgroundColor: "#7A5AF8" }}
           >

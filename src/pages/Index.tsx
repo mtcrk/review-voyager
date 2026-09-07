@@ -88,13 +88,13 @@ const Index = () => {
                 {t('indexPage.nav.features')}
               </a>
               <Link
-                to="/blog"
+                to="/blog/"
                 className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
               >
                 {t('indexPage.nav.blog')}
               </Link>
               <Link
-                to="/contact"
+                to="/contact/"
                 className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
               >
                 {t('indexPage.nav.contact')}
@@ -114,7 +114,7 @@ const Index = () => {
                 asChild
                 className="gradient-primary text-white text-sm px-5 py-2 h-9 hover:shadow-lg transition-all duration-200"
               >
-                <Link to="/demo">{t('indexPage.nav.startFree')}</Link>
+                <Link to="/demo/">{t('indexPage.nav.startFree')}</Link>
               </Button>
             </div>
 
@@ -163,7 +163,7 @@ const Index = () => {
               )}
               <div className="px-4 pt-2">
                 <Button asChild className="w-full gradient-primary text-white">
-                  <Link to="/demo" onClick={() => setMobileMenuOpen(false)}>
+                  <Link to="/demo/" onClick={() => setMobileMenuOpen(false)}>
                     {t('indexPage.nav.startFree')}
                   </Link>
                 </Button>
@@ -246,7 +246,7 @@ const Index = () => {
                 className="gradient-primary text-white text-base px-8 py-6 w-full sm:w-auto hover:scale-[1.02] transition-all duration-200 group"
                 style={{ boxShadow: "0 10px 40px -10px rgba(122,90,248,0.55)" }}
               >
-                <Link to="/demo">
+                <Link to="/demo/">
                   Ücretsiz Kaydolun
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
@@ -256,7 +256,7 @@ const Index = () => {
                 size="lg"
                 className="text-base px-8 py-6 w-full sm:w-auto bg-transparent border border-border text-foreground hover:bg-muted hover:border-border/80 transition-all duration-200"
               >
-                <Link to="/demo">{t('indexPage.hero.ctaSecondary')}</Link>
+                <Link to="/demo/">{t('indexPage.hero.ctaSecondary')}</Link>
               </Button>
             </div>
 
@@ -531,12 +531,12 @@ const Index = () => {
           <div className="max-w-4xl mx-auto p-6 rounded-xl bg-background border border-border">
             <h2 className="text-base font-semibold text-foreground mb-4">Popüler Rehberler</h2>
             <ul className="grid sm:grid-cols-2 gap-2">
-              <li><Link to="/google-yorum-cevap-ornekleri" className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Google Yorum Cevap Örnekleri (25 Şablon) →</Link></li>
-              <li><Link to="/otel-yorum-cevaplari" className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Otel Yorum Cevapları →</Link></li>
-              <li><Link to="/restoran-yorum-cevaplari" className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Restoran Yorum Cevapları →</Link></li>
-              <li><Link to="/blog/google-yorumlarina-nasil-yanit-verilir" className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Google Yorumlarına Nasıl Yanıt Verilir? →</Link></li>
-              <li><Link to="/blog/ai-gorunurluk-skoru-nedir" className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">AI Görünürlük Skoru Nedir? →</Link></li>
-              <li><Link to="/blog/kotu-yorumlara-nasil-cevap-verilir" className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Kötü Yorumlara Nasıl Cevap Verilir? →</Link></li>
+              <li><Link to="/google-yorum-cevap-ornekleri/" className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Google Yorum Cevap Örnekleri (25 Şablon) →</Link></li>
+              <li><Link to="/otel-yorum-cevaplari/" className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Otel Yorum Cevapları →</Link></li>
+              <li><Link to="/restoran-yorum-cevaplari/" className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Restoran Yorum Cevapları →</Link></li>
+              <li><Link to="/blog/google-yorumlarina-nasil-yanit-verilir/" className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Google Yorumlarına Nasıl Yanıt Verilir? →</Link></li>
+              <li><Link to="/blog/ai-gorunurluk-skoru-nedir/" className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">AI Görünürlük Skoru Nedir? →</Link></li>
+              <li><Link to="/blog/kotu-yorumlara-nasil-cevap-verilir/" className="text-sm text-muted-foreground hover:text-primary hover:underline text-left transition-colors">Kötü Yorumlara Nasıl Cevap Verilir? →</Link></li>
             </ul>
           </div>
           <div className="max-w-4xl mx-auto mt-4 p-6 rounded-xl bg-background border border-border">
@@ -587,9 +587,9 @@ const Index = () => {
             <div>
               <h4 className="font-medium text-foreground text-sm mb-3">{t('indexPage.footerSection.links')}</h4>
               <div className="space-y-2">
-                <Link to="/about" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.about')}</Link>
-                <Link to="/blog" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.blog')}</Link>
-                <Link to="/contact" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.contact')}</Link>
+                <Link to="/about/" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.about')}</Link>
+                <Link to="/blog/" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.blog')}</Link>
+                <Link to="/contact/" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.contact')}</Link>
                 <Link to="/hub" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.hub')}</Link>
               </div>
             </div>
@@ -598,11 +598,11 @@ const Index = () => {
             <div>
               <h4 className="font-medium text-foreground text-sm mb-3">{t('indexPage.footerSection.legal')}</h4>
               <div className="space-y-2">
-                <Link to="/privacy-policy" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.privacy')}</Link>
-                <Link to="/terms-of-service" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.terms')}</Link>
-                <Link to="/mesafeli-satis-sozlesmesi" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Mesafeli Satış Sözleşmesi</Link>
-                <Link to="/on-bilgilendirme-formu" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Ön Bilgilendirme Formu</Link>
-                <Link to="/iptal-iade-kosullari" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">İptal &amp; İade Koşulları</Link>
+                <Link to="/privacy-policy/" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.privacy')}</Link>
+                <Link to="/terms-of-service/" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('indexPage.footerSection.terms')}</Link>
+                <Link to="/mesafeli-satis-sozlesmesi/" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Mesafeli Satış Sözleşmesi</Link>
+                <Link to="/on-bilgilendirme-formu/" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Ön Bilgilendirme Formu</Link>
+                <Link to="/iptal-iade-kosullari/" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">İptal &amp; İade Koşulları</Link>
                 <p className="text-sm text-muted-foreground pt-1">support@voyagerespond.com</p>
               </div>
             </div>

@@ -31,7 +31,7 @@ const Blog = () => {
                 Ana Sayfa
               </Link>
               <Link
-                to="/demo"
+                to="/demo/"
                 className="px-4 py-2 rounded-md text-sm font-medium text-white transition-all"
                 style={{ backgroundColor: "#7A5AF8" }}
               >
@@ -112,7 +112,7 @@ const Blog = () => {
             3 ay ücretsiz, tüm özellikler dahil.
           </p>
           <Link
-            to="/demo"
+            to="/demo/"
             className="inline-block px-8 py-3 rounded-md text-white font-medium transition-all hover:shadow-lg min-h-[48px]"
             style={{ backgroundColor: "#7A5AF8" }}
           >
@@ -127,9 +127,9 @@ const Blog = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>© 2024 VoyageRespond</span>
             <span className="hidden md:block">•</span>
-            <Link to="/privacy-policy" className="hover:text-foreground">Gizlilik Politikası</Link>
+            <Link to="/privacy-policy/" className="hover:text-foreground">Gizlilik Politikası</Link>
             <span className="hidden md:block">•</span>
-            <Link to="/terms-of-service" className="hover:text-foreground">Kullanım Koşulları</Link>
+            <Link to="/terms-of-service/" className="hover:text-foreground">Kullanım Koşulları</Link>
           </div>
         </div>
       </footer>

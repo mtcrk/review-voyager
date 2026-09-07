@@ -167,7 +167,7 @@ const Pricing = () => {
                 </Button>
               ) : (
                 <Button className="gradient-primary text-white" asChild>
-                  <Link to="/demo">Get Started</Link>
+                  <Link to="/demo/">Get Started</Link>
                 </Button>
               )}
             </div>
@@ -256,7 +256,7 @@ const Pricing = () => {
                 variant={plan.highlighted ? "default" : "outline"}
                 asChild
               >
-                <Link to="/demo">{plan.cta}</Link>
+                <Link to="/demo/">{plan.cta}</Link>
               </Button>
 
               <div className="space-y-3">
@@ -324,7 +324,7 @@ const Pricing = () => {
                 </Button>
               ) : (
                 <Button variant="outline" className="w-full" asChild>
-                  <Link to="/demo">Add to Plan</Link>
+                  <Link to="/demo/">Add to Plan</Link>
                 </Button>
               )}
             </div>
@@ -347,7 +347,7 @@ const Pricing = () => {
             className="gradient-primary text-white"
             asChild
           >
-            <Link to="/demo">
+            <Link to="/demo/">
               Start Free Trial
               <ArrowRight className="w-5 h-5 ml-2" />
             </Link>
@@ -361,11 +361,11 @@ const Pricing = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>© 2024 VoyageRespond</span>
             <span className="hidden md:block">•</span>
-            <Link to="/privacy-policy" className="hover:text-foreground">
+            <Link to="/privacy-policy/" className="hover:text-foreground">
               Privacy Policy
             </Link>
             <span className="hidden md:block">•</span>
-            <Link to="/terms-of-service" className="hover:text-foreground">
+            <Link to="/terms-of-service/" className="hover:text-foreground">
               Terms of Service
             </Link>
           </div>

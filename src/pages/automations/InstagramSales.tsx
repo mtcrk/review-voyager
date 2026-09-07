@@ -64,7 +64,7 @@ const InstagramSales = () => {
                 <Link to="/hub">Automation Hub</Link>
               </Button>
               <Button className="gradient-primary text-white" asChild>
-                <Link to="/demo">Get Started</Link>
+                <Link to="/demo/">Get Started</Link>
               </Button>
             </div>
           </div>
@@ -95,7 +95,7 @@ const InstagramSales = () => {
               className="gradient-primary text-white px-8"
               asChild
             >
-              <Link to="/demo">
+              <Link to="/demo/">
                 Start Free Trial
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Link>
@@ -231,7 +231,7 @@ const InstagramSales = () => {
             className="gradient-primary text-white px-8"
             asChild
           >
-            <Link to="/demo">
+            <Link to="/demo/">
               Get Started Free
               <ArrowRight className="w-5 h-5 ml-2" />
             </Link>
@@ -245,11 +245,11 @@ const InstagramSales = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>© 2024 VoyageRespond</span>
             <span className="hidden md:block">•</span>
-            <Link to="/privacy-policy" className="hover:text-foreground">
+            <Link to="/privacy-policy/" className="hover:text-foreground">
               Privacy Policy
             </Link>
             <span className="hidden md:block">•</span>
-            <Link to="/terms-of-service" className="hover:text-foreground">
+            <Link to="/terms-of-service/" className="hover:text-foreground">
               Terms of Service
             </Link>
           </div>
