@@ -6,13 +6,13 @@ const AUTHOR = "VoyageRespond Ekibi";
 export const memnuniyetClusterPosts: BlogPost[] = [
   {
     slug: "google-yorumlarim-nasil-yonetilir",
-    title: "Google Yorumlarım Nasıl Yönetilir? Adım Adım Rehber (2026)",
-    metaTitle: "Google Yorumlarım Nasıl Yönetilir? 2026 Rehberi",
+    title: "Google Yorumlarımı Görüntüleme ve Yönetme Paneli Rehberi (2026)",
+    metaTitle: "Google Yorumlarımı Görüntüleme ve Yönetme | 2026 Rehberi",
     metaDescription:
-      "Google yorumlarımı nasıl görürüm, nasıl yanıtlarım, nasıl silerim? Google Business Profile üzerinden tüm yorum yönetim adımları + AI ipuçları.",
+      "Google yorumlarınızı görüntüleme, yanıtlama, raporlama ve kaldırma: Google Business Profile panelinde yorum yönetimi ve AI ipuçları.",
     description:
       "Google yorumlarınızı tek panelden yönetmenin yolları: yorumları görmek, yanıtlamak, raporlamak, kaldırmak ve AI ile otomatikleştirmek.",
-    ogTitle: "Google Yorumlarım Nasıl Yönetilir? | VoyageRespond",
+    ogTitle: "Google Yorumlarımı Görüntüleme ve Yönetme | VoyageRespond",
     ogDescription:
       "Google Business Profile üzerinden yorum görme, yanıtlama, silme ve AI otomasyonu — tek rehberde.",
     author: AUTHOR,

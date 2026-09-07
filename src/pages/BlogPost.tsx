@@ -5,6 +5,7 @@ import { getBlogPost, blogPosts } from "@/lib/blogPosts";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import AEOSection from "@/components/seo/AEOSection";
 import SEO from "@/components/seo/SEO";
+import { canonicalPath } from "@/prerenderPaths";
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
