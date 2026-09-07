@@ -9,7 +9,7 @@
 
 import { canonicalPath, canonicalUrl } from "@/prerenderPaths";
 import { isEnglishPath } from "@/lib/geoPages";
-import { cityHotelPages } from "@/lib/cityHotelData";
+import { cityHotelData } from "@/lib/cityHotelData";
 
 /** Turkish path -> English path. Both without trailing slash here. */
 const BASE_PAIRS: [string, string][] = [
@@ -46,7 +46,7 @@ const BASE_PAIRS: [string, string][] = [
 ];
 
 // City hotel pages: /otel-yorum-yonetimi/<slug> <-> /hotel-review-management/<slug>
-const CITY_PAIRS: [string, string][] = (cityHotelPages ?? []).map((c) => [
+const CITY_PAIRS: [string, string][] = cityHotelData.map((c) => [
   `/otel-yorum-yonetimi/${c.slug}`,
   `/hotel-review-management/${c.slug}`,
 ]);
