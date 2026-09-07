@@ -47,8 +47,8 @@ const ZincirRestoranYorumYonetimi = () => {
               </span>
             </Link>
             <div className="flex items-center gap-4">
-              <Link to="/blog" className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-foreground">Blog</Link>
-              <Link to="/demo" className="px-4 py-2 rounded-md text-sm font-medium text-white" style={{ backgroundColor: "#7A5AF8" }}>
+              <Link to="/blog/" className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-foreground">Blog</Link>
+              <Link to="/demo/" className="px-4 py-2 rounded-md text-sm font-medium text-white" style={{ backgroundColor: "#7A5AF8" }}>
                 Ücretsiz Dene
               </Link>
             </div>
@@ -216,7 +216,7 @@ const ZincirRestoranYorumYonetimi = () => {
           <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
             Google, Yemeksepeti ve Getir yorumları için AI yanıt, şube karşılaştırma ve haftalık rapor. Ücretsiz kaydolun.
           </p>
-          <Link to="/demo" className="px-8 py-3 rounded-md text-white font-medium hover:shadow-lg min-h-[48px]" style={{ backgroundColor: "#7A5AF8" }}>
+          <Link to="/demo/" className="px-8 py-3 rounded-md text-white font-medium hover:shadow-lg min-h-[48px]" style={{ backgroundColor: "#7A5AF8" }}>
             Ücretsiz Başla <ArrowRight className="w-4 h-4 inline ml-1" />
           </Link>
         </div>
@@ -251,9 +251,9 @@ const ZincirRestoranYorumYonetimi = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>© 2026 VoyageRespond</span>
             <span className="hidden md:block">•</span>
-            <Link to="/privacy-policy" className="hover:text-foreground">Gizlilik Politikası</Link>
+            <Link to="/privacy-policy/" className="hover:text-foreground">Gizlilik Politikası</Link>
             <span className="hidden md:block">•</span>
-            <Link to="/terms-of-service" className="hover:text-foreground">Kullanım Koşulları</Link>
+            <Link to="/terms-of-service/" className="hover:text-foreground">Kullanım Koşulları</Link>
           </div>
         </div>
       </footer>

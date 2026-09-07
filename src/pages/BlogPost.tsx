@@ -5,6 +5,7 @@ import { getBlogPost, blogPosts } from "@/lib/blogPosts";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import AEOSection from "@/components/seo/AEOSection";
 import SEO from "@/components/seo/SEO";
+import { canonicalPath } from "@/prerenderPaths";
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -52,7 +53,7 @@ const BlogPost = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
           <h1 className="text-2xl font-bold">Yazı bulunamadı</h1>
-          <Link to="/blog" className="text-primary hover:underline">
+          <Link to="/blog/" className="text-primary hover:underline">
             Blog'a dön
           </Link>
         </div>
@@ -136,9 +137,15 @@ const BlogPost = () => {
   const formatInline = (text: string): string => {
     return text
       .replace(/\*\*(.*?)\*\*/g, '<strong class="text-foreground font-semibold">$1</strong>')
-      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-primary hover:underline font-medium">$1</a>')
+      .replace(
+        /\[([^\]]+)\]\(([^)]+)\)/g,
+        (_m, label: string, href: string) =>
+          // Internal links follow the site-wide trailing-slash canonical rule.
+          `<a href="${href.startsWith("/") ? canonicalPath(href) : href}" class="text-primary hover:underline font-medium">${label}</a>`
+      )
       .replace(/`([^`]+)`/g, '<code class="bg-muted px-1.5 py-0.5 rounded text-sm">$1</code>');
   };
+
 
   const otherPosts = blogPosts.filter((p) => p.slug !== slug).slice(0, 2);
 
@@ -181,11 +188,11 @@ const BlogPost = () => {
               </span>
             </Link>
             <div className="flex items-center gap-4">
-              <Link to="/blog" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              <Link to="/blog/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                 Blog
               </Link>
               <Link
-                to="/demo"
+                to="/demo/"
                 className="px-4 py-2 rounded-md text-sm font-medium text-white transition-all inline-block"
                 style={{ backgroundColor: "#7A5AF8" }}
               >
@@ -202,7 +209,7 @@ const BlogPost = () => {
           <article className="min-w-0">
         {/* Back */}
         <Link
-          to="/blog"
+          to="/blog/"
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -269,7 +276,7 @@ const BlogPost = () => {
             </p>
           </div>
           <Link
-            to="/demo"
+            to="/demo/"
             className="px-6 py-3 rounded-md text-white font-medium transition-all hover:shadow-lg whitespace-nowrap min-h-[48px] inline-block"
             style={{ backgroundColor: "#7A5AF8" }}
           >
@@ -371,7 +378,7 @@ const BlogPost = () => {
           </h2>
           <p className="text-muted-foreground mb-6">3 ay ücretsiz, tüm özellikler dahil.</p>
           <Link
-            to="/demo"
+            to="/demo/"
             className="px-8 py-3 rounded-md text-white font-medium transition-all hover:shadow-lg inline-block"
             style={{ backgroundColor: "#7A5AF8" }}
           >
@@ -386,9 +393,9 @@ const BlogPost = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>© 2024 VoyageRespond</span>
             <span className="hidden md:block">•</span>
-            <Link to="/privacy-policy" className="hover:text-foreground">Gizlilik Politikası</Link>
+            <Link to="/privacy-policy/" className="hover:text-foreground">Gizlilik Politikası</Link>
             <span className="hidden md:block">•</span>
-            <Link to="/terms-of-service" className="hover:text-foreground">Kullanım Koşulları</Link>
+            <Link to="/terms-of-service/" className="hover:text-foreground">Kullanım Koşulları</Link>
           </div>
         </div>
       </footer>

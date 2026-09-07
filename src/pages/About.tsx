@@ -39,7 +39,7 @@ export default function About() {
               <Link to="/#pricing" className="text-base font-medium text-foreground hover:text-primary transition-colors">
                 {t('landing.earlyAccess.badge', 'Erken Erişim')}
               </Link>
-              <Link to="/contact" className="text-base font-medium text-foreground hover:text-primary transition-colors">
+              <Link to="/contact/" className="text-base font-medium text-foreground hover:text-primary transition-colors">
                 {t('nav.contact', 'İletişim')}
               </Link>
             </div>
@@ -163,7 +163,7 @@ export default function About() {
             size="lg"
             className="gradient-primary text-white shadow-lg text-base sm:text-lg px-8 sm:px-10 py-6 w-full sm:w-auto min-h-[48px] hover:shadow-2xl transition-all duration-300 hover:scale-105"
           >
-            <Link to="/demo">
+            <Link to="/demo/">
               {t('landing.heroCta', 'See Your AI Visibility Score')}
               <ArrowRight className="w-5 h-5 ml-2" />
             </Link>
@@ -189,8 +189,8 @@ export default function About() {
               <div className="space-y-2">
                 <Link to="/" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('nav.home', 'Ana Sayfa')}</Link>
                 <Link to="/#pricing" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing.earlyAccess.badge', 'Erken Erişim')}</Link>
-                <Link to="/contact" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('nav.contact', 'İletişim')}</Link>
-                <Link to="/about" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('about.badge', 'Hakkımızda')}</Link>
+                <Link to="/contact/" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('nav.contact', 'İletişim')}</Link>
+                <Link to="/about/" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('about.badge', 'Hakkımızda')}</Link>
               </div>
             </div>
             <div>
@@ -206,9 +206,9 @@ export default function About() {
           <div className="border-t border-border pt-6 flex flex-col md:flex-row items-center justify-center gap-6 text-sm text-muted-foreground">
             <span>{t('footer.copyright')}</span>
             <span className="hidden md:block">•</span>
-            <Link to="/privacy-policy" className="hover:text-foreground transition-colors">{t('footer.privacy')}</Link>
+            <Link to="/privacy-policy/" className="hover:text-foreground transition-colors">{t('footer.privacy')}</Link>
             <span className="hidden md:block">•</span>
-            <Link to="/terms-of-service" className="hover:text-foreground transition-colors">{t('footer.terms')}</Link>
+            <Link to="/terms-of-service/" className="hover:text-foreground transition-colors">{t('footer.terms')}</Link>
           </div>
         </div>
       </footer>

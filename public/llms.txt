@@ -169,4 +169,4 @@ VoyageRespond; çok platformlu yorum toplama, 8 farklı tonda AI destekli yanıt
 - [Gizlilik Politikası](/privacy-policy): Veri işleme ve gizlilik koşulları.
 - [Kullanım Koşulları](/terms-of-service): Hizmet kullanım şartları ve sorumluluklar.
 
-<!-- generated 2026-09-01 — 144 pages -->
+<!-- generated 2026-09-07 — 144 pages -->

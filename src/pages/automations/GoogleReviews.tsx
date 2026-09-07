@@ -118,14 +118,14 @@ const GoogleReviews = () => {
               </span>
             </Link>
             <div className="flex items-center gap-4">
-              <Link to="/blog" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden md:block">
+              <Link to="/blog/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden md:block">
                 Blog
               </Link>
               <Link to="/hub" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden md:block">
                 Hub
               </Link>
               <Link
-                to="/demo"
+                to="/demo/"
                 className="px-5 py-2.5 rounded-md text-sm font-medium text-white transition-all shadow-sm hover:shadow-md inline-block"
                 style={{ backgroundColor: "#7A5AF8" }}
               >
@@ -383,7 +383,7 @@ const GoogleReviews = () => {
             </form>
           )}
           <div className="mt-6">
-            <Link to="/blog" className="text-sm text-primary hover:underline">
+            <Link to="/blog/" className="text-sm text-primary hover:underline">
               Blog yazılarımızı okuyun →
             </Link>
           </div>
@@ -396,11 +396,11 @@ const GoogleReviews = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>© 2024 VoyageRespond</span>
             <span className="hidden md:block">•</span>
-            <Link to="/blog" className="hover:text-foreground">Blog</Link>
+            <Link to="/blog/" className="hover:text-foreground">Blog</Link>
             <span className="hidden md:block">•</span>
-            <Link to="/privacy-policy" className="hover:text-foreground">Gizlilik Politikası</Link>
+            <Link to="/privacy-policy/" className="hover:text-foreground">Gizlilik Politikası</Link>
             <span className="hidden md:block">•</span>
-            <Link to="/terms-of-service" className="hover:text-foreground">Kullanım Koşulları</Link>
+            <Link to="/terms-of-service/" className="hover:text-foreground">Kullanım Koşulları</Link>
           </div>
         </div>
       </footer>

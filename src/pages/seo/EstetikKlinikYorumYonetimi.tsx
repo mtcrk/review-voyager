@@ -42,7 +42,7 @@ const EstetikKlinikYorumYonetimi = () => {
                 <span className="font-normal">Voyage</span><span className="font-semibold">Respond</span>
               </span>
             </Link>
-            <Link to="/demo" className="px-4 py-2 rounded-md text-sm font-medium text-white" style={{ backgroundColor: "#7A5AF8" }}>
+            <Link to="/demo/" className="px-4 py-2 rounded-md text-sm font-medium text-white" style={{ backgroundColor: "#7A5AF8" }}>
               Ücretsiz Dene
             </Link>
           </div>
@@ -151,7 +151,7 @@ const EstetikKlinikYorumYonetimi = () => {
           <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
             KVKK + 1219 uyumlu AI yanıt akışı, çoklu kanal tek panel, duygu trend raporu. Ücretsiz başlayın.
           </p>
-          <Link to="/demo" className="px-8 py-3 rounded-md text-white font-medium hover:shadow-lg min-h-[48px]" style={{ backgroundColor: "#7A5AF8" }}>
+          <Link to="/demo/" className="px-8 py-3 rounded-md text-white font-medium hover:shadow-lg min-h-[48px]" style={{ backgroundColor: "#7A5AF8" }}>
             Ücretsiz Başla <ArrowRight className="w-4 h-4 inline ml-1" />
           </Link>
         </div>
@@ -169,12 +169,12 @@ const EstetikKlinikYorumYonetimi = () => {
         <div className="mt-12 p-6 rounded-xl bg-muted/50 border border-border">
           <h3 className="font-semibold text-foreground mb-4">İlgili Rehberler</h3>
           <ul className="space-y-2">
-            <li><Link to="/saglik-itibar-yonetimi" className="text-primary hover:underline text-sm">Sağlık Kuruluşları için İtibar Yönetimi (Hub) →</Link></li>
-            <li><Link to="/blog/doktor-yorumlari-nasil-yonetilir" className="text-primary hover:underline text-sm">Doktor Yorumları Nasıl Yönetilir? →</Link></li>
-            <li><Link to="/dis-hekimi-yorum-yonetimi" className="text-primary hover:underline text-sm">Diş Hekimi Yorum Yönetimi →</Link></li>
-            <li><Link to="/blog/sahte-saglik-yorumu-sikayet" className="text-primary hover:underline text-sm">Sahte Sağlık Yorumu Şikayet Rehberi →</Link></li>
-            <li><Link to="/yorum-yonetim-araclari" className="text-primary hover:underline text-sm">Yorum Yönetim Araçları Karşılaştırması →</Link></li>
-            <li><Link to="/platform/google-yorumlari-icin-yapay-zeka" className="text-primary hover:underline text-sm">Google Yorumları için Yapay Zeka →</Link></li>
+            <li><Link to="/saglik-itibar-yonetimi/" className="text-primary hover:underline text-sm">Sağlık Kuruluşları için İtibar Yönetimi (Hub) →</Link></li>
+            <li><Link to="/blog/doktor-yorumlari-nasil-yonetilir/" className="text-primary hover:underline text-sm">Doktor Yorumları Nasıl Yönetilir? →</Link></li>
+            <li><Link to="/dis-hekimi-yorum-yonetimi/" className="text-primary hover:underline text-sm">Diş Hekimi Yorum Yönetimi →</Link></li>
+            <li><Link to="/blog/sahte-saglik-yorumu-sikayet/" className="text-primary hover:underline text-sm">Sahte Sağlık Yorumu Şikayet Rehberi →</Link></li>
+            <li><Link to="/yorum-yonetim-araclari/" className="text-primary hover:underline text-sm">Yorum Yönetim Araçları Karşılaştırması →</Link></li>
+            <li><Link to="/platform/google-yorumlari-icin-yapay-zeka/" className="text-primary hover:underline text-sm">Google Yorumları için Yapay Zeka →</Link></li>
           </ul>
         </div>
       </section>
@@ -184,9 +184,9 @@ const EstetikKlinikYorumYonetimi = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>© 2026 VoyageRespond</span>
             <span className="hidden md:block">•</span>
-            <Link to="/privacy-policy" className="hover:text-foreground">Gizlilik Politikası</Link>
+            <Link to="/privacy-policy/" className="hover:text-foreground">Gizlilik Politikası</Link>
             <span className="hidden md:block">•</span>
-            <Link to="/terms-of-service" className="hover:text-foreground">Kullanım Koşulları</Link>
+            <Link to="/terms-of-service/" className="hover:text-foreground">Kullanım Koşulları</Link>
           </div>
         </div>
       </footer>

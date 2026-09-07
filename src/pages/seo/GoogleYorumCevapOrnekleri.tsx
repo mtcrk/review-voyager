@@ -70,8 +70,8 @@ const GoogleYorumCevapOrnekleri = () => {
               </span>
             </Link>
             <div className="flex items-center gap-4">
-              <Link to="/blog" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Blog</Link>
-              <Link to="/demo" className="px-4 py-2 rounded-md text-sm font-medium text-white transition-all" style={{ backgroundColor: "#7A5AF8" }}>Ücretsiz Dene</Link>
+              <Link to="/blog/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Blog</Link>
+              <Link to="/demo/" className="px-4 py-2 rounded-md text-sm font-medium text-white transition-all" style={{ backgroundColor: "#7A5AF8" }}>Ücretsiz Dene</Link>
             </div>
           </div>
         </div>
@@ -128,7 +128,7 @@ const GoogleYorumCevapOrnekleri = () => {
           <p className="text-muted-foreground mb-6">
             VoyageRespond, her yorumu analiz ederek kişiselleştirilmiş, markanıza uygun yanıtlar üretir.
           </p>
-          <Link to="/demo" className="px-8 py-3 rounded-md text-white font-medium transition-all hover:shadow-lg" style={{ backgroundColor: "#7A5AF8" }}>
+          <Link to="/demo/" className="px-8 py-3 rounded-md text-white font-medium transition-all hover:shadow-lg" style={{ backgroundColor: "#7A5AF8" }}>
             Ücretsiz Deneyin <ArrowRight className="w-4 h-4 inline ml-1" />
           </Link>
         </div>
@@ -148,12 +148,12 @@ const GoogleYorumCevapOrnekleri = () => {
         <div className="mt-12 p-6 rounded-xl bg-muted/50 border border-border">
           <h3 className="font-semibold text-foreground mb-4">İlgili Rehberler</h3>
           <ul className="space-y-2">
-            <li><Link to="/blog/google-yorumlarina-nasil-yanit-verilir" className="text-primary hover:underline text-sm">Google Yorumlarına Nasıl Yanıt Verilir? →</Link></li>
-            <li><Link to="/blog/kotu-yorumlara-nasil-cevap-verilir" className="text-primary hover:underline text-sm">Kötü Yorumlara Nasıl Cevap Verilir? →</Link></li>
-            <li><Link to="/blog/chatgpt-ile-google-yorumlarina-nasil-cevap-yazilir" className="text-primary hover:underline text-sm">ChatGPT ile Yorum Cevabı Nasıl Yazılır? →</Link></li>
-            <li><Link to="/blog/google-yorum-cevap-araclari-2026" className="text-primary hover:underline text-sm">En İyi Yorum Yönetim Araçları (2026) →</Link></li>
-            <li><Link to="/restoran-yorum-cevaplari" className="text-primary hover:underline text-sm">Restoran Yorum Cevapları (30 Şablon) →</Link></li>
-            <li><Link to="/otel-yorum-cevaplari" className="text-primary hover:underline text-sm">Otel Yorum Cevapları (30 Şablon) →</Link></li>
+            <li><Link to="/blog/google-yorumlarina-nasil-yanit-verilir/" className="text-primary hover:underline text-sm">Google Yorumlarına Nasıl Yanıt Verilir? →</Link></li>
+            <li><Link to="/blog/kotu-yorumlara-nasil-cevap-verilir/" className="text-primary hover:underline text-sm">Kötü Yorumlara Nasıl Cevap Verilir? →</Link></li>
+            <li><Link to="/blog/chatgpt-ile-google-yorumlarina-nasil-cevap-yazilir/" className="text-primary hover:underline text-sm">ChatGPT ile Yorum Cevabı Nasıl Yazılır? →</Link></li>
+            <li><Link to="/blog/google-yorum-cevap-araclari-2026/" className="text-primary hover:underline text-sm">En İyi Yorum Yönetim Araçları (2026) →</Link></li>
+            <li><Link to="/restoran-yorum-cevaplari/" className="text-primary hover:underline text-sm">Restoran Yorum Cevapları (30 Şablon) →</Link></li>
+            <li><Link to="/otel-yorum-cevaplari/" className="text-primary hover:underline text-sm">Otel Yorum Cevapları (30 Şablon) →</Link></li>
           </ul>
         </div>
       </section>
@@ -163,9 +163,9 @@ const GoogleYorumCevapOrnekleri = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>© 2026 VoyageRespond</span>
             <span className="hidden md:block">•</span>
-            <Link to="/privacy-policy" className="hover:text-foreground">Gizlilik Politikası</Link>
+            <Link to="/privacy-policy/" className="hover:text-foreground">Gizlilik Politikası</Link>
             <span className="hidden md:block">•</span>
-            <Link to="/terms-of-service" className="hover:text-foreground">Kullanım Koşulları</Link>
+            <Link to="/terms-of-service/" className="hover:text-foreground">Kullanım Koşulları</Link>
           </div>
         </div>
       </footer>

@@ -60,7 +60,7 @@ const WhatsAppAutomation = () => {
                 <Link to="/hub">Automation Hub</Link>
               </Button>
               <Button className="gradient-primary text-white" asChild>
-                <Link to="/demo">Get Started</Link>
+                <Link to="/demo/">Get Started</Link>
               </Button>
             </div>
           </div>
@@ -158,13 +158,13 @@ const WhatsAppAutomation = () => {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button asChild>
-              <Link to="/automations/instagram-sales">
+              <Link to="/automations/instagram-sales/">
                 Instagram Automation
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
             </Button>
             <Button variant="outline" asChild>
-              <Link to="/automations/google-reviews">Google Reviews</Link>
+              <Link to="/automations/google-reviews/">Google Reviews</Link>
             </Button>
           </div>
         </div>
@@ -176,11 +176,11 @@ const WhatsAppAutomation = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>© 2024 VoyageRespond</span>
             <span className="hidden md:block">•</span>
-            <Link to="/privacy-policy" className="hover:text-foreground">
+            <Link to="/privacy-policy/" className="hover:text-foreground">
               Privacy Policy
             </Link>
             <span className="hidden md:block">•</span>
-            <Link to="/terms-of-service" className="hover:text-foreground">
+            <Link to="/terms-of-service/" className="hover:text-foreground">
               Terms of Service
             </Link>
           </div>

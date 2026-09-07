@@ -58,7 +58,7 @@ const RaporIndir = () => {
               </span>
             </Link>
             <Button variant="ghost" asChild>
-              <Link to="/demo">Demo</Link>
+              <Link to="/demo/">Demo</Link>
             </Button>
           </div>
         </div>
@@ -107,7 +107,7 @@ const RaporIndir = () => {
               Yorumlarınızı yapay zeka ile tek panelden yönetmek ister misiniz?
             </p>
             <Button size="lg" variant="outline" className="w-full sm:w-auto h-12" asChild>
-              <Link to="/demo">
+              <Link to="/demo/">
                 Ürünü canlı dene
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Link>

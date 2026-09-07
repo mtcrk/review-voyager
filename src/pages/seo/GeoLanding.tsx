@@ -95,7 +95,7 @@ const GeoLanding = () => {
                 {t.otherLang}
               </Link>
 
-              <Link to="/demo" className="px-4 py-2 rounded-md text-sm font-medium text-white" style={{ backgroundColor: "#7A5AF8" }}>
+              <Link to="/demo/" className="px-4 py-2 rounded-md text-sm font-medium text-white" style={{ backgroundColor: "#7A5AF8" }}>
                 {t.tryFree}
               </Link>
             </div>

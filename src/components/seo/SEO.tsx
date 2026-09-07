@@ -1,5 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
+import { canonicalPath as normalizePath, canonicalUrl as toCanonicalUrl, SITE_URL } from "@/prerenderPaths";
+import { hreflangFor } from "@/lib/hreflangPairs";
 
 interface SEOProps {
   title: string;
@@ -15,34 +17,8 @@ interface SEOProps {
   locale?: "tr" | "en";
 }
 
-
-const SITE_URL = "https://voyagerespond.com";
-
-/**
- * Site-wide canonical form: trailing slash.
- * "/blog/foo" -> "/blog/foo/", "//blog//foo" -> "/blog/foo/", "/" stays "/".
- * Query/hash are dropped from canonical URLs on purpose.
- */
-const normalizePath = (rawPath: string) => {
-  const [pathOnly] = rawPath.split(/[?#]/);
-  const collapsed = `/${pathOnly}`.replace(/\/{2,}/g, "/");
-  if (collapsed === "/") return "/";
-  return collapsed.endsWith("/") ? collapsed : `${collapsed}/`;
-};
-
-const toCanonicalUrl = (value: string) => {
-  if (/^https?:\/\//i.test(value)) {
-    try {
-      const u = new URL(value);
-      return `${u.origin}${normalizePath(u.pathname)}`;
-    } catch {
-      return value;
-    }
-  }
-  return `${SITE_URL}${normalizePath(value)}`;
-};
-
 const SEO = ({ title, description, canonical, ogImage, ogType, noindex, jsonLd, alternates, locale }: SEOProps) => {
+
   const location = useLocation();
   const isEnPath = location.pathname.startsWith("/en/") || location.pathname === "/en";
 
@@ -65,14 +41,25 @@ const SEO = ({ title, description, canonical, ogImage, ogType, noindex, jsonLd, 
     locale ?? (isEnPath || matchAlt("en") ? "en" : matchAlt("tr") ? "tr" : "tr");
   const ogLocale = resolvedLocale === "en" ? "en_US" : "tr_TR";
 
+  // hreflang: explicit prop wins; otherwise derive tr / en / x-default from the
+  // TR<->EN page-pair map. Skipped for noindex pages. All hrefs canonicalized.
+  const resolvedAlternates = (
+    alternates && alternates.length > 0
+      ? alternates
+      : noindex
+        ? []
+        : hreflangFor(location.pathname)
+  ).map((a) => ({ hrefLang: a.hrefLang, href: toCanonicalUrl(a.href) }));
+
   return (
     <Helmet htmlAttributes={{ lang: resolvedLocale }}>
       <title>{title}</title>
       <meta name="description" content={description} />
       {url && <link rel="canonical" href={url} />}
-      {(alternates ?? []).map((a) => (
+      {resolvedAlternates.map((a) => (
         <link key={a.hrefLang} rel="alternate" hrefLang={a.hrefLang} href={a.href} />
       ))}
+
       <meta
         name="robots"
         content={

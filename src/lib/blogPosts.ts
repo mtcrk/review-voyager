@@ -25,14 +25,14 @@ export interface BlogPost {
 export const blogPosts: BlogPost[] = [
   {
     slug: "google-yorumlarina-nasil-yanit-verilir",
-    title: "Google Yorumlarına Nasıl Cevap Verilir? İşletmeler İçin Örnekli Rehber",
+    title: "Google Yorumlarına Cevap Verme Rehberi: İşletmeler İçin Örnekli Yanıtlama",
     description:
-      "İşletme sahipleri için Google yorumlarına cevap yazma rehberi: olumlu ve olumsuz yorumlar için hazır cevap örnekleri, ton önerileri ve pratik kurallar.",
-    metaTitle: "Google Yorumlarına Nasıl Cevap Verilir? Örnekli Rehber",
+      "İşletme sahipleri için Google yorumlarını yanıtlama rehberi: olumlu ve olumsuz yorumlara cevap verme örnekleri, ton önerileri ve pratik kurallar.",
+    metaTitle: "Google Yorumlarına Cevap Verme Rehberi | Örnekli Yanıtlar",
     metaDescription:
-      "İşletme sahipleri için Google yorumlarına cevap yazma rehberi: olumlu ve olumsuz yorumlar için hazır cevap örnekleri ve pratik kurallar.",
-    ogTitle: "Google Yorumlarına Nasıl Cevap Verilir? İşletmeler İçin Rehber",
-    ogDescription: "İşletmeler için Google yorumlarına cevap yazma rehberi: olumlu ve olumsuz yorumlar için hazır örnekler.",
+      "Gelen Google yorumlarını yanıtlama rehberi: olumlu ve olumsuz yorumlara cevap verme örnekleri, ton seçimi ve pratik kurallar.",
+    ogTitle: "Google Yorumlarına Cevap Verme Rehberi | İşletmeler İçin",
+    ogDescription: "İşletmeler için Google yorumlarını yanıtlama rehberi: olumlu ve olumsuz yorumlara cevap örnekleri.",
     author: "VoyageRespond",
     publishedAt: "2026-03-10",
     category: "Yorum Yönetimi",

@@ -58,7 +58,7 @@ const SehirOtelYorumYonetimi = () => {
           <Link to="/" className="flex items-center gap-2">
             <img src={voyageRespondLogo} alt="VoyageRespond" className="h-8" />
           </Link>
-          <Link to="/demo"
+          <Link to="/demo/"
             className="px-4 py-2 rounded-lg text-sm font-semibold text-white"
             style={{ backgroundColor: "#7C3AED" }}
           >
@@ -144,7 +144,7 @@ const SehirOtelYorumYonetimi = () => {
           <p className="text-sm sm:text-base text-purple-200 max-w-xl mx-auto mb-6">
             Google, Booking, TripAdvisor ve diğer platformlardaki tüm yorumları tek panelden, AI destekli çok dilli yanıtlarla yönetin.
           </p>
-          <Link to="/demo"
+          <Link to="/demo/"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-semibold"
             style={{ backgroundColor: "#7C3AED" }}
           >

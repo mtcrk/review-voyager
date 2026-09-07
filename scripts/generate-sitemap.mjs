@@ -169,7 +169,8 @@ const allEntries = [...staticRoutes, ...blogPosts, ...cityHotelPages];
 // Sort by path for consistent output
 allEntries.sort((a, b) => a.path.localeCompare(b.path));
 
-// Site-wide canonical form: trailing slash. Deduplicate after normalizing.
+// Site-wide canonical form: trailing slash. Mirrors canonicalPath() in
+// src/prerenderPaths.ts (single source of truth for the URL rule).
 const normalizePath = (p) => {
   const collapsed = `/${p}`.replace(/\/{2,}/g, "/");
   if (collapsed === "/") return "/";
