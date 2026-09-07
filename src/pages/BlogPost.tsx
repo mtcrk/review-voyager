@@ -136,9 +136,15 @@ const BlogPost = () => {
   const formatInline = (text: string): string => {
     return text
       .replace(/\*\*(.*?)\*\*/g, '<strong class="text-foreground font-semibold">$1</strong>')
-      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-primary hover:underline font-medium">$1</a>')
+      .replace(
+        /\[([^\]]+)\]\(([^)]+)\)/g,
+        (_m, label: string, href: string) =>
+          // Internal links follow the site-wide trailing-slash canonical rule.
+          `<a href="${href.startsWith("/") ? canonicalPath(href) : href}" class="text-primary hover:underline font-medium">${label}</a>`
+      )
       .replace(/`([^`]+)`/g, '<code class="bg-muted px-1.5 py-0.5 rounded text-sm">$1</code>');
   };
+
 
   const otherPosts = blogPosts.filter((p) => p.slug !== slug).slice(0, 2);
 
