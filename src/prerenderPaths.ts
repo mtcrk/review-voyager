@@ -117,3 +117,33 @@ export const PRERENDER_APP_SHELL_PATHS = [
   "/tiktok-review-kit",
   "/tiktok-dm",
 ];
+
+// ---------------------------------------------------------------------------
+// Canonical URL rule (single source of truth)
+// ---------------------------------------------------------------------------
+// Site-wide form: every path ends with a trailing slash, except the homepage.
+// Used by <SEO> (canonical + hreflang), the sitemap generator and internal
+// links so the same URL is never served in two forms.
+
+export const SITE_URL = "https://voyagerespond.com";
+
+/** "/foo" -> "/foo/", "//foo//" -> "/foo/", "/" stays "/". Query/hash dropped. */
+export function canonicalPath(rawPath: string): string {
+  const [pathOnly] = String(rawPath).split(/[?#]/);
+  const collapsed = `/${pathOnly}`.replace(/\/{2,}/g, "/");
+  if (collapsed === "/") return "/";
+  return collapsed.endsWith("/") ? collapsed : `${collapsed}/`;
+}
+
+/** Absolute canonical URL for a path or an already absolute URL. */
+export function canonicalUrl(value: string): string {
+  if (/^https?:\/\//i.test(value)) {
+    try {
+      const u = new URL(value);
+      return `${u.origin}${canonicalPath(u.pathname)}`;
+    } catch {
+      return value;
+    }
+  }
+  return `${SITE_URL}${canonicalPath(value)}`;
+}
