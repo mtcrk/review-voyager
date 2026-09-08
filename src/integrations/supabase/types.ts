@@ -584,6 +584,7 @@ export type Database = {
           review_count: number | null
           room_count: number | null
           segment: string | null
+          serpapi_property_token: string | null
           source: string
           source_urls: Json
           star_rating: number | null
@@ -613,6 +614,7 @@ export type Database = {
           review_count?: number | null
           room_count?: number | null
           segment?: string | null
+          serpapi_property_token?: string | null
           source?: string
           source_urls?: Json
           star_rating?: number | null
@@ -642,6 +644,7 @@ export type Database = {
           review_count?: number | null
           room_count?: number | null
           segment?: string | null
+          serpapi_property_token?: string | null
           source?: string
           source_urls?: Json
           star_rating?: number | null
@@ -844,6 +847,75 @@ export type Database = {
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "ci_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competitor_price_snapshots: {
+        Row: {
+          adults: number
+          business_id: string
+          checkin: string
+          competitor_id: string
+          currency: string
+          fetched_at: string
+          free_cancellation: boolean | null
+          id: string
+          is_ad: boolean | null
+          is_official: boolean | null
+          nights: number
+          num_guests: number | null
+          price: number
+          raw: Json
+          source: string
+        }
+        Insert: {
+          adults?: number
+          business_id: string
+          checkin: string
+          competitor_id: string
+          currency?: string
+          fetched_at?: string
+          free_cancellation?: boolean | null
+          id?: string
+          is_ad?: boolean | null
+          is_official?: boolean | null
+          nights?: number
+          num_guests?: number | null
+          price: number
+          raw: Json
+          source: string
+        }
+        Update: {
+          adults?: number
+          business_id?: string
+          checkin?: string
+          competitor_id?: string
+          currency?: string
+          fetched_at?: string
+          free_cancellation?: boolean | null
+          id?: string
+          is_ad?: boolean | null
+          is_official?: boolean | null
+          nights?: number
+          num_guests?: number | null
+          price?: number
+          raw?: Json
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competitor_price_snapshots_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competitor_price_snapshots_competitor_id_fkey"
+            columns: ["competitor_id"]
+            isOneToOne: false
+            referencedRelation: "ci_competitors"
             referencedColumns: ["id"]
           },
         ]

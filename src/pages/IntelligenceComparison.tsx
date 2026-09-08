@@ -61,6 +61,8 @@ import { buildTopicCsv, downloadCsv, type CsvTopicRow } from "@/lib/topicCsv";
 import { TopicAnalysis } from "@/components/intelligence/TopicAnalysis";
 import { ActionPack } from "@/components/intelligence/ActionPack";
 import { GuestOriginBreakdown } from "@/components/intelligence/GuestOriginBreakdown";
+import { CompetitorPriceComparison } from "@/components/intelligence/CompetitorPriceComparison";
+
 
 type Competitor = {
   id: string;
@@ -1036,7 +1038,12 @@ export default function IntelligenceComparison() {
           )}
         </div>
 
+        {!loading && !isEmpty && (
+          <CompetitorPriceComparison businessId={businessId} competitors={competitors} />
+        )}
+
         {!loading && readiness.length > 0 && (
+
           <Card className="border-amber-500/40 bg-amber-500/5 no-print">
             <CardContent className="p-4 space-y-2">
               <div className="flex items-center gap-2 text-sm font-medium">

@@ -114,7 +114,7 @@ VoyageRespond; çok platformlu yorum toplama, 8 farklı tonda AI destekli yanıt
 
 ## Blog
 
-- [Google Yorumlarına Nasıl Cevap Verilir? İşletmeler İçin Örnekli Rehber](/blog/google-yorumlarina-nasil-yanit-verilir): İşletme sahipleri için Google yorumlarına cevap yazma rehberi: olumlu ve olumsuz yorumlar için hazır cevap örnekleri, ton önerileri ve prat…
+- [Google Yorumlarına Cevap Verme Rehberi: İşletmeler İçin Örnekli Yanıtlama](/blog/google-yorumlarina-nasil-yanit-verilir): İşletme sahipleri için Google yorumlarını yanıtlama rehberi: olumlu ve olumsuz yorumlara cevap verme örnekleri, ton önerileri ve pratik kur…
 - [AI Visibility Score Nedir? İşletmeniz Yapay Zekada Nasıl Görünüyor?](/blog/ai-gorunurluk-skoru-nedir): AI Visibility Score, işletmenizin ChatGPT, Gemini ve diğer AI asistanlarında nasıl göründüğünü ölçer. Skorunuzu nasıl artıracağınızı öğreni…
 - [Otel ve Restoran İçin Yorum Yönetimi: Kapsamlı Rehber](/blog/otel-restoran-yorum-yonetimi-rehberi): Otel ve restoran sahipleri için Google, Booking, TripAdvisor yorumlarını profesyonelce yönetme rehberi. Çok platformlu yorum stratejisi.
 - [Kötü Yorumlara Nasıl Cevap Verilir? 15 Altın Kural ve Örnekler](/blog/kotu-yorumlara-nasil-cevap-verilir): Olumsuz Google yorumlarına profesyonel cevap verme rehberi. 15 gerçek örnek ve hazır şablonlarla kötü yorumları fırsata çevirin.
@@ -154,7 +154,7 @@ VoyageRespond; çok platformlu yorum toplama, 8 farklı tonda AI destekli yanıt
 - [Google Yorum Cevap Şablonları: 50 Hazır Yanıt (Kopyala-Yapıştır)](/blog/google-yorum-cevap-sablonlari): 5 yıldızdan 1 yıldıza, otel-restoran-klinik-kuaför için 50 Google yorum cevap şablonu. Her yanıt kişiselleştirme notu ile birlikte.
 - [Otel Yorum Cevaplama Rehberi: Booking, TripAdvisor & Google için Örnekler](/blog/otel-yorum-cevaplama-rehberi): Otel yorumlarını Booking, TripAdvisor ve Google'da cevaplama rehberi. Oda, temizlik, personel ve F&B şikayetleri için örnekler, OTA özel st…
 - [AI ile Yorum Cevaplama: ChatGPT vs Özel Araçlar (2026 Karşılaştırma)](/blog/ai-ile-yorum-cevaplama): AI ile yorum cevaplama 2026 rehberi: ChatGPT/Gemini'nin işletme için limitleri, özel araç karşılaştırması, ROI hesabı ve VoyageRespond'un 8…
-- [Google Yorumlarım Nasıl Yönetilir? Adım Adım Rehber (2026)](/blog/google-yorumlarim-nasil-yonetilir): Google yorumlarınızı tek panelden yönetmenin yolları: yorumları görmek, yanıtlamak, raporlamak, kaldırmak ve AI ile otomatikleştirmek.
+- [Google Yorumlarımı Görüntüleme ve Yönetme Paneli Rehberi (2026)](/blog/google-yorumlarim-nasil-yonetilir): Google yorumlarınızı tek panelden yönetmenin yolları: yorumları görmek, yanıtlamak, raporlamak, kaldırmak ve AI ile otomatikleştirmek.
 - [Google Yorum Nedir, Nasıl Yapılır ve Nasıl Yönetilir?](/blog/google-yorum-nedir-nasil-yapilir): Google yorum sisteminin nasıl çalıştığını, müşteri olarak nasıl yorum yazılacağını ve işletme olarak yorumların nasıl yönetileceğini öğreni…
 - [Müşteri Memnuniyet Anketi Örnekleri: 20 Hazır Soru + 5 Şablon (2026)](/blog/musteri-memnuniyet-anketi-ornekleri): Müşteri memnuniyet anketi tasarlamanın 5 kuralı, NPS/CSAT/CES farkları ve sektöre göre 20 hazır soru.
 - [Müşteri Memnuniyet Mesajı Örnekleri: 50 Hazır Şablon (2026)](/blog/musteri-memnuniyet-mesaji-ornekleri): Restoran, otel ve e-ticaret işletmeleri için müşteri memnuniyet mesajı şablonları — teşekkür, özür, takip, yorum talebi ve teşvik.
@@ -169,4 +169,4 @@ VoyageRespond; çok platformlu yorum toplama, 8 farklı tonda AI destekli yanıt
 - [Gizlilik Politikası](/privacy-policy): Veri işleme ve gizlilik koşulları.
 - [Kullanım Koşulları](/terms-of-service): Hizmet kullanım şartları ve sorumluluklar.
 
-<!-- generated 2026-09-07 — 144 pages -->
+<!-- generated 2026-09-08 — 144 pages -->
