@@ -18,7 +18,7 @@ project_id = "pnpuhewfoxssmbpryart"
   [functions.extract-topics]
     verify_jwt = false
   [functions.fetch-competitor-prices]
-    verify_jwt = true
+    verify_jwt = false
   [functions.fetch-competitor-reviews]
     verify_jwt = false
 
