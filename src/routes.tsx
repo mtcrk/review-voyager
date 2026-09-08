@@ -103,6 +103,8 @@ export const routes: RouteRecord[] = [
       { path: "about", lazy: lazyDefault(() => import("./pages/About")) },
       { path: "rapor", lazy: lazyDefault(() => import("./pages/RaporIndir")) },
       { path: "blog", lazy: lazyDefault(() => import("./pages/Blog")) },
+      { path: "makaleler", lazy: lazyDefault(() => import("./pages/Makaleler")) },
+
       {
         path: "blog/:slug",
         lazy: lazyDefault(() => import("./pages/BlogPost")),

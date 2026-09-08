@@ -166,6 +166,9 @@ const total = corePages.length + hubGuides.length + geo.length + platform.length
 const out = header + body + `\n<!-- generated ${new Date().toISOString().slice(0, 10)} — ${total} pages -->\n`;
 
 writeFileSync(resolve("public/llms.txt"), out, "utf-8");
+// Base copy consumed by the generated (server side) llms.txt, which appends
+// imported articles stored in the database.
+writeFileSync(resolve("public/llms-base.txt"), out, "utf-8");
 console.log(
   `llms.txt written (${total} pages: ${corePages.length} core, ${hubGuides.length} hub, ${geo.length} geo, ${platform.length} platform, ${cities.length} city, ${blog.length} blog)`
 );

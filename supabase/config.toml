@@ -20,7 +20,18 @@ project_id = "pnpuhewfoxssmbpryart"
   [functions.fetch-competitor-prices]
     verify_jwt = false
   [functions.fetch-competitor-reviews]
+  [functions.content-image]
     verify_jwt = false
+  [functions.indexnow-key]
+    verify_jwt = false
+  [functions.rankdesk-sync]
+    verify_jwt = false
+  [functions.rankdesk-sitemap]
+    verify_jwt = false
+  [functions.rankdesk-llms]
+    verify_jwt = false
+
+
 
   [functions.generate-monday-brief]
     verify_jwt = false

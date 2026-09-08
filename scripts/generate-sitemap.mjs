@@ -187,8 +187,10 @@ for (const e of allEntries) {
 }
 
 const sitemapXml = generateSitemap(canonicalEntries);
-const outputPath = resolve("public/sitemap.xml");
-writeFileSync(outputPath, sitemapXml);
+writeFileSync(resolve("public/sitemap.xml"), sitemapXml);
+// Base copy consumed by the generated (server side) sitemap, which appends
+// imported articles stored in the database.
+writeFileSync(resolve("public/sitemap-base.xml"), sitemapXml);
 
 console.log(
   `sitemap.xml written (${canonicalEntries.length} entries, ${blogPosts.length} blog posts, ${cityHotelPages.length} city pages)`

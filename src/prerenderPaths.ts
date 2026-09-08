@@ -16,6 +16,8 @@ export const PRERENDER_PUBLIC_PATHS = [
   "/about",
   "/rapor",
   "/blog",
+  "/makaleler",
+
   "/google-yorum-cevap-ornekleri",
   "/restoran-yorum-cevaplari",
   "/otel-yorum-cevaplari",
