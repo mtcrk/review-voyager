@@ -122,19 +122,51 @@ export function CompetitorPriceComparison({
     if (!competitors.length) return;
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("fetch-competitor-prices", {
-        body: {
-          business_id: businessId,
-          competitor_ids: competitors.map((c) => c.id),
-          checkin,
-          nights: Number(nights),
-          adults: Number(adults),
-          force_refresh: force,
-        },
-      });
-      if (error) throw error;
-      if ((data as any)?.error) throw new Error((data as any).error);
-      setResults(((data as any)?.results ?? []) as CompResult[]);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error("Oturum doğrulanamadı. Lütfen tekrar giriş yapın.");
+      }
+
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fetch-competitor-prices`;
+      let res: Response;
+      try {
+        res = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string,
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            business_id: businessId,
+            competitor_ids: competitors.map((c) => c.id),
+            checkin,
+            nights: Number(nights),
+            adults: Number(adults),
+            force_refresh: force,
+          }),
+        });
+      } catch {
+        toast({
+          title: "Bağlantı kurulamadı",
+          description: "Fiyat servisine ulaşılamadı. İnternet bağlantınızı kontrol edip tekrar deneyin.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const payload = await res.json().catch(() => null as any);
+
+      if (!res.ok || payload?.error) {
+        const raw = String(payload?.error ?? `Sunucu hatası (${res.status})`);
+        const friendly = /SERPAPI_API_KEY/i.test(raw)
+          ? "SerpApi anahtarı tanımlı değil. Fiyat karşılaştırması için anahtarın eklenmesi gerekiyor."
+          : raw;
+        toast({ title: "Fiyatlar alınamadı", description: friendly, variant: "destructive" });
+        return;
+      }
+
+      setResults((payload?.results ?? []) as CompResult[]);
       setMeta({ checkin, nights: Number(nights), adults: Number(adults) });
       setExpanded(null);
     } catch (e) {
