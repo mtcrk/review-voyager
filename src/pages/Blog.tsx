@@ -1,10 +1,25 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Clock, Tag } from "lucide-react";
 import { blogPosts } from "@/lib/blogPosts";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import SEO from "@/components/seo/SEO";
+import { listManagedArticles, readTimeLabel, type ManagedArticle } from "@/lib/siteContent";
 
 const Blog = () => {
+  const [articles, setArticles] = useState<ManagedArticle[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    listManagedArticles().then((rows) => {
+      if (active) setArticles(rows);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+
   return (
     <div className="min-h-screen bg-background">
       <SEO
@@ -30,6 +45,10 @@ const Blog = () => {
               <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                 Ana Sayfa
               </Link>
+              <Link to="/makaleler/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                Makaleler
+              </Link>
+
               <Link
                 to="/demo/"
                 className="px-4 py-2 rounded-md text-sm font-medium text-white transition-all"
@@ -99,7 +118,55 @@ const Blog = () => {
               </div>
             </Link>
           ))}
+
+          {articles.map((article) => (
+            <Link
+              key={`managed-${article.slug}`}
+              to={`/blog/${article.slug}/`}
+              className="group block cursor-pointer rounded-2xl border border-border bg-card overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+            >
+              <div className="h-2 w-full" style={{ background: "linear-gradient(90deg, #7A5AF8, #3B82F6)" }} />
+              <div className="p-6 space-y-4">
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  {article.primaryKeyword ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                      <Tag className="w-3 h-3" />
+                      {article.primaryKeyword}
+                    </span>
+                  ) : null}
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    {readTimeLabel(article)}
+                  </span>
+                </div>
+
+                <h2 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors leading-tight">
+                  {article.title}
+                </h2>
+
+                {article.excerpt && (
+                  <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3">{article.excerpt}</p>
+                )}
+
+                <div className="flex items-center justify-between pt-2">
+                  <span className="text-xs text-muted-foreground">
+                    {article.publishedAt
+                      ? new Date(article.publishedAt).toLocaleDateString("tr-TR", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
+                      : ""}
+                  </span>
+                  <span className="flex items-center gap-1 text-primary text-sm font-medium group-hover:gap-2 transition-all">
+                    Oku <ArrowRight className="w-4 h-4" />
+                  </span>
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
+
       </section>
 
       {/* CTA */}

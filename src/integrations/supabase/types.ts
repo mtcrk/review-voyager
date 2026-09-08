@@ -2237,6 +2237,90 @@ export type Database = {
           },
         ]
       }
+      site_content: {
+        Row: {
+          content: string | null
+          content_updated_at: string | null
+          created_at: string
+          excerpt: string | null
+          html: string | null
+          id: string
+          image_alt: string | null
+          image_height: number | null
+          image_path: string | null
+          image_url: string | null
+          image_width: number | null
+          json_ld: Json
+          kind: string
+          meta_description: string | null
+          meta_title: string | null
+          primary_keyword: string | null
+          published_at: string | null
+          slug: string
+          source: string
+          synced_at: string
+          title: string
+          toc: Json
+          updated_at: string
+          word_count: number | null
+          youtube_url: string | null
+        }
+        Insert: {
+          content?: string | null
+          content_updated_at?: string | null
+          created_at?: string
+          excerpt?: string | null
+          html?: string | null
+          id?: string
+          image_alt?: string | null
+          image_height?: number | null
+          image_path?: string | null
+          image_url?: string | null
+          image_width?: number | null
+          json_ld?: Json
+          kind?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          primary_keyword?: string | null
+          published_at?: string | null
+          slug: string
+          source?: string
+          synced_at?: string
+          title: string
+          toc?: Json
+          updated_at?: string
+          word_count?: number | null
+          youtube_url?: string | null
+        }
+        Update: {
+          content?: string | null
+          content_updated_at?: string | null
+          created_at?: string
+          excerpt?: string | null
+          html?: string | null
+          id?: string
+          image_alt?: string | null
+          image_height?: number | null
+          image_path?: string | null
+          image_url?: string | null
+          image_width?: number | null
+          json_ld?: Json
+          kind?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          primary_keyword?: string | null
+          published_at?: string | null
+          slug?: string
+          source?: string
+          synced_at?: string
+          title?: string
+          toc?: Json
+          updated_at?: string
+          word_count?: number | null
+          youtube_url?: string | null
+        }
+        Relationships: []
+      }
       social_connection_credentials: {
         Row: {
           access_token: string | null

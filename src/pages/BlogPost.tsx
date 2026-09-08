@@ -6,10 +6,37 @@ import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import AEOSection from "@/components/seo/AEOSection";
 import SEO from "@/components/seo/SEO";
 import { canonicalPath } from "@/prerenderPaths";
+import ManagedArticlePage from "@/pages/ManagedArticle";
+import { getManagedArticle, type ManagedArticle } from "@/lib/siteContent";
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
-  const post = slug ? getBlogPost(slug) : undefined;
+  const staticPost = slug ? getBlogPost(slug) : undefined;
+
+  // Imported articles are owned rows in our own database and win for their slug.
+  const [managed, setManaged] = useState<ManagedArticle | null>(null);
+  const [managedChecked, setManagedChecked] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    setManaged(null);
+    setManagedChecked(false);
+    if (!slug) {
+      setManagedChecked(true);
+      return;
+    }
+    getManagedArticle(slug).then((row) => {
+      if (!active) return;
+      setManaged(row);
+      setManagedChecked(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, [slug]);
+
+  const post = managed ? undefined : staticPost;
+
 
   // Build TOC from H2 headings in markdown (must run on every render before any early return)
   const toc = useMemo(() => {
@@ -48,7 +75,18 @@ const BlogPost = () => {
     return () => observer.disconnect();
   }, [toc, slug]);
 
+  if (managed) {
+    return <ManagedArticlePage article={managed} />;
+  }
+
   if (!post) {
+    if (!managedChecked) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <p className="text-muted-foreground">Yazı yükleniyor…</p>
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -60,6 +98,7 @@ const BlogPost = () => {
       </div>
     );
   }
+
 
   // Simple markdown to HTML (handles headers, bold, links, tables, lists)
   const renderMarkdown = (md: string) => {

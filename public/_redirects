@@ -6,4 +6,12 @@
 /otel-yorum-cevaplari      /otel-yorum-cevaplari/      301
 /yorum-yonetim-araclari    /yorum-yonetim-araclari/    301
 
+# Content sync API, generated sitemap/llms, adopted images and IndexNow key file.
+/api/rankdesk/sync  https://pnpuhewfoxssmbpryart.supabase.co/functions/v1/rankdesk-sync  200
+/images/content/*   https://pnpuhewfoxssmbpryart.supabase.co/functions/v1/content-image/:splat  200
+/sitemap.xml        https://pnpuhewfoxssmbpryart.supabase.co/functions/v1/rankdesk-sitemap  200
+/llms.txt           https://pnpuhewfoxssmbpryart.supabase.co/functions/v1/rankdesk-llms  200
+/indexnow-key.txt   https://pnpuhewfoxssmbpryart.supabase.co/functions/v1/indexnow-key  200
+
 /*  /index.html  200
+
