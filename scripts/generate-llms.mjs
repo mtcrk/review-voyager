@@ -137,7 +137,13 @@ function section(title, items) {
 
 const platform = [...platformPages(), ...platformEnPages()];
 const cities = [...cityPages(), ...cityEnPages()];
-const blog = blogPages();
+const managed = (await fetchManagedArticles()).map((a) => [
+  `/blog/${a.slug}`,
+  a.title,
+  shorten(a.description),
+]);
+const managedSlugs = new Set(managed.map(([u]) => u));
+const blog = [...blogPages().filter(([u]) => !managedSlugs.has(u)), ...managed];
 const geo = geoPages();
 
 const optional = [
