@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync } from "fs";
 import { resolve } from "path";
+import { fetchManagedArticles } from "./fetch-managed-articles.mjs";
 
 const BASE_URL = "https://voyagerespond.com";
 
