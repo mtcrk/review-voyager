@@ -151,6 +151,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://voyagerespond.com/blog/google-yorumlari-isletme-siralamasini-etkiler-mi/</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://voyagerespond.com/blog/google-yorumlarim-nasil-yonetilir/</loc>
     <lastmod>2026-06-05</lastmod>
     <changefreq>monthly</changefreq>
@@ -261,6 +267,12 @@
   <url>
     <loc>https://voyagerespond.com/blog/online-itibar-yonetimi-rehberi/</loc>
     <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://voyagerespond.com/blog/otel-itibar-yonetimi-yazilimi-secme-rehberi/</loc>
+    <lastmod>2026-09-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
