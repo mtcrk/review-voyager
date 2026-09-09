@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync } from "fs";
 import { resolve } from "path";
+import { fetchManagedArticles } from "./fetch-managed-articles.mjs";
 
 function read(rel) {
   return readFileSync(resolve(rel), "utf-8");
