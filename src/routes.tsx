@@ -177,6 +177,10 @@ export const routes: RouteRecord[] = [
       { path: "automations/whatsapp", lazy: lazyDefault(() => import("./pages/automations/WhatsAppAutomation")) },
       { path: "automations/other", lazy: lazyDefault(() => import("./pages/automations/OtherAutomations")) },
 
+      // Rankdesk publication notifications use /:slug; imported articles live
+      // canonically under /blog/:slug/.
+      { path: ":slug", lazy: lazyDefault(() => import("./pages/ManagedArticleRedirect")) },
+
       // ---------- Protected (not prerendered; render at runtime only) ----------
       { path: "auth/tiktok/callback", lazy: lazyDefault(() => import("./pages/TikTokCallback")) },
       { path: "channels/tiktok", lazy: lazyProtected(() => import("./pages/channels/TikTok")) },
