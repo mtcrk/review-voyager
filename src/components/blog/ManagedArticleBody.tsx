@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { ManagedArticle } from "@/lib/siteContent";
+import { resolveContentImagesInHtml, type ManagedArticle } from "@/lib/siteContent";
 
 /**
  * Renders the stored article body HTML. External links open in a new tab,
@@ -7,7 +7,7 @@ import type { ManagedArticle } from "@/lib/siteContent";
  */
 const ManagedArticleBody = ({ article }: { article: ManagedArticle }) => {
   const html = useMemo(() => {
-    let out = article.html ?? "";
+    let out = resolveContentImagesInHtml(article.html ?? "");
     // External links open in a new tab; internal links stay in the same tab.
     out = out.replace(/<a\b([^>]*?)href="(https?:\/\/[^"]+)"([^>]*)>/gi, (match, pre, href, post) => {
       if (href.includes("voyagerespond.com")) return match;

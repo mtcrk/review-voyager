@@ -114,9 +114,38 @@ export async function getManagedArticle(slug: string): Promise<ManagedArticle | 
   }
 }
 
+const CONTENT_IMAGE_PREFIX = "/images/content/";
+
+/**
+ * Owned image paths are served by the site's own image endpoint. Hosting does not
+ * rewrite this path, so resolve it to the absolute endpoint URL at render time.
+ */
+export function resolveContentImage(src: string): string {
+  if (!src.startsWith(CONTENT_IMAGE_PREFIX)) return src;
+  const base = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+  if (!base) return src;
+  return `${base}/functions/v1/content-image/${src.slice(CONTENT_IMAGE_PREFIX.length)}`;
+}
+
+/** Rewrites every owned image reference inside stored HTML to a loadable URL. */
+export function resolveContentImagesInHtml(html: string): string {
+  return html.replace(/(src|srcset|content)="([^"]*\/images\/content\/[^"]*)"/gi, (_m, attr, value) => {
+    const next = value
+      .split(",")
+      .map((part: string) => {
+        const trimmed = part.trim();
+        const [url, ...rest] = trimmed.split(/\s+/);
+        return [resolveContentImage(url), ...rest].join(" ");
+      })
+      .join(", ");
+    return `${attr}="${next}"`;
+  });
+}
+
 /** Featured image source: owned storage path first, absolute source URL as fallback. */
 export function articleImageSrc(a: ManagedArticle): string | null {
-  return a.imagePath ?? a.imageUrl ?? null;
+  const src = a.imagePath ?? a.imageUrl ?? null;
+  return src ? resolveContentImage(src) : null;
 }
 
 /** Reading time label in the same style the existing blog uses. */
