@@ -164,7 +164,13 @@ function generateSitemap(entries) {
 
 const blogPosts = extractBlogPosts();
 const cityHotelPages = extractCityHotelPages();
-const allEntries = [...staticRoutes, ...blogPosts, ...cityHotelPages];
+const managedArticles = (await fetchManagedArticles()).map((a) => ({
+  path: `/blog/${a.slug}`,
+  lastmod: a.lastmod || undefined,
+  changefreq: "monthly",
+  priority: "0.8",
+}));
+const allEntries = [...staticRoutes, ...blogPosts, ...cityHotelPages, ...managedArticles];
 
 // Sort by path for consistent output
 allEntries.sort((a, b) => a.path.localeCompare(b.path));
