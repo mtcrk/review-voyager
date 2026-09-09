@@ -32,8 +32,8 @@ export async function fetchManagedArticles() {
       .map((r) => ({
         slug: r.slug,
         title: typeof r.title === "string" ? r.title : r.slug,
-        description: typeof r.description === "string" ? r.description : "",
-        lastmod: (r.updated_at || "").slice(0, 10),
+        description: r.meta_description || r.excerpt || "",
+        lastmod: (r.content_updated_at || r.updated_at || "").slice(0, 10),
       }));
   } catch {
     return [];
