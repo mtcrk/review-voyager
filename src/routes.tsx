@@ -112,6 +112,10 @@ export const routes: RouteRecord[] = [
       },
       { path: "google-yorum-cevap-ornekleri", lazy: lazyDefault(() => import("./pages/seo/GoogleYorumCevapOrnekleri")) },
       { path: "restoran-yorum-cevaplari", lazy: lazyDefault(() => import("./pages/seo/RestoranYorumCevaplari")) },
+      {
+        path: "restoran-yorum-cevaplari/:slug",
+        lazy: lazyDefault(() => import("./pages/BlogPost")),
+      },
       { path: "otel-yorum-cevaplari", lazy: lazyDefault(() => import("./pages/seo/OtelYorumCevaplari")) },
       {
         path: "otel-yorum-yonetimi/:sehir",
