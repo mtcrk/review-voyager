@@ -55,6 +55,10 @@ Deno.serve(async (req) => {
       }
     }
 
+    if (items.length > 0) {
+      await pingIndexNow(items.map((i) => `https://voyagerespond.com/blog/${i.slug}/`));
+    }
+
     return json({ synced: items.length, items, ...(errors.length ? { errors } : {}) });
   } catch (e) {
     const message = (e as Error).message ?? "sync failed";
@@ -63,3 +67,23 @@ Deno.serve(async (req) => {
     return json({ synced: 0, error: message }, status);
   }
 });
+
+// Notifies participating search engines of new/changed article URLs.
+async function pingIndexNow(urls: string[]): Promise<void> {
+  const key = Deno.env.get("INDEXNOW_KEY");
+  if (!key || !/^[a-f0-9]{32}$/i.test(key) || urls.length === 0) return;
+  try {
+    await fetch("https://api.indexnow.org/IndexNow", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        host: "voyagerespond.com",
+        key,
+        keyLocation: `https://voyagerespond.com/${key}.txt`,
+        urlList: urls,
+      }),
+    });
+  } catch (e) {
+    console.error("indexnow ping failed:", (e as Error).message);
+  }
+}
