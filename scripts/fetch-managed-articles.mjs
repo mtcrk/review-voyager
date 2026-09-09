@@ -21,7 +21,7 @@ export async function fetchManagedArticles() {
   if (!url || !key) return [];
   try {
     const res = await fetch(
-      `${url}/rest/v1/site_content?select=slug,title,description,updated_at&order=updated_at.desc&limit=1000`,
+      `${url}/rest/v1/site_content?select=slug,title,meta_description,excerpt,content_updated_at,updated_at&order=updated_at.desc&limit=1000`,
       { headers: { apikey: key, Authorization: `Bearer ${key}` } }
     );
     if (!res.ok) return [];
