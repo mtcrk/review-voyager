@@ -7,6 +7,7 @@ import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import AEOSection from "@/components/seo/AEOSection";
 import SEO from "@/components/seo/SEO";
 import { canonicalPath } from "@/prerenderPaths";
+import { withBrandSuffix } from "@/lib/titleSuffix";
 import ManagedArticlePage from "@/pages/ManagedArticle";
 import { getManagedArticle, type ManagedArticle } from "@/lib/siteContent";
 
@@ -192,7 +193,7 @@ const BlogPost = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title={post.metaTitle ?? `${post.ogTitle} | VoyageRespond Blog`}
+        title={post.metaTitle ?? withBrandSuffix(post.ogTitle, "VoyageRespond Blog")}
         description={post.metaDescription ?? post.ogDescription}
         canonical={`/blog/${post.slug}`}
         ogType="article"

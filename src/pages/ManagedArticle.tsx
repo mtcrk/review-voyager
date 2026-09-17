@@ -5,6 +5,7 @@ import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import SEO from "@/components/seo/SEO";
 import ManagedArticleBody from "@/components/blog/ManagedArticleBody";
 import { articleImageSrc, readTimeLabel, type ManagedArticle } from "@/lib/siteContent";
+import { withBrandSuffix } from "@/lib/titleSuffix";
 
 const ManagedArticlePage = ({ article }: { article: ManagedArticle }) => {
   const [activeId, setActiveId] = useState<string>("");
@@ -48,7 +49,7 @@ const ManagedArticlePage = ({ article }: { article: ManagedArticle }) => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title={article.metaTitle ?? `${article.title} | VoyageRespond Blog`}
+        title={article.metaTitle ?? withBrandSuffix(article.title, "VoyageRespond Blog")}
         description={article.metaDescription ?? article.excerpt ?? article.title}
         canonical={`/blog/${article.slug}`}
         ogType="article"
