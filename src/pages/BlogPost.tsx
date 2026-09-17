@@ -7,6 +7,7 @@ import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import AEOSection from "@/components/seo/AEOSection";
 import SEO from "@/components/seo/SEO";
 import { canonicalPath } from "@/prerenderPaths";
+import { withBrandSuffix } from "@/lib/titleSuffix";
 import ManagedArticlePage from "@/pages/ManagedArticle";
 import { getManagedArticle, type ManagedArticle } from "@/lib/siteContent";
 

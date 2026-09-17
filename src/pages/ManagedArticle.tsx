@@ -5,6 +5,7 @@ import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import SEO from "@/components/seo/SEO";
 import ManagedArticleBody from "@/components/blog/ManagedArticleBody";
 import { articleImageSrc, readTimeLabel, type ManagedArticle } from "@/lib/siteContent";
+import { withBrandSuffix } from "@/lib/titleSuffix";
 
 const ManagedArticlePage = ({ article }: { article: ManagedArticle }) => {
   const [activeId, setActiveId] = useState<string>("");
