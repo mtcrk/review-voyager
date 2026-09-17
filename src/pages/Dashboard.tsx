@@ -9,7 +9,8 @@ import { useBusiness } from "@/contexts/BusinessContext";
 import { BusinessOnboarding } from "@/components/BusinessOnboarding";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { Link } from "@/components/Link";
 
 import { PriorityActions } from "@/components/dashboard/PriorityActions";
 import { TopicAnalyticsCard } from "@/components/dashboard/TopicAnalyticsCard";

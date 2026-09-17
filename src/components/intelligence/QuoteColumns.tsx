@@ -4,7 +4,7 @@
  * (kıyas dönem vs bu dönem) so both surfaces read identically.
  */
 import { sentimentToIndex100 } from "@/lib/topicDepartments";
-import { Link } from "react-router-dom";
+import { Link } from "@/components/Link";
 import { ExternalLink } from "lucide-react";
 
 export type EvidenceQuote = {

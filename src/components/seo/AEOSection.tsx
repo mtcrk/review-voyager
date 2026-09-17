@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "@/components/Link";
 import { Bot, ArrowRight, Zap, Clock, Brain } from "lucide-react";
 
 interface FAQItem {

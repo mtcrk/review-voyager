@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link } from "@/components/Link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {

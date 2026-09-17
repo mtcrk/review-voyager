@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Lock, ExternalLink } from "lucide-react";
 import { useTikTokConnection } from "@/hooks/useTikTokConnection";
-import { Link } from "react-router-dom";
+import { Link } from "@/components/Link";
 
 export default function TikTokDMInbox() {
   const { connection, loading } = useTikTokConnection();

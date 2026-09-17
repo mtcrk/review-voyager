@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "@/components/Link";
 import { XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

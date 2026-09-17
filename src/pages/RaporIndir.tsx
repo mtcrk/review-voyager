@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+import { Link } from "@/components/Link";
 import SEO from "@/components/seo/SEO";
 import { Button } from "@/components/ui/button";
 import { trackEvent } from "@/lib/analytics";

@@ -1,7 +1,7 @@
 import { AlertTriangle, Info, ExternalLink } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link } from "@/components/Link";
 import { TIKTOK_CONFIG } from "@/lib/tiktokConfig";
 
 interface TikTokSandboxBannerProps {

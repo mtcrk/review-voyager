@@ -17,7 +17,7 @@ import {
   Download,
   Eye,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "@/components/Link";
 import { Button } from "@/components/ui/button";
 
 const CHECKLIST_ITEMS = [
