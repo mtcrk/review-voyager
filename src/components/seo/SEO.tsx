@@ -22,7 +22,11 @@ const SEO = ({ title, description, canonical, ogImage, ogType, noindex, jsonLd, 
   const location = useLocation();
   const isEnPath = location.pathname.startsWith("/en/") || location.pathname === "/en";
 
-  let url = canonical ? toCanonicalUrl(canonical) : undefined;
+  // Always self-reference the canonical trailing-slash form of the current URL
+  // unless an explicit canonical is provided.
+  let url = canonical
+    ? toCanonicalUrl(canonical)
+    : `${SITE_URL}${normalizePath(location.pathname)}`;
 
   // For English routes, self-reference the /en/ canonical instead of the Turkish root
   if (isEnPath) {
