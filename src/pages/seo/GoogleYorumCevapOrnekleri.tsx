@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "@/components/Link";
 import { ArrowRight, Copy, Check, MessageSquare } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import { useState } from "react";

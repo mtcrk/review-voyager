@@ -1,4 +1,5 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import { NavLink } from "@/components/NavLink";
 import { cn } from "@/lib/utils";
 
 const tabs = [

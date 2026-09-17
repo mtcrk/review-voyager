@@ -1,4 +1,5 @@
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { Link } from "@/components/Link";
 import { ArrowRight, MapPin, Star, Hotel, TrendingUp, CheckCircle2, Globe } from "lucide-react";
 import { useEffect } from "react";
 import SEO from "@/components/seo/SEO";

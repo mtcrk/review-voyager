@@ -35,7 +35,7 @@ import {
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { tr } from "date-fns/locale";
-import { Link } from "react-router-dom";
+import { Link } from "@/components/Link";
 import { TIKTOK_CONFIG } from "@/lib/tiktokConfig";
 
 const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline"; icon: React.ReactNode }> = {

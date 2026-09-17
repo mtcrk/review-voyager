@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { Link } from "@/components/Link";
 import { ArrowLeft, Clock, Tag, Share2, List } from "lucide-react";
 import { getBlogPost, blogPosts } from "@/lib/blogPosts";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";

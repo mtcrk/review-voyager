@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "@/components/Link";
 import { useMemo, useState } from "react";
 import { ArrowRight, Check, Sparkles, Bot, ArrowUpDown } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";

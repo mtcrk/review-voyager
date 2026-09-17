@@ -1,4 +1,5 @@
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { Link } from "@/components/Link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import AEOSection from "@/components/seo/AEOSection";

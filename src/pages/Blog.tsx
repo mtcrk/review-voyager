@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/components/Link";
 import { ArrowRight, Clock, Tag } from "lucide-react";
 import { blogPosts } from "@/lib/blogPosts";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";

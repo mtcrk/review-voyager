@@ -5,7 +5,8 @@
  */
 import { Fragment, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+import { Link } from "@/components/Link";
 import { useQuery } from "@tanstack/react-query";
 import {
   addMonths,

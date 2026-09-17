@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "@/components/Link";
 import { ArrowRight, Shield, TrendingUp, Eye, MessageSquare, BarChart3, Sparkles, BookOpen, Scale } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import AEOSection from "@/components/seo/AEOSection";

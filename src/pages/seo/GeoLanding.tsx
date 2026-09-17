@@ -1,4 +1,5 @@
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import { Link } from "@/components/Link";
 import { ArrowRight, Check, Sparkles } from "lucide-react";
 import voyageRespondLogo from "@/assets/voyage-respond-logo.svg";
 import SEO from "@/components/seo/SEO";
