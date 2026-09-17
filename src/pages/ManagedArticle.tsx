@@ -48,7 +48,7 @@ const ManagedArticlePage = ({ article }: { article: ManagedArticle }) => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title={article.metaTitle ?? `${article.title} | VoyageRespond Blog`}
+        title={article.metaTitle ?? withBrandSuffix(article.title, "VoyageRespond Blog")}
         description={article.metaDescription ?? article.excerpt ?? article.title}
         canonical={`/blog/${article.slug}`}
         ogType="article"

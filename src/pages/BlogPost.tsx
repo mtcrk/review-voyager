@@ -192,7 +192,7 @@ const BlogPost = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title={post.metaTitle ?? `${post.ogTitle} | VoyageRespond Blog`}
+        title={post.metaTitle ?? withBrandSuffix(post.ogTitle, "VoyageRespond Blog")}
         description={post.metaDescription ?? post.ogDescription}
         canonical={`/blog/${post.slug}`}
         ogType="article"
