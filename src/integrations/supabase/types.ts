@@ -904,8 +904,9 @@ export type Database = {
           is_ad: boolean | null
           is_official: boolean | null
           nights: number
+          no_availability: boolean
           num_guests: number | null
-          price: number
+          price: number | null
           price_derived: boolean
           price_per_night: number | null
           price_total: number | null
@@ -930,8 +931,9 @@ export type Database = {
           is_ad?: boolean | null
           is_official?: boolean | null
           nights?: number
+          no_availability?: boolean
           num_guests?: number | null
-          price: number
+          price?: number | null
           price_derived?: boolean
           price_per_night?: number | null
           price_total?: number | null
@@ -956,8 +958,9 @@ export type Database = {
           is_ad?: boolean | null
           is_official?: boolean | null
           nights?: number
+          no_availability?: boolean
           num_guests?: number | null
-          price?: number
+          price?: number | null
           price_derived?: boolean
           price_per_night?: number | null
           price_total?: number | null
