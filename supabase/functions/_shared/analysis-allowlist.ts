@@ -15,11 +15,12 @@ const EXTRA_ALLOWED_EMAILS = [
   "esra@titanic.com",
 ];
 
-export function allowlistEmails(): string[] {
-  const raw = Deno.env.get("ANALYSIS_ALLOWLIST_EMAILS") ?? "";
+export function allowlistEmails(envName = "ANALYSIS_ALLOWLIST_EMAILS"): string[] {
+  const raw = Deno.env.get(envName) ?? "";
+  const extra = envName === "ANALYSIS_ALLOWLIST_EMAILS" ? EXTRA_ALLOWED_EMAILS : [];
   return Array.from(
     new Set(
-      [...raw.split(","), ...EXTRA_ALLOWED_EMAILS]
+      [...raw.split(","), ...extra]
         .map((e) => e.trim().toLowerCase())
         .filter((e) => e.length > 0),
     ),
@@ -36,8 +37,9 @@ export type AllowlistResolution = {
 export async function resolveAllowlistBusinessIds(
   supabaseUrl: string,
   serviceKey: string,
+  envName = "ANALYSIS_ALLOWLIST_EMAILS",
 ): Promise<AllowlistResolution> {
-  const emails = allowlistEmails();
+  const emails = allowlistEmails(envName);
   const businessIds = new Set<string>();
   const matchedEmails: string[] = [];
   if (emails.length === 0) return { emails, matchedEmails, businessIds };

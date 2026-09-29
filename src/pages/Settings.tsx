@@ -1,4 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PriceTrackingSettings } from "@/components/settings/PriceTrackingSettings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -223,6 +224,7 @@ export default function Settings() {
           
           <TabsTrigger value="brand-voice">Marka Sesi</TabsTrigger>
           <TabsTrigger value="notifications">Bildirimler</TabsTrigger>
+          <TabsTrigger value="price-tracking">Fiyat Takibi</TabsTrigger>
         </TabsList>
 
         {/* Profile Tab */}
@@ -358,6 +360,10 @@ export default function Settings() {
         </TabsContent>
 
         {/* Notifications Tab */}
+        <TabsContent value="price-tracking" className="space-y-6">
+          <PriceTrackingSettings />
+        </TabsContent>
+
         <TabsContent value="notifications" className="space-y-6">
           <Card className="shadow-card">
             <CardHeader>

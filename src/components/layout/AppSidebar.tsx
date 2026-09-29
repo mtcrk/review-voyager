@@ -41,6 +41,7 @@ import {
   Radar,
   Tags,
 } from "lucide-react";
+import { Wallet } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -463,6 +464,7 @@ export function AppSidebar() {
                     { title: "Rakip Analizi", url: "/intelligence", icon: Swords },
                     { title: "Konu Analizi", url: "/konu-analizi", icon: Tags },
                     { title: "Dönem Analizi", url: "/donem-analizi", icon: BarChart3 },
+                    { title: "Fiyat Takibi", url: "/fiyat-takibi", icon: Wallet },
                   ].map((item) => (
                     <SidebarMenuItem key={item.url}>
                       <SidebarMenuButton
