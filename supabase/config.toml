@@ -19,6 +19,8 @@ project_id = "pnpuhewfoxssmbpryart"
     verify_jwt = false
   [functions.fetch-competitor-prices]
     verify_jwt = false
+  [functions.price-tracking-daily]
+    verify_jwt = false
   [functions.fetch-competitor-reviews]
   [functions.content-image]
     verify_jwt = false
