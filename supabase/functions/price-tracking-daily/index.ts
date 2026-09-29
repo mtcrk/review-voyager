@@ -69,11 +69,12 @@ Deno.serve(async (req) => {
       if (!r.complete && !r.capped) {
         if (hop < MAX_HOPS) {
           // Kalan işi yeni bir çağrıda sürdür (cache sayesinde yapılanlar atlanır).
-          fetch(`${supabaseUrl}/functions/v1/price-tracking-daily`, {
+          const next = fetch(`${supabaseUrl}/functions/v1/price-tracking-daily`, {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${serviceKey}` },
             body: JSON.stringify({ cursor: i, hop: hop + 1 }),
           }).catch((e) => console.error("self-invoke failed", e));
+          (globalThis as any).EdgeRuntime?.waitUntil?.(next);
         }
         return json({ ok: true, continued_from: i, summary });
       }
