@@ -296,6 +296,8 @@ export type Database = {
       businesses: {
         Row: {
           booking_hotel_id: string | null
+          booking_matched_name: string | null
+          booking_url: string | null
           brand_voice: Json
           city: string | null
           created_at: string
@@ -313,11 +315,17 @@ export type Database = {
           name: string
           parent_business_id: string | null
           place_id: string | null
+          price_compare_board_type: string | null
           price_estimate_eur: number | null
+          price_source_checked_at: string | null
+          price_source_preference: string | null
           price_tier: number | null
+          price_tracking_enabled: boolean
           review_notification_type: string
           room_count: number | null
           segment: string | null
+          serpapi_matched_name: string | null
+          serpapi_property_token: string | null
           star_rating: number | null
           tone: string | null
           tripadvisor_id: string | null
@@ -330,6 +338,8 @@ export type Database = {
         }
         Insert: {
           booking_hotel_id?: string | null
+          booking_matched_name?: string | null
+          booking_url?: string | null
           brand_voice?: Json
           city?: string | null
           created_at?: string
@@ -347,11 +357,17 @@ export type Database = {
           name: string
           parent_business_id?: string | null
           place_id?: string | null
+          price_compare_board_type?: string | null
           price_estimate_eur?: number | null
+          price_source_checked_at?: string | null
+          price_source_preference?: string | null
           price_tier?: number | null
+          price_tracking_enabled?: boolean
           review_notification_type?: string
           room_count?: number | null
           segment?: string | null
+          serpapi_matched_name?: string | null
+          serpapi_property_token?: string | null
           star_rating?: number | null
           tone?: string | null
           tripadvisor_id?: string | null
@@ -364,6 +380,8 @@ export type Database = {
         }
         Update: {
           booking_hotel_id?: string | null
+          booking_matched_name?: string | null
+          booking_url?: string | null
           brand_voice?: Json
           city?: string | null
           created_at?: string
@@ -381,11 +399,17 @@ export type Database = {
           name?: string
           parent_business_id?: string | null
           place_id?: string | null
+          price_compare_board_type?: string | null
           price_estimate_eur?: number | null
+          price_source_checked_at?: string | null
+          price_source_preference?: string | null
           price_tier?: number | null
+          price_tracking_enabled?: boolean
           review_notification_type?: string
           room_count?: number | null
           segment?: string | null
+          serpapi_matched_name?: string | null
+          serpapi_property_token?: string | null
           star_rating?: number | null
           tone?: string | null
           tripadvisor_id?: string | null
@@ -563,6 +587,8 @@ export type Database = {
       ci_competitors: {
         Row: {
           added_by: string | null
+          booking_matched_name: string | null
+          booking_url: string | null
           business_id: string
           category: string | null
           city: string | null
@@ -578,12 +604,15 @@ export type Database = {
           name: string
           place_id: string | null
           price_estimate_eur: number | null
+          price_source_checked_at: string | null
+          price_source_preference: string | null
           price_tier: number | null
           proximity_m: number | null
           rating: number | null
           review_count: number | null
           room_count: number | null
           segment: string | null
+          serpapi_matched_name: string | null
           serpapi_property_token: string | null
           source: string
           source_urls: Json
@@ -593,6 +622,8 @@ export type Database = {
         }
         Insert: {
           added_by?: string | null
+          booking_matched_name?: string | null
+          booking_url?: string | null
           business_id: string
           category?: string | null
           city?: string | null
@@ -608,12 +639,15 @@ export type Database = {
           name: string
           place_id?: string | null
           price_estimate_eur?: number | null
+          price_source_checked_at?: string | null
+          price_source_preference?: string | null
           price_tier?: number | null
           proximity_m?: number | null
           rating?: number | null
           review_count?: number | null
           room_count?: number | null
           segment?: string | null
+          serpapi_matched_name?: string | null
           serpapi_property_token?: string | null
           source?: string
           source_urls?: Json
@@ -623,6 +657,8 @@ export type Database = {
         }
         Update: {
           added_by?: string | null
+          booking_matched_name?: string | null
+          booking_url?: string | null
           business_id?: string
           category?: string | null
           city?: string | null
@@ -638,12 +674,15 @@ export type Database = {
           name?: string
           place_id?: string | null
           price_estimate_eur?: number | null
+          price_source_checked_at?: string | null
+          price_source_preference?: string | null
           price_tier?: number | null
           proximity_m?: number | null
           rating?: number | null
           review_count?: number | null
           room_count?: number | null
           segment?: string | null
+          serpapi_matched_name?: string | null
           serpapi_property_token?: string | null
           source?: string
           source_urls?: Json
@@ -854,9 +893,10 @@ export type Database = {
       competitor_price_snapshots: {
         Row: {
           adults: number
+          board_type: string
           business_id: string
           checkin: string
-          competitor_id: string
+          competitor_id: string | null
           currency: string
           fetched_at: string
           free_cancellation: boolean | null
@@ -866,14 +906,23 @@ export type Database = {
           nights: number
           num_guests: number | null
           price: number
+          price_derived: boolean
+          price_per_night: number | null
+          price_total: number | null
           raw: Json
+          refundable: boolean | null
+          room_name: string | null
           source: string
+          source_adapter: string
+          subject_type: string
+          taxes_included: boolean | null
         }
         Insert: {
           adults?: number
+          board_type?: string
           business_id: string
           checkin: string
-          competitor_id: string
+          competitor_id?: string | null
           currency?: string
           fetched_at?: string
           free_cancellation?: boolean | null
@@ -883,14 +932,23 @@ export type Database = {
           nights?: number
           num_guests?: number | null
           price: number
+          price_derived?: boolean
+          price_per_night?: number | null
+          price_total?: number | null
           raw: Json
+          refundable?: boolean | null
+          room_name?: string | null
           source: string
+          source_adapter?: string
+          subject_type?: string
+          taxes_included?: boolean | null
         }
         Update: {
           adults?: number
+          board_type?: string
           business_id?: string
           checkin?: string
-          competitor_id?: string
+          competitor_id?: string | null
           currency?: string
           fetched_at?: string
           free_cancellation?: boolean | null
@@ -900,8 +958,16 @@ export type Database = {
           nights?: number
           num_guests?: number | null
           price?: number
+          price_derived?: boolean
+          price_per_night?: number | null
+          price_total?: number | null
           raw?: Json
+          refundable?: boolean | null
+          room_name?: string | null
           source?: string
+          source_adapter?: string
+          subject_type?: string
+          taxes_included?: boolean | null
         }
         Relationships: [
           {
@@ -1597,6 +1663,59 @@ export type Database = {
         }
         Relationships: []
       }
+      own_rate_entries: {
+        Row: {
+          board_type: string
+          business_id: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          date: string
+          id: string
+          note: string | null
+          price_per_night: number
+          refundable: boolean | null
+          room_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          board_type?: string
+          business_id: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          date: string
+          id?: string
+          note?: string | null
+          price_per_night: number
+          refundable?: boolean | null
+          room_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          board_type?: string
+          business_id?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          date?: string
+          id?: string
+          note?: string | null
+          price_per_night?: number
+          refundable?: boolean | null
+          room_name?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "own_rate_entries_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       paytr_customer_tokens: {
         Row: {
           business_id: string
@@ -1874,6 +1993,44 @@ export type Database = {
           source_url?: string | null
         }
         Relationships: []
+      }
+      price_fetch_log: {
+        Row: {
+          adapter: string
+          business_id: string | null
+          calls: number
+          created_at: string
+          estimated_cost_usd: number
+          id: string
+          trigger: string | null
+        }
+        Insert: {
+          adapter: string
+          business_id?: string | null
+          calls?: number
+          created_at?: string
+          estimated_cost_usd?: number
+          id?: string
+          trigger?: string | null
+        }
+        Update: {
+          adapter?: string
+          business_id?: string | null
+          calls?: number
+          created_at?: string
+          estimated_cost_usd?: number
+          id?: string
+          trigger?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "price_fetch_log_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -3802,6 +3959,10 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      user_can_access_business: {
+        Args: { _business_id: string; _user_id: string }
+        Returns: boolean
       }
     }
     Enums: {
