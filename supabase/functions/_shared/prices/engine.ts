@@ -237,6 +237,7 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
         const r = await serp.fetchMany(serpList, p);
         track("serpapi", r.calls, r.cost_usd);
         r.results.forEach((v, k) => serpRes.set(k, v));
+        r.results.forEach((v) => { if (v.status === "error") console.warn("serpapi error:", v.error); });
         // Zincir: SerpApi kıyaslanabilir fiyat vermediyse Booking'e düş.
         if (booking) {
           for (const s of serpList) {
