@@ -312,7 +312,7 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
     }
   } finally {
     const logs = Object.entries(perAdapter)
-      .filter(([a, v]) => v.calls > 0 || (a === "etstur" && v.cost >= 0 && false))
+      .filter(([, v]) => v.calls > 0)
       .map(([adapter, v]) => ({
         business_id: o.business.id,
         adapter,
