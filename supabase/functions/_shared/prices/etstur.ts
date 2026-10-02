@@ -1,3 +1,4 @@
+import { detectBoard } from "./board.ts";
 // ETS Tur adapter'ı (yurt içi pazar). Önce doğrudan etstur.com iç API'si denenir;
 // engellenirse Bright Data Unlocker'a düşülür (yalnızca gerektiğinde → maliyet düşük).
 import type { AdapterResult, BatchResult, BoardType, FetchParams, PriceQuote, Subject } from "./types.ts";
@@ -17,6 +18,8 @@ export function etsBoard(code: string | null | undefined, label: string | null |
   if (/yarım\s*pansiyon/.test(l)) return "half_board";
   if (/oda\s*kahvaltı|kahvaltı\s*dahil/.test(l)) return "breakfast";
   if (/sadece\s*oda/.test(l)) return "room_only";
+  const d = detectBoard(label);
+  if (d !== "unknown") return d;
   console.warn("etstur unknown board code", c, label);
   return "unknown";
 }
