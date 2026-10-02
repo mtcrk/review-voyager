@@ -1,0 +1,2 @@
+ALTER TABLE public.competitor_price_snapshots DROP CONSTRAINT cps_adapter_chk;
+ALTER TABLE public.competitor_price_snapshots ADD CONSTRAINT cps_adapter_chk CHECK (source_adapter = ANY (ARRAY['serpapi','booking','manual','etstur','jollytur','tatilsepeti']));
