@@ -62,8 +62,7 @@ Deno.serve(async (req) => {
         results.push({ key: t.table === "businesses" ? "own" : t.id, name: t.row.name, outcomes: r.outcomes });
       }
       await admin.from("price_fetch_log").insert({
-        business_id, adapter: "matching", trigger: isService ? "cron" : "manual", calls, cost_usd: cost,
-        status: "ok", details: { unlocker_calls: unlocker, subjects: results.length },
+        business_id, adapter: "matching", trigger: isService ? "cron" : "manual", calls, estimated_cost_usd: Number(cost.toFixed(4)),
       }).then(({ error }: any) => error && console.warn("log insert failed", error.message));
       return { results, calls, unlocker_calls: unlocker, cost_usd: cost };
     };
