@@ -142,10 +142,20 @@ export function createEtsAdapter() {
           counter.calls++;
           const body = JSON.stringify({ hotelId, checkIn: p.checkin, checkOut: p.checkout, rooms: [{ adultCount: p.adults, childCount: 0, childAges: [] }] });
           let data: any;
-          try { data = await etsCall(`${BASE}/room/multi`, "POST", body, counter); }
-          catch (e1) { console.warn("etstur retry", s.name, String(e1)); data = await etsCall(`${BASE}/room/multi`, "POST", body, counter); }
-          const { quotes, minStay } = parseRoomMulti(data, p.nights);
-          results.set(s.key, { status: quotes.length ? "ok" : "no_prices", quotes, match: match as any, min_stay: quotes.length ? null : minStay });
+          const call = async () => {
+            const d = await etsCall(`${BASE}/room/multi`, "POST", body, counter);
+            // Geçersiz/boş cevap "dolu" sayılmaz → hata.
+            if (!d?.success || !d?.result) throw new Error(`ETS geçersiz cevap: ${JSON.stringify(d).slice(0, 160)}`);
+            return d;
+          };
+          try { data = await call(); }
+          catch (e1) { console.warn("etstur retry", s.name, String(e1)); data = await call(); }
+          const { quotes, minStay, anyRoom } = parseRoomMulti(data, p.nights);
+          results.set(s.key, {
+            status: quotes.length ? "ok" : "no_prices", quotes, match: match as any,
+            min_stay: quotes.length ? null : minStay,
+            not_on_sale: !quotes.length && !anyRoom,
+          });
         } catch (e) {
           console.error("etstur adapter failed", s.name, e);
           results.set(s.key, { status: "error", quotes: [], error: String(e) });
