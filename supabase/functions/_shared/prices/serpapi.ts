@@ -76,6 +76,11 @@ export function createSerpApiAdapter(apiKey: string): PriceAdapter {
           let token = s.serpapi_property_token;
           const match: AdapterResult["match"] = {};
           if (!token) {
+            // Eşleştirme matcher.ts'te; eşleşmesiz mülk için arama yapılmaz.
+            results.set(s.key, { status: "not_found", quotes: [] });
+            continue;
+          }
+          if (false) {
             calls++;
             const q = [s.name, s.city].filter(Boolean).join(" ");
             const res = await fetch(`${base(p)}&q=${encodeURIComponent(q)}`);

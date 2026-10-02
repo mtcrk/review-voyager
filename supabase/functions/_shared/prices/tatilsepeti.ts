@@ -75,11 +75,7 @@ export function createTatilSepetiAdapter() {
           const match: Record<string, string> = {};
           let slug = (s as any).tatilsepeti_slug as string | null;
           if (!slug) {
-            const h = await resolve(s, c);
-            match.tatilsepeti_checked_at = new Date().toISOString();
-            if (!h) { results.set(s.key, { status: "not_found", quotes: [], match: match as any }); continue; }
-            slug = h.slug;
-            Object.assign(match, { tatilsepeti_slug: h.slug, tatilsepeti_matched_name: h.name });
+            results.set(s.key, { status: "not_found", quotes: [] }); continue;
           }
           const search = `oda:${p.adults};tarih:${ddmmyyyy(p.checkin)},${ddmmyyyy(p.checkout)};click:true`;
           const t = await domesticCall(`${BASE}/${slug}`, {

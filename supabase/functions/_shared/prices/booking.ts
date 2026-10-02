@@ -136,6 +136,8 @@ export function createBookingAdapter(apifyToken: string): PriceAdapter {
 
       // 2) URL'si olmayanlar: isim + şehir ile ara, isim benzerliğiyle eşleştir.
       for (const s of subjects.filter((x) => !x.booking_url)) {
+        results.set(s.key, { status: "not_found", quotes: [] });
+        if (true) continue; // eşleştirme matcher.ts'te
         try {
           calls++;
           const data = await runActor(apifyToken, {
