@@ -5,6 +5,17 @@ import { similarity, splitPrice } from "./types.ts";
 // SerpApi planlarında arama başı maliyet ~0.01–0.015 USD; tahmini değer.
 const COST_PER_CALL_USD = 0.0125;
 
+// Google, her oda için rates[].inclusions listesi verir ("kahvaltı", "her şey dahil" …). Sadece "kahvaltı"
+// bilgisi her şey dahil otellerde de genel etiket olarak çıkabildiği için tek başına pansiyon sayılmaz.
+function googleRoomBoard(name: string | null, room: any) {
+  const inc: string[] = [];
+  for (const r of room?.rates ?? []) for (const x of r?.inclusions ?? []) if (typeof x === "string") inc.push(x);
+  const texts = [name, room?.description, ...(room?.amenities ?? []), ...inc];
+  const b = detectBoard(...texts);
+  if (b === "breakfast" && !texts.some((t) => typeof t === "string" && /breakfast\s*included|oda\s*kahvalt|kahvalt[ıi]\s*dahil/i.test(t))) return "unknown";
+  return b;
+}
+
 function rowsFrom(list: any[], isAd: boolean, nights: number): PriceQuote[] {
   const out: PriceQuote[] = [];
   for (const row of list ?? []) {
@@ -24,7 +35,7 @@ function rowsFrom(list: any[], isAd: boolean, nights: number): PriceQuote[] {
           source,
           source_adapter: "serpapi",
           ...sp,
-          board_type: detectBoard(name, room?.description, ...(room?.amenities ?? [])),
+          board_type: googleRoomBoard(name, room),
           room_name: name,
           refundable: typeof row?.free_cancellation === "boolean" ? row.free_cancellation : null,
           taxes_included: null,

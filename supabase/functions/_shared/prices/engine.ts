@@ -202,7 +202,7 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
             if (er.status === "ok") {
               for (const q of er.quotes) erows.push({ ...base, ...q, source: q.source, source_adapter: q.source_adapter, is_official: false, is_ad: false, no_availability: false });
             } else if (er.status === "no_prices") {
-              erows.push({ ...base, source: d.label, source_adapter: d.id, price_per_night: null, no_availability: true, board_type: "unknown", raw: er.min_stay ? { reason: "min_stay", min_stay: er.min_stay } : {} });
+              erows.push({ ...base, source: d.label, source_adapter: d.id, price_per_night: null, no_availability: true, board_type: "unknown", raw: er.min_stay ? { reason: "min_stay", min_stay: er.min_stay } : er.not_on_sale ? { reason: "not_on_sale" } : {} });
             } else if (er.status === "error" && er.error) {
               console.warn(`${d.id} error for ${s.name}: ${er.error}`);
             }

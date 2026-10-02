@@ -62,6 +62,8 @@ export type AdapterResult = {
   error?: string;
   /** Fiyat yoksa: sitenin istediği minimum konaklama (gece). */
   min_stay?: number | null;
+  /** Mülk kaynakta var ama bu tarihte hiç oda listelenmiyor (satış kapalı). */
+  not_on_sale?: boolean;
 };
 
 export type FetchParams = { checkin: string; checkout: string; nights: number; adults: number; /** Uzun süren kaynaklar (Apify) için üst sınır. */ timeoutSec?: number };

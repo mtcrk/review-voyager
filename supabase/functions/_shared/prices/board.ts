@@ -8,14 +8,16 @@ export function detectBoard(...texts: Array<string | null | undefined>): BoardTy
   const t = texts
     .filter((x): x is string => typeof x === "string" && x.length > 0)
     .join(" | ")
-    .toLocaleLowerCase("tr");
+    // Not: toLocaleLowerCase("tr") İngilizce "Inclusive"i "ınclusive" yapıyordu → eşleşme kaçıyordu.
+    .replace(/[İI]/g, "i")
+    .toLowerCase();
   if (!t) return "unknown";
 
   if (/(ultra\s*)?(all[\s-]*inclusive|her\s*ş?s?ey\s*dahil|herşey\s*dahil|hersey\s*dahil)/.test(t)) {
     return "all_inclusive";
   }
-  if (/(full\s*board|tam\s*pansiyon|all\s*meals\s*included)/.test(t)) return "full_board";
-  if (/(half\s*board|yar[ıi]m\s*pansiyon|breakfast\s*(&|and|\+)\s*dinner|kahvalt[ıi]\s*(ve|&|\+)\s*ak[şs]am)/.test(t)) {
+  if (/(full[\s-]*board|tam\s*pansiyon|all\s*meals\s*included)/.test(t)) return "full_board";
+  if (/(half[\s-]*board|yar[ıi]m\s*pansiyon|breakfast\s*(&|and|\+)\s*dinner|kahvalt[ıi]\s*(ve|&|\+)\s*ak[şs]am)/.test(t)) {
     return "half_board";
   }
   if (

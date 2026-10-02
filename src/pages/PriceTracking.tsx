@@ -68,7 +68,7 @@ function CellView({ cell, median: med, isOwn }: { cell: Cell; median: number | n
           (cell.changePct > 0 ? <ArrowUp className="h-3 w-3 text-destructive" /> : <ArrowDown className="h-3 w-3 text-success" />)}
       </span>
     ) : cell.kind === "sold_out" ? (
-      <span className="text-[10px] leading-tight text-muted-foreground">fiyat yok — muhtemelen dolu</span>
+      <span className="text-[10px] leading-tight text-muted-foreground">{cell.label}</span>
     ) : cell.kind === "incomparable" ? (
       <span className="text-[10px] leading-tight text-warning">kıyaslanamaz</span>
     ) : (
@@ -124,9 +124,11 @@ function CellView({ cell, median: med, isOwn }: { cell: Cell; median: number | n
           </>
         )}
         {cell.kind === "sold_out" && (
-          <p className="text-muted-foreground">
-            {cell.source} bu tarih için fiyat döndürmedi — muhtemelen dolu. Çekim: {fmtTime(cell.fetchedAt)}
-          </p>
+          <div className="space-y-1 text-muted-foreground">
+            <p className="font-medium text-foreground">{cell.label}</p>
+            {cell.details.map((d, i) => <p key={i}>{d}</p>)}
+            <p>Çekim: {fmtTime(cell.fetchedAt)}</p>
+          </div>
         )}
         {cell.kind === "none" && <p className="text-muted-foreground">Bu tarih için henüz çekim yapılmadı.</p>}
       </PopoverContent>
@@ -184,7 +186,7 @@ export default function PriceTracking() {
       for (let off = 0; off < 20000; off += 1000) {
         const { data, error } = await (supabase as any)
           .from("competitor_price_snapshots")
-          .select("id, competitor_id, subject_type, checkin, adults, source, source_adapter, price_per_night, price_total, price_derived, board_type, room_name, refundable, taxes_included, no_availability, fetched_at")
+          .select("id, competitor_id, subject_type, checkin, adults, source, source_adapter, price_per_night, price_total, price_derived, board_type, room_name, refundable, taxes_included, no_availability, fetched_at, reason:raw->>reason, min_stay:raw->>min_stay")
           .eq("business_id", businessId)
           .eq("nights", 1)
           .eq("adults", adults)
