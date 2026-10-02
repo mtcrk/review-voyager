@@ -60,9 +60,11 @@ export type AdapterResult = {
   quotes: PriceQuote[];
   match?: MatchUpdate;
   error?: string;
+  /** Fiyat yoksa: sitenin istediği minimum konaklama (gece). */
+  min_stay?: number | null;
 };
 
-export type FetchParams = { checkin: string; checkout: string; nights: number; adults: number };
+export type FetchParams = { checkin: string; checkout: string; nights: number; adults: number; /** Uzun süren kaynaklar (Apify) için üst sınır. */ timeoutSec?: number };
 
 export type BatchResult = {
   results: Map<string, AdapterResult>;

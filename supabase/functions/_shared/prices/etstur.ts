@@ -38,6 +38,7 @@ function slugCandidates(name: string, city: string | null) {
 
 /** Doğrudan dener; HTTP hatası/HTML/engel durumunda Bright Data'ya düşer. */
 async function etsCall(url: string, method: "GET" | "POST", body: string | undefined, counter: { unlocker: number }) {
+  let reason = "";
   try {
     const res = await fetch(url, {
       method,
@@ -45,12 +46,12 @@ async function etsCall(url: string, method: "GET" | "POST", body: string | undef
       body,
       signal: AbortSignal.timeout(20_000),
     });
-    if (res.ok) {
-      const t = await res.text();
-      if (t.trim().startsWith("{")) return JSON.parse(t);
-    }
-  } catch (_) { /* fallback */ }
-  if (!unlockerAvailable()) throw new Error("ETS doğrudan erişilemedi ve Bright Data yok");
+    const t = await res.text();
+    if (res.ok && t.trim().startsWith("{")) return JSON.parse(t);
+    reason = `status ${res.status}${res.ok ? " (JSON değil)" : ""} · ${t.slice(0, 120).replace(/\s+/g, " ")}`;
+  } catch (e) { reason = `fetch hatası: ${e instanceof Error ? e.message : String(e)}`; }
+  console.warn(`ETS direct failed → Bright Data fallback [${method} ${url.replace(/^https?:\/\/[^/]+/, "")}]: ${reason}`);
+  if (!unlockerAvailable()) throw new Error(`ETS doğrudan erişilemedi (${reason}) ve Bright Data yok`);
   counter.unlocker++;
   const r = await unlockerFetch({ url, method, body, headers: { "Content-Type": "application/json" } });
   if (r.status >= 400) throw new Error(`Bright Data ${r.status}`);
@@ -73,13 +74,18 @@ async function resolveHotel(s: Subject, counter: { unlocker: number; calls: numb
   return null;
 }
 
-export function parseRoomMulti(data: any, nights: number): { quotes: PriceQuote[]; anyRoom: boolean } {
+export function parseRoomMulti(data: any, nights: number): { quotes: PriceQuote[]; anyRoom: boolean; minStay: number | null } {
   const quotes: PriceQuote[] = [];
   let anyRoom = false;
+  let minStay: number | null = null;
   for (const g of data?.result?.roomGroups ?? []) {
     for (const room of g?.rooms ?? []) {
       for (const sb of room?.subBoards ?? []) {
         anyRoom = true;
+        if (sb?.availability?.type === "MIN_STAY" && Number(sb?.availability?.nightCount) > 0) {
+          const n = Number(sb.availability.nightCount);
+          minStay = minStay === null ? n : Math.min(minStay, n);
+        }
         if (sb?.availability?.type !== "AVAILABLE") continue;
         const disc = Number(sb?.price?.discountedPrice) || 0;
         const amt = Number(sb?.price?.amount) || 0;
@@ -109,7 +115,7 @@ export function parseRoomMulti(data: any, nights: number): { quotes: PriceQuote[
       }
     }
   }
-  return { quotes, anyRoom };
+  return { quotes, anyRoom, minStay };
 }
 
 export function createEtsAdapter() {
@@ -118,27 +124,34 @@ export function createEtsAdapter() {
     async fetchMany(subjects: Subject[], p: FetchParams): Promise<BatchResult & { unlocker_calls: number }> {
       const results = new Map<string, AdapterResult>();
       const counter = { unlocker: 0, calls: 0 };
-      for (const s of subjects) {
+      // Bright Data'ya düşen çağrılar yavaş (5–45 sn); mülkler 4'erli paralel işlenir.
+      const one = async (s: Subject) => {
         try {
           const match: EtsMatch = {};
           let hotelId = s.etstur_hotel_id;
           if (!hotelId) {
             const h = await resolveHotel(s, counter);
             match.etstur_checked_at = new Date().toISOString();
-            if (!h) { results.set(s.key, { status: "not_found", quotes: [], match: match as any }); continue; }
+            if (!h) { results.set(s.key, { status: "not_found", quotes: [], match: match as any }); return; }
             hotelId = h.id;
             Object.assign(match, { etstur_hotel_id: h.id, etstur_slug: h.slug, etstur_matched_name: h.name });
           }
           counter.calls++;
           const body = JSON.stringify({ hotelId, checkIn: p.checkin, checkOut: p.checkout, rooms: [{ adultCount: p.adults, childCount: 0, childAges: [] }] });
-          const data = await etsCall(`${BASE}/room/multi`, "POST", body, counter);
-          const { quotes } = parseRoomMulti(data, p.nights);
-          results.set(s.key, { status: quotes.length ? "ok" : "no_prices", quotes, match: match as any });
+          let data: any;
+          try { data = await etsCall(`${BASE}/room/multi`, "POST", body, counter); }
+          catch (e1) { console.warn("etstur retry", s.name, String(e1)); data = await etsCall(`${BASE}/room/multi`, "POST", body, counter); }
+          const { quotes, minStay } = parseRoomMulti(data, p.nights);
+          results.set(s.key, { status: quotes.length ? "ok" : "no_prices", quotes, match: match as any, min_stay: quotes.length ? null : minStay });
         } catch (e) {
           console.error("etstur adapter failed", s.name, e);
           results.set(s.key, { status: "error", quotes: [], error: String(e) });
         }
-      }
+      };
+      const queue = [...subjects];
+      await Promise.all(Array.from({ length: Math.min(4, queue.length) }, async () => {
+        while (queue.length) await one(queue.shift()!);
+      }));
       return { results, calls: counter.calls, unlocker_calls: counter.unlocker, cost_usd: counter.unlocker * UNLOCKER_COST_USD };
     },
   };

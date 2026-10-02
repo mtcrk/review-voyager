@@ -24,11 +24,15 @@ Deno.serve(async (req) => {
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    const userClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } },
-    });
-    const { data: { user } } = await userClient.auth.getUser();
-    if (!user) return json({ error: "Oturum doğrulanamadı" }, 401);
+    const auth = req.headers.get("Authorization") ?? "";
+    const isService = auth === `Bearer ${serviceKey}`;
+    let userId: string | null = null;
+    if (!isService) {
+      const userClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: auth } } });
+      const { data: { user } } = await userClient.auth.getUser();
+      if (!user) return json({ error: "Oturum doğrulanamadı" }, 401);
+      userId = user.id;
+    }
     const admin = createClient(supabaseUrl, serviceKey);
 
     let body: any = {};
@@ -47,8 +51,10 @@ Deno.serve(async (req) => {
       return json({ error: "Geçersiz istek: business_id ve checkin gerekli" }, 400);
     }
 
-    const { data: can } = await admin.rpc("user_can_access_business", { _user_id: user.id, _business_id: business_id });
-    if (!can) return json({ error: "Bu işletmeye erişiminiz yok" }, 403);
+    if (!isService) {
+      const { data: can } = await admin.rpc("user_can_access_business", { _user_id: userId, _business_id: business_id });
+      if (!can) return json({ error: "Bu işletmeye erişiminiz yok" }, 403);
+    }
 
     const { data: biz } = await admin
       .from("businesses")

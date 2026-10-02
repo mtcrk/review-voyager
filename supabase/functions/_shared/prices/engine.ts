@@ -6,6 +6,7 @@ import { createEtsAdapter } from "./etstur.ts";
 import { createJollyAdapter } from "./jollytur.ts";
 import { createTatilSepetiAdapter } from "./tatilsepeti.ts";
 import { ensureMatches } from "./matcher.ts";
+import { insertSnapshots, type SnapshotInput } from "./snapshots.ts";
 
 export const DOMESTIC_COLS = "jollytur_hotel_id, jollytur_slug, jollytur_checked_at, tatilsepeti_slug, tatilsepeti_checked_at";
 const pickDomestic = (r: any) => ({
@@ -197,24 +198,19 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
             const er = r.results.get(s.key);
             if (!er) continue;
             if (er.match && Object.keys(er.match).length) await updateSubject(o.admin, o.business.id, s, er.match as any);
-            const base = { business_id: o.business.id, competitor_id: s.competitor_id, subject_type: s.subject_type, checkin, nights: o.nights, adults: o.adults, currency: "TRY", fetched_at: fa, market: "domestic" };
+            const base = { business_id: o.business.id, competitor_id: s.competitor_id, subject_type: s.subject_type, checkin, nights: o.nights, adults: o.adults, currency: "TRY", fetched_at: fa, market: "domestic" as const };
             if (er.status === "ok") {
-              for (const q of er.quotes) erows.push({
-                ...base, source: q.source, source_adapter: q.source_adapter, price: q.price_per_night,
-                price_per_night: q.price_per_night, price_total: q.price_total, price_derived: q.price_derived,
-                board_type: q.board_type, room_name: q.room_name, refundable: q.refundable, free_cancellation: q.refundable,
-                taxes_included: q.taxes_included, is_official: false, is_ad: false, raw: q.raw ?? {},
-                price_before_discount: q.price_before_discount ?? null, campaign_price: q.campaign_price ?? null, campaign_label: q.campaign_label ?? null,
-                remaining_allotment: q.remaining_allotment ?? null, cancellation_details: q.cancellation_details ?? null,
-              });
+              for (const q of er.quotes) erows.push({ ...base, ...q, source: q.source, source_adapter: q.source_adapter, is_official: false, is_ad: false, no_availability: false });
             } else if (er.status === "no_prices") {
-              erows.push({ ...base, source: d.label, source_adapter: d.id, price: null, no_availability: true, board_type: "unknown", is_official: false, is_ad: false, raw: {} });
+              erows.push({ ...base, source: d.label, source_adapter: d.id, price_per_night: null, no_availability: true, board_type: "unknown", raw: er.min_stay ? { reason: "min_stay", min_stay: er.min_stay } : {} });
+            } else if (er.status === "error" && er.error) {
+              console.warn(`${d.id} error for ${s.name}: ${er.error}`);
             }
           }
         }
         if (erows.length) {
-          const { error } = await o.admin.from("competitor_price_snapshots").insert(erows);
-          if (error) { console.error("domestic snapshot insert failed", error); res.errors.push(`yurt içi kayıt: ${error.message}`); } else res.saved += erows.length;
+          const w = await insertSnapshots(o.admin, erows, "yurt içi kayıt");
+          res.saved += w.saved; res.errors.push(...w.errors);
         }
       }
 
@@ -236,11 +232,21 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
         else if (booking) bookingList.push(s);
       }
 
+      const baseOf = (s: Subject, fetchedAt: string) => ({
+        business_id: o.business.id, competitor_id: s.competitor_id, subject_type: s.subject_type, checkin,
+        nights: o.nights, adults: o.adults, currency: "TRY", fetched_at: fetchedAt, market: "international" as const,
+      });
+      const noPriceRow = (s: Subject, fetchedAt: string, adapter: "serpapi" | "booking") => ({
+        ...baseOf(s, fetchedAt), source: adapter === "booking" ? "Booking.com" : "Google Hotels", source_adapter: adapter,
+        price_per_night: null, no_availability: true, board_type: "unknown", raw: {},
+      });
+
       const serpRes = new Map<string, AdapterResult>();
       if (serp && serpList.length) {
         const r = await serp.fetchMany(serpList, p);
         track("serpapi", r.calls, r.cost_usd);
         r.results.forEach((v, k) => serpRes.set(k, v));
+        r.results.forEach((v) => { if (v.status === "error") console.warn("serpapi error:", v.error); });
         // Zincir: SerpApi kıyaslanabilir fiyat vermediyse Booking'e düş.
         if (booking) {
           for (const s of serpList) {
@@ -248,16 +254,33 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
             if (!sr || sr.status !== "ok" || !comparable(sr.quotes, board)) bookingList.push(s);
           }
         }
+        // Google fiyatlarını Booking'i beklemeden hemen kaydet (Booking uzun sürüp zaman aşımına düşse de kaybolmasın).
+        const fa = new Date().toISOString();
+        const srows: SnapshotInput[] = [];
+        for (const s of serpList) {
+          const sr = serpRes.get(s.key);
+          if (sr?.status === "ok") for (const q of sr.quotes) srows.push({ ...baseOf(s, fa), ...q, no_availability: false });
+          else if (sr?.status === "no_prices" && !bookingList.includes(s)) srows.push(noPriceRow(s, fa, "serpapi"));
+        }
+        if (srows.length) {
+          const w = await insertSnapshots(o.admin, srows, "Google kayıt");
+          res.saved += w.saved; res.errors.push(...w.errors);
+        }
       }
       const bookRes = new Map<string, AdapterResult>();
+      const remainingSec = Math.floor((o.deadline - Date.now()) / 1000);
       if (booking && bookingList.length && res.calls < o.maxCalls) {
-        const r = await booking.fetchMany(bookingList, p);
-        track("booking", r.calls, r.cost_usd);
-        r.results.forEach((v, k) => bookRes.set(k, v));
+        if (remainingSec < 30) {
+          res.complete = false; // Booking için süre kalmadı; sonraki çağrıda tamamlanır.
+        } else {
+          const r = await booking.fetchMany(bookingList, { ...p, timeoutSec: Math.min(150, remainingSec - 10) });
+          track("booking", r.calls, r.cost_usd);
+          r.results.forEach((v, k) => bookRes.set(k, v));
+        }
       }
 
       const fetchedAt = new Date().toISOString();
-      const rows: any[] = [];
+      const rows: SnapshotInput[] = [];
       for (const s of todo) {
         const sr = serpRes.get(s.key);
         const br = bookRes.get(s.key);
@@ -283,55 +306,18 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
         }
         await updateSubject(o.admin, o.business.id, s, patch);
 
-        const quotes = [...(sr?.quotes ?? []), ...(br?.quotes ?? [])];
-        const base = {
-          business_id: o.business.id,
-          competitor_id: s.competitor_id,
-          subject_type: s.subject_type,
-          checkin,
-          nights: o.nights,
-          adults: o.adults,
-          currency: "TRY",
-          fetched_at: fetchedAt,
-        };
-        if (quotes.length) {
-          for (const q of quotes) {
-            rows.push({
-              ...base,
-              source: q.source,
-              source_adapter: q.source_adapter,
-              price: q.price_per_night, // geriye uyum: price = gecelik
-              price_per_night: q.price_per_night,
-              price_total: q.price_total,
-              price_derived: q.price_derived,
-              board_type: q.board_type,
-              room_name: q.room_name,
-              refundable: q.refundable,
-              free_cancellation: q.refundable,
-              taxes_included: q.taxes_included,
-              is_official: q.is_official,
-              is_ad: q.is_ad,
-              num_guests: q.num_guests,
-              raw: q.raw ?? {},
-            });
-          }
-        } else if (sr?.status === "no_prices" || br?.status === "no_prices") {
-          rows.push({
-            ...base,
-            source: br ? "Booking.com" : "Google Hotels",
-            source_adapter: br ? "booking" : "serpapi",
-            price: null,
-            no_availability: true,
-            board_type: "unknown",
-            is_official: false,
-            is_ad: false,
-            raw: {},
-          });
+        // Google satırları yukarıda yazıldı; burada yalnızca Booking (ve Booking'e düşüp onu da alamayan Google "fiyat yok").
+        if (br?.status === "ok") {
+          for (const q of br.quotes) rows.push({ ...baseOf(s, fetchedAt), ...q, no_availability: false });
+        } else if (br?.status === "no_prices") {
+          rows.push(noPriceRow(s, fetchedAt, "booking"));
+        } else if (sr?.status === "no_prices" && bookingList.includes(s)) {
+          rows.push(noPriceRow(s, fetchedAt, "serpapi"));
         }
       }
       if (rows.length) {
-        const { error } = await o.admin.from("competitor_price_snapshots").insert(rows);
-        if (error) { console.error("snapshot insert failed", error); res.errors.push(`kayıt: ${error.message}`); } else res.saved += rows.length;
+        const w = await insertSnapshots(o.admin, rows, "Booking kayıt");
+        res.saved += w.saved; res.errors.push(...w.errors);
       }
     }
   } finally {
