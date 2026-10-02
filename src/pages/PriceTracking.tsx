@@ -154,6 +154,7 @@ export default function PriceTracking() {
   const [force, setForce] = useState(false);
   const [market, setMarket] = useState<"international" | "domestic">("international");
   const [refreshing, setRefreshing] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const board: BoardType = boardOverride ?? (biz?.price_compare_board_type as BoardType) ?? "breakfast";
 
   const dates = useMemo(() => Array.from({ length: days }, (_, i) => isoDay(i)), [days]);
@@ -340,7 +341,7 @@ export default function PriceTracking() {
           </label>
           <Button size="sm" onClick={refresh} disabled={refreshing}>
             {refreshing ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-1 h-4 w-4" />}
-            Şimdi yenile
+            {progress ? `Yenileniyor ${progress.done + 1}/${progress.total} gün` : "Şimdi yenile"}
           </Button>
         </div>
       </div>
