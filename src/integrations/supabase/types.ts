@@ -1153,6 +1153,7 @@ export type Database = {
           checkin: string
           competitor_id: string | null
           currency: string
+          fetch_trigger: string | null
           fetched_at: string
           free_cancellation: boolean | null
           id: string
@@ -1188,6 +1189,7 @@ export type Database = {
           checkin: string
           competitor_id?: string | null
           currency?: string
+          fetch_trigger?: string | null
           fetched_at?: string
           free_cancellation?: boolean | null
           id?: string
@@ -1223,6 +1225,7 @@ export type Database = {
           checkin?: string
           competitor_id?: string | null
           currency?: string
+          fetch_trigger?: string | null
           fetched_at?: string
           free_cancellation?: boolean | null
           id?: string
@@ -2273,6 +2276,137 @@ export type Database = {
         }
         Relationships: []
       }
+      price_credit_ledger: {
+        Row: {
+          business_id: string
+          created_at: string
+          created_by: string | null
+          delta: number
+          id: string
+          note: string | null
+          reason: string
+          ref_id: string | null
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          created_by?: string | null
+          delta: number
+          id?: string
+          note?: string | null
+          reason: string
+          ref_id?: string | null
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          created_by?: string | null
+          delta?: number
+          id?: string
+          note?: string | null
+          reason?: string
+          ref_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "price_credit_ledger_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      price_credit_orders: {
+        Row: {
+          amount_try: number
+          business_id: string
+          created_at: string
+          created_by: string | null
+          credits: number
+          id: string
+          is_test: boolean
+          merchant_oid: string
+          package_id: string
+          paid_at: string | null
+          status: string
+        }
+        Insert: {
+          amount_try: number
+          business_id: string
+          created_at?: string
+          created_by?: string | null
+          credits: number
+          id?: string
+          is_test?: boolean
+          merchant_oid: string
+          package_id: string
+          paid_at?: string | null
+          status?: string
+        }
+        Update: {
+          amount_try?: number
+          business_id?: string
+          created_at?: string
+          created_by?: string | null
+          credits?: number
+          id?: string
+          is_test?: boolean
+          merchant_oid?: string
+          package_id?: string
+          paid_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "price_credit_orders_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "price_credit_orders_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "price_credit_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      price_credit_packages: {
+        Row: {
+          created_at: string
+          credits: number
+          id: string
+          is_active: boolean
+          name: string
+          price_try: number
+          sort: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          credits: number
+          id?: string
+          is_active?: boolean
+          name: string
+          price_try: number
+          sort?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          credits?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          price_try?: number
+          sort?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       price_fetch_log: {
         Row: {
           adapter: string
@@ -2304,6 +2438,65 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "price_fetch_log_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      price_instant_queries: {
+        Row: {
+          adults: number
+          business_id: string
+          created_at: string
+          created_by: string | null
+          credits: number
+          dates: string[]
+          done_chunks: string[]
+          finished_at: string | null
+          id: string
+          markets: string[]
+          nights: number
+          refunded: number
+          status: string
+          subjects: Json
+        }
+        Insert: {
+          adults: number
+          business_id: string
+          created_at?: string
+          created_by?: string | null
+          credits: number
+          dates: string[]
+          done_chunks?: string[]
+          finished_at?: string | null
+          id?: string
+          markets: string[]
+          nights: number
+          refunded?: number
+          status?: string
+          subjects: Json
+        }
+        Update: {
+          adults?: number
+          business_id?: string
+          created_at?: string
+          created_by?: string | null
+          credits?: number
+          dates?: string[]
+          done_chunks?: string[]
+          finished_at?: string | null
+          id?: string
+          markets?: string[]
+          nights?: number
+          refunded?: number
+          status?: string
+          subjects?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "price_instant_queries_business_id_fkey"
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
@@ -4119,6 +4312,15 @@ export type Database = {
         }[]
       }
       can_view_business: { Args: { _business_id: string }; Returns: boolean }
+      consume_price_credits: {
+        Args: {
+          _amount: number
+          _business_id: string
+          _ref: string
+          _user: string
+        }
+        Returns: number
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -4231,6 +4433,7 @@ export type Database = {
           topic_id: string
         }[]
       }
+      price_credit_balance: { Args: { _business_id: string }; Returns: number }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
