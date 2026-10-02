@@ -217,6 +217,7 @@ export default function PriceTracking() {
   const [params, setParams] = useSearchParams();
   const rangeKey = (["7", "weekend", "30", "custom"].includes(params.get("range") ?? "") ? params.get("range") : "7") as RangeKey;
   // Uluslararası pazarda varsayılan 7 gece (yabancı misafir tipik konaklaması), yurt içinde 1 gece.
+  const [market, setMarket] = useState<"international" | "domestic">("international");
   const defaultNights = market === "international" ? 7 : 1;
   const nights = [1, 2, 3, 7].includes(Number(params.get("nights"))) ? Number(params.get("nights")) : defaultNights;
   const setParam = (patch: Record<string, string | null>) => {
@@ -231,7 +232,6 @@ export default function PriceTracking() {
   const [adults, setAdults] = useState(2);
   const [boardOverride, setBoardOverride] = useState<BoardType | null>(null);
   const [force, setForce] = useState(false);
-  const [market, setMarket] = useState<"international" | "domestic">("international");
   const [refreshing, setRefreshing] = useState(false);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const board: BoardType = boardOverride ?? (biz?.price_compare_board_type as BoardType) ?? "breakfast";
