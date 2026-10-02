@@ -616,6 +616,7 @@ function SummaryRow({ label, values, dates }: { label: string; values: React.Rea
       {values.map((v, i) => (
         <td key={dates[i]} className="border-t bg-muted/40 px-1 py-1.5 tabular-nums">{v}</td>
       ))}
+      <td className="border-t bg-muted/40" />
     </tr>
   );
 }
