@@ -46,6 +46,8 @@ export type EngineOptions = {
   allowBooking: boolean;
   deadline: number; // epoch ms
   trigger: "manual" | "cron";
+  /** Yalnızca bu pazarlar çekilir (varsayılan: ikisi de). */
+  markets?: ("domestic" | "international")[];
 };
 
 export type EngineResult = {
@@ -182,7 +184,7 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
 
       // Yurt içi pazar (ETS): uluslararası zincirden tamamen ayrı; hücrelerde asla karışmaz.
       // Kaynaklar: ETS Tur, Jolly Tur, Tatil Sepeti — aynı fetched_at ile tek batch yazılır; hücrede en ucuz kıyaslanabilir seçilir.
-      {
+      if (!o.markets || o.markets.includes("domestic")) {
         const pe = { checkin, checkout: addDays(checkin, o.nights), nights: o.nights, adults: o.adults };
         const fa = new Date().toISOString();
         const erows: any[] = [];
@@ -248,6 +250,7 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
         }
       }
 
+      if (o.markets && !o.markets.includes("international")) continue;
       const todo = subjects.filter((s) => {
         if (done.has(`${s.key}|${checkin}`)) { res.cached++; return false; }
         return true;
@@ -303,6 +306,8 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
       }
       const bookRes = new Map<string, AdapterResult>();
       const remainingSec = Math.floor((o.deadline - Date.now()) / 1000);
+      const bookQueriedN = new Map<string, number>();
+      const bookTried = new Map<string, number[]>();
       if (booking && bookingList.length && res.calls < o.maxCalls) {
         if (remainingSec < 30) {
           res.complete = false; // Booking için süre kalmadı; sonraki çağrıda tamamlanır.
@@ -310,6 +315,29 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
           const r = await booking.fetchMany(bookingList, { ...p, timeoutSec: Math.min(150, remainingSec - 10) });
           track("booking", r.calls, r.cost_usd);
           r.results.forEach((v, k) => bookRes.set(k, v));
+          // Min. konaklama geri dönüşü: Booking seçilen gecede oda listesini boş döndürür (actor min. gece bilgisi vermez).
+          // +1, sonra +2 gece ile tekrar sorulur (en fazla 2 ek run); fiyat gecelik kaydedilir.
+          // +1 ve +2 gece paralel sorulur (Apify run'ı uzun sürdüğü için sırayla süreye sığmaz); en kısa fiyatlı olan alınır.
+          const left = Math.floor((o.deadline - Date.now()) / 1000);
+          const subs = bookingList.filter((s) => bookRes.get(s.key)?.status === "no_prices");
+          if (subs.length && left >= 40) {
+            const ns = [o.nights + 1, o.nights + 2];
+            const outs = await Promise.all(ns.map((n) =>
+              booking.fetchMany(subs, { checkin, checkout: addDays(checkin, n), nights: n, adults: o.adults, timeoutSec: Math.min(150, left - 10) })
+                .catch(() => null)));
+            outs.forEach((r2) => { if (r2) track("booking", r2.calls, r2.cost_usd); });
+            for (const s of subs) {
+              bookTried.set(s.key, [o.nights, ...ns]);
+              for (let i = 0; i < ns.length; i++) {
+                const e2 = outs[i]?.results.get(s.key);
+                if (e2?.status === "ok") { bookQueriedN.set(s.key, ns[i]); bookRes.set(s.key, e2); break; }
+              }
+            }
+          } else if (subs.length) {
+            // Süre yetmedi: "fiyat yok" yazma, sonraki çağrıda yeniden denensin.
+            for (const s of subs) bookRes.delete(s.key);
+            res.complete = false;
+          }
         }
       }
 
@@ -342,9 +370,10 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
 
         // Google satırları yukarıda yazıldı; burada yalnızca Booking (ve Booking'e düşüp onu da alamayan Google "fiyat yok").
         if (br?.status === "ok") {
-          for (const q of br.quotes) rows.push({ ...baseOf(s, fetchedAt), ...q, no_availability: false });
+          const qn = bookQueriedN.get(s.key) ?? o.nights;
+          for (const q of br.quotes) rows.push({ ...baseOf(s, fetchedAt), ...q, no_availability: false, queried_nights: qn, min_stay_nights: qn > o.nights ? qn : null } as SnapshotInput);
         } else if (br?.status === "no_prices") {
-          rows.push(noPriceRow(s, fetchedAt, "booking"));
+          rows.push({ ...noPriceRow(s, fetchedAt, "booking"), raw: { tried_nights: bookTried.get(s.key) ?? [o.nights] } });
         } else if (sr?.status === "no_prices" && bookingList.includes(s)) {
           rows.push(noPriceRow(s, fetchedAt, "serpapi"));
         }
