@@ -1159,6 +1159,7 @@ export type Database = {
           is_ad: boolean | null
           is_official: boolean | null
           market: string
+          min_stay_nights: number | null
           nights: number
           no_availability: boolean
           num_guests: number | null
@@ -1167,6 +1168,7 @@ export type Database = {
           price_derived: boolean
           price_per_night: number | null
           price_total: number | null
+          queried_nights: number | null
           raw: Json
           refundable: boolean | null
           remaining_allotment: number | null
@@ -1192,6 +1194,7 @@ export type Database = {
           is_ad?: boolean | null
           is_official?: boolean | null
           market?: string
+          min_stay_nights?: number | null
           nights?: number
           no_availability?: boolean
           num_guests?: number | null
@@ -1200,6 +1203,7 @@ export type Database = {
           price_derived?: boolean
           price_per_night?: number | null
           price_total?: number | null
+          queried_nights?: number | null
           raw: Json
           refundable?: boolean | null
           remaining_allotment?: number | null
@@ -1225,6 +1229,7 @@ export type Database = {
           is_ad?: boolean | null
           is_official?: boolean | null
           market?: string
+          min_stay_nights?: number | null
           nights?: number
           no_availability?: boolean
           num_guests?: number | null
@@ -1233,6 +1238,7 @@ export type Database = {
           price_derived?: boolean
           price_per_night?: number | null
           price_total?: number | null
+          queried_nights?: number | null
           raw?: Json
           refundable?: boolean | null
           remaining_allotment?: number | null
