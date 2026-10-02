@@ -1,7 +1,10 @@
 // Arama tabanlı otomatik otel eşleştirme (fiyat çekmez).
 // Kaynaklar sitelerin kendi arama/autocomplete servisleri: ETS /v2/autocomplete, Jolly /Shared/Search,
 // Tatil Sepeti /common/hotelsearch, Booking autocomplete + arama sayfası, Google Hotels (SerpApi).
-import { type Candidate, pickBest, queryVariants, type Scored } from "./matching.ts";
+import { type Candidate, distinctive, fold, pickBest, queryVariants, type Scored } from "./matching.ts";
+
+const decode = (s: string) => s.replace(/&amp;/g, "&").replace(/&#39;|&apos;/g, "'").replace(/&quot;/g, '"');
+const distinctiveHit = (name: string, cand: string) => { const c = new Set(fold(cand).split(" ")); return Array.from(distinctive(name)).every((w) => c.has(w)); };
 import { type Counter, domesticCall, UA } from "./domesticHtml.ts";
 import { unlockerAvailable, unlockerFetch } from "./unlocker.ts";
 import { addDays } from "./types.ts";
@@ -40,7 +43,7 @@ const searchers: Record<SourceId, (name: string, city: string | null, c: Counter
         const title = String(it.title ?? "");
         out.push({ name: title, location: [title.split(",").slice(1).join(","), ...(it.state ?? []), it.city].filter(Boolean).join(" "), data: { slug: String(it.url), name: title.split(",")[0].trim() } });
       }
-      if (out.length) break;
+      if (out.some((x) => x.name && distinctiveHit(name, x.name))) break;
     }
     return { cands: out, cost: 0 };
   },
@@ -52,7 +55,7 @@ const searchers: Record<SourceId, (name: string, city: string | null, c: Counter
         if (!it?.isDomestic || it?.typeName !== "Otel" || !it?.id) continue;
         out.push({ name: String(it.value ?? ""), location: String(it.destinationBreadCrumb ?? ""), data: { id: String(it.id), slug: String(it.adjustName ?? "").replace(/^\//, ""), name: String(it.value ?? "") } });
       }
-      if (out.length) break;
+      if (out.some((x) => x.name && distinctiveHit(name, x.name))) break;
     }
     return { cands: out, cost: 0 };
   },
@@ -64,7 +67,7 @@ const searchers: Record<SourceId, (name: string, city: string | null, c: Counter
         if (!it?.IsDomestic || Number(it?.TypeId) !== 1 || !it?.Link) continue;
         out.push({ name: String(it.Title ?? ""), location: `${it.AreaPlace ?? ""} ${it.Category ?? ""}`, data: { slug: String(it.Link).replace(/^\//, ""), name: String(it.Title ?? "") } });
       }
-      if (out.length) break;
+      if (out.some((x) => x.name && distinctiveHit(name, x.name))) break;
     }
     return { cands: out, cost: 0 };
   },
@@ -77,9 +80,9 @@ const searchers: Record<SourceId, (name: string, city: string | null, c: Counter
       for (const it of d?.results ?? []) {
         if (it?.dest_type !== "hotel" || it?.cc1 !== "tr") continue;
         const gps = typeof it.latitude === "number" ? { lat: it.latitude, lng: it.longitude } : null;
-        out.push({ name: String(it.label1 ?? ""), location: String(it.label2 ?? ""), gps, data: { dest_id: String(it.dest_id), name: String(it.label1 ?? "").replace(/\s*-\s*(Ultra\s+)?All Inclusive$/i, "") } });
+        out.push({ name: decode(String(it.label1 ?? "")), location: String(it.label2 ?? ""), gps, data: { dest_id: String(it.dest_id), name: decode(String(it.label1 ?? "")).replace(/\s*-\s*[^-]*All Inclusive$/i, "") } });
       }
-      if (out.length) break;
+      if (out.some((x) => x.name && distinctiveHit(name, x.name))) break;
     }
     return { cands: out, cost: 0 };
   },

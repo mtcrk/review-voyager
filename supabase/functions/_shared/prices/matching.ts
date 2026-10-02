@@ -19,7 +19,7 @@ const GENERIC = new Set([
   "hotel", "hotels", "otel", "oteli", "otelleri", "resort", "resorts", "spa", "club", "beach", "family", "golf", "deluxe", "luxury",
   "the", "and", "ve", "by", "all", "inclusive", "ultra", "her", "sey", "dahil", "herseydahil", "collection", "boutique", "butik",
   "suite", "suites", "thalasso", "wellness", "convention", "center", "centre", "kids", "adult", "adults", "only", "concept",
-  "a", "de", "la", "le", "of", "hv1", "turkey", "turkiye", "antalya", "mugla", "riviera", "mediterranean", "region", "coast",
+  "a", "de", "la", "le", "of", "hv1", "turkey", "turkiye", "antalya", "mugla", "riviera", "mediterranean", "region", "coast", "hours", "24", "h",
 ]);
 
 // Bölge eşdeğerlik tablosu: aynı grup içindeki yerler aynı bölge sayılır.
