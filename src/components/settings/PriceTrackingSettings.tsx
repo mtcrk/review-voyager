@@ -21,8 +21,10 @@ function MatchEditor({
   serpName,
   etsSlug,
   etsName,
+  row,
   onSave,
 }: {
+  row?: any;
   etsSlug?: string | null;
   etsName?: string | null;
   label: string;
@@ -64,7 +66,33 @@ function MatchEditor({
           onSave({ etstur_slug: m ? m[1] : null, etstur_hotel_id: null, etstur_matched_name: null, etstur_checked_at: null });
         }}>ETS'yi kaydet</Button>
       </div>
+      <DomesticMatch label="Jolly Tur" host="jollytur.com" name={row?.jollytur_matched_name} slug={row?.jollytur_slug}
+        toPatch={(slug) => ({ jollytur_slug: slug, jollytur_hotel_id: null, jollytur_matched_name: null, jollytur_checked_at: null })} onSave={onSave} />
+      <DomesticMatch label="Tatil Sepeti" host="tatilsepeti.com" name={row?.tatilsepeti_matched_name} slug={row?.tatilsepeti_slug}
+        toPatch={(slug) => ({ tatilsepeti_slug: slug, tatilsepeti_matched_name: null, tatilsepeti_checked_at: null })} onSave={onSave} />
     </div>
+  );
+}
+
+function DomesticMatch({ label, host, name, slug, toPatch, onSave }: {
+  label: string; host: string; name?: string | null; slug?: string | null;
+  toPatch: (slug: string | null) => Record<string, unknown>;
+  onSave: (patch: Record<string, unknown>) => Promise<void>;
+}) {
+  const [v, setV] = useState(slug ? `https://www.${host}/${slug}` : "");
+  return (
+    <>
+      <div className="text-xs text-muted-foreground">{label} eşleşmesi (yurt içi): <b className="text-foreground">{name ?? (slug ? "adres girildi" : "henüz yok")}</b></div>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <Input value={v} onChange={(e) => setV(e.target.value)} placeholder={`https://www.${host}/otel-adi`} className="h-9" />
+        <Button size="sm" variant="outline" onClick={() => {
+          const t = v.trim();
+          const m = t.match(new RegExp(`^https://(?:www\\.)?${host.replace(".", "\\.")}/([^/?#]+)`));
+          if (t && !m) return void toast({ title: `Geçersiz ${label} adresi`, variant: "destructive" });
+          onSave(toPatch(m ? m[1] : null));
+        }}>{label}'u kaydet</Button>
+      </div>
+    </>
   );
 }
 
@@ -82,7 +110,7 @@ export function PriceTrackingSettings() {
     queryFn: async () => {
       const { data } = await (supabase as any)
         .from("ci_competitors")
-        .select("id, name, booking_url, booking_matched_name, serpapi_matched_name, etstur_slug, etstur_matched_name")
+        .select("id, name, booking_url, booking_matched_name, serpapi_matched_name, etstur_slug, etstur_matched_name, jollytur_slug, jollytur_matched_name, tatilsepeti_slug, tatilsepeti_matched_name")
         .eq("business_id", biz.id)
         .eq("is_active", true)
         .order("name");
@@ -211,9 +239,9 @@ export function PriceTrackingSettings() {
           <CardDescription>Eşleşen otel adı yanlışsa düzelt; bir sonraki çekimde yeniden eşleştirilir.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          <MatchEditor label={`${biz.name} (otelimiz)`} bookingUrl={biz.booking_url} bookingName={biz.booking_matched_name} serpName={biz.serpapi_matched_name} etsSlug={biz.etstur_slug} etsName={biz.etstur_matched_name} onSave={saveBiz} />
+          <MatchEditor label={`${biz.name} (otelimiz)`} bookingUrl={biz.booking_url} bookingName={biz.booking_matched_name} serpName={biz.serpapi_matched_name} etsSlug={biz.etstur_slug} etsName={biz.etstur_matched_name} row={biz} onSave={saveBiz} />
           {comps.map((c: any) => (
-            <MatchEditor key={c.id} label={c.name} bookingUrl={c.booking_url} bookingName={c.booking_matched_name} serpName={c.serpapi_matched_name} etsSlug={c.etstur_slug} etsName={c.etstur_matched_name} onSave={saveComp(c.id)} />
+            <MatchEditor key={c.id} label={c.name} bookingUrl={c.booking_url} bookingName={c.booking_matched_name} serpName={c.serpapi_matched_name} etsSlug={c.etstur_slug} etsName={c.etstur_matched_name} row={c} onSave={saveComp(c.id)} />
           ))}
           {!comps.length && <p className="text-sm text-muted-foreground">Henüz rakip eklenmemiş.</p>}
         </CardContent>

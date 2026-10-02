@@ -313,6 +313,10 @@ export type Database = {
           group_id: string | null
           hotelscom_url: string | null
           id: string
+          jollytur_checked_at: string | null
+          jollytur_hotel_id: string | null
+          jollytur_matched_name: string | null
+          jollytur_slug: string | null
           language: string | null
           lat: number | null
           lng: number | null
@@ -331,6 +335,9 @@ export type Database = {
           serpapi_matched_name: string | null
           serpapi_property_token: string | null
           star_rating: number | null
+          tatilsepeti_checked_at: string | null
+          tatilsepeti_matched_name: string | null
+          tatilsepeti_slug: string | null
           tone: string | null
           tripadvisor_id: string | null
           tripcom_hotel_id: string | null
@@ -359,6 +366,10 @@ export type Database = {
           group_id?: string | null
           hotelscom_url?: string | null
           id?: string
+          jollytur_checked_at?: string | null
+          jollytur_hotel_id?: string | null
+          jollytur_matched_name?: string | null
+          jollytur_slug?: string | null
           language?: string | null
           lat?: number | null
           lng?: number | null
@@ -377,6 +388,9 @@ export type Database = {
           serpapi_matched_name?: string | null
           serpapi_property_token?: string | null
           star_rating?: number | null
+          tatilsepeti_checked_at?: string | null
+          tatilsepeti_matched_name?: string | null
+          tatilsepeti_slug?: string | null
           tone?: string | null
           tripadvisor_id?: string | null
           tripcom_hotel_id?: string | null
@@ -405,6 +419,10 @@ export type Database = {
           group_id?: string | null
           hotelscom_url?: string | null
           id?: string
+          jollytur_checked_at?: string | null
+          jollytur_hotel_id?: string | null
+          jollytur_matched_name?: string | null
+          jollytur_slug?: string | null
           language?: string | null
           lat?: number | null
           lng?: number | null
@@ -423,6 +441,9 @@ export type Database = {
           serpapi_matched_name?: string | null
           serpapi_property_token?: string | null
           star_rating?: number | null
+          tatilsepeti_checked_at?: string | null
+          tatilsepeti_matched_name?: string | null
+          tatilsepeti_slug?: string | null
           tone?: string | null
           tripadvisor_id?: string | null
           tripcom_hotel_id?: string | null
@@ -612,6 +633,10 @@ export type Database = {
           etstur_slug: string | null
           id: string
           is_active: boolean
+          jollytur_checked_at: string | null
+          jollytur_hotel_id: string | null
+          jollytur_matched_name: string | null
+          jollytur_slug: string | null
           last_scraped_at: string | null
           lat: number | null
           lng: number | null
@@ -634,6 +659,9 @@ export type Database = {
           source_urls: Json
           star_rating: number | null
           status: string
+          tatilsepeti_checked_at: string | null
+          tatilsepeti_matched_name: string | null
+          tatilsepeti_slug: string | null
           updated_at: string
         }
         Insert: {
@@ -651,6 +679,10 @@ export type Database = {
           etstur_slug?: string | null
           id?: string
           is_active?: boolean
+          jollytur_checked_at?: string | null
+          jollytur_hotel_id?: string | null
+          jollytur_matched_name?: string | null
+          jollytur_slug?: string | null
           last_scraped_at?: string | null
           lat?: number | null
           lng?: number | null
@@ -673,6 +705,9 @@ export type Database = {
           source_urls?: Json
           star_rating?: number | null
           status?: string
+          tatilsepeti_checked_at?: string | null
+          tatilsepeti_matched_name?: string | null
+          tatilsepeti_slug?: string | null
           updated_at?: string
         }
         Update: {
@@ -690,6 +725,10 @@ export type Database = {
           etstur_slug?: string | null
           id?: string
           is_active?: boolean
+          jollytur_checked_at?: string | null
+          jollytur_hotel_id?: string | null
+          jollytur_matched_name?: string | null
+          jollytur_slug?: string | null
           last_scraped_at?: string | null
           lat?: number | null
           lng?: number | null
@@ -712,6 +751,9 @@ export type Database = {
           source_urls?: Json
           star_rating?: number | null
           status?: string
+          tatilsepeti_checked_at?: string | null
+          tatilsepeti_matched_name?: string | null
+          tatilsepeti_slug?: string | null
           updated_at?: string
         }
         Relationships: [

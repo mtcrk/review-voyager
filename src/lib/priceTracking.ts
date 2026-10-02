@@ -21,6 +21,8 @@ export const ADAPTER_LABELS: Record<string, string> = {
   serpapi: "Google Hotels",
   booking: "Booking.com",
   etstur: "ETS Tur",
+  jollytur: "Jolly Tur",
+  tatilsepeti: "Tatil Sepeti",
   manual: "Otel tarafından girildi",
   none: "Kaynak yok",
 };
