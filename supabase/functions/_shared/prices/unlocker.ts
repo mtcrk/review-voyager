@@ -16,7 +16,7 @@ export function unlockerAvailable() {
   return !!Deno.env.get("BRIGHTDATA_API_KEY") && !!Deno.env.get("BRIGHTDATA_UNLOCKER_ZONE");
 }
 
-export async function unlockerFetch(r: UnlockerRequest, timeoutMs = 45_000): Promise<{ status: number; text: string }> {
+export async function unlockerFetch(r: UnlockerRequest, timeoutMs = 30_000): Promise<{ status: number; text: string }> {
   const key = Deno.env.get("BRIGHTDATA_API_KEY");
   const zone = Deno.env.get("BRIGHTDATA_UNLOCKER_ZONE");
   if (!key || !zone) throw new Error("Bright Data yapılandırılmamış");

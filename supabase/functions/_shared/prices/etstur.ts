@@ -124,27 +124,34 @@ export function createEtsAdapter() {
     async fetchMany(subjects: Subject[], p: FetchParams): Promise<BatchResult & { unlocker_calls: number }> {
       const results = new Map<string, AdapterResult>();
       const counter = { unlocker: 0, calls: 0 };
-      for (const s of subjects) {
+      // Bright Data'ya düşen çağrılar yavaş (5–45 sn); mülkler 4'erli paralel işlenir.
+      const one = async (s: Subject) => {
         try {
           const match: EtsMatch = {};
           let hotelId = s.etstur_hotel_id;
           if (!hotelId) {
             const h = await resolveHotel(s, counter);
             match.etstur_checked_at = new Date().toISOString();
-            if (!h) { results.set(s.key, { status: "not_found", quotes: [], match: match as any }); continue; }
+            if (!h) { results.set(s.key, { status: "not_found", quotes: [], match: match as any }); return; }
             hotelId = h.id;
             Object.assign(match, { etstur_hotel_id: h.id, etstur_slug: h.slug, etstur_matched_name: h.name });
           }
           counter.calls++;
           const body = JSON.stringify({ hotelId, checkIn: p.checkin, checkOut: p.checkout, rooms: [{ adultCount: p.adults, childCount: 0, childAges: [] }] });
-          const data = await etsCall(`${BASE}/room/multi`, "POST", body, counter);
+          let data: any;
+          try { data = await etsCall(`${BASE}/room/multi`, "POST", body, counter); }
+          catch (e1) { console.warn("etstur retry", s.name, String(e1)); data = await etsCall(`${BASE}/room/multi`, "POST", body, counter); }
           const { quotes, minStay } = parseRoomMulti(data, p.nights);
           results.set(s.key, { status: quotes.length ? "ok" : "no_prices", quotes, match: match as any, min_stay: quotes.length ? null : minStay });
         } catch (e) {
           console.error("etstur adapter failed", s.name, e);
           results.set(s.key, { status: "error", quotes: [], error: String(e) });
         }
-      }
+      };
+      const queue = [...subjects];
+      await Promise.all(Array.from({ length: Math.min(4, queue.length) }, async () => {
+        while (queue.length) await one(queue.shift()!);
+      }));
       return { results, calls: counter.calls, unlocker_calls: counter.unlocker, cost_usd: counter.unlocker * UNLOCKER_COST_USD };
     },
   };
