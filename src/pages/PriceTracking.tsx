@@ -20,7 +20,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertTriangle, ArrowDown, ArrowUp, Loader2, RefreshCw, Settings2 } from "lucide-react";
+import { AlertTriangle, ArrowDown, ArrowUp, Loader2, RefreshCw, Settings2, Zap } from "lucide-react";
+import { InstantQueryDialog } from "@/components/price/InstantQueryDialog";
 import {
   ADAPTER_LABELS,
   BOARD_LABELS,
@@ -313,6 +314,7 @@ export default function PriceTracking() {
     return m;
   }, [ownRates]);
 
+  const [instant, setInstant] = useState<string[] | null>(null);
   const subjects = useMemo(
     () => [{ key: "own", name: biz?.name ?? "Otelimiz", own: true }, ...comps.map((c) => ({ key: c.id, name: c.name, own: false }))],
     [biz?.name, comps],
@@ -412,6 +414,10 @@ export default function PriceTracking() {
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-6 sm:px-6">
+      {biz?.id && (
+        <InstantQueryDialog open={instant !== null} onOpenChange={(v) => !v && setInstant(null)} businessId={biz.id}
+          subjects={subjects.map((x) => ({ key: x.key, name: x.name }))} initial={instant ?? []} defaultNights={nights} />
+      )}
       <Helmet><title>Fiyat Takibi | VoyageRespond</title></Helmet>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
@@ -421,6 +427,9 @@ export default function PriceTracking() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setInstant([])}>
+            <Zap className="mr-1 h-4 w-4" />Anlık fiyat sorgula
+          </Button>
           <Button variant="outline" size="sm" asChild>
             <Link to="/settings?tab=price-tracking"><Settings2 className="mr-1 h-4 w-4" />Ayarlar</Link>
           </Button>
@@ -557,7 +566,10 @@ export default function PriceTracking() {
                   {subjects.map((s) => (
                     <tr key={s.key} className={cn(s.own && "bg-primary/5")}>
                       <td className={cn("sticky left-0 z-10 border-t px-3 py-1 text-left", s.own ? "bg-primary/10 font-semibold" : "bg-card")}>
-                        <div className="max-w-48 truncate">{s.name}</div>
+                        <div className="flex items-center gap-1">
+                          <div className="max-w-44 truncate">{s.name}</div>
+                          <button title="Anlık fiyat sorgula" onClick={() => setInstant([s.key])} className="shrink-0 text-muted-foreground hover:text-primary"><Zap className="h-3 w-3" /></button>
+                        </div>
                         {s.own && <div className="text-[10px] font-normal text-primary">Otelimiz</div>}
                       </td>
                       {dates.map((d, i) => (

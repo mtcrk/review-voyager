@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2, Upload, Wand2 } from "lucide-react";
 import { invokeAuthedFunction } from "@/lib/invokeAuthedFunction";
+import { PriceCredits } from "@/components/price/PriceCredits";
 import { BOARD_LABELS, COMPARABLE_BOARDS, type BoardType, fmtTry, isoDay, parseBoard } from "@/lib/priceTracking";
 
 type Src = "etstur" | "jollytur" | "tatilsepeti" | "booking" | "serpapi";
@@ -226,6 +227,7 @@ export function PriceTrackingSettings() {
 
   return (
     <div className="space-y-6">
+      {biz?.id && <PriceCredits businessId={biz.id} />}
       <Card className="shadow-card">
         <CardHeader>
           <CardTitle>Fiyat Takibi</CardTitle>
