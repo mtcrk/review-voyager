@@ -154,6 +154,7 @@ export default function PriceTracking() {
   const [force, setForce] = useState(false);
   const [market, setMarket] = useState<"international" | "domestic">("international");
   const [refreshing, setRefreshing] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const board: BoardType = boardOverride ?? (biz?.price_compare_board_type as BoardType) ?? "breakfast";
 
   const dates = useMemo(() => Array.from({ length: days }, (_, i) => isoDay(i)), [days]);
@@ -277,22 +278,38 @@ export default function PriceTracking() {
   const refresh = async () => {
     if (!businessId) return;
     setRefreshing(true);
+    let calls = 0, saved = 0;
+    const errors: string[] = [];
     try {
-      let calls = 0;
-      for (let i = 0; i < days; i += 14) {
-        const r: any = await invokeAuthedFunction("fetch-competitor-prices", {
-          body: { business_id: businessId, checkin: dates[i], days: Math.min(14, days - i), nights: 1, adults, force_refresh: force },
-        });
-        calls += r?.calls ?? 0;
-        if (r?.capped) break;
+      // Gün gün çağır: her istek zaman sınırının çok altında kalır, kısmi sonuçlar anında kaydedilir.
+      for (let i = 0; i < days; i++) {
+        setProgress({ done: i, total: days });
+        let attempt = 0;
+        while (attempt < 3) {
+          const r: any = await invokeAuthedFunction("fetch-competitor-prices", {
+            body: { business_id: businessId, checkin: dates[i], days: 1, nights: 1, adults, force_refresh: force },
+          });
+          calls += r?.calls ?? 0;
+          saved += r?.saved ?? 0;
+          if (Array.isArray(r?.errors)) errors.push(...r.errors);
+          if (r?.capped || r?.complete !== false) break;
+          attempt++; // süre doldu: kalan mülkler önbellek sayesinde bir sonraki çağrıda tamamlanır
+        }
+        if (i % 2 === 1) qc.invalidateQueries({ queryKey: ["pt-snaps", businessId] });
       }
       await qc.invalidateQueries({ queryKey: ["pt-snaps", businessId] });
       await qc.invalidateQueries({ queryKey: ["pt-comps", businessId] });
-      toast({ title: "Fiyatlar güncellendi", description: calls ? `${calls} sorgu yapıldı.` : "Önbellekteki güncel veriler kullanıldı." });
+      if (errors.length) {
+        toast({ title: "Bazı fiyatlar kaydedilemedi", description: Array.from(new Set(errors)).slice(0, 3).join(" · "), variant: "destructive" });
+      } else {
+        toast({ title: "Fiyatlar güncellendi", description: calls || saved ? `${calls} sorgu, ${saved} fiyat kaydı.` : "Önbellekteki güncel veriler kullanıldı." });
+      }
     } catch (e) {
+      await qc.invalidateQueries({ queryKey: ["pt-snaps", businessId] });
       toast({ title: "Fiyatlar alınamadı", description: e instanceof Error ? e.message : String(e), variant: "destructive" });
     } finally {
       setRefreshing(false);
+      setProgress(null);
     }
   };
 
@@ -324,7 +341,7 @@ export default function PriceTracking() {
           </label>
           <Button size="sm" onClick={refresh} disabled={refreshing}>
             {refreshing ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-1 h-4 w-4" />}
-            Şimdi yenile
+            {progress ? `Yenileniyor ${progress.done + 1}/${progress.total} gün` : "Şimdi yenile"}
           </Button>
         </div>
       </div>

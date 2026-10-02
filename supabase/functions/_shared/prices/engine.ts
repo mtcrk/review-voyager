@@ -54,6 +54,8 @@ export type EngineResult = {
   fetched: number;
   cached: number;
   skipped_no_source: number;
+  saved: number;
+  errors: string[];
 };
 
 export async function loadSubjects(admin: any, b: EngineBusiness, competitorIds?: string[], includeOwn = true) {
@@ -130,13 +132,13 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
   const board = (o.business.price_compare_board_type ?? "breakfast") as BoardType;
 
   const subjects = await loadSubjects(o.admin, o.business, o.competitorIds, o.includeOwn ?? true);
-  const res: EngineResult = { calls: 0, cost_usd: 0, complete: true, capped: false, fetched: 0, cached: 0, skipped_no_source: 0 };
+  const res: EngineResult = { calls: 0, cost_usd: 0, complete: true, capped: false, fetched: 0, cached: 0, skipped_no_source: 0, saved: 0, errors: [] };
   const perAdapter: Record<string, { calls: number; cost: number }> = {};
-  const track = (id: string, calls: number, cost: number) => {
+  const track = (id: string, calls: number, cost: number, capCalls = calls) => {
     perAdapter[id] ??= { calls: 0, cost: 0 };
     perAdapter[id].calls += calls;
     perAdapter[id].cost += cost;
-    res.calls += calls;
+    res.calls += capCalls;
     res.cost_usd += cost;
   };
 
@@ -183,7 +185,7 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
           const list = subjects.filter((s) => !doneDom.has(`${s.key}|${checkin}`) && !notMatchedRecently(s, d.idField, d.checkedField));
           if (!list.length) continue;
           const r = await d.adapter.fetchMany(list, pe);
-          track(d.id, r.unlocker_calls, r.cost_usd);
+          track(d.id, r.calls, r.cost_usd, r.unlocker_calls);
           for (const s of list) {
             const er = r.results.get(s.key);
             if (!er) continue;
@@ -194,18 +196,18 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
                 ...base, source: q.source, source_adapter: q.source_adapter, price: q.price_per_night,
                 price_per_night: q.price_per_night, price_total: q.price_total, price_derived: q.price_derived,
                 board_type: q.board_type, room_name: q.room_name, refundable: q.refundable, free_cancellation: q.refundable,
-                taxes_included: q.taxes_included, is_official: false, is_ad: false, raw: q.raw,
+                taxes_included: q.taxes_included, is_official: false, is_ad: false, raw: q.raw ?? {},
                 price_before_discount: q.price_before_discount ?? null, campaign_price: q.campaign_price ?? null, campaign_label: q.campaign_label ?? null,
                 remaining_allotment: q.remaining_allotment ?? null, cancellation_details: q.cancellation_details ?? null,
               });
             } else if (er.status === "no_prices") {
-              erows.push({ ...base, source: d.label, source_adapter: d.id, price: null, no_availability: true, board_type: "unknown", is_official: false, is_ad: false });
+              erows.push({ ...base, source: d.label, source_adapter: d.id, price: null, no_availability: true, board_type: "unknown", is_official: false, is_ad: false, raw: {} });
             }
           }
         }
         if (erows.length) {
           const { error } = await o.admin.from("competitor_price_snapshots").insert(erows);
-          if (error) console.error("domestic snapshot insert failed", error);
+          if (error) { console.error("domestic snapshot insert failed", error); res.errors.push(`yurt içi kayıt: ${error.message}`); } else res.saved += erows.length;
         }
       }
 
@@ -303,7 +305,7 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
               is_official: q.is_official,
               is_ad: q.is_ad,
               num_guests: q.num_guests,
-              raw: q.raw,
+              raw: q.raw ?? {},
             });
           }
         } else if (sr?.status === "no_prices" || br?.status === "no_prices") {
@@ -316,17 +318,18 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
             board_type: "unknown",
             is_official: false,
             is_ad: false,
+            raw: {},
           });
         }
       }
       if (rows.length) {
         const { error } = await o.admin.from("competitor_price_snapshots").insert(rows);
-        if (error) console.error("snapshot insert failed", error);
+        if (error) { console.error("snapshot insert failed", error); res.errors.push(`kayıt: ${error.message}`); } else res.saved += rows.length;
       }
     }
   } finally {
     const logs = Object.entries(perAdapter)
-      .filter(([, v]) => v.calls > 0)
+      .filter(([, v]) => v.calls > 0 || v.cost > 0)
       .map(([adapter, v]) => ({
         business_id: o.business.id,
         adapter,
