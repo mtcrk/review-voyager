@@ -11,88 +11,80 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Upload } from "lucide-react";
+import { Trash2, Upload, Wand2 } from "lucide-react";
+import { invokeAuthedFunction } from "@/lib/invokeAuthedFunction";
 import { BOARD_LABELS, COMPARABLE_BOARDS, type BoardType, fmtTry, isoDay, parseBoard } from "@/lib/priceTracking";
 
-function MatchEditor({
-  label,
-  bookingUrl,
-  bookingName,
-  serpName,
-  etsSlug,
-  etsName,
-  row,
-  onSave,
-}: {
-  row?: any;
-  etsSlug?: string | null;
-  etsName?: string | null;
-  label: string;
-  bookingUrl: string | null;
-  bookingName: string | null;
-  serpName: string | null;
-  onSave: (patch: Record<string, unknown>) => Promise<void>;
-}) {
-  const [url, setUrl] = useState(bookingUrl ?? "");
-  const [ets, setEts] = useState(etsSlug ? `https://www.etstur.com/${etsSlug}` : "");
+type Src = "etstur" | "jollytur" | "tatilsepeti" | "booking" | "serpapi";
+const SRC: { id: Src; label: string; nameCol: string; idCols: string[]; host?: string; parse?: (u: string) => Record<string, unknown> | null }[] = [
+  { id: "etstur", label: "ETS Tur", nameCol: "etstur_matched_name", idCols: ["etstur_hotel_id", "etstur_slug"], host: "etstur.com",
+    parse: (u) => { const m = u.match(/^https:\/\/(?:www\.)?etstur\.com\/([^/?#]+)/); return m ? { etstur_slug: m[1], etstur_hotel_id: null, etstur_matched_name: null, etstur_checked_at: null } : null; } },
+  { id: "jollytur", label: "Jolly Tur", nameCol: "jollytur_matched_name", idCols: ["jollytur_hotel_id", "jollytur_slug"], host: "jollytur.com",
+    parse: (u) => { const m = u.match(/^https:\/\/(?:www\.)?jollytur\.com\/([^/?#]+)/); return m ? { jollytur_slug: m[1], jollytur_hotel_id: null, jollytur_matched_name: null, jollytur_checked_at: null } : null; } },
+  { id: "tatilsepeti", label: "Tatil Sepeti", nameCol: "tatilsepeti_matched_name", idCols: ["tatilsepeti_slug"], host: "tatilsepeti.com",
+    parse: (u) => { const m = u.match(/^https:\/\/(?:www\.)?tatilsepeti\.com\/([^/?#]+)/); return m ? { tatilsepeti_slug: m[1], tatilsepeti_matched_name: null, tatilsepeti_checked_at: null } : null; } },
+  { id: "booking", label: "Booking", nameCol: "booking_matched_name", idCols: ["booking_url"], host: "booking.com",
+    parse: (u) => /^https:\/\/(www\.)?booking\.com\/hotel\//.test(u) ? { booking_url: u.split("?")[0], booking_matched_name: null, price_source_preference: null, price_source_checked_at: null } : null },
+  { id: "serpapi", label: "Google Hotels", nameCol: "serpapi_matched_name", idCols: ["serpapi_property_token"] },
+];
+
+function statusOf(row: any, s: (typeof SRC)[number]) {
+  if (row?.[`${s.id}_match_source`] === "manual" && s.idCols.some((c) => row?.[c])) return "manual";
+  if (row?.[`${s.id}_match_status`] === "pending") return "pending";
+  if (s.idCols.some((c) => row?.[c])) return "matched";
+  return "none";
+}
+const BADGE: Record<string, { t: string; v: "default" | "secondary" | "outline" | "destructive" }> = {
+  matched: { t: "✓ eşleşti", v: "default" }, pending: { t: "⏳ onay bekliyor", v: "secondary" }, none: { t: "— bulunamadı", v: "outline" }, manual: { t: "✎ elle", v: "secondary" },
+};
+
+function SourceRow({ row, s, onSave }: { row: any; s: (typeof SRC)[number]; onSave: (p: Record<string, unknown>) => Promise<void> }) {
+  const [v, setV] = useState("");
+  const [open, setOpen] = useState(false);
+  const st = statusOf(row, s);
+  const cand = row?.[`${s.id}_match_candidate`];
+  const name = st === "pending" ? cand?.[s.nameCol] : row?.[s.nameCol];
+  const reason = row?.[`${s.id}_match_reason`];
   return (
-    <div className="space-y-2 rounded-lg border p-3 text-sm">
-      <div className="font-medium">{label}</div>
-      <div className="grid gap-1 text-xs text-muted-foreground sm:grid-cols-2">
-        <span>Google Hotels eşleşmesi: <b className="text-foreground">{serpName ?? "henüz yok"}</b></span>
-        <span>Booking eşleşmesi: <b className="text-foreground">{bookingName ?? (bookingUrl ? "URL girildi" : "henüz yok")}</b></span>
+    <div className="space-y-1 border-t pt-2 first:border-t-0 first:pt-0">
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <span className="w-24 font-medium">{s.label}</span>
+        <Badge variant={BADGE[st].v} className="text-[10px]">{BADGE[st].t}</Badge>
+        <span className="flex-1 truncate text-foreground">{name ?? (st === "none" ? "" : "adres girildi")}</span>
+        {st === "pending" && (
+          <>
+            <span className="text-muted-foreground">Bu otel mi?</span>
+            <Button size="sm" variant="outline" className="h-7 px-2" onClick={() => onSave({ ...cand, [`${s.id}_match_status`]: "matched", [`${s.id}_match_source`]: "manual", [`${s.id}_match_confidence`]: 1, [`${s.id}_match_candidate`]: null })}>✓</Button>
+            <Button size="sm" variant="outline" className="h-7 px-2" onClick={() => onSave({ [`${s.id}_match_status`]: "not_found", [`${s.id}_match_source`]: "manual", [`${s.id}_match_candidate`]: null, [`${s.id}_match_reason`]: "kullanıcı reddetti" })}>✗</Button>
+          </>
+        )}
+        {(st === "matched" || st === "manual") && (
+          <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => onSave({ ...Object.fromEntries([s.nameCol, ...s.idCols].map((c) => [c, null])), [`${s.id}_match_status`]: "not_found", [`${s.id}_match_source`]: "manual", [`${s.id}_match_reason`]: "kullanıcı yanlış dedi" })}>Yanlış</Button>
+        )}
+        {s.parse && <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => setOpen(!open)}>Adres gir</Button>}
       </div>
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://www.booking.com/hotel/tr/..." className="h-9" />
-        <Button size="sm" variant="outline" onClick={() => {
-          const v = url.trim();
-          if (v && !/^https:\/\/(www\.)?booking\.com\/hotel\//.test(v)) {
-            toast({ title: "Geçersiz Booking adresi", variant: "destructive" });
-            return;
-          }
-          onSave({ booking_url: v || null, booking_matched_name: null, price_source_preference: null, price_source_checked_at: null });
-        }}>Booking'i kaydet</Button>
-        <Button size="sm" variant="ghost" onClick={() =>
-          onSave({ serpapi_property_token: null, serpapi_matched_name: null, price_source_preference: null, price_source_checked_at: null })
-        }>Google eşleşmesi yanlış</Button>
-      </div>
-      <div className="text-xs text-muted-foreground">ETS eşleşmesi (yurt içi): <b className="text-foreground">{etsName ?? "henüz yok"}</b></div>
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <Input value={ets} onChange={(e) => setEts(e.target.value)} placeholder="https://www.etstur.com/Otel-Adi" className="h-9" />
-        <Button size="sm" variant="outline" onClick={() => {
-          const v = ets.trim();
-          const m = v.match(/^https:\/\/(?:www\.)?etstur\.com\/([^/?#]+)/);
-          if (v && !m) return void toast({ title: "Geçersiz ETS adresi", variant: "destructive" });
-          onSave({ etstur_slug: m ? m[1] : null, etstur_hotel_id: null, etstur_matched_name: null, etstur_checked_at: null });
-        }}>ETS'yi kaydet</Button>
-      </div>
-      <DomesticMatch label="Jolly Tur" host="jollytur.com" name={row?.jollytur_matched_name} slug={row?.jollytur_slug}
-        toPatch={(slug) => ({ jollytur_slug: slug, jollytur_hotel_id: null, jollytur_matched_name: null, jollytur_checked_at: null })} onSave={onSave} />
-      <DomesticMatch label="Tatil Sepeti" host="tatilsepeti.com" name={row?.tatilsepeti_matched_name} slug={row?.tatilsepeti_slug}
-        toPatch={(slug) => ({ tatilsepeti_slug: slug, tatilsepeti_matched_name: null, tatilsepeti_checked_at: null })} onSave={onSave} />
+      {reason && <p className="truncate text-[11px] text-muted-foreground" title={reason}>{reason}</p>}
+      {open && s.parse && (
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Input value={v} onChange={(e) => setV(e.target.value)} placeholder={`https://www.${s.host}/...`} className="h-8" />
+          <Button size="sm" variant="outline" onClick={async () => {
+            const p = s.parse!(v.trim());
+            if (!p) return void toast({ title: `Geçersiz ${s.label} adresi`, variant: "destructive" });
+            await onSave({ ...p, [`${s.id}_match_status`]: "matched", [`${s.id}_match_source`]: "manual", [`${s.id}_match_confidence`]: 1, [`${s.id}_match_candidate`]: null, [`${s.id}_match_reason`]: "elle girildi" });
+            setOpen(false);
+          }}>Kaydet</Button>
+        </div>
+      )}
     </div>
   );
 }
 
-function DomesticMatch({ label, host, name, slug, toPatch, onSave }: {
-  label: string; host: string; name?: string | null; slug?: string | null;
-  toPatch: (slug: string | null) => Record<string, unknown>;
-  onSave: (patch: Record<string, unknown>) => Promise<void>;
-}) {
-  const [v, setV] = useState(slug ? `https://www.${host}/${slug}` : "");
+function MatchEditor({ label, row, onSave }: { label: string; row: any; onSave: (patch: Record<string, unknown>) => Promise<void> }) {
   return (
-    <>
-      <div className="text-xs text-muted-foreground">{label} eşleşmesi (yurt içi): <b className="text-foreground">{name ?? (slug ? "adres girildi" : "henüz yok")}</b></div>
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <Input value={v} onChange={(e) => setV(e.target.value)} placeholder={`https://www.${host}/otel-adi`} className="h-9" />
-        <Button size="sm" variant="outline" onClick={() => {
-          const t = v.trim();
-          const m = t.match(new RegExp(`^https://(?:www\\.)?${host.replace(".", "\\.")}/([^/?#]+)`));
-          if (t && !m) return void toast({ title: `Geçersiz ${label} adresi`, variant: "destructive" });
-          onSave(toPatch(m ? m[1] : null));
-        }}>{label}'u kaydet</Button>
-      </div>
-    </>
+    <div className="space-y-2 rounded-lg border p-3 text-sm">
+      <div className="font-medium">{label}</div>
+      {SRC.map((s) => <SourceRow key={s.id} row={row} s={s} onSave={onSave} />)}
+    </div>
   );
 }
 
@@ -110,7 +102,7 @@ export function PriceTrackingSettings() {
     queryFn: async () => {
       const { data } = await (supabase as any)
         .from("ci_competitors")
-        .select("id, name, booking_url, booking_matched_name, serpapi_matched_name, etstur_slug, etstur_matched_name, jollytur_slug, jollytur_matched_name, tatilsepeti_slug, tatilsepeti_matched_name")
+        .select("*")
         .eq("business_id", biz.id)
         .eq("is_active", true)
         .order("name");
@@ -133,7 +125,28 @@ export function PriceTrackingSettings() {
     },
   });
 
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  const [summary, setSummary] = useState<string | null>(null);
+
   if (!biz) return null;
+
+  const autoMatch = async () => {
+    const subjects = ["own", ...comps.map((c: any) => c.id)];
+    const n = { matched: 0, pending: 0, not_found: 0 };
+    setSummary(null);
+    for (let i = 0; i < subjects.length; i++) {
+      setProgress({ done: i, total: subjects.length });
+      try {
+        const r: any = await invokeAuthedFunction("match-hotels", { body: { business_id: biz.id, subject: subjects[i], force: true, background: false } });
+        for (const res of r?.results ?? []) for (const o of res.outcomes ?? []) if (o.status in n) (n as any)[o.status]++;
+      } catch (e: any) {
+        toast({ title: "Eşleştirme hatası", description: e?.message, variant: "destructive" });
+      }
+    }
+    setProgress(null);
+    await Promise.all([refetchBusinesses(), refetchComps()]);
+    setSummary(`${n.matched} eşleşme, ${n.pending} onay bekliyor, ${n.not_found} bulunamadı`);
+  };
 
   const saveBiz = async (patch: Record<string, unknown>) => {
     const { error } = await (supabase as any).from("businesses").update(patch).eq("id", biz.id);
@@ -239,9 +252,15 @@ export function PriceTrackingSettings() {
           <CardDescription>Eşleşen otel adı yanlışsa düzelt; bir sonraki çekimde yeniden eşleştirilir.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          <MatchEditor label={`${biz.name} (otelimiz)`} bookingUrl={biz.booking_url} bookingName={biz.booking_matched_name} serpName={biz.serpapi_matched_name} etsSlug={biz.etstur_slug} etsName={biz.etstur_matched_name} row={biz} onSave={saveBiz} />
+          <div className="flex flex-wrap items-center gap-3">
+            <Button size="sm" onClick={autoMatch} disabled={!!progress}>
+              <Wand2 className="mr-1 h-4 w-4" />{progress ? `Aranıyor… ${progress.done}/${progress.total}` : "Eşleşmeleri otomatik bul"}
+            </Button>
+            {summary && <span className="text-xs text-muted-foreground">{summary}</span>}
+          </div>
+          <MatchEditor label={`${biz.name} (otelimiz)`} row={biz} onSave={saveBiz} />
           {comps.map((c: any) => (
-            <MatchEditor key={c.id} label={c.name} bookingUrl={c.booking_url} bookingName={c.booking_matched_name} serpName={c.serpapi_matched_name} etsSlug={c.etstur_slug} etsName={c.etstur_matched_name} row={c} onSave={saveComp(c.id)} />
+            <MatchEditor key={c.id} label={c.name} row={c} onSave={saveComp(c.id)} />
           ))}
           {!comps.length && <p className="text-sm text-muted-foreground">Henüz rakip eklenmemiş.</p>}
         </CardContent>
