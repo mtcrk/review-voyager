@@ -212,3 +212,24 @@ export async function matchRow(row: Row, opts: { force?: boolean; sources?: Sour
   }
   return { patch, outcomes, calls: c.calls, unlocker: c.unlocker, cost_usd: cost + c.unlocker * 0.0015 };
 }
+
+/** Fiyat çekiminden önce: eşleşmesi eskimiş / hiç denenmemiş / adı değişmiş mülkleri eşleştirir. */
+export async function ensureMatches(admin: any, businessId: string, opts: { competitorIds?: string[]; includeOwn?: boolean; deadline: number }) {
+  const { data: biz } = await admin.from("businesses").select(`id, name, city, ${MATCH_COLS}`).eq("id", businessId).single();
+  const targets: { table: string; row: any }[] = [];
+  if (biz && opts.includeOwn !== false) targets.push({ table: "businesses", row: biz });
+  let q = admin.from("ci_competitors").select(`id, name, city, ${MATCH_COLS}`).eq("business_id", businessId).eq("is_active", true);
+  if (opts.competitorIds?.length) q = q.in("id", opts.competitorIds);
+  const { data: comps } = await q;
+  for (const r of comps ?? []) targets.push({ table: "ci_competitors", row: r });
+  let cost = 0, calls = 0;
+  for (const t of targets) {
+    if (Date.now() > opts.deadline) break;
+    const row = { ...t.row, city: t.row.city ?? biz?.city ?? null };
+    if (!SOURCES.some((s) => needsMatch(row, s, false))) continue;
+    const r = await matchRow(row);
+    cost += r.cost_usd; calls += r.calls;
+    await admin.from(t.table).update(r.patch).eq("id", t.row.id);
+  }
+  if (calls) await admin.from("price_fetch_log").insert({ business_id: businessId, adapter: "matching", calls, estimated_cost_usd: Number(cost.toFixed(4)), trigger: "cron" });
+}
