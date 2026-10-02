@@ -3,6 +3,7 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { CORS_HEADERS, formToRecord, paytrNotificationHash } from "../_shared/paytr.ts";
+import { CREDIT_OID_PREFIX, handleCreditPayment } from "../_shared/priceCredits.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
@@ -39,6 +40,12 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
+
+    // Fiyat kredisi siparişleri abonelik akışından tamamen ayrı işlenir.
+    if (merchant_oid.startsWith(CREDIT_OID_PREFIX)) {
+      const r = await handleCreditPayment(admin, { merchant_oid, status, total_amount });
+      if (r.handled) return ok();
+    }
 
     const { data: origLog } = await admin
       .from("paytr_payment_log")
