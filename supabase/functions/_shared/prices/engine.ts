@@ -3,6 +3,14 @@
 import { createBookingAdapter } from "./booking.ts";
 import { createSerpApiAdapter } from "./serpapi.ts";
 import { createEtsAdapter } from "./etstur.ts";
+import { createJollyAdapter } from "./jollytur.ts";
+import { createTatilSepetiAdapter } from "./tatilsepeti.ts";
+
+export const DOMESTIC_COLS = "jollytur_hotel_id, jollytur_slug, jollytur_checked_at, tatilsepeti_slug, tatilsepeti_checked_at";
+const pickDomestic = (r: any) => ({
+  jollytur_hotel_id: r?.jollytur_hotel_id ?? null, jollytur_slug: r?.jollytur_slug ?? null, jollytur_checked_at: r?.jollytur_checked_at ?? null,
+  tatilsepeti_slug: r?.tatilsepeti_slug ?? null, tatilsepeti_checked_at: r?.tatilsepeti_checked_at ?? null,
+});
 import type { AdapterResult, BoardType, PriceAdapter, PriceQuote, Subject } from "./types.ts";
 import { addDays } from "./types.ts";
 
@@ -51,7 +59,7 @@ export type EngineResult = {
 export async function loadSubjects(admin: any, b: EngineBusiness, competitorIds?: string[], includeOwn = true) {
   let q = admin
     .from("ci_competitors")
-    .select("id, name, city, serpapi_property_token, booking_url, price_source_preference, price_source_checked_at, etstur_slug, etstur_hotel_id, etstur_checked_at")
+    .select(`id, name, city, serpapi_property_token, booking_url, price_source_preference, price_source_checked_at, etstur_slug, etstur_hotel_id, etstur_checked_at, ${DOMESTIC_COLS}`)
     .eq("business_id", b.id)
     .eq("is_active", true);
   if (competitorIds?.length) q = q.in("id", competitorIds);
@@ -133,7 +141,11 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
   // Cache: son cacheHours içinde çekilmiş (mülk, tarih) çiftleri.
   const done = new Set<string>();
   const doneDom = new Set<string>();
-  const ets = createEtsAdapter();
+  const domestic = [
+    { id: "etstur", label: "ETS Tur", adapter: createEtsAdapter(), idField: "etstur_hotel_id", checkedField: "etstur_checked_at" },
+    { id: "jollytur", label: "Jolly Tur", adapter: createJollyAdapter(), idField: "jollytur_hotel_id", checkedField: "jollytur_checked_at" },
+    { id: "tatilsepeti", label: "Tatil Sepeti", adapter: createTatilSepetiAdapter(), idField: "tatilsepeti_slug", checkedField: "tatilsepeti_checked_at" },
+  ];
   if (!o.force && o.dates.length) {
     const since = new Date(Date.now() - o.cacheHours * 3600_000).toISOString();
     const { data } = await o.admin
@@ -157,20 +169,20 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
       if (res.calls >= o.maxCalls) { res.capped = true; res.complete = false; break; }
 
       // Yurt içi pazar (ETS): uluslararası zincirden tamamen ayrı; hücrelerde asla karışmaz.
+      // Kaynaklar: ETS Tur, Jolly Tur, Tatil Sepeti — aynı fetched_at ile tek batch yazılır; hücrede en ucuz kıyaslanabilir seçilir.
       {
-        const etsTodo = subjects.filter((s) => {
-          if (doneDom.has(`${s.key}|${checkin}`)) return false;
-          // Eşleşme bulunamamış ve 30 gün geçmemişse tekrar deneme.
-          if (!s.etstur_hotel_id && (s as any).etstur_checked_at && Date.now() - new Date((s as any).etstur_checked_at).getTime() < PREF_TTL_MS) return false;
-          return true;
-        });
-        if (etsTodo.length) {
-          const pe = { checkin, checkout: addDays(checkin, o.nights), nights: o.nights, adults: o.adults };
-          const r = await ets.fetchMany(etsTodo, pe);
-          track("etstur", r.unlocker_calls, r.cost_usd);
-          const fa = new Date().toISOString();
-          const erows: any[] = [];
-          for (const s of etsTodo) {
+        const pe = { checkin, checkout: addDays(checkin, o.nights), nights: o.nights, adults: o.adults };
+        const fa = new Date().toISOString();
+        const erows: any[] = [];
+        const notMatchedRecently = (s: Subject, idField: string, checkedField: string) =>
+          !(s as any)[idField] && (s as any)[checkedField] && Date.now() - new Date((s as any)[checkedField]).getTime() < PREF_TTL_MS;
+        for (const d of domestic) {
+          if (Date.now() > o.deadline) { res.complete = false; break; }
+          const list = subjects.filter((s) => !doneDom.has(`${s.key}|${checkin}`) && !notMatchedRecently(s, d.idField, d.checkedField));
+          if (!list.length) continue;
+          const r = await d.adapter.fetchMany(list, pe);
+          track(d.id, r.unlocker_calls, r.cost_usd);
+          for (const s of list) {
             const er = r.results.get(s.key);
             if (!er) continue;
             if (er.match && Object.keys(er.match).length) await updateSubject(o.admin, o.business.id, s, er.match as any);
@@ -181,17 +193,17 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
                 price_per_night: q.price_per_night, price_total: q.price_total, price_derived: q.price_derived,
                 board_type: q.board_type, room_name: q.room_name, refundable: q.refundable, free_cancellation: q.refundable,
                 taxes_included: q.taxes_included, is_official: false, is_ad: false, raw: q.raw,
-                price_before_discount: q.price_before_discount, campaign_price: q.campaign_price, campaign_label: q.campaign_label,
-                remaining_allotment: q.remaining_allotment, cancellation_details: q.cancellation_details,
+                price_before_discount: q.price_before_discount ?? null, campaign_price: q.campaign_price ?? null, campaign_label: q.campaign_label ?? null,
+                remaining_allotment: q.remaining_allotment ?? null, cancellation_details: q.cancellation_details ?? null,
               });
             } else if (er.status === "no_prices") {
-              erows.push({ ...base, source: "ETS Tur", source_adapter: "etstur", price: null, no_availability: true, board_type: "unknown", is_official: false, is_ad: false });
+              erows.push({ ...base, source: d.label, source_adapter: d.id, price: null, no_availability: true, board_type: "unknown", is_official: false, is_ad: false });
             }
           }
-          if (erows.length) {
-            const { error } = await o.admin.from("competitor_price_snapshots").insert(erows);
-            if (error) console.error("ets snapshot insert failed", error);
-          }
+        }
+        if (erows.length) {
+          const { error } = await o.admin.from("competitor_price_snapshots").insert(erows);
+          if (error) console.error("domestic snapshot insert failed", error);
         }
       }
 
