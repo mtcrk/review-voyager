@@ -239,9 +239,9 @@ export function PriceTrackingSettings() {
           <CardDescription>Eşleşen otel adı yanlışsa düzelt; bir sonraki çekimde yeniden eşleştirilir.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          <MatchEditor label={`${biz.name} (otelimiz)`} bookingUrl={biz.booking_url} bookingName={biz.booking_matched_name} serpName={biz.serpapi_matched_name} etsSlug={biz.etstur_slug} etsName={biz.etstur_matched_name} onSave={saveBiz} />
+          <MatchEditor label={`${biz.name} (otelimiz)`} bookingUrl={biz.booking_url} bookingName={biz.booking_matched_name} serpName={biz.serpapi_matched_name} etsSlug={biz.etstur_slug} etsName={biz.etstur_matched_name} row={biz} onSave={saveBiz} />
           {comps.map((c: any) => (
-            <MatchEditor key={c.id} label={c.name} bookingUrl={c.booking_url} bookingName={c.booking_matched_name} serpName={c.serpapi_matched_name} etsSlug={c.etstur_slug} etsName={c.etstur_matched_name} onSave={saveComp(c.id)} />
+            <MatchEditor key={c.id} label={c.name} bookingUrl={c.booking_url} bookingName={c.booking_matched_name} serpName={c.serpapi_matched_name} etsSlug={c.etstur_slug} etsName={c.etstur_matched_name} row={c} onSave={saveComp(c.id)} />
           ))}
           {!comps.length && <p className="text-sm text-muted-foreground">Henüz rakip eklenmemiş.</p>}
         </CardContent>

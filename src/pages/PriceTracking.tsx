@@ -315,7 +315,7 @@ export default function PriceTracking() {
           <div className="flex rounded-md border p-0.5 text-xs">
             {(["international", "domestic"] as const).map((m) => (
               <button key={m} onClick={() => setMarket(m)} className={`rounded px-2 py-1 ${market === m ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
-                {m === "international" ? "Uluslararası" : "Yurt içi (ETS)"}
+                {m === "international" ? "Uluslararası" : "Yurt içi (ETS · Jolly · Tatil Sepeti)"}
               </button>
             ))}
           </div>
