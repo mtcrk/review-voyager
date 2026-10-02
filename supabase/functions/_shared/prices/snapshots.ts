@@ -39,6 +39,9 @@ export type SnapshotInput = {
   campaign_label?: string | null;
   remaining_allotment?: number | null;
   cancellation_details?: unknown;
+  /** Kaynağın min. konaklama şartı nedeniyle fiyatın alındığı gece sayısı (seçilenden büyükse). */
+  min_stay_nights?: number | null;
+  queried_nights?: number | null;
 };
 
 export function toSnapshotRow(i: SnapshotInput) {
@@ -52,6 +55,8 @@ export function toSnapshotRow(i: SnapshotInput) {
     subject_type: i.subject_type,
     checkin: i.checkin,
     nights: int(i.nights) ?? 1,
+    min_stay_nights: int(i.min_stay_nights),
+    queried_nights: int(i.queried_nights) ?? int(i.nights) ?? 1,
     adults: int(i.adults) ?? 2,
     source: i.source || adapter,
     source_adapter: adapter,

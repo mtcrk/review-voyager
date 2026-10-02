@@ -108,6 +108,9 @@ function CellView({ cell, median: med, isOwn }: { cell: Cell; median: number | n
       <PopoverTrigger asChild>
         <button className={cn("h-full min-h-12 w-full rounded px-1 py-1 text-xs transition-colors hover:ring-1 hover:ring-primary/40", tone, cell.kind === "none" && "bg-muted/60", cell.kind === "sold_out" && "bg-muted/30")}>
           {content}
+          {cell.kind === "value" && cell.minStay ? (
+            <div className="mt-0.5 text-[9px] leading-none text-warning">min {cell.minStay} gece</div>
+          ) : null}
           {cell.kind === "value" && isOwn && (
             <div className="mt-0.5 text-[9px] leading-none text-muted-foreground">
               {cell.badge === "manual" ? "otel girdi" : "tahmini"}
@@ -127,6 +130,7 @@ function CellView({ cell, median: med, isOwn }: { cell: Cell; median: number | n
             <Row k="Kaynak" v={`${cell.source}${cell.adapter !== "manual" ? ` · ${ADAPTER_LABELS[cell.adapter] ?? cell.adapter}` : ""}`} />
             <Row k="Çekim zamanı" v={cell.fetchedAt ? fmtTime(cell.fetchedAt) : "Manuel giriş"} />
             <Row k="Pansiyon" v={BOARD_LABELS[cell.board]} />
+            {cell.minStay ? <Row k="Min. konaklama" v={`${cell.minStay} gece (fiyat gecelik)`} /> : null}
             <Row k="Oda" v={cell.roomName ?? "Belirtilmemiş"} />
             <Row k="İade" v={cell.refundable == null ? "Bilinmiyor" : cell.refundable ? "Ücretsiz iptal" : "İade edilemez"} />
             <Row k="Vergiler" v={cell.taxesIncluded == null ? "Bilinmiyor" : cell.taxesIncluded ? "Dahil" : "Hariç"} />
@@ -250,7 +254,7 @@ export default function PriceTracking() {
       for (let off = 0; off < 20000; off += 1000) {
         const { data, error } = await (supabase as any)
           .from("competitor_price_snapshots")
-          .select("id, competitor_id, subject_type, checkin, adults, source, source_adapter, price_per_night, price_total, price_derived, board_type, room_name, refundable, taxes_included, no_availability, fetched_at, reason:raw->>reason, min_stay:raw->>min_stay")
+          .select("id, competitor_id, subject_type, checkin, adults, source, source_adapter, price_per_night, price_total, price_derived, board_type, room_name, refundable, taxes_included, no_availability, fetched_at, reason:raw->>reason, min_stay:raw->>min_stay, min_stay_nights")
           .eq("business_id", businessId)
           .eq("nights", nights)
           .eq("adults", adults)
