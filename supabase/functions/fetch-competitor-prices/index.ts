@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
     const dates = Array.from({ length: days }, (_, i) => addDays(checkin, i));
     const result = await runPriceFetch({
       admin,
-      business: biz,
+      business: biz as any,
       competitorIds: competitor_ids,
       includeOwn: include_own,
       dates,
