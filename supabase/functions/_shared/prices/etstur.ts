@@ -38,6 +38,7 @@ function slugCandidates(name: string, city: string | null) {
 
 /** Doğrudan dener; HTTP hatası/HTML/engel durumunda Bright Data'ya düşer. */
 async function etsCall(url: string, method: "GET" | "POST", body: string | undefined, counter: { unlocker: number }) {
+  let reason = "";
   try {
     const res = await fetch(url, {
       method,
@@ -45,12 +46,12 @@ async function etsCall(url: string, method: "GET" | "POST", body: string | undef
       body,
       signal: AbortSignal.timeout(20_000),
     });
-    if (res.ok) {
-      const t = await res.text();
-      if (t.trim().startsWith("{")) return JSON.parse(t);
-    }
-  } catch (_) { /* fallback */ }
-  if (!unlockerAvailable()) throw new Error("ETS doğrudan erişilemedi ve Bright Data yok");
+    const t = await res.text();
+    if (res.ok && t.trim().startsWith("{")) return JSON.parse(t);
+    reason = `status ${res.status}${res.ok ? " (JSON değil)" : ""} · ${t.slice(0, 120).replace(/\s+/g, " ")}`;
+  } catch (e) { reason = `fetch hatası: ${e instanceof Error ? e.message : String(e)}`; }
+  console.warn(`ETS direct failed → Bright Data fallback [${method} ${url.replace(/^https?:\/\/[^/]+/, "")}]: ${reason}`);
+  if (!unlockerAvailable()) throw new Error(`ETS doğrudan erişilemedi (${reason}) ve Bright Data yok`);
   counter.unlocker++;
   const r = await unlockerFetch({ url, method, body, headers: { "Content-Type": "application/json" } });
   if (r.status >= 400) throw new Error(`Bright Data ${r.status}`);
