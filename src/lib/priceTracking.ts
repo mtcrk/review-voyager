@@ -57,6 +57,9 @@ export type Snapshot = {
   taxes_included: boolean | null;
   no_availability: boolean;
   fetched_at: string;
+  /** raw.reason: "min_stay" | "not_on_sale" | null */
+  reason?: string | null;
+  min_stay?: string | number | null;
 };
 
 export type OwnRate = {
@@ -71,7 +74,7 @@ export type OwnRate = {
 
 export type Cell =
   | { kind: "none" }
-  | { kind: "sold_out"; fetchedAt: string; source: string }
+  | { kind: "sold_out"; fetchedAt: string; source: string; label: string; details: string[] }
   | { kind: "incomparable"; fetchedAt: string; reason: string; rows: Snapshot[] }
   | {
       kind: "value";
@@ -153,7 +156,26 @@ export function computeCell(batches: Snapshot[][] | undefined, board: BoardType,
   const latest = batches[0];
   const fetchedAt = latest[0].fetched_at;
   const priced = latest.filter((r) => !r.no_availability && r.price_per_night);
-  if (!priced.length) return { kind: "sold_out", fetchedAt, source: latest[0].source };
+  if (!priced.length) {
+    // "muhtemelen dolu" yalnızca hiçbir kaynak min. konaklama / satış kapalı bilgisi vermediyse.
+    const details = latest.map((r) =>
+      r.reason === "min_stay" && r.min_stay
+        ? `${r.source}: en az ${r.min_stay} gece konaklama şartı`
+        : r.reason === "not_on_sale"
+        ? `${r.source}'de bu tarihte satışta değil`
+        : `${r.source}: fiyat yok`,
+    );
+    const ms = latest.filter((r) => r.reason === "min_stay" && r.min_stay).map((r) => Number(r.min_stay));
+    const nos = latest.filter((r) => r.reason === "not_on_sale");
+    const label = ms.length
+      ? `en az ${Math.min(...ms)} gece`
+      : nos.length === latest.length
+      ? "satışta değil"
+      : nos.length
+      ? `${nos.map((r) => r.source).join(", ")}'de satışta değil`
+      : "fiyat yok — muhtemelen dolu";
+    return { kind: "sold_out", fetchedAt, source: latest[0].source, label, details };
+  }
   const best = cheapest(latest, board);
   if (!best) return { kind: "incomparable", fetchedAt, reason: incomparableReason(latest), rows: latest };
   let prev: number | undefined;
