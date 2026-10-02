@@ -57,6 +57,7 @@ Deno.serve(async (req) => {
         business: list[i],
         dates,
         nights: 1,
+        intlNights: 7, // uluslararası pazar 7 gece (yabancı misafir tipik konaklaması; min. konaklama şartını karşılar)
         adults: 2,
         cacheHours: 20,
         force: false,

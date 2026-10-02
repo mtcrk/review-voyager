@@ -48,6 +48,8 @@ export type EngineOptions = {
   trigger: "manual" | "cron";
   /** Yalnızca bu pazarlar çekilir (varsayılan: ikisi de). */
   markets?: ("domestic" | "international")[];
+  /** Uluslararası pazar sorgu gece sayısı (varsayılan nights). 7 ve üzerinde ek gece denemesi yapılmaz. */
+  intlNights?: number;
 };
 
 export type EngineResult = {
@@ -164,16 +166,17 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
     const since = new Date(Date.now() - o.cacheHours * 3600_000).toISOString();
     const { data } = await o.admin
       .from("competitor_price_snapshots")
-      .select("subject_type, competitor_id, checkin, market")
+      .select("subject_type, competitor_id, checkin, market, nights")
       .eq("business_id", o.business.id)
-      .eq("nights", o.nights)
+      .in("nights", [o.nights, o.intlNights ?? o.nights])
       .eq("adults", o.adults)
       .in("checkin", o.dates)
       .gte("fetched_at", since)
       .limit(10000);
     for (const r of data ?? []) {
       const k = `${r.subject_type === "own" ? "own" : r.competitor_id}|${r.checkin}`;
-      if (r.market === "domestic") doneDom.add(k); else done.add(k);
+      if (r.market === "domestic") { if (r.nights === o.nights) doneDom.add(k); }
+      else if (r.nights === (o.intlNights ?? o.nights)) done.add(k);
     }
   }
 
@@ -256,7 +259,8 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
         return true;
       });
       if (!todo.length) continue;
-      const p = { checkin, checkout: addDays(checkin, o.nights), nights: o.nights, adults: o.adults };
+      const iN = o.intlNights ?? o.nights;
+      const p = { checkin, checkout: addDays(checkin, iN), nights: iN, adults: o.adults };
 
       const serpList: Subject[] = [];
       const bookingList: Subject[] = [];
@@ -271,7 +275,7 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
 
       const baseOf = (s: Subject, fetchedAt: string) => ({
         business_id: o.business.id, competitor_id: s.competitor_id, subject_type: s.subject_type, checkin,
-        nights: o.nights, adults: o.adults, currency: "TRY", fetched_at: fetchedAt, market: "international" as const,
+        nights: iN, adults: o.adults, currency: "TRY", fetched_at: fetchedAt, market: "international" as const,
       });
       const noPriceRow = (s: Subject, fetchedAt: string, adapter: "serpapi" | "booking") => ({
         ...baseOf(s, fetchedAt), source: adapter === "booking" ? "Booking.com" : "Google Hotels", source_adapter: adapter,
@@ -320,20 +324,20 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
           // +1 ve +2 gece paralel sorulur (Apify run'ı uzun sürdüğü için sırayla süreye sığmaz); en kısa fiyatlı olan alınır.
           const left = Math.floor((o.deadline - Date.now()) / 1000);
           const subs = bookingList.filter((s) => bookRes.get(s.key)?.status === "no_prices");
-          if (subs.length && left >= 40) {
-            const ns = [o.nights + 1, o.nights + 2];
+          if (iN < 7 && subs.length && left >= 40) {
+            const ns = [iN + 1, iN + 2];
             const outs = await Promise.all(ns.map((n) =>
               booking.fetchMany(subs, { checkin, checkout: addDays(checkin, n), nights: n, adults: o.adults, timeoutSec: Math.min(150, left - 10) })
                 .catch(() => null)));
             outs.forEach((r2) => { if (r2) track("booking", r2.calls, r2.cost_usd); });
             for (const s of subs) {
-              bookTried.set(s.key, [o.nights, ...ns]);
+              bookTried.set(s.key, [iN, ...ns]);
               for (let i = 0; i < ns.length; i++) {
                 const e2 = outs[i]?.results.get(s.key);
                 if (e2?.status === "ok") { bookQueriedN.set(s.key, ns[i]); bookRes.set(s.key, e2); break; }
               }
             }
-          } else if (subs.length) {
+          } else if (iN < 7 && subs.length) {
             // Süre yetmedi: "fiyat yok" yazma, sonraki çağrıda yeniden denensin.
             for (const s of subs) bookRes.delete(s.key);
             res.complete = false;
@@ -370,10 +374,10 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
 
         // Google satırları yukarıda yazıldı; burada yalnızca Booking (ve Booking'e düşüp onu da alamayan Google "fiyat yok").
         if (br?.status === "ok") {
-          const qn = bookQueriedN.get(s.key) ?? o.nights;
-          for (const q of br.quotes) rows.push({ ...baseOf(s, fetchedAt), ...q, no_availability: false, queried_nights: qn, min_stay_nights: qn > o.nights ? qn : null } as SnapshotInput);
+          const qn = bookQueriedN.get(s.key) ?? iN;
+          for (const q of br.quotes) rows.push({ ...baseOf(s, fetchedAt), ...q, no_availability: false, queried_nights: qn, min_stay_nights: qn > iN ? qn : null } as SnapshotInput);
         } else if (br?.status === "no_prices") {
-          rows.push({ ...noPriceRow(s, fetchedAt, "booking"), raw: { tried_nights: bookTried.get(s.key) ?? [o.nights] } });
+          rows.push({ ...noPriceRow(s, fetchedAt, "booking"), raw: { tried_nights: bookTried.get(s.key) ?? [iN] } });
         } else if (sr?.status === "no_prices" && bookingList.includes(s)) {
           rows.push(noPriceRow(s, fetchedAt, "serpapi"));
         }
