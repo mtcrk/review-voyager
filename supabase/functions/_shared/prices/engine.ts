@@ -361,7 +361,7 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
         } else if (
           !prefValid(s) &&
           (!sr || sr.status === "not_found" || sr.status === "no_prices") &&
-          (!br || br.status === "not_found") &&
+          (br ? br.status === "not_found" : !booking) &&
           (booking || !apifyToken)
         ) {
           Object.assign(patch, { price_source_preference: "none", price_source_checked_at: nowIso });
