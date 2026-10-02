@@ -9,7 +9,7 @@ export type BoardType =
   | "all_inclusive"
   | "unknown";
 
-export type AdapterId = "serpapi" | "booking" | "etstur";
+export type AdapterId = "serpapi" | "booking" | "etstur" | "jollytur" | "tatilsepeti";
 export type Market = "international" | "domestic";
 
 export type Subject = {

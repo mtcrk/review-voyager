@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
 
     const { data: biz } = await admin
       .from("businesses")
-      .select("id, name, city, serpapi_property_token, booking_url, price_source_preference, price_source_checked_at, price_compare_board_type, etstur_slug, etstur_hotel_id, etstur_checked_at")
+      .select("id, name, city, serpapi_property_token, booking_url, price_source_preference, price_source_checked_at, price_compare_board_type, etstur_slug, etstur_hotel_id, etstur_checked_at, jollytur_hotel_id, jollytur_slug, jollytur_checked_at, tatilsepeti_slug, tatilsepeti_checked_at")
       .eq("id", business_id)
       .single();
 

@@ -80,6 +80,7 @@ export async function loadSubjects(admin: any, b: EngineBusiness, competitorIds?
       etstur_slug: b.etstur_slug ?? null,
       etstur_hotel_id: b.etstur_hotel_id ?? null,
       etstur_checked_at: b.etstur_checked_at ?? null,
+      ...pickDomestic(b),
     } as Subject);
   }
   for (const c of comps ?? []) {
@@ -96,6 +97,7 @@ export async function loadSubjects(admin: any, b: EngineBusiness, competitorIds?
       etstur_slug: c.etstur_slug,
       etstur_hotel_id: c.etstur_hotel_id,
       etstur_checked_at: c.etstur_checked_at,
+      ...pickDomestic(c),
     } as Subject);
   }
   return subjects;
