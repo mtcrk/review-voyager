@@ -79,10 +79,10 @@ function quotesFromItem(item: any, p: FetchParams): PriceQuote[] {
   return out;
 }
 
-async function runActor(token: string, input: Record<string, unknown>): Promise<any[]> {
+async function runActor(token: string, input: Record<string, unknown>, timeoutSec = 150): Promise<any[]> {
   const res = await fetch(
-    `https://api.apify.com/v2/acts/${ACTOR}/run-sync-get-dataset-items?token=${token}&timeout=150`,
-    { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input) },
+    `https://api.apify.com/v2/acts/${ACTOR}/run-sync-get-dataset-items?token=${token}&timeout=${timeoutSec}`,
+    { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input), signal: AbortSignal.timeout((timeoutSec + 5) * 1000) },
   );
   if (!res.ok) throw new Error(`Apify ${res.status}: ${(await res.text()).slice(0, 300)}`);
   const data = await res.json();
@@ -115,7 +115,7 @@ export function createBookingAdapter(apifyToken: string): PriceAdapter {
             ...common,
             startUrls: withUrl.map((s) => ({ url: datedUrl(s.booking_url!, p) })),
             maxItems: withUrl.length,
-          });
+          }, p.timeoutSec ?? 150);
           items += data.length;
           const bySlug = new Map<string, any>();
           for (const it of data) if (it?.url) bySlug.set(slugOf(String(it.url)), it);

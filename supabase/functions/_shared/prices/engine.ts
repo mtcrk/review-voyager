@@ -232,6 +232,15 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
         else if (booking) bookingList.push(s);
       }
 
+      const baseOf = (s: Subject, fetchedAt: string) => ({
+        business_id: o.business.id, competitor_id: s.competitor_id, subject_type: s.subject_type, checkin,
+        nights: o.nights, adults: o.adults, currency: "TRY", fetched_at: fetchedAt, market: "international" as const,
+      });
+      const noPriceRow = (s: Subject, fetchedAt: string, adapter: "serpapi" | "booking") => ({
+        ...baseOf(s, fetchedAt), source: adapter === "booking" ? "Booking.com" : "Google Hotels", source_adapter: adapter,
+        price_per_night: null, no_availability: true, board_type: "unknown", raw: {},
+      });
+
       const serpRes = new Map<string, AdapterResult>();
       if (serp && serpList.length) {
         const r = await serp.fetchMany(serpList, p);
@@ -245,16 +254,33 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
             if (!sr || sr.status !== "ok" || !comparable(sr.quotes, board)) bookingList.push(s);
           }
         }
+        // Google fiyatlarını Booking'i beklemeden hemen kaydet (Booking uzun sürüp zaman aşımına düşse de kaybolmasın).
+        const fa = new Date().toISOString();
+        const srows: SnapshotInput[] = [];
+        for (const s of serpList) {
+          const sr = serpRes.get(s.key);
+          if (sr?.status === "ok") for (const q of sr.quotes) srows.push({ ...baseOf(s, fa), ...q, no_availability: false });
+          else if (sr?.status === "no_prices" && !bookingList.includes(s)) srows.push(noPriceRow(s, fa, "serpapi"));
+        }
+        if (srows.length) {
+          const w = await insertSnapshots(o.admin, srows, "Google kayıt");
+          res.saved += w.saved; res.errors.push(...w.errors);
+        }
       }
       const bookRes = new Map<string, AdapterResult>();
+      const remainingSec = Math.floor((o.deadline - Date.now()) / 1000);
       if (booking && bookingList.length && res.calls < o.maxCalls) {
-        const r = await booking.fetchMany(bookingList, p);
-        track("booking", r.calls, r.cost_usd);
-        r.results.forEach((v, k) => bookRes.set(k, v));
+        if (remainingSec < 30) {
+          res.complete = false; // Booking için süre kalmadı; sonraki çağrıda tamamlanır.
+        } else {
+          const r = await booking.fetchMany(bookingList, { ...p, timeoutSec: Math.min(150, remainingSec - 10) });
+          track("booking", r.calls, r.cost_usd);
+          r.results.forEach((v, k) => bookRes.set(k, v));
+        }
       }
 
       const fetchedAt = new Date().toISOString();
-      const rows: any[] = [];
+      const rows: SnapshotInput[] = [];
       for (const s of todo) {
         const sr = serpRes.get(s.key);
         const br = bookRes.get(s.key);
@@ -280,34 +306,17 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
         }
         await updateSubject(o.admin, o.business.id, s, patch);
 
-        const quotes = [...(sr?.quotes ?? []), ...(br?.quotes ?? [])];
-        const base = {
-          business_id: o.business.id,
-          competitor_id: s.competitor_id,
-          subject_type: s.subject_type,
-          checkin,
-          nights: o.nights,
-          adults: o.adults,
-          currency: "TRY",
-          fetched_at: fetchedAt,
-          market: "international" as const,
-        };
-        if (quotes.length) {
-          for (const q of quotes) rows.push({ ...base, ...q, source: q.source, source_adapter: q.source_adapter, no_availability: false });
-        } else if (sr?.status === "no_prices" || br?.status === "no_prices") {
-          rows.push({
-            ...base,
-            source: br ? "Booking.com" : "Google Hotels",
-            source_adapter: br ? "booking" : "serpapi",
-            price_per_night: null,
-            no_availability: true,
-            board_type: "unknown",
-            raw: {},
-          });
+        // Google satırları yukarıda yazıldı; burada yalnızca Booking (ve Booking'e düşüp onu da alamayan Google "fiyat yok").
+        if (br?.status === "ok") {
+          for (const q of br.quotes) rows.push({ ...baseOf(s, fetchedAt), ...q, no_availability: false });
+        } else if (br?.status === "no_prices") {
+          rows.push(noPriceRow(s, fetchedAt, "booking"));
+        } else if (sr?.status === "no_prices" && bookingList.includes(s)) {
+          rows.push(noPriceRow(s, fetchedAt, "serpapi"));
         }
       }
       if (rows.length) {
-        const w = await insertSnapshots(o.admin, rows, "uluslararası kayıt");
+        const w = await insertSnapshots(o.admin, rows, "Booking kayıt");
         res.saved += w.saved; res.errors.push(...w.errors);
       }
     }
