@@ -80,26 +80,6 @@ export function createSerpApiAdapter(apiKey: string): PriceAdapter {
             results.set(s.key, { status: "not_found", quotes: [] });
             continue;
           }
-          if (false) {
-            calls++;
-            const q = [s.name, s.city].filter(Boolean).join(" ");
-            const res = await fetch(`${base(p)}&q=${encodeURIComponent(q)}`);
-            const data = await res.json();
-            const props: any[] = Array.isArray(data?.properties) ? data.properties : [];
-            let best: { token: string; name: string; score: number } | null = null;
-            for (const pr of props) {
-              if (!pr?.property_token) continue;
-              const score = similarity(s.name, String(pr?.name ?? ""));
-              if (!best || score > best.score) best = { token: String(pr.property_token), name: String(pr.name ?? ""), score };
-            }
-            if (!best || best.score < 0.34) {
-              results.set(s.key, { status: "not_found", quotes: [] });
-              continue;
-            }
-            token = best.token;
-            match.serpapi_property_token = best.token;
-            match.serpapi_matched_name = best.name;
-          }
           calls++;
           const res = await fetch(`${base(p)}&property_token=${encodeURIComponent(token)}`);
           const payload = await res.json();
