@@ -163,7 +163,7 @@ export function computeCell(batches: Snapshot[][] | undefined, board: BoardType,
         ? `${r.source}: en az ${r.min_stay} gece konaklama şartı`
         : r.reason === "not_on_sale"
         ? `${r.source}'de bu tarihte satışta değil`
-        : `${r.source}: fiyat yok`,
+        : `${r.source}: fiyat vermedi`,
     );
     const ms = latest.filter((r) => r.reason === "min_stay" && r.min_stay).map((r) => Number(r.min_stay));
     const nos = latest.filter((r) => r.reason === "not_on_sale");
@@ -173,7 +173,7 @@ export function computeCell(batches: Snapshot[][] | undefined, board: BoardType,
       ? "satışta değil"
       : nos.length
       ? `${nos.map((r) => r.source).join(", ")}'de satışta değil`
-      : "fiyat yok — muhtemelen dolu";
+      : "dolu";
     return { kind: "sold_out", fetchedAt, source: latest[0].source, label, details };
   }
   const best = cheapest(latest, board);

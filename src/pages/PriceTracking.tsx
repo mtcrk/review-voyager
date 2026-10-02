@@ -1,4 +1,8 @@
 import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import type { DateRange } from "react-day-picker";
+import { Calendar } from "@/components/ui/calendar";
+import { CalendarIcon } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@/components/Link";
@@ -42,6 +46,30 @@ type Comp = {
 
 const DOW = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"];
 
+const MAX_REFRESH_DAYS = 31;
+type RangeKey = "7" | "weekend" | "30" | "custom";
+
+function addIso(iso: string, n: number) {
+  const d = new Date(`${iso}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+function spanDates(from: string, to: string) {
+  const out: string[] = [];
+  for (let d = from; d <= to && out.length < 400; d = addIso(d, 1)) out.push(d);
+  return out;
+}
+/** Bu hafta sonu: Cuma ve Cumartesi girişleri (bugün Cumartesi ise yalnız bugün). */
+function weekendDates() {
+  const today = isoDay(0);
+  const dow = new Date(`${today}T00:00:00Z`).getUTCDay();
+  if (dow === 6) return [today];
+  const toFri = (5 - dow + 7) % 7;
+  return [addIso(today, toFri), addIso(today, toFri + 1)];
+}
+const toIso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const fromIso = (s: string) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+
 function dayMeta(iso: string) {
   const d = new Date(`${iso}T00:00:00Z`);
   const dow = d.getUTCDay();
@@ -72,13 +100,13 @@ function CellView({ cell, median: med, isOwn }: { cell: Cell; median: number | n
     ) : cell.kind === "incomparable" ? (
       <span className="text-[10px] leading-tight text-warning">kıyaslanamaz</span>
     ) : (
-      <span className="text-[10px] text-muted-foreground">henüz çekilmedi</span>
+      <span className="text-[10px] text-muted-foreground/70">henüz çekilmedi</span>
     );
 
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button className={cn("h-full min-h-12 w-full rounded px-1 py-1 text-xs transition-colors hover:ring-1 hover:ring-primary/40", tone)}>
+        <button className={cn("h-full min-h-12 w-full rounded px-1 py-1 text-xs transition-colors hover:ring-1 hover:ring-primary/40", tone, cell.kind === "none" && "bg-muted/60", cell.kind === "sold_out" && "bg-muted/30")}>
           {content}
           {cell.kind === "value" && isOwn && (
             <div className="mt-0.5 text-[9px] leading-none text-muted-foreground">
@@ -111,7 +139,22 @@ function CellView({ cell, median: med, isOwn }: { cell: Cell; median: number | n
         {cell.kind === "incomparable" && (
           <>
             <p className="font-medium">Kıyaslanamaz</p>
-            <p className="text-muted-foreground">{cell.reason}. Yanlış kıyas yapmamak için ana karşılaştırmaya alınmadı.</p>
+            <p className="text-muted-foreground">{cell.reason}. Fiyat var ama pansiyon farklı; yanlış kıyas yapmamak için ana karşılaştırmaya alınmadı.</p>
+            <div className="space-y-0.5 border-t pt-1">
+              {Object.entries(
+                cell.rows.reduce<Record<string, number>>((acc, r) => {
+                  if (!r.price_per_night) return acc;
+                  const v = Number(r.price_per_night);
+                  if (acc[r.board_type] == null || v < acc[r.board_type]) acc[r.board_type] = v;
+                  return acc;
+                }, {}),
+              ).map(([b, v]) => (
+                <div key={b} className="flex justify-between gap-2">
+                  <span>{BOARD_LABELS[b as BoardType] ?? b}</span>
+                  <span className="font-medium tabular-nums">en ucuz {fmtTry(v)}</span>
+                </div>
+              ))}
+            </div>
             <Row k="Çekim zamanı" v={fmtTime(cell.fetchedAt)} />
             <div className="max-h-32 space-y-0.5 overflow-auto border-t pt-1">
               {cell.rows.slice(0, 8).map((r) => (
@@ -150,7 +193,18 @@ export default function PriceTracking() {
   const biz = activeBusiness as any;
   const businessId: string | undefined = biz?.id;
   const qc = useQueryClient();
-  const [days, setDays] = useState<14 | 30 | 60>(14);
+  const [params, setParams] = useSearchParams();
+  const rangeKey = (["7", "weekend", "30", "custom"].includes(params.get("range") ?? "") ? params.get("range") : "7") as RangeKey;
+  const nights = [1, 2, 3, 7].includes(Number(params.get("nights"))) ? Number(params.get("nights")) : 1;
+  const setParam = (patch: Record<string, string | null>) => {
+    const next = new URLSearchParams(params);
+    for (const [k, v] of Object.entries(patch)) v == null ? next.delete(k) : next.set(k, v);
+    setParams(next, { replace: true });
+  };
+  const customFrom = params.get("from");
+  const customTo = params.get("to");
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [draft, setDraft] = useState<DateRange | undefined>(undefined);
   const [adults, setAdults] = useState(2);
   const [boardOverride, setBoardOverride] = useState<BoardType | null>(null);
   const [force, setForce] = useState(false);
@@ -159,7 +213,17 @@ export default function PriceTracking() {
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const board: BoardType = boardOverride ?? (biz?.price_compare_board_type as BoardType) ?? "breakfast";
 
-  const dates = useMemo(() => Array.from({ length: days }, (_, i) => isoDay(i)), [days]);
+  const dates = useMemo(() => {
+    if (rangeKey === "weekend") return weekendDates();
+    if (rangeKey === "30") return Array.from({ length: 30 }, (_, i) => isoDay(i));
+    if (rangeKey === "custom" && customFrom && /^\d{4}-\d{2}-\d{2}$/.test(customFrom)) {
+      const t = customTo && /^\d{4}-\d{2}-\d{2}$/.test(customTo) && customTo >= customFrom ? customTo : customFrom;
+      return spanDates(customFrom, t);
+    }
+    return Array.from({ length: 7 }, (_, i) => isoDay(i));
+  }, [rangeKey, customFrom, customTo]);
+  const days = dates.length;
+  const tooLong = days > MAX_REFRESH_DAYS;
   const from = dates[0];
   const to = dates[dates.length - 1];
 
@@ -179,7 +243,7 @@ export default function PriceTracking() {
   });
 
   const { data: snaps = [], isLoading } = useQuery({
-    queryKey: ["pt-snaps", businessId, from, to, adults, market],
+    queryKey: ["pt-snaps", businessId, from, to, adults, nights, market],
     enabled: !!businessId,
     queryFn: async () => {
       const all: Snapshot[] = [];
@@ -188,7 +252,7 @@ export default function PriceTracking() {
           .from("competitor_price_snapshots")
           .select("id, competitor_id, subject_type, checkin, adults, source, source_adapter, price_per_night, price_total, price_derived, board_type, room_name, refundable, taxes_included, no_availability, fetched_at, reason:raw->>reason, min_stay:raw->>min_stay")
           .eq("business_id", businessId)
-          .eq("nights", 1)
+          .eq("nights", nights)
           .eq("adults", adults)
           .eq("market", market)
           .gte("checkin", from)
@@ -277,8 +341,14 @@ export default function PriceTracking() {
     });
   }, [subjects, dates, batches, biz?.price_source_preference, comps, ownRates.length]);
 
+  const adaptersByKey = useMemo(() => new Map(coverage.map((c) => [c.key, c.adapters])), [coverage]);
+  const missingDays = useMemo(
+    () => dates.filter((d) => !subjects.some((s) => batches.get(`${s.key}|${d}`)?.length)).length,
+    [dates, subjects, batches],
+  );
+
   const refresh = async () => {
-    if (!businessId) return;
+    if (!businessId || tooLong) return;
     setRefreshing(true);
     let calls = 0, saved = 0;
     const errors: string[] = [];
@@ -289,7 +359,7 @@ export default function PriceTracking() {
         let attempt = 0;
         while (attempt < 3) {
           const r: any = await invokeAuthedFunction("fetch-competitor-prices", {
-            body: { business_id: businessId, checkin: dates[i], days: 1, nights: 1, adults, force_refresh: force },
+            body: { business_id: businessId, checkin: dates[i], days: 1, nights, adults, force_refresh: force },
           });
           calls += r?.calls ?? 0;
           saved += r?.saved ?? 0;
@@ -341,7 +411,7 @@ export default function PriceTracking() {
           <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Switch checked={force} onCheckedChange={setForce} /> Önbelleği atla
           </label>
-          <Button size="sm" onClick={refresh} disabled={refreshing}>
+          <Button size="sm" onClick={refresh} disabled={refreshing || tooLong}>
             {refreshing ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-1 h-4 w-4" />}
             {progress ? `Yenileniyor ${progress.done + 1}/${progress.total} gün` : "Şimdi yenile"}
           </Button>
@@ -357,13 +427,48 @@ export default function PriceTracking() {
       )}
 
       <div className="flex flex-wrap items-center gap-2">
-        <Tabs value={String(days)} onValueChange={(v) => setDays(Number(v) as 14 | 30 | 60)}>
+        <Tabs value={rangeKey} onValueChange={(v) => v !== "custom" ? setParam({ range: v, from: null, to: null }) : setPickerOpen(true)}>
           <TabsList>
-            <TabsTrigger value="14">14 gün</TabsTrigger>
-            <TabsTrigger value="30">30 gün</TabsTrigger>
-            <TabsTrigger value="60">60 gün</TabsTrigger>
+            <TabsTrigger value="7">Önümüzdeki 7 gün</TabsTrigger>
+            <TabsTrigger value="weekend">Bu hafta sonu</TabsTrigger>
+            <TabsTrigger value="30">Önümüzdeki 30 gün</TabsTrigger>
           </TabsList>
         </Tabs>
+        <Popover open={pickerOpen} onOpenChange={(o) => { setPickerOpen(o); if (o) setDraft(customFrom ? { from: fromIso(customFrom), to: customTo ? fromIso(customTo) : undefined } : undefined); }}>
+          <PopoverTrigger asChild>
+            <Button variant={rangeKey === "custom" ? "default" : "outline"} size="sm" className="h-9">
+              <CalendarIcon className="mr-1 h-4 w-4" />
+              {rangeKey === "custom" && customFrom ? `${dayMeta(dates[0]).label} – ${dayMeta(dates[dates.length - 1]).label}` : "Özel aralık"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="range"
+              numberOfMonths={2}
+              selected={draft}
+              onSelect={setDraft}
+              disabled={{ before: fromIso(isoDay(0)) }}
+              initialFocus
+              className={cn("p-3 pointer-events-auto")}
+            />
+            <div className="flex items-center justify-between gap-2 border-t p-2 text-xs">
+              <span className="text-muted-foreground">
+                {draft?.from ? `${toIso(draft.from)}${draft.to ? ` → ${toIso(draft.to)}` : ""}` : "Başlangıç ve bitiş seç"}
+              </span>
+              <Button size="sm" disabled={!draft?.from} onClick={() => {
+                if (!draft?.from) return;
+                setParam({ range: "custom", from: toIso(draft.from), to: toIso(draft.to ?? draft.from) });
+                setPickerOpen(false);
+              }}>Uygula</Button>
+            </div>
+          </PopoverContent>
+        </Popover>
+        <Select value={String(nights)} onValueChange={(v) => setParam({ nights: v === "1" ? null : v })}>
+          <SelectTrigger className="h-9 w-28"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {[1, 2, 3, 7].map((n) => <SelectItem key={n} value={String(n)}>{n} gece</SelectItem>)}
+          </SelectContent>
+        </Select>
         <Select value={board} onValueChange={(v) => setBoardOverride(v as BoardType)}>
           <SelectTrigger className="h-9 w-40"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -379,8 +484,31 @@ export default function PriceTracking() {
         <Badge variant="outline">TL</Badge>
       </div>
 
+      {tooLong && (
+        <Alert variant="destructive">
+          <AlertDescription className="text-sm">
+            Seçili aralık {days} gün. "Şimdi yenile" tek seferde en fazla {MAX_REFRESH_DAYS} gün çekebilir; aralığı kısalt.
+          </AlertDescription>
+        </Alert>
+      )}
+      {!isLoading && !tooLong && missingDays > 0 && (
+        <Alert>
+          <AlertDescription className="flex flex-wrap items-center justify-between gap-2 text-sm">
+            <span>{missingDays} gün henüz çekilmedi ({nights} gece, {adults} yetişkin).</span>
+            <Button size="sm" variant="outline" onClick={refresh} disabled={refreshing}>
+              <RefreshCw className="mr-1 h-4 w-4" />Şimdi yenile
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
       <Card className="shadow-card">
-        <CardHeader className="pb-2"><CardTitle className="text-base">Fiyat takvimi</CardTitle></CardHeader>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Fiyat takvimi</CardTitle>
+          <p className="text-xs text-muted-foreground">
+            {dayMeta(dates[0]).label} – {dayMeta(dates[dates.length - 1]).label} · {days} giriş günü · {nights} gecelik sorgu, gecelik fiyatla kıyas
+          </p>
+        </CardHeader>
         <CardContent className="p-0 sm:p-2">
           {isLoading ? (
             <Skeleton className="m-4 h-64" />
@@ -399,6 +527,7 @@ export default function PriceTracking() {
                         </th>
                       );
                     })}
+                    <th className="min-w-28 px-2 py-2 text-left font-medium">Kaynaklar</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -413,6 +542,15 @@ export default function PriceTracking() {
                           <CellView cell={grid.cells.get(`${s.key}|${d}`)!} median={grid.perDay[i].med} isOwn={s.own} />
                         </td>
                       ))}
+                      <td className="border-t px-2 py-1 text-left">
+                        <div className="flex flex-wrap gap-0.5">
+                          {(adaptersByKey.get(s.key) ?? []).length
+                            ? adaptersByKey.get(s.key)!.map((a) => (
+                                <Badge key={a} variant="outline" className="px-1 py-0 text-[9px] font-normal">{ADAPTER_LABELS[a] ?? a}</Badge>
+                              ))
+                            : <span className="text-[10px] text-muted-foreground">veri yok</span>}
+                        </div>
+                      </td>
                     </tr>
                   ))}
                   <SummaryRow label="Rakip medyanı" values={grid.perDay.map((p) => (p.med ? fmtTry(p.med) : "—"))} dates={dates} />
