@@ -134,11 +134,11 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
   const subjects = await loadSubjects(o.admin, o.business, o.competitorIds, o.includeOwn ?? true);
   const res: EngineResult = { calls: 0, cost_usd: 0, complete: true, capped: false, fetched: 0, cached: 0, skipped_no_source: 0, saved: 0, errors: [] };
   const perAdapter: Record<string, { calls: number; cost: number }> = {};
-  const track = (id: string, calls: number, cost: number) => {
+  const track = (id: string, calls: number, cost: number, capCalls = calls) => {
     perAdapter[id] ??= { calls: 0, cost: 0 };
     perAdapter[id].calls += calls;
     perAdapter[id].cost += cost;
-    res.calls += calls;
+    res.calls += capCalls;
     res.cost_usd += cost;
   };
 
@@ -185,7 +185,7 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
           const list = subjects.filter((s) => !doneDom.has(`${s.key}|${checkin}`) && !notMatchedRecently(s, d.idField, d.checkedField));
           if (!list.length) continue;
           const r = await d.adapter.fetchMany(list, pe);
-          track(d.id, r.unlocker_calls, r.cost_usd);
+          track(d.id, r.calls, r.cost_usd, r.unlocker_calls);
           for (const s of list) {
             const er = r.results.get(s.key);
             if (!er) continue;
