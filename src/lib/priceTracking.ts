@@ -60,6 +60,7 @@ export type Snapshot = {
   /** raw.reason: "min_stay" | "not_on_sale" | null */
   reason?: string | null;
   min_stay?: string | number | null;
+  min_stay_nights?: number | null;
 };
 
 export type OwnRate = {
@@ -195,6 +196,7 @@ export function computeCell(batches: Snapshot[][] | undefined, board: BoardType,
     roomName: best.room_name,
     refundable: best.refundable,
     taxesIncluded: best.taxes_included,
+    minStay: best.min_stay_nights ?? null,
     prev,
     changePct: prev ? ((value - prev) / prev) * 100 : undefined,
   };
