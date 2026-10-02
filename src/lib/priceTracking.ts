@@ -20,6 +20,7 @@ export const COMPARABLE_BOARDS: BoardType[] = ["room_only", "breakfast", "half_b
 export const ADAPTER_LABELS: Record<string, string> = {
   serpapi: "Google Hotels",
   booking: "Booking.com",
+  etstur: "ETS Tur",
   manual: "Otel tarafından girildi",
   none: "Kaynak yok",
 };
