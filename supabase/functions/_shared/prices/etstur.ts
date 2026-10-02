@@ -58,7 +58,9 @@ async function etsCall(url: string, method: "GET" | "POST", body: string | undef
 }
 
 async function resolveHotel(s: Subject, counter: { unlocker: number; calls: number }): Promise<{ id: string; slug: string; name: string } | null> {
-  const tries = s.etstur_slug ? [s.etstur_slug] : slugCandidates(s.name, s.city);
+  // Yalnızca elle girilen slug çözülür; otomatik eşleştirme matcher.ts'te.
+  if (!s.etstur_slug) return null;
+  const tries = [s.etstur_slug];
   for (const slug of tries) {
     counter.calls++;
     const d = await etsCall(`${BASE}/hotel/detail/${encodeURIComponent(slug)}`, "GET", undefined, counter).catch(() => null);

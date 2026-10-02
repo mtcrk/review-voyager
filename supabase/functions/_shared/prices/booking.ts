@@ -136,33 +136,7 @@ export function createBookingAdapter(apifyToken: string): PriceAdapter {
 
       // 2) URL'si olmayanlar: isim + şehir ile ara, isim benzerliğiyle eşleştir.
       for (const s of subjects.filter((x) => !x.booking_url)) {
-        try {
-          calls++;
-          const data = await runActor(apifyToken, {
-            ...common,
-            search: [s.name, s.city].filter(Boolean).join(" "),
-            maxItems: 5,
-          });
-          items += data.length;
-          let best: { it: any; score: number } | null = null;
-          for (const it of data) {
-            const score = similarity(s.name, String(it?.name ?? ""));
-            if (!best || score > best.score) best = { it, score };
-          }
-          if (!best || best.score < 0.5 || !best.it?.url) {
-            results.set(s.key, { status: "not_found", quotes: [] });
-            continue;
-          }
-          const quotes = quotesFromItem(best.it, p);
-          results.set(s.key, {
-            status: quotes.length ? "ok" : "no_prices",
-            quotes,
-            match: { booking_url: cleanBookingUrl(String(best.it.url)), booking_matched_name: String(best.it.name ?? "") },
-          });
-        } catch (e) {
-          console.error("booking search failed", s.name, e);
-          results.set(s.key, { status: "error", quotes: [], error: String(e) });
-        }
+        results.set(s.key, { status: "not_found", quotes: [] });
       }
 
       return { results, calls, cost_usd: Math.max(items, calls) * COST_PER_ITEM_USD };

@@ -5,6 +5,7 @@ import { createSerpApiAdapter } from "./serpapi.ts";
 import { createEtsAdapter } from "./etstur.ts";
 import { createJollyAdapter } from "./jollytur.ts";
 import { createTatilSepetiAdapter } from "./tatilsepeti.ts";
+import { ensureMatches } from "./matcher.ts";
 
 export const DOMESTIC_COLS = "jollytur_hotel_id, jollytur_slug, jollytur_checked_at, tatilsepeti_slug, tatilsepeti_checked_at";
 const pickDomestic = (r: any) => ({
@@ -131,6 +132,12 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
   const booking: PriceAdapter | null = o.allowBooking && apifyToken ? createBookingAdapter(apifyToken) : null;
   const board = (o.business.price_compare_board_type ?? "breakfast") as BoardType;
 
+  // Otomatik eşleştirme (arama + katı puanlama). Onay bekleyen/bulunamayan mülkler için fiyat çekilmez.
+  try {
+    await ensureMatches(o.admin, o.business.id, { competitorIds: o.competitorIds, includeOwn: o.includeOwn, deadline: o.deadline - 60_000 });
+  } catch (e) { console.error("ensureMatches failed", e); }
+  const fresh = await o.admin.from("businesses").select("serpapi_property_token, booking_url, etstur_slug, etstur_hotel_id, etstur_checked_at, jollytur_hotel_id, jollytur_slug, jollytur_checked_at, tatilsepeti_slug, tatilsepeti_checked_at").eq("id", o.business.id).single();
+  if (fresh.data) Object.assign(o.business, fresh.data);
   const subjects = await loadSubjects(o.admin, o.business, o.competitorIds, o.includeOwn ?? true);
   const res: EngineResult = { calls: 0, cost_usd: 0, complete: true, capped: false, fetched: 0, cached: 0, skipped_no_source: 0, saved: 0, errors: [] };
   const perAdapter: Record<string, { calls: number; cost: number }> = {};

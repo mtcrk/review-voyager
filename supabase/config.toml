@@ -99,3 +99,6 @@ project_id = "pnpuhewfoxssmbpryart"
     verify_jwt = false
   [functions.whatsapp-webhook]
     verify_jwt = false
+
+[functions.match-hotels]
+  verify_jwt = false

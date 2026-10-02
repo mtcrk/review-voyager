@@ -64,11 +64,8 @@ export function createJollyAdapter() {
           const match: Record<string, string> = {};
           let id = (s as any).jollytur_hotel_id as string | null;
           if (!id) {
-            const h = await resolve(s, c);
-            match.jollytur_checked_at = new Date().toISOString();
-            if (!h) { results.set(s.key, { status: "not_found", quotes: [], match: match as any }); continue; }
-            id = h.id;
-            Object.assign(match, { jollytur_hotel_id: h.id, jollytur_slug: h.slug, jollytur_matched_name: h.name });
+            // Eşleştirme matcher.ts'te (arama + katı puanlama); burada tahmin yapılmaz.
+            results.set(s.key, { status: "not_found", quotes: [] }); continue;
           }
           const body = new URLSearchParams({
             id, startDate: p.checkin, endDate: p.checkout, rooms: String(p.adults), originType: "Zone",
