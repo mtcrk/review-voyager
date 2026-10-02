@@ -1,1 +1,2 @@
 - Hotel matching for price sources lives only in supabase/functions/_shared/prices/matcher.ts + matching.ts (search + strict scoring); price adapters never guess matches — keeps matches reliable and auditable.
+- competitor_price_snapshots rows are written only via insertSnapshots/toSnapshotRow in supabase/functions/_shared/prices/snapshots.ts — every row gets the same full key set (PostgREST bulk insert sends missing keys as NULL) and a failed batch falls back to row-by-row.
