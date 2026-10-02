@@ -42,6 +42,8 @@ export type SnapshotInput = {
   /** Kaynağın min. konaklama şartı nedeniyle fiyatın alındığı gece sayısı (seçilenden büyükse). */
   min_stay_nights?: number | null;
   queried_nights?: number | null;
+  /** Çekimi başlatan: cron | manual | instant */
+  fetch_trigger?: string | null;
 };
 
 export function toSnapshotRow(i: SnapshotInput) {
@@ -82,12 +84,13 @@ export function toSnapshotRow(i: SnapshotInput) {
     campaign_label: str(i.campaign_label),
     remaining_allotment: int(i.remaining_allotment),
     cancellation_details: i.cancellation_details ?? null,
+    fetch_trigger: str(i.fetch_trigger),
   };
 }
 
 /** Toplu yazar; batch reddedilirse satır satır dener. Kaydedilen sayıyı ve hataları döndürür. */
-export async function insertSnapshots(admin: any, inputs: SnapshotInput[], label: string) {
-  const rows = inputs.map(toSnapshotRow);
+export async function insertSnapshots(admin: any, inputs: SnapshotInput[], label: string, fetchTrigger?: string) {
+  const rows = inputs.map((i) => toSnapshotRow(fetchTrigger ? { ...i, fetch_trigger: fetchTrigger } : i));
   const errors: string[] = [];
   if (!rows.length) return { saved: 0, errors };
   const { error } = await admin.from("competitor_price_snapshots").insert(rows, { defaultToNull: false });

@@ -45,7 +45,7 @@ export type EngineOptions = {
   maxCalls: number;
   allowBooking: boolean;
   deadline: number; // epoch ms
-  trigger: "manual" | "cron";
+  trigger: "manual" | "cron" | "instant";
   /** Yalnızca bu pazarlar çekilir (varsayılan: ikisi de). */
   markets?: ("domestic" | "international")[];
   /** Uluslararası pazar sorgu gece sayısı (varsayılan nights). 7 ve üzerinde ek gece denemesi yapılmaz. */
@@ -248,7 +248,7 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
           }
         }
         if (erows.length) {
-          const w = await insertSnapshots(o.admin, erows, "yurt içi kayıt");
+          const w = await insertSnapshots(o.admin, erows, "yurt içi kayıt", o.trigger);
           res.saved += w.saved; res.errors.push(...w.errors);
         }
       }
@@ -304,7 +304,7 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
           else if (sr?.status === "no_prices" && !bookingList.includes(s)) srows.push(noPriceRow(s, fa, "serpapi"));
         }
         if (srows.length) {
-          const w = await insertSnapshots(o.admin, srows, "Google kayıt");
+          const w = await insertSnapshots(o.admin, srows, "Google kayıt", o.trigger);
           res.saved += w.saved; res.errors.push(...w.errors);
         }
       }
@@ -383,7 +383,7 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
         }
       }
       if (rows.length) {
-        const w = await insertSnapshots(o.admin, rows, "Booking kayıt");
+        const w = await insertSnapshots(o.admin, rows, "Booking kayıt", o.trigger);
         res.saved += w.saved; res.errors.push(...w.errors);
       }
     }
