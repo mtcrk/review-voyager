@@ -118,9 +118,10 @@ Deno.serve(async (req) => {
       if (!q.dates.includes(date) || !q.markets.includes(market)) return json({ error: "Parça bu sorguya ait değil" }, 400);
       if (q.status !== "running") return json({ error: "Sorgu kapalı" }, 409);
       const chunk = `${date}|${market}`;
-      // Parça yalnızca bir kez çalışır (aynı krediyle tekrar çekim yapılamaz).
-      if (q.done_chunks.includes(chunk)) return json({ error: "Bu parça zaten çalıştırıldı" }, 409);
-      await admin.from("price_instant_queries").update({ done_chunks: [...q.done_chunks, chunk] }).eq("id", query_id);
+      // Parça yalnızca bir kez çalışır; atomik ekleme (paralel parçalar birbirini ezmesin).
+      const { data: claimed, error: ce } = await admin.rpc("mark_instant_chunk_done", { _query_id: query_id, _chunk: chunk });
+      if (ce) return json({ error: ce.message }, 500);
+      if (!claimed) return json({ error: "Bu parça zaten çalıştırıldı" }, 409);
 
       const { data: biz } = await admin.from("businesses")
         .select("id, name, city, serpapi_property_token, booking_url, price_source_preference, price_source_checked_at, price_compare_board_type, etstur_slug, etstur_hotel_id, etstur_checked_at, jollytur_hotel_id, jollytur_slug, jollytur_checked_at, tatilsepeti_slug, tatilsepeti_checked_at")
