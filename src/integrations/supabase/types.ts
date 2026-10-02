@@ -301,6 +301,10 @@ export type Database = {
           brand_voice: Json
           city: string | null
           created_at: string
+          etstur_checked_at: string | null
+          etstur_hotel_id: string | null
+          etstur_matched_name: string | null
+          etstur_slug: string | null
           expedia_hotel_id: string | null
           fetch_disabled: boolean
           google_account_id: string | null
@@ -343,6 +347,10 @@ export type Database = {
           brand_voice?: Json
           city?: string | null
           created_at?: string
+          etstur_checked_at?: string | null
+          etstur_hotel_id?: string | null
+          etstur_matched_name?: string | null
+          etstur_slug?: string | null
           expedia_hotel_id?: string | null
           fetch_disabled?: boolean
           google_account_id?: string | null
@@ -385,6 +393,10 @@ export type Database = {
           brand_voice?: Json
           city?: string | null
           created_at?: string
+          etstur_checked_at?: string | null
+          etstur_hotel_id?: string | null
+          etstur_matched_name?: string | null
+          etstur_slug?: string | null
           expedia_hotel_id?: string | null
           fetch_disabled?: boolean
           google_account_id?: string | null
@@ -594,6 +606,10 @@ export type Database = {
           city: string | null
           created_at: string
           discovered_at: string | null
+          etstur_checked_at: string | null
+          etstur_hotel_id: string | null
+          etstur_matched_name: string | null
+          etstur_slug: string | null
           id: string
           is_active: boolean
           last_scraped_at: string | null
@@ -629,6 +645,10 @@ export type Database = {
           city?: string | null
           created_at?: string
           discovered_at?: string | null
+          etstur_checked_at?: string | null
+          etstur_hotel_id?: string | null
+          etstur_matched_name?: string | null
+          etstur_slug?: string | null
           id?: string
           is_active?: boolean
           last_scraped_at?: string | null
@@ -664,6 +684,10 @@ export type Database = {
           city?: string | null
           created_at?: string
           discovered_at?: string | null
+          etstur_checked_at?: string | null
+          etstur_hotel_id?: string | null
+          etstur_matched_name?: string | null
+          etstur_slug?: string | null
           id?: string
           is_active?: boolean
           last_scraped_at?: string | null
@@ -895,6 +919,9 @@ export type Database = {
           adults: number
           board_type: string
           business_id: string
+          campaign_label: string | null
+          campaign_price: number | null
+          cancellation_details: Json | null
           checkin: string
           competitor_id: string | null
           currency: string
@@ -903,15 +930,18 @@ export type Database = {
           id: string
           is_ad: boolean | null
           is_official: boolean | null
+          market: string
           nights: number
           no_availability: boolean
           num_guests: number | null
           price: number | null
+          price_before_discount: number | null
           price_derived: boolean
           price_per_night: number | null
           price_total: number | null
           raw: Json
           refundable: boolean | null
+          remaining_allotment: number | null
           room_name: string | null
           source: string
           source_adapter: string
@@ -922,6 +952,9 @@ export type Database = {
           adults?: number
           board_type?: string
           business_id: string
+          campaign_label?: string | null
+          campaign_price?: number | null
+          cancellation_details?: Json | null
           checkin: string
           competitor_id?: string | null
           currency?: string
@@ -930,15 +963,18 @@ export type Database = {
           id?: string
           is_ad?: boolean | null
           is_official?: boolean | null
+          market?: string
           nights?: number
           no_availability?: boolean
           num_guests?: number | null
           price?: number | null
+          price_before_discount?: number | null
           price_derived?: boolean
           price_per_night?: number | null
           price_total?: number | null
           raw: Json
           refundable?: boolean | null
+          remaining_allotment?: number | null
           room_name?: string | null
           source: string
           source_adapter?: string
@@ -949,6 +985,9 @@ export type Database = {
           adults?: number
           board_type?: string
           business_id?: string
+          campaign_label?: string | null
+          campaign_price?: number | null
+          cancellation_details?: Json | null
           checkin?: string
           competitor_id?: string | null
           currency?: string
@@ -957,15 +996,18 @@ export type Database = {
           id?: string
           is_ad?: boolean | null
           is_official?: boolean | null
+          market?: string
           nights?: number
           no_availability?: boolean
           num_guests?: number | null
           price?: number | null
+          price_before_discount?: number | null
           price_derived?: boolean
           price_per_night?: number | null
           price_total?: number | null
           raw?: Json
           refundable?: boolean | null
+          remaining_allotment?: number | null
           room_name?: string | null
           source?: string
           source_adapter?: string

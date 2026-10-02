@@ -9,7 +9,8 @@ export type BoardType =
   | "all_inclusive"
   | "unknown";
 
-export type AdapterId = "serpapi" | "booking";
+export type AdapterId = "serpapi" | "booking" | "etstur";
+export type Market = "international" | "domestic";
 
 export type Subject = {
   key: string; // "own" | competitor id
@@ -21,6 +22,8 @@ export type Subject = {
   booking_url: string | null;
   price_source_preference: string | null;
   price_source_checked_at: string | null;
+  etstur_slug?: string | null;
+  etstur_hotel_id?: string | null;
 };
 
 export type PriceQuote = {
@@ -36,6 +39,11 @@ export type PriceQuote = {
   is_official: boolean;
   is_ad: boolean;
   num_guests: number | null;
+  price_before_discount?: number | null;
+  campaign_price?: number | null;
+  campaign_label?: string | null;
+  remaining_allotment?: number | null;
+  cancellation_details?: unknown;
   raw: unknown;
 };
 

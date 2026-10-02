@@ -2,6 +2,7 @@
 // sorgu tavanı, snapshot yazımı ve maliyet kaydı.
 import { createBookingAdapter } from "./booking.ts";
 import { createSerpApiAdapter } from "./serpapi.ts";
+import { createEtsAdapter } from "./etstur.ts";
 import type { AdapterResult, BoardType, PriceAdapter, PriceQuote, Subject } from "./types.ts";
 import { addDays } from "./types.ts";
 
@@ -16,6 +17,9 @@ export type EngineBusiness = {
   price_source_preference: string | null;
   price_source_checked_at: string | null;
   price_compare_board_type: string | null;
+  etstur_slug?: string | null;
+  etstur_hotel_id?: string | null;
+  etstur_checked_at?: string | null;
 };
 
 export type EngineOptions = {
@@ -47,7 +51,7 @@ export type EngineResult = {
 export async function loadSubjects(admin: any, b: EngineBusiness, competitorIds?: string[], includeOwn = true) {
   let q = admin
     .from("ci_competitors")
-    .select("id, name, city, serpapi_property_token, booking_url, price_source_preference, price_source_checked_at")
+    .select("id, name, city, serpapi_property_token, booking_url, price_source_preference, price_source_checked_at, etstur_slug, etstur_hotel_id, etstur_checked_at")
     .eq("business_id", b.id)
     .eq("is_active", true);
   if (competitorIds?.length) q = q.in("id", competitorIds);
@@ -65,7 +69,10 @@ export async function loadSubjects(admin: any, b: EngineBusiness, competitorIds?
       booking_url: b.booking_url,
       price_source_preference: b.price_source_preference,
       price_source_checked_at: b.price_source_checked_at,
-    });
+      etstur_slug: b.etstur_slug ?? null,
+      etstur_hotel_id: b.etstur_hotel_id ?? null,
+      etstur_checked_at: b.etstur_checked_at ?? null,
+    } as Subject);
   }
   for (const c of comps ?? []) {
     subjects.push({
@@ -78,7 +85,10 @@ export async function loadSubjects(admin: any, b: EngineBusiness, competitorIds?
       booking_url: c.booking_url,
       price_source_preference: c.price_source_preference,
       price_source_checked_at: c.price_source_checked_at,
-    });
+      etstur_slug: c.etstur_slug,
+      etstur_hotel_id: c.etstur_hotel_id,
+      etstur_checked_at: c.etstur_checked_at,
+    } as Subject);
   }
   return subjects;
 }
@@ -122,24 +132,68 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
 
   // Cache: son cacheHours içinde çekilmiş (mülk, tarih) çiftleri.
   const done = new Set<string>();
+  const doneDom = new Set<string>();
+  const ets = createEtsAdapter();
   if (!o.force && o.dates.length) {
     const since = new Date(Date.now() - o.cacheHours * 3600_000).toISOString();
     const { data } = await o.admin
       .from("competitor_price_snapshots")
-      .select("subject_type, competitor_id, checkin")
+      .select("subject_type, competitor_id, checkin, market")
       .eq("business_id", o.business.id)
       .eq("nights", o.nights)
       .eq("adults", o.adults)
       .in("checkin", o.dates)
       .gte("fetched_at", since)
       .limit(10000);
-    for (const r of data ?? []) done.add(`${r.subject_type === "own" ? "own" : r.competitor_id}|${r.checkin}`);
+    for (const r of data ?? []) {
+      const k = `${r.subject_type === "own" ? "own" : r.competitor_id}|${r.checkin}`;
+      if (r.market === "domestic") doneDom.add(k); else done.add(k);
+    }
   }
 
   try {
     for (const checkin of o.dates) {
       if (Date.now() > o.deadline) { res.complete = false; break; }
       if (res.calls >= o.maxCalls) { res.capped = true; res.complete = false; break; }
+
+      // Yurt içi pazar (ETS): uluslararası zincirden tamamen ayrı; hücrelerde asla karışmaz.
+      {
+        const etsTodo = subjects.filter((s) => {
+          if (doneDom.has(`${s.key}|${checkin}`)) return false;
+          // Eşleşme bulunamamış ve 30 gün geçmemişse tekrar deneme.
+          if (!s.etstur_hotel_id && (s as any).etstur_checked_at && Date.now() - new Date((s as any).etstur_checked_at).getTime() < PREF_TTL_MS) return false;
+          return true;
+        });
+        if (etsTodo.length) {
+          const pe = { checkin, checkout: addDays(checkin, o.nights), nights: o.nights, adults: o.adults };
+          const r = await ets.fetchMany(etsTodo, pe);
+          track("etstur", r.unlocker_calls, r.cost_usd);
+          const fa = new Date().toISOString();
+          const erows: any[] = [];
+          for (const s of etsTodo) {
+            const er = r.results.get(s.key);
+            if (!er) continue;
+            if (er.match && Object.keys(er.match).length) await updateSubject(o.admin, o.business.id, s, er.match as any);
+            const base = { business_id: o.business.id, competitor_id: s.competitor_id, subject_type: s.subject_type, checkin, nights: o.nights, adults: o.adults, currency: "TRY", fetched_at: fa, market: "domestic" };
+            if (er.status === "ok") {
+              for (const q of er.quotes) erows.push({
+                ...base, source: q.source, source_adapter: q.source_adapter, price: q.price_per_night,
+                price_per_night: q.price_per_night, price_total: q.price_total, price_derived: q.price_derived,
+                board_type: q.board_type, room_name: q.room_name, refundable: q.refundable, free_cancellation: q.refundable,
+                taxes_included: q.taxes_included, is_official: false, is_ad: false, raw: q.raw,
+                price_before_discount: q.price_before_discount, campaign_price: q.campaign_price, campaign_label: q.campaign_label,
+                remaining_allotment: q.remaining_allotment, cancellation_details: q.cancellation_details,
+              });
+            } else if (er.status === "no_prices") {
+              erows.push({ ...base, source: "ETS Tur", source_adapter: "etstur", price: null, no_availability: true, board_type: "unknown", is_official: false, is_ad: false });
+            }
+          }
+          if (erows.length) {
+            const { error } = await o.admin.from("competitor_price_snapshots").insert(erows);
+            if (error) console.error("ets snapshot insert failed", error);
+          }
+        }
+      }
 
       const todo = subjects.filter((s) => {
         if (done.has(`${s.key}|${checkin}`)) { res.cached++; return false; }

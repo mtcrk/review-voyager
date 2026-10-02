@@ -152,6 +152,7 @@ export default function PriceTracking() {
   const [adults, setAdults] = useState(2);
   const [boardOverride, setBoardOverride] = useState<BoardType | null>(null);
   const [force, setForce] = useState(false);
+  const [market, setMarket] = useState<"international" | "domestic">("international");
   const [refreshing, setRefreshing] = useState(false);
   const board: BoardType = boardOverride ?? (biz?.price_compare_board_type as BoardType) ?? "breakfast";
 
@@ -175,7 +176,7 @@ export default function PriceTracking() {
   });
 
   const { data: snaps = [], isLoading } = useQuery({
-    queryKey: ["pt-snaps", businessId, from, to, adults],
+    queryKey: ["pt-snaps", businessId, from, to, adults, market],
     enabled: !!businessId,
     queryFn: async () => {
       const all: Snapshot[] = [];
@@ -186,6 +187,7 @@ export default function PriceTracking() {
           .eq("business_id", businessId)
           .eq("nights", 1)
           .eq("adults", adults)
+          .eq("market", market)
           .gte("checkin", from)
           .lte("checkin", to)
           .gte("fetched_at", new Date(Date.now() - 21 * 86400_000).toISOString())
@@ -310,6 +312,13 @@ export default function PriceTracking() {
           <Button variant="outline" size="sm" asChild>
             <Link to="/settings?tab=price-tracking"><Settings2 className="mr-1 h-4 w-4" />Ayarlar</Link>
           </Button>
+          <div className="flex rounded-md border p-0.5 text-xs">
+            {(["international", "domestic"] as const).map((m) => (
+              <button key={m} onClick={() => setMarket(m)} className={`rounded px-2 py-1 ${market === m ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
+                {m === "international" ? "Uluslararası" : "Yurt içi (ETS)"}
+              </button>
+            ))}
+          </div>
           <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Switch checked={force} onCheckedChange={setForce} /> Önbelleği atla
           </label>

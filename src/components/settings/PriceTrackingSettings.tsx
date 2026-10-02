@@ -19,8 +19,12 @@ function MatchEditor({
   bookingUrl,
   bookingName,
   serpName,
+  etsSlug,
+  etsName,
   onSave,
 }: {
+  etsSlug?: string | null;
+  etsName?: string | null;
   label: string;
   bookingUrl: string | null;
   bookingName: string | null;
@@ -28,6 +32,7 @@ function MatchEditor({
   onSave: (patch: Record<string, unknown>) => Promise<void>;
 }) {
   const [url, setUrl] = useState(bookingUrl ?? "");
+  const [ets, setEts] = useState(etsSlug ? `https://www.etstur.com/${etsSlug}` : "");
   return (
     <div className="space-y-2 rounded-lg border p-3 text-sm">
       <div className="font-medium">{label}</div>
@@ -49,6 +54,16 @@ function MatchEditor({
           onSave({ serpapi_property_token: null, serpapi_matched_name: null, price_source_preference: null, price_source_checked_at: null })
         }>Google eşleşmesi yanlış</Button>
       </div>
+      <div className="text-xs text-muted-foreground">ETS eşleşmesi (yurt içi): <b className="text-foreground">{etsName ?? "henüz yok"}</b></div>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <Input value={ets} onChange={(e) => setEts(e.target.value)} placeholder="https://www.etstur.com/Otel-Adi" className="h-9" />
+        <Button size="sm" variant="outline" onClick={() => {
+          const v = ets.trim();
+          const m = v.match(/^https:\/\/(?:www\.)?etstur\.com\/([^/?#]+)/);
+          if (v && !m) return void toast({ title: "Geçersiz ETS adresi", variant: "destructive" });
+          onSave({ etstur_slug: m ? m[1] : null, etstur_hotel_id: null, etstur_matched_name: null, etstur_checked_at: null });
+        }}>ETS'yi kaydet</Button>
+      </div>
     </div>
   );
 }
@@ -67,7 +82,7 @@ export function PriceTrackingSettings() {
     queryFn: async () => {
       const { data } = await (supabase as any)
         .from("ci_competitors")
-        .select("id, name, booking_url, booking_matched_name, serpapi_matched_name")
+        .select("id, name, booking_url, booking_matched_name, serpapi_matched_name, etstur_slug, etstur_matched_name")
         .eq("business_id", biz.id)
         .eq("is_active", true)
         .order("name");
@@ -196,9 +211,9 @@ export function PriceTrackingSettings() {
           <CardDescription>Eşleşen otel adı yanlışsa düzelt; bir sonraki çekimde yeniden eşleştirilir.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          <MatchEditor label={`${biz.name} (otelimiz)`} bookingUrl={biz.booking_url} bookingName={biz.booking_matched_name} serpName={biz.serpapi_matched_name} onSave={saveBiz} />
+          <MatchEditor label={`${biz.name} (otelimiz)`} bookingUrl={biz.booking_url} bookingName={biz.booking_matched_name} serpName={biz.serpapi_matched_name} etsSlug={biz.etstur_slug} etsName={biz.etstur_matched_name} onSave={saveBiz} />
           {comps.map((c: any) => (
-            <MatchEditor key={c.id} label={c.name} bookingUrl={c.booking_url} bookingName={c.booking_matched_name} serpName={c.serpapi_matched_name} onSave={saveComp(c.id)} />
+            <MatchEditor key={c.id} label={c.name} bookingUrl={c.booking_url} bookingName={c.booking_matched_name} serpName={c.serpapi_matched_name} etsSlug={c.etstur_slug} etsName={c.etstur_matched_name} onSave={saveComp(c.id)} />
           ))}
           {!comps.length && <p className="text-sm text-muted-foreground">Henüz rakip eklenmemiş.</p>}
         </CardContent>
