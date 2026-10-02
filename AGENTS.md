@@ -1,0 +1,1 @@
+- Hotel matching for price sources lives only in supabase/functions/_shared/prices/matcher.ts + matching.ts (search + strict scoring); price adapters never guess matches — keeps matches reliable and auditable.
