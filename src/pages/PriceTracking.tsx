@@ -79,7 +79,7 @@ function dayMeta(iso: string) {
 const fmtTime = (iso: string) =>
   new Date(iso).toLocaleString("tr-TR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
 
-function CellView({ cell, median: med, isOwn }: { cell: Cell; median: number | null; isOwn: boolean }) {
+function CellView({ cell, median: med, isOwn, nights }: { cell: Cell; median: number | null; isOwn: boolean; nights: number }) {
   let tone = "";
   if (cell.kind === "value" && med) {
     const r = cell.value / med;
@@ -130,6 +130,9 @@ function CellView({ cell, median: med, isOwn }: { cell: Cell; median: number | n
             <Row k="Kaynak" v={`${cell.source}${cell.adapter !== "manual" ? ` · ${ADAPTER_LABELS[cell.adapter] ?? cell.adapter}` : ""}`} />
             <Row k="Çekim zamanı" v={cell.fetchedAt ? fmtTime(cell.fetchedAt) : "Manuel giriş"} />
             <Row k="Pansiyon" v={BOARD_LABELS[cell.board]} />
+            {cell.adapter !== "manual" && (
+              <Row k="Sorgu" v={`${cell.minStay ?? nights} gecelik sorgu (gecelik = toplam / ${cell.minStay ?? nights})`} />
+            )}
             {cell.minStay ? <Row k="Min. konaklama" v={`${cell.minStay} gece (fiyat gecelik)`} /> : null}
             <Row k="Oda" v={cell.roomName ?? "Belirtilmemiş"} />
             <Row k="İade" v={cell.refundable == null ? "Bilinmiyor" : cell.refundable ? "Ücretsiz iptal" : "İade edilemez"} />
@@ -213,7 +216,10 @@ export default function PriceTracking() {
   const qc = useQueryClient();
   const [params, setParams] = useSearchParams();
   const rangeKey = (["7", "weekend", "30", "custom"].includes(params.get("range") ?? "") ? params.get("range") : "7") as RangeKey;
-  const nights = [1, 2, 3, 7].includes(Number(params.get("nights"))) ? Number(params.get("nights")) : 1;
+  // Uluslararası pazarda varsayılan 7 gece (yabancı misafir tipik konaklaması), yurt içinde 1 gece.
+  const [market, setMarket] = useState<"international" | "domestic">("international");
+  const defaultNights = market === "international" ? 7 : 1;
+  const nights = [1, 2, 3, 7].includes(Number(params.get("nights"))) ? Number(params.get("nights")) : defaultNights;
   const setParam = (patch: Record<string, string | null>) => {
     const next = new URLSearchParams(params);
     for (const [k, v] of Object.entries(patch)) v == null ? next.delete(k) : next.set(k, v);
@@ -226,7 +232,6 @@ export default function PriceTracking() {
   const [adults, setAdults] = useState(2);
   const [boardOverride, setBoardOverride] = useState<BoardType | null>(null);
   const [force, setForce] = useState(false);
-  const [market, setMarket] = useState<"international" | "domestic">("international");
   const [refreshing, setRefreshing] = useState(false);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const board: BoardType = boardOverride ?? (biz?.price_compare_board_type as BoardType) ?? "breakfast";
@@ -377,7 +382,7 @@ export default function PriceTracking() {
         let attempt = 0;
         while (attempt < 3) {
           const r: any = await invokeAuthedFunction("fetch-competitor-prices", {
-            body: { business_id: businessId, checkin: dates[i], days: 1, nights, adults, force_refresh: force },
+            body: { business_id: businessId, checkin: dates[i], days: 1, nights, adults, force_refresh: force, markets: [market] },
           });
           calls += r?.calls ?? 0;
           saved += r?.saved ?? 0;
@@ -421,7 +426,7 @@ export default function PriceTracking() {
           </Button>
           <div className="flex rounded-md border p-0.5 text-xs">
             {(["international", "domestic"] as const).map((m) => (
-              <button key={m} onClick={() => setMarket(m)} className={`rounded px-2 py-1 ${market === m ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
+              <button key={m} onClick={() => { setMarket(m); setParam({ nights: null }); }} className={`rounded px-2 py-1 ${market === m ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
                 {m === "international" ? "Uluslararası" : "Yurt içi (ETS · Jolly · Tatil Sepeti)"}
               </button>
             ))}
@@ -481,7 +486,7 @@ export default function PriceTracking() {
             </div>
           </PopoverContent>
         </Popover>
-        <Select value={String(nights)} onValueChange={(v) => setParam({ nights: v === "1" ? null : v })}>
+        <Select value={String(nights)} onValueChange={(v) => setParam({ nights: Number(v) === defaultNights ? null : v })}>
           <SelectTrigger className="h-9 w-28"><SelectValue /></SelectTrigger>
           <SelectContent>
             {[1, 2, 3, 7].map((n) => <SelectItem key={n} value={String(n)}>{n} gece</SelectItem>)}
@@ -557,7 +562,7 @@ export default function PriceTracking() {
                       </td>
                       {dates.map((d, i) => (
                         <td key={d} className={cn("border-t p-0.5", dayMeta(d).weekend && "bg-muted/40")}>
-                          <CellView cell={grid.cells.get(`${s.key}|${d}`)!} median={grid.perDay[i].med} isOwn={s.own} />
+                          <CellView cell={grid.cells.get(`${s.key}|${d}`)!} median={grid.perDay[i].med} isOwn={s.own} nights={nights} />
                         </td>
                       ))}
                       <td className="border-t px-2 py-1 text-left">
