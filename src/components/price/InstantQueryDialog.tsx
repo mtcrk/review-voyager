@@ -4,7 +4,7 @@ import { Loader2, Zap } from "lucide-react";
 import { Link } from "@/components/Link";
 import { supabase } from "@/integrations/supabase/client";
 import { invokeAuthedFunction } from "@/lib/invokeAuthedFunction";
-import { BOARD_LABELS, type BoardType, fmtTry, isoDay } from "@/lib/priceTracking";
+import { BOARD_LABELS, type BoardType, fmtTry } from "@/lib/priceTracking";
 import { toast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -48,7 +48,7 @@ export function InstantQueryDialog({
   open: boolean; onOpenChange: (v: boolean) => void; businessId: string; subjects: Subject[]; initial?: string[]; defaultNights: number;
 }) {
   const qc = useQueryClient();
-  const today = isoDay(new Date());
+  const today = new Date().toISOString().slice(0, 10);
   const [sel, setSel] = useState<string[]>([]);
   const [from, setFrom] = useState(today);
   const [to, setTo] = useState(today);
