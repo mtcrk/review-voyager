@@ -90,6 +90,8 @@ export type Cell =
       taxesIncluded: boolean | null;
       prev?: number;
       changePct?: number;
+      /** Fiyat kaynağın min. konaklama şartı nedeniyle bu kadar gecelik sorguyla alındı. */
+      minStay?: number | null;
     };
 
 export const subjectKey = (s: { subject_type: string; competitor_id: string | null }) =>
