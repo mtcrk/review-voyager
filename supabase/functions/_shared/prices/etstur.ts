@@ -74,13 +74,18 @@ async function resolveHotel(s: Subject, counter: { unlocker: number; calls: numb
   return null;
 }
 
-export function parseRoomMulti(data: any, nights: number): { quotes: PriceQuote[]; anyRoom: boolean } {
+export function parseRoomMulti(data: any, nights: number): { quotes: PriceQuote[]; anyRoom: boolean; minStay: number | null } {
   const quotes: PriceQuote[] = [];
   let anyRoom = false;
+  let minStay: number | null = null;
   for (const g of data?.result?.roomGroups ?? []) {
     for (const room of g?.rooms ?? []) {
       for (const sb of room?.subBoards ?? []) {
         anyRoom = true;
+        if (sb?.availability?.type === "MIN_STAY" && Number(sb?.availability?.nightCount) > 0) {
+          const n = Number(sb.availability.nightCount);
+          minStay = minStay === null ? n : Math.min(minStay, n);
+        }
         if (sb?.availability?.type !== "AVAILABLE") continue;
         const disc = Number(sb?.price?.discountedPrice) || 0;
         const amt = Number(sb?.price?.amount) || 0;
@@ -110,7 +115,7 @@ export function parseRoomMulti(data: any, nights: number): { quotes: PriceQuote[
       }
     }
   }
-  return { quotes, anyRoom };
+  return { quotes, anyRoom, minStay };
 }
 
 export function createEtsAdapter() {
@@ -133,8 +138,8 @@ export function createEtsAdapter() {
           counter.calls++;
           const body = JSON.stringify({ hotelId, checkIn: p.checkin, checkOut: p.checkout, rooms: [{ adultCount: p.adults, childCount: 0, childAges: [] }] });
           const data = await etsCall(`${BASE}/room/multi`, "POST", body, counter);
-          const { quotes } = parseRoomMulti(data, p.nights);
-          results.set(s.key, { status: quotes.length ? "ok" : "no_prices", quotes, match: match as any });
+          const { quotes, minStay } = parseRoomMulti(data, p.nights);
+          results.set(s.key, { status: quotes.length ? "ok" : "no_prices", quotes, match: match as any, min_stay: quotes.length ? null : minStay });
         } catch (e) {
           console.error("etstur adapter failed", s.name, e);
           results.set(s.key, { status: "error", quotes: [], error: String(e) });

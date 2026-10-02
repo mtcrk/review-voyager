@@ -75,8 +75,10 @@ export function createJollyAdapter() {
             method: "POST", body, headers: { "Content-Type": "application/x-www-form-urlencoded" },
           }, c);
           const d = JSON.parse(t);
-          const quotes = parseJolly(String(d?.html ?? ""), p.nights);
-          results.set(s.key, { status: quotes.length ? "ok" : "no_prices", quotes, match: match as any });
+          const html = String(d?.html ?? "");
+          const quotes = parseJolly(html, p.nights);
+          const ms = Array.from(html.matchAll(/Minimum\s+(\d+)\s+Gece/gi)).map((m) => Number(m[1])).filter((n) => n > p.nights);
+          results.set(s.key, { status: quotes.length ? "ok" : "no_prices", quotes, match: match as any, min_stay: !quotes.length && ms.length ? Math.min(...ms) : null });
         } catch (e) {
           console.error("jollytur adapter failed", s.name, e);
           results.set(s.key, { status: "error", quotes: [], error: String(e) });

@@ -81,7 +81,8 @@ export function createSerpApiAdapter(apiKey: string): PriceAdapter {
             continue;
           }
           calls++;
-          const res = await fetch(`${base(p)}&property_token=${encodeURIComponent(token)}`);
+          // SerpApi property_token ile de `q` zorunlu (yoksa "Missing query `q` parameter").
+          const res = await fetch(`${base(p)}&q=${encodeURIComponent([s.name, s.city].filter(Boolean).join(" "))}&property_token=${encodeURIComponent(token)}`);
           const payload = await res.json();
           if (payload?.error && !payload?.prices) {
             results.set(s.key, { status: "error", quotes: [], match, error: String(payload.error) });
