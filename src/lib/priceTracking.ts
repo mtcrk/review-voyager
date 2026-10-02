@@ -75,8 +75,8 @@ export type OwnRate = {
 
 export type Cell =
   | { kind: "none" }
-  | { kind: "sold_out"; fetchedAt: string; source: string; label: string; details: string[] }
-  | { kind: "incomparable"; fetchedAt: string; reason: string; rows: Snapshot[] }
+  | { kind: "sold_out"; fetchedAt: string; source: string; label: string; details: string[]; refs?: RefPrice[] }
+  | { kind: "incomparable"; fetchedAt: string; reason: string; rows: Snapshot[]; refs?: RefPrice[] }
   | {
       kind: "value";
       value: number;
@@ -92,7 +92,21 @@ export type Cell =
       changePct?: number;
       /** Fiyat kaynağın min. konaklama şartı nedeniyle bu kadar gecelik sorguyla alındı. */
       minStay?: number | null;
+      refs?: RefPrice[];
     };
+
+/** Pansiyon tipi belirtilmemiş fiyatlar: kıyasa girmez, yalnızca referans olarak gösterilir. */
+export type RefPrice = { source: string; price: number };
+
+function unknownBoardRefs(rows: Snapshot[]): RefPrice[] {
+  const m = new Map<string, number>();
+  for (const r of rows) {
+    if (r.no_availability || r.board_type !== "unknown" || !r.price_per_night) continue;
+    const v = Number(r.price_per_night);
+    if (!m.has(r.source) || v < m.get(r.source)!) m.set(r.source, v);
+  }
+  return Array.from(m, ([source, price]) => ({ source, price }));
+}
 
 export const subjectKey = (s: { subject_type: string; competitor_id: string | null }) =>
   s.subject_type === "own" ? "own" : (s.competitor_id as string);
@@ -156,8 +170,16 @@ export function computeCell(batches: Snapshot[][] | undefined, board: BoardType,
     };
   }
   if (!batches?.length) return { kind: "none" };
-  const latest = batches[0];
-  const fetchedAt = latest[0].fetched_at;
+  // Aynı çekim turunda kaynaklar ayrı anlarda yazılır (ör. Google hemen, Booking sonra) — 15 dk içindekiler tek tur sayılır.
+  const fetchedAt = batches[0][0].fetched_at;
+  const t0 = new Date(fetchedAt).getTime();
+  let used = 0;
+  const latest: Snapshot[] = [];
+  for (const b of batches) {
+    if (t0 - new Date(b[0].fetched_at).getTime() > 15 * 60_000) break;
+    latest.push(...b); used++;
+  }
+  const refs = unknownBoardRefs(latest);
   const priced = latest.filter((r) => !r.no_availability && r.price_per_night);
   if (!priced.length) {
     // "muhtemelen dolu" yalnızca hiçbir kaynak min. konaklama / satış kapalı bilgisi vermediyse.
@@ -180,9 +202,9 @@ export function computeCell(batches: Snapshot[][] | undefined, board: BoardType,
     return { kind: "sold_out", fetchedAt, source: latest[0].source, label, details };
   }
   const best = cheapest(latest, board);
-  if (!best) return { kind: "incomparable", fetchedAt, reason: incomparableReason(latest), rows: latest };
+  if (!best) return { kind: "incomparable", fetchedAt, reason: incomparableReason(latest), rows: latest, refs };
   let prev: number | undefined;
-  for (const b of batches.slice(1)) {
+  for (const b of batches.slice(used)) {
     const p = cheapest(b, board);
     if (p) { prev = Number(p.price_per_night); break; }
   }
@@ -199,6 +221,7 @@ export function computeCell(batches: Snapshot[][] | undefined, board: BoardType,
     refundable: best.refundable,
     taxesIncluded: best.taxes_included,
     minStay: best.min_stay_nights ?? null,
+    refs,
     prev,
     changePct: prev ? ((value - prev) / prev) * 100 : undefined,
   };

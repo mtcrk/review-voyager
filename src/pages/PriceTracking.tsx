@@ -138,6 +138,13 @@ function CellView({ cell, median: med, isOwn }: { cell: Cell; median: number | n
               <Row k="Önceki çekim" v={`${fmtTry(cell.prev)} (${cell.changePct! > 0 ? "+" : ""}${cell.changePct!.toFixed(0)}%)`} />
             )}
             {med && <Row k="Rakip medyanı" v={fmtTry(med)} />}
+            {cell.refs?.length ? (
+              <div className="space-y-0.5 border-t pt-1 text-muted-foreground">
+                {cell.refs.map((r) => (
+                  <p key={r.source}>{r.source}: {fmtTry(r.price)} (pansiyon belirtilmemiş)</p>
+                ))}
+              </div>
+            ) : null}
           </>
         )}
         {cell.kind === "incomparable" && (
@@ -159,6 +166,13 @@ function CellView({ cell, median: med, isOwn }: { cell: Cell; median: number | n
                 </div>
               ))}
             </div>
+            {cell.refs?.length ? (
+              <div className="space-y-0.5 border-t pt-1 text-muted-foreground">
+                {cell.refs.map((r) => (
+                  <p key={r.source}>{r.source}: {fmtTry(r.price)} (pansiyon belirtilmemiş)</p>
+                ))}
+              </div>
+            ) : null}
             <Row k="Çekim zamanı" v={fmtTime(cell.fetchedAt)} />
             <div className="max-h-32 space-y-0.5 overflow-auto border-t pt-1">
               {cell.rows.slice(0, 8).map((r) => (

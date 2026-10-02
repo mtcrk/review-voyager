@@ -84,6 +84,7 @@ Deno.serve(async (req) => {
       allowBooking,
       deadline: Date.now() + 130_000,
       trigger: "manual",
+      markets: Array.isArray(body?.markets) ? body.markets.filter((m: unknown) => m === "domestic" || m === "international") : undefined,
     });
     return json({ ok: true, dates, nights, adults, booking_enabled: allowBooking, ...result });
   } catch (e) {
