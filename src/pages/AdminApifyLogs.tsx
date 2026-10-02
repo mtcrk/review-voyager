@@ -17,6 +17,7 @@ import { Loader2, RefreshCw, Mail, MailX, Search, ChevronLeft, ChevronRight } fr
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { AdminCronJobs } from "@/components/admin/AdminCronJobs";
+import { AdminPriceCredits } from "@/components/admin/AdminPriceCredits";
 
 const ADMIN_EMAIL = "metecorukbasari@gmail.com";
 const PAGE_SIZE = 25;
@@ -238,8 +239,10 @@ export default function AdminApifyLogs() {
               <TabsTrigger value="emails">Mailler ({data.email_logs.total})</TabsTrigger>
               <TabsTrigger value="integrations">Tüm Logs ({data.integrations.total})</TabsTrigger>
               <TabsTrigger value="cron">Cron Joblar</TabsTrigger>
+              <TabsTrigger value="credits">Fiyat Kredileri</TabsTrigger>
             </TabsList>
 
+            <TabsContent value="credits"><AdminPriceCredits /></TabsContent>
             <TabsContent value="cron">
               <AdminCronJobs />
             </TabsContent>
