@@ -2285,6 +2285,57 @@ export type Database = {
         }
         Relationships: []
       }
+      price_base_rooms: {
+        Row: {
+          business_id: string
+          competitor_id: string | null
+          created_at: string
+          determined_by: string
+          id: string
+          room_name: string
+          source_adapter: string
+          subject_type: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          competitor_id?: string | null
+          created_at?: string
+          determined_by?: string
+          id?: string
+          room_name: string
+          source_adapter: string
+          subject_type: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          competitor_id?: string | null
+          created_at?: string
+          determined_by?: string
+          id?: string
+          room_name?: string
+          source_adapter?: string
+          subject_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "price_base_rooms_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "price_base_rooms_competitor_id_fkey"
+            columns: ["competitor_id"]
+            isOneToOne: false
+            referencedRelation: "ci_competitors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       price_credit_ledger: {
         Row: {
           business_id: string
