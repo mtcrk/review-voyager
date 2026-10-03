@@ -6,6 +6,7 @@ import { createEtsAdapter } from "./etstur.ts";
 import { createJollyAdapter } from "./jollytur.ts";
 import { createTatilSepetiAdapter } from "./tatilsepeti.ts";
 import { ensureMatches } from "./matcher.ts";
+import { hasStandard } from "./roomTier.ts";
 import { insertSnapshots, type SnapshotInput } from "./snapshots.ts";
 
 export const DOMESTIC_COLS = "jollytur_hotel_id, jollytur_slug, jollytur_checked_at, tatilsepeti_slug, tatilsepeti_checked_at";
@@ -210,9 +211,12 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
             const byN = new Map<number, Subject[]>();
             for (const s of list) {
               const er = r.results.get(s.key);
-              if (!er || er.status !== "no_prices" || er.not_on_sale) continue;
-              const cur = queriedN.get(s.key) ?? o.nights;
+              if (!er) continue;
+              // Tetik: hiç müsait oda yok VEYA müsait odalar arasında standart kategori yok (ör. yalnızca Suite).
+              const noStd = er.status === "ok" && !hasStandard(er.quotes);
+              if (!(er.status === "no_prices" && !er.not_on_sale) && !noStd) continue;
               const t = tried.get(s.key) ?? [o.nights];
+              const cur = Math.max(...t);
               let n = er.min_stay && er.min_stay > cur ? er.min_stay : cur + 1;
               if (n > MAX_FALLBACK_NIGHTS || t.includes(n)) continue;
               byN.set(n, [...(byN.get(n) ?? []), s]);
@@ -225,8 +229,18 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
                 tried.set(s.key, [...(tried.get(s.key) ?? [o.nights]), n]);
                 const e2 = r2.results.get(s.key);
                 if (!e2 || e2.status === "error") continue;
-                queriedN.set(s.key, n);
-                r.results.set(s.key, { ...e2, match: r.results.get(s.key)?.match });
+                const prev = r.results.get(s.key)!;
+                for (const q of e2.quotes) (q as any)._qn = n;
+                if (prev.status === "ok") {
+                  // Önceki (daha kısa konaklama) odalar korunur; yeni sorgudaki yeni odalar eklenir.
+                  const seen = new Set(prev.quotes.map((q) => `${q.room_name}|${q.board_type}`));
+                  const add = e2.quotes.filter((q) => !seen.has(`${q.room_name}|${q.board_type}`));
+                  r.results.set(s.key, { ...prev, quotes: [...prev.quotes, ...add], min_stay: e2.min_stay ?? prev.min_stay });
+                  if (add.length) queriedN.set(s.key, n);
+                } else {
+                  queriedN.set(s.key, n);
+                  r.results.set(s.key, { ...e2, match: prev.match });
+                }
               }
             }
           }
@@ -236,8 +250,11 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
             if (er.match && Object.keys(er.match).length) await updateSubject(o.admin, o.business.id, s, er.match as any);
             const base = { business_id: o.business.id, competitor_id: s.competitor_id, subject_type: s.subject_type, checkin, nights: o.nights, adults: o.adults, currency: "TRY", fetched_at: fa, market: "domestic" as const };
             if (er.status === "ok") {
-              const qn = queriedN.get(s.key) ?? o.nights;
-              for (const q of er.quotes) erows.push({ ...base, ...q, source: q.source, source_adapter: q.source_adapter, is_official: false, is_ad: false, no_availability: false, queried_nights: qn, min_stay_nights: qn > o.nights ? qn : null });
+              for (const q of er.quotes) {
+                const n = (q as any)._qn ?? o.nights;
+                const { _qn: _, ...qq } = q as any;
+                erows.push({ ...base, ...qq, source: q.source, source_adapter: q.source_adapter, is_official: false, is_ad: false, no_availability: false, queried_nights: n, min_stay_nights: n > o.nights ? n : null });
+              }
             } else if (er.status === "no_prices") {
               const t = tried.get(s.key) ?? [o.nights];
               erows.push({ ...base, source: d.label, source_adapter: d.id, price_per_night: null, no_availability: true, board_type: "unknown", queried_nights: queriedN.get(s.key) ?? o.nights,

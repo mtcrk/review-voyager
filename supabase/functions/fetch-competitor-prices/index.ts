@@ -1,5 +1,6 @@
 // Manuel "Şimdi yenile": kullanıcı oturumu + işletme erişimi (sahip veya grup üyesi).
 // 6 saatlik cache korunur; force_refresh ile atlanır. Tek tarih veya en fazla 14 günlük aralık.
+import { isServiceAuth } from "../_shared/serviceAuth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { runPriceFetch } from "../_shared/prices/engine.ts";
 import { addDays } from "../_shared/prices/types.ts";
@@ -25,13 +26,15 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
     const auth = req.headers.get("Authorization") ?? "";
-    const isService = auth === `Bearer ${serviceKey}`;
+    const isService = await isServiceAuth(auth, supabaseUrl, serviceKey);
     let userId: string | null = null;
+    let platformAdmin = false;
     if (!isService) {
       const userClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: auth } } });
       const { data: { user } } = await userClient.auth.getUser();
       if (!user) return json({ error: "Oturum doğrulanamadı" }, 401);
       userId = user.id;
+      platformAdmin = user.email?.toLowerCase() === "metecorukbasari@gmail.com";
     }
     const admin = createClient(supabaseUrl, serviceKey);
 
@@ -53,7 +56,8 @@ Deno.serve(async (req) => {
 
     if (!isService) {
       const { data: can } = await admin.rpc("user_can_access_business", { _user_id: userId, _business_id: business_id });
-      if (!can) return json({ error: "Bu işletmeye erişiminiz yok" }, 403);
+      const isAdm = platformAdmin;
+      if (!can && !isAdm) return json({ error: "Bu işletmeye erişiminiz yok" }, 403);
     }
 
     const { data: biz } = await admin

@@ -153,7 +153,7 @@ export function createEtsAdapter() {
           const { quotes, minStay, anyRoom } = parseRoomMulti(data, p.nights);
           results.set(s.key, {
             status: quotes.length ? "ok" : "no_prices", quotes, match: match as any,
-            min_stay: quotes.length ? null : minStay,
+            min_stay: minStay,
             not_on_sale: !quotes.length && !anyRoom,
           });
         } catch (e) {

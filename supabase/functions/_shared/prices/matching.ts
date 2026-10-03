@@ -1,3 +1,4 @@
+import { PLACE_WORDS, provincesOf } from "./provinces.ts";
 // Ortak otel eşleşme puanlaması (tüm kaynaklar).
 // Kural: işletme adındaki AYIRT EDİCİ kelimelerin hepsi adayda geçmeli; konum aynı bölgede olmalı.
 // Seviye: high → otomatik kaydet · medium → onay bekler (fiyat çekilmez) · low → eşleşme yok.
@@ -36,7 +37,7 @@ const REGIONS: Record<string, { words: string[]; center: [number, number] }> = {
   cesme: { words: ["cesme", "alacati", "ilica", "urla"], center: [38.32, 26.3] },
   istanbul: { words: ["istanbul", "beyoglu", "sisli", "besiktas", "fatih", "kadikoy", "taksim", "sultanahmet", "sariyer", "atasehir", "uskudar"], center: [41.03, 28.98] },
 };
-const LOC_WORDS = new Set(Object.values(REGIONS).flatMap((r) => r.words));
+const LOC_WORDS = new Set([...Object.values(REGIONS).flatMap((r) => r.words), ...PLACE_WORDS]);
 
 function regionsOf(text: string) {
   const t = new Set(toks(text));
@@ -68,6 +69,13 @@ export function locationCheck(city: string | null, c: Candidate): { status: "ok"
   if (bizR.size && candR.size) {
     const hit = Array.from(candR).some((k) => bizR.has(k));
     return hit ? { status: "ok", note: `konum ${Array.from(candR).join("/")}` } : { status: "mismatch", note: `konum ${Array.from(candR).join("/")}` };
+  }
+  // İl düzeyi: işletme şehri ilçe olabilir ("Akdeniz" → Mersin); aday konumu ilçe ya da il düzeyinde eşleşmeli.
+  const bizP = provincesOf(fold(city ?? ""));
+  const candP = provincesOf(fold(c.location ? c.location : c.name));
+  if (bizP.size && candP.size) {
+    const hit = Array.from(candP).some((p) => bizP.has(p));
+    return { status: hit ? "ok" : "mismatch", note: `il ${Array.from(candP).join("/")}` };
   }
   const ct = fold(city ?? "");
   if (ct && fold(`${c.name} ${c.location ?? ""}`).split(" ").includes(ct)) return { status: "ok", note: `konum ${ct}` };

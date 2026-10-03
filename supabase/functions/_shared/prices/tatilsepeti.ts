@@ -83,8 +83,10 @@ export function createTatilSepetiAdapter() {
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
           }, c);
           const d = JSON.parse(t);
-          const quotes = parseTatilSepeti(String(d?.roomList ?? ""), p.nights);
-          results.set(s.key, { status: quotes.length ? "ok" : "no_prices", quotes, match: match as any });
+          const html = String(d?.roomList ?? "");
+          const quotes = parseTatilSepeti(html, p.nights);
+          const ms = Array.from(html.matchAll(/(?:Minimum|en az)\s+(\d+)\s+Gece/gi)).map((m) => Number(m[1])).filter((n) => n > p.nights);
+          results.set(s.key, { status: quotes.length ? "ok" : "no_prices", quotes, match: match as any, min_stay: ms.length ? Math.min(...ms) : null });
         } catch (e) {
           console.error("tatilsepeti adapter failed", s.name, e);
           results.set(s.key, { status: "error", quotes: [], error: String(e) });

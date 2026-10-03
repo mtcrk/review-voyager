@@ -1,2 +1,4 @@
 - Hotel matching for price sources lives only in supabase/functions/_shared/prices/matcher.ts + matching.ts (search + strict scoring); price adapters never guess matches — keeps matches reliable and auditable.
 - competitor_price_snapshots rows are written only via insertSnapshots/toSnapshotRow in supabase/functions/_shared/prices/snapshots.ts — every row gets the same full key set (PostgREST bulk insert sends missing keys as NULL) and a failed batch falls back to row-by-row.
+- Room category (room_tier) is assigned only in supabase/functions/_shared/prices/roomTier.ts (called from insertSnapshots); price cells compare same board + selected tier, never averages — keeps comparisons like-for-like.
+- Location checks in hotel matching resolve districts to provinces via _shared/prices/provinces.ts — business city fields often hold a district name.

@@ -348,6 +348,7 @@ export type Database = {
           price_source_preference: string | null
           price_tier: number | null
           price_tracking_enabled: boolean
+          province: string | null
           review_notification_type: string
           room_count: number | null
           segment: string | null
@@ -432,6 +433,7 @@ export type Database = {
           price_source_preference?: string | null
           price_tier?: number | null
           price_tracking_enabled?: boolean
+          province?: string | null
           review_notification_type?: string
           room_count?: number | null
           segment?: string | null
@@ -516,6 +518,7 @@ export type Database = {
           price_source_preference?: string | null
           price_tier?: number | null
           price_tracking_enabled?: boolean
+          province?: string | null
           review_notification_type?: string
           room_count?: number | null
           segment?: string | null
@@ -760,6 +763,7 @@ export type Database = {
           price_source_checked_at: string | null
           price_source_preference: string | null
           price_tier: number | null
+          province: string | null
           proximity_m: number | null
           rating: number | null
           review_count: number | null
@@ -837,6 +841,7 @@ export type Database = {
           price_source_checked_at?: string | null
           price_source_preference?: string | null
           price_tier?: number | null
+          province?: string | null
           proximity_m?: number | null
           rating?: number | null
           review_count?: number | null
@@ -914,6 +919,7 @@ export type Database = {
           price_source_checked_at?: string | null
           price_source_preference?: string | null
           price_tier?: number | null
+          province?: string | null
           proximity_m?: number | null
           rating?: number | null
           review_count?: number | null
@@ -1174,6 +1180,7 @@ export type Database = {
           refundable: boolean | null
           remaining_allotment: number | null
           room_name: string | null
+          room_tier: string
           source: string
           source_adapter: string
           subject_type: string
@@ -1210,6 +1217,7 @@ export type Database = {
           refundable?: boolean | null
           remaining_allotment?: number | null
           room_name?: string | null
+          room_tier?: string
           source: string
           source_adapter?: string
           subject_type?: string
@@ -1246,6 +1254,7 @@ export type Database = {
           refundable?: boolean | null
           remaining_allotment?: number | null
           room_name?: string | null
+          room_tier?: string
           source?: string
           source_adapter?: string
           subject_type?: string

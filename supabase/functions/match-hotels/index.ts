@@ -1,5 +1,6 @@
 // Otel eşleştirme (fiyat çekmeden). Kullanıcı: işletmeye erişimi olan oturum. Servis: service role ile
 // (bir kerelik toplu çalıştırma). Body: { business_id, subject?: "own" | competitor_id, force?, sources? }
+import { isServiceAuth } from "../_shared/serviceAuth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { MATCH_COLS, matchRow, SOURCES, type SourceId } from "../_shared/prices/matcher.ts";
 
@@ -17,7 +18,7 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const admin: any = createClient(url, serviceKey);
     const auth = req.headers.get("Authorization") ?? "";
-    const isService = auth === `Bearer ${serviceKey}`;
+    const isService = await isServiceAuth(auth, url, serviceKey);
 
     let body: any = {};
     try { body = await req.json(); } catch {}
@@ -28,8 +29,10 @@ Deno.serve(async (req) => {
       const userClient = createClient(url, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: auth } } });
       const { data: { user } } = await userClient.auth.getUser();
       if (!user) return json({ error: "Oturum doğrulanamadı" }, 401);
+      const platformAdmin = user.email?.toLowerCase() === "metecorukbasari@gmail.com";
       const { data: can } = await admin.rpc("user_can_access_business", { _user_id: user.id, _business_id: business_id });
-      if (!can) return json({ error: "Bu işletmeye erişiminiz yok" }, 403);
+      const isAdm = platformAdmin;
+      if (!can && !isAdm) return json({ error: "Bu işletmeye erişiminiz yok" }, 403);
     }
 
     const force = body?.force === true;
@@ -48,13 +51,13 @@ Deno.serve(async (req) => {
       for (const r of data ?? []) targets.push({ table: "ci_competitors", id: r.id, row: { ...r, city: r.city } });
     }
     // Rakiplerde şehir yoksa işletmenin şehri referans alınır.
-    const { data: biz } = await admin.from("businesses").select("city").eq("id", business_id).single();
+    const { data: biz } = await admin.from("businesses").select("city, province").eq("id", business_id).single();
 
     const work = async () => {
       const results: any[] = [];
       let calls = 0, unlocker = 0, cost = 0;
       for (const t of targets) {
-        const row = { ...t.row, city: t.row.city ?? biz?.city ?? null };
+        const row = { ...t.row, city: t.row.city ?? biz?.city ?? null, province: t.row.province ?? biz?.province ?? null };
         const r = await matchRow(row, { force, sources });
         calls += r.calls; unlocker += r.unlocker; cost += r.cost_usd;
         const { error } = await admin.from(t.table).update(r.patch).eq("id", t.id);
