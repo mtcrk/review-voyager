@@ -29,8 +29,9 @@ Deno.serve(async (req) => {
       const userClient = createClient(url, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: auth } } });
       const { data: { user } } = await userClient.auth.getUser();
       if (!user) return json({ error: "Oturum doğrulanamadı" }, 401);
+      const platformAdmin = user.email?.toLowerCase() === "metecorukbasari@gmail.com";
       const { data: can } = await admin.rpc("user_can_access_business", { _user_id: user.id, _business_id: business_id });
-      const { data: isAdm } = can ? { data: true } : await admin.rpc("has_role", { _user_id: user.id, _role: "admin" });
+      const isAdm = platformAdmin;
       if (!can && !isAdm) return json({ error: "Bu işletmeye erişiminiz yok" }, 403);
     }
 
