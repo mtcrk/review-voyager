@@ -48,13 +48,13 @@ Deno.serve(async (req) => {
       for (const r of data ?? []) targets.push({ table: "ci_competitors", id: r.id, row: { ...r, city: r.city } });
     }
     // Rakiplerde şehir yoksa işletmenin şehri referans alınır.
-    const { data: biz } = await admin.from("businesses").select("city").eq("id", business_id).single();
+    const { data: biz } = await admin.from("businesses").select("city, province").eq("id", business_id).single();
 
     const work = async () => {
       const results: any[] = [];
       let calls = 0, unlocker = 0, cost = 0;
       for (const t of targets) {
-        const row = { ...t.row, city: t.row.city ?? biz?.city ?? null };
+        const row = { ...t.row, city: t.row.city ?? biz?.city ?? null, province: t.row.province ?? biz?.province ?? null };
         const r = await matchRow(row, { force, sources });
         calls += r.calls; unlocker += r.unlocker; cost += r.cost_usd;
         const { error } = await admin.from(t.table).update(r.patch).eq("id", t.id);

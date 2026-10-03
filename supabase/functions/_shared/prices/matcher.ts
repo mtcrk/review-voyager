@@ -8,6 +8,7 @@ const distinctiveHit = (name: string, cand: string) => { const c = new Set(fold(
 import { type Counter, domesticCall, UA } from "./domesticHtml.ts";
 import { unlockerAvailable, unlockerFetch } from "./unlocker.ts";
 import { addDays } from "./types.ts";
+import { withProvince } from "./provinces.ts";
 
 export type SourceId = "etstur" | "jollytur" | "tatilsepeti" | "booking" | "serpapi";
 export const SOURCES: SourceId[] = ["etstur", "jollytur", "tatilsepeti", "booking", "serpapi"];
@@ -23,6 +24,7 @@ export const FIELDS: Record<SourceId, { idCols: string[]; nameCol: string }> = {
 };
 export const MATCH_COLS = [
   "match_name_snapshot",
+  "province",
   ...SOURCES.flatMap((s) => [...FIELDS[s].idCols, FIELDS[s].nameCol, `${s}_match_status`, `${s}_match_confidence`, `${s}_match_reason`, `${s}_match_source`, `${s}_match_candidate`, `${s}_match_checked_at`]),
 ].join(", ");
 
@@ -160,6 +162,7 @@ export function needsMatch(row: Row, src: SourceId, force: boolean) {
 
 /** Bir mülk için seçilen kaynakları eşleştirir; satır patch'ini ve sonuçları döndürür. */
 export async function matchRow(row: Row, opts: { force?: boolean; sources?: SourceId[]; allowPaid?: boolean } = {}) {
+  const loc = withProvince(row.city, row.province, fold);
   const c: Counter = { calls: 0, unlocker: 0 };
   let cost = 0;
   const patch: Record<string, unknown> = { match_name_snapshot: row.name };
@@ -177,9 +180,9 @@ export async function matchRow(row: Row, opts: { force?: boolean; sources?: Sour
     if (src === "serpapi" && opts.allowPaid === false) { outcomes.push({ source: src, status: "skipped", reason: "ücretli arama kapalı" }); continue; }
     if (!needsMatch(row, src, !!opts.force)) { outcomes.push({ source: src, status: "skipped", reason: row[`${src}_match_source`] === "manual" ? "elle girildi" : "güncel" }); continue; }
     try {
-      const f = await searchers[src](row.name, row.city, c);
+      const f = await searchers[src](row.name, loc, c);
       cost += f.cost;
-      const { best, rejected } = pickBest(refs, row.city, f.cands);
+      const { best, rejected } = pickBest(refs, loc, f.cands);
       const rej = rejected.map((r) => r.reason).join(" · ");
       const base = { [`${src}_match_checked_at`]: now, [`${src}_match_source`]: "auto" };
       if (!best) {
@@ -225,7 +228,7 @@ export async function ensureMatches(admin: any, businessId: string, opts: { comp
   let cost = 0, calls = 0;
   for (const t of targets) {
     if (Date.now() > opts.deadline) break;
-    const row = { ...t.row, city: t.row.city ?? biz?.city ?? null };
+    const row = { ...t.row, city: t.row.city ?? biz?.city ?? null, province: t.row.province ?? biz?.province ?? null };
     if (!SOURCES.some((s) => needsMatch(row, s, false))) continue;
     const r = await matchRow(row);
     cost += r.cost_usd; calls += r.calls;
