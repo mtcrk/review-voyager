@@ -187,14 +187,6 @@ function CellView({ cell, median: med, isOwn, nights }: { cell: Cell; median: nu
               </div>
             ) : null}
             <Row k="Çekim zamanı" v={fmtTime(cell.fetchedAt)} />
-            <div className="max-h-32 space-y-0.5 overflow-auto border-t pt-1">
-              {cell.rows.slice(0, 8).map((r) => (
-                <div key={r.id} className="flex justify-between gap-2 text-muted-foreground">
-                  <span className="truncate">{BOARD_LABELS[r.board_type]} · {r.room_name ?? r.source}</span>
-                  <span className="tabular-nums">{r.price_per_night ? fmtTry(Number(r.price_per_night)) : "—"}</span>
-                </div>
-              ))}
-            </div>
           </>
         )}
         {cell.kind === "sold_out" && (
