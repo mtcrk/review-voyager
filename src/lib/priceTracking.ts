@@ -15,6 +15,16 @@ export const BOARD_LABELS: Record<BoardType, string> = {
   unknown: "Belirsiz",
 };
 
+export type RoomTier = "standard" | "superior" | "deluxe" | "family" | "suite" | "villa" | "unknown";
+export type TierFilter = "standard" | "all" | "superior" | "deluxe" | "suite";
+export const TIER_LABELS: Record<RoomTier, string> = {
+  standard: "Standart", superior: "Superior", deluxe: "Deluxe", family: "Aile", suite: "Suit", villa: "Villa", unknown: "Belirsiz",
+};
+export const TIER_FILTERS: { v: TierFilter; label: string }[] = [
+  { v: "standard", label: "Standart" }, { v: "all", label: "Tümü (en ucuz müsait)" },
+  { v: "superior", label: "Superior" }, { v: "deluxe", label: "Deluxe" }, { v: "suite", label: "Suit" },
+];
+
 export const COMPARABLE_BOARDS: BoardType[] = ["room_only", "breakfast", "half_board", "full_board", "all_inclusive"];
 
 export const ADAPTER_LABELS: Record<string, string> = {
@@ -61,6 +71,7 @@ export type Snapshot = {
   reason?: string | null;
   min_stay?: string | number | null;
   min_stay_nights?: number | null;
+  room_tier?: RoomTier | null;
 };
 
 export type OwnRate = {
@@ -76,6 +87,15 @@ export type OwnRate = {
 export type Cell =
   | { kind: "none" }
   | { kind: "sold_out"; fetchedAt: string; source: string; label: string; details: string[]; refs?: RefPrice[] }
+  | {
+      /** Pansiyon uyuyor ama seçili oda kategorisi yok: kıyasa/medyana girmez. */
+      kind: "no_tier";
+      fetchedAt: string;
+      tier: TierFilter;
+      cheapest: { value: number; roomName: string | null; tier: RoomTier; source: string };
+      rows: Snapshot[];
+      refs?: RefPrice[];
+    }
   | { kind: "incomparable"; fetchedAt: string; reason: string; rows: Snapshot[]; refs?: RefPrice[] }
   | {
       kind: "value";
@@ -93,6 +113,9 @@ export type Cell =
       /** Fiyat kaynağın min. konaklama şartı nedeniyle bu kadar gecelik sorguyla alındı. */
       minStay?: number | null;
       refs?: RefPrice[];
+      tier?: RoomTier | null;
+      /** Aynı çekim turundaki tüm odalar (detay listesi için). */
+      rows?: Snapshot[];
     };
 
 /** Pansiyon tipi belirtilmemiş fiyatlar: kıyasa girmez, yalnızca referans olarak gösterilir. */
@@ -134,10 +157,12 @@ export function groupBatches(rows: Snapshot[]) {
   return out;
 }
 
-function cheapest(rows: Snapshot[], board: BoardType) {
+const tierOk = (r: Snapshot, tier: TierFilter) => tier === "all" || (r.room_tier ?? "unknown") === tier;
+
+function cheapest(rows: Snapshot[], board: BoardType, tier: TierFilter = "all") {
   let best: Snapshot | null = null;
   for (const r of rows) {
-    if (r.no_availability || r.board_type !== board || !r.price_per_night) continue;
+    if (r.no_availability || r.board_type !== board || !r.price_per_night || !tierOk(r, tier)) continue;
     if (!best || Number(r.price_per_night) < Number(best.price_per_night)) best = r;
   }
   return best;
@@ -151,7 +176,7 @@ function incomparableReason(rows: Snapshot[]) {
   return `Yalnızca ${known.map((b) => BOARD_LABELS[b as BoardType].toLocaleLowerCase("tr")).join(", ")} fiyatı bulundu`;
 }
 
-export function computeCell(batches: Snapshot[][] | undefined, board: BoardType, manual?: OwnRate[]): Cell {
+export function computeCell(batches: Snapshot[][] | undefined, board: BoardType, manual?: OwnRate[], tier: TierFilter = "standard"): Cell {
   const manualBest = (manual ?? [])
     .filter((m) => m.board_type === board)
     .sort((a, b) => a.price_per_night - b.price_per_night)[0];
@@ -201,11 +226,18 @@ export function computeCell(batches: Snapshot[][] | undefined, board: BoardType,
       : "dolu";
     return { kind: "sold_out", fetchedAt, source: latest[0].source, label, details };
   }
-  const best = cheapest(latest, board);
-  if (!best) return { kind: "incomparable", fetchedAt, reason: incomparableReason(latest), rows: latest, refs };
+  const anyBoard = cheapest(latest, board, "all");
+  if (!anyBoard) return { kind: "incomparable", fetchedAt, reason: incomparableReason(latest), rows: latest, refs };
+  const best = cheapest(latest, board, tier);
+  if (!best) {
+    return {
+      kind: "no_tier", fetchedAt, tier, rows: latest, refs,
+      cheapest: { value: Number(anyBoard.price_per_night), roomName: anyBoard.room_name, tier: (anyBoard.room_tier ?? "unknown") as RoomTier, source: anyBoard.source },
+    };
+  }
   let prev: number | undefined;
   for (const b of batches.slice(used)) {
-    const p = cheapest(b, board);
+    const p = cheapest(b, board, tier);
     if (p) { prev = Number(p.price_per_night); break; }
   }
   const value = Number(best.price_per_night);
@@ -222,6 +254,8 @@ export function computeCell(batches: Snapshot[][] | undefined, board: BoardType,
     taxesIncluded: best.taxes_included,
     minStay: best.min_stay_nights ?? null,
     refs,
+    tier: best.room_tier ?? null,
+    rows: latest,
     prev,
     changePct: prev ? ((value - prev) / prev) * 100 : undefined,
   };
