@@ -102,3 +102,6 @@ project_id = "pnpuhewfoxssmbpryart"
 
 [functions.match-hotels]
   verify_jwt = false
+
+[functions.price-base-rooms]
+verify_jwt = false
