@@ -215,8 +215,8 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
               // Tetik: hiç müsait oda yok VEYA müsait odalar arasında standart kategori yok (ör. yalnızca Suite).
               const noStd = er.status === "ok" && !hasStandard(er.quotes);
               if (!(er.status === "no_prices" && !er.not_on_sale) && !noStd) continue;
-              const cur = queriedN.get(s.key) ?? o.nights;
               const t = tried.get(s.key) ?? [o.nights];
+              const cur = Math.max(...t);
               let n = er.min_stay && er.min_stay > cur ? er.min_stay : cur + 1;
               if (n > MAX_FALLBACK_NIGHTS || t.includes(n)) continue;
               byN.set(n, [...(byN.get(n) ?? []), s]);
@@ -250,9 +250,8 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
             if (er.match && Object.keys(er.match).length) await updateSubject(o.admin, o.business.id, s, er.match as any);
             const base = { business_id: o.business.id, competitor_id: s.competitor_id, subject_type: s.subject_type, checkin, nights: o.nights, adults: o.adults, currency: "TRY", fetched_at: fa, market: "domestic" as const };
             if (er.status === "ok") {
-              const qn = queriedN.get(s.key) ?? o.nights;
               for (const q of er.quotes) {
-                const n = (q as any)._qn ?? (er.status === "ok" && !queriedN.has(s.key) ? o.nights : qn);
+                const n = (q as any)._qn ?? o.nights;
                 const { _qn: _, ...qq } = q as any;
                 erows.push({ ...base, ...qq, source: q.source, source_adapter: q.source_adapter, is_official: false, is_ad: false, no_availability: false, queried_nights: n, min_stay_nights: n > o.nights ? n : null });
               }
