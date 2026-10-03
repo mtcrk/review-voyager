@@ -30,7 +30,8 @@ Deno.serve(async (req) => {
       const { data: { user } } = await userClient.auth.getUser();
       if (!user) return json({ error: "Oturum doğrulanamadı" }, 401);
       const { data: can } = await admin.rpc("user_can_access_business", { _user_id: user.id, _business_id: business_id });
-      if (!can) return json({ error: "Bu işletmeye erişiminiz yok" }, 403);
+      const { data: isAdm } = can ? { data: true } : await admin.rpc("has_role", { _user_id: user.id, _role: "admin" });
+      if (!can && !isAdm) return json({ error: "Bu işletmeye erişiminiz yok" }, 403);
     }
 
     const force = body?.force === true;

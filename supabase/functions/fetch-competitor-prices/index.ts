@@ -54,7 +54,8 @@ Deno.serve(async (req) => {
 
     if (!isService) {
       const { data: can } = await admin.rpc("user_can_access_business", { _user_id: userId, _business_id: business_id });
-      if (!can) return json({ error: "Bu işletmeye erişiminiz yok" }, 403);
+      const { data: isAdm } = can ? { data: true } : await admin.rpc("has_role", { _user_id: userId, _role: "admin" });
+      if (!can && !isAdm) return json({ error: "Bu işletmeye erişiminiz yok" }, 403);
     }
 
     const { data: biz } = await admin
