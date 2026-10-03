@@ -1,5 +1,6 @@
 // Otel eşleştirme (fiyat çekmeden). Kullanıcı: işletmeye erişimi olan oturum. Servis: service role ile
 // (bir kerelik toplu çalıştırma). Body: { business_id, subject?: "own" | competitor_id, force?, sources? }
+import { isServiceAuth } from "../_shared/serviceAuth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { MATCH_COLS, matchRow, SOURCES, type SourceId } from "../_shared/prices/matcher.ts";
 
@@ -17,7 +18,7 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const admin: any = createClient(url, serviceKey);
     const auth = req.headers.get("Authorization") ?? "";
-    const isService = auth === `Bearer ${serviceKey}`;
+    const isService = await isServiceAuth(auth, url, serviceKey);
 
     let body: any = {};
     try { body = await req.json(); } catch {}

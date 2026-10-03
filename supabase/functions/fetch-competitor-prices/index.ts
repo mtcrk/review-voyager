@@ -1,5 +1,6 @@
 // Manuel "Şimdi yenile": kullanıcı oturumu + işletme erişimi (sahip veya grup üyesi).
 // 6 saatlik cache korunur; force_refresh ile atlanır. Tek tarih veya en fazla 14 günlük aralık.
+import { isServiceAuth } from "../_shared/serviceAuth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { runPriceFetch } from "../_shared/prices/engine.ts";
 import { addDays } from "../_shared/prices/types.ts";
@@ -25,7 +26,7 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
     const auth = req.headers.get("Authorization") ?? "";
-    const isService = auth === `Bearer ${serviceKey}`;
+    const isService = await isServiceAuth(auth, supabaseUrl, serviceKey);
     let userId: string | null = null;
     if (!isService) {
       const userClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: auth } } });
