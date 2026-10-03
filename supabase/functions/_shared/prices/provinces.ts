@@ -59,3 +59,15 @@ export function provincesOf(folded: string): Set<string> {
   for (const w of toks) if (DISTRICT_TO_PROVINCE[w]) out.add(DISTRICT_TO_PROVINCE[w]);
   return out;
 }
+
+const TITLE: Record<string, string> = { mersin: "Mersin", antalya: "Antalya", mugla: "Muğla", izmir: "İzmir", aydin: "Aydın", istanbul: "İstanbul" };
+/** "Akdeniz" → "Akdeniz Mersin"; il zaten geçiyorsa olduğu gibi. */
+export function withProvince(city: string | null, province?: string | null, foldFn: (s: string) => string = (s) => s.toLowerCase()) {
+  const c = (city ?? "").trim();
+  if (province && !foldFn(c).split(" ").includes(foldFn(province))) return [c, province].filter(Boolean).join(" ");
+  const f = foldFn(c);
+  if (!c || PROVINCES.includes(f)) return c || null;
+  const p = provincesOf(f);
+  if (p.size === 1) { const k = Array.from(p)[0]; return `${c} ${TITLE[k] ?? k[0].toUpperCase() + k.slice(1)}`; }
+  return c;
+}
