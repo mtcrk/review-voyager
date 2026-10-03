@@ -1,3 +1,4 @@
+import { isPlatformAdmin } from "../_shared/platformAdmin.ts";
 // Manuel "Şimdi yenile": kullanıcı oturumu + işletme erişimi (sahip veya grup üyesi).
 // 6 saatlik cache korunur; force_refresh ile atlanır. Tek tarih veya en fazla 14 günlük aralık.
 import { isServiceAuth } from "../_shared/serviceAuth.ts";
@@ -34,7 +35,7 @@ Deno.serve(async (req) => {
       const { data: { user } } = await userClient.auth.getUser();
       if (!user) return json({ error: "Oturum doğrulanamadı" }, 401);
       userId = user.id;
-      platformAdmin = user.email?.toLowerCase() === "metecorukbasari@gmail.com";
+      platformAdmin = isPlatformAdmin(user.email);
     }
     const admin = createClient(supabaseUrl, serviceKey);
 

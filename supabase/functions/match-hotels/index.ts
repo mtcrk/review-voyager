@@ -1,3 +1,4 @@
+import { isPlatformAdmin } from "../_shared/platformAdmin.ts";
 // Otel eşleştirme (fiyat çekmeden). Kullanıcı: işletmeye erişimi olan oturum. Servis: service role ile
 // (bir kerelik toplu çalıştırma). Body: { business_id, subject?: "own" | competitor_id, force?, sources? }
 import { isServiceAuth } from "../_shared/serviceAuth.ts";
@@ -29,7 +30,7 @@ Deno.serve(async (req) => {
       const userClient = createClient(url, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: auth } } });
       const { data: { user } } = await userClient.auth.getUser();
       if (!user) return json({ error: "Oturum doğrulanamadı" }, 401);
-      const platformAdmin = user.email?.toLowerCase() === "metecorukbasari@gmail.com";
+      const platformAdmin = isPlatformAdmin(user.email);
       const { data: can } = await admin.rpc("user_can_access_business", { _user_id: user.id, _business_id: business_id });
       const isAdm = platformAdmin;
       if (!can && !isAdm) return json({ error: "Bu işletmeye erişiminiz yok" }, 403);

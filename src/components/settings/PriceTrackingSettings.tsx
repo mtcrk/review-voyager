@@ -80,11 +80,50 @@ function SourceRow({ row, s, onSave }: { row: any; s: (typeof SRC)[number]; onSa
   );
 }
 
-function MatchEditor({ label, row, onSave }: { label: string; row: any; onSave: (patch: Record<string, unknown>) => Promise<void> }) {
+type BaseInfo = { bases: Map<string, { room_name: string; determined_by: string }>; seen: Map<string, string[]> };
+const bk = (st: string, cid: string | null, ad: string) => `${st}|${st === "own" ? "" : cid ?? ""}|${ad}`;
+
+function BaseRoomRow({ bizId, st, cid, s, info, onChanged }: { bizId: string; st: string; cid: string | null; s: (typeof SRC)[number]; info: BaseInfo; onChanged: () => void }) {
+  const k = bk(st, cid, s.id);
+  const base = info.bases.get(k);
+  const seen = info.seen.get(k) ?? [];
+  const [edit, setEdit] = useState(false);
+  if (!base && !seen.length) return null;
+  const save = async (room: string | null) => {
+    try {
+      await invokeAuthedFunction("price-base-rooms", { body: { business_id: bizId, action: "set", subject_type: st, competitor_id: cid, source_adapter: s.id, room_name: room } });
+      toast({ title: room ? "Giriş odası kaydedildi" : "Otomatik seçime döndü" });
+      setEdit(false); onChanged();
+    } catch (e) { toast({ title: "Kaydedilemedi", description: (e as Error).message, variant: "destructive" }); }
+  };
+  return (
+    <div className="flex flex-wrap items-center gap-2 pl-24 text-[11px] text-muted-foreground">
+      <span>Giriş odası: <span className="text-foreground">{base?.room_name ?? "henüz belirlenmedi"}</span>{base && ` (${base.determined_by === "manual" ? "elle" : "otomatik"})`}</span>
+      {!edit && <Button size="sm" variant="ghost" className="h-6 px-2 text-[11px]" onClick={() => setEdit(true)}>değiştir</Button>}
+      {edit && (
+        <>
+          <Select value={base?.room_name ?? ""} onValueChange={(v) => save(v)}>
+            <SelectTrigger className="h-7 w-64 text-xs"><SelectValue placeholder="Oda seç" /></SelectTrigger>
+            <SelectContent>{seen.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}</SelectContent>
+          </Select>
+          {base?.determined_by === "manual" && <Button size="sm" variant="ghost" className="h-6 px-2 text-[11px]" onClick={() => save(null)}>Otomatiğe dön</Button>}
+          <Button size="sm" variant="ghost" className="h-6 px-2 text-[11px]" onClick={() => setEdit(false)}>Vazgeç</Button>
+        </>
+      )}
+    </div>
+  );
+}
+
+function MatchEditor({ label, row, onSave, bizId, st, cid, info, onBaseChanged }: { label: string; row: any; onSave: (patch: Record<string, unknown>) => Promise<void>; bizId: string; st: string; cid: string | null; info: BaseInfo; onBaseChanged: () => void }) {
   return (
     <div className="space-y-2 rounded-lg border p-3 text-sm">
       <div className="font-medium">{label}</div>
-      {SRC.map((s) => <SourceRow key={s.id} row={row} s={s} onSave={onSave} />)}
+      {SRC.map((s) => (
+        <div key={s.id} className="space-y-1">
+          <SourceRow row={row} s={s} onSave={onSave} />
+          <BaseRoomRow bizId={bizId} st={st} cid={cid} s={s} info={info} onChanged={onBaseChanged} />
+        </div>
+      ))}
     </div>
   );
 }
@@ -123,6 +162,27 @@ export function PriceTrackingSettings() {
         .order("date")
         .limit(200);
       return data ?? [];
+    },
+  });
+
+  const { data: baseInfo = { bases: new Map(), seen: new Map() } as BaseInfo, refetch: refetchBase } = useQuery({
+    queryKey: ["pt-base-rooms", biz?.id],
+    enabled: !!biz?.id,
+    queryFn: async (): Promise<BaseInfo> => {
+      const { data: b } = await (supabase as any).from("price_base_rooms").select("subject_type, competitor_id, source_adapter, room_name, determined_by").eq("business_id", biz.id);
+      const bases = new Map<string, { room_name: string; determined_by: string }>();
+      for (const r of b ?? []) bases.set(bk(r.subject_type, r.competitor_id, r.source_adapter), r);
+      const since = new Date(Date.now() - 30 * 86400_000).toISOString();
+      const seenSet = new Map<string, Set<string>>();
+      for (let from = 0; from < 10000; from += 1000) {
+        const { data } = await (supabase as any).from("competitor_price_snapshots").select("subject_type, competitor_id, source_adapter, room_name")
+          .eq("business_id", biz.id).gte("fetched_at", since).not("room_name", "is", null).not("price_per_night", "is", null).order("id").range(from, from + 999);
+        for (const r of data ?? []) { const k = bk(r.subject_type, r.competitor_id, r.source_adapter); (seenSet.get(k) ?? seenSet.set(k, new Set()).get(k)!).add(r.room_name); }
+        if (!data || data.length < 1000) break;
+      }
+      const seen = new Map<string, string[]>();
+      seenSet.forEach((v, k) => seen.set(k, [...v].sort((a, z) => a.localeCompare(z, "tr"))));
+      return { bases, seen };
     },
   });
 
@@ -260,9 +320,9 @@ export function PriceTrackingSettings() {
             </Button>
             {summary && <span className="text-xs text-muted-foreground">{summary}</span>}
           </div>
-          <MatchEditor label={`${biz.name} (otelimiz)`} row={biz} onSave={saveBiz} />
+          <MatchEditor label={`${biz.name} (otelimiz)`} row={biz} onSave={saveBiz} bizId={biz.id} st="own" cid={null} info={baseInfo} onBaseChanged={() => { refetchBase(); qc.invalidateQueries({ queryKey: ["pt-snapshots"] }); }} />
           {comps.map((c: any) => (
-            <MatchEditor key={c.id} label={c.name} row={c} onSave={saveComp(c.id)} />
+            <MatchEditor key={c.id} label={c.name} row={c} onSave={saveComp(c.id)} bizId={biz.id} st="competitor" cid={c.id} info={baseInfo} onBaseChanged={() => { refetchBase(); qc.invalidateQueries({ queryKey: ["pt-snapshots"] }); }} />
           ))}
           {!comps.length && <p className="text-sm text-muted-foreground">Henüz rakip eklenmemiş.</p>}
         </CardContent>

@@ -3,6 +3,7 @@
 // (default'u kullanmaz) → NOT NULL ihlali tüm batch'i düşürür. Bu yüzden her satır aynı
 // anahtar kümesiyle, tüm kolonları açıkça dolu olarak üretilir.
 import { assignTiers, classifyRoom } from "./roomTier.ts";
+import { baseKey, loadBaseRooms } from "./baseRooms.ts";
 const TIERS = new Set(["standard", "superior", "deluxe", "family", "suite", "villa", "unknown"]);
 const BOARDS = new Set(["room_only", "breakfast", "half_board", "full_board", "all_inclusive", "unknown"]);
 const ADAPTERS = new Set(["serpapi", "booking", "manual", "etstur", "jollytur", "tatilsepeti"]);
@@ -102,7 +103,13 @@ export async function insertSnapshots(admin: any, inputs: SnapshotInput[], label
     const k = `${r.subject_type}|${r.competitor_id}|${r.checkin}|${r.source_adapter}|${r.source}|${r.fetched_at}`;
     groups.set(k, [...(groups.get(k) ?? []), r]);
   }
-  groups.forEach((g) => assignTiers(g));
+  // Kalıcı giriş odası varsa standart o odadır; yoksa geçici gruplama kuralı (en ucuz kategorisiz oda).
+  const bases = rows.length ? await loadBaseRooms(admin, rows[0].business_id).catch(() => new Map<string, string>()) : new Map<string, string>();
+  groups.forEach((g) => {
+    const base = bases.get(baseKey(g[0].subject_type, g[0].competitor_id, g[0].source_adapter));
+    if (!base) { assignTiers(g); return; }
+    for (const r of g) r.room_tier = r.room_name === base ? "standard" : classifyRoom(r.room_name);
+  });
   const errors: string[] = [];
   if (!rows.length) return { saved: 0, errors };
   const { error } = await admin.from("competitor_price_snapshots").insert(rows, { defaultToNull: false });
