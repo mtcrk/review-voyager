@@ -2,6 +2,8 @@
 // Toplu insert'te satırların anahtar kümesi farklıysa PostgREST eksik kolonu NULL gönderir
 // (default'u kullanmaz) → NOT NULL ihlali tüm batch'i düşürür. Bu yüzden her satır aynı
 // anahtar kümesiyle, tüm kolonları açıkça dolu olarak üretilir.
+import { assignTiers, classifyRoom } from "./roomTier.ts";
+const TIERS = new Set(["standard", "superior", "deluxe", "family", "suite", "villa", "unknown"]);
 const BOARDS = new Set(["room_only", "breakfast", "half_board", "full_board", "all_inclusive", "unknown"]);
 const ADAPTERS = new Set(["serpapi", "booking", "manual", "etstur", "jollytur", "tatilsepeti"]);
 
@@ -44,6 +46,7 @@ export type SnapshotInput = {
   queried_nights?: number | null;
   /** Çekimi başlatan: cron | manual | instant */
   fetch_trigger?: string | null;
+  room_tier?: string | null;
 };
 
 export function toSnapshotRow(i: SnapshotInput) {
@@ -71,6 +74,7 @@ export function toSnapshotRow(i: SnapshotInput) {
     price_derived: i.price_derived === true,
     board_type: board,
     room_name: str(i.room_name),
+    room_tier: i.room_tier && TIERS.has(i.room_tier) ? i.room_tier : classifyRoom(str(i.room_name)),
     refundable,
     free_cancellation: refundable,
     taxes_included: bool(i.taxes_included),
@@ -91,6 +95,14 @@ export function toSnapshotRow(i: SnapshotInput) {
 /** Toplu yazar; batch reddedilirse satır satır dener. Kaydedilen sayıyı ve hataları döndürür. */
 export async function insertSnapshots(admin: any, inputs: SnapshotInput[], label: string, fetchTrigger?: string) {
   const rows = inputs.map((i) => toSnapshotRow(fetchTrigger ? { ...i, fetch_trigger: fetchTrigger } : i));
+  // Oda kategorisi grup bazında (mülk × tarih × kaynak × çekim): kategorisiz en ucuz oda standart sayılabilir.
+  const groups = new Map<string, any[]>();
+  for (const r of rows) {
+    if (r.price_per_night === null) continue;
+    const k = `${r.subject_type}|${r.competitor_id}|${r.checkin}|${r.source_adapter}|${r.source}|${r.fetched_at}`;
+    groups.set(k, [...(groups.get(k) ?? []), r]);
+  }
+  groups.forEach((g) => assignTiers(g));
   const errors: string[] = [];
   if (!rows.length) return { saved: 0, errors };
   const { error } = await admin.from("competitor_price_snapshots").insert(rows, { defaultToNull: false });
