@@ -7,6 +7,7 @@ import { createJollyAdapter } from "./jollytur.ts";
 import { createTatilSepetiAdapter } from "./tatilsepeti.ts";
 import { ensureMatches } from "./matcher.ts";
 import { hasStandard } from "./roomTier.ts";
+import { refreshBaseRooms } from "./baseRooms.ts";
 import { insertSnapshots, type SnapshotInput } from "./snapshots.ts";
 
 export const DOMESTIC_COLS = "jollytur_hotel_id, jollytur_slug, jollytur_checked_at, tatilsepeti_slug, tatilsepeti_checked_at";
@@ -405,6 +406,9 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
       }
     }
   } finally {
+    if (res.saved > 0) {
+      try { await refreshBaseRooms(o.admin, o.business.id); } catch (e) { console.error("refreshBaseRooms failed", e); }
+    }
     const logs = Object.entries(perAdapter)
       .filter(([, v]) => v.calls > 0 || v.cost > 0)
       .map(([adapter, v]) => ({
