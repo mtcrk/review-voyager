@@ -31,6 +31,10 @@ import {
   type OwnRate,
   type Snapshot,
   computeCell,
+  TIER_FILTERS,
+  TIER_LABELS,
+  type TierFilter,
+  type Snapshot as SnapRow,
   fmtTry,
   groupBatches,
   isoDay,
@@ -98,6 +102,11 @@ function CellView({ cell, median: med, isOwn, nights }: { cell: Cell; median: nu
       </span>
     ) : cell.kind === "sold_out" ? (
       <span className="text-[10px] leading-tight text-muted-foreground">{cell.label}</span>
+    ) : cell.kind === "no_tier" ? (
+      <span className="block text-[10px] leading-tight text-muted-foreground">
+        {cell.tier === "standard" ? "standart oda yok" : `${TIER_LABELS[cell.tier as keyof typeof TIER_LABELS] ?? cell.tier} yok`}
+        <span className="block tabular-nums">en ucuz: {TIER_LABELS[cell.cheapest.tier]} {fmtTry(cell.cheapest.value)}</span>
+      </span>
     ) : cell.kind === "incomparable" ? (
       <span className="text-[10px] leading-tight text-warning">kıyaslanamaz</span>
     ) : (
@@ -107,7 +116,7 @@ function CellView({ cell, median: med, isOwn, nights }: { cell: Cell; median: nu
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button className={cn("h-full min-h-12 w-full rounded px-1 py-1 text-xs transition-colors hover:ring-1 hover:ring-primary/40", tone, cell.kind === "none" && "bg-muted/60", cell.kind === "sold_out" && "bg-muted/30")}>
+        <button className={cn("h-full min-h-12 w-full rounded px-1 py-1 text-xs transition-colors hover:ring-1 hover:ring-primary/40", tone, cell.kind === "none" && "bg-muted/60", cell.kind === "sold_out" && "bg-muted/30", cell.kind === "no_tier" && "bg-[repeating-linear-gradient(45deg,hsl(var(--muted)),hsl(var(--muted))_4px,transparent_4px,transparent_8px)]")}>
           {content}
           {cell.kind === "value" && cell.minStay ? (
             <div className="mt-0.5 text-[9px] leading-none text-warning">min {cell.minStay} gece</div>
@@ -119,7 +128,7 @@ function CellView({ cell, median: med, isOwn, nights }: { cell: Cell; median: nu
           )}
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-72 space-y-1.5 text-xs">
+      <PopoverContent className="w-96 max-w-[90vw] space-y-1.5 text-xs">
         {cell.kind === "value" && (
           <>
             <div className="flex items-center justify-between">
@@ -135,7 +144,7 @@ function CellView({ cell, median: med, isOwn, nights }: { cell: Cell; median: nu
               <Row k="Sorgu" v={`${cell.minStay ?? nights} gecelik sorgu (gecelik = toplam / ${cell.minStay ?? nights})`} />
             )}
             {cell.minStay ? <Row k="Min. konaklama" v={`${cell.minStay} gece (fiyat gecelik)`} /> : null}
-            <Row k="Oda" v={cell.roomName ?? "Belirtilmemiş"} />
+            <Row k="Oda" v={`${cell.roomName ?? "Belirtilmemiş"}${cell.tier ? ` · ${TIER_LABELS[cell.tier]}` : ""}`} />
             <Row k="İade" v={cell.refundable == null ? "Bilinmiyor" : cell.refundable ? "Ücretsiz iptal" : "İade edilemez"} />
             <Row k="Vergiler" v={cell.taxesIncluded == null ? "Bilinmiyor" : cell.taxesIncluded ? "Dahil" : "Hariç"} />
             {cell.prev != null && (
@@ -195,9 +204,44 @@ function CellView({ cell, median: med, isOwn, nights }: { cell: Cell; median: nu
             <p>Çekim: {fmtTime(cell.fetchedAt)}</p>
           </div>
         )}
+        {cell.kind === "no_tier" && (
+          <div className="space-y-1">
+            <p className="font-medium">{cell.tier === "standard" ? "Standart oda yok" : "Seçili kategoride oda yok"}</p>
+            <p className="text-muted-foreground">En ucuz müsait: {cell.cheapest.roomName ?? "—"} ({TIER_LABELS[cell.cheapest.tier]}) · {fmtTry(cell.cheapest.value)} / gece · {cell.cheapest.source}. Farklı kategori olduğu için kıyasa ve medyana alınmadı.</p>
+            <Row k="Çekim zamanı" v={fmtTime(cell.fetchedAt)} />
+          </div>
+        )}
+        {(cell.kind === "value" || cell.kind === "no_tier" || cell.kind === "incomparable") && cell.rows?.length ? <RoomList rows={cell.rows} /> : null}
         {cell.kind === "none" && <p className="text-muted-foreground">Bu tarih için henüz çekim yapılmadı.</p>}
       </PopoverContent>
     </Popover>
+  );
+}
+
+function RoomList({ rows }: { rows: SnapRow[] }) {
+  const priced = rows.filter((r) => !r.no_availability && r.price_per_night);
+  if (!priced.length) return null;
+  const bySrc = new Map<string, SnapRow[]>();
+  for (const r of priced) bySrc.set(r.source, [...(bySrc.get(r.source) ?? []), r]);
+  return (
+    <div className="max-h-56 space-y-1.5 overflow-auto border-t pt-1">
+      <p className="font-medium">Tüm odalar</p>
+      {Array.from(bySrc).map(([src, rs]) => (
+        <div key={src}>
+          <p className="text-[10px] uppercase text-muted-foreground">{src}</p>
+          {[...rs].sort((a, b) => Number(a.price_per_night) - Number(b.price_per_night)).map((r) => (
+            <div key={r.id} className="flex justify-between gap-2">
+              <span className="min-w-0 truncate">
+                {r.room_name ?? "Oda"} · {TIER_LABELS[(r.room_tier ?? "unknown") as keyof typeof TIER_LABELS]} · {BOARD_LABELS[r.board_type]}
+                {r.min_stay_nights ? ` · min ${r.min_stay_nights} gece` : ""}
+                {r.refundable == null ? "" : r.refundable ? " · ücretsiz iptal" : " · iade yok"}
+              </span>
+              <span className="shrink-0 tabular-nums">{fmtTry(Number(r.price_per_night))}</span>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -231,6 +275,7 @@ export default function PriceTracking() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [draft, setDraft] = useState<DateRange | undefined>(undefined);
   const [adults, setAdults] = useState(2);
+  const tier = ((params.get("tier") as TierFilter) || "standard") as TierFilter;
   const [boardOverride, setBoardOverride] = useState<BoardType | null>(null);
   const [force, setForce] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -274,7 +319,7 @@ export default function PriceTracking() {
       for (let off = 0; off < 20000; off += 1000) {
         const { data, error } = await (supabase as any)
           .from("competitor_price_snapshots")
-          .select("id, competitor_id, subject_type, checkin, adults, source, source_adapter, price_per_night, price_total, price_derived, board_type, room_name, refundable, taxes_included, no_availability, fetched_at, reason:raw->>reason, min_stay:raw->>min_stay, min_stay_nights")
+          .select("id, competitor_id, subject_type, checkin, adults, source, source_adapter, price_per_night, price_total, price_derived, board_type, room_name, refundable, taxes_included, no_availability, fetched_at, reason:raw->>reason, min_stay:raw->>min_stay, min_stay_nights, room_tier")
           .eq("business_id", businessId)
           .eq("nights", nights)
           .eq("adults", adults)
@@ -323,7 +368,7 @@ export default function PriceTracking() {
   const grid = useMemo(() => {
     const cells = new Map<string, Cell>();
     for (const s of subjects) for (const d of dates) {
-      cells.set(`${s.key}|${d}`, computeCell(batches.get(`${s.key}|${d}`), board, s.own ? manualByDate.get(d) : undefined));
+      cells.set(`${s.key}|${d}`, computeCell(batches.get(`${s.key}|${d}`), board, s.own ? manualByDate.get(d) : undefined, tier));
     }
     const perDay = dates.map((d) => {
       const rivals = comps
@@ -341,7 +386,7 @@ export default function PriceTracking() {
       return { d, med, ownVal, rank, compared: rivals.length };
     });
     return { cells, perDay };
-  }, [subjects, dates, batches, board, manualByDate, comps]);
+  }, [subjects, dates, batches, board, manualByDate, comps, tier]);
 
   const coverage = useMemo(() => {
     return subjects.map((s) => {
@@ -499,6 +544,12 @@ export default function PriceTracking() {
           <SelectTrigger className="h-9 w-28"><SelectValue /></SelectTrigger>
           <SelectContent>
             {[1, 2, 3, 7].map((n) => <SelectItem key={n} value={String(n)}>{n} gece</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={tier} onValueChange={(v) => setParam({ tier: v === "standard" ? null : v })}>
+          <SelectTrigger className="h-9 w-44" aria-label="Oda kategorisi"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {TIER_FILTERS.map((t) => <SelectItem key={t.v} value={t.v}>Oda: {t.label}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={board} onValueChange={(v) => setBoardOverride(v as BoardType)}>
