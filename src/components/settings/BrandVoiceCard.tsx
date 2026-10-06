@@ -14,6 +14,8 @@ type BrandVoice = {
   signature_name?: string;
   signature_role?: string;
   contact_channel?: string;
+  closing_text?: string;
+  closing_enabled_by_default?: boolean;
   brand_values?: string;
   forbidden_phrases?: string[];
   seo_optimized?: boolean;
@@ -98,6 +100,33 @@ export function BrandVoiceCard() {
             placeholder="Ör: iletisim@voyagerespond.com veya +90 555 000 00 00"
             value={voice.contact_channel || ""}
             onChange={(e) => setVoice({ ...voice, contact_channel: e.target.value })}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Kayıtlı Kapanış</Label>
+          <Textarea
+            rows={4}
+            placeholder={"Ör:\nMete Çoruk\nGenel Müdür\n+90 555 000 00 00"}
+            value={voice.closing_text || ""}
+            onChange={(e) => setVoice({ ...voice, closing_text: e.target.value })}
+          />
+          <p className="text-xs text-muted-foreground">
+            Seçtiğiniz yanıtlarda metnin sonuna, satır düzeni korunarak aynen eklenir.
+          </p>
+        </div>
+
+        <div className="flex items-center justify-between p-3 rounded-lg border">
+          <div>
+            <p className="text-sm font-medium">Yanıtlara varsayılan olarak ekle</p>
+            <p className="text-xs text-muted-foreground">
+              Yanıt üretirken bu seçimi tek seferlik kapatabilirsiniz.
+            </p>
+          </div>
+          <Switch
+            checked={voice.closing_enabled_by_default === true}
+            disabled={!voice.closing_text?.trim()}
+            onCheckedChange={(v) => setVoice({ ...voice, closing_enabled_by_default: v })}
           />
         </div>
 

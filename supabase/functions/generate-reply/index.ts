@@ -199,17 +199,18 @@ function buildSystemPrompt(opts: {
   recentOpenings: string[];
   gold: string[];
   analysis?: AnalysisCtx | null;
+  appendCustomClosing?: boolean;
 }) {
   const {
     lang, langForced, tone, category, rating, reviewer, businessName, city, platform,
-    brandVoice, customInstructions, recentOpenings, gold, analysis,
+    brandVoice, customInstructions, recentOpenings, gold, analysis, appendCustomClosing,
   } = opts;
   const langName = lang === "tr" ? "TURKISH (Türkçe)" : "ENGLISH";
   const languageRule = langForced
     ? `4. Write the ENTIRE reply in ${langName}, regardless of the language the guest wrote in. No other language, no translations, no bilingual output.`
     : `4. Reply STRICTLY in the reviewer's language. Fallback hint: ${lang.toUpperCase()}.`;
   const toneCfg = toneDescriptions[tone] || toneDescriptions.friendly;
-  const signature = brandVoice?.signature_name
+  const signature = !appendCustomClosing && brandVoice?.signature_name
     ? `${brandVoice.signature_name}${brandVoice.signature_role ? ", " + brandVoice.signature_role : ""}`
     : "";
   const contact = brandVoice?.contact_channel || "";
@@ -333,7 +334,7 @@ serve(async (req) => {
       review_text, reviewText: reviewTextAlt, reviewer_name, rating, tone = "friendly",
       language = "TR", summary, issues, praises, sentiment,
       business_name, custom_instructions,
-      business_id, platform, review_id,
+      business_id, platform, review_id, include_closing,
     } = body;
     const reviewText = review_text ?? reviewTextAlt ?? "";
 
@@ -457,6 +458,14 @@ serve(async (req) => {
     // fraction of the tokens they consume.
     const maxTokens = category === "negative" || category === "mixed" ? 3000 : 2200;
     const seoOptimized = platform === "google" && brandVoice?.seo_optimized !== false;
+    const closingText = typeof brandVoice?.closing_text === "string"
+      ? brandVoice.closing_text.trim()
+      : "";
+    const appendCustomClosing = closingText.length > 0 && (
+      typeof include_closing === "boolean"
+        ? include_closing
+        : brandVoice?.closing_enabled_by_default === true
+    );
 
     // Server analysis wins over anything the caller sent.
     const analysisCtx = analysis
@@ -479,6 +488,7 @@ serve(async (req) => {
     const systemPrompt = buildSystemPrompt({
       lang, langForced, tone, category, rating, reviewer: reviewer_name, businessName, city, platform,
       brandVoice, customInstructions: custom_instructions, recentOpenings, gold, analysis,
+      appendCustomClosing,
     });
     const userPrompt = `Generate a reply for this ${rating}-star ${category} review.
 ---
@@ -575,6 +585,15 @@ Return ONLY the reply text.`;
       console.log("qa failed, returning draft", (e as Error).message);
     }
 
+    if (appendCustomClosing && draft) {
+      const normalizedDraft = draft.trimEnd();
+      if (!normalizedDraft.endsWith(closingText)) {
+        draft = `${normalizedDraft}\n\n${closingText}`;
+      } else {
+        draft = normalizedDraft;
+      }
+    }
+
     return new Response(
       JSON.stringify({
         reply: draft,
@@ -592,6 +611,7 @@ Return ONLY the reply text.`;
           flags: analysis?.flags ?? null,
           truncated: !looksComplete(draft),
           requires_human_review: requiresHumanReview || !looksComplete(draft),
+          closing_appended: appendCustomClosing,
         },
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
