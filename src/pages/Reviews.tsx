@@ -713,7 +713,8 @@ export default function Reviews() {
   };
 
   const getReviewBrandVoice = (review: any) => {
-    const business = businesses.find((item) => item.id === review.business_id) || activeBusiness;
+    const business = businesses.find((item) => item.id === review.business_id)
+      || (activeBusiness?.id === review.business_id ? activeBusiness : null);
     return ((business as any)?.brand_voice || {}) as {
       closing_text?: string;
       closing_enabled_by_default?: boolean;
