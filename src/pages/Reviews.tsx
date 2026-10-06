@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Star, Copy, Send, CheckCircle2, Search, Filter, ArrowUpDown, RefreshCw, Sparkles, Download, Globe, ChevronLeft, ChevronRight, Loader2, MapPin } from "lucide-react";
 import {
@@ -103,6 +104,7 @@ export default function Reviews() {
   const [selectedReview, setSelectedReview] = useState<any>(null);
   const [replyText, setReplyText] = useState("");
   const [replyLanguage, setReplyLanguage] = useState<string>("auto");
+  const [sheetIncludeClosing, setSheetIncludeClosing] = useState<boolean | null>(null);
   
   // Filters and sorting
   const [searchQuery, setSearchQuery] = useState("");
@@ -395,6 +397,7 @@ export default function Reviews() {
   const [generatingIds, setGeneratingIds] = useState<Set<string>>(new Set());
   const [tonePerId, setTonePerId] = useState<Record<string, ToneOption>>({});
   const [langPerId, setLangPerId] = useState<Record<string, string>>({});
+  const [closingPerId, setClosingPerId] = useState<Record<string, boolean>>({});
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 25;
 
@@ -676,6 +679,7 @@ export default function Reviews() {
           language: replyLanguage,
           business_id: review.business_id,
           platform: review.platform,
+          include_closing: getIncludeClosing(review),
         },
       });
 
@@ -708,6 +712,25 @@ export default function Reviews() {
     setLangPerId(prev => ({ ...prev, [reviewId]: lang }));
   };
 
+  const getReviewBrandVoice = (review: any) => {
+    const business = businesses.find((item) => item.id === review.business_id)
+      || (activeBusiness?.id === review.business_id ? activeBusiness : null);
+    return ((business as any)?.brand_voice || {}) as {
+      closing_text?: string;
+      closing_enabled_by_default?: boolean;
+    };
+  };
+
+  const hasClosing = (review: any) => !!getReviewBrandVoice(review).closing_text?.trim();
+  const getIncludeClosing = (review: any) => {
+    if (selectedReview?.id === review.id && sheetIncludeClosing !== null) return sheetIncludeClosing;
+    if (Object.prototype.hasOwnProperty.call(closingPerId, review.id)) return closingPerId[review.id];
+    return getReviewBrandVoice(review).closing_enabled_by_default === true;
+  };
+  const setReviewIncludeClosing = (review: any, value: boolean) => {
+    setClosingPerId((prev) => ({ ...prev, [review.id]: value }));
+  };
+
   // Inline AI reply generation for table rows
   const inlineGenerateMutation = useMutation({
     mutationFn: async (review: any) => {
@@ -724,6 +747,7 @@ export default function Reviews() {
           language: getReviewLang(review.id),
           business_id: review.business_id,
           platform: review.platform,
+          include_closing: getIncludeClosing(review),
         },
       });
       if (response.error) throw response.error;
@@ -749,6 +773,7 @@ export default function Reviews() {
   const handleReviewClick = (review: any) => {
     setSelectedReview(review);
     setReplyText(review.suggested_reply || "");
+    setSheetIncludeClosing(null);
   };
 
   const handleApprove = () => {
@@ -1451,6 +1476,15 @@ export default function Reviews() {
                                 ))}
                               </SelectContent>
                             </Select>
+                            {hasClosing(review) && (
+                              <div className="flex items-center gap-1 px-1" title="Kayıtlı kapanışı ekle">
+                                <Switch
+                                  checked={getIncludeClosing(review)}
+                                  onCheckedChange={(value) => setReviewIncludeClosing(review, value)}
+                                  className="scale-75"
+                                />
+                              </div>
+                            )}
                             <Button
                               size="icon"
                               variant="ghost"
@@ -1496,6 +1530,16 @@ export default function Reviews() {
                               ))}
                             </SelectContent>
                           </Select>
+                          {hasClosing(review) && (
+                            <div className="flex items-center gap-1.5 px-1" title="Kayıtlı kapanışı ekle">
+                              <Switch
+                                checked={getIncludeClosing(review)}
+                                onCheckedChange={(value) => setReviewIncludeClosing(review, value)}
+                                className="scale-75"
+                              />
+                              <span className="text-xs text-muted-foreground">Kapanış</span>
+                            </div>
+                          )}
                           <Button
                             size="sm"
                             variant="outline"
@@ -1747,6 +1791,18 @@ export default function Reviews() {
                   className="min-h-[120px] resize-none"
                   placeholder="Önerilen yanıtı düzenleyin..."
                 />
+                {hasClosing(selectedReview) && (
+                  <div className="mt-3 flex items-center justify-between rounded-lg border p-3">
+                    <div>
+                      <p className="text-sm font-medium">Kayıtlı kapanışı ekle</p>
+                      <p className="text-xs text-muted-foreground">Bu seçim yalnız bu yanıt için geçerlidir.</p>
+                    </div>
+                    <Switch
+                      checked={getIncludeClosing(selectedReview)}
+                      onCheckedChange={setSheetIncludeClosing}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Actions */}

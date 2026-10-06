@@ -199,17 +199,18 @@ function buildSystemPrompt(opts: {
   recentOpenings: string[];
   gold: string[];
   analysis?: AnalysisCtx | null;
+  appendCustomClosing?: boolean;
 }) {
   const {
     lang, langForced, tone, category, rating, reviewer, businessName, city, platform,
-    brandVoice, customInstructions, recentOpenings, gold, analysis,
+    brandVoice, customInstructions, recentOpenings, gold, analysis, appendCustomClosing,
   } = opts;
   const langName = lang === "tr" ? "TURKISH (Türkçe)" : "ENGLISH";
   const languageRule = langForced
     ? `4. Write the ENTIRE reply in ${langName}, regardless of the language the guest wrote in. No other language, no translations, no bilingual output.`
     : `4. Reply STRICTLY in the reviewer's language. Fallback hint: ${lang.toUpperCase()}.`;
   const toneCfg = toneDescriptions[tone] || toneDescriptions.friendly;
-  const signature = brandVoice?.signature_name
+  const signature = !appendCustomClosing && brandVoice?.signature_name
     ? `${brandVoice.signature_name}${brandVoice.signature_role ? ", " + brandVoice.signature_role : ""}`
     : "";
   const contact = brandVoice?.contact_channel || "";
@@ -220,7 +221,7 @@ function buildSystemPrompt(opts: {
 - Never defensive. Never dispute the guest's account publicly.
 - NEVER promise or imply compensation, refunds, upgrades, free stays, or admit legal fault.
 - Invite them to a private channel: ${contact || "(no contact set — say 'directly via our contact page')"}.
-- Sign from a named person: ${signature || "(no signature set — sign as 'Guest Relations Team')"}.
+${appendCustomClosing ? "- Do not add a signature; a saved closing will be appended after generation." : `- Sign from a named person: ${signature || "(no signature set — sign as 'Guest Relations Team')"}.`}
 - Close with a forward-looking commitment to improvement.`;
 
   const positiveNeutralBlock = `TONE FOR ${category.toUpperCase()} (rating ${rating}):
@@ -262,7 +263,7 @@ ${analysis.worstTopic ? `- Address "${analysis.worstTopic.name}" FIRST — it is
   * NEVER admit fault, liability or negligence. NEVER dispute or correct the guest's account publicly.
   * NEVER promise compensation, refunds, or any remedy.
   * Move the conversation to a private channel IMMEDIATELY${contact ? ` (${contact})` : ""} — this is the main purpose of the reply.
-  * Sign from a named person${signature ? `: ${signature}` : " (e.g. the Guest Relations Manager)"}.
+  * ${appendCustomClosing ? "Do not add a signature; a saved closing will be appended after generation." : `Sign from a named person${signature ? `: ${signature}` : " (e.g. the Guest Relations Manager)"}.`}
   * Keep it short, calm and non-committal. No marketing language, no invitation to return.`);
     }
     if (f.refund_request) {
@@ -302,6 +303,7 @@ ${recentOpenings.map((o, i) => `   ${i + 1}. "${o}"`).join("\n") || "   (none)"}
 10. Thank the guest ONCE only. Never add a closing paragraph that repeats the thanks ("Nazik sözleriniz için…", "Thanks again…") — that padding makes the reply feel machine-written.
 11. NEVER restate an unverified attribute the guest assigned to your team or property as if it were your own fact (e.g. do not call someone "our Amsterdam-based guide" because the guest said so). Refer to people and places only as your own records support: by name and role.
 12. Make the guest feel personally seen: mirror the emotion they expressed (excitement, relief, disappointment) in your own words before moving on. Warmth beats formality — no "Sayın Misafirimiz" / "Dear Valued Guest" register.
+${appendCustomClosing ? "13. Do not write any signature, name, role, phone number, email address, or closing block; the saved closing is appended separately after quality control." : ""}
 
 ## STYLE
 - Tone: ${tone.toUpperCase()} — ${lang === "tr" ? toneCfg.tr : toneCfg.en}
@@ -333,7 +335,7 @@ serve(async (req) => {
       review_text, reviewText: reviewTextAlt, reviewer_name, rating, tone = "friendly",
       language = "TR", summary, issues, praises, sentiment,
       business_name, custom_instructions,
-      business_id, platform, review_id,
+      business_id, platform, review_id, include_closing,
     } = body;
     const reviewText = review_text ?? reviewTextAlt ?? "";
 
@@ -457,6 +459,14 @@ serve(async (req) => {
     // fraction of the tokens they consume.
     const maxTokens = category === "negative" || category === "mixed" ? 3000 : 2200;
     const seoOptimized = platform === "google" && brandVoice?.seo_optimized !== false;
+    const closingText = typeof brandVoice?.closing_text === "string"
+      ? brandVoice.closing_text.trim()
+      : "";
+    const appendCustomClosing = closingText.length > 0 && (
+      typeof include_closing === "boolean"
+        ? include_closing
+        : brandVoice?.closing_enabled_by_default === true
+    );
 
     // Server analysis wins over anything the caller sent.
     const analysisCtx = analysis
@@ -479,6 +489,7 @@ serve(async (req) => {
     const systemPrompt = buildSystemPrompt({
       lang, langForced, tone, category, rating, reviewer: reviewer_name, businessName, city, platform,
       brandVoice, customInstructions: custom_instructions, recentOpenings, gold, analysis,
+      appendCustomClosing,
     });
     const userPrompt = `Generate a reply for this ${rating}-star ${category} review.
 ---
@@ -575,6 +586,15 @@ Return ONLY the reply text.`;
       console.log("qa failed, returning draft", (e as Error).message);
     }
 
+    if (appendCustomClosing && draft) {
+      const normalizedDraft = draft.trimEnd();
+      if (!normalizedDraft.endsWith(closingText)) {
+        draft = `${normalizedDraft}\n\n${closingText}`;
+      } else {
+        draft = normalizedDraft;
+      }
+    }
+
     return new Response(
       JSON.stringify({
         reply: draft,
@@ -592,6 +612,7 @@ Return ONLY the reply text.`;
           flags: analysis?.flags ?? null,
           truncated: !looksComplete(draft),
           requires_human_review: requiresHumanReview || !looksComplete(draft),
+          closing_appended: appendCustomClosing,
         },
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }

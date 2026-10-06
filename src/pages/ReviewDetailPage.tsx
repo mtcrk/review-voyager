@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useTranslation } from "react-i18next";
 import { ReviewAnalysisPanel } from "@/components/reviews/ReviewAnalysisPanel";
 import { WhatsAppActionStatus } from "@/components/reviews/WhatsAppActionStatus";
@@ -41,6 +42,7 @@ const ReviewDetailPage = () => {
   const [selectedTone, setSelectedTone] = useState<ToneOption>("Friendly");
   const [replyLanguage, setReplyLanguage] = useState<string>("auto");
   const [aiReply, setAiReply] = useState("");
+  const [includeClosing, setIncludeClosing] = useState<boolean | null>(null);
 
   // Fetch review from Supabase
   const { data: review, isLoading } = useQuery({
@@ -61,6 +63,10 @@ const ReviewDetailPage = () => {
     },
     enabled: !!id,
   });
+
+  const brandVoice = (review as any)?.businesses?.brand_voice || {};
+  const hasClosing = !!brandVoice.closing_text?.trim();
+  const closingChecked = includeClosing ?? brandVoice.closing_enabled_by_default === true;
 
   // Set initial AI reply when review loads — prioritize approved_reply (existing response)
   useEffect(() => {
@@ -220,6 +226,7 @@ const ReviewDetailPage = () => {
           sentiment: review.sentiment,
           business_id: review.business_id,
           platform: review.platform,
+          include_closing: includeClosing ?? (review as any)?.businesses?.brand_voice?.closing_enabled_by_default === true,
         },
       });
 
@@ -508,6 +515,15 @@ const ReviewDetailPage = () => {
               </div>
             </CardHeader>
             <CardContent>
+              {hasClosing && (
+                <div className="mb-4 flex items-center justify-between rounded-lg border p-3">
+                  <div>
+                    <p className="text-sm font-medium">Kayıtlı kapanışı ekle</p>
+                    <p className="text-xs text-muted-foreground">Bu seçim yalnız bu yanıt için geçerlidir.</p>
+                  </div>
+                  <Switch checked={closingChecked} onCheckedChange={setIncludeClosing} />
+                </div>
+              )}
               <Textarea
                 value={aiReply}
                 onChange={(e) => setAiReply(e.target.value)}
