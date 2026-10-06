@@ -43,9 +43,6 @@ const ReviewDetailPage = () => {
   const [replyLanguage, setReplyLanguage] = useState<string>("auto");
   const [aiReply, setAiReply] = useState("");
   const [includeClosing, setIncludeClosing] = useState<boolean | null>(null);
-  const brandVoice = (review as any)?.businesses?.brand_voice || {};
-  const hasClosing = !!brandVoice.closing_text?.trim();
-  const closingChecked = includeClosing ?? brandVoice.closing_enabled_by_default === true;
 
   // Fetch review from Supabase
   const { data: review, isLoading } = useQuery({
@@ -66,6 +63,10 @@ const ReviewDetailPage = () => {
     },
     enabled: !!id,
   });
+
+  const brandVoice = (review as any)?.businesses?.brand_voice || {};
+  const hasClosing = !!brandVoice.closing_text?.trim();
+  const closingChecked = includeClosing ?? brandVoice.closing_enabled_by_default === true;
 
   // Set initial AI reply when review loads — prioritize approved_reply (existing response)
   useEffect(() => {

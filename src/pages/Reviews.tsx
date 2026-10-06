@@ -1475,6 +1475,15 @@ export default function Reviews() {
                                 ))}
                               </SelectContent>
                             </Select>
+                            {hasClosing(review) && (
+                              <div className="flex items-center gap-1 px-1" title="Kayıtlı kapanışı ekle">
+                                <Switch
+                                  checked={getIncludeClosing(review)}
+                                  onCheckedChange={(value) => setReviewIncludeClosing(review, value)}
+                                  className="scale-75"
+                                />
+                              </div>
+                            )}
                             <Button
                               size="icon"
                               variant="ghost"
