@@ -221,7 +221,7 @@ function buildSystemPrompt(opts: {
 - Never defensive. Never dispute the guest's account publicly.
 - NEVER promise or imply compensation, refunds, upgrades, free stays, or admit legal fault.
 - Invite them to a private channel: ${contact || "(no contact set — say 'directly via our contact page')"}.
-- Sign from a named person: ${signature || "(no signature set — sign as 'Guest Relations Team')"}.
+${appendCustomClosing ? "- Do not add a signature; a saved closing will be appended after generation." : `- Sign from a named person: ${signature || "(no signature set — sign as 'Guest Relations Team')"}.`}
 - Close with a forward-looking commitment to improvement.`;
 
   const positiveNeutralBlock = `TONE FOR ${category.toUpperCase()} (rating ${rating}):
@@ -263,7 +263,7 @@ ${analysis.worstTopic ? `- Address "${analysis.worstTopic.name}" FIRST — it is
   * NEVER admit fault, liability or negligence. NEVER dispute or correct the guest's account publicly.
   * NEVER promise compensation, refunds, or any remedy.
   * Move the conversation to a private channel IMMEDIATELY${contact ? ` (${contact})` : ""} — this is the main purpose of the reply.
-  * Sign from a named person${signature ? `: ${signature}` : " (e.g. the Guest Relations Manager)"}.
+  * ${appendCustomClosing ? "Do not add a signature; a saved closing will be appended after generation." : `Sign from a named person${signature ? `: ${signature}` : " (e.g. the Guest Relations Manager)"}.`}
   * Keep it short, calm and non-committal. No marketing language, no invitation to return.`);
     }
     if (f.refund_request) {
@@ -303,6 +303,7 @@ ${recentOpenings.map((o, i) => `   ${i + 1}. "${o}"`).join("\n") || "   (none)"}
 10. Thank the guest ONCE only. Never add a closing paragraph that repeats the thanks ("Nazik sözleriniz için…", "Thanks again…") — that padding makes the reply feel machine-written.
 11. NEVER restate an unverified attribute the guest assigned to your team or property as if it were your own fact (e.g. do not call someone "our Amsterdam-based guide" because the guest said so). Refer to people and places only as your own records support: by name and role.
 12. Make the guest feel personally seen: mirror the emotion they expressed (excitement, relief, disappointment) in your own words before moving on. Warmth beats formality — no "Sayın Misafirimiz" / "Dear Valued Guest" register.
+${appendCustomClosing ? "13. Do not write any signature, name, role, phone number, email address, or closing block; the saved closing is appended separately after quality control." : ""}
 
 ## STYLE
 - Tone: ${tone.toUpperCase()} — ${lang === "tr" ? toneCfg.tr : toneCfg.en}
