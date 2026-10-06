@@ -43,6 +43,9 @@ const ReviewDetailPage = () => {
   const [replyLanguage, setReplyLanguage] = useState<string>("auto");
   const [aiReply, setAiReply] = useState("");
   const [includeClosing, setIncludeClosing] = useState<boolean | null>(null);
+  const brandVoice = (review as any)?.businesses?.brand_voice || {};
+  const hasClosing = !!brandVoice.closing_text?.trim();
+  const closingChecked = includeClosing ?? brandVoice.closing_enabled_by_default === true;
 
   // Fetch review from Supabase
   const { data: review, isLoading } = useQuery({
@@ -511,6 +514,15 @@ const ReviewDetailPage = () => {
               </div>
             </CardHeader>
             <CardContent>
+              {hasClosing && (
+                <div className="mb-4 flex items-center justify-between rounded-lg border p-3">
+                  <div>
+                    <p className="text-sm font-medium">Kayıtlı kapanışı ekle</p>
+                    <p className="text-xs text-muted-foreground">Bu seçim yalnız bu yanıt için geçerlidir.</p>
+                  </div>
+                  <Switch checked={closingChecked} onCheckedChange={setIncludeClosing} />
+                </div>
+              )}
               <Textarea
                 value={aiReply}
                 onChange={(e) => setAiReply(e.target.value)}

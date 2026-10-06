@@ -1520,6 +1520,16 @@ export default function Reviews() {
                               ))}
                             </SelectContent>
                           </Select>
+                          {hasClosing(review) && (
+                            <div className="flex items-center gap-1.5 px-1" title="Kayıtlı kapanışı ekle">
+                              <Switch
+                                checked={getIncludeClosing(review)}
+                                onCheckedChange={(value) => setReviewIncludeClosing(review, value)}
+                                className="scale-75"
+                              />
+                              <span className="text-xs text-muted-foreground">Kapanış</span>
+                            </div>
+                          )}
                           <Button
                             size="sm"
                             variant="outline"
@@ -1771,6 +1781,18 @@ export default function Reviews() {
                   className="min-h-[120px] resize-none"
                   placeholder="Önerilen yanıtı düzenleyin..."
                 />
+                {hasClosing(selectedReview) && (
+                  <div className="mt-3 flex items-center justify-between rounded-lg border p-3">
+                    <div>
+                      <p className="text-sm font-medium">Kayıtlı kapanışı ekle</p>
+                      <p className="text-xs text-muted-foreground">Bu seçim yalnız bu yanıt için geçerlidir.</p>
+                    </div>
+                    <Switch
+                      checked={getIncludeClosing(selectedReview)}
+                      onCheckedChange={setSheetIncludeClosing}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Actions */}
