@@ -105,3 +105,6 @@ project_id = "pnpuhewfoxssmbpryart"
 
 [functions.price-base-rooms]
 verify_jwt = false
+
+[functions.admin-price-sources]
+verify_jwt = false
