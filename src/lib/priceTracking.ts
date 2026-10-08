@@ -99,6 +99,8 @@ export type Cell =
   | { kind: "incomparable"; fetchedAt: string; reason: string; rows: Snapshot[]; refs?: RefPrice[] }
   | {
       kind: "value";
+      /** Bu turda geçici olarak alınamayan kaynaklar. */
+      notes?: string[];
       value: number;
       badge: "manual" | "estimated";
       source: string;
@@ -246,7 +248,7 @@ export function computeCell(batches: Snapshot[][] | undefined, board: BoardType,
   }
   const value = Number(best.price_per_night);
   return {
-    kind: "value",
+    kind: "value", notes: errNotes,
     value,
     badge: "estimated",
     source: best.source,

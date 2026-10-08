@@ -203,6 +203,7 @@ function CellView({ cell, median: med, isOwn, nights }: { cell: Cell; median: nu
             <Row k="Çekim zamanı" v={fmtTime(cell.fetchedAt)} />
           </div>
         )}
+        {cell.kind === "value" && cell.notes?.map((n, i) => <p key={i} className="text-muted-foreground">{n}</p>)}
         {(cell.kind === "value" || cell.kind === "no_tier" || cell.kind === "incomparable") && cell.rows?.length ? <RoomList rows={cell.rows} /> : null}
         {cell.kind === "none" && <p className="text-muted-foreground">Bu tarih için henüz çekim yapılmadı.</p>}
       </PopoverContent>
@@ -426,6 +427,7 @@ export default function PriceTracking() {
           calls += r?.calls ?? 0;
           saved += r?.saved ?? 0;
           if (Array.isArray(r?.errors)) errors.push(...r.errors);
+          if (Array.isArray(r?.disabled)) for (const d of r.disabled) errors.push(`${d} kaynağı yönetici tarafından kapalı`);
           if (r?.capped || r?.complete !== false) break;
           attempt++; // süre doldu: kalan mülkler önbellek sayesinde bir sonraki çağrıda tamamlanır
         }
