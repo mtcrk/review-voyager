@@ -2473,8 +2473,11 @@ export type Database = {
           business_id: string | null
           calls: number
           created_at: string
+          error_count: number
           estimated_cost_usd: number
           id: string
+          no_prices_count: number
+          ok_count: number
           trigger: string | null
         }
         Insert: {
@@ -2482,8 +2485,11 @@ export type Database = {
           business_id?: string | null
           calls?: number
           created_at?: string
+          error_count?: number
           estimated_cost_usd?: number
           id?: string
+          no_prices_count?: number
+          ok_count?: number
           trigger?: string | null
         }
         Update: {
@@ -2491,8 +2497,11 @@ export type Database = {
           business_id?: string | null
           calls?: number
           created_at?: string
+          error_count?: number
           estimated_cost_usd?: number
           id?: string
+          no_prices_count?: number
+          ok_count?: number
           trigger?: string | null
         }
         Relationships: [
@@ -2563,6 +2572,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      price_source_settings: {
+        Row: {
+          adapter: string
+          enabled: boolean
+          note: string | null
+          updated_at: string
+        }
+        Insert: {
+          adapter: string
+          enabled?: boolean
+          note?: string | null
+          updated_at?: string
+        }
+        Update: {
+          adapter?: string
+          enabled?: boolean
+          note?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {

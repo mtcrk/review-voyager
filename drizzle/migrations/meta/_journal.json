@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791441510955,
+      "tag": "0000_price_source_health_and_switch",
+      "breakpoints": true
+    }
+  ]
+}
