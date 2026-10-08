@@ -24,10 +24,11 @@ export async function domesticCall(
     counter.unlocker++;
     let r: { status: number; text: string };
     try {
-      r = await unlockerFetch({ url, method: init.method, body: init.body, headers: init.headers, country: "tr" });
+      // XHR başlığı korunur: bazı uç noktalar (Tatil Sepeti/Jolly) bu başlık olmadan JSON yerine HTML döndürür.
+      r = await unlockerFetch({ url, method: init.method, body: init.body, headers: { "X-Requested-With": "XMLHttpRequest", ...(init.headers ?? {}) }, country: "tr" });
     } catch (e) {
-      last = `Bright Data isteği başarısız: ${e instanceof Error ? e.message : String(e)}`;
-      continue;
+      // Zaman aşımı/ağ hatasında retry yok (süre bütçesi); yalnız HTTP 4xx/5xx tekrar denenir.
+      throw new Error(`Bright Data isteği başarısız: ${e instanceof Error ? e.message : String(e)}`);
     }
     if (r.status >= 400) {
       last = `Bright Data ${r.status}`;
