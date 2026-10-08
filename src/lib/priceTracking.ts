@@ -67,7 +67,7 @@ export type Snapshot = {
   taxes_included: boolean | null;
   no_availability: boolean;
   fetched_at: string;
-  /** raw.reason: "min_stay" | "not_on_sale" | null */
+  /** raw.reason: "min_stay" | "not_on_sale" | "source_error" | null */
   reason?: string | null;
   min_stay?: string | number | null;
   min_stay_nights?: number | null;
@@ -206,25 +206,29 @@ export function computeCell(batches: Snapshot[][] | undefined, board: BoardType,
   }
   const refs = unknownBoardRefs(latest);
   const priced = latest.filter((r) => !r.no_availability && r.price_per_night);
+  // Kaynak hatası (geçici alınamadı) "dolu" sayılmaz; yalnız bilgi satırı olarak gösterilir.
+  const errNotes = Array.from(new Set(latest.filter((r) => r.reason === "source_error").map((r) => `${r.source} geçici olarak alınamadı`)));
   if (!priced.length) {
+    const real = latest.filter((r) => r.reason !== "source_error");
+    if (!real.length) return { kind: "sold_out", fetchedAt, source: latest[0].source, label: "alınamadı", details: errNotes };
     // "muhtemelen dolu" yalnızca hiçbir kaynak min. konaklama / satış kapalı bilgisi vermediyse.
-    const details = latest.map((r) =>
+    const details = real.map((r) =>
       r.reason === "min_stay" && r.min_stay
         ? `${r.source}: en az ${r.min_stay} gece konaklama şartı`
         : r.reason === "not_on_sale"
         ? `${r.source}'de bu tarihte satışta değil`
         : `${r.source}: fiyat vermedi`,
     );
-    const ms = latest.filter((r) => r.reason === "min_stay" && r.min_stay).map((r) => Number(r.min_stay));
-    const nos = latest.filter((r) => r.reason === "not_on_sale");
+    const ms = real.filter((r) => r.reason === "min_stay" && r.min_stay).map((r) => Number(r.min_stay));
+    const nos = real.filter((r) => r.reason === "not_on_sale");
     const label = ms.length
       ? `en az ${Math.min(...ms)} gece`
-      : nos.length === latest.length
+      : nos.length === real.length
       ? "satışta değil"
       : nos.length
       ? `${nos.map((r) => r.source).join(", ")}'de satışta değil`
       : "dolu";
-    return { kind: "sold_out", fetchedAt, source: latest[0].source, label, details };
+    return { kind: "sold_out", fetchedAt, source: latest[0].source, label, details: [...details, ...errNotes] };
   }
   const anyBoard = cheapest(latest, board, "all");
   if (!anyBoard) return { kind: "incomparable", fetchedAt, reason: incomparableReason(latest), rows: latest, refs };

@@ -17,6 +17,7 @@ import { Loader2, RefreshCw, Mail, MailX, Search, ChevronLeft, ChevronRight } fr
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { AdminCronJobs } from "@/components/admin/AdminCronJobs";
+import { AdminPriceSources } from "@/components/admin/AdminPriceSources";
 import { AdminPriceCredits } from "@/components/admin/AdminPriceCredits";
 
 const ADMIN_EMAIL = "metecorukbasari@gmail.com";
@@ -232,17 +233,19 @@ export default function AdminApifyLogs() {
 
         {data && (
           <Tabs defaultValue="apify" className="space-y-4">
-            <TabsList className="grid grid-cols-6 w-full max-w-3xl">
+            <TabsList className="grid grid-cols-4 lg:grid-cols-8 h-auto w-full max-w-5xl">
               <TabsTrigger value="apify">Apify ({data.apify.totals.total_runs})</TabsTrigger>
               <TabsTrigger value="users">Kullanıcılar ({data.users.total})</TabsTrigger>
               <TabsTrigger value="replies">Yanıtlar ({data.reply_logs.total})</TabsTrigger>
               <TabsTrigger value="emails">Mailler ({data.email_logs.total})</TabsTrigger>
               <TabsTrigger value="integrations">Tüm Logs ({data.integrations.total})</TabsTrigger>
               <TabsTrigger value="cron">Cron Joblar</TabsTrigger>
+              <TabsTrigger value="sources">Fiyat Kaynakları</TabsTrigger>
               <TabsTrigger value="credits">Fiyat Kredileri</TabsTrigger>
             </TabsList>
 
             <TabsContent value="credits"><AdminPriceCredits /></TabsContent>
+            <TabsContent value="sources"><AdminPriceSources /></TabsContent>
             <TabsContent value="cron">
               <AdminCronJobs />
             </TabsContent>
