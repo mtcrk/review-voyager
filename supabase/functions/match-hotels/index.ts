@@ -4,6 +4,7 @@ import { isPlatformAdmin } from "../_shared/platformAdmin.ts";
 import { isServiceAuth } from "../_shared/serviceAuth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { MATCH_COLS, matchRow, SOURCES, type SourceId } from "../_shared/prices/matcher.ts";
+import { loadDisabledSources } from "../_shared/prices/sourceSettings.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -57,9 +58,10 @@ Deno.serve(async (req) => {
     const work = async () => {
       const results: any[] = [];
       let calls = 0, unlocker = 0, cost = 0;
+      const disabled = await loadDisabledSources(admin);
       for (const t of targets) {
         const row = { ...t.row, city: t.row.city ?? biz?.city ?? null, province: t.row.province ?? biz?.province ?? null };
-        const r = await matchRow(row, { force, sources });
+        const r = await matchRow(row, { force, sources, disabled });
         calls += r.calls; unlocker += r.unlocker; cost += r.cost_usd;
         const { error } = await admin.from(t.table).update(r.patch).eq("id", t.id);
         if (error) console.error("match update failed", t.id, error);

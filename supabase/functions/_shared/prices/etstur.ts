@@ -3,7 +3,8 @@ import { detectBoard } from "./board.ts";
 // engellenirse Bright Data Unlocker'a düşülür (yalnızca gerektiğinde → maliyet düşük).
 import type { AdapterResult, BatchResult, BoardType, FetchParams, PriceQuote, Subject } from "./types.ts";
 import { similarity } from "./types.ts";
-import { UNLOCKER_COST_USD, unlockerAvailable, unlockerFetch } from "./unlocker.ts";
+import { UNLOCKER_COST_USD } from "./unlocker.ts";
+import { type Counter, domesticCall } from "./domesticHtml.ts";
 
 const BASE = "https://www.etstur.com/services/api";
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36";
@@ -39,26 +40,14 @@ function slugCandidates(name: string, city: string | null) {
   return Array.from(out).slice(0, 3);
 }
 
-/** Doğrudan dener; HTTP hatası/HTML/engel durumunda Bright Data'ya düşer. */
-async function etsCall(url: string, method: "GET" | "POST", body: string | undefined, counter: { unlocker: number }) {
-  let reason = "";
-  try {
-    const res = await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json", "User-Agent": UA, Accept: "application/json" },
-      body,
-      signal: AbortSignal.timeout(20_000),
-    });
-    const t = await res.text();
-    if (res.ok && t.trim().startsWith("{")) return JSON.parse(t);
-    reason = `status ${res.status}${res.ok ? " (JSON değil)" : ""} · ${t.slice(0, 120).replace(/\s+/g, " ")}`;
-  } catch (e) { reason = `fetch hatası: ${e instanceof Error ? e.message : String(e)}`; }
-  console.warn(`ETS direct failed → Bright Data fallback [${method} ${url.replace(/^https?:\/\/[^/]+/, "")}]: ${reason}`);
-  if (!unlockerAvailable()) throw new Error(`ETS doğrudan erişilemedi (${reason}) ve Bright Data yok`);
-  counter.unlocker++;
-  const r = await unlockerFetch({ url, method, body, headers: { "Content-Type": "application/json" } });
-  if (r.status >= 400) throw new Error(`Bright Data ${r.status}`);
-  return JSON.parse(r.text);
+/** Tüm ETS istekleri domesticCall (yalnız Bright Data) üzerinden; JSON değilse hata. */
+async function etsCall(url: string, method: "GET" | "POST", body: string | undefined, counter: Counter) {
+  const t = await domesticCall(url, { method, body, headers: { "Content-Type": "application/json", Accept: "application/json" } }, counter);
+  if (!t.trim().startsWith("{")) {
+    console.error(`ETS JSON olmayan cevap [${method} ${url}]: ${t.slice(0, 500)}`);
+    throw new Error(`ETS geçersiz cevap (JSON değil)`);
+  }
+  return JSON.parse(t);
 }
 
 async function resolveHotel(s: Subject, counter: { unlocker: number; calls: number }): Promise<{ id: string; slug: string; name: string } | null> {
@@ -66,7 +55,6 @@ async function resolveHotel(s: Subject, counter: { unlocker: number; calls: numb
   if (!s.etstur_slug) return null;
   const tries = [s.etstur_slug];
   for (const slug of tries) {
-    counter.calls++;
     const d = await etsCall(`${BASE}/hotel/detail/${encodeURIComponent(slug)}`, "GET", undefined, counter).catch(() => null);
     const id = d?.result?.hotelId;
     const nm = String(d?.result?.name ?? "");
@@ -139,7 +127,6 @@ export function createEtsAdapter() {
             hotelId = h.id;
             Object.assign(match, { etstur_hotel_id: h.id, etstur_slug: h.slug, etstur_matched_name: h.name });
           }
-          counter.calls++;
           const body = JSON.stringify({ hotelId, checkIn: p.checkin, checkOut: p.checkout, rooms: [{ adultCount: p.adults, childCount: 0, childAges: [] }] });
           let data: any;
           const call = async () => {

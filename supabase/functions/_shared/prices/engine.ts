@@ -9,6 +9,9 @@ import { ensureMatches } from "./matcher.ts";
 import { hasStandard } from "./roomTier.ts";
 import { refreshBaseRooms } from "./baseRooms.ts";
 import { insertSnapshots, type SnapshotInput } from "./snapshots.ts";
+import { ADAPTER_LABELS, loadDisabledSources } from "./sourceSettings.ts";
+import { unlockerAvailable } from "./unlocker.ts";
+import { BRIGHTDATA_REQUIRED } from "./domesticHtml.ts";
 
 export const DOMESTIC_COLS = "jollytur_hotel_id, jollytur_slug, jollytur_checked_at, tatilsepeti_slug, tatilsepeti_checked_at";
 const pickDomestic = (r: any) => ({
@@ -64,6 +67,8 @@ export type EngineResult = {
   skipped_no_source: number;
   saved: number;
   errors: string[];
+  /** Yönetici tarafından kapatılmış kaynakların adları (bu turda atlandı). */
+  disabled: string[];
 };
 
 export async function loadSubjects(admin: any, b: EngineBusiness, competitorIds?: string[], includeOwn = true) {
@@ -135,8 +140,10 @@ async function updateSubject(admin: any, businessId: string, s: Subject, patch: 
 export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
   const serpKey = Deno.env.get("SERPAPI_API_KEY");
   const apifyToken = Deno.env.get("APIFY_API_TOKEN");
-  const serp: PriceAdapter | null = serpKey ? createSerpApiAdapter(serpKey) : null;
-  const booking: PriceAdapter | null = o.allowBooking && apifyToken ? createBookingAdapter(apifyToken) : null;
+  // Kaynak kapatma anahtarı: çekime başlamadan bir kez okunur.
+  const off = await loadDisabledSources(o.admin);
+  const serp: PriceAdapter | null = serpKey && !off.has("serpapi") ? createSerpApiAdapter(serpKey) : null;
+  const booking: PriceAdapter | null = o.allowBooking && apifyToken && !off.has("booking") ? createBookingAdapter(apifyToken) : null;
   const board = (o.business.price_compare_board_type ?? "breakfast") as BoardType;
 
   // Otomatik eşleştirme (arama + katı puanlama). Onay bekleyen/bulunamayan mülkler için fiyat çekilmez.
@@ -146,10 +153,16 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
   const fresh = await o.admin.from("businesses").select("serpapi_property_token, booking_url, etstur_slug, etstur_hotel_id, etstur_checked_at, jollytur_hotel_id, jollytur_slug, jollytur_checked_at, tatilsepeti_slug, tatilsepeti_checked_at").eq("id", o.business.id).single();
   if (fresh.data) Object.assign(o.business, fresh.data);
   const subjects = await loadSubjects(o.admin, o.business, o.competitorIds, o.includeOwn ?? true);
-  const res: EngineResult = { calls: 0, cost_usd: 0, complete: true, capped: false, fetched: 0, cached: 0, skipped_no_source: 0, saved: 0, errors: [] };
-  const perAdapter: Record<string, { calls: number; cost: number }> = {};
+  const res: EngineResult = { calls: 0, cost_usd: 0, complete: true, capped: false, fetched: 0, cached: 0, skipped_no_source: 0, saved: 0, errors: [], disabled: Array.from(off).map((a) => ADAPTER_LABELS[a] ?? a) };
+  const perAdapter: Record<string, { calls: number; cost: number; ok: number; no_prices: number; error: number }> = {};
+  const health = (id: string, status: string | undefined) => {
+    perAdapter[id] ??= { calls: 0, cost: 0, ok: 0, no_prices: 0, error: 0 };
+    if (status === "ok") perAdapter[id].ok++;
+    else if (status === "no_prices") perAdapter[id].no_prices++;
+    else if (status === "error") perAdapter[id].error++;
+  };
   const track = (id: string, calls: number, cost: number, capCalls = calls) => {
-    perAdapter[id] ??= { calls: 0, cost: 0 };
+    perAdapter[id] ??= { calls: 0, cost: 0, ok: 0, no_prices: 0, error: 0 };
     perAdapter[id].calls += calls;
     perAdapter[id].cost += cost;
     res.calls += capCalls;
@@ -163,12 +176,17 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
     { id: "etstur", label: "ETS Tur", adapter: createEtsAdapter(), idField: "etstur_hotel_id", checkedField: "etstur_checked_at" },
     { id: "jollytur", label: "Jolly Tur", adapter: createJollyAdapter(), idField: "jollytur_hotel_id", checkedField: "jollytur_checked_at" },
     { id: "tatilsepeti", label: "Tatil Sepeti", adapter: createTatilSepetiAdapter(), idField: "tatilsepeti_slug", checkedField: "tatilsepeti_checked_at" },
-  ];
+  ].filter((d) => !off.has(d.id));
+  // Yurt içi kaynaklar yalnız Bright Data ile çalışır; yoksa tek ve açık hata (sessiz "fiyat yok" yazılmaz).
+  if (domestic.length && (!o.markets || o.markets.includes("domestic")) && !unlockerAvailable()) {
+    res.errors.push(BRIGHTDATA_REQUIRED);
+    domestic.length = 0;
+  }
   if (!o.force && o.dates.length) {
     const since = new Date(Date.now() - o.cacheHours * 3600_000).toISOString();
     const { data } = await o.admin
       .from("competitor_price_snapshots")
-      .select("subject_type, competitor_id, checkin, market, nights")
+      .select("subject_type, competitor_id, checkin, market, nights, reason:raw->>reason")
       .eq("business_id", o.business.id)
       .in("nights", [o.nights, o.intlNights ?? o.nights])
       .eq("adults", o.adults)
@@ -176,6 +194,7 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
       .gte("fetched_at", since)
       .limit(10000);
     for (const r of data ?? []) {
+      if (r.reason === "source_error") continue; // kaynak hatası önbellek sayılmaz, tekrar denenir
       const k = `${r.subject_type === "own" ? "own" : r.competitor_id}|${r.checkin}`;
       if (r.market === "domestic") { if (r.nights === o.nights) doneDom.add(k); }
       else if (r.nights === (o.intlNights ?? o.nights)) done.add(k);
@@ -247,6 +266,7 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
           }
           for (const s of list) {
             const er = r.results.get(s.key);
+            health(d.id, er?.status);
             if (!er) continue;
             if (er.match && Object.keys(er.match).length) await updateSubject(o.admin, o.business.id, s, er.match as any);
             const base = { business_id: o.business.id, competitor_id: s.competitor_id, subject_type: s.subject_type, checkin, nights: o.nights, adults: o.adults, currency: "TRY", fetched_at: fa, market: "domestic" as const };
@@ -260,8 +280,11 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
               const t = tried.get(s.key) ?? [o.nights];
               erows.push({ ...base, source: d.label, source_adapter: d.id, price_per_night: null, no_availability: true, board_type: "unknown", queried_nights: queriedN.get(s.key) ?? o.nights,
                 raw: er.min_stay ? { reason: "min_stay", min_stay: er.min_stay, tried_nights: t } : er.not_on_sale ? { reason: "not_on_sale", tried_nights: t } : { tried_nights: t } });
-            } else if (er.status === "error" && er.error) {
-              console.warn(`${d.id} error for ${s.name}: ${er.error}`);
+            } else if (er.status === "error") {
+              console.error(`${d.id} error for ${s.name}: ${String(er.error ?? "").slice(0, 500)}`);
+              // Hücre "dolu" görünmesin: kaynak hatası ayrı işaretlenir (computeCell bunu doluya saymaz).
+              erows.push({ ...base, source: d.label, source_adapter: d.id, price_per_night: null, no_availability: true, board_type: "unknown", queried_nights: o.nights,
+                raw: { reason: "source_error", error: String(er.error ?? "").slice(0, 300) } });
             }
           }
         }
@@ -304,7 +327,7 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
       if (serp && serpList.length) {
         const r = await serp.fetchMany(serpList, p);
         track("serpapi", r.calls, r.cost_usd);
-        r.results.forEach((v, k) => serpRes.set(k, v));
+        r.results.forEach((v, k) => { serpRes.set(k, v); health("serpapi", v.status); });
         r.results.forEach((v) => { if (v.status === "error") console.warn("serpapi error:", v.error); });
         // Zincir: SerpApi kıyaslanabilir fiyat vermediyse Booking'e düş.
         if (booking) {
@@ -368,6 +391,7 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
       for (const s of todo) {
         const sr = serpRes.get(s.key);
         const br = bookRes.get(s.key);
+        if (br) health("booking", br.status);
         if (!sr && !br) continue;
         res.fetched++;
 
@@ -410,13 +434,16 @@ export async function runPriceFetch(o: EngineOptions): Promise<EngineResult> {
       try { await refreshBaseRooms(o.admin, o.business.id); } catch (e) { console.error("refreshBaseRooms failed", e); }
     }
     const logs = Object.entries(perAdapter)
-      .filter(([, v]) => v.calls > 0 || v.cost > 0)
+      .filter(([, v]) => v.calls > 0 || v.cost > 0 || v.ok + v.no_prices + v.error > 0)
       .map(([adapter, v]) => ({
         business_id: o.business.id,
         adapter,
         calls: v.calls,
         estimated_cost_usd: Number(v.cost.toFixed(4)),
         trigger: o.trigger,
+        ok_count: v.ok,
+        no_prices_count: v.no_prices,
+        error_count: v.error,
       }));
     if (logs.length) await o.admin.from("price_fetch_log").insert(logs);
   }

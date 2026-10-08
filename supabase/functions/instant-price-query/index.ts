@@ -146,12 +146,12 @@ Deno.serve(async (req) => {
         .select("subject_type, competitor_id, source, source_adapter, room_name, board_type, refundable, price_per_night, price_total, no_availability, min_stay_nights, queried_nights, fetched_at, raw")
         .eq("business_id", business_id).eq("checkin", date).eq("market", market).eq("nights", q.nights)
         .eq("fetch_trigger", "instant").gte("fetched_at", t0).limit(2000);
-      const got = new Set((rows ?? []).map((r: any) => (r.subject_type === "own" ? "own" : r.competitor_id)));
+      const got = new Set((rows ?? []).filter((r: any) => r.raw?.reason !== "source_error").map((r: any) => (r.subject_type === "own" ? "own" : r.competitor_id)));
       const missing = subjects.filter((s) => !got.has(s));
       await refund(missing.length, `İade: ${date} ${market === "domestic" ? "yurt içi" : "uluslararası"} — ${missing.length} otel için cevap alınamadı`);
       return json({
         date, market, refunded: missing.length, missing, failure,
-        calls: result?.calls ?? 0, cost_usd: result?.cost_usd ?? 0, errors: result?.errors ?? [],
+        calls: result?.calls ?? 0, cost_usd: result?.cost_usd ?? 0, errors: result?.errors ?? [], disabled: result?.disabled ?? [],
         rows: (rows ?? []).map((r: any) => ({ ...r, raw: undefined, reason: r.raw?.reason ?? null })),
       });
     }

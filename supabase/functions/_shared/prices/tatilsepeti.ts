@@ -5,7 +5,7 @@ import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.45/deno-dom-wasm.ts
 import type { AdapterResult, BatchResult, FetchParams, PriceQuote, Subject } from "./types.ts";
 import { similarity } from "./types.ts";
 import { etsBoard } from "./etstur.ts";
-import { UNLOCKER_COST_USD, unlockerAvailable, unlockerFetch } from "./unlocker.ts";
+import { UNLOCKER_COST_USD } from "./unlocker.ts";
 import { type Counter, ddmmyyyy, domesticCall, parseTrPrice, trSlug, UA } from "./domesticHtml.ts";
 
 const BASE = "https://www.tatilsepeti.com";
@@ -14,17 +14,8 @@ async function resolve(s: Subject, c: Counter) {
   const base = trSlug(s.name);
   const short = trSlug(s.name.replace(/\b(hotel|otel|resort|spa|golf|&|ve)\b/gi, " "));
   for (const slug of Array.from(new Set([base, short])).filter(Boolean)) {
-    c.calls++;
-    let finalUrl = "", html = "";
-    try {
-      const r = await fetch(`${BASE}/${slug}`, { headers: { "User-Agent": UA }, redirect: "follow", signal: AbortSignal.timeout(25_000) });
-      finalUrl = r.url; html = r.ok ? await r.text() : "";
-    } catch (_) { /* fallback */ }
-    if (!html && unlockerAvailable()) {
-      c.unlocker++;
-      const r = await unlockerFetch({ url: `${BASE}/${slug}` });
-      if (r.status < 400) { html = r.text; finalUrl = `${BASE}/${slug}`; }
-    }
+    let finalUrl = `${BASE}/${slug}`, html = "";
+    try { html = await domesticCall(finalUrl, {}, c); } catch (e) { if (String(e).includes("Bright Data gerekli")) throw e; }
     const title = html.match(/<title>([^<|]+)/)?.[1]?.replace(/\s*Otel\s*$/i, "").trim() ?? "";
     if (!title || /bulunamad|404/i.test(title)) continue;
     if (similarity(s.name, title) < 0.5 && similarity(title, s.name) < 0.5) continue;

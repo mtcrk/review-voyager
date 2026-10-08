@@ -5,7 +5,8 @@ import { type Candidate, distinctive, fold, pickBest, queryVariants, type Scored
 
 const decode = (s: string) => s.replace(/&amp;/g, "&").replace(/&#39;|&apos;/g, "'").replace(/&quot;/g, '"');
 const distinctiveHit = (name: string, cand: string) => { const c = new Set(fold(cand).split(" ")); return Array.from(distinctive(name)).every((w) => c.has(w)); };
-import { type Counter, domesticCall, UA } from "./domesticHtml.ts";
+import { BRIGHTDATA_REQUIRED, type Counter, domesticCall } from "./domesticHtml.ts";
+import { loadDisabledSources } from "./sourceSettings.ts";
 import { unlockerAvailable, unlockerFetch } from "./unlocker.ts";
 import { addDays } from "./types.ts";
 import { withProvince } from "./provinces.ts";
@@ -119,18 +120,16 @@ async function finalize(src: SourceId, s: Scored, c: Counter): Promise<Record<st
   if (src === "jollytur") return { jollytur_hotel_id: d.id, jollytur_slug: d.slug, jollytur_matched_name: d.name };
   if (src === "tatilsepeti") return { tatilsepeti_slug: d.slug, tatilsepeti_matched_name: d.name };
   if (src === "serpapi") return { serpapi_property_token: d.token, serpapi_matched_name: d.name };
-  // Booking: arama sayfasında hpos=1 olan bağlantı hedef oteldir.
+  // Booking: arama sayfasında hpos=1 olan bağlantı hedef oteldir. Doğrudan fetch yok; yalnız Bright Data (yurt içiyle tutarlı).
   const url = `https://www.booking.com/searchresults.html?dest_id=${d.dest_id}&dest_type=hotel&lang=en-gb`;
+  if (!unlockerAvailable()) throw new Error(BRIGHTDATA_REQUIRED);
   let html = "";
-  try {
-    c.calls++;
-    const r = await fetch(url, { headers: { "User-Agent": UA, "Accept-Language": "en-GB" }, signal: AbortSignal.timeout(25_000) });
-    if (r.ok) html = await r.text();
-  } catch (_) { /* fallback */ }
-  if (!/hotel\/[a-z]{2}\/[a-z0-9-]+\.[a-z-]*\.?html[^"]*dest_id=/.test(html) && unlockerAvailable()) {
-    c.unlocker++;
-    const r = await unlockerFetch({ url, country: "de" });
+  for (let attempt = 0; attempt < 2 && !html; attempt++) {
+    if (attempt) await new Promise((r) => setTimeout(r, 1500));
+    c.calls++; c.unlocker++;
+    const r = await unlockerFetch({ url, country: "de" }).catch((e) => ({ status: 599, text: String(e) }));
     if (r.status < 400) html = r.text;
+    else console.error(`Booking finalize hatası [${url}] ${r.status}: ${r.text.slice(0, 500)}`);
   }
   const m = html.match(new RegExp(`https://www\\.booking\\.com/hotel/([a-z]{2})/([a-z0-9-]+)\\.[a-z-]+\\.html\\?[^"]*dest_id=${d.dest_id}[^"]*hpos=1`)) ??
     html.match(/https:\/\/www\.booking\.com\/hotel\/([a-z]{2})\/([a-z0-9-]+)\.[a-z-]+\.html\?[^"]*hpos=1&/);
@@ -161,7 +160,7 @@ export function needsMatch(row: Row, src: SourceId, force: boolean) {
 }
 
 /** Bir mülk için seçilen kaynakları eşleştirir; satır patch'ini ve sonuçları döndürür. */
-export async function matchRow(row: Row, opts: { force?: boolean; sources?: SourceId[]; allowPaid?: boolean } = {}) {
+export async function matchRow(row: Row, opts: { force?: boolean; sources?: SourceId[]; allowPaid?: boolean; disabled?: Set<string> } = {}) {
   const loc = withProvince(row.city, row.province, fold);
   const c: Counter = { calls: 0, unlocker: 0 };
   let cost = 0;
@@ -177,6 +176,9 @@ export async function matchRow(row: Row, opts: { force?: boolean; sources?: Sour
   }
   const now = new Date().toISOString();
   for (const src of opts.sources ?? SOURCES) {
+    if (opts.disabled?.has(src)) { outcomes.push({ source: src, status: "skipped", reason: "kaynak kapalı" }); continue; }
+    // Yurt içi + Booking eşleştirme aramaları Bright Data'ya bağlı: yoksa sessizce "aday yok" denmez.
+    if (src !== "serpapi" && !unlockerAvailable()) { outcomes.push({ source: src, status: "error", reason: BRIGHTDATA_REQUIRED }); continue; }
     if (src === "serpapi" && opts.allowPaid === false) { outcomes.push({ source: src, status: "skipped", reason: "ücretli arama kapalı" }); continue; }
     if (!needsMatch(row, src, !!opts.force)) { outcomes.push({ source: src, status: "skipped", reason: row[`${src}_match_source`] === "manual" ? "elle girildi" : "güncel" }); continue; }
     try {
@@ -226,11 +228,13 @@ export async function ensureMatches(admin: any, businessId: string, opts: { comp
   const { data: comps } = await q;
   for (const r of comps ?? []) targets.push({ table: "ci_competitors", row: r });
   let cost = 0, calls = 0;
+  const disabled = await loadDisabledSources(admin);
+  const active = SOURCES.filter((s) => !disabled.has(s));
   for (const t of targets) {
     if (Date.now() > opts.deadline) break;
     const row = { ...t.row, city: t.row.city ?? biz?.city ?? null, province: t.row.province ?? biz?.province ?? null };
-    if (!SOURCES.some((s) => needsMatch(row, s, false))) continue;
-    const r = await matchRow(row);
+    if (!active.some((s) => needsMatch(row, s, false))) continue;
+    const r = await matchRow(row, { disabled });
     cost += r.cost_usd; calls += r.calls;
     await admin.from(t.table).update(r.patch).eq("id", t.row.id);
   }
